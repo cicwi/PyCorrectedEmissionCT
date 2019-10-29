@@ -1,0 +1,309 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>corrct.corrct &mdash; PyCorrectedEmissionCT  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyCorrectedEmissionCT
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>corrct.corrct</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for corrct.corrct</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Thu May  4 15:37:13 2017</span>
+
+<span class="sd">@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">projectors</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">solvers</span>
+
+
+<div class="viewcode-block" id="create_sino"><a class="viewcode-back" href="../../corrct.html#corrct.corrct.create_sino">[docs]</a><span class="k">def</span> <span class="nf">create_sino</span><span class="p">(</span>
+        <span class="n">vol</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">vol_att_in</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vol_att_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a synthetic sinogram, from the given volume, attenuations and</span>
+<span class="sd">    PSF.</span>
+
+<span class="sd">    :param vol: Volume containing the elemental concentrations or other quantities (numpy.array_like)</span>
+<span class="sd">    :param angles_rad: Angles in radians of each sinogram line (numpy.array_like)</span>
+<span class="sd">    :param vol_att_in: Volume containing the local attenuation coefficients for the incoming photons (numpy.array_like)</span>
+<span class="sd">    :param vol_att_out: Volume containing the local attenuation coefficients for the emitted photons (numpy.array_like)</span>
+<span class="sd">    :param psf: Detector point spread function (PSF) (numpy.array_like)</span>
+<span class="sd">    :param data_type: Volume data type (numpy.dtype)</span>
+
+<span class="sd">    :returns: The simulated sinogram</span>
+<span class="sd">    :rtype: (numpy.array_like)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sino</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">angles_rad</span><span class="p">),</span> <span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">projectors</span><span class="o">.</span><span class="n">AttenuationProjector</span><span class="p">(</span>
+            <span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">att_in</span><span class="o">=</span><span class="n">vol_att_in</span><span class="p">,</span> <span class="n">att_out</span><span class="o">=</span><span class="n">vol_att_out</span><span class="p">,</span>
+            <span class="n">psf</span><span class="o">=</span><span class="n">psf</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">angles_rad</span><span class="p">)):</span>
+            <span class="n">sino</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">fp_angle</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">ii</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sino</span></div>
+
+
+<div class="viewcode-block" id="reconstruct"><a class="viewcode-back" href="../../corrct.html#corrct.corrct.reconstruct">[docs]</a><span class="k">def</span> <span class="nf">reconstruct</span><span class="p">(</span>
+        <span class="n">algo</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vol_att_in</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vol_att_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">apply_circ_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">symm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">lambda_reg</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="s1">&#39;kl&#39;</span><span class="p">,</span> <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reconstructs the given sinogram, with the requested algorithm.</span>
+
+<span class="sd">    :param algo: Reconstruction algorithms to use. Options: &#39;SART&#39; | &#39;SIRT&#39; | &#39;CP&#39; | &#39;CPTV&#39; | &#39;CPL1&#39; (string)</span>
+<span class="sd">    :param sino: The sinogram to recosntruct (numpy.array_like)</span>
+<span class="sd">    :param angles_rad: Angles in radians of each sinogram line (numpy.array_like)</span>
+<span class="sd">    :param iterations: Number of iterations (int)</span>
+<span class="sd">    :param vol_att_in: Volume containing the local attenuation coefficients for the incoming photons (numpy.array_like)</span>
+<span class="sd">    :param vol_att_out: Volume containing the local attenuation coefficients for the emitted photons (numpy.array_like)</span>
+<span class="sd">    :param lower_limit: Lower clipping limit (float)</span>
+<span class="sd">    :param upper_limit: Upper clipping limit (float)</span>
+<span class="sd">    :param apply_circ_mask: Switch to activate a circular volume mask (boolean)</span>
+<span class="sd">    :param symm: Switch to define whether the projectors should be symmetric (boolean)</span>
+<span class="sd">    :param lambda_reg: Regularizer weight (float)</span>
+<span class="sd">    :param data_term: Data fidelity term. Options: &#39;l2&#39; | &#39;kl&#39; (string)</span>
+<span class="sd">    :param psf: Detector point spread function (PSF) (numpy.array_like)</span>
+<span class="sd">    :param data_type: Volume data type (numpy.dtype)</span>
+
+<span class="sd">    :returns: The reconstructed volume</span>
+<span class="sd">    :rtype: (numpy.array_like)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vol_shape</span> <span class="o">=</span> <span class="p">[</span><span class="n">sino</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sino</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="k">if</span> <span class="n">apply_circ_mask</span><span class="p">:</span>
+        <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">vol_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.001</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">vol_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mf">0.001</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">)</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+        <span class="n">circ_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">yy</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">vol_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+
+    <span class="n">det_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="k">with</span> <span class="n">projectors</span><span class="o">.</span><span class="n">AttenuationProjector</span><span class="p">(</span>
+            <span class="n">vol_shape</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">att_in</span><span class="o">=</span><span class="n">vol_att_in</span><span class="p">,</span> <span class="n">att_out</span><span class="o">=</span><span class="n">vol_att_out</span><span class="p">,</span>
+            <span class="n">detector_angle</span><span class="o">=</span><span class="n">det_pos</span><span class="p">,</span> <span class="n">psf</span><span class="o">=</span><span class="n">psf</span><span class="p">,</span> <span class="n">is_symmetric</span><span class="o">=</span><span class="n">symm</span><span class="p">,</span>
+            <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;SART&#39;</span><span class="p">:</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">ii</span> <span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">fp_angle</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ii</span><span class="p">)</span>
+            <span class="n">At</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">y</span><span class="p">,</span> <span class="n">ii</span> <span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">bp_angle</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">ii</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">At</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">y</span> <span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">iterations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;SIRT&#39;</span><span class="p">,</span> <span class="s1">&#39;CPTV&#39;</span><span class="p">):</span>
+                <span class="n">iterations</span> <span class="o">=</span> <span class="mi">50</span>
+            <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;CP&#39;</span><span class="p">):</span>
+                <span class="n">iterations</span> <span class="o">=</span> <span class="mi">25</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">iterations</span> <span class="o">=</span> <span class="mi">5</span>
+
+        <span class="c1"># Algorithms</span>
+        <span class="k">if</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;SART&#39;</span><span class="p">:</span>
+            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Sart</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">angles_rad</span><span class="p">),</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">circ_mask</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;SIRT&#39;</span><span class="p">:</span>
+            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Sirt</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">circ_mask</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;CP&#39;</span><span class="p">:</span>
+            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">circ_mask</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;CPTV&#39;</span><span class="p">:</span>
+            <span class="n">regularizer</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_TV2D</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">lambda_reg</span><span class="p">)</span>
+            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">regularizer</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">circ_mask</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;CPL1&#39;</span><span class="p">:</span>
+            <span class="n">regularizer</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">lambda_reg</span><span class="p">)</span>
+            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">regularizer</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">circ_mask</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown algorithm: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">algo</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">vol</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Author
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

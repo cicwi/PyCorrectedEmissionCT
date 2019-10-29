@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PyCorrectedEmissionCT &mdash; PyCorrectedEmissionCT  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="corrct" href="modules.html" />
+    <link rel="prev" title="Welcome to the documentation of PyCorrectedEmissionCT!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyCorrectedEmissionCT
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PyCorrectedEmissionCT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installing-with-conda">Installing with conda</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-from-source">Installing from source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-examples">Running the examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#authors-and-contributors">Authors and contributors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-contribute">How to contribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyCorrectedEmissionCT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>PyCorrectedEmissionCT</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/readme.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pycorrectedemissionct">
+<h1>PyCorrectedEmissionCT<a class="headerlink" href="#pycorrectedemissionct" title="Permalink to this headline">¶</a></h1>
+<p>Physically corrected projectors for X-ray induced emission CT.</p>
+<p>This package provides the following functionality:</p>
+<ul class="simple">
+<li><p>Support for correction of the forward-projection and back-projection.</p></li>
+<li><p>Includes the following solvers (reconstruction algorithms):</p>
+<ul>
+<li><p>Simultaneous Iterative Reconstruction Technique (SIRT).</p></li>
+<li><p>Simultaneous Algebraic Reconstruction Technique (SART).</p></li>
+<li><p>Primal-dual optimization from Chambolle-Pock, with Gaussian and Poisson
+noise modelling, and offering optional TV-min and l1-min based regularization.</p></li>
+</ul>
+</li>
+</ul>
+<p>It contains the code used for the following paper, which also provides a
+mathematical description of the concepts and algorithms used here:</p>
+<ul class="simple">
+<li><p>N. Viganò and V. A. Solé, “Physically corrected forward operators for
+induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
+Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.</p></li>
+</ul>
+<p>Other useful information:</p>
+<ul class="simple">
+<li><p>Free software: BSD license</p></li>
+<li><p>Documentation: <a class="reference external" href="https://cicwi.github.io/corrct">https://cicwi.github.io/corrct</a></p></li>
+</ul>
+<!--
+## Readiness
+
+The author of this package is in the process of setting up this
+package for optimal usability. The following has already been completed:
+
+- [ ] Documentation
+    - A package description has been written in the README
+    - Documentation has been generated using `make docs`, committed,
+        and pushed to GitHub.
+	- GitHub pages have been setup in the project settings
+	  with the "source" set to "master branch /docs folder".
+- [ ] An initial release
+	- In `CHANGELOG.md`, a release date has been added to v0.1.0 (change the YYYY-MM-DD).
+	- The release has been marked a release on GitHub.
+	- For more info, see the [Software Release Guide](https://cicwi.github.io/software-guides/software-release-guide).
+- [ ] A conda package
+    - Required packages have been added to `setup.py`, for instance,
+      ```
+      requirements = [
+          # Add your project's requirements here, e.g.,
+          # 'astra-toolbox',
+          # 'sacred>=0.7.2',
+          # 'tables==3.4.4',
+      ]
+      ```
+      has been replaced by
+      ```
+      requirements = [
+          'astra-toolbox',
+          'sacred>=0.7.2',
+          'tables==3.4.4',
+      ]
+      ```
+    - All "conda channels" that are required for building and
+      installing the package have been added to the
+      `Makefile`. Specifically, replace
+      ```
+      conda_package:
+        conda install conda-build -y
+        conda build conda/
+      ```
+      by
+      ```
+      conda_package:
+        conda install conda-build -y
+        conda build conda/ -c some-channel -c some-other-channel
+      ```
+    - Conda packages have been built successfully with `make conda_package`.
+    - These conda packages have been uploaded to
+      [Anaconda](https://anaconda.org). [This](http://docs.anaconda.com/anaconda-cloud/user-guide/getting-started/#cloud-getting-started-build-upload)
+      is a good getting started guide.
+    - The installation instructions (below) have been updated. Do not
+      forget to add the required channels, e.g., `-c some-channel -c
+      some-other-channel`, and your own channel, e.g., `-c cicwi`.
+--><div class="section" id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<p>It takes a few steps to setup PyCorrectedEmissionCT on your
+machine. We recommend installing
+<a class="reference external" href="https://www.anaconda.com/download/">Anaconda package manager</a> for
+Python 3.</p>
+<div class="section" id="installing-with-conda">
+<h3>Installing with conda<a class="headerlink" href="#installing-with-conda" title="Permalink to this headline">¶</a></h3>
+<p>Simply install with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">cicwi</span> <span class="n">corrct</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-from-source">
+<h3>Installing from source<a class="headerlink" href="#installing-from-source" title="Permalink to this headline">¶</a></h3>
+<p>To install PyCorrectedEmissionCT, simply clone this GitHub
+project. Go to the cloned directory and run PIP installer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">cicwi</span><span class="o">/</span><span class="n">corrct</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">corrct</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-the-examples">
+<h3>Running the examples<a class="headerlink" href="#running-the-examples" title="Permalink to this headline">¶</a></h3>
+<p>To learn more about the functionality of the package check out our
+examples folder.</p>
+</div>
+</div>
+<div class="section" id="authors-and-contributors">
+<h2>Authors and contributors<a class="headerlink" href="#authors-and-contributors" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Nicola VIGANÒ</strong> - <em>Initial work</em></p></li>
+</ul>
+<p>See also the list of <a class="reference external" href="https://github.com/cicwi/corrct/contributors">contributors</a> who participated in this project.</p>
+</div>
+<div class="section" id="how-to-contribute">
+<h2>How to contribute<a class="headerlink" href="#how-to-contribute" title="Permalink to this headline">¶</a></h2>
+<p>Contributions are always welcome. Please submit pull requests against the <code class="docutils literal notranslate"><span class="pre">master</span></code> branch.</p>
+<p>If you have any issues, questions, or remarks, then please open an issue on GitHub.</p>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>This project is licensed under the BSD license - see the <a class="reference external" href="LICENSE">LICENSE.md</a> file for details.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="modules.html" class="btn btn-neutral float-right" title="corrct" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to the documentation of PyCorrectedEmissionCT!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Author
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
