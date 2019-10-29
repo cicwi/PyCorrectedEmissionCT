@@ -21,7 +21,7 @@ Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.
 Other useful information:
 
 * Free software: BSD license
-* Documentation: [https://cicwi.github.io/corrct](https://cicwi.github.io/corrct)
+* Documentation: [https://cicwi.github.io/PyCorrectedEmissionCT/](https://cicwi.github.io/PyCorrectedEmissionCT/)
 
 <!--
 ## Readiness
