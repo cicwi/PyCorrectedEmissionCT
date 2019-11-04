@@ -69,7 +69,7 @@ class Regularizer_TV2D(BaseRegularizer):
         x0, x1 = x[0, ...], x[1, ...]
         d0 = np.pad(x0, ((1, 0), (0, 0)), mode='constant')
         d1 = np.pad(x1, ((0, 0), (1, 0)), mode='constant')
-        return np.diff(d0, n=1, axis=0) + np.diff(d1, n=1, axis=1)
+        return - (np.diff(d0, n=1, axis=0) + np.diff(d1, n=1, axis=1))
 
 
 class Regularizer_l1(BaseRegularizer):
