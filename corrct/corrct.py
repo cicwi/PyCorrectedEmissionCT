@@ -28,13 +28,10 @@ def create_sino(
     :returns: The simulated sinogram
     :rtype: (numpy.array_like)
     """
-    sino = np.empty([len(angles_rad), vol.shape[0]], dtype=np.float32)
     with projectors.AttenuationProjector(
             vol.shape, angles_rad, att_in=vol_att_in, att_out=vol_att_out,
             psf=psf, data_type=data_type) as p:
-        for ii in range(len(angles_rad)):
-            sino[ii, :] = p.fp_angle(vol, ii)
-    return sino
+        return p.fp(vol)
 
 
 def reconstruct(
@@ -63,7 +60,7 @@ def reconstruct(
     :returns: The reconstructed volume
     :rtype: (numpy.array_like)
     """
-    vol_shape = [sino.shape[1], sino.shape[1]]
+    vol_shape = [sino.shape[-1], sino.shape[-1]]
 
     if apply_circ_mask:
         xx = np.arange(-(vol_shape[0]-1)/2, (vol_shape[0]-1)/2+0.001, 1, dtype=data_type)
