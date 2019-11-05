@@ -190,20 +190,21 @@ class AttenuationProjector(Projector2D):
 
         return sino_line
 
-    def bp_angle(self, sino, angle_ind):
+    def bp_angle(self, sino, angle_ind, single_line=False):
         """Back-projection of a single sinogram line to the volume. It only
         applies the attenuation corrections if the projector is symmetric.
 
         :param sino: The sinogram to back-project or a single line (numpy.array_like)
         :param angle_ind: The angle index to foward project (int)
+        :param single_line: Whether the input is a single sinogram line (boolean, default: False)
 
         :returns: The back-projected volume
         :rtype: (numpy.array_like)
         """
-        if len(sino.shape) > 1:
-            sino_line = sino[angle_ind, :]
-        else:
+        if single_line:
             sino_line = sino
+        else:
+            sino_line = sino[angle_ind, :]
 
         if self.psf is not None:
             sino_line = spsig.convolve(sino_line, self.psf, mode='same')

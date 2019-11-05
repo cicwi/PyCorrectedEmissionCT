@@ -134,7 +134,7 @@ class Sart(Solver):
 
         # Back-projection diagonal re-scaling
         b_ones = np.ones_like(b)
-        tau = [At(b_ones, ii) for ii in range(A_num_rows)]
+        tau = [At(b_ones[ii, ...], ii) for ii in range(A_num_rows)]
         tau = np.abs(np.stack(tau))
         tau[(tau / np.max(tau)) < 1e-5] = 1
         tau = 1 / tau

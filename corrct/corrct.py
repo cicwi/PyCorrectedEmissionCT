@@ -80,7 +80,7 @@ def reconstruct(
 
         if algo.upper() == 'SART':
             A = lambda x, ii : p.fp_angle(x, ii)
-            At = lambda y, ii : p.bp_angle(y, ii)
+            At = lambda y, ii : p.bp_angle(y, ii, single_line=True)
         else:
             A = lambda x : p.fp(x)
             At = lambda y : p.bp(y)
