@@ -17,8 +17,16 @@ class BaseRegularizer(object):
     """Base regularizer class that defines the Regularizer object interface.
     """
 
+    __reg_name__ = ''
+
     def __init__(self, weight):
         self.weight = weight
+
+    def upper(self):
+        return self.__reg_name__.upper()
+
+    def lower(self):
+        return self.__reg_name__.lower()
 
     def initialize_sigma_tau(self):
         raise NotImplementedError()
@@ -40,6 +48,8 @@ class Regularizer_TV2D(BaseRegularizer):
     """Total Variation (TV) regularizer. It can be used to promote piece-wise
     constant reconstructions.
     """
+
+    __reg_name__ = 'TV2D'
 
     def initialize_sigma_tau(self):
         self.sigma = 0.5
@@ -75,6 +85,8 @@ class Regularizer_TV2D(BaseRegularizer):
 class Regularizer_l1(BaseRegularizer):
     """l1-norm regularizer. It can be used to promote sparse reconstructions.
     """
+
+    __reg_name__ = 'l1'
 
     def initialize_sigma_tau(self):
         return self.weight
@@ -145,8 +157,8 @@ class Sart(Solver):
         rows_sequence = rnd.permutation(A_num_rows)
 
         if self.verbose:
-            print("- Performing SIRT iterations (init: %g seconds): " % (
-                    c_init - c_in), end='', flush=True)
+            print("- Performing %s iterations (init: %g seconds): " % (
+                    self.upper(), c_init - c_in), end='', flush=True)
         for ii in range(iterations):
             if self.verbose:
                 prnt_str = "%03d/%03d (avg: %g seconds)" % (
@@ -213,8 +225,8 @@ class Sirt(Solver):
         c_init = tm.time()
 
         if self.verbose:
-            print("- Performing SIRT iterations (init: %g seconds): " % (
-                    c_init - c_in), end='', flush=True)
+            print("- Performing %s iterations (init: %g seconds): " % (
+                    self.upper(), c_init - c_in), end='', flush=True)
         for ii in range(iterations):
             if self.verbose:
                 prnt_str = "%03d/%03d (avg: %g seconds)" % (
@@ -300,7 +312,11 @@ class CP(Solver):
         c_init = tm.time()
 
         if self.verbose:
-            print("- Performing CP-%s iterations (init: %g seconds): " % (self.data_term, c_init - c_in), end='', flush=True)
+            reg_info = ''
+            if self.regularizer is not None:
+                reg_info = '-' + self.regularizer.upper()
+            print("- Performing CP-%s%s iterations (init: %g seconds): " % (
+                    self.data_term, reg_info, c_init - c_in), end='', flush=True)
         for ii in range(iterations):
             if self.verbose:
                 prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
