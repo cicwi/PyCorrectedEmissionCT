@@ -171,7 +171,7 @@
 <p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands</p>
 <dl class="function">
 <dt id="corrct.corrct.create_sino">
-<code class="sig-prename descclassname">corrct.corrct.</code><code class="sig-name descname">create_sino</code><span class="sig-paren">(</span><em class="sig-param">vol</em>, <em class="sig-param">angles_rad</em>, <em class="sig-param">vol_att_in=None</em>, <em class="sig-param">vol_att_out=None</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/corrct.html#create_sino"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.corrct.create_sino" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">corrct.corrct.</code><code class="sig-name descname">create_sino</code><span class="sig-paren">(</span><em class="sig-param">vol</em>, <em class="sig-param">angles_rad</em>, <em class="sig-param">vol_att_in=None</em>, <em class="sig-param">vol_att_out=None</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">angles_detectors_rad=1.5707963267948966</em>, <em class="sig-param">weights_detectors=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/corrct.html#create_sino"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.corrct.create_sino" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a synthetic sinogram, from the given volume, attenuations and
 PSF.</p>
 <dl class="field-list simple">
@@ -181,6 +181,8 @@ PSF.</p>
 <li><p><strong>angles_rad</strong> – Angles in radians of each sinogram line (numpy.array_like)</p></li>
 <li><p><strong>vol_att_in</strong> – Volume containing the local attenuation coefficients for the incoming photons (numpy.array_like)</p></li>
 <li><p><strong>vol_att_out</strong> – Volume containing the local attenuation coefficients for the emitted photons (numpy.array_like)</p></li>
+<li><p><strong>angles_detectors_rad</strong> – Detectors’ position angles in radians (numpy.array_like or float, deafult: pi/2)</p></li>
+<li><p><strong>weights_detectors</strong> – Detectors’ weights (numpy.array_like or float, deafult: None)</p></li>
 <li><p><strong>psf</strong> – Detector point spread function (PSF) (numpy.array_like)</p></li>
 <li><p><strong>data_type</strong> – Volume data type (numpy.dtype)</p></li>
 </ul>
@@ -196,7 +198,7 @@ PSF.</p>
 
 <dl class="function">
 <dt id="corrct.corrct.reconstruct">
-<code class="sig-prename descclassname">corrct.corrct.</code><code class="sig-name descname">reconstruct</code><span class="sig-paren">(</span><em class="sig-param">algo</em>, <em class="sig-param">sino</em>, <em class="sig-param">angles_rad</em>, <em class="sig-param">iterations=None</em>, <em class="sig-param">vol_att_in=None</em>, <em class="sig-param">vol_att_out=None</em>, <em class="sig-param">lower_limit=None</em>, <em class="sig-param">upper_limit=None</em>, <em class="sig-param">apply_circ_mask=True</em>, <em class="sig-param">symm=True</em>, <em class="sig-param">lambda_reg=0.01</em>, <em class="sig-param">data_term='kl'</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/corrct.html#reconstruct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.corrct.reconstruct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">corrct.corrct.</code><code class="sig-name descname">reconstruct</code><span class="sig-paren">(</span><em class="sig-param">algo</em>, <em class="sig-param">sino</em>, <em class="sig-param">angles_rad</em>, <em class="sig-param">iterations=None</em>, <em class="sig-param">vol_att_in=None</em>, <em class="sig-param">vol_att_out=None</em>, <em class="sig-param">angles_detectors_rad=1.5707963267948966</em>, <em class="sig-param">weights_detectors=None</em>, <em class="sig-param">lower_limit=None</em>, <em class="sig-param">upper_limit=None</em>, <em class="sig-param">apply_circ_mask=True</em>, <em class="sig-param">symm=True</em>, <em class="sig-param">lambda_reg=0.01</em>, <em class="sig-param">data_term='kl'</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/corrct.html#reconstruct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.corrct.reconstruct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reconstructs the given sinogram, with the requested algorithm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -207,6 +209,8 @@ PSF.</p>
 <li><p><strong>iterations</strong> – Number of iterations (int)</p></li>
 <li><p><strong>vol_att_in</strong> – Volume containing the local attenuation coefficients for the incoming photons (numpy.array_like)</p></li>
 <li><p><strong>vol_att_out</strong> – Volume containing the local attenuation coefficients for the emitted photons (numpy.array_like)</p></li>
+<li><p><strong>angles_detectors_rad</strong> – Detectors’ position angles in radians (numpy.array_like or float, deafult: pi/2)</p></li>
+<li><p><strong>weights_detectors</strong> – Detectors’ weights (numpy.array_like or float, deafult: None)</p></li>
 <li><p><strong>lower_limit</strong> – Lower clipping limit (float)</p></li>
 <li><p><strong>upper_limit</strong> – Upper clipping limit (float)</p></li>
 <li><p><strong>apply_circ_mask</strong> – Switch to activate a circular volume mask (boolean)</p></li>
@@ -233,9 +237,9 @@ PSF.</p>
 <p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands</p>
 <dl class="class">
 <dt id="corrct.projectors.AttenuationProjector">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">AttenuationProjector</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">att_in=None</em>, <em class="sig-param">att_out=None</em>, <em class="sig-param">detector_angle=1.5707963267948966</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">precompute_attenuation=True</em>, <em class="sig-param">is_symmetric=False</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#AttenuationProjector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.AttenuationProjector" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">AttenuationProjector</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">att_in=None</em>, <em class="sig-param">att_out=None</em>, <em class="sig-param">angles_detectors_rad=1.5707963267948966</em>, <em class="sig-param">weights_detectors=None</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">precompute_attenuation=True</em>, <em class="sig-param">is_symmetric=False</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#AttenuationProjector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.AttenuationProjector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.projectors.Projector2D" title="corrct.projectors.Projector2D"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.projectors.Projector2D</span></code></a></p>
-<p>Attenuation corrected projection class.</p>
+<p>Attenuation corrected projection class, with multi-detector support.</p>
 <dl class="method">
 <dt id="corrct.projectors.AttenuationProjector.bp">
 <code class="sig-name descname">bp</code><span class="sig-paren">(</span><em class="sig-param">sino</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#AttenuationProjector.bp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.AttenuationProjector.bp" title="Permalink to this definition">¶</a></dt>
@@ -243,7 +247,7 @@ PSF.</p>
 
 <dl class="method">
 <dt id="corrct.projectors.AttenuationProjector.bp_angle">
-<code class="sig-name descname">bp_angle</code><span class="sig-paren">(</span><em class="sig-param">sino</em>, <em class="sig-param">angle_ind</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#AttenuationProjector.bp_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.AttenuationProjector.bp_angle" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">bp_angle</code><span class="sig-paren">(</span><em class="sig-param">sino</em>, <em class="sig-param">angle_ind</em>, <em class="sig-param">single_line=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#AttenuationProjector.bp_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.AttenuationProjector.bp_angle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Back-projection of a single sinogram line to the volume. It only
 applies the attenuation corrections if the projector is symmetric.</p>
 <dl class="field-list simple">
@@ -251,6 +255,7 @@ applies the attenuation corrections if the projector is symmetric.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sino</strong> – The sinogram to back-project or a single line (numpy.array_like)</p></li>
 <li><p><strong>angle_ind</strong> – The angle index to foward project (int)</p></li>
+<li><p><strong>single_line</strong> – Whether the input is a single sinogram line (boolean, default: False)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -369,8 +374,18 @@ point of the volume, along a certain direction.</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="corrct.solvers.BaseRegularizer.lower">
+<code class="sig-name descname">lower</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#BaseRegularizer.lower"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.BaseRegularizer.lower" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="corrct.solvers.BaseRegularizer.update_dual">
 <code class="sig-name descname">update_dual</code><span class="sig-paren">(</span><em class="sig-param">dual</em>, <em class="sig-param">primal</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#BaseRegularizer.update_dual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.BaseRegularizer.update_dual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.BaseRegularizer.upper">
+<code class="sig-name descname">upper</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#BaseRegularizer.upper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.BaseRegularizer.upper" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

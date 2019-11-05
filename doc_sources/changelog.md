@@ -12,10 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - <insert-bugs-fixed-not-in-a-release-yet>
 -->
 
+## 0.2.0 - 2019-11-05
+### Added
+- Multi-detector reconstruction
+### Fixed
+- TV-min sign
+- Solvers' name visualization
+- Back-projection behavior with different inputs
+
 ## 0.1.0 - 2019-10-29
 ### Added
 - Initial release, with corrected forward and back-projections.
 - SIRT, SART, and Chambolle-Pock solvers.
 - TV-min and l1-norm based regularizers.
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.1.0...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.2.0...develop

@@ -254,13 +254,14 @@
 
 
 <div class="viewcode-block" id="AttenuationProjector"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.AttenuationProjector">[docs]</a><span class="k">class</span> <span class="nc">AttenuationProjector</span><span class="p">(</span><span class="n">Projector2D</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Attenuation corrected projection class.</span>
+    <span class="sd">&quot;&quot;&quot;Attenuation corrected projection class, with multi-detector support.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">vol_shape</span><span class="p">,</span> <span class="n">angles_rot_rad</span><span class="p">,</span> <span class="n">att_in</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">att_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">detector_angle</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">precompute_attenuation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">is_symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span> <span class="p">):</span>
+            <span class="n">angles_detectors_rad</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">weights_detectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">precompute_attenuation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span> <span class="p">):</span>
         <span class="n">Projector2D</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol_shape</span><span class="p">,</span> <span class="n">angles_rot_rad</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">precompute_attenuation</span><span class="p">:</span>
@@ -272,7 +273,21 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">att_in</span> <span class="o">=</span> <span class="n">att_in</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">att_out</span> <span class="o">=</span> <span class="n">att_out</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">detector_angle</span> <span class="o">=</span> <span class="n">detector_angle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angles_detectors_rad</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">num_det_angles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weights_detectors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">weights_detectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">weights_detectors</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">num_det_weights</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_det_angles</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">num_det_weights</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">,</span> <span class="p">[</span><span class="n">num_det_angles</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">num_det_weights</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">num_det_weights</span> <span class="o">==</span> <span class="n">num_det_angles</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;Number of detector weights differs from number of&#39;</span> <span class="o">+</span>
+                        <span class="s1">&#39; detector angles: </span><span class="si">%d</span><span class="s1"> vs </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_det_weights</span><span class="p">,</span> <span class="n">num_det_angles</span><span class="p">))</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">precompute_attenuation</span> <span class="o">=</span> <span class="n">precompute_attenuation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_symmetric</span> <span class="o">=</span> <span class="n">is_symmetric</span>
 
@@ -283,14 +298,17 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
-        <span class="n">direction_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="n">Projector2D</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_in</span><span class="p">,</span> <span class="n">direction_in</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
+        <span class="n">direction_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">Projector2D</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_in</span><span class="p">,</span> <span class="n">direction_in</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
-        <span class="n">a_det</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector_angle</span>
-        <span class="n">direction_out</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a_det</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a_det</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="n">Projector2D</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_out</span><span class="p">,</span> <span class="n">direction_out</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
+        <span class="n">angle_det</span> <span class="o">=</span> <span class="n">angle</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span>
+        <span class="n">atts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">angle_det</span><span class="p">):</span>
+            <span class="n">direction_out</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)]</span>
+            <span class="n">atts</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">Projector2D</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_out</span><span class="p">,</span> <span class="n">direction_out</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">atts</span>
 
 <div class="viewcode-block" id="AttenuationProjector.compute_attenuation_volumes"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.AttenuationProjector.compute_attenuation_volumes">[docs]</a>    <span class="k">def</span> <span class="nf">compute_attenuation_volumes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Computes the corrections for each angle.</span>
@@ -299,7 +317,8 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No attenuation volumes were given&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
-                <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">),</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
+                <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">),</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">],</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_in</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">):</span>
@@ -319,7 +338,8 @@
 <span class="sd">        :returns: The forward-projected sinogram line</span>
 <span class="sd">        :rtype: (numpy.array_like)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">temp_vol</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">vol</span><span class="p">)</span>
+        <span class="n">temp_vol</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">vol</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+        <span class="n">temp_vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">temp_vol</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">precompute_attenuation</span><span class="p">:</span>
             <span class="n">temp_vol</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
@@ -330,32 +350,43 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_att_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">temp_vol</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_out</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
-        <span class="n">sino_line</span> <span class="o">=</span> <span class="n">Projector2D</span><span class="o">.</span><span class="n">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp_vol</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">)</span>
+        <span class="n">sino_line</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="n">Projector2D</span><span class="o">.</span><span class="n">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp_vol</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">angle_ind</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">))]</span>
+        <span class="n">sino_line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sino_line</span> <span class="o">=</span> <span class="n">spsig</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">sino_line</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">sino_line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">sino_line</span></div>
 
-<div class="viewcode-block" id="AttenuationProjector.bp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.AttenuationProjector.bp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">):</span>
+<div class="viewcode-block" id="AttenuationProjector.bp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.AttenuationProjector.bp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">,</span> <span class="n">single_line</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Back-projection of a single sinogram line to the volume. It only</span>
 <span class="sd">        applies the attenuation corrections if the projector is symmetric.</span>
 
 <span class="sd">        :param sino: The sinogram to back-project or a single line (numpy.array_like)</span>
 <span class="sd">        :param angle_ind: The angle index to foward project (int)</span>
+<span class="sd">        :param single_line: Whether the input is a single sinogram line (boolean, default: False)</span>
 
 <span class="sd">        :returns: The back-projected volume</span>
 <span class="sd">        :rtype: (numpy.array_like)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sino</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">sino_line</span> <span class="o">=</span> <span class="n">sino</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">single_line</span><span class="p">:</span>
             <span class="n">sino_line</span> <span class="o">=</span> <span class="n">sino</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sino_line</span> <span class="o">=</span> <span class="n">sino</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">,</span> <span class="p">:]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sino_line</span> <span class="o">=</span> <span class="n">spsig</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)</span>
 
-        <span class="n">vol</span> <span class="o">=</span> <span class="n">Projector2D</span><span class="o">.</span><span class="n">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino_line</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">)</span>
+        <span class="n">sino_line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sino_line</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="n">vol</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="n">Projector2D</span><span class="o">.</span><span class="n">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino_line</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">angle_ind</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">))]</span>
+        <span class="n">vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">precompute_attenuation</span><span class="p">:</span>
@@ -367,7 +398,7 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_att_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">vol</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_out</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">vol</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AttenuationProjector.fp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.AttenuationProjector.fp">[docs]</a>    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
