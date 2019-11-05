@@ -107,13 +107,14 @@ class Projector2D(object):
 
 
 class AttenuationProjector(Projector2D):
-    """Attenuation corrected projection class.
+    """Attenuation corrected projection class, with multi-detector support.
     """
 
     def __init__(
             self, vol_shape, angles_rot_rad, att_in=None, att_out=None,
-            detector_angle=(np.pi/2), psf=None, precompute_attenuation=True,
-            is_symmetric=False, data_type=np.float32 ):
+            angles_detectors_rad=(np.pi/2), weights_detectors=None, psf=None,
+            precompute_attenuation=True, is_symmetric=False,
+            data_type=np.float32 ):
         Projector2D.__init__(self, vol_shape, angles_rot_rad)
 
         if precompute_attenuation:
@@ -125,7 +126,21 @@ class AttenuationProjector(Projector2D):
 
         self.att_in = att_in
         self.att_out = att_out
-        self.detector_angle = detector_angle
+        self.angles_det_rad = np.array(angles_detectors_rad, ndmin=1)
+        num_det_angles = len(self.angles_det_rad)
+        if weights_detectors is None:
+            weights_detectors = np.ones_like(self.angles_det_rad)
+        self.weights_det = np.array(weights_detectors, ndmin=1)
+
+        num_det_weights = len(self.weights_det)
+        if num_det_angles > 1:
+            if num_det_weights == 1:
+                self.weights_det = np.tile(self.weights_det, [num_det_angles])
+            elif num_det_weights > 1 and not num_det_weights == num_det_angles:
+                raise ValueError(
+                        'Number of detector weights differs from number of' +
+                        ' detector angles: %d vs %d' % (num_det_weights, num_det_angles))
+
         self.precompute_attenuation = precompute_attenuation
         self.is_symmetric = is_symmetric
 
@@ -136,14 +151,17 @@ class AttenuationProjector(Projector2D):
         else:
             self.att_vol_angles = None
 
-    def _compute_attenuation_angle_in(self, a):
-        direction_in = [np.sin(a), np.cos(a)]
-        return Projector2D.compute_attenuation(self.att_in, direction_in)
+    def _compute_attenuation_angle_in(self, angle):
+        direction_in = [np.sin(angle), np.cos(angle)]
+        return Projector2D.compute_attenuation(self.att_in, direction_in)[np.newaxis, ...]
 
-    def _compute_attenuation_angle_out(self, a):
-        a_det = a + self.detector_angle
-        direction_out = [np.sin(a_det), np.cos(a_det)]
-        return Projector2D.compute_attenuation(self.att_out, direction_out, invert=True)
+    def _compute_attenuation_angle_out(self, angle):
+        angle_det = angle + self.angles_det_rad
+        atts = np.zeros(self.att_vol_angles.shape[1:], dtype=self.data_type)
+        for ii, a in enumerate(angle_det):
+            direction_out = [np.sin(a), np.cos(a)]
+            atts[ii, ...] = Projector2D.compute_attenuation(self.att_out, direction_out, invert=True)
+        return atts
 
     def compute_attenuation_volumes(self):
         """Computes the corrections for each angle.
@@ -152,7 +170,8 @@ class AttenuationProjector(Projector2D):
             raise ValueError('No attenuation volumes were given')
 
         self.att_vol_angles = np.ones(
-                [len(self.angles_rot_rad), *self.vol_shape], dtype=self.data_type)
+                [len(self.angles_rot_rad), len(self.angles_det_rad), *self.vol_shape],
+                dtype=self.data_type)
 
         if self.att_in is not None:
             for ii, a in enumerate(self.angles_rot_rad):
@@ -172,7 +191,8 @@ class AttenuationProjector(Projector2D):
         :returns: The forward-projected sinogram line
         :rtype: (numpy.array_like)
         """
-        temp_vol = copy.deepcopy(vol)
+        temp_vol = copy.deepcopy(vol)[np.newaxis, ...]
+        temp_vol = np.tile(temp_vol, (len(self.angles_det_rad), 1, 1))
 
         if self.precompute_attenuation:
             temp_vol *= self.att_vol_angles[angle_ind, ...]
@@ -183,10 +203,16 @@ class AttenuationProjector(Projector2D):
             if self.vol_att_out is not None:
                 temp_vol *= self._compute_attenuation_angle_out(a)
 
-        sino_line = Projector2D.fp_angle(self, temp_vol, angle_ind)
+        sino_line = [
+                self.weights_det[ii] * Projector2D.fp_angle(self, temp_vol[ii], angle_ind)
+                for ii in range(len(self.angles_det_rad))]
+        sino_line = np.stack(sino_line, axis=0)
 
         if self.psf is not None:
             sino_line = spsig.convolve(sino_line, self.psf, mode='same')
+
+        if sino_line.shape[0] == 1:
+            sino_line = np.squeeze(sino_line, axis=0)
 
         return sino_line
 
@@ -209,7 +235,11 @@ class AttenuationProjector(Projector2D):
         if self.psf is not None:
             sino_line = spsig.convolve(sino_line, self.psf, mode='same')
 
-        vol = Projector2D.bp_angle(self, sino_line, angle_ind)
+        sino_line = np.reshape(sino_line, [-1, sino_line.shape[-1]])
+        vol = [
+                self.weights_det[ii] * Projector2D.bp_angle(self, sino_line[ii], angle_ind)
+                for ii in range(len(self.angles_det_rad))]
+        vol = np.stack(vol, axis=0)
 
         if self.is_symmetric:
             if self.precompute_attenuation:
@@ -221,7 +251,7 @@ class AttenuationProjector(Projector2D):
                 if self.vol_att_out is not None:
                     vol *= self._compute_attenuation_angle_out(a)
 
-        return vol
+        return np.sum(vol, axis=0)
 
     def fp(self, vol):
         return np.stack(
