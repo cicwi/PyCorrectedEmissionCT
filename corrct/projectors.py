@@ -96,7 +96,8 @@ class Projector2D(object):
         cum_arr = np.pad(vol, ((edges[0], ), (edges[1], )), mode='constant')
 
         cum_arr = spimg.interpolation.rotate(cum_arr, rot_angle, reshape=False, order=1)
-        cum_arr = np.cumsum(cum_arr, axis=-1)
+        cum_arr += np.roll(cum_arr, 1, axis=-1)
+        cum_arr = np.cumsum(cum_arr / 2, axis=-1)
 
         cum_arr = spimg.interpolation.rotate(cum_arr, -rot_angle, reshape=False, order=1)
         cum_arr = cum_arr[edges[0]:-edges[0], edges[1]:-edges[1]]
