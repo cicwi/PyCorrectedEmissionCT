@@ -44,19 +44,23 @@ class BaseRegularizer(object):
         raise NotImplementedError()
 
 
-class Regularizer_TV2D(BaseRegularizer):
+class Regularizer_TV(BaseRegularizer):
     """Total Variation (TV) regularizer. It can be used to promote piece-wise
     constant reconstructions.
     """
 
-    __reg_name__ = 'TV2D'
+    __reg_name__ = 'TV'
+
+    def __init__(self, weight, ndims=2):
+        BaseRegularizer.__init__(self, weight=weight)
+        self.ndims = ndims
 
     def initialize_sigma_tau(self):
         self.sigma = 0.5
-        return self.weight * 2 * 2
+        return self.weight * 2 * self.ndims
 
     def initialize_dual(self, primal):
-        return np.zeros([2, *primal.shape], dtype=primal.dtype)
+        return np.zeros([self.ndims, *primal.shape], dtype=primal.dtype)
 
     def update_dual(self, dual, primal):
         dual += self.sigma * self.gradient(primal)
@@ -69,17 +73,35 @@ class Regularizer_TV2D(BaseRegularizer):
         return self.weight * self.divergence(dual)
 
     def gradient(self, x):
-        d0 = np.pad(x, ((0, 1), (0, 0)), mode='constant')
-        d0 = np.diff(d0, n=1, axis=0)
-        d1 = np.pad(x, ((0, 0), (0, 1)), mode='constant')
-        d1 = np.diff(d1, n=1, axis=1)
-        return np.stack((d0, d1), axis=0)
+        d = [None] * self.ndims
+        for ii in range(self.ndims):
+            ind = -(ii + 1)
+            padding = [(0, 0)] * self.ndims
+            padding[ind] = (0, 1)
+            temp_x = np.pad(x, padding, mode='constant')
+            d[ind] = np.diff(temp_x, n=1, axis=ind)
+        return np.stack(d, axis=0)
 
     def divergence(self, x):
-        x0, x1 = x[0, ...], x[1, ...]
-        d0 = np.pad(x0, ((1, 0), (0, 0)), mode='constant')
-        d1 = np.pad(x1, ((0, 0), (1, 0)), mode='constant')
-        return - (np.diff(d0, n=1, axis=0) + np.diff(d1, n=1, axis=1))
+        d = [None] * self.ndims
+        for ii in range(self.ndims):
+            ind = -(ii + 1)
+            padding = [(0, 0)] * self.ndims
+            padding[ind] = (1, 0)
+            temp_x = np.pad(x[ind, ...], padding, mode='constant')
+            d[ind] = np.diff(temp_x, n=1, axis=ind)
+        return - np.sum(np.stack(d, axis=0), axis=0)
+
+
+class Regularizer_TV2D(Regularizer_TV):
+    """Total Variation (TV) regularizer in 2D. It can be used to promote
+    piece-wise constant reconstructions.
+    """
+
+    __reg_name__ = 'TV2D'
+
+    def __init__(self, weight):
+        Regularizer_TV.__init__(self, weight=weight, ndims=2)
 
 
 class Regularizer_l1(BaseRegularizer):
