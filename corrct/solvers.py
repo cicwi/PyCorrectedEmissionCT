@@ -104,6 +104,55 @@ class Regularizer_TV2D(Regularizer_TV):
         Regularizer_TV.__init__(self, weight=weight, ndims=2)
 
 
+class Regularizer_Lap(BaseRegularizer):
+    """Laplacian regularizer. It can be used to promote smooth reconstructions.
+    """
+
+    __reg_name__ = 'Lap'
+
+    def __init__(self, weight, ndims=2):
+        BaseRegularizer.__init__(self, weight=weight)
+        self.ndims = ndims
+
+    def initialize_sigma_tau(self):
+        self.sigma = 0.25
+        return self.weight * 4 * self.ndims
+
+    def initialize_dual(self, primal):
+        return np.zeros(primal.shape, dtype=primal.dtype)
+
+    def update_dual(self, dual, primal):
+        dual += self.sigma * self.laplacian(primal)
+
+    def apply_proximal(self, dual):
+        dual_dir_norm_l2 = np.linalg.norm(dual, ord=2, axis=0, keepdims=True)
+        dual /= np.fmax(1, dual_dir_norm_l2)
+
+    def compute_update_primal(self, dual):
+        return self.weight * self.laplacian(dual)
+
+    def laplacian(self, x):
+        d = [None] * self.ndims
+        for ii in range(self.ndims):
+            ind = -(ii + 1)
+            padding = [(0, 0)] * self.ndims
+            padding[ind] = (1, 1)
+            temp_x = np.pad(x, padding, mode='edge')
+            d[ind] = np.diff(temp_x, n=2, axis=ind)
+        return np.sum(d, axis=0)
+
+
+class Regularizer_Lap2D(Regularizer_Lap):
+    """Laplacian regularizer in 2D. It can be used to promote smooth
+    reconstructions.
+    """
+
+    __reg_name__ = 'Lap2D'
+
+    def __init__(self, weight):
+        Regularizer_Lap.__init__(self, weight=weight, ndims=2)
+
+
 class Regularizer_l1(BaseRegularizer):
     """l1-norm regularizer. It can be used to promote sparse reconstructions.
     """
