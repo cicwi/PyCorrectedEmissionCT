@@ -179,8 +179,9 @@ class Solver(object):
     """Base solver class.
     """
 
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=False, relaxation=1):
         self.verbose = verbose
+        self.relaxation = relaxation
 
     def upper(self):
         return type(self).__name__.upper()
@@ -208,7 +209,7 @@ class Sart(Solver):
         tau = [At(b_ones[ii, ...], ii) for ii in range(A_num_rows)]
         tau = np.abs(np.stack(tau))
         tau[(tau / np.max(tau)) < 1e-5] = 1
-        tau = 1 / tau
+        tau = self.relaxation / tau
 
         # Forward-projection diagonal re-scaling
         x_ones = np.ones(tau.shape[1:], dtype=data_type)
@@ -267,6 +268,10 @@ class Sirt(Solver):
     Technique (SIRT) algorithm.
     """
 
+    def __init__(self, verbose=False, relaxation=1.95, regularizer=None):
+        Solver.__init__(self, verbose=verbose, relaxation=relaxation)
+        self.regularizer = regularizer
+
     def __call__(
             self, A, b, iterations, x0=None, At=None, lower_limit=None,
             upper_limit=None, x_mask=None, b_mask=None):
@@ -277,9 +282,14 @@ class Sirt(Solver):
         c_in = tm.time()
 
         # Back-projection diagonal re-scaling
-        tau = np.abs(At(np.ones(b.shape, data_type)))
+        tau = np.ones(b.shape, data_type)
+        if b_mask is not None:
+            tau *= b_mask
+        tau = np.abs(At(tau))
+        if self.regularizer is not None:
+            tau += self.regularizer.initialize_sigma_tau()
         tau[(tau / np.max(tau)) < 1e-5] = 1
-        tau = 1 / tau
+        tau = self.relaxation / tau
 
         # Forward-projection diagonal re-scaling
         sigma = np.abs(A(np.ones(tau.shape, dtype=data_type)))
@@ -289,6 +299,9 @@ class Sirt(Solver):
         if x0 is None:
             x0 = At(b * sigma) * tau
         x = x0
+
+        if self.regularizer is not None:
+            q = self.regularizer.initialize_dual(x)
 
         res_norm_0 = np.linalg.norm(b.flatten())
         res_norm_rel = np.empty((iterations, ))
@@ -309,7 +322,14 @@ class Sirt(Solver):
                 res *= b_mask
             res_norm_rel[ii] = np.linalg.norm(res.flatten()) / res_norm_0
 
-            x += At(res * sigma) * tau
+            if self.regularizer is not None:
+                self.regularizer.update_dual(q, x)
+                self.regularizer.apply_proximal(q)
+
+            upd = At(res * sigma)
+            if self.regularizer is not None:
+                upd -= self.regularizer.compute_update_primal(q)
+            x += upd * tau
 
             if lower_limit is not None:
                 x = np.fmax(x, lower_limit)
@@ -339,8 +359,8 @@ class CP(Solver):
     based on the BaseRegularizer interface.
     """
 
-    def __init__(self, verbose=False, data_term='l2', regularizer=None):
-        Solver.__init__(self, verbose=verbose)
+    def __init__(self, verbose=False, relaxation=0.9, data_term='l2', regularizer=None):
+        Solver.__init__(self, verbose=verbose, relaxation=relaxation)
         self.data_term = data_term
         self.regularizer = regularizer
 
@@ -353,11 +373,14 @@ class CP(Solver):
 
         c_in = tm.time()
 
-        tau = np.abs(At(np.ones(b.shape, dtype=data_type)))
+        tau = np.ones(b.shape, data_type)
+        if b_mask is not None:
+            tau *= b_mask
+        tau = np.abs(At(tau))
         if self.regularizer is not None:
             tau += self.regularizer.initialize_sigma_tau()
         tau[(tau / np.max(tau)) < 1e-5] = 1
-        tau = 1 / tau
+        tau = self.relaxation / tau
 
         sigma = np.abs(A(np.ones(tau.shape, dtype=data_type)))
         sigma[(sigma / np.max(sigma)) < 1e-5] = 1
