@@ -12,6 +12,15 @@ from numpy import random as rnd
 
 import time as tm
 
+try:
+    import pywt
+    has_pywt = True
+    use_swtn = pywt.version.version >= '1.0.2'
+except ImportError:
+    has_pywt = False
+    use_swtn = False
+    print('WARNING - pywt was not found')
+
 
 class BaseRegularizer(object):
     """Base regularizer class that defines the Regularizer object interface.
@@ -173,6 +182,51 @@ class Regularizer_l1(BaseRegularizer):
 
     def compute_update_primal(self, dual):
         return self.weight * dual
+
+
+class Regularizer_l1wl(BaseRegularizer):
+    """l1-norm regularizer. It can be used to promote sparse reconstructions.
+    """
+
+    __reg_name__ = 'l1wl'
+
+    def __init__(self, weight, wavelet, level, ndims=2):
+        if not has_pywt:
+            raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
+        if not use_swtn:
+            raise ValueError('Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).')
+        BaseRegularizer.__init__(self, weight=weight)
+        self.wavelet = wavelet
+        self.level = level
+        self.ndims = ndims
+        self.axes = np.arange(-ndims, -1, dtype=np.int)
+
+    def _op_direct(self, primal):
+        return pywt.swtn(primal, wavelet=self.wavelet, axes=self.axes, level=self.level)
+
+    def _op_adjoint(self, dual):
+        return pywt.iswtn(dual, wavelet=self.wavelet, axes=self.axes)
+
+    def initialize_sigma_tau(self):
+        self.sigma = 1 / (2 ** np.arange(self.level, 0, -1))
+        return self.weight
+
+    def initialize_dual(self, primal):
+        return self._op_direct(np.zeros(primal.shape, dtype=primal.dtype))
+
+    def update_dual(self, dual, primal):
+        d = self._op_direct(primal)
+        for ii_l in range(self.level):
+            for k in dual[ii_l].keys():
+                dual[ii_l][k] += d[ii_l][k] * self.sigma[ii_l]
+
+    def apply_proximal(self, dual):
+        for ii_l in range(self.level):
+            for k in dual[ii_l].keys():
+                dual[ii_l][k] /= np.fmax(1, np.abs(dual[ii_l][k]))
+
+    def compute_update_primal(self, dual):
+        return self.weight * self._op_adjoint(dual)
 
 
 class Solver(object):
