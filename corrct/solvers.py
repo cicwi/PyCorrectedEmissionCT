@@ -104,11 +104,11 @@ class Regularizer_TV2D(Regularizer_TV):
         Regularizer_TV.__init__(self, weight=weight, ndims=2)
 
 
-class Regularizer_Lap(BaseRegularizer):
+class Regularizer_lap(BaseRegularizer):
     """Laplacian regularizer. It can be used to promote smooth reconstructions.
     """
 
-    __reg_name__ = 'Lap'
+    __reg_name__ = 'lap'
 
     def __init__(self, weight, ndims=2):
         BaseRegularizer.__init__(self, weight=weight)
@@ -142,15 +142,15 @@ class Regularizer_Lap(BaseRegularizer):
         return np.sum(d, axis=0)
 
 
-class Regularizer_Lap2D(Regularizer_Lap):
+class Regularizer_lap2D(Regularizer_lap):
     """Laplacian regularizer in 2D. It can be used to promote smooth
     reconstructions.
     """
 
-    __reg_name__ = 'Lap2D'
+    __reg_name__ = 'lap2D'
 
     def __init__(self, weight):
-        Regularizer_Lap.__init__(self, weight=weight, ndims=2)
+        Regularizer_lap.__init__(self, weight=weight, ndims=2)
 
 
 class Regularizer_l1(BaseRegularizer):
