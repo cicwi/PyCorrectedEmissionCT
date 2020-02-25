@@ -113,6 +113,17 @@ class Regularizer_TV2D(Regularizer_TV):
         Regularizer_TV.__init__(self, weight=weight, ndims=2)
 
 
+class Regularizer_TV3D(Regularizer_TV):
+    """Total Variation (TV) regularizer in 3D. It can be used to promote
+    piece-wise constant reconstructions.
+    """
+
+    __reg_name__ = 'TV3D'
+
+    def __init__(self, weight):
+        Regularizer_TV.__init__(self, weight=weight, ndims=3)
+
+
 class Regularizer_lap(BaseRegularizer):
     """Laplacian regularizer. It can be used to promote smooth reconstructions.
     """
@@ -160,6 +171,17 @@ class Regularizer_lap2D(Regularizer_lap):
 
     def __init__(self, weight):
         Regularizer_lap.__init__(self, weight=weight, ndims=2)
+
+
+class Regularizer_lap3D(Regularizer_lap):
+    """Laplacian regularizer in 3D. It can be used to promote smooth
+    reconstructions.
+    """
+
+    __reg_name__ = 'lap3D'
+
+    def __init__(self, weight):
+        Regularizer_lap.__init__(self, weight=weight, ndims=3)
 
 
 class Regularizer_l1(BaseRegularizer):
