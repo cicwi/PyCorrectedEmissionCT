@@ -23,6 +23,11 @@ class ProjectorBase(object):
     """
 
     def __init__(self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0):
+        if len(vol_shape) < 2 or len(vol_shape) > 3:
+            raise ValueError("Only 2D or 3D volumes")
+        if not vol_shape[0] == vol_shape[1]:
+            raise ValueError("Only square volumes")
+
         self.proj_id = []
         self.dispose_projectors()
 
@@ -30,14 +35,6 @@ class ProjectorBase(object):
         self.angles_rot_rad = angles_rot_rad
 
         self.vol_geom = astra.create_vol_geom(vol_shape)
-        self.initialize_geometry(vol_shape, angles_rot_rad, rot_axis_shift_pix)
-
-    def initialize_geometry(self, vol_shape, angles_rot_rad, rot_axis_shift_pix):
-
-        if len(vol_shape) < 2 or len(vol_shape) > 3:
-            raise ValueError("Only 2D or 3D volumes")
-        if not vol_shape[0] == vol_shape[1]:
-            raise ValueError("Only square volumes")
 
         num_angles = angles_rot_rad.size
 
@@ -326,4 +323,156 @@ class AttenuationProjector(ProjectorBase):
         return np.sum(
                 [self.bp_angle(sino, ii) for ii in range(len(self.angles_rot_rad))],
                 axis=0)
+
+
+class ProjectorUncorrected(object):
+    """Uncorrected projection class, which implements the forward and back
+    projection of the whole projection data.
+    It takes care of initializing and disposing the ASTRA projectors when used
+    in a *with* statement.
+    It supports both 2D and 3D geometries.
+    """
+
+    def __init__(self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0):
+        if len(vol_shape) < 2 or len(vol_shape) > 3:
+            raise ValueError("Only 2D or 3D volumes")
+        if not vol_shape[0] == vol_shape[1]:
+            raise ValueError("Only square volumes")
+
+        num_angles = len(angles_rot_rad)
+        self.is_3d = len(vol_shape) == 3
+        if self.is_3d:
+            self.vol_geom = astra.create_vol_geom([vol_shape[1], vol_shape[0], vol_shape[2]])
+
+            vectors = np.empty([num_angles, 12])
+            # source
+            vectors[:, 0] = -np.sin(angles_rot_rad)
+            vectors[:, 1] = -np.cos(angles_rot_rad)
+            vectors[:, 2] = 0
+            # vector from detector pixel (0,0) to (0,1)
+            vectors[:, 6] = np.cos(angles_rot_rad)
+            vectors[:, 7] = -np.sin(angles_rot_rad)
+            vectors[:, 8] = 0
+            # center of detector
+            vectors[:, 3:6] = rot_axis_shift_pix * vectors[:, 6:9]
+            # vector from detector pixel (0,0) to (1,0)
+            vectors[:, 9] = 0
+            vectors[:, 10] = 0
+            vectors[:, 11] = 1
+
+            self.proj_geom = astra.create_proj_geom('parallel3d_vec', vol_shape[2], vol_shape[0], vectors)
+        else:
+            self.vol_geom = astra.create_vol_geom([vol_shape[1], vol_shape[0]])
+
+            vectors = np.empty([num_angles, 6])
+            # source
+            vectors[:, 0] = np.sin(angles_rot_rad)
+            vectors[:, 1] = -np.cos(angles_rot_rad)
+            # vector from detector pixel 0 to 1
+            vectors[:, 4] = np.cos(angles_rot_rad)
+            vectors[:, 5] = np.sin(angles_rot_rad)
+            # center of detector
+            vectors[:, 2:4] = rot_axis_shift_pix * vectors[:, 4:6]
+
+            self.proj_geom = astra.create_proj_geom('parallel_vec', vol_shape[0], vectors)
+
+        self.projector_id = None
+        self.W = None
+
+    def __enter__(self):
+        self._initialize_projector()
+        return self
+
+    def __exit__(self, *args):
+        self._reset()
+
+    def _initialize_projector(self):
+        if self.projector_id is None:
+            if self.is_3d:
+                self.projector_id = astra.create_projector('cuda3d', self.proj_geom, self.vol_geom)
+            else:
+                self.projector_id = astra.create_projector('cuda', self.proj_geom, self.vol_geom)
+            self.W = astra.OpTomo(self.projector_id)
+
+    def _reset(self):
+        if self.projector_id is not None:
+            astra.projector.delete(self.projector_id)
+            self.projector_id = None
+            self.W = None
+
+    def fp(self, vol):
+        """Forward-projection of the volume to the projection data.
+
+        :param vol: The volume to forward-project (numpy.array_like)
+
+        :returns: The forward-projected projection data
+        :rtype: (numpy.array_like)
+        """
+        return self.W.FP(vol)
+
+    def bp(self, data):
+        """Back-projection of the projection data to the volume.
+
+        :param data: The projection data to back-project (numpy.array_like)
+
+        :returns: The back-projected volume
+        :rtype: (numpy.array_like)
+        """
+        return self.W.BP(data)
+
+    def fbp(self, projs, fbp_filter = 'shepp-logan'):
+        """Computes the filtered back-projection of the projection data to the
+        volume.
+        The data could either be a sinogram, or a stack of sinograms.
+
+        :param projs: The projection data to back-project (numpy.array_like)
+        :param fbp_filter: The FBP filter to use (str)
+
+        :returns: The FBP reconstructed volume
+        :rtype: (numpy.array_like)
+        """
+        if self.is_3d:
+            raise ValueError('FBP not supported with 3D projector')
+
+        cfg = astra.astra_dict('FBP_CUDA')
+        cfg['ProjectorId'] = self.projector_id
+        cfg['FilterType'] = fbp_filter
+
+        proj_geom = astra.projector.projection_geometry(self.projector_id)
+        vol_geom = astra.projector.volume_geometry(self.projector_id)
+
+        if len(projs.shape) > 2:
+            num_lines = projs.shape[1]
+            vols = [None] * num_lines
+
+            for ii_v in range(num_lines):
+                sino_id = astra.data2d.create('-sino', proj_geom, projs[:, ii_v, :])
+                vol_id = astra.data2d.create('-vol', vol_geom, 0)
+
+                cfg['ProjectionDataId'] = sino_id
+                cfg['ReconstructionDataId'] = vol_id
+                alg_id = astra.algorithm.create(cfg)
+                astra.algorithm.run(alg_id)
+                astra.algorithm.delete(alg_id)
+
+                vols[ii_v] = astra.data2d.get(vol_id)
+                astra.data2d.delete(vol_id)
+                astra.data2d.delete(sino_id)
+
+            return np.stack(vols, axis=0)
+        else:
+            sino_id = astra.data2d.create('-sino', proj_geom, projs)
+            vol_id = astra.data2d.create('-vol', vol_geom, 0)
+
+            cfg['ProjectionDataId'] = sino_id
+            cfg['ReconstructionDataId'] = vol_id
+            alg_id = astra.algorithm.create(cfg)
+            astra.algorithm.run(alg_id)
+            astra.algorithm.delete(alg_id)
+
+            vol = astra.data2d.get(vol_id)
+            astra.data2d.delete(vol_id)
+            astra.data2d.delete(sino_id)
+
+            return vol
 
