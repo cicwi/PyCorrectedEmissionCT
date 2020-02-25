@@ -3,7 +3,8 @@
 """
 Created on Thu May  4 15:37:13 2017
 
-@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands
+@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np

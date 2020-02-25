@@ -3,7 +3,8 @@
 """
 Solvers for the tomographic reconstruction problem.
 
-@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands
+@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np

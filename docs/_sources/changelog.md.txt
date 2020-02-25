@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - <insert-bugs-fixed-not-in-a-release-yet>
 -->
 
+## 0.2.1 - 2020-02-25
+### Added
+- New regularizers: non-decimated wavelets and laplacian
+- Solvers: added projection masks, relaxation parameters, sirt regularizers
+- Uncorrected projector for 2D and 3D data
+### Fixed
+- sub-pixel attenuation correction
+
 ## 0.2.0 - 2019-11-05
 ### Added
 - Multi-detector reconstruction
@@ -26,4 +34,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SIRT, SART, and Chambolle-Pock solvers.
 - TV-min and l1-norm based regularizers.
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.2.0...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.2.1...develop

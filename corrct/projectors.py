@@ -2,7 +2,8 @@
 """
 Tomographic projectors.
 
-@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands
+@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
@@ -19,7 +20,7 @@ class ProjectorBase(object):
     of the single lines of a sinogram.
     It takes care of initializing and disposing the ASTRA projectors when used
     in a *with* statement.
-    It includes the computation of the attenuation volumes.
+    It supports both 2D and 3D geometries.
     """
 
     def __init__(self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0):
@@ -101,22 +102,36 @@ class ProjectorBase(object):
     def __exit__(self, *args):
         self.dispose_projectors()
 
-    def fp_angle(self, vol, ii):
+    def fp_angle(self, vol, angle_ind):
         """Forward-projection of the volume to a single sinogram line.
-        """
-        return self.W[ii].FP(vol)[0, ...]
 
-    def bp_angle(self, sino_line, ii):
-        """Back-projection of a single sinogram line to the volume.
+        :param vol: The volume to forward-project (numpy.array_like)
+        :param angle_ind: The angle index to foward project (int)
+
+        :returns: The forward-projected sinogram line
+        :rtype: (numpy.array_like)
+        """
+        return self.W[angle_ind].FP(vol)[0, ...]
+
+    def bp_angle(self, sino_line, angle_ind):
+        """Back-projection of a single sinogram line to the volume. It only
+        applies the attenuation corrections if the projector is symmetric.
+
+        :param sino_line: The sinogram to back-project or a single line (numpy.array_like)
+        :param angle_ind: The angle index to foward project (int)
+
+        :returns: The back-projected volume
+        :rtype: (numpy.array_like)
         """
         sino = np.empty([2, *np.squeeze(sino_line).shape], dtype=sino_line.dtype)
         sino[0, ...] = sino_line
         sino[1, ...] = 0
-        return self.W[ii].BP(sino)
+        return self.W[angle_ind].BP(sino)
 
 
 class AttenuationProjector(ProjectorBase):
     """Attenuation corrected projection class, with multi-detector support.
+    It includes the computation of the attenuation volumes.
     """
 
     def __init__(
@@ -233,6 +248,8 @@ class AttenuationProjector(ProjectorBase):
             self.att_vol_angles = self.att_vol_angles[:, :, np.newaxis, ...]
 
     def collapse_detectors(self):
+        """Converts multi-detector configurations into single-detector.
+        """
         weights = np.reshape(self.weights_det, [1, -1, 1, 1]) / np.sum(self.weights_det)
 
         self.att_vol_angles = np.sum(self.att_vol_angles * weights, axis=1)
@@ -315,11 +332,26 @@ class AttenuationProjector(ProjectorBase):
         return np.sum(vol, axis=0)
 
     def fp(self, vol):
+        """Forward-projection of the volume to the sinogram. It applies the
+        attenuation corrections.
+
+        :param vol: The volume to forward-project (numpy.array_like)
+
+        :returns: The forward-projected sinogram
+        :rtype: (numpy.array_like)
+        """
         return np.stack(
                 [self.fp_angle(vol, ii) for ii in range(len(self.angles_rot_rad))],
                 axis=0)
 
     def bp(self, sino):
+        """Back-projection of the sinogram to the volume.
+
+        :param sino: The sinogram to back-project (numpy.array_like)
+
+        :returns: The back-projected volume
+        :rtype: (numpy.array_like)
+        """
         return np.sum(
                 [self.bp_angle(sino, ii) for ii in range(len(self.angles_rot_rad))],
                 axis=0)
