@@ -8,6 +8,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
+import scipy.sparse as sps
 
 from numpy import random as rnd
 
@@ -266,6 +267,21 @@ class Solver(object):
     def lower(self):
         return type(self).__name__.lower()
 
+    def _initialize_data_operators(self, A, At):
+        if At is None:
+            if isinstance(A, np.ndarray):
+                At = A.transpose((1, 0))
+            elif isinstance(A, sps.dia_matrix):
+                At = A.transpose()
+
+        if isinstance(At, np.ndarray) or isinstance(At, sps.dia_matrix):
+            At_m = At
+            At = lambda x: np.dot(At_m, x)
+        if isinstance(A, np.ndarray) or isinstance(A, sps.dia_matrix):
+            A_m = A
+            A = lambda x: np.dot(A_m, x)
+        return (A, At)
+
 
 class Sart(Solver):
     """Solver class implementing the Simultaneous Algebraic Reconstruction
@@ -354,6 +370,8 @@ class Sirt(Solver):
             upper_limit=None, x_mask=None, b_mask=None):
         """
         """
+        (A, At) = self._initialize_data_operators(A, At)
+
         data_type = b.dtype
 
         c_in = tm.time()
@@ -446,6 +464,8 @@ class CP(Solver):
             lower_limit=None, x_mask=None, b_mask=None):
         """
         """
+        (A, At) = self._initialize_data_operators(A, At)
+
         data_type = b.dtype
 
         c_in = tm.time()
