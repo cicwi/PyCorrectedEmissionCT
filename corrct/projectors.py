@@ -495,3 +495,140 @@ class ProjectorUncorrected(ProjectorBase):
             return self.bp(projs)
 
 
+class FilterMR(object):
+    """Data dependent FBP filter. This is a simplified implementation from:
+
+    [1] Pelt, D. M., & Batenburg, K. J. (2014). Improving filtered backprojection
+    reconstruction by data-dependent filtering. Image Processing, IEEE
+    Transactions on, 23(11), 4750-4762.
+
+    Code inspired by: https://github.com/dmpelt/pymrfbp
+    """
+
+    def __init__(
+            self, sinogram_pixels_num=None, sinogram_angles_num=None,
+            start_exp_binning=2, lambda_smooth=None, data_type=np.float32):
+        """
+        :param sinogram_pixels_num: Number of sinogram pixels (int)
+        :param sinogram_angles_num: Number of sinogram angles (int)
+        :param start_exp_binning: From which distance to start exponentional binning (int)
+        :param lambda_smooth: Smoothing parameter (float)
+        :param data_type: Filter data type (numpy data type)
+        """
+        self.data_type = data_type
+        self.start_exp_binning = start_exp_binning
+        self.lambda_smooth = lambda_smooth
+        self.is_initialized = False
+        self.sinogram_pixels_num = sinogram_pixels_num
+        self.sinogram_angles_num = sinogram_angles_num
+
+        if sinogram_pixels_num is not None and sinogram_angles_num is not None:
+            self.initialize()
+
+    def initialize(self):
+        """ Filter initialization function.
+        """
+        if self.sinogram_pixels_num is None:
+            raise ValueError('No sinogram pixels number was given!')
+        if self.sinogram_angles_num is None:
+            raise ValueError('No sinogram angles number was given!')
+
+        filter_center = np.floor(self.sinogram_pixels_num / 2).astype(np.int)
+        self.filter_size = filter_center * 2 + 1
+
+        window_size = 1
+        window_position = filter_center
+
+        self.basis = []
+        count = 0
+        while window_position < self.filter_size:
+            basis_tmp = np.zeros(self.filter_size, dtype=self.data_type)
+
+            # simmetric exponential binning
+            l = window_position
+            r = np.fmin(l + window_size, self.filter_size)
+            basis_tmp[l:r] = 1
+
+            r = self.filter_size - window_position
+            l = np.fmax(r - window_size, 0)
+            basis_tmp[l:r] = 1
+
+            self.basis.append(basis_tmp)
+            window_position += window_size
+
+            count += 1
+            if self.start_exp_binning is not None and count > self.start_exp_binning:
+                window_size = 2 * window_size
+
+        self.is_initialized = True
+
+    def compute_filter(self, sinogram, projector):
+        """ Computes the filter.
+
+        :param sinogram: The sinogram (np.array_like)
+        :param projector: The projector used in the FBP (object)
+
+        :returns: The computed filter
+        :rtype: (numpy.array_like)
+        """
+        sino_size = self.sinogram_angles_num * self.sinogram_pixels_num
+        nrows = sino_size
+        ncols = len(self.basis)
+
+        if self.lambda_smooth:
+            grad_vol_size = self.sinogram_pixels_num * (self.sinogram_pixels_num - 1)
+            nrows += 2 * grad_vol_size
+
+        A = np.zeros((nrows, ncols), dtype=self.data_type)
+
+        for ii, bas in enumerate(self.basis):
+            img = self.apply_filter(sinogram, bas)
+            img = projector.bp(img)
+
+            astra.extrautils.clipCircle(img)
+            A[:sino_size, ii] = projector.fp(img).flatten()
+            if self.lambda_smooth:
+                dx = np.diff(img, axis=0)
+                dy = np.diff(img, axis=1)
+                d = np.concatenate((dx.flatten(), dy.flatten()))
+                A[sino_size:, ii] = self.lambda_smooth * d
+
+        b = np.zeros((nrows, ), dtype=self.data_type)
+        b[:sino_size] = sinogram.flatten()
+        fitted_components = np.linalg.lstsq(A, b, rcond=None)
+
+        computed_filter = np.zeros((self.filter_size, ), dtype=self.data_type)
+        for ii, bas in enumerate(self.basis):
+            computed_filter += fitted_components[0][ii] * bas
+        return computed_filter
+
+    def apply_filter(self, sinogram, computed_filter):
+        """ Applies the filter to the sinogram.
+
+        :param sinogram: The sinogram (np.array_like)
+        :param computed_filter: The computed filter (np.array_like)
+
+        :returns: The filtered sinogram
+        :rtype: (numpy.array_like)
+        """
+        return spsig.fftconvolve(sinogram, computed_filter[np.newaxis, ...], 'same')
+
+    def __call__(self, sinogram, projector):
+        """ Filters the sinogram, by first computing the filter, and then
+        applying it.
+
+        :param sinogram: The sinogram (np.array_like)
+        :param projector: The projector used in the FBP (object)
+
+        :returns: The filtered sinogram
+        :rtype: (numpy.array_like)
+        """
+        if not self.is_initialized:
+            self.sinogram_angles_num = sinogram.shape[0]
+            self.sinogram_pixels_num = sinogram.shape[1]
+            self.initialize()
+
+        computed_filter = self.compute_filter(sinogram, projector)
+        return self.apply_filter(sinogram, computed_filter)
+
+
