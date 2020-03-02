@@ -185,10 +185,13 @@ class AttenuationProjector(ProjectorBase):
         point of the volume, along a certain direction.
         """
         vol = np.array(vol)
-        if len(vol.shape) > 2:
+        if not len(vol.shape) == 2:
             raise ValueError("Maps can only be 2D Arrays")
-        if not np.all(vol.shape == self.vol_shape[1:3]):
-            raise ValueError("Mismatching volume shape of input volume with vol_shape")
+        if not np.all(np.equal(vol.shape, self.vol_shape[:2])):
+            raise ValueError("Mismatching volume shape of input volume (%s) with vol_shape (%s in 2D -> %s)" % (
+                    " ".join(("%d" % x for x in vol.shape)),
+                    " ".join(("%d" % x for x in self.vol_shape)),
+                    " ".join(("%d" % x for x in self.vol_shape[:2])) ))
 
         size_lims = np.array(vol.shape)
         min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
