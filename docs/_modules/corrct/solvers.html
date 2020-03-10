@@ -155,6 +155,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">sps</span>
 
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">random</span> <span class="k">as</span> <span class="n">rnd</span>
 
@@ -411,7 +412,22 @@
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Solver.lower"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver.lower">[docs]</a>    <span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_initialize_data_operators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">At</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">At</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">):</span>
+                <span class="n">At</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">At</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">At</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">):</span>
+            <span class="n">At_m</span> <span class="o">=</span> <span class="n">At</span>
+            <span class="n">At</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">At_m</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">):</span>
+            <span class="n">A_m</span> <span class="o">=</span> <span class="n">A</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A_m</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Sart"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Sart">[docs]</a><span class="k">class</span> <span class="nc">Sart</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
@@ -501,6 +517,8 @@
             <span class="n">upper_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data_operators</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span>
+
         <span class="n">data_type</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">dtype</span>
 
         <span class="n">c_in</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -593,6 +611,8 @@
             <span class="n">lower_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data_operators</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span>
+
         <span class="n">data_type</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">dtype</span>
 
         <span class="n">c_in</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>

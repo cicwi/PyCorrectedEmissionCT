@@ -91,7 +91,7 @@ Python 3.
 
 Simply install with:
 ```
-conda install -c cicwi corrct
+conda install -c n-vigano corrct
 ```
 
 ### Installing from source

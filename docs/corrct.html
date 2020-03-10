@@ -343,14 +343,88 @@ applies the attenuation corrections.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="corrct.projectors.FilterMR">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">FilterMR</code><span class="sig-paren">(</span><em class="sig-param">sinogram_pixels_num=None</em>, <em class="sig-param">sinogram_angles_num=None</em>, <em class="sig-param">start_exp_binning=2</em>, <em class="sig-param">lambda_smooth=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#FilterMR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.FilterMR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Data dependent FBP filter. This is a simplified implementation from:</p>
+<p>[1] Pelt, D. M., &amp; Batenburg, K. J. (2014). Improving filtered backprojection
+reconstruction by data-dependent filtering. Image Processing, IEEE
+Transactions on, 23(11), 4750-4762.</p>
+<p>Code inspired by: <a class="reference external" href="https://github.com/dmpelt/pymrfbp">https://github.com/dmpelt/pymrfbp</a></p>
+<dl class="method">
+<dt id="corrct.projectors.FilterMR.apply_filter">
+<code class="sig-name descname">apply_filter</code><span class="sig-paren">(</span><em class="sig-param">sinogram</em>, <em class="sig-param">computed_filter</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#FilterMR.apply_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.FilterMR.apply_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the filter to the sinogram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sinogram</strong> – The sinogram (np.array_like)</p></li>
+<li><p><strong>computed_filter</strong> – The computed filter (np.array_like)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The filtered sinogram</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(numpy.array_like)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="corrct.projectors.FilterMR.compute_filter">
+<code class="sig-name descname">compute_filter</code><span class="sig-paren">(</span><em class="sig-param">sinogram</em>, <em class="sig-param">projector</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#FilterMR.compute_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.FilterMR.compute_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sinogram</strong> – The sinogram (np.array_like)</p></li>
+<li><p><strong>projector</strong> – The projector used in the FBP (object)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The computed filter</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(numpy.array_like)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="corrct.projectors.FilterMR.initialize">
+<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#FilterMR.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.FilterMR.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter initialization function.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="corrct.projectors.ProjectorBase">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorBase</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorBase</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">create_ind_projs=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Basic projection class, which implements the forward and back projection
 of the single lines of a sinogram.
 It takes care of initializing and disposing the ASTRA projectors when used
 in a <em>with</em> statement.
 It supports both 2D and 3D geometries.</p>
+<dl class="method">
+<dt id="corrct.projectors.ProjectorBase.bp">
+<code class="sig-name descname">bp</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase.bp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase.bp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Back-projection of the projection data to the volume.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – The projection data to back-project (numpy.array_like)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The back-projected volume</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(numpy.array_like)</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="method">
 <dt id="corrct.projectors.ProjectorBase.bp_angle">
 <code class="sig-name descname">bp_angle</code><span class="sig-paren">(</span><em class="sig-param">sino_line</em>, <em class="sig-param">angle_ind</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase.bp_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase.bp_angle" title="Permalink to this definition">¶</a></dt>
@@ -376,6 +450,23 @@ applies the attenuation corrections if the projector is symmetric.</p>
 <dt id="corrct.projectors.ProjectorBase.dispose_projectors">
 <code class="sig-name descname">dispose_projectors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase.dispose_projectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase.dispose_projectors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disposal of the ASTRA projectors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="corrct.projectors.ProjectorBase.fp">
+<code class="sig-name descname">fp</code><span class="sig-paren">(</span><em class="sig-param">vol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase.fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase.fp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward-projection of the volume to the projection data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>vol</strong> – The volume to forward-project (numpy.array_like)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The forward-projected projection data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(numpy.array_like)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -408,30 +499,13 @@ applies the attenuation corrections if the projector is symmetric.</p>
 
 <dl class="class">
 <dt id="corrct.projectors.ProjectorUncorrected">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorUncorrected</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorUncorrected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorUncorrected" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorUncorrected</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">create_ind_projs=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorUncorrected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorUncorrected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.projectors.ProjectorBase" title="corrct.projectors.ProjectorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.projectors.ProjectorBase</span></code></a></p>
 <p>Uncorrected projection class, which implements the forward and back
 projection of the whole projection data.
 It takes care of initializing and disposing the ASTRA projectors when used
 in a <em>with</em> statement.
 It supports both 2D and 3D geometries.</p>
-<dl class="method">
-<dt id="corrct.projectors.ProjectorUncorrected.bp">
-<code class="sig-name descname">bp</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorUncorrected.bp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorUncorrected.bp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Back-projection of the projection data to the volume.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – The projection data to back-project (numpy.array_like)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The back-projected volume</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="method">
 <dt id="corrct.projectors.ProjectorUncorrected.fbp">
 <code class="sig-name descname">fbp</code><span class="sig-paren">(</span><em class="sig-param">projs</em>, <em class="sig-param">fbp_filter='shepp-logan'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorUncorrected.fbp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorUncorrected.fbp" title="Permalink to this definition">¶</a></dt>
@@ -442,28 +516,11 @@ The data could either be a sinogram, or a stack of sinograms.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>projs</strong> – The projection data to back-project (numpy.array_like)</p></li>
-<li><p><strong>fbp_filter</strong> – The FBP filter to use (str)</p></li>
+<li><p><strong>fbp_filter</strong> – The FBP filter to use (str or function)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The FBP reconstructed volume</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="corrct.projectors.ProjectorUncorrected.fp">
-<code class="sig-name descname">fp</code><span class="sig-paren">(</span><em class="sig-param">vol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorUncorrected.fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorUncorrected.fp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Forward-projection of the volume to the projection data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>vol</strong> – The volume to forward-project (numpy.array_like)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The forward-projected projection data</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>(numpy.array_like)</p>
