@@ -99,7 +99,7 @@ conda install -c n-vigano corrct
 To install PyCorrectedEmissionCT, simply clone this GitHub
 project. Go to the cloned directory and run PIP installer:
 ```
-git clone https://github.com/cicwi/corrct.git
+git clone https://github.com/cicwi/PyCorrectedEmissionCT.git
 cd corrct
 pip install -e .
 ```
@@ -113,7 +113,7 @@ examples folder.
 
 * **Nicola VIGANÒ** - *Initial work*
 
-See also the list of [contributors](https://github.com/cicwi/corrct/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/cicwi/PyCorrectedEmissionCT/contributors) who participated in this project.
 
 ## How to contribute
 
