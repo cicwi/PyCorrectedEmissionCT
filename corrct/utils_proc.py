@@ -10,20 +10,12 @@ import numpy as np
 
 
 def get_circular_mask(vol_shape_yx, radius_offset=0, data_type=np.float32):
-    """
-    Computes a circular mask for the reconstruction volume.
+    """Computes a circular mask for the reconstruction volume.
 
-    Parameters
-    ----------
-    :param vol_shape_yx: numpy.array_like
-        The size of the volume.
-    :param radius_offset: float, optional
-        The offset with respect to the volume edge. The default is 0.
-    :param data_type: numpy.dtype, optional
-        The mask data type. The default is np.float32.
+    :param vol_shape_yx: The size of the volume (numpy.array_like)
+    :param radius_offset: The offset with respect to the volume edge. Optinal, default: 0 (float)
+    :param data_type: The mask data type. Optional, default: np.float32 (numpy.dtype)
 
-    Returns
-    -------
     :returns: The circular mask.
     :rtype: (numpy.array_like)
     """
@@ -35,23 +27,14 @@ def get_circular_mask(vol_shape_yx, radius_offset=0, data_type=np.float32):
 
 
 def pad_sinogram(sinogram, width, pad_axis=-1, mode='edge', **kwds):
-    """
-    Pads the sinogram.
+    """Pads the sinogram.
 
-    Parameters
-    ----------
-    :param sinogram: numpy.array_like
-        The sinogram to pad.
-    :param width: int or tuple(int, int)
-        The width of the padding. Could be a scalar or a tuple of two integers.
-    :param pad_axis: int, optional
-        The axis to pad. The default is -1.
-    :param mode: string, optional
-        The padding type (from numpy.pad). The default is 'edge'.
+    :param sinogram: The sinogram to pad. (numpy.array_like)
+    :param width: The width of the padding. Could be a scalar or a tuple of two integers. (int or tuple(int, int) )
+    :param pad_axis: The axis to pad. Optional, default: -1. (int)
+    :param mode: The padding type (from numpy.pad). Optional, default: 'edge'. (string)
     :param **kwds: The numpy.pad arguments.
 
-    Returns
-    -------
     :returns: The padded sinogram.
     :rtype: (numpy.array_like)
     """
