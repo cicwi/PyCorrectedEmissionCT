@@ -215,7 +215,7 @@ class Regularizer_l1wl(BaseRegularizer):
 
     __reg_name__ = 'l1wl'
 
-    def __init__(self, weight, wavelet, level, ndims=2):
+    def __init__(self, weight, wavelet, level, ndims=2, axes=None):
         if not has_pywt:
             raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
         if not use_swtn:
@@ -224,7 +224,10 @@ class Regularizer_l1wl(BaseRegularizer):
         self.wavelet = wavelet
         self.level = level
         self.ndims = ndims
-        self.axes = np.arange(-ndims, 0, dtype=np.int)
+
+        if axes is None:
+            axes = np.arange(-ndims, 0, dtype=np.int)
+        self.axes = axes
 
     def _op_direct(self, primal):
         return pywt.swtn(primal, wavelet=self.wavelet, axes=self.axes, level=self.level)
