@@ -12,6 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - <insert-bugs-fixed-not-in-a-release-yet>
 -->
 
+## 0.2.2 - 2020-03-30
+### Added
+- Unpreconditioned Chambolle-Pock algorithm (as default)
+- Utility functions for sinogram padding and circular volume mask creation
+- FBP data-dependent filters from D. Pelt
+- Improved performance of backprojection in non-symmetric uncorrected
+### Fixed
+- Wavelet decomposition along one dimension
+- TV regularizer for dimensions larger than ndims
+- Documentation and links
+- Handling of matrices
+
 ## 0.2.1 - 2020-02-25
 ### Added
 - New regularizers: non-decimated wavelets and laplacian
@@ -34,4 +46,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SIRT, SART, and Chambolle-Pock solvers.
 - TV-min and l1-norm based regularizers.
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.2.1...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.2.2...develop

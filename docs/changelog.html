@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -83,18 +83,23 @@
 <li class="toctree-l1"><a class="reference internal" href="readme.html">PyCorrectedEmissionCT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id1">0.2.1 - 2020-02-25</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">0.2.2 - 2020-03-30</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#added">Added</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#fixed">Fixed</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#id2">0.2.0 - 2019-11-05</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">0.2.1 - 2020-02-25</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id3">Added</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id4">Fixed</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#id5">0.1.0 - 2019-10-29</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id5">0.2.0 - 2019-11-05</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id6">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">0.1.0 - 2019-10-29</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Added</a></li>
 </ul>
 </li>
 </ul>
@@ -175,32 +180,53 @@ and this project adheres to <a class="reference external" href="https://semver.o
 ### Fixed
 - <insert-bugs-fixed-not-in-a-release-yet>
 --><div class="section" id="id1">
-<h2>0.2.1 - 2020-02-25<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.2.2 - 2020-03-30<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="added">
 <h3>Added<a class="headerlink" href="#added" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Unpreconditioned Chambolle-Pock algorithm (as default)</p></li>
+<li><p>Utility functions for sinogram padding and circular volume mask creation</p></li>
+<li><p>FBP data-dependent filters from D. Pelt</p></li>
+<li><p>Improved performance of backprojection in non-symmetric uncorrected</p></li>
+</ul>
+</div>
+<div class="section" id="fixed">
+<h3>Fixed<a class="headerlink" href="#fixed" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Wavelet decomposition along one dimension</p></li>
+<li><p>TV regularizer for dimensions larger than ndims</p></li>
+<li><p>Documentation and links</p></li>
+<li><p>Handling of matrices</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>0.2.1 - 2020-02-25<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id3">
+<h3>Added<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>New regularizers: non-decimated wavelets and laplacian</p></li>
 <li><p>Solvers: added projection masks, relaxation parameters, sirt regularizers</p></li>
 <li><p>Uncorrected projector for 2D and 3D data</p></li>
 </ul>
 </div>
-<div class="section" id="fixed">
-<h3>Fixed<a class="headerlink" href="#fixed" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id4">
+<h3>Fixed<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>sub-pixel attenuation correction</p></li>
 </ul>
 </div>
 </div>
-<div class="section" id="id2">
-<h2>0.2.0 - 2019-11-05<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id3">
-<h3>Added<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id5">
+<h2>0.2.0 - 2019-11-05<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h3>Added<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Multi-detector reconstruction</p></li>
 </ul>
 </div>
-<div class="section" id="id4">
-<h3>Fixed<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id7">
+<h3>Fixed<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>TV-min sign</p></li>
 <li><p>Solvers’ name visualization</p></li>
@@ -208,10 +234,10 @@ and this project adheres to <a class="reference external" href="https://semver.o
 </ul>
 </div>
 </div>
-<div class="section" id="id5">
-<h2>0.1.0 - 2019-10-29<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id6">
-<h3>Added<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id8">
+<h2>0.1.0 - 2019-10-29<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id9">
+<h3>Added<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>Initial release, with corrected forward and back-projections.</p></li>
 <li><p>SIRT, SART, and Chambolle-Pock solvers.</p></li>

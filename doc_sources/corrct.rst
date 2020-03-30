@@ -28,6 +28,14 @@ corrct.solvers module
    :undoc-members:
    :show-inheritance:
 
+corrct.utils\_proc module
+-------------------------
+
+.. automodule:: corrct.utils_proc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 Module contents
 ---------------

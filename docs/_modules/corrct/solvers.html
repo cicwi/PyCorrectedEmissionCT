@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -218,7 +218,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span></div>
 
 <div class="viewcode-block" id="Regularizer_TV.initialize_dual"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Regularizer_TV.initialize_dual">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">,</span> <span class="o">*</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">primal</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primal_shape</span> <span class="o">=</span> <span class="n">primal</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">primal_shape</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">primal</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Regularizer_TV.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Regularizer_TV.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
         <span class="n">dual</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span></div>
@@ -234,7 +235,7 @@
         <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span>
         <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">):</span>
             <span class="n">ind</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">padding</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">primal_shape</span><span class="p">)</span>
             <span class="n">padding</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">temp_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span>
             <span class="n">d</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">temp_x</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">ind</span><span class="p">)</span>
@@ -244,7 +245,7 @@
         <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span>
         <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">):</span>
             <span class="n">ind</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">padding</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">primal_shape</span><span class="p">)</span>
             <span class="n">padding</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">temp_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">padding</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span>
             <span class="n">d</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">temp_x</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">ind</span><span class="p">)</span>
@@ -361,7 +362,7 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s1">&#39;l1wl&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_pywt</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot use l1wl regularizer because pywavelets is not installed.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">use_swtn</span><span class="p">:</span>
@@ -370,7 +371,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">wavelet</span> <span class="o">=</span> <span class="n">wavelet</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">level</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span> <span class="o">=</span> <span class="n">ndims</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">ndims</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">ndims</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span>
 
     <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">pywt</span><span class="o">.</span><span class="n">swtn</span><span class="p">(</span><span class="n">primal</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelet</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>
@@ -534,7 +538,10 @@
         <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">/</span> <span class="n">tau</span>
 
         <span class="c1"># Forward-projection diagonal re-scaling</span>
-        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">tau</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)))</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">tau</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sigma</span> <span class="o">*=</span> <span class="n">x_mask</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="n">sigma</span><span class="p">))</span>
         <span class="n">sigma</span><span class="p">[(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sigma</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sigma</span>
 
@@ -601,14 +608,33 @@
 <span class="sd">    based on the BaseRegularizer interface.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">relaxation</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">relaxation</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">Solver</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">relaxation</span><span class="o">=</span><span class="n">relaxation</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span> <span class="o">=</span> <span class="n">data_term</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span> <span class="o">=</span> <span class="n">regularizer</span>
 
+<div class="viewcode-block" id="CP.power_method"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.CP.power_method">[docs]</a>    <span class="k">def</span> <span class="nf">power_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">dtype</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">At</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">x_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">x_norm</span>
+
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">/=</span> <span class="n">x_norm</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">At</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+            <span class="n">x_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x_norm</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">lower_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">lower_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">precondition</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data_operators</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span>
@@ -617,23 +643,33 @@
 
         <span class="n">c_in</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-        <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">b_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">tau</span> <span class="o">*=</span> <span class="n">b_mask</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">At</span><span class="p">(</span><span class="n">tau</span><span class="p">))</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">tau</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span><span class="o">.</span><span class="n">initialize_sigma_tau</span><span class="p">()</span>
-        <span class="n">tau</span><span class="p">[(</span><span class="n">tau</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">tau</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">/</span> <span class="n">tau</span>
+        <span class="k">if</span> <span class="n">precondition</span><span class="p">:</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">b_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tau</span> <span class="o">*=</span> <span class="n">b_mask</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">At</span><span class="p">(</span><span class="n">tau</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tau</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span><span class="o">.</span><span class="n">initialize_sigma_tau</span><span class="p">()</span>
+            <span class="n">tau</span><span class="p">[(</span><span class="n">tau</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">tau</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">/</span> <span class="n">tau</span>
 
-        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">tau</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)))</span>
-        <span class="n">sigma</span><span class="p">[(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sigma</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sigma</span>
+            <span class="n">x_shape</span> <span class="o">=</span> <span class="n">tau</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">tau</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">x_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sigma</span> <span class="o">*=</span> <span class="n">x_mask</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="n">sigma</span><span class="p">))</span>
+            <span class="n">sigma</span><span class="p">[(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sigma</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.95</span> <span class="o">/</span> <span class="n">sigma</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_method</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">/</span> <span class="n">L</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.95</span> <span class="o">/</span> <span class="p">(</span><span class="n">L</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span><span class="o">.</span><span class="n">initialize_sigma_tau</span><span class="p">())</span>
 
         <span class="n">sigma1</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sigma</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x0</span>
         <span class="n">x_relax</span> <span class="o">=</span> <span class="n">x</span>
 

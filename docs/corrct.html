@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -88,6 +88,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-corrct.corrct">corrct.corrct module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-corrct.projectors">corrct.projectors module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-corrct.solvers">corrct.solvers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-corrct.utils_proc">corrct.utils_proc module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-corrct">Module contents</a></li>
 </ul>
 </li>
@@ -580,7 +581,7 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 
 <dl class="class">
 <dt id="corrct.solvers.CP">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">CP</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em>, <em class="sig-param">relaxation=0.9</em>, <em class="sig-param">data_term='l2'</em>, <em class="sig-param">regularizer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#CP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.CP" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">CP</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em>, <em class="sig-param">relaxation=0.95</em>, <em class="sig-param">data_term='l2'</em>, <em class="sig-param">regularizer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#CP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.CP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Solver" title="corrct.solvers.Solver"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Solver</span></code></a></p>
 <p>Solver class implementing the primal-dual algorithm from Chambolle and
 Pock.
@@ -589,6 +590,11 @@ Kulback-Leibler. The first assumes Gaussian noise and the second Poisson
 noise as dominant sources of noise in the data.
 This solver also allows to specify a chosen regularizer, from the ones
 based on the BaseRegularizer interface.</p>
+<dl class="method">
+<dt id="corrct.solvers.CP.power_method">
+<code class="sig-name descname">power_method</code><span class="sig-paren">(</span><em class="sig-param">A</em>, <em class="sig-param">At</em>, <em class="sig-param">b</em>, <em class="sig-param">iterations=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#CP.power_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.CP.power_method" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -684,7 +690,7 @@ piece-wise constant reconstructions.</p>
 
 <dl class="class">
 <dt id="corrct.solvers.Regularizer_l1wl">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_l1wl</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">wavelet</em>, <em class="sig-param">level</em>, <em class="sig-param">ndims=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_l1wl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_l1wl" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_l1wl</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">wavelet</em>, <em class="sig-param">level</em>, <em class="sig-param">ndims=2</em>, <em class="sig-param">axes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_l1wl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_l1wl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.BaseRegularizer" title="corrct.solvers.BaseRegularizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.BaseRegularizer</span></code></a></p>
 <p>l1-norm regularizer. It can be used to promote sparse reconstructions.</p>
 <dl class="method">
@@ -798,6 +804,57 @@ Technique (SIRT) algorithm.</p>
 <code class="sig-name descname">upper</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Solver.upper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Solver.upper" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="module-corrct.utils_proc">
+<span id="corrct-utils-proc-module"></span><h2>corrct.utils_proc module<a class="headerlink" href="#module-corrct.utils_proc" title="Permalink to this headline">¶</a></h2>
+<p>Created on Tue Mar 24 15:25:14 2020</p>
+<p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France</p>
+<dl class="function">
+<dt id="corrct.utils_proc.get_circular_mask">
+<code class="sig-prename descclassname">corrct.utils_proc.</code><code class="sig-name descname">get_circular_mask</code><span class="sig-paren">(</span><em class="sig-param">vol_shape_yx</em>, <em class="sig-param">radius_offset=0</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/utils_proc.html#get_circular_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.utils_proc.get_circular_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a circular mask for the reconstruction volume.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vol_shape_yx</strong> – The size of the volume (numpy.array_like)</p></li>
+<li><p><strong>radius_offset</strong> – The offset with respect to the volume edge. Optinal, default: 0 (float)</p></li>
+<li><p><strong>data_type</strong> – The mask data type. Optional, default: np.float32 (numpy.dtype)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The circular mask.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(numpy.array_like)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="corrct.utils_proc.pad_sinogram">
+<code class="sig-prename descclassname">corrct.utils_proc.</code><code class="sig-name descname">pad_sinogram</code><span class="sig-paren">(</span><em class="sig-param">sinogram</em>, <em class="sig-param">width</em>, <em class="sig-param">pad_axis=-1</em>, <em class="sig-param">mode='edge'</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/utils_proc.html#pad_sinogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.utils_proc.pad_sinogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pads the sinogram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sinogram</strong> – The sinogram to pad. (numpy.array_like)</p></li>
+<li><p><strong>width</strong> – The width of the padding. Could be a scalar or a tuple of two integers. (int or tuple(int, int) )</p></li>
+<li><p><strong>pad_axis</strong> – The axis to pad. Optional, default: -1. (int)</p></li>
+<li><p><strong>mode</strong> – The padding type (from numpy.pad). Optional, default: ‘edge’. (string)</p></li>
+<li><p><strong>**kwds</strong> – <p>The numpy.pad arguments.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The padded sinogram.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(numpy.array_like)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
