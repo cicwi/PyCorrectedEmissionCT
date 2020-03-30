@@ -223,7 +223,7 @@ class Regularizer_l1wl(BaseRegularizer):
         self.wavelet = wavelet
         self.level = level
         self.ndims = ndims
-        self.axes = np.arange(-ndims, -1, dtype=np.int)
+        self.axes = np.arange(-ndims, 0, dtype=np.int)
 
     def _op_direct(self, primal):
         return pywt.swtn(primal, wavelet=self.wavelet, axes=self.axes, level=self.level)
