@@ -20,3 +20,4 @@ __version__ = __get_version()
 from .corrct import *
 from . import projectors
 from . import solvers
+from . import utils_proc
