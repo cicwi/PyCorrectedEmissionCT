@@ -454,14 +454,33 @@ class CP(Solver):
     based on the BaseRegularizer interface.
     """
 
-    def __init__(self, verbose=False, relaxation=0.9, data_term='l2', regularizer=None):
+    def __init__(self, verbose=False, relaxation=0.95, data_term='l2', regularizer=None):
         Solver.__init__(self, verbose=verbose, relaxation=relaxation)
         self.data_term = data_term
         self.regularizer = regularizer
 
+    def power_method(self, A, At, b, iterations=5):
+        data_type = b.dtype
+
+        x = np.random.rand(*b.shape).astype(data_type)
+        x /= np.linalg.norm(x)
+        x = At(x)
+
+        x_norm = np.linalg.norm(x)
+        L = x_norm
+
+        for ii in range(iterations):
+            x /= x_norm
+            x = At(A(x))
+
+            x_norm = np.linalg.norm(x)
+            L = np.sqrt(x_norm)
+
+        return (L, x.shape)
+
     def __call__(
             self, A, b, iterations, x0=None, At=None, upper_limit=None,
-            lower_limit=None, x_mask=None, b_mask=None):
+            lower_limit=None, x_mask=None, b_mask=None, precondition=False):
         """
         """
         (A, At) = self._initialize_data_operators(A, At)
@@ -470,23 +489,31 @@ class CP(Solver):
 
         c_in = tm.time()
 
-        tau = np.ones(b.shape, data_type)
-        if b_mask is not None:
-            tau *= b_mask
-        tau = np.abs(At(tau))
-        if self.regularizer is not None:
-            tau += self.regularizer.initialize_sigma_tau()
-        tau[(tau / np.max(tau)) < 1e-5] = 1
-        tau = self.relaxation / tau
+        if precondition:
+            tau = np.ones(b.shape, data_type)
+            if b_mask is not None:
+                tau *= b_mask
+            tau = np.abs(At(tau))
+            if self.regularizer is not None:
+                tau += self.regularizer.initialize_sigma_tau()
+            tau[(tau / np.max(tau)) < 1e-5] = 1
+            tau = self.relaxation / tau
 
-        sigma = np.abs(A(np.ones(tau.shape, dtype=data_type)))
-        sigma[(sigma / np.max(sigma)) < 1e-5] = 1
-        sigma = 1 / sigma
+            x_shape = tau.shape
+
+            sigma = np.ones(tau.shape, dtype=data_type)
+            sigma = np.abs(A(sigma))
+            sigma[(sigma / np.max(sigma)) < 1e-5] = 1
+            sigma = 0.95 / sigma
+        else:
+            (L, x_shape) = self.power_method(A, At, b)
+            tau = self.relaxation / L
+            sigma = 0.95 / (L + self.regularizer.initialize_sigma_tau())
 
         sigma1 = 1 / (1 + sigma)
 
         if x0 is None:
-            x0 = np.zeros_like(tau)
+            x0 = np.zeros(x_shape, data_type)
         x = x0
         x_relax = x
 
