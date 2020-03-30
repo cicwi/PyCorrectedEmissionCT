@@ -71,7 +71,8 @@ class Regularizer_TV(BaseRegularizer):
         return self.weight * 2 * self.ndims
 
     def initialize_dual(self, primal):
-        return np.zeros([self.ndims, *primal.shape], dtype=primal.dtype)
+        self.primal_shape = primal.shape
+        return np.zeros([self.ndims, *self.primal_shape], dtype=primal.dtype)
 
     def update_dual(self, dual, primal):
         dual += self.sigma * self.gradient(primal)
@@ -87,7 +88,7 @@ class Regularizer_TV(BaseRegularizer):
         d = [None] * self.ndims
         for ii in range(self.ndims):
             ind = -(ii + 1)
-            padding = [(0, 0)] * self.ndims
+            padding = [(0, 0)] * len(self.primal_shape)
             padding[ind] = (0, 1)
             temp_x = np.pad(x, padding, mode='constant')
             d[ind] = np.diff(temp_x, n=1, axis=ind)
@@ -97,7 +98,7 @@ class Regularizer_TV(BaseRegularizer):
         d = [None] * self.ndims
         for ii in range(self.ndims):
             ind = -(ii + 1)
-            padding = [(0, 0)] * self.ndims
+            padding = [(0, 0)] * len(self.primal_shape)
             padding[ind] = (1, 0)
             temp_x = np.pad(x[ind, ...], padding, mode='constant')
             d[ind] = np.diff(temp_x, n=1, axis=ind)
