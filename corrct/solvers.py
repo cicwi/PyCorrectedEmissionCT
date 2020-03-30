@@ -388,7 +388,10 @@ class Sirt(Solver):
         tau = self.relaxation / tau
 
         # Forward-projection diagonal re-scaling
-        sigma = np.abs(A(np.ones(tau.shape, dtype=data_type)))
+        sigma = np.ones(tau.shape, dtype=data_type)
+        if x_mask is not None:
+            sigma *= x_mask
+        sigma = np.abs(A(sigma))
         sigma[(sigma / np.max(sigma)) < 1e-5] = 1
         sigma = 1 / sigma
 
@@ -503,6 +506,8 @@ class CP(Solver):
             x_shape = tau.shape
 
             sigma = np.ones(tau.shape, dtype=data_type)
+            if x_mask is not None:
+                sigma *= x_mask
             sigma = np.abs(A(sigma))
             sigma[(sigma / np.max(sigma)) < 1e-5] = 1
             sigma = 0.95 / sigma
