@@ -24,13 +24,19 @@ class ProjectorBase(object):
     It supports both 2D and 3D geometries.
     """
 
-    def __init__(self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0, create_ind_projs=True):
+    def __init__(
+            self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
+            create_single_projs=True):
         """
-        :param vol_shape: The volume shape in X Y and optionally Z (numpy.array_like)
-        :param angles_rot_rad: The rotation angles (numpy.array_like)
-        :param rot_axis_shift_pix: The rotation axis shift(s) in pixels (float or numpy.array_like)
-        :param create_ind_projs: Specifies whether to create projectors for single projections.
-        Useful for corrections and SART (boolean)
+        :param vol_shape: The volume shape in X Y and optionally Z
+        :type vol_shape: numpy.array_like
+        :param angles_rot_rad: The rotation angles
+        :type angles_rot_rad: numpy.array_like
+        :param rot_axis_shift_pix: The rotation axis shift(s) in pixels, defaults to 0
+        :type rot_axis_shift_pix: float or numpy.array_like, optional
+        :param create_single_projs: Specifies whether to create projectors for single projections.
+        Useful for corrections and SART, defaults to True
+        :type create_single_projs: boolean, optional
         """
         if len(vol_shape) < 2 or len(vol_shape) > 3:
             raise ValueError("Only 2D or 3D volumes")
@@ -38,7 +44,7 @@ class ProjectorBase(object):
             raise ValueError("Only square volumes")
 
         self.proj_id = []
-        self.has_individual_projs = create_ind_projs
+        self.has_individual_projs = create_single_projs
         self.dispose_projectors()
 
         self.vol_shape = vol_shape
@@ -48,7 +54,8 @@ class ProjectorBase(object):
 
         self.is_3d = len(vol_shape) == 3
         if self.is_3d:
-            self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0], vol_shape[2]))
+            self.vol_geom = astra.create_vol_geom(
+                (vol_shape[1], vol_shape[0], vol_shape[2]))
 
             vectors = np.empty([num_angles, 12])
             # source
@@ -68,10 +75,13 @@ class ProjectorBase(object):
 
             if self.has_individual_projs:
                 self.proj_geom_ind = [
-                        astra.create_proj_geom('parallel3d_vec', vol_shape[2], vol_shape[0],
-                                               np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1]))
-                        for ii in range(num_angles)]
-            self.proj_geom_all = astra.create_proj_geom('parallel3d_vec', vol_shape[2], vol_shape[0], vectors)
+                    astra.create_proj_geom(
+                        'parallel3d_vec', vol_shape[2], vol_shape[0],
+                        np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1]))
+                    for ii in range(num_angles)]
+
+            self.proj_geom_all = astra.create_proj_geom(
+                'parallel3d_vec', vol_shape[2], vol_shape[0], vectors)
         else:
             self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0]))
 
@@ -87,10 +97,13 @@ class ProjectorBase(object):
 
             if self.has_individual_projs:
                 self.proj_geom_ind = [
-                        astra.create_proj_geom('parallel_vec', vol_shape[0],
-                                               np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1]))
-                        for ii in range(num_angles)]
-            self.proj_geom_all = astra.create_proj_geom('parallel_vec', vol_shape[0], vectors)
+                    astra.create_proj_geom(
+                        'parallel_vec', vol_shape[0],
+                        np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1]))
+                    for ii in range(num_angles)]
+
+            self.proj_geom_all = astra.create_proj_geom(
+                'parallel_vec', vol_shape[0], vectors)
 
     def initialize_projectors(self):
         """Initialization of the ASTRA projectors.
@@ -130,7 +143,7 @@ class ProjectorBase(object):
         :param angle_ind: The angle index to foward project (int)
 
         :returns: The forward-projected sinogram line
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         if not self.has_individual_projs:
             raise ValueError('Individual projectors not available!')
@@ -144,7 +157,7 @@ class ProjectorBase(object):
         :param angle_ind: The angle index to foward project (int)
 
         :returns: The back-projected volume
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         if not self.has_individual_projs:
             raise ValueError('Individual projectors not available!')
@@ -159,7 +172,7 @@ class ProjectorBase(object):
         :param vol: The volume to forward-project (numpy.array_like)
 
         :returns: The forward-projected projection data
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         return self.W_all.FP(vol)
 
@@ -169,7 +182,7 @@ class ProjectorBase(object):
         :param data: The projection data to back-project (numpy.array_like)
 
         :returns: The back-projected volume
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         return self.W_all.BP(data)
 
@@ -185,7 +198,34 @@ class AttenuationProjector(ProjectorBase):
             angles_detectors_rad=(np.pi/2), weights_detectors=None, psf=None,
             precompute_attenuation=True, is_symmetric=False, weights_angles=None,
             data_type=np.float32 ):
-        ProjectorBase.__init__(self, vol_shape, angles_rot_rad, rot_axis_shift_pix)
+        """
+        :param vol_shape: The volume shape in X Y and optionally Z
+        :type vol_shape: numpy.array_like
+        :param angles_rot_rad: The rotation angles
+        :type angles_rot_rad: numpy.array_like
+        :param rot_axis_shift_pix: The rotation axis shift(s) in pixels, defaults to 0
+        :type rot_axis_shift_pix: float or numpy.array_like, optional
+        :param att_in: Attenuation volume of the incoming beam, defaults to None
+        :type att_in: numpy.array_like, optional
+        :param att_out: Attenuation volume of the outgoing beam, defaults to None
+        :type att_out: TYPE, optional
+        :param angles_detectors_rad: Angles of the detector elements with respect to incident beam, defaults to (np.pi/2)
+        :type angles_detectors_rad: numpy.array_like, optional
+        :param weights_detectors: Weights (e.g. solid angle, efficiency, etc) of the detector elements, defaults to None
+        :type weights_detectors: numpy.array_like, optional
+        :param psf: Optical system's point spread function (PSF), defaults to None
+        :type psf: numpy.array_like, optional
+        :param precompute_attenuation: Whether to precompute attenuation or not, defaults to True
+        :type precompute_attenuation: boolean, optional
+        :param is_symmetric: Whether the projector is symmetric or not, defaults to False
+        :type is_symmetric: boolean, optional
+        :param weights_angles: Projection weight for a given element at a given angle, defaults to None
+        :type weights_angles: numpy.array_like, optional
+        :param data_type: Data type, defaults to np.float32
+        :type data_type: numpy.dtype, optional
+        """
+        ProjectorBase.__init__(
+            self, vol_shape, angles_rot_rad, rot_axis_shift_pix)
 
         self.data_type = data_type
 
@@ -314,7 +354,7 @@ class AttenuationProjector(ProjectorBase):
         :param angle_ind: The angle index to foward project (int)
 
         :returns: The forward-projected sinogram line
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         temp_vol = copy.deepcopy(vol)[np.newaxis, ...]
         temp_vol = np.tile(temp_vol, (len(self.angles_det_rad), *((1, ) * len(self.vol_shape))))
@@ -351,7 +391,7 @@ class AttenuationProjector(ProjectorBase):
         :param single_line: Whether the input is a single sinogram line (boolean, default: False)
 
         :returns: The back-projected volume
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         if single_line:
             sino_line = sino
@@ -387,7 +427,7 @@ class AttenuationProjector(ProjectorBase):
         :param vol: The volume to forward-project (numpy.array_like)
 
         :returns: The forward-projected sinogram
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         return np.stack(
                 [self.fp_angle(vol, ii) for ii in range(len(self.angles_rot_rad))],
@@ -399,7 +439,7 @@ class AttenuationProjector(ProjectorBase):
         :param sino: The sinogram to back-project (numpy.array_like)
 
         :returns: The back-projected volume
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         if self.is_symmetric:
             return np.sum(
@@ -419,17 +459,21 @@ class ProjectorUncorrected(ProjectorBase):
 
     def __init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
-            create_ind_projs=False):
+            create_single_projs=False):
         """
-        :param vol_shape: The volume shape in X Y and optionally Z (numpy.array_like)
-        :param angles_rot_rad: The rotation angles (numpy.array_like)
-        :param rot_axis_shift_pix: The rotation axis shift(s) in pixels (float or numpy.array_like)
-        :param create_ind_projs: Specifies whether to create projectors for single projections.
-        Useful for corrections and SART (boolean)
+        :param vol_shape: The volume shape in X Y and optionally Z
+        :type vol_shape: numpy.array_like
+        :param angles_rot_rad: The rotation angles
+        :type angles_rot_rad: numpy.array_like
+        :param rot_axis_shift_pix: The rotation axis shift(s) in pixels, defaults to 0
+        :type rot_axis_shift_pix: float or numpy.array_like, optional
+        :param create_single_projs: Specifies whether to create projectors for single projections.
+        Useful for corrections and SART, defaults to False
+        :type create_single_projs: boolean, optional
         """
         ProjectorBase.__init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix,
-            create_ind_projs)
+            create_single_projs=create_single_projs)
 
     def _astra_fbp(self, projs, fbp_filter):
         cfg = astra.astra_dict('FBP_CUDA')
@@ -479,11 +523,13 @@ class ProjectorUncorrected(ProjectorBase):
         volume.
         The data could either be a sinogram, or a stack of sinograms.
 
-        :param projs: The projection data to back-project (numpy.array_like)
-        :param fbp_filter: The FBP filter to use (str or function)
+        :param projs: The projection data to back-project
+        :type projs: numpy.array_like
+        :param fbp_filter: The FBP filter to use
+        :type fbp_filter: str or function
 
         :returns: The FBP reconstructed volume
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         if self.is_3d:
             raise ValueError('FBP not supported with 3D projector')
@@ -569,7 +615,7 @@ class FilterMR(object):
         :param projector: The projector used in the FBP (object)
 
         :returns: The computed filter
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         sino_size = self.sinogram_angles_num * self.sinogram_pixels_num
         nrows = sino_size
@@ -609,7 +655,7 @@ class FilterMR(object):
         :param computed_filter: The computed filter (np.array_like)
 
         :returns: The filtered sinogram
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         return spsig.fftconvolve(sinogram, computed_filter[np.newaxis, ...], 'same')
 
@@ -621,7 +667,7 @@ class FilterMR(object):
         :param projector: The projector used in the FBP (object)
 
         :returns: The filtered sinogram
-        :rtype: (numpy.array_like)
+        :rtype: numpy.array_like
         """
         if not self.is_initialized:
             self.sinogram_angles_num = sinogram.shape[0]
