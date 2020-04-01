@@ -302,8 +302,10 @@ class Sart(Solver):
         c_in = tm.time()
 
         # Back-projection diagonal re-scaling
-        b_ones = np.ones_like(b)
-        tau = [At(b_ones[ii, ...], ii) for ii in range(A_num_rows)]
+        tau = np.ones_like(b)
+        if b_mask is not None:
+            tau *= b_mask
+        tau = [At(tau[ii, ...], ii) for ii in range(A_num_rows)]
         tau = np.abs(np.stack(tau))
         tau[(tau / np.max(tau)) < 1e-5] = 1
         tau = self.relaxation / tau
@@ -311,6 +313,8 @@ class Sart(Solver):
         # Forward-projection diagonal re-scaling
         x_ones = np.ones(tau.shape[1:], dtype=data_type)
         sigma = np.empty_like(b)
+        if x_mask is not None:
+            sigma *= x_mask
         for ii in range(A_num_rows):
             sigma[ii, ...] = A(x_ones, ii)
         sigma = np.abs(sigma)
