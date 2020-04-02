@@ -26,7 +26,7 @@ class ProjectorBase(object):
 
     def __init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
-            create_single_projs=True):
+            proj_intensities=None, create_single_projs=True):
         """
         :param vol_shape: The volume shape in X Y and optionally Z
         :type vol_shape: numpy.array_like
@@ -34,6 +34,8 @@ class ProjectorBase(object):
         :type angles_rot_rad: numpy.array_like
         :param rot_axis_shift_pix: The rotation axis shift(s) in pixels, defaults to 0
         :type rot_axis_shift_pix: float or numpy.array_like, optional
+        :param proj_intensities: Projection scaling factor, defaults to None
+        :type proj_intensities: float or numpy.array_like, optional
         :param create_single_projs: Specifies whether to create projectors for single projections.
         Useful for corrections and SART, defaults to True
         :type create_single_projs: boolean, optional
@@ -51,6 +53,16 @@ class ProjectorBase(object):
         self.angles_rot_rad = angles_rot_rad
 
         num_angles = angles_rot_rad.size
+        if proj_intensities is not None:
+            proj_intensities = np.squeeze(proj_intensities)
+            num_proj_ints = len(proj_intensities)
+            if num_proj_ints > 1 and not num_proj_ints == num_angles:
+                raise ValueError(
+                    'Non-singleton number of projection intensities differs from number of angles:' +
+                    ' num_angles = {}, num_proj_intensities = {}'.format(num_angles, num_proj_ints))
+            elif num_proj_ints == 1:
+                proj_intensities = np.tile(proj_intensities, num_angles)
+        self.proj_intensities = proj_intensities
 
         self.is_3d = len(vol_shape) == 3
         if self.is_3d:
@@ -147,7 +159,10 @@ class ProjectorBase(object):
         """
         if not self.has_individual_projs:
             raise ValueError('Individual projectors not available!')
-        return self.W_ind[angle_ind].FP(vol)[0, ...]
+        x = self.W_ind[angle_ind].FP(vol)[0, ...]
+        if self.proj_intensities is not None:
+            x *= self.proj_intensities[angle_ind]
+        return x
 
     def bp_angle(self, sino_line, angle_ind):
         """Back-projection of a single sinogram line to the volume. It only
@@ -164,6 +179,8 @@ class ProjectorBase(object):
         sino = np.empty([2, *np.squeeze(sino_line).shape], dtype=sino_line.dtype)
         sino[0, ...] = sino_line
         sino[1, ...] = 0
+        if self.proj_intensities is not None:
+            sino[0, ...] *= self.proj_intensities[angle_ind]
         return self.W_ind[angle_ind].BP(sino)
 
     def fp(self, vol):
@@ -174,7 +191,10 @@ class ProjectorBase(object):
         :returns: The forward-projected projection data
         :rtype: numpy.array_like
         """
-        return self.W_all.FP(vol)
+        x = self.W_all.FP(vol)
+        if self.proj_intensities is not None:
+            x *= self.proj_intensities[:, np.newaxis]
+        return x
 
     def bp(self, data):
         """Back-projection of the projection data to the volume.
@@ -184,6 +204,8 @@ class ProjectorBase(object):
         :returns: The back-projected volume
         :rtype: numpy.array_like
         """
+        if self.proj_intensities is not None:
+            data = data * self.proj_intensities[:, np.newaxis]  # Needs copy
         return self.W_all.BP(data)
 
 
@@ -194,7 +216,7 @@ class AttenuationProjector(ProjectorBase):
 
     def __init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
-            att_in=None, att_out=None,
+            proj_intensities=None, att_in=None, att_out=None,
             angles_detectors_rad=(np.pi/2), weights_detectors=None, psf=None,
             precompute_attenuation=True, is_symmetric=False, weights_angles=None,
             data_type=np.float32):
@@ -205,6 +227,8 @@ class AttenuationProjector(ProjectorBase):
         :type angles_rot_rad: numpy.array_like
         :param rot_axis_shift_pix: The rotation axis shift(s) in pixels, defaults to 0
         :type rot_axis_shift_pix: float or numpy.array_like, optional
+        :param proj_intensities: Projection scaling factor, defaults to None
+        :type proj_intensities: float or numpy.array_like, optional
         :param att_in: Attenuation volume of the incoming beam, defaults to None
         :type att_in: numpy.array_like, optional
         :param att_out: Attenuation volume of the outgoing beam, defaults to None
@@ -225,7 +249,8 @@ class AttenuationProjector(ProjectorBase):
         :type data_type: numpy.dtype, optional
         """
         ProjectorBase.__init__(
-            self, vol_shape, angles_rot_rad, rot_axis_shift_pix)
+            self, vol_shape, angles_rot_rad, rot_axis_shift_pix,
+            proj_intensities=proj_intensities)
 
         self.data_type = data_type
 
@@ -459,7 +484,7 @@ class ProjectorUncorrected(ProjectorBase):
 
     def __init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
-            create_single_projs=False):
+            proj_intensities=None, create_single_projs=False):
         """
         :param vol_shape: The volume shape in X Y and optionally Z
         :type vol_shape: numpy.array_like
@@ -467,12 +492,15 @@ class ProjectorUncorrected(ProjectorBase):
         :type angles_rot_rad: numpy.array_like
         :param rot_axis_shift_pix: The rotation axis shift(s) in pixels, defaults to 0
         :type rot_axis_shift_pix: float or numpy.array_like, optional
+        :param proj_intensities: Projection scaling factor, defaults to None
+        :type proj_intensities: float or numpy.array_like, optional
         :param create_single_projs: Specifies whether to create projectors for single projections.
         Useful for corrections and SART, defaults to False
         :type create_single_projs: boolean, optional
         """
         ProjectorBase.__init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix,
+            proj_intensities=proj_intensities,
             create_single_projs=create_single_projs)
 
     def _astra_fbp(self, projs, fbp_filter):
