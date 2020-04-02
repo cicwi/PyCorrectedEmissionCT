@@ -280,10 +280,10 @@ class Solver(object):
 
         if isinstance(At, np.ndarray) or isinstance(At, sps.dia_matrix):
             At_m = At
-            At = lambda x: np.dot(At_m, x)
+            At = lambda x: np.dot(At_m, x)  # noqa: E731
         if isinstance(A, np.ndarray) or isinstance(A, sps.dia_matrix):
             A_m = A
-            A = lambda x: np.dot(A_m, x)
+            A = lambda x: np.dot(A_m, x)  # noqa: E731
         return (A, At)
 
 
@@ -292,7 +292,7 @@ class Sart(Solver):
     Technique (SART) algorithm.
     """
 
-    def __call__(
+    def __call__(  # noqa: C901
             self, A, b, iterations, A_num_rows, x0=None, At=None,
             lower_limit=None, upper_limit=None, x_mask=None, b_mask=None):
         """
@@ -373,7 +373,7 @@ class Sirt(Solver):
         Solver.__init__(self, verbose=verbose, relaxation=relaxation)
         self.regularizer = regularizer
 
-    def __call__(
+    def __call__(  # noqa: C901
             self, A, b, iterations, x0=None, At=None, lower_limit=None,
             upper_limit=None, x_mask=None, b_mask=None):
         """
@@ -489,7 +489,7 @@ class CP(Solver):
 
         return (L, x.shape)
 
-    def __call__(
+    def __call__(  # noqa: C901
             self, A, b, iterations, x0=None, At=None, upper_limit=None,
             lower_limit=None, x_mask=None, b_mask=None, precondition=False):
         """
@@ -597,5 +597,3 @@ class CP(Solver):
             print("Done in %g seconds." % (tm.time() - c_in))
 
         return (x, None)
-
-

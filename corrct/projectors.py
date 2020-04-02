@@ -197,7 +197,7 @@ class AttenuationProjector(ProjectorBase):
             att_in=None, att_out=None,
             angles_detectors_rad=(np.pi/2), weights_detectors=None, psf=None,
             precompute_attenuation=True, is_symmetric=False, weights_angles=None,
-            data_type=np.float32 ):
+            data_type=np.float32):
         """
         :param vol_shape: The volume shape in X Y and optionally Z
         :type vol_shape: numpy.array_like
@@ -276,7 +276,7 @@ class AttenuationProjector(ProjectorBase):
             raise ValueError("Mismatching volume shape of input volume (%s) with vol_shape (%s in 2D -> %s)" % (
                     " ".join(("%d" % x for x in vol.shape)),
                     " ".join(("%d" % x for x in self.vol_shape)),
-                    " ".join(("%d" % x for x in self.vol_shape[:2])) ))
+                    " ".join(("%d" % x for x in self.vol_shape[:2]))))
 
         size_lims = np.array(vol.shape)
         min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
@@ -591,13 +591,13 @@ class FilterMR(object):
             basis_tmp = np.zeros(self.filter_size, dtype=self.data_type)
 
             # simmetric exponential binning
-            l = window_position
-            r = np.fmin(l + window_size, self.filter_size)
-            basis_tmp[l:r] = 1
+            l_bound = window_position
+            r_bound = np.fmin(l_bound + window_size, self.filter_size)
+            basis_tmp[l_bound:r_bound] = 1
 
-            r = self.filter_size - window_position
-            l = np.fmax(r - window_size, 0)
-            basis_tmp[l:r] = 1
+            r_bound = self.filter_size - window_position
+            l_bound = np.fmax(r_bound - window_size, 0)
+            basis_tmp[l_bound:r_bound] = 1
 
             self.basis.append(basis_tmp)
             window_position += window_size
@@ -676,5 +676,3 @@ class FilterMR(object):
 
         computed_filter = self.compute_filter(sinogram, projector)
         return self.apply_filter(sinogram, computed_filter)
-
-

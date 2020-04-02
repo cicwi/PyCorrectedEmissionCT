@@ -40,7 +40,7 @@ def create_sino(
         return p.fp(vol)
 
 
-def reconstruct(
+def reconstruct(  # noqa: C901
         algo, sino, angles_rad, iterations=None,
         vol_att_in=None, vol_att_out=None,
         angles_detectors_rad=(np.pi/2), weights_detectors=None,
@@ -84,11 +84,11 @@ def reconstruct(
             data_type=data_type) as p:
 
         if algo.upper() == 'SART':
-            A = lambda x, ii : p.fp_angle(x, ii)
-            At = lambda y, ii : p.bp_angle(y, ii, single_line=True)
+            A = lambda x, ii: p.fp_angle(x, ii)  # noqa: E731
+            At = lambda y, ii: p.bp_angle(y, ii, single_line=True)  # noqa: E731
         else:
-            A = lambda x : p.fp(x)
-            At = lambda y : p.bp(y)
+            A = lambda x: p.fp(x)  # noqa: E731
+            At = lambda y: p.bp(y)  # noqa: E731
 
         if iterations is None:
             if algo.upper() in ('SIRT', 'CPTV'):
@@ -122,4 +122,3 @@ def reconstruct(
             raise ValueError('Unknown algorithm: %s' % algo)
 
     return vol
-
