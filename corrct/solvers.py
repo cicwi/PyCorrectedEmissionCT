@@ -261,9 +261,10 @@ class Solver(object):
     """Base solver class.
     """
 
-    def __init__(self, verbose=False, relaxation=1):
+    def __init__(self, verbose=False, relaxation=1, tolerance=None):
         self.verbose = verbose
         self.relaxation = relaxation
+        self.tolerance = tolerance
 
     def upper(self):
         return type(self).__name__.upper()
@@ -305,8 +306,8 @@ class Sart(Solver):
         tau = np.ones_like(b)
         if b_mask is not None:
             tau *= b_mask
-        tau = [At(tau[ii, ...], ii) for ii in range(A_num_rows)]
-        tau = np.abs(np.stack(tau))
+        tau = [At(tau[..., ii, :], ii) for ii in range(A_num_rows)]
+        tau = np.abs(np.stack(tau, axis=-1))
         tau[(tau / np.max(tau)) < 1e-5] = 1
         tau = self.relaxation / tau
 
@@ -316,7 +317,7 @@ class Sart(Solver):
         if x_mask is not None:
             sigma *= x_mask
         for ii in range(A_num_rows):
-            sigma[ii, ...] = A(x_ones, ii)
+            sigma[..., ii, ...] = A(x_ones, ii)
         sigma = np.abs(sigma)
         sigma[(sigma / np.max(sigma)) < 1e-5] = 1
         sigma = 1 / sigma
@@ -324,6 +325,12 @@ class Sart(Solver):
         if x0 is None:
             x0 = np.zeros_like(x_ones)
         x = x0
+
+        if self.tolerance is not None:
+            res_norm_0 = np.linalg.norm((b * b_mask).flatten())
+            res_norm_rel = np.ones((iterations, )) * self.tolerance
+        else:
+            res_norm_rel= None
 
         c_init = tm.time()
 
@@ -340,11 +347,11 @@ class Sart(Solver):
 
             for ii_a in rows_sequence:
 
-                res = A(x, ii_a) - b[ii_a, :]
+                res = A(x, ii_a) - b[..., ii_a, :]
                 if b_mask is not None:
-                    res *= b_mask[ii_a, :]
+                    res *= b_mask[..., ii_a, :]
 
-                x -= At(res * sigma[ii_a, :], ii_a) * tau[ii_a, ...]
+                x -= At(res * sigma[..., ii_a, :], ii_a) * tau[..., ii_a, ...]
 
                 if lower_limit is not None:
                     x = np.fmax(x, lower_limit)
@@ -358,10 +365,21 @@ class Sart(Solver):
                 print((' ') * len(prnt_str), end='', flush=True)
                 print(('\b') * len(prnt_str), end='', flush=True)
 
-        if self.verbose:
-            print("Done in %g seconds." % (tm.time() - c_in))
+            if self.tolerance is not None:
+                res = np.empty_like(b)
+                for ii_a in rows_sequence:
+                    res[..., ii_a, :] = A(x, ii_a) - b[..., ii_a, :]
+                if b_mask is not None:
+                    res *= b_mask
+                res_norm_rel[ii] = np.linalg.norm(res) / res_norm_0
 
-        return (x, None)
+                if self.tolerance > res_norm_rel[ii]:
+                    break
+
+        if self.verbose:
+            print("Done %d in %g seconds." % (iterations, tm.time() - c_in))
+
+        return (x, res_norm_rel)
 
 
 class Sirt(Solver):
@@ -369,8 +387,11 @@ class Sirt(Solver):
     Technique (SIRT) algorithm.
     """
 
-    def __init__(self, verbose=False, relaxation=1.95, regularizer=None):
-        Solver.__init__(self, verbose=verbose, relaxation=relaxation)
+    def __init__(
+            self, verbose=False, tolerance=None, relaxation=1.95,
+            regularizer=None):
+        Solver.__init__(
+            self, verbose=verbose, tolerance=tolerance, relaxation=relaxation)
         self.regularizer = regularizer
 
     def __call__(  # noqa: C901
@@ -409,8 +430,11 @@ class Sirt(Solver):
         if self.regularizer is not None:
             q = self.regularizer.initialize_dual(x)
 
-        res_norm_0 = np.linalg.norm(b.flatten())
-        res_norm_rel = np.empty((iterations, ))
+        if self.tolerance is not None:
+            res_norm_0 = np.linalg.norm(b.flatten())
+            res_norm_rel = np.ones((iterations, )) * self.tolerance
+        else:
+            res_norm_rel= None
 
         c_init = tm.time()
 
@@ -426,7 +450,11 @@ class Sirt(Solver):
             res = b - A(x)
             if b_mask is not None:
                 res *= b_mask
-            res_norm_rel[ii] = np.linalg.norm(res.flatten()) / res_norm_0
+
+            if self.tolerance is not None:
+                res_norm_rel[ii] = np.linalg.norm(res.flatten()) / res_norm_0
+                if self.tolerance > res_norm_rel[ii]:
+                    break
 
             if self.regularizer is not None:
                 self.regularizer.update_dual(q, x)
@@ -450,7 +478,7 @@ class Sirt(Solver):
                 print(('\b') * len(prnt_str), end='', flush=True)
 
         if self.verbose:
-            print("Done in %g seconds." % (tm.time() - c_in))
+            print("Done %d in %g seconds." % (iterations, tm.time() - c_in))
 
         return (x, res_norm_rel)
 
@@ -465,8 +493,11 @@ class CP(Solver):
     based on the BaseRegularizer interface.
     """
 
-    def __init__(self, verbose=False, relaxation=0.95, data_term='l2', regularizer=None):
-        Solver.__init__(self, verbose=verbose, relaxation=relaxation)
+    def __init__(
+            self, verbose=False, tolerance=None, relaxation=0.95,
+            data_term='l2', regularizer=None):
+        Solver.__init__(
+            self, verbose=verbose, tolerance=tolerance, relaxation=relaxation)
         self.data_term = data_term
         self.regularizer = regularizer
 
@@ -540,6 +571,12 @@ class CP(Solver):
         if self.regularizer is not None:
             q = self.regularizer.initialize_dual(x)
 
+        if self.tolerance is not None:
+            res_norm_0 = np.linalg.norm(b.flatten())
+            res_norm_rel = np.ones((iterations, )) * self.tolerance
+        else:
+            res_norm_rel= None
+
         c_init = tm.time()
 
         if self.verbose:
@@ -593,7 +630,14 @@ class CP(Solver):
                 print((' ') * len(prnt_str), end='', flush=True)
                 print(('\b') * len(prnt_str), end='', flush=True)
 
-        if self.verbose:
-            print("Done in %g seconds." % (tm.time() - c_in))
+            if self.tolerance is not None:
+                Ax = A(x)
+                res = b - Ax
+                res_norm_rel[ii] = np.linalg.norm(res.flatten()) / res_norm_0
+                if self.tolerance > res_norm_rel[ii]:
+                    break
 
-        return (x, None)
+        if self.verbose:
+            print("Done %d in %g seconds." % (iterations, tm.time() - c_in))
+
+        return (x, res_norm_rel)
