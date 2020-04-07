@@ -551,8 +551,11 @@ class CP(Solver):
             sigma = 0.95 / sigma
         else:
             (L, x_shape) = self.power_method(A, At, b)
-            tau = self.relaxation / L
-            sigma = 0.95 / (L + self.regularizer.initialize_sigma_tau())
+            tau = L
+            if self.regularizer is not None:
+                tau += self.regularizer.initialize_sigma_tau()
+            tau = self.relaxation / tau
+            sigma = 0.95 / L
 
         sigma1 = 1 / (1 + sigma)
 
