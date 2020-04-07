@@ -294,16 +294,24 @@ class AttenuationProjector(ProjectorBase):
         """Computes the attenuation experienced by the photons emitted in every
         point of the volume, along a certain direction.
         """
+
+        def pad_vol(vol, edges):
+            paddings = [(0, )] * len(vol.shape)
+            paddings[-2], paddings[-1] = (edges[0], ), (edges[1], )
+            return np.pad(vol, paddings, mode='constant')
+
         vol = np.array(vol)
-        if not len(vol.shape) == 2:
-            raise ValueError("Maps can only be 2D Arrays")
-        if not np.all(np.equal(vol.shape, self.vol_shape[:2])):
-            raise ValueError("Mismatching volume shape of input volume (%s) with vol_shape (%s in 2D -> %s)" % (
+        if not len(vol.shape) in [2, 3]:
+            raise ValueError(
+                "Maps can only be 2D or 3D Arrays. A %d-dimensional was passed" % (len(vol.shape)))
+        if not np.all(np.equal(vol.shape[-2:], self.vol_shape[:2])):
+            raise ValueError(
+                "Mismatching volume shape of input volume (%s) with vol_shape (%s in 2D -> %s)" % (
                     " ".join(("%d" % x for x in vol.shape)),
                     " ".join(("%d" % x for x in self.vol_shape)),
                     " ".join(("%d" % x for x in self.vol_shape[:2]))))
 
-        size_lims = np.array(vol.shape)
+        size_lims = np.array(vol.shape[-2:])
         min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
         edges = np.ceil((min_size - size_lims) / 2).astype(np.intp)
 
@@ -314,16 +322,16 @@ class AttenuationProjector(ProjectorBase):
 
         rot_angle = np.rad2deg(np.arctan2(direction[1], direction[0]))
 
-        cum_arr = np.pad(vol, ((edges[0], ), (edges[1], )), mode='constant')
+        cum_arr = pad_vol(vol, edges)
 
-        cum_arr = spimg.interpolation.rotate(cum_arr, rot_angle, reshape=False, order=1)
+        cum_arr = spimg.interpolation.rotate(cum_arr, rot_angle, reshape=False, order=1, axes=(-2, -1))
         cum_arr += np.roll(cum_arr, 1, axis=-1)
         cum_arr = np.cumsum(cum_arr / 2, axis=-1)
 
-        cum_arr = spimg.interpolation.rotate(cum_arr, -rot_angle, reshape=False, order=1)
-        cum_arr = cum_arr[edges[0]:-edges[0], edges[1]:-edges[1]]
+        cum_arr = spimg.interpolation.rotate(cum_arr, -rot_angle, reshape=False, order=1, axes=(-2, -1))
+        cum_arr = cum_arr[..., edges[0]:-edges[0], edges[1]:-edges[1]]
 
-        cum_arr = np.exp(- cum_arr)
+        cum_arr = np.exp(-cum_arr)
 
         return cum_arr
 
