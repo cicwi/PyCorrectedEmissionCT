@@ -53,6 +53,7 @@ def create_sino(
 
     return (sino_noise, angles_rad)
 
+
 vol_shape_xy = [256, 256]
 
 ph = np.squeeze(phantom.modified_shepp_logan([*vol_shape_xy, 3]).astype(np.float32))
@@ -91,5 +92,3 @@ axes[0].plot(filt_reg)
 axes[1].plot(np.abs(np.fft.fft(np.fft.ifftshift(filt))))
 axes[1].plot(np.abs(np.fft.fft(np.fft.ifftshift(filt_reg))))
 plt.show()
-
-

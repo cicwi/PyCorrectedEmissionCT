@@ -51,8 +51,8 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint: ## check style with flake8
-	flake8 corrct tests --count --select=E9,F63,F7,F82 --show-source --statistics
-	flake8 corrct tests --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+	flake8 corrct tests examples --count --select=E9,F63,F7,F82 --show-source --statistics
+	flake8 corrct tests examples --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 test: ## run tests quickly with the default Python
 	python setup.py test

@@ -330,7 +330,7 @@ class Sart(Solver):
             res_norm_0 = np.linalg.norm((b * b_mask).flatten())
             res_norm_rel = np.ones((iterations, )) * self.tolerance
         else:
-            res_norm_rel= None
+            res_norm_rel = None
 
         c_init = tm.time()
 
@@ -434,7 +434,7 @@ class Sirt(Solver):
             res_norm_0 = np.linalg.norm(b.flatten())
             res_norm_rel = np.ones((iterations, )) * self.tolerance
         else:
-            res_norm_rel= None
+            res_norm_rel = None
 
         c_init = tm.time()
 
@@ -578,7 +578,7 @@ class CP(Solver):
             res_norm_0 = np.linalg.norm(b.flatten())
             res_norm_rel = np.ones((iterations, )) * self.tolerance
         else:
-            res_norm_rel= None
+            res_norm_rel = None
 
         c_init = tm.time()
 

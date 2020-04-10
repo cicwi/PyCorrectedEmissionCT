@@ -50,7 +50,7 @@ def create_phantom(vol_shape, data_type=np.float32):
     conv_mm_to_cm = 1e-1
     conv_um_to_mm = 1e-3
     voxel_size_um = 0.5
-    voxel_size_cm = voxel_size_um * conv_um_to_mm * conv_mm_to_cm # cm to micron
+    voxel_size_cm = voxel_size_um * conv_um_to_mm * conv_mm_to_cm  # cm to micron
     print('Sample size: [%g %g] um' % (vol_shape[0] * voxel_size_um, vol_shape[1] * voxel_size_um))
 
     xraylib.XRayInit()
@@ -69,13 +69,13 @@ def create_phantom(vol_shape, data_type=np.float32):
         + ph_CaO * xraylib.CS_Total_CP('Calcium Oxide', in_energy_keV) * cp_co['density']
 
     ph_lin_att_out = ph_FeO * xraylib.CS_Total_CP('Ferric Oxide', out_energy_keV) * cp_fo['density'] \
-         + ph_CaC * xraylib.CS_Total_CP('Calcium Carbonate', out_energy_keV) * cp_cc['density'] \
-         + ph_CaO * xraylib.CS_Total_CP('Calcium Oxide', out_energy_keV) * cp_co['density']
+        + ph_CaC * xraylib.CS_Total_CP('Calcium Carbonate', out_energy_keV) * cp_cc['density'] \
+        + ph_CaO * xraylib.CS_Total_CP('Calcium Oxide', out_energy_keV) * cp_co['density']
 
     vol_att_in = ph_lin_att_in * voxel_size_cm
     vol_att_out = ph_lin_att_out * voxel_size_cm
 
-    ca_cs = xraylib.CS_FluorLine_Kissel(ca_an, xraylib.KA_LINE, in_energy_keV) # fluo production for cm2/g
+    ca_cs = xraylib.CS_FluorLine_Kissel(ca_an, xraylib.KA_LINE, in_energy_keV)  # fluo production for cm2/g
     ph_CaC_mass_fract = cp_cc['massFractions'][np.where(np.array(cp_cc['Elements']) == ca_an)[0][0]]
     ph_CaO_mass_fract = cp_co['massFractions'][np.where(np.array(cp_co['Elements']) == ca_an)[0][0]]
 
@@ -110,10 +110,10 @@ def create_sino(
     return (sino_noise, angles)
 
 
-#psf = spsig.gaussian(11, 1)
+# psf = spsig.gaussian(11, 1)
 psf = None
 
-det_angles = [+np.pi/2,-np.pi/2]
+det_angles = [+np.pi/2, -np.pi/2]
 (ph, vol_att_in, vol_att_out) = create_phantom([256, 256, 3])
 (sino, angles) = create_sino(ph, vol_att_in, vol_att_out, 120, det_angles, psf)
 
@@ -135,37 +135,61 @@ renorm_factor = np.max(np.sum(sino, axis=-1)) / np.sqrt(np.sum(np.array(ph.shape
 
 if apply_corrections:
     print('Reconstructing with SART w/ corrections')
-    rec_sart = corrct.reconstruct('SART', sino, angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out, angles_detectors_rad=det_angles, psf=psf, lower_limit=0, data_term='l2', iterations=num_sart_iterations)
-    print('- Phantom power: %g, noise power: %g' % (np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_sart - ph) ** 2) / ph.size)))
+    rec_sart = corrct.reconstruct(
+        'SART', sino, angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out,
+        angles_detectors_rad=det_angles, psf=psf, lower_limit=0,
+        data_term='l2', iterations=num_sart_iterations)
+    print('- Phantom power: %g, noise power: %g' % (
+        np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_sart - ph) ** 2) / ph.size)))
 
     print('Reconstructing with SIRT w/ corrections')
-    rec_sirt = corrct.reconstruct('SIRT', sino, angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out, angles_detectors_rad=det_angles, psf=psf, lower_limit=0, data_term='l2', iterations=num_sirt_iterations)
-    print('- Phantom power: %g, noise power: %g' % (np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_sirt - ph) ** 2) / ph.size)))
+    rec_sirt = corrct.reconstruct(
+        'SIRT', sino, angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out,
+        angles_detectors_rad=det_angles, psf=psf, lower_limit=0,
+        data_term='l2', iterations=num_sirt_iterations)
+    print('- Phantom power: %g, noise power: %g' % (
+        np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_sirt - ph) ** 2) / ph.size)))
 
     print('Reconstructing with CP - using KL w/ corrections')
-    rec_cpkl = corrct.reconstruct('CP', sino / renorm_factor, angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out, angles_detectors_rad=det_angles, psf=psf, lower_limit=0, iterations=num_cp_iterations) * renorm_factor
-    print('- Phantom power: %g, noise power: %g' % (np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cpkl - ph) ** 2) / ph.size)))
+    rec_cpkl = corrct.reconstruct(
+        'CP', sino / renorm_factor, angles, vol_att_in=vol_att_in,
+        vol_att_out=vol_att_out, angles_detectors_rad=det_angles, psf=psf,
+        lower_limit=0, iterations=num_cp_iterations) * renorm_factor
+    print('- Phantom power: %g, noise power: %g' % (
+        np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cpkl - ph) ** 2) / ph.size)))
 
     print('Reconstructing with CPTV - using KL w/ corrections')
-    rec_cptvkl = corrct.reconstruct('CPTV', sino / renorm_factor, angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out, angles_detectors_rad=det_angles, psf=psf, lower_limit=0, lambda_reg=2e-1, iterations=num_cptv_iterations) * renorm_factor
-    print('- Phantom power: %g, noise power: %g' % (np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cptvkl - ph) ** 2) / ph.size)))
+    rec_cptvkl = corrct.reconstruct(
+        'CPTV', sino / renorm_factor, angles, vol_att_in=vol_att_in,
+        vol_att_out=vol_att_out, angles_detectors_rad=det_angles, psf=psf,
+        lower_limit=0, lambda_reg=2e-1, iterations=num_cptv_iterations) * renorm_factor
+    print('- Phantom power: %g, noise power: %g' % (
+        np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cptvkl - ph) ** 2) / ph.size)))
 
 else:
     print('Reconstructing with SART w/o corrections')
-    rec_sart = corrct.reconstruct('SART', sino, angles, lower_limit=0, data_term='l2', iterations=num_sart_iterations)
-    print('- Phantom power: %g, noise power: %g' % (np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_sart - ph) ** 2) / ph.size)))
+    rec_sart = corrct.reconstruct(
+        'SART', sino, angles, lower_limit=0, data_term='l2', iterations=num_sart_iterations)
+    print('- Phantom power: %g, noise power: %g' % (
+        np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_sart - ph) ** 2) / ph.size)))
 
     print('Reconstructing with SIRT w/o corrections')
-    rec_sirt = corrct.reconstruct('SIRT', sino, angles, lower_limit=0, data_term='l2', iterations=num_sirt_iterations)
-    print('- Phantom power: %g, noise power: %g' % (np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_sirt - ph) ** 2) / ph.size)))
+    rec_sirt = corrct.reconstruct(
+        'SIRT', sino, angles, lower_limit=0, data_term='l2', iterations=num_sirt_iterations)
+    print('- Phantom power: %g, noise power: %g' % (
+        np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_sirt - ph) ** 2) / ph.size)))
 
     print('Reconstructing with CP - using KL w/o corrections')
-    rec_cpkl = corrct.reconstruct('CP', sino / renorm_factor, angles, lower_limit=0, iterations=num_cp_iterations) * renorm_factor
-    print('- Phantom power: %g, noise power: %g' % (np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cpkl - ph) ** 2) / ph.size)))
+    rec_cpkl = corrct.reconstruct(
+        'CP', sino / renorm_factor, angles, lower_limit=0, iterations=num_cp_iterations) * renorm_factor
+    print('- Phantom power: %g, noise power: %g' % (
+        np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cpkl - ph) ** 2) / ph.size)))
 
     print('Reconstructing with CPTV - using KL w/o corrections')
-    rec_cptvkl = corrct.reconstruct('CPTV', sino / renorm_factor, angles, lower_limit=0, lambda_reg=2e-1, iterations=num_cptv_iterations) * renorm_factor
-    print('- Phantom power: %g, noise power: %g' % (np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cptvkl - ph) ** 2) / ph.size)))
+    rec_cptvkl = corrct.reconstruct(
+        'CPTV', sino / renorm_factor, angles, lower_limit=0, lambda_reg=2e-1, iterations=num_cptv_iterations) * renorm_factor
+    print('- Phantom power: %g, noise power: %g' % (
+        np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cptvkl - ph) ** 2) / ph.size)))
 
 (f, axes) = plt.subplots(2, 3)
 axes[0, 0].imshow(ph)
@@ -183,4 +207,3 @@ axes[1, 2].imshow(rec_cptvkl)
 axes[1, 2].set_title('CP-KL-TV')
 
 plt.show()
-

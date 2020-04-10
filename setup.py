@@ -54,6 +54,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     description="Physically corrected projectors for X-ray induced emission CT.",
     install_requires=requirements,
