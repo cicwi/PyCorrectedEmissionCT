@@ -240,7 +240,7 @@ PSF.</p>
 and ESRF - The European Synchrotron, Grenoble, France</p>
 <dl class="class">
 <dt id="corrct.projectors.AttenuationProjector">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">AttenuationProjector</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">att_in=None</em>, <em class="sig-param">att_out=None</em>, <em class="sig-param">angles_detectors_rad=1.5707963267948966</em>, <em class="sig-param">weights_detectors=None</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">precompute_attenuation=True</em>, <em class="sig-param">is_symmetric=False</em>, <em class="sig-param">weights_angles=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#AttenuationProjector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.AttenuationProjector" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">AttenuationProjector</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">proj_intensities=None</em>, <em class="sig-param">att_in=None</em>, <em class="sig-param">att_out=None</em>, <em class="sig-param">angles_detectors_rad=1.5707963267948966</em>, <em class="sig-param">weights_detectors=None</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">precompute_attenuation=True</em>, <em class="sig-param">is_symmetric=False</em>, <em class="sig-param">weights_angles=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#AttenuationProjector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.AttenuationProjector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.projectors.ProjectorBase" title="corrct.projectors.ProjectorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.projectors.ProjectorBase</span></code></a></p>
 <p>Attenuation corrected projection class, with multi-detector support.
 It includes the computation of the attenuation volumes.</p>
@@ -256,7 +256,7 @@ It includes the computation of the attenuation volumes.</p>
 <dd class="field-even"><p>The back-projected volume</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -278,7 +278,7 @@ applies the attenuation corrections if the projector is symmetric.</p>
 <dd class="field-even"><p>The back-projected volume</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -315,7 +315,7 @@ attenuation corrections.</p>
 <dd class="field-even"><p>The forward-projected sinogram</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -336,7 +336,7 @@ applies the attenuation corrections.</p>
 <dd class="field-even"><p>The forward-projected sinogram line</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -367,7 +367,7 @@ Transactions on, 23(11), 4750-4762.</p>
 <dd class="field-even"><p>The filtered sinogram</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -387,7 +387,7 @@ Transactions on, 23(11), 4750-4762.</p>
 <dd class="field-even"><p>The computed filter</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -402,7 +402,7 @@ Transactions on, 23(11), 4750-4762.</p>
 
 <dl class="class">
 <dt id="corrct.projectors.ProjectorBase">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorBase</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">create_ind_projs=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorBase</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">proj_intensities=None</em>, <em class="sig-param">create_single_projs=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Basic projection class, which implements the forward and back projection
 of the single lines of a sinogram.
@@ -421,7 +421,7 @@ It supports both 2D and 3D geometries.</p>
 <dd class="field-even"><p>The back-projected volume</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -442,7 +442,7 @@ applies the attenuation corrections if the projector is symmetric.</p>
 <dd class="field-even"><p>The back-projected volume</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -465,7 +465,7 @@ applies the attenuation corrections if the projector is symmetric.</p>
 <dd class="field-even"><p>The forward-projected projection data</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -485,7 +485,7 @@ applies the attenuation corrections if the projector is symmetric.</p>
 <dd class="field-even"><p>The forward-projected sinogram line</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -500,7 +500,7 @@ applies the attenuation corrections if the projector is symmetric.</p>
 
 <dl class="class">
 <dt id="corrct.projectors.ProjectorUncorrected">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorUncorrected</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">create_ind_projs=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorUncorrected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorUncorrected" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorUncorrected</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">proj_intensities=None</em>, <em class="sig-param">create_single_projs=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorUncorrected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorUncorrected" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.projectors.ProjectorBase" title="corrct.projectors.ProjectorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.projectors.ProjectorBase</span></code></a></p>
 <p>Uncorrected projection class, which implements the forward and back
 projection of the whole projection data.
@@ -516,15 +516,15 @@ The data could either be a sinogram, or a stack of sinograms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>projs</strong> – The projection data to back-project (numpy.array_like)</p></li>
-<li><p><strong>fbp_filter</strong> – The FBP filter to use (str or function)</p></li>
+<li><p><strong>projs</strong> (<em>numpy.array_like</em>) – The projection data to back-project</p></li>
+<li><p><strong>fbp_filter</strong> (<em>str</em><em> or </em><em>function</em>) – The FBP filter to use</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The FBP reconstructed volume</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -581,7 +581,7 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 
 <dl class="class">
 <dt id="corrct.solvers.CP">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">CP</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em>, <em class="sig-param">relaxation=0.95</em>, <em class="sig-param">data_term='l2'</em>, <em class="sig-param">regularizer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#CP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.CP" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">CP</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em>, <em class="sig-param">tolerance=None</em>, <em class="sig-param">relaxation=0.95</em>, <em class="sig-param">data_term='l2'</em>, <em class="sig-param">regularizer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#CP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.CP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Solver" title="corrct.solvers.Solver"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Solver</span></code></a></p>
 <p>Solver class implementing the primal-dual algorithm from Chambolle and
 Pock.
@@ -775,7 +775,7 @@ reconstructions.</p>
 
 <dl class="class">
 <dt id="corrct.solvers.Sart">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Sart</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em>, <em class="sig-param">relaxation=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Sart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Sart" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Sart</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em>, <em class="sig-param">relaxation=1</em>, <em class="sig-param">tolerance=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Sart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Sart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Solver" title="corrct.solvers.Solver"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Solver</span></code></a></p>
 <p>Solver class implementing the Simultaneous Algebraic Reconstruction
 Technique (SART) algorithm.</p>
@@ -783,7 +783,7 @@ Technique (SART) algorithm.</p>
 
 <dl class="class">
 <dt id="corrct.solvers.Sirt">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Sirt</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em>, <em class="sig-param">relaxation=1.95</em>, <em class="sig-param">regularizer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Sirt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Sirt" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Sirt</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em>, <em class="sig-param">tolerance=None</em>, <em class="sig-param">relaxation=1.95</em>, <em class="sig-param">regularizer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Sirt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Sirt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Solver" title="corrct.solvers.Solver"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Solver</span></code></a></p>
 <p>Solver class implementing the Simultaneous Iterative Reconstruction
 Technique (SIRT) algorithm.</p>
@@ -791,7 +791,7 @@ Technique (SIRT) algorithm.</p>
 
 <dl class="class">
 <dt id="corrct.solvers.Solver">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Solver</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em>, <em class="sig-param">relaxation=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Solver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Solver" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Solver</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em>, <em class="sig-param">relaxation=1</em>, <em class="sig-param">tolerance=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Solver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Solver" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Base solver class.</p>
 <dl class="method">
