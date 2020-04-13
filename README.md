@@ -1,5 +1,10 @@
 # PyCorrectedEmissionCT
 
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/cicwi/PyCorrectedEmissionCT/Python%20Package%20using%20Anaconda)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/cicwi/PyCorrectedEmissionCT)
+![License](https://img.shields.io/github/license/cicwi/PyCorrectedEmissionCT)
+[![DOI](https://zenodo.org/badge/218092017.svg)](https://zenodo.org/badge/latestdoi/218092017)
+
 Physically corrected projectors for X-ray induced emission CT.
 
 This package provides the following functionality:
@@ -8,8 +13,9 @@ This package provides the following functionality:
 * Includes the following solvers (reconstruction algorithms):
   - Simultaneous Iterative Reconstruction Technique (SIRT).
   - Simultaneous Algebraic Reconstruction Technique (SART).
-  - Primal-dual optimization from Chambolle-Pock, with Gaussian and Poisson
-noise modelling, and offering optional TV-min and l1-min based regularization.
+  - Primal-dual optimization from Chambolle-Pock, with:
+    * Gaussian and Poisson noise modelling
+    * Optional TV-min, l1-min, laplacian, and wavelet based regularization.
 
 It contains the code used for the following paper, which also provides a
 mathematical description of the concepts and algorithms used here:
@@ -20,7 +26,7 @@ Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.
 
 Other useful information:
 
-* Free software: BSD license
+* Free software: BSD 3-Clause license
 * Documentation: [https://cicwi.github.io/PyCorrectedEmissionCT/](https://cicwi.github.io/PyCorrectedEmissionCT/)
 
 <!--
