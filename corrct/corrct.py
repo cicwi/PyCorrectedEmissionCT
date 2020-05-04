@@ -11,6 +11,7 @@ import numpy as np
 
 from . import projectors
 from . import solvers
+from . import utils_proc
 
 
 def create_sino(
@@ -45,7 +46,7 @@ def reconstruct(  # noqa: C901
         vol_att_in=None, vol_att_out=None,
         angles_detectors_rad=(np.pi/2), weights_detectors=None,
         lower_limit=None, upper_limit=None, apply_circ_mask=True,
-        symm=True, lambda_reg=1e-2, data_term='kl', psf=None,
+        symm=True, lambda_reg=1e-2, data_term='l2', psf=None,
         data_type=np.float32):
     """Reconstructs the given sinogram, with the requested algorithm.
 
@@ -72,10 +73,7 @@ def reconstruct(  # noqa: C901
     vol_shape = [sino.shape[-1], sino.shape[-1]]
 
     if apply_circ_mask:
-        xx = np.arange(-(vol_shape[0]-1)/2, (vol_shape[0]-1)/2+0.001, 1, dtype=data_type)
-        yy = np.arange(-(vol_shape[1]-1)/2, (vol_shape[1]-1)/2+0.001, 1, dtype=data_type)
-        (xx, yy) = np.meshgrid(xx, yy, indexing='ij')
-        circ_mask = np.sqrt(xx ** 2 + yy ** 2) <= (vol_shape[0]-1)/2
+        x_mask = utils_proc.get_circular_mask(vol_shape, radius_offset=-1)
 
     with projectors.AttenuationProjector(
             vol_shape, angles_rad, att_in=vol_att_in, att_out=vol_att_out,
@@ -87,11 +85,11 @@ def reconstruct(  # noqa: C901
             A = lambda x, ii: p.fp_angle(x, ii)  # noqa: E731
             At = lambda y, ii: p.bp_angle(y, ii, single_line=True)  # noqa: E731
         else:
-            A = lambda x: p.fp(x)  # noqa: E731
-            At = lambda y: p.bp(y)  # noqa: E731
+            A = p
+            At = p.T
 
         if iterations is None:
-            if algo.upper() in ('SIRT', 'CPTV'):
+            if algo.upper() in ('SIRT', 'CPTV', 'CPL1', 'CPWL'):
                 iterations = 50
             elif algo.upper() in ('CP'):
                 iterations = 25
@@ -101,23 +99,28 @@ def reconstruct(  # noqa: C901
         # Algorithms
         if algo.upper() == 'SART':
             algo = solvers.Sart(verbose=True)
-            (vol, _) = algo(A, sino, iterations, len(angles_rad), At=At, x_mask=circ_mask)
+            (vol, _) = algo(A, sino, iterations, len(angles_rad), At=At, x_mask=x_mask)
         elif algo.upper() == 'SIRT':
             algo = solvers.Sirt(verbose=True)
-            (vol, _) = algo(A, sino, iterations, At=At, x_mask=circ_mask)
+            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask)
         elif algo.upper() == 'CP':
             algo = solvers.CP(verbose=True, data_term=data_term)
-            (vol, _) = algo(A, sino, iterations, At=At, x_mask=circ_mask)
+            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask)
         elif algo.upper() == 'CPTV':
             regularizer = solvers.Regularizer_TV2D(weight=lambda_reg)
             algo = solvers.CP(
                     verbose=True, data_term=data_term, regularizer=regularizer)
-            (vol, _) = algo(A, sino, iterations, At=At, x_mask=circ_mask)
+            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask)
         elif algo.upper() == 'CPL1':
             regularizer = solvers.Regularizer_l1(weight=lambda_reg)
             algo = solvers.CP(
                     verbose=True, data_term=data_term, regularizer=regularizer)
-            (vol, _) = algo(A, sino, iterations, At=At, x_mask=circ_mask)
+            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask)
+        elif algo.upper() == 'CPWL':
+            regularizer = solvers.Regularizer_l1wl(weight=lambda_reg, pad_on_demand=True)
+            algo = solvers.CP(
+                    verbose=True, data_term=data_term, regularizer=regularizer)
+            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask)
         else:
             raise ValueError('Unknown algorithm: %s' % algo)
 
