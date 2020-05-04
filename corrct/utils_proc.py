@@ -9,12 +9,15 @@ and ESRF - The European Synchrotron, Grenoble, France
 import numpy as np
 
 
-def get_circular_mask(vol_shape_yx, radius_offset=0, data_type=np.float32):
+def get_circular_mask(vol_shape_yx, radius_offset=0, mask_drop_off='const', data_type=np.float32):
     """Computes a circular mask for the reconstruction volume.
 
-    :param vol_shape_yx: The size of the volume (numpy.array_like)
-    :param radius_offset: The offset with respect to the volume edge. Optinal, default: 0 (float)
-    :param data_type: The mask data type. Optional, default: np.float32 (numpy.dtype)
+    :param vol_shape_yx: The size of the volume.
+    :type vol_shape_yx: numpy.array_like
+    :param radius_offset: The offset with respect to the volume edge.
+    :type radius_offset: float. Optional, default: 0
+    :param data_type: The mask data type.
+    :type data_type: numpy.dtype. Optional, default: np.float32
 
     :returns: The circular mask.
     :rtype: (numpy.array_like)
@@ -23,16 +26,28 @@ def get_circular_mask(vol_shape_yx, radius_offset=0, data_type=np.float32):
     xx = np.linspace(-(vol_shape_yx[1]-1)/2, (vol_shape_yx[1]-1)/2, vol_shape_yx[1], dtype=data_type)
     (yy, xx) = np.meshgrid(yy, xx, indexing='ij')
 
-    return np.sqrt(xx ** 2 + yy ** 2) <= ((vol_shape_yx[0]) / 2 + radius_offset)
+    radius = (vol_shape_yx[0]) / 2 + radius_offset
+    if mask_drop_off.lower() == 'const':
+        return np.sqrt(xx ** 2 + yy ** 2) <= radius
+    elif mask_drop_off.lower() == 'sinc':
+        outter_region = 1 - (np.sqrt(xx ** 2 + yy ** 2) <= radius)
+        outter_vals = 1 - np.sinc((np.sqrt(xx ** 2 + yy ** 2) - radius) / ((vol_shape_yx[0]) / np.sqrt(2) - radius))
+        return 1 - outter_region * outter_vals
+    else:
+        raise ValueError('Unknown drop-off function: %s' % mask_drop_off)
 
 
 def pad_sinogram(sinogram, width, pad_axis=-1, mode='edge', **kwds):
     """Pads the sinogram.
 
-    :param sinogram: The sinogram to pad. (numpy.array_like)
-    :param width: The width of the padding. Could be a scalar or a tuple of two integers. (int or tuple(int, int) )
-    :param pad_axis: The axis to pad. Optional, default: -1. (int)
-    :param mode: The padding type (from numpy.pad). Optional, default: 'edge'. (string)
+    :param sinogram: The sinogram to pad.
+    :type sinogram: numpy.array_like
+    :param width: The width of the padding.
+    :type width: either an int or tuple(int, int)
+    :param pad_axis: The axis to pad.
+    :type pad_axis: int. Optional, default: -1
+    :param mode: The padding type (from numpy.pad).
+    :type mode: string. Optional, default: 'edge'.
     :param **kwds: The numpy.pad arguments.
 
     :returns: The padded sinogram.
@@ -44,3 +59,47 @@ def pad_sinogram(sinogram, width, pad_axis=-1, mode='edge', **kwds):
     pad_size[pad_axis] = width
 
     return np.pad(sinogram, pad_size, mode=mode, **kwds)
+
+
+def apply_flat_field(projs, flats, darks=None, crop=None, data_type=np.float32):
+    """Apply flat field.
+
+    :param projs: Projections
+    :type projs: numpy.array_like
+    :param flats: Flat fields
+    :type flats: numpy.array_like
+    :param darks: Dark noise, defaults to None
+    :type darks: numpy.array_like, optional
+    :param crop: Crop region, defaults to None
+    :type crop: numpy.array_like, optional
+    :param data_type: numpy.dtype, defaults to np.float32
+    :type data_type: Data type of the processed data, optional
+
+    :return: Falt-field corrected and linearized projections
+    :rtype: numpy.array_like
+    """
+    if crop is not None:
+        projs = projs[..., crop[0]:crop[2], crop[1]:crop[3]]
+        flats = flats[..., crop[0]:crop[2], crop[1]:crop[3]]
+        if darks is not None:
+            darks = darks[..., crop[0]:crop[2], crop[1]:crop[3]]
+
+    if darks is not None:
+        projs -= darks
+        flats -= darks
+
+    flats = np.mean(flats.astype(data_type), axis=0)
+
+    return projs.astype(data_type) / flats
+
+
+def apply_minus_log(projs):
+    """Apply -log.
+
+    :param projs: Projections
+    :type projs: numpy.array_like
+
+    :return: Falt-field corrected and linearized projections
+    :rtype: numpy.array_like
+    """
+    return np.fmax(-np.log(projs), 0.0)
