@@ -27,7 +27,7 @@ class ProjectorBase(spsla.LinearOperator):
 
     def __init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
-            proj_intensities=None, create_single_projs=True):
+            proj_intensities=None, create_single_projs=True, super_sampling=1):
         """
         :param vol_shape: The volume shape in X Y and optionally Z
         :type vol_shape: numpy.array_like
@@ -40,6 +40,8 @@ class ProjectorBase(spsla.LinearOperator):
         :param create_single_projs: Specifies whether to create projectors for single projections.
         Useful for corrections and SART, defaults to True
         :type create_single_projs: boolean, optional
+        :param super_sampling: pixel and voxel super-sampling, defaults to 1
+        :type super_sampling: int, optional
         """
         if len(vol_shape) < 2 or len(vol_shape) > 3:
             raise ValueError("Only 2D or 3D volumes")
@@ -48,6 +50,7 @@ class ProjectorBase(spsla.LinearOperator):
 
         self.proj_id = []
         self.has_individual_projs = create_single_projs
+        self.super_sampling = super_sampling
         self.dispose_projectors()
 
         self.angles_rot_rad = angles_rot_rad
@@ -137,11 +140,13 @@ class ProjectorBase(spsla.LinearOperator):
         else:
             projector_type = 'cuda'
 
+        opts = {'VoxelSuperSampling': self.super_sampling, 'DetectorSuperSampling': self.super_sampling}
+
         if self.has_individual_projs:
-            self.proj_id = [astra.create_projector(projector_type, pg, self.vol_geom) for pg in self.proj_geom_ind]
+            self.proj_id = [astra.create_projector(projector_type, pg, self.vol_geom, opts) for pg in self.proj_geom_ind]
             self.W_ind = [astra.OpTomo(p_id) for p_id in self.proj_id]
 
-        self.proj_id.append(astra.create_projector(projector_type, self.proj_geom_all, self.vol_geom))
+        self.proj_id.append(astra.create_projector(projector_type, self.proj_geom_all, self.vol_geom, opts))
         self.W_all = astra.OpTomo(self.proj_id[-1])
 
     def dispose_projectors(self):
@@ -278,7 +283,7 @@ class AttenuationProjector(ProjectorBase):
 
     def __init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
-            proj_intensities=None, att_in=None, att_out=None,
+            proj_intensities=None, super_sampling=1, att_in=None, att_out=None,
             angles_detectors_rad=(np.pi/2), weights_detectors=None, psf=None,
             precompute_attenuation=True, is_symmetric=False, weights_angles=None,
             data_type=np.float32):
@@ -291,6 +296,8 @@ class AttenuationProjector(ProjectorBase):
         :type rot_axis_shift_pix: float or numpy.array_like, optional
         :param proj_intensities: Projection scaling factor, defaults to None
         :type proj_intensities: float or numpy.array_like, optional
+        :param super_sampling: pixel and voxel super-sampling, defaults to 1
+        :type super_sampling: int, optional
         :param att_in: Attenuation volume of the incoming beam, defaults to None
         :type att_in: numpy.array_like, optional
         :param att_out: Attenuation volume of the outgoing beam, defaults to None
@@ -312,7 +319,7 @@ class AttenuationProjector(ProjectorBase):
         """
         ProjectorBase.__init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix,
-            proj_intensities=proj_intensities)
+            proj_intensities=proj_intensities, super_sampling=super_sampling)
 
         self.data_type = data_type
 
@@ -554,7 +561,7 @@ class ProjectorUncorrected(ProjectorBase):
 
     def __init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
-            proj_intensities=None, create_single_projs=False):
+            proj_intensities=None, create_single_projs=False, super_sampling=1):
         """
         :param vol_shape: The volume shape in X Y and optionally Z
         :type vol_shape: numpy.array_like
@@ -567,11 +574,14 @@ class ProjectorUncorrected(ProjectorBase):
         :param create_single_projs: Specifies whether to create projectors for single projections.
         Useful for corrections and SART, defaults to False
         :type create_single_projs: boolean, optional
+        :param super_sampling: pixel and voxel super-sampling, defaults to 1
+        :type super_sampling: int, optional
         """
         ProjectorBase.__init__(
             self, vol_shape, angles_rot_rad, rot_axis_shift_pix,
             proj_intensities=proj_intensities,
-            create_single_projs=create_single_projs)
+            create_single_projs=create_single_projs,
+            super_sampling=super_sampling)
 
     def _astra_fbp(self, projs, fbp_filter):
         cfg = astra.astra_dict('FBP_CUDA')
