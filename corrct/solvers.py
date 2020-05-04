@@ -276,15 +276,15 @@ class Solver(object):
         if At is None:
             if isinstance(A, np.ndarray):
                 At = A.transpose((1, 0))
-            elif isinstance(A, sps.dia_matrix):
+            elif isinstance(A, sps.dia_matrix) or isinstance(A, sps.linalg.LinearOperator):
                 At = A.transpose()
 
         if isinstance(At, np.ndarray) or isinstance(At, sps.dia_matrix):
             At_m = At
-            At = lambda x: np.dot(At_m, x)  # noqa: E731
+            At = At_m.dot
         if isinstance(A, np.ndarray) or isinstance(A, sps.dia_matrix):
             A_m = A
-            A = lambda x: np.dot(A_m, x)  # noqa: E731
+            A = A_m.dot
         return (A, At)
 
 
@@ -526,6 +526,14 @@ class CP(Solver):
         """
         """
         (A, At) = self._initialize_data_operators(A, At)
+        if precondition:
+            try:
+                At_abs = At.absolute()
+                A_abs = A.absolute()
+            except AttributeError:
+                print(A, At)
+                print('WARNING: Turning off preconditioning because system matrix does not support absolute')
+                precondition = False
 
         data_type = b.dtype
 
@@ -535,7 +543,7 @@ class CP(Solver):
             tau = np.ones(b.shape, data_type)
             if b_mask is not None:
                 tau *= b_mask
-            tau = np.abs(At(tau))
+            tau = np.abs(At_abs(tau))
             if self.regularizer is not None:
                 tau += self.regularizer.initialize_sigma_tau()
             tau[(tau / np.max(tau)) < 1e-5] = 1
@@ -546,7 +554,7 @@ class CP(Solver):
             sigma = np.ones(tau.shape, dtype=data_type)
             if x_mask is not None:
                 sigma *= x_mask
-            sigma = np.abs(A(sigma))
+            sigma = np.abs(A_abs(sigma))
             sigma[(sigma / np.max(sigma)) < 1e-5] = 1
             sigma = 0.95 / sigma
         else:
