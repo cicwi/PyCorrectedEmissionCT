@@ -215,7 +215,7 @@ class Regularizer_l1wl(BaseRegularizer):
 
     __reg_name__ = 'l1wl'
 
-    def __init__(self, weight, wavelet, level, ndims=2, axes=None):
+    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand=False):
         if not has_pywt:
             raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
         if not use_swtn:
@@ -229,7 +229,19 @@ class Regularizer_l1wl(BaseRegularizer):
             axes = np.arange(-ndims, 0, dtype=np.int)
         self.axes = axes
 
+        self.pad_on_demand = pad_on_demand
+
     def _op_direct(self, primal):
+        if self.pad_on_demand:
+            alignment = 2 ** self.level
+            primal_axes = np.array(primal.shape)[np.array(self.axes)]
+            self.pad_axes = (alignment - primal_axes % alignment) % alignment
+            for ax in np.nonzero(self.pad_axes)[0]:
+                pad_l = np.ceil(self.pad_axes[ax] / 2).astype(np.int)
+                pad_h = np.floor(self.pad_axes[ax] / 2).astype(np.int)
+                pad_width = [(0, 0)] * len(primal.shape)
+                pad_width[self.axes[ax]] = (pad_l, pad_h)
+                primal = np.pad(primal, pad_width, mode='edge')
         return pywt.swtn(primal, wavelet=self.wavelet, axes=self.axes, level=self.level)
 
     def _op_adjoint(self, dual):
@@ -240,6 +252,7 @@ class Regularizer_l1wl(BaseRegularizer):
         return self.weight
 
     def initialize_dual(self, primal):
+        self.primal_shape = primal.shape
         return self._op_direct(np.zeros(primal.shape, dtype=primal.dtype))
 
     def update_dual(self, dual, primal):
@@ -254,7 +267,15 @@ class Regularizer_l1wl(BaseRegularizer):
                 dual[ii_l][k] /= np.fmax(1, np.abs(dual[ii_l][k]))
 
     def compute_update_primal(self, dual):
-        return self.weight * self._op_adjoint(dual)
+        upd = self.weight * self._op_adjoint(dual)
+        if self.pad_on_demand and np.any(self.pad_axes):
+            for ax in np.nonzero(self.pad_axes)[0]:
+                pad_l = np.ceil(self.pad_axes[ax] / 2).astype(np.int)
+                pad_h = np.floor(self.pad_axes[ax] / 2).astype(np.int)
+                slices = [slice(None)] * len(upd.shape)
+                slices[self.axes[ax]] = slice(pad_l, -pad_h, 1)
+                upd = upd[tuple(slices)]
+        return upd
 
 
 class Solver(object):
