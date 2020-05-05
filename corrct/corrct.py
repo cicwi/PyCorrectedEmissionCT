@@ -18,20 +18,27 @@ def create_sino(
         vol, angles_rad, vol_att_in=None, vol_att_out=None, psf=None,
         angles_detectors_rad=(np.pi/2), weights_detectors=None,
         data_type=np.float32):
-    """Creates a synthetic sinogram, from the given volume, attenuations and
-    PSF.
+    """Creates a synthetic sinogram, from the given volume, attenuations and PSF.
 
-    :param vol: Volume containing the elemental concentrations or other quantities (numpy.array_like)
-    :param angles_rad: Angles in radians of each sinogram line (numpy.array_like)
-    :param vol_att_in: Volume containing the local attenuation coefficients for the incoming photons (numpy.array_like)
-    :param vol_att_out: Volume containing the local attenuation coefficients for the emitted photons (numpy.array_like)
-    :param angles_detectors_rad: Detectors' position angles in radians (numpy.array_like or float, deafult: pi/2)
-    :param weights_detectors: Detectors' weights (numpy.array_like or float, deafult: None)
-    :param psf: Detector point spread function (PSF) (numpy.array_like)
-    :param data_type: Volume data type (numpy.dtype)
+    :param vol: Volume containing the elemental concentrations or other quantities.
+    :type vol: numpy.array_like
+    :param angles_rad: Angles in radians of each sinogram line
+    :type angles_rad: numpy.array_like
+    :param vol_att_in: Volume containing the local attenuation coefficients for the incoming photons
+    :type vol_att_in: numpy.array_like
+    :param vol_att_out: Volume containing the local attenuation coefficients for the emitted photons
+    :type vol_att_out: numpy.array_like
+    :param angles_detectors_rad: Detectors' position angles in radians
+    :type angles_detectors_rad: numpy.array_like or float, optional. Deafult: numpy.pi / 2
+    :param weights_detectors: Detectors' weights
+    :type weights_detectors: numpy.array_like or float, optional. Deafult: None
+    :param psf: Detector point spread function (PSF)
+    :type psf: numpy.array_like, optional. Deafult: None
+    :param data_type: Volume data type
+    :type data_type: `numpy.dtype`, optional. Default: `numpy.float32`
 
     :returns: The simulated sinogram
-    :rtype: (numpy.array_like)
+    :rtype: numpy.array_like
     """
     with projectors.AttenuationProjector(
             vol.shape, angles_rad, att_in=vol_att_in, att_out=vol_att_out,
@@ -50,25 +57,43 @@ def reconstruct(  # noqa: C901
         data_type=np.float32):
     """Reconstructs the given sinogram, with the requested algorithm.
 
-    :param algo: Reconstruction algorithms to use. Options: 'SART' | 'SIRT' | 'CP' | 'CPTV' | 'CPL1' (string)
-    :param sino: The sinogram to recosntruct (numpy.array_like)
-    :param angles_rad: Angles in radians of each sinogram line (numpy.array_like)
-    :param iterations: Number of iterations (int)
-    :param vol_att_in: Volume containing the local attenuation coefficients for the incoming photons (numpy.array_like)
-    :param vol_att_out: Volume containing the local attenuation coefficients for the emitted photons (numpy.array_like)
-    :param angles_detectors_rad: Detectors' position angles in radians (numpy.array_like or float, deafult: pi/2)
-    :param weights_detectors: Detectors' weights (numpy.array_like or float, deafult: None)
-    :param lower_limit: Lower clipping limit (float)
-    :param upper_limit: Upper clipping limit (float)
-    :param apply_circ_mask: Switch to activate a circular volume mask (boolean)
-    :param symm: Switch to define whether the projectors should be symmetric (boolean)
-    :param lambda_reg: Regularizer weight (float)
-    :param data_term: Data fidelity term. Options: 'l2' | 'kl' (string)
-    :param psf: Detector point spread function (PSF) (numpy.array_like)
-    :param data_type: Volume data type (numpy.dtype)
+    :param algo: Reconstruction algorithms to use.
+    :type algo: string. Options: 'SART' | 'SIRT' | 'CP' | 'CPTV' | 'CPL1' | 'CPWL'
+    :param sino: The sinogram to recosntruct
+    :type sino: numpy.array_like
+    :param angles_rad: Angles in radians of each sinogram line
+    :type angles_rad: numpy.array_like
+    :param iterations: Number of iterations
+    :type iterations: int, optional. Default: None
+    :param vol_att_in: Volume containing the local attenuation coefficients for the incoming photons
+    :type vol_att_in: numpy.array_like, optional. Default: None
+    :param vol_att_out: Volume containing the local attenuation coefficients for the emitted photons
+    :type vol_att_out: numpy.array_like, optional. Default: None
+    :param angles_detectors_rad: Detectors' position angles in radians
+    :type angles_detectors_rad: numpy.array_like or float, optional. Default: numpy.pi / 2
+    :param weights_detectors: Detectors' weights
+    :type weights_detectors: numpy.array_like or float, optional. Default: None
+    :param lower_limit: Lower clipping limit
+    :type lower_limit: float, optional. Default: None
+    :param upper_limit: Upper clipping limit
+    :type upper_limit: float, optional. Default: None
+    :param apply_circ_mask: Switch to activate a circular volume mask
+    :type apply_circ_mask: boolean, optional. Default: True
+    :param symm: Switch to define whether the projectors should be symmetric
+    :type symm: boolean, optional. Default: True
+    :param lambda_reg: Regularizer weight
+    :type lambda_reg: float, optional. Default: 1e-2
+    :param data_term: Data fidelity term
+    :type data_term: string, optional. Options: 'l2' | 'kl'. Default: 'l2'
+    :param psf: Detector point spread function (PSF)
+    :type psf: numpy.array_like, optional. Default: None
+    :param data_type: Volume data type
+    :type data_type: `numpy.dtype`, optional. Default: `numpy.float32`
+
+    :raises ValueError: Raises an error if the algorithm is not known.
 
     :returns: The reconstructed volume
-    :rtype: (numpy.array_like)
+    :rtype: numpy.array_like
     """
     vol_shape = [sino.shape[-1], sino.shape[-1]]
 
@@ -96,6 +121,8 @@ def reconstruct(  # noqa: C901
             else:
                 iterations = 5
 
+        precondition = True
+
         # Algorithms
         if algo.upper() == 'SART':
             algo = solvers.Sart(verbose=True)
@@ -105,22 +132,22 @@ def reconstruct(  # noqa: C901
             (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask)
         elif algo.upper() == 'CP':
             algo = solvers.CP(verbose=True, data_term=data_term)
-            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask)
+            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask, precondition=precondition)
         elif algo.upper() == 'CPTV':
             regularizer = solvers.Regularizer_TV2D(weight=lambda_reg)
             algo = solvers.CP(
                     verbose=True, data_term=data_term, regularizer=regularizer)
-            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask)
+            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask, precondition=precondition)
         elif algo.upper() == 'CPL1':
             regularizer = solvers.Regularizer_l1(weight=lambda_reg)
             algo = solvers.CP(
                     verbose=True, data_term=data_term, regularizer=regularizer)
-            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask)
+            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask, precondition=precondition)
         elif algo.upper() == 'CPWL':
             regularizer = solvers.Regularizer_l1wl(weight=lambda_reg, pad_on_demand=True)
             algo = solvers.CP(
                     verbose=True, data_term=data_term, regularizer=regularizer)
-            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask)
+            (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask, precondition=precondition)
         else:
             raise ValueError('Unknown algorithm: %s' % algo)
 
