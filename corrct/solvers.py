@@ -324,22 +324,20 @@ class Sart(Solver):
         c_in = tm.time()
 
         # Back-projection diagonal re-scaling
-        tau = np.ones_like(b)
+        b_ones = np.ones_like(b)
         if b_mask is not None:
-            tau *= b_mask
-        tau = [At(tau[..., ii, :], ii) for ii in range(A_num_rows)]
-        tau = np.abs(np.stack(tau, axis=-1))
+            b_ones *= b_mask
+        tau = [At(b_ones[ii, :], ii) for ii in range(A_num_rows)]
+        tau = np.abs(np.stack(tau, axis=0))
         tau[(tau / np.max(tau)) < 1e-5] = 1
         tau = self.relaxation / tau
 
         # Forward-projection diagonal re-scaling
         x_ones = np.ones(tau.shape[1:], dtype=data_type)
-        sigma = np.empty_like(b)
         if x_mask is not None:
-            sigma *= x_mask
-        for ii in range(A_num_rows):
-            sigma[..., ii, ...] = A(x_ones, ii)
-        sigma = np.abs(sigma)
+            x_ones *= x_mask
+        sigma = [A(x_ones, ii) for ii in range(A_num_rows)]
+        sigma = np.abs(np.stack(sigma, axis=0))
         sigma[(sigma / np.max(sigma)) < 1e-5] = 1
         sigma = 1 / sigma
 
@@ -368,11 +366,11 @@ class Sart(Solver):
 
             for ii_a in rows_sequence:
 
-                res = A(x, ii_a) - b[..., ii_a, :]
+                res = A(x, ii_a) - b[ii_a, ...]
                 if b_mask is not None:
-                    res *= b_mask[..., ii_a, :]
+                    res *= b_mask[ii_a, ...]
 
-                x -= At(res * sigma[..., ii_a, :], ii_a) * tau[..., ii_a, ...]
+                x -= At(res * sigma[ii_a, ...], ii_a) * tau[ii_a, ...]
 
                 if lower_limit is not None:
                     x = np.fmax(x, lower_limit)
