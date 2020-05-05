@@ -152,17 +152,17 @@ if apply_corrections:
 
     print('Reconstructing with CP - using KL w/ corrections')
     rec_cpkl = corrct.reconstruct(
-        'CP', sino / renorm_factor, angles, vol_att_in=vol_att_in,
-        vol_att_out=vol_att_out, angles_detectors_rad=det_angles, psf=psf,
-        lower_limit=0, iterations=num_cp_iterations) * renorm_factor
+        'CP', sino / renorm_factor, angles, iterations=num_cp_iterations,
+        data_term='kl', vol_att_in=vol_att_in, vol_att_out=vol_att_out,
+        angles_detectors_rad=det_angles, psf=psf, lower_limit=0) * renorm_factor
     print('- Phantom power: %g, noise power: %g' % (
         np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cpkl - ph) ** 2) / ph.size)))
 
     print('Reconstructing with CPTV - using KL w/ corrections')
     rec_cptvkl = corrct.reconstruct(
-        'CPTV', sino / renorm_factor, angles, vol_att_in=vol_att_in,
-        vol_att_out=vol_att_out, angles_detectors_rad=det_angles, psf=psf,
-        lower_limit=0, lambda_reg=2e-1, iterations=num_cptv_iterations) * renorm_factor
+        'CPTV', sino / renorm_factor, angles, iterations=num_cptv_iterations,
+        data_term='kl', vol_att_in=vol_att_in, vol_att_out=vol_att_out,
+        angles_detectors_rad=det_angles, psf=psf, lower_limit=0, lambda_reg=2e-1) * renorm_factor
     print('- Phantom power: %g, noise power: %g' % (
         np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cptvkl - ph) ** 2) / ph.size)))
 
@@ -181,13 +181,15 @@ else:
 
     print('Reconstructing with CP - using KL w/o corrections')
     rec_cpkl = corrct.reconstruct(
-        'CP', sino / renorm_factor, angles, lower_limit=0, iterations=num_cp_iterations) * renorm_factor
+        'CP', sino / renorm_factor, angles, iterations=num_cp_iterations,
+        data_term='kl', lower_limit=0) * renorm_factor
     print('- Phantom power: %g, noise power: %g' % (
         np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cpkl - ph) ** 2) / ph.size)))
 
     print('Reconstructing with CPTV - using KL w/o corrections')
     rec_cptvkl = corrct.reconstruct(
-        'CPTV', sino / renorm_factor, angles, lower_limit=0, lambda_reg=2e-1, iterations=num_cptv_iterations) * renorm_factor
+        'CPTV', sino / renorm_factor, angles, iterations=num_cptv_iterations,
+        data_term='kl', lower_limit=0, lambda_reg=2e-1) * renorm_factor
     print('- Phantom power: %g, noise power: %g' % (
         np.sqrt(np.sum((ph) ** 2) / ph.size), np.sqrt(np.sum((rec_cptvkl - ph) ** 2) / ph.size)))
 
