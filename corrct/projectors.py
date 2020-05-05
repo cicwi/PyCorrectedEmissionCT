@@ -17,7 +17,81 @@ import copy as cp
 import astra
 
 
-class ProjectorBase(spsla.LinearOperator):
+class ProjectorOperator(spsla.LinearOperator):
+    """Base projector class, that implements the linear operator behavior that
+    can be used with the solvers in the `.solvers` module and the solvers in
+    `scipy.sparse.linalg`.
+    """
+
+    def __init__(self):
+        num_cols = np.prod(self.vol_shape)
+        num_rows = np.prod(self.proj_shape)
+        super().__init__(np.float32, [num_rows, num_cols])
+        self.is_fwd_operator = True
+
+    def _matvec(self, x):
+        """Implement the operator.
+
+        :param x: Either the volume or the projection data.
+        :type x: numpy.array_like
+        """
+        if self.is_fwd_operator:
+            x = np.reshape(x, self.vol_shape)
+            return self.fp(x).flatten()
+        else:
+            x = np.reshape(x, self.proj_shape)
+            return self.bp(x).flatten()
+
+    def rmatvec(self, x):
+        """Implement the transpose operator.
+
+        :param x: Either the projection data or the volume.
+        :type x: numpy.array_like
+        """
+        if self.is_fwd_operator:
+            x = np.reshape(x, self.proj_shape)
+            return self.bp(x).flatten()
+        else:
+            x = np.reshape(x, self.vol_shape)
+            return self.fp(x).flatten()
+
+    def _transpose(self):
+        """Create the transpose operator.
+
+        :returns: The transpose operator
+        :rtype: ProjectorOperator
+        """
+        Op_t = cp.copy(self)
+        Op_t.shape = [Op_t.shape[1], Op_t.shape[0]]
+        Op_t.is_fwd_operator = False
+        return Op_t
+
+    def _adjoint(self):
+        return self._transpose()
+
+    def absolute(self):
+        """Returns the projection operator using the absolute value of the
+        projection coefficients.
+
+        :returns: The absolute value operator
+        :rtype: ProjectorOperator
+        """
+        return self
+
+    def __call__(self, x):
+        if self.is_fwd_operator:
+            return self.fp(x)
+        else:
+            return self.bp(x)
+
+    def fp(self, x):
+        raise NotImplementedError()
+
+    def bp(self, x):
+        raise NotImplementedError()
+
+
+class ProjectorBase(ProjectorOperator):
     """Basic projection class, which implements the forward and back projection
     of the single lines of a sinogram.
     It takes care of initializing and disposing the ASTRA projectors when used
@@ -122,15 +196,7 @@ class ProjectorBase(spsla.LinearOperator):
 
         self.vol_shape = astra.functions.geom_size(self.vol_geom)
         self.proj_shape = astra.functions.geom_size(self.proj_geom_all)
-
-        num_cols = np.prod(self.vol_shape)
-        num_rows = np.prod(self.proj_shape)
-        self.initialize_linear_operator(num_rows, num_cols)
-
-    def initialize_linear_operator(self, num_rows, num_cols):
-        super().__init__(np.float32, [num_rows, num_cols])
-
-        self.is_fwd_operator = True
+        super().__init__()
 
     def initialize_projectors(self):
         """Initialization of the ASTRA projectors.
@@ -225,55 +291,6 @@ class ProjectorBase(spsla.LinearOperator):
         if self.proj_intensities is not None:
             data = data * self.proj_intensities[:, np.newaxis]  # Needs copy
         return self.W_all.BP(data)
-
-    def _matvec(self, x):
-        """Implement the operator.
-
-        :param x: Either the volume or the projection data.
-        :type x: numpy.array_like
-        """
-        if self.is_fwd_operator:
-            x = np.reshape(x, self.vol_shape)
-            return self.fp(x).flatten()
-        else:
-            x = np.reshape(x, self.proj_shape)
-            return self.bp(x).flatten()
-
-    def rmatvec(self, x):
-        """Implement the transpose operator.
-
-        :param x: Either the projection data or the volume.
-        :type x: numpy.array_like
-        """
-        if self.is_fwd_operator:
-            x = np.reshape(x, self.proj_shape)
-            return self.bp(x).flatten()
-        else:
-            x = np.reshape(x, self.vol_shape)
-            return self.fp(x).flatten()
-
-    def _transpose(self):
-        """Create the transpose operator.
-
-        :returns: The transpose operator
-        :rtype: ProjectorBase
-        """
-        Op_t = cp.deepcopy(self)
-        Op_t.shape = [Op_t.shape[1], Op_t.shape[0]]
-        Op_t.is_fwd_operator = False
-        return Op_t
-
-    def _adjoint(self):
-        return self._transpose()
-
-    def absolute(self):
-        return self
-
-    def __call__(self, x):
-        if self.is_fwd_operator:
-            return self.fp(x)
-        else:
-            return self.bp(x)
 
 
 class AttenuationProjector(ProjectorBase):
