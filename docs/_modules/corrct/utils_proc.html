@@ -156,12 +156,15 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="get_circular_mask"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_circular_mask">[docs]</a><span class="k">def</span> <span class="nf">get_circular_mask</span><span class="p">(</span><span class="n">vol_shape_yx</span><span class="p">,</span> <span class="n">radius_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+<div class="viewcode-block" id="get_circular_mask"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_circular_mask">[docs]</a><span class="k">def</span> <span class="nf">get_circular_mask</span><span class="p">(</span><span class="n">vol_shape_yx</span><span class="p">,</span> <span class="n">radius_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mask_drop_off</span><span class="o">=</span><span class="s1">&#39;const&#39;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Computes a circular mask for the reconstruction volume.</span>
 
-<span class="sd">    :param vol_shape_yx: The size of the volume (numpy.array_like)</span>
-<span class="sd">    :param radius_offset: The offset with respect to the volume edge. Optinal, default: 0 (float)</span>
-<span class="sd">    :param data_type: The mask data type. Optional, default: np.float32 (numpy.dtype)</span>
+<span class="sd">    :param vol_shape_yx: The size of the volume.</span>
+<span class="sd">    :type vol_shape_yx: numpy.array_like</span>
+<span class="sd">    :param radius_offset: The offset with respect to the volume edge.</span>
+<span class="sd">    :type radius_offset: float. Optional, default: 0</span>
+<span class="sd">    :param data_type: The mask data type.</span>
+<span class="sd">    :type data_type: numpy.dtype. Optional, default: np.float32</span>
 
 <span class="sd">    :returns: The circular mask.</span>
 <span class="sd">    :rtype: (numpy.array_like)</span>
@@ -170,16 +173,28 @@
     <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">vol_shape_yx</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">vol_shape_yx</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">vol_shape_yx</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
     <span class="p">(</span><span class="n">yy</span><span class="p">,</span> <span class="n">xx</span><span class="p">)</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">yy</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">yy</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">((</span><span class="n">vol_shape_yx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">radius_offset</span><span class="p">)</span></div>
+    <span class="n">radius</span> <span class="o">=</span> <span class="p">(</span><span class="n">vol_shape_yx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">radius_offset</span>
+    <span class="k">if</span> <span class="n">mask_drop_off</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;const&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">yy</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">radius</span>
+    <span class="k">elif</span> <span class="n">mask_drop_off</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;sinc&#39;</span><span class="p">:</span>
+        <span class="n">outter_region</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">yy</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">radius</span><span class="p">)</span>
+        <span class="n">outter_vals</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sinc</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">yy</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">radius</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">vol_shape_yx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">radius</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">outter_region</span> <span class="o">*</span> <span class="n">outter_vals</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown drop-off function: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mask_drop_off</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="pad_sinogram"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.pad_sinogram">[docs]</a><span class="k">def</span> <span class="nf">pad_sinogram</span><span class="p">(</span><span class="n">sinogram</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">pad_axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Pads the sinogram.</span>
 
-<span class="sd">    :param sinogram: The sinogram to pad. (numpy.array_like)</span>
-<span class="sd">    :param width: The width of the padding. Could be a scalar or a tuple of two integers. (int or tuple(int, int) )</span>
-<span class="sd">    :param pad_axis: The axis to pad. Optional, default: -1. (int)</span>
-<span class="sd">    :param mode: The padding type (from numpy.pad). Optional, default: &#39;edge&#39;. (string)</span>
+<span class="sd">    :param sinogram: The sinogram to pad.</span>
+<span class="sd">    :type sinogram: numpy.array_like</span>
+<span class="sd">    :param width: The width of the padding.</span>
+<span class="sd">    :type width: either an int or tuple(int, int)</span>
+<span class="sd">    :param pad_axis: The axis to pad.</span>
+<span class="sd">    :type pad_axis: int. Optional, default: -1</span>
+<span class="sd">    :param mode: The padding type (from numpy.pad).</span>
+<span class="sd">    :type mode: string. Optional, default: &#39;edge&#39;.</span>
 <span class="sd">    :param **kwds: The numpy.pad arguments.</span>
 
 <span class="sd">    :returns: The padded sinogram.</span>
@@ -191,6 +206,50 @@
     <span class="n">pad_size</span><span class="p">[</span><span class="n">pad_axis</span><span class="p">]</span> <span class="o">=</span> <span class="n">width</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">sinogram</span><span class="p">,</span> <span class="n">pad_size</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="apply_flat_field"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.apply_flat_field">[docs]</a><span class="k">def</span> <span class="nf">apply_flat_field</span><span class="p">(</span><span class="n">projs</span><span class="p">,</span> <span class="n">flats</span><span class="p">,</span> <span class="n">darks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply flat field.</span>
+
+<span class="sd">    :param projs: Projections</span>
+<span class="sd">    :type projs: numpy.array_like</span>
+<span class="sd">    :param flats: Flat fields</span>
+<span class="sd">    :type flats: numpy.array_like</span>
+<span class="sd">    :param darks: Dark noise, defaults to None</span>
+<span class="sd">    :type darks: numpy.array_like, optional</span>
+<span class="sd">    :param crop: Crop region, defaults to None</span>
+<span class="sd">    :type crop: numpy.array_like, optional</span>
+<span class="sd">    :param data_type: numpy.dtype, defaults to np.float32</span>
+<span class="sd">    :type data_type: Data type of the processed data, optional</span>
+
+<span class="sd">    :return: Falt-field corrected and linearized projections</span>
+<span class="sd">    :rtype: numpy.array_like</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">crop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">projs</span> <span class="o">=</span> <span class="n">projs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+        <span class="n">flats</span> <span class="o">=</span> <span class="n">flats</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">darks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">darks</span> <span class="o">=</span> <span class="n">darks</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+
+    <span class="k">if</span> <span class="n">darks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">projs</span> <span class="o">-=</span> <span class="n">darks</span>
+        <span class="n">flats</span> <span class="o">-=</span> <span class="n">darks</span>
+
+    <span class="n">flats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">flats</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">projs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span> <span class="o">/</span> <span class="n">flats</span></div>
+
+
+<div class="viewcode-block" id="apply_minus_log"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.apply_minus_log">[docs]</a><span class="k">def</span> <span class="nf">apply_minus_log</span><span class="p">(</span><span class="n">projs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply -log.</span>
+
+<span class="sd">    :param projs: Projections</span>
+<span class="sd">    :type projs: numpy.array_like</span>
+
+<span class="sd">    :return: Falt-field corrected and linearized projections</span>
+<span class="sd">    :rtype: numpy.array_like</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">projs</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

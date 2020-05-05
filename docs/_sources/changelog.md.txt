@@ -12,6 +12,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - <insert-bugs-fixed-not-in-a-release-yet>
 -->
 
+## 0.2.3 - 2020-05-05
+### Added
+- On-demand padding for Wavelet regularizer
+- Projection intensity rescaling for different angles in base projector
+- Support for 3D absorption maps (but not thouroughly tested, yet)
+- Data-term residual computation to all solvers
+- Some tests to solvers and regularizers
+- Automated testing and linting on github workflows
+- Support for ASTRA's super-sampling of pixels and voxels
+- Implemented scipy's sparse LinearOperator interface for the projectors
+- Utility min-log and simple flat-fielding functions for transmission data
+### Fixed
+- Copy-paste error, and detector data axis order in SART algorithm implementation
+- Weights for masks in SART algorithm
+- Error in unpreconditioned CP implementation
+- Applied linting changes, to improve the readability of the code
+
 ## 0.2.2 - 2020-03-30
 ### Added
 - Unpreconditioned Chambolle-Pock algorithm (as default)
@@ -46,4 +63,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SIRT, SART, and Chambolle-Pock solvers.
 - TV-min and l1-norm based regularizers.
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.2.2...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.2.3...develop

@@ -174,60 +174,62 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <dl class="function">
 <dt id="corrct.corrct.create_sino">
 <code class="sig-prename descclassname">corrct.corrct.</code><code class="sig-name descname">create_sino</code><span class="sig-paren">(</span><em class="sig-param">vol</em>, <em class="sig-param">angles_rad</em>, <em class="sig-param">vol_att_in=None</em>, <em class="sig-param">vol_att_out=None</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">angles_detectors_rad=1.5707963267948966</em>, <em class="sig-param">weights_detectors=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/corrct.html#create_sino"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.corrct.create_sino" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a synthetic sinogram, from the given volume, attenuations and
-PSF.</p>
+<dd><p>Creates a synthetic sinogram, from the given volume, attenuations and PSF.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vol</strong> – Volume containing the elemental concentrations or other quantities (numpy.array_like)</p></li>
-<li><p><strong>angles_rad</strong> – Angles in radians of each sinogram line (numpy.array_like)</p></li>
-<li><p><strong>vol_att_in</strong> – Volume containing the local attenuation coefficients for the incoming photons (numpy.array_like)</p></li>
-<li><p><strong>vol_att_out</strong> – Volume containing the local attenuation coefficients for the emitted photons (numpy.array_like)</p></li>
-<li><p><strong>angles_detectors_rad</strong> – Detectors’ position angles in radians (numpy.array_like or float, deafult: pi/2)</p></li>
-<li><p><strong>weights_detectors</strong> – Detectors’ weights (numpy.array_like or float, deafult: None)</p></li>
-<li><p><strong>psf</strong> – Detector point spread function (PSF) (numpy.array_like)</p></li>
-<li><p><strong>data_type</strong> – Volume data type (numpy.dtype)</p></li>
+<li><p><strong>vol</strong> (<em>numpy.array_like</em>) – Volume containing the elemental concentrations or other quantities.</p></li>
+<li><p><strong>angles_rad</strong> (<em>numpy.array_like</em>) – Angles in radians of each sinogram line</p></li>
+<li><p><strong>vol_att_in</strong> (<em>numpy.array_like</em>) – Volume containing the local attenuation coefficients for the incoming photons</p></li>
+<li><p><strong>vol_att_out</strong> (<em>numpy.array_like</em>) – Volume containing the local attenuation coefficients for the emitted photons</p></li>
+<li><p><strong>angles_detectors_rad</strong> (<em>numpy.array_like</em><em> or </em><em>float</em><em>, </em><em>optional. Deafult: numpy.pi / 2</em>) – Detectors’ position angles in radians</p></li>
+<li><p><strong>weights_detectors</strong> (<em>numpy.array_like</em><em> or </em><em>float</em><em>, </em><em>optional. Deafult: None</em>) – Detectors’ weights</p></li>
+<li><p><strong>psf</strong> (<em>numpy.array_like</em><em>, </em><em>optional. Deafult: None</em>) – Detector point spread function (PSF)</p></li>
+<li><p><strong>data_type</strong> (<cite>numpy.dtype</cite>, optional. Default: <cite>numpy.float32</cite>) – Volume data type</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The simulated sinogram</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dd class="field-odd"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="corrct.corrct.reconstruct">
-<code class="sig-prename descclassname">corrct.corrct.</code><code class="sig-name descname">reconstruct</code><span class="sig-paren">(</span><em class="sig-param">algo</em>, <em class="sig-param">sino</em>, <em class="sig-param">angles_rad</em>, <em class="sig-param">iterations=None</em>, <em class="sig-param">vol_att_in=None</em>, <em class="sig-param">vol_att_out=None</em>, <em class="sig-param">angles_detectors_rad=1.5707963267948966</em>, <em class="sig-param">weights_detectors=None</em>, <em class="sig-param">lower_limit=None</em>, <em class="sig-param">upper_limit=None</em>, <em class="sig-param">apply_circ_mask=True</em>, <em class="sig-param">symm=True</em>, <em class="sig-param">lambda_reg=0.01</em>, <em class="sig-param">data_term='kl'</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/corrct.html#reconstruct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.corrct.reconstruct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">corrct.corrct.</code><code class="sig-name descname">reconstruct</code><span class="sig-paren">(</span><em class="sig-param">algo</em>, <em class="sig-param">sino</em>, <em class="sig-param">angles_rad</em>, <em class="sig-param">iterations=None</em>, <em class="sig-param">vol_att_in=None</em>, <em class="sig-param">vol_att_out=None</em>, <em class="sig-param">angles_detectors_rad=1.5707963267948966</em>, <em class="sig-param">weights_detectors=None</em>, <em class="sig-param">lower_limit=None</em>, <em class="sig-param">upper_limit=None</em>, <em class="sig-param">apply_circ_mask=True</em>, <em class="sig-param">symm=True</em>, <em class="sig-param">lambda_reg=0.01</em>, <em class="sig-param">data_term='l2'</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/corrct.html#reconstruct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.corrct.reconstruct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reconstructs the given sinogram, with the requested algorithm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>algo</strong> – Reconstruction algorithms to use. Options: ‘SART’ | ‘SIRT’ | ‘CP’ | ‘CPTV’ | ‘CPL1’ (string)</p></li>
-<li><p><strong>sino</strong> – The sinogram to recosntruct (numpy.array_like)</p></li>
-<li><p><strong>angles_rad</strong> – Angles in radians of each sinogram line (numpy.array_like)</p></li>
-<li><p><strong>iterations</strong> – Number of iterations (int)</p></li>
-<li><p><strong>vol_att_in</strong> – Volume containing the local attenuation coefficients for the incoming photons (numpy.array_like)</p></li>
-<li><p><strong>vol_att_out</strong> – Volume containing the local attenuation coefficients for the emitted photons (numpy.array_like)</p></li>
-<li><p><strong>angles_detectors_rad</strong> – Detectors’ position angles in radians (numpy.array_like or float, deafult: pi/2)</p></li>
-<li><p><strong>weights_detectors</strong> – Detectors’ weights (numpy.array_like or float, deafult: None)</p></li>
-<li><p><strong>lower_limit</strong> – Lower clipping limit (float)</p></li>
-<li><p><strong>upper_limit</strong> – Upper clipping limit (float)</p></li>
-<li><p><strong>apply_circ_mask</strong> – Switch to activate a circular volume mask (boolean)</p></li>
-<li><p><strong>symm</strong> – Switch to define whether the projectors should be symmetric (boolean)</p></li>
-<li><p><strong>lambda_reg</strong> – Regularizer weight (float)</p></li>
-<li><p><strong>data_term</strong> – Data fidelity term. Options: ‘l2’ | ‘kl’ (string)</p></li>
-<li><p><strong>psf</strong> – Detector point spread function (PSF) (numpy.array_like)</p></li>
-<li><p><strong>data_type</strong> – Volume data type (numpy.dtype)</p></li>
+<li><p><strong>algo</strong> (<em>string. Options: 'SART' | 'SIRT' | 'CP' | 'CPTV' | 'CPL1' | 'CPWL'</em>) – Reconstruction algorithms to use.</p></li>
+<li><p><strong>sino</strong> (<em>numpy.array_like</em>) – The sinogram to recosntruct</p></li>
+<li><p><strong>angles_rad</strong> (<em>numpy.array_like</em>) – Angles in radians of each sinogram line</p></li>
+<li><p><strong>iterations</strong> (<em>int</em><em>, </em><em>optional. Default: None</em>) – Number of iterations</p></li>
+<li><p><strong>vol_att_in</strong> (<em>numpy.array_like</em><em>, </em><em>optional. Default: None</em>) – Volume containing the local attenuation coefficients for the incoming photons</p></li>
+<li><p><strong>vol_att_out</strong> (<em>numpy.array_like</em><em>, </em><em>optional. Default: None</em>) – Volume containing the local attenuation coefficients for the emitted photons</p></li>
+<li><p><strong>angles_detectors_rad</strong> (<em>numpy.array_like</em><em> or </em><em>float</em><em>, </em><em>optional. Default: numpy.pi / 2</em>) – Detectors’ position angles in radians</p></li>
+<li><p><strong>weights_detectors</strong> (<em>numpy.array_like</em><em> or </em><em>float</em><em>, </em><em>optional. Default: None</em>) – Detectors’ weights</p></li>
+<li><p><strong>lower_limit</strong> (<em>float</em><em>, </em><em>optional. Default: None</em>) – Lower clipping limit</p></li>
+<li><p><strong>upper_limit</strong> (<em>float</em><em>, </em><em>optional. Default: None</em>) – Upper clipping limit</p></li>
+<li><p><strong>apply_circ_mask</strong> (<em>boolean</em><em>, </em><em>optional. Default: True</em>) – Switch to activate a circular volume mask</p></li>
+<li><p><strong>symm</strong> (<em>boolean</em><em>, </em><em>optional. Default: True</em>) – Switch to define whether the projectors should be symmetric</p></li>
+<li><p><strong>lambda_reg</strong> (<em>float</em><em>, </em><em>optional. Default: 1e-2</em>) – Regularizer weight</p></li>
+<li><p><strong>data_term</strong> (<em>string</em><em>, </em><em>optional. Options: 'l2' | 'kl'. Default: 'l2'</em>) – Data fidelity term</p></li>
+<li><p><strong>psf</strong> (<em>numpy.array_like</em><em>, </em><em>optional. Default: None</em>) – Detector point spread function (PSF)</p></li>
+<li><p><strong>data_type</strong> (<cite>numpy.dtype</cite>, optional. Default: <cite>numpy.float32</cite>) – Volume data type</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The reconstructed volume</p>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Raises an error if the algorithm is not known.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(numpy.array_like)</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The reconstructed volume</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy.array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -240,7 +242,7 @@ PSF.</p>
 and ESRF - The European Synchrotron, Grenoble, France</p>
 <dl class="class">
 <dt id="corrct.projectors.AttenuationProjector">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">AttenuationProjector</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">proj_intensities=None</em>, <em class="sig-param">att_in=None</em>, <em class="sig-param">att_out=None</em>, <em class="sig-param">angles_detectors_rad=1.5707963267948966</em>, <em class="sig-param">weights_detectors=None</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">precompute_attenuation=True</em>, <em class="sig-param">is_symmetric=False</em>, <em class="sig-param">weights_angles=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#AttenuationProjector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.AttenuationProjector" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">AttenuationProjector</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">proj_intensities=None</em>, <em class="sig-param">super_sampling=1</em>, <em class="sig-param">att_in=None</em>, <em class="sig-param">att_out=None</em>, <em class="sig-param">angles_detectors_rad=1.5707963267948966</em>, <em class="sig-param">weights_detectors=None</em>, <em class="sig-param">psf=None</em>, <em class="sig-param">precompute_attenuation=True</em>, <em class="sig-param">is_symmetric=False</em>, <em class="sig-param">weights_angles=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#AttenuationProjector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.AttenuationProjector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.projectors.ProjectorBase" title="corrct.projectors.ProjectorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.projectors.ProjectorBase</span></code></a></p>
 <p>Attenuation corrected projection class, with multi-detector support.
 It includes the computation of the attenuation volumes.</p>
@@ -402,8 +404,8 @@ Transactions on, 23(11), 4750-4762.</p>
 
 <dl class="class">
 <dt id="corrct.projectors.ProjectorBase">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorBase</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">proj_intensities=None</em>, <em class="sig-param">create_single_projs=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorBase</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">proj_intensities=None</em>, <em class="sig-param">create_single_projs=True</em>, <em class="sig-param">super_sampling=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.projectors.ProjectorOperator" title="corrct.projectors.ProjectorOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.projectors.ProjectorOperator</span></code></a></p>
 <p>Basic projection class, which implements the forward and back projection
 of the single lines of a sinogram.
 It takes care of initializing and disposing the ASTRA projectors when used
@@ -459,7 +461,7 @@ applies the attenuation corrections if the projector is symmetric.</p>
 <dd><p>Forward-projection of the volume to the projection data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>vol</strong> – The volume to forward-project (numpy.array_like)</p>
+<dd class="field-odd"><p><strong>vol</strong> (<em>numpy.array_like</em>) – The volume to forward-project.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The forward-projected projection data</p>
@@ -499,8 +501,53 @@ applies the attenuation corrections if the projector is symmetric.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="corrct.projectors.ProjectorOperator">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorOperator</code><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorOperator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorOperator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.linalg.interface.LinearOperator</span></code></p>
+<p>Base projector class, that implements the linear operator behavior that
+can be used with the solvers in the <cite>.solvers</cite> module and the solvers in
+<cite>scipy.sparse.linalg</cite>.</p>
+<dl class="method">
+<dt id="corrct.projectors.ProjectorOperator.absolute">
+<code class="sig-name descname">absolute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorOperator.absolute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorOperator.absolute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the projection operator using the absolute value of the
+projection coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The absolute value operator</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#corrct.projectors.ProjectorOperator" title="corrct.projectors.ProjectorOperator">ProjectorOperator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="corrct.projectors.ProjectorOperator.bp">
+<code class="sig-name descname">bp</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorOperator.bp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorOperator.bp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.projectors.ProjectorOperator.fp">
+<code class="sig-name descname">fp</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorOperator.fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorOperator.fp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.projectors.ProjectorOperator.rmatvec">
+<code class="sig-name descname">rmatvec</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorOperator.rmatvec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorOperator.rmatvec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement the transpose operator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>numpy.array_like</em>) – Either the projection data or the volume.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="corrct.projectors.ProjectorUncorrected">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorUncorrected</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">proj_intensities=None</em>, <em class="sig-param">create_single_projs=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorUncorrected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorUncorrected" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorUncorrected</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">proj_intensities=None</em>, <em class="sig-param">create_single_projs=False</em>, <em class="sig-param">super_sampling=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorUncorrected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorUncorrected" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.projectors.ProjectorBase" title="corrct.projectors.ProjectorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.projectors.ProjectorBase</span></code></a></p>
 <p>Uncorrected projection class, which implements the forward and back
 projection of the whole projection data.
@@ -690,7 +737,7 @@ piece-wise constant reconstructions.</p>
 
 <dl class="class">
 <dt id="corrct.solvers.Regularizer_l1wl">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_l1wl</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">wavelet</em>, <em class="sig-param">level</em>, <em class="sig-param">ndims=2</em>, <em class="sig-param">axes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_l1wl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_l1wl" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_l1wl</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">wavelet</em>, <em class="sig-param">level</em>, <em class="sig-param">ndims=2</em>, <em class="sig-param">axes=None</em>, <em class="sig-param">pad_on_demand=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_l1wl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_l1wl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.BaseRegularizer" title="corrct.solvers.BaseRegularizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.BaseRegularizer</span></code></a></p>
 <p>l1-norm regularizer. It can be used to promote sparse reconstructions.</p>
 <dl class="method">
@@ -813,15 +860,55 @@ Technique (SIRT) algorithm.</p>
 <p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
 and ESRF - The European Synchrotron, Grenoble, France</p>
 <dl class="function">
+<dt id="corrct.utils_proc.apply_flat_field">
+<code class="sig-prename descclassname">corrct.utils_proc.</code><code class="sig-name descname">apply_flat_field</code><span class="sig-paren">(</span><em class="sig-param">projs</em>, <em class="sig-param">flats</em>, <em class="sig-param">darks=None</em>, <em class="sig-param">crop=None</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/utils_proc.html#apply_flat_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.utils_proc.apply_flat_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply flat field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>projs</strong> (<em>numpy.array_like</em>) – Projections</p></li>
+<li><p><strong>flats</strong> (<em>numpy.array_like</em>) – Flat fields</p></li>
+<li><p><strong>darks</strong> (<em>numpy.array_like</em><em>, </em><em>optional</em>) – Dark noise, defaults to None</p></li>
+<li><p><strong>crop</strong> (<em>numpy.array_like</em><em>, </em><em>optional</em>) – Crop region, defaults to None</p></li>
+<li><p><strong>data_type</strong> (<em>Data type of the processed data</em><em>, </em><em>optional</em>) – numpy.dtype, defaults to np.float32</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Falt-field corrected and linearized projections</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="corrct.utils_proc.apply_minus_log">
+<code class="sig-prename descclassname">corrct.utils_proc.</code><code class="sig-name descname">apply_minus_log</code><span class="sig-paren">(</span><em class="sig-param">projs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/utils_proc.html#apply_minus_log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.utils_proc.apply_minus_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply -log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>projs</strong> (<em>numpy.array_like</em>) – Projections</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Falt-field corrected and linearized projections</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="corrct.utils_proc.get_circular_mask">
-<code class="sig-prename descclassname">corrct.utils_proc.</code><code class="sig-name descname">get_circular_mask</code><span class="sig-paren">(</span><em class="sig-param">vol_shape_yx</em>, <em class="sig-param">radius_offset=0</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/utils_proc.html#get_circular_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.utils_proc.get_circular_mask" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">corrct.utils_proc.</code><code class="sig-name descname">get_circular_mask</code><span class="sig-paren">(</span><em class="sig-param">vol_shape_yx</em>, <em class="sig-param">radius_offset=0</em>, <em class="sig-param">mask_drop_off='const'</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/utils_proc.html#get_circular_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.utils_proc.get_circular_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes a circular mask for the reconstruction volume.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vol_shape_yx</strong> – The size of the volume (numpy.array_like)</p></li>
-<li><p><strong>radius_offset</strong> – The offset with respect to the volume edge. Optinal, default: 0 (float)</p></li>
-<li><p><strong>data_type</strong> – The mask data type. Optional, default: np.float32 (numpy.dtype)</p></li>
+<li><p><strong>vol_shape_yx</strong> (<em>numpy.array_like</em>) – The size of the volume.</p></li>
+<li><p><strong>radius_offset</strong> (<em>float. Optional</em><em>, </em><em>default: 0</em>) – The offset with respect to the volume edge.</p></li>
+<li><p><strong>data_type</strong> (<em>numpy.dtype. Optional</em><em>, </em><em>default: np.float32</em>) – The mask data type.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -840,10 +927,10 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sinogram</strong> – The sinogram to pad. (numpy.array_like)</p></li>
-<li><p><strong>width</strong> – The width of the padding. Could be a scalar or a tuple of two integers. (int or tuple(int, int) )</p></li>
-<li><p><strong>pad_axis</strong> – The axis to pad. Optional, default: -1. (int)</p></li>
-<li><p><strong>mode</strong> – The padding type (from numpy.pad). Optional, default: ‘edge’. (string)</p></li>
+<li><p><strong>sinogram</strong> (<em>numpy.array_like</em>) – The sinogram to pad.</p></li>
+<li><p><strong>width</strong> (<em>either an int</em><em> or </em><em>tuple</em><em>(</em><em>int</em><em>, </em><em>int</em><em>)</em>) – The width of the padding.</p></li>
+<li><p><strong>pad_axis</strong> (<em>int. Optional</em><em>, </em><em>default: -1</em>) – The axis to pad.</p></li>
+<li><p><strong>mode</strong> (<em>string. Optional</em><em>, </em><em>default: 'edge'.</em>) – The padding type (from numpy.pad).</p></li>
 <li><p><strong>**kwds</strong> – <p>The numpy.pad arguments.</p>
 </p></li>
 </ul>
