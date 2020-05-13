@@ -8,90 +8,17 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 
-import scipy.sparse.linalg as spsla
 import scipy.ndimage as spimg
 import scipy.signal as spsig
 
 import copy as cp
 
+from . import operators
+
 import astra
 
 
-class ProjectorOperator(spsla.LinearOperator):
-    """Base projector class, that implements the linear operator behavior that
-    can be used with the solvers in the `.solvers` module and the solvers in
-    `scipy.sparse.linalg`.
-    """
-
-    def __init__(self):
-        num_cols = np.prod(self.vol_shape)
-        num_rows = np.prod(self.proj_shape)
-        super().__init__(np.float32, [num_rows, num_cols])
-        self.is_fwd_operator = True
-
-    def _matvec(self, x):
-        """Implement the operator.
-
-        :param x: Either the volume or the projection data.
-        :type x: numpy.array_like
-        """
-        if self.is_fwd_operator:
-            x = np.reshape(x, self.vol_shape)
-            return self.fp(x).flatten()
-        else:
-            x = np.reshape(x, self.proj_shape)
-            return self.bp(x).flatten()
-
-    def rmatvec(self, x):
-        """Implement the transpose operator.
-
-        :param x: Either the projection data or the volume.
-        :type x: numpy.array_like
-        """
-        if self.is_fwd_operator:
-            x = np.reshape(x, self.proj_shape)
-            return self.bp(x).flatten()
-        else:
-            x = np.reshape(x, self.vol_shape)
-            return self.fp(x).flatten()
-
-    def _transpose(self):
-        """Create the transpose operator.
-
-        :returns: The transpose operator
-        :rtype: ProjectorOperator
-        """
-        Op_t = cp.copy(self)
-        Op_t.shape = [Op_t.shape[1], Op_t.shape[0]]
-        Op_t.is_fwd_operator = False
-        return Op_t
-
-    def _adjoint(self):
-        return self._transpose()
-
-    def absolute(self):
-        """Returns the projection operator using the absolute value of the
-        projection coefficients.
-
-        :returns: The absolute value operator
-        :rtype: ProjectorOperator
-        """
-        return self
-
-    def __call__(self, x):
-        if self.is_fwd_operator:
-            return self.fp(x)
-        else:
-            return self.bp(x)
-
-    def fp(self, x):
-        raise NotImplementedError()
-
-    def bp(self, x):
-        raise NotImplementedError()
-
-
-class ProjectorBase(ProjectorOperator):
+class ProjectorBase(operators.ProjectorOperator):
     """Basic projection class, which implements the forward and back projection
     of the single lines of a sinogram.
     It takes care of initializing and disposing the ASTRA projectors when used
