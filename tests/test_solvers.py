@@ -27,6 +27,22 @@ class TestRegularizers(unittest.TestCase):
     def tearDown(self):
         """Tear down test fixtures, if any."""
 
+    @staticmethod
+    def round_to_pow2(x, p, data_type=np.int):
+        """Rounds first argument to the power of 2 indicated by second argument.
+
+        :param x: Number to round up
+        :type x: int or float
+        :param p: Power of 2
+        :type p: int
+        :param data_type: data type of the output
+        :type data_type: `numpy.dtype`
+
+        :return: DESCRIPTION
+        :rtype: dtype specified by data_type
+        """
+        return np.ceil(np.array(x) / (2 ** p)).astype(data_type) * (2 ** p)
+
     def _test_Regularizer_l1(self, vol):
         weight = 0.5
         reg = solvers.Regularizer_l1(weight)
@@ -55,7 +71,53 @@ class TestRegularizers(unittest.TestCase):
         assert np.all(np.isclose(dual, np.fmax(-1, copy_dual)))
 
         upd = reg.compute_update_primal(dual)
-        assert np.all(dual * weight == upd)
+        assert np.all(np.isclose(dual * weight, upd))
+
+    def _test_Regularizer_l1wl(self, vol):
+        weight = 0.5
+        ndims = len(vol.shape)
+        level = 2
+        reg = solvers.Regularizer_l1wl(weight, 'db1', level, ndims=ndims)
+
+        tau = reg.initialize_sigma_tau()
+        assert tau == weight
+
+        dual = reg.initialize_dual(vol)
+        assert np.all(dual.shape[1:] == self.round_to_pow2(vol.shape, level))
+        assert dual.shape[0] == ((2 ** ndims - 1) * level + 1)
+        assert np.all(dual == 0)
+
+        copy_dual = cp.deepcopy(dual)
+        reg.update_dual(dual, vol)
+        assert np.all(np.isclose(dual, copy_dual + reg.H(vol)))
+
+        upd = reg.compute_update_primal(dual)
+        assert np.all(np.isclose(vol * weight, upd))
+
+        copy_dual = cp.deepcopy(dual)
+        reg.apply_proximal(dual)
+        assert np.all(np.isclose(dual, np.fmax(np.fmin(1, copy_dual), -1)))
+
+    def _test_Regularizer_TV(self, vol):
+        weight = 0.5
+        ndims = len(vol.shape)
+        reg = solvers.Regularizer_TV(weight, ndims=ndims)
+
+        tau = reg.initialize_sigma_tau()
+        assert tau == (weight * 2 * ndims)
+
+        dual = reg.initialize_dual(vol)
+        assert np.all(dual.shape[1:] == vol.shape)
+        assert dual.shape[0] == ndims
+        assert np.all(dual == 0)
+
+        copy_dual = cp.deepcopy(dual)
+        reg.update_dual(dual, vol)
+        assert np.all(np.isclose(dual, copy_dual + reg.D(vol) / 2))
+
+        dual = np.ones_like(dual)
+        upd = reg.compute_update_primal(dual)
+        assert np.all(np.isclose(reg.D.T(dual) * weight, upd))
 
     def test_000_Regularizer_l1_2D(self):
         """Test l1-min regularizer in 2D."""
@@ -64,6 +126,22 @@ class TestRegularizers(unittest.TestCase):
     def test_001_Regularizer_l1_3D(self):
         """Test l1-min regularizer in 3D."""
         self._test_Regularizer_l1(self.vol_rand_3d)
+
+    def test_002_Regularizer_l1wl_2D(self):
+        """Test l1-min wavelet regularizer in 2D."""
+        self._test_Regularizer_l1wl(self.vol_rand_2d)
+
+    def test_003_Regularizer_l1wl_3D(self):
+        """Test l1-min wavelet regularizer in 3D."""
+        self._test_Regularizer_l1wl(self.vol_rand_3d)
+
+    def test_004_Regularizer_TV_2D(self):
+        """Test l1-min wavelet regularizer in 2D."""
+        self._test_Regularizer_TV(self.vol_rand_2d)
+
+    def test_005_Regularizer_TV_3D(self):
+        """Test l1-min wavelet regularizer in 3D."""
+        self._test_Regularizer_TV(self.vol_rand_3d)
 
 
 class TestSolvers(unittest.TestCase):
