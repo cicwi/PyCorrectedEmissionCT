@@ -148,8 +148,7 @@ class Regularizer_lap(BaseRegularizer):
         dual += self.sigma * self.laplacian(primal)
 
     def apply_proximal(self, dual):
-        dual_dir_norm_l2 = np.linalg.norm(dual, ord=2, axis=0, keepdims=True)
-        dual /= np.fmax(1, dual_dir_norm_l2)
+        dual /= np.fmax(1, np.abs(dual))
 
     def compute_update_primal(self, dual):
         return self.weight * self.laplacian(dual)
