@@ -14,6 +14,8 @@ from numpy import random as rnd
 
 import time as tm
 
+from . import operators
+
 try:
     import pywt
     has_pywt = True
@@ -62,47 +64,36 @@ class Regularizer_TV(BaseRegularizer):
 
     __reg_name__ = 'TV'
 
-    def __init__(self, weight, ndims=2):
+    def __init__(self, weight, ndims=2, axes=None):
         BaseRegularizer.__init__(self, weight=weight)
+
+        if axes is None:
+            axes = np.arange(-ndims, 0, dtype=np.int)
+        elif not ndims == len(axes):
+            print('WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.')
+            ndims = len(axes)
         self.ndims = ndims
+        self.axes = axes
+
+        self.D = None
 
     def initialize_sigma_tau(self):
         self.sigma = 0.5
         return self.weight * 2 * self.ndims
 
     def initialize_dual(self, primal):
-        self.primal_shape = primal.shape
-        return np.zeros([self.ndims, *self.primal_shape], dtype=primal.dtype)
+        self.D = operators.TransformGradient(primal.shape, axes=self.axes)
+        return np.zeros(self.D.adj_shape, dtype=primal.dtype)
 
     def update_dual(self, dual, primal):
-        dual += self.sigma * self.gradient(primal)
+        dual += self.sigma * self.D(primal)
 
     def apply_proximal(self, dual):
         dual_dir_norm_l2 = np.linalg.norm(dual, ord=2, axis=0, keepdims=True)
         dual /= np.fmax(1, dual_dir_norm_l2)
 
     def compute_update_primal(self, dual):
-        return self.weight * self.divergence(dual)
-
-    def gradient(self, x):
-        d = [None] * self.ndims
-        for ii in range(self.ndims):
-            ind = -(ii + 1)
-            padding = [(0, 0)] * len(self.primal_shape)
-            padding[ind] = (0, 1)
-            temp_x = np.pad(x, padding, mode='constant')
-            d[ind] = np.diff(temp_x, n=1, axis=ind)
-        return np.stack(d, axis=0)
-
-    def divergence(self, x):
-        d = [None] * self.ndims
-        for ii in range(self.ndims):
-            ind = -(ii + 1)
-            padding = [(0, 0)] * len(self.primal_shape)
-            padding[ind] = (1, 0)
-            temp_x = np.pad(x[ind, ...], padding, mode='constant')
-            d[ind] = np.diff(temp_x, n=1, axis=ind)
-        return - np.sum(np.stack(d, axis=0), axis=0)
+        return self.weight * self.D.T(dual)
 
 
 class Regularizer_TV2D(Regularizer_TV):
@@ -112,8 +103,8 @@ class Regularizer_TV2D(Regularizer_TV):
 
     __reg_name__ = 'TV2D'
 
-    def __init__(self, weight):
-        Regularizer_TV.__init__(self, weight=weight, ndims=2)
+    def __init__(self, weight, axes=None):
+        Regularizer_TV.__init__(self, weight=weight, ndims=2, axes=axes)
 
 
 class Regularizer_TV3D(Regularizer_TV):
@@ -123,8 +114,8 @@ class Regularizer_TV3D(Regularizer_TV):
 
     __reg_name__ = 'TV3D'
 
-    def __init__(self, weight):
-        Regularizer_TV.__init__(self, weight=weight, ndims=3)
+    def __init__(self, weight, axes=None):
+        Regularizer_TV.__init__(self, weight=weight, ndims=3, axes=axes)
 
 
 class Regularizer_lap(BaseRegularizer):
@@ -214,7 +205,7 @@ class Regularizer_l1wl(BaseRegularizer):
 
     __reg_name__ = 'l1wl'
 
-    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand=False):
+    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant'):
         if not has_pywt:
             raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
         if not use_swtn:
@@ -222,59 +213,34 @@ class Regularizer_l1wl(BaseRegularizer):
         BaseRegularizer.__init__(self, weight=weight)
         self.wavelet = wavelet
         self.level = level
-        self.ndims = ndims
 
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
+        elif not ndims == len(axes):
+            print('WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.')
+            ndims = len(axes)
+        self.ndims = ndims
         self.axes = axes
 
         self.pad_on_demand = pad_on_demand
 
-    def _op_direct(self, x):
-        if self.pad_on_demand:
-            alignment = 2 ** self.level
-            x_axes = np.array(x.shape)[np.array(self.axes)]
-            self.pad_axes = (alignment - x_axes % alignment) % alignment
-            for ax in np.nonzero(self.pad_axes)[0]:
-                pad_l = np.ceil(self.pad_axes[ax] / 2).astype(np.int)
-                pad_h = np.floor(self.pad_axes[ax] / 2).astype(np.int)
-                pad_width = [(0, 0)] * len(x.shape)
-                pad_width[self.axes[ax]] = (pad_l, pad_h)
-                x = np.pad(x, pad_width, mode='edge')
-        return pywt.swtn(x, wavelet=self.wavelet, axes=self.axes, level=self.level)
-
-    def _op_adjoint(self, y):
-        x = pywt.iswtn(y, wavelet=self.wavelet, axes=self.axes)
-        if self.pad_on_demand and np.any(self.pad_axes):
-            for ax in np.nonzero(self.pad_axes)[0]:
-                pad_l = np.ceil(self.pad_axes[ax] / 2).astype(np.int)
-                pad_h = np.floor(self.pad_axes[ax] / 2).astype(np.int)
-                slices = [slice(None)] * len(x.shape)
-                slices[self.axes[ax]] = slice(pad_l, -pad_h, 1)
-                x = x[tuple(slices)]
-        return x
-
     def initialize_sigma_tau(self):
-        self.sigma = 1 / (2 ** np.arange(self.level, 0, -1))
+        self.sigma = 1  # Because the transform is normalized
         return self.weight
 
     def initialize_dual(self, primal):
-        self.primal_shape = primal.shape
-        return self._op_direct(np.zeros(primal.shape, dtype=primal.dtype))
+        self.H = operators.TranformWavelet(
+            primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes, pad_on_demand=self.pad_on_demand)
+        return np.zeros(self.H.adj_shape, dtype=primal.dtype)
 
     def update_dual(self, dual, primal):
-        d = self._op_direct(primal)
-        for ii_l in range(self.level):
-            for k in dual[ii_l].keys():
-                dual[ii_l][k] += d[ii_l][k] * self.sigma[ii_l]
+        dual += self.H(primal)
 
     def apply_proximal(self, dual):
-        for ii_l in range(self.level):
-            for k in dual[ii_l].keys():
-                dual[ii_l][k] /= np.fmax(1, np.abs(dual[ii_l][k]))
+        dual /= np.fmax(1, np.abs(dual))
 
     def compute_update_primal(self, dual):
-        return self.weight * self._op_adjoint(dual)
+        return self.weight * self.H.T(dual)
 
 
 class Solver(object):
