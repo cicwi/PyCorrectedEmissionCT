@@ -8,8 +8,6 @@ Created on Fri May  8 15:36:39 2020
 import numpy as np
 import scipy.sparse.linalg as spsla
 
-import matplotlib.pyplot as plt
-
 import copy as cp
 
 try:
@@ -311,9 +309,3 @@ if __name__ == '__main__':
 
     D = TransformGradient(test_vol.shape)
     Dg = D.explicit()
-
-    plt.figure()
-    plt.imshow(np.concatenate((Hw, Htw.T), axis=1))
-    plt.figure()
-    plt.imshow(Dg)
-    plt.show(block=False)
