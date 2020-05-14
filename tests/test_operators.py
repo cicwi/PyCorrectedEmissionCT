@@ -80,7 +80,7 @@ class TestTransformWavelet(TestOperators):
     """Tests for the TransformWavelet class in `corrct.operators` package."""
 
     @staticmethod
-    def round_to_2pow(x, p, data_type=np.int):
+    def round_to_pow2(x, p, data_type=np.int):
         """Rounds first argument to the power of 2 indicated by second argument.
 
         :param x: Number to round up
@@ -101,7 +101,7 @@ class TestTransformWavelet(TestOperators):
         H = operators.TranformWavelet(self.vol_ones_2d.shape, 'db1', wl_dec_level)
 
         w = H(self.vol_ones_2d)
-        assert np.all(w.shape[1:] == self.round_to_2pow(self.vol_ones_2d.shape, wl_dec_level))
+        assert np.all(w.shape[1:] == self.round_to_pow2(self.vol_ones_2d.shape, wl_dec_level))
         assert w.shape[0] == 10
 
         wtw = H.T(w)
