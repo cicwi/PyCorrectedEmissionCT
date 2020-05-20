@@ -602,7 +602,7 @@ class CP(Solver):
                 p *= b_mask
 
             if self.regularizer is not None:
-                self.regularizer.update_dual(q, x)
+                self.regularizer.update_dual(q, x_relax)
                 self.regularizer.apply_proximal(q)
 
             upd = At(p)
