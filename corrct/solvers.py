@@ -504,6 +504,15 @@ class CP(Solver):
 
         return (L, x.shape)
 
+    def _get_data_sigma_tau_unpreconditioned(self, A, At, b):
+        (L, x_shape) = self.power_method(A, At, b)
+        tau = L
+        if self.regularizer is not None:
+            tau += self.regularizer.initialize_sigma_tau()
+        tau = self.relaxation / tau
+        sigma = 0.95 / L
+        return (x_shape, sigma, tau)
+
     def __call__(  # noqa: C901
             self, A, b, iterations, x0=None, At=None, upper_limit=None,
             lower_limit=None, x_mask=None, b_mask=None, precondition=False):
@@ -542,12 +551,7 @@ class CP(Solver):
             sigma[(sigma / np.max(sigma)) < 1e-5] = 1
             sigma = 0.95 / sigma
         else:
-            (L, x_shape) = self.power_method(A, At, b)
-            tau = L
-            if self.regularizer is not None:
-                tau += self.regularizer.initialize_sigma_tau()
-            tau = self.relaxation / tau
-            sigma = 0.95 / L
+            (x_shape, sigma, tau) = self._get_data_sigma_tau_unpreconditioned(A, At, b)
 
         sigma1 = 1 / (1 + sigma)
 
