@@ -578,8 +578,8 @@ class CP(Solver):
             reg_info = ''
             if self.regularizer is not None:
                 reg_info = '-' + self.regularizer.upper()
-            print("- Performing CP-%s%s iterations (init: %g seconds): " % (
-                    self.data_term, reg_info, c_init - c_in), end='', flush=True)
+            print("- Performing %s-%s%s iterations (init: %g seconds): " % (
+                    self.upper(), self.data_term, reg_info, c_init - c_in), end='', flush=True)
         for ii in range(iterations):
             if self.verbose:
                 prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
