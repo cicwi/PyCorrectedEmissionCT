@@ -135,6 +135,60 @@ class ProjectorOperator(BaseTransform):
         return self.bp(x)
 
 
+class TranformIdentity(BaseTransform):
+    """Identity operator.
+    """
+
+    def __init__(self, x_shape):
+        """Identity operator.
+
+        :param x_shape: Shape of the data.
+        :type x_shape: `numpy.array_like`
+        """
+        self.dir_shape = np.array(x_shape)
+        self.adj_shape = np.array(x_shape)
+        super().__init__()
+
+    def _op_direct(self, x):
+        return x
+
+    def _op_adjoint(self, x):
+        return x
+
+
+class TranformDiagonalScaling(BaseTransform):
+    """Diagonal scaling operator.
+    """
+
+    def __init__(self, x_shape, scale):
+        """Diagonal scaling operator.
+
+        :param x_shape: Shape of the data.
+        :type x_shape: `numpy.array_like`
+        :param scale: Operator diagonal.
+        :type scale: float or `numpy.array_like`
+        """
+        self.scale = scale
+        self.dir_shape = np.array(x_shape)
+        self.adj_shape = np.array(x_shape)
+        super().__init__()
+
+    def absolute(self):
+        """Returns the projection operator using the absolute value of the
+        projection coefficients.
+
+        :returns: The absolute value operator
+        :rtype: Diagonal operator of the absolute values
+        """
+        return TranformDiagonalScaling(self.dir_shape, np.abs(self.scale))
+
+    def _op_direct(self, x):
+        return self.scale * x
+
+    def _op_adjoint(self, x):
+        return self.scale * x
+
+
 class TranformWavelet(BaseTransform):
     """Wavelet tranform operator.
     """
