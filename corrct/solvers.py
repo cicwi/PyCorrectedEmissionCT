@@ -26,6 +26,9 @@ except ImportError:
     print('WARNING - pywt was not found')
 
 
+# ---- Regularizers ----
+
+
 class BaseRegularizer(object):
     """Base regularizer class that defines the Regularizer object interface.
     """
@@ -241,6 +244,100 @@ class Regularizer_l1wl(BaseRegularizer):
 
     def compute_update_primal(self, dual):
         return self.weight * self.H.T(dual)
+
+
+# ---- Data Fidelity terms ----
+
+
+class DataFidelityBase(object):
+    """Base data-fidelity class that defines the object interface.
+    """
+
+    __data_fidelity_name__ = ''
+
+    def assign_data(self, data, sigma=1):
+        self.data = data
+        self.sigma = sigma
+        self._compute_sigma_data()
+
+    def _compute_sigma_data(self):
+        self.sigma_data = self.sigma * self.data
+
+    def upper(self):
+        return self.__data_fidelity_name__.upper()
+
+    def lower(self):
+        return self.__data_fidelity_name__.lower()
+
+    def initialize_dual(self):
+        return np.zeros_like(self.data)
+
+    def update_dual(self, dual, proj_primal):
+        dual += proj_primal * self.sigma
+
+    def apply_proximal(self, dual):
+        raise NotImplementedError()
+
+    def compute_update_primal(self, dual):
+        raise NotImplementedError()
+
+
+class DataFidelity_l2(DataFidelityBase):
+    """l2-norm data-fidelity class.
+    """
+
+    __data_fidelity_name__ = 'l2'
+
+    def assign_data(self, data, sigma=1):
+        super().assign_data(data=data, sigma=sigma)
+        self.sigma1 = 1 / (1 + sigma)
+
+    def apply_proximal(self, dual):
+        dual -= self.sigma_data
+        dual *= self.sigma1
+
+    def compute_primal_dual_gap(self, proj_primal, dual):
+        return (
+            (np.linalg.norm(proj_primal - self.data, ord=2) + np.linalg.norm(dual, ord=2)) / 2
+            + np.dot(dual.flatten(), self.data.flatten()))
+
+
+class DataFidelity_l1(DataFidelityBase):
+    """l1-norm data-fidelity class.
+    """
+
+    __data_fidelity_name__ = 'l1'
+
+    def apply_proximal(self, dual):
+        dual -= self.sigma_data
+        dual /= np.fmax(1, np.abs(dual))
+
+    def compute_primal_dual_gap(self, proj_primal, dual):
+        return (
+            np.linalg.norm(proj_primal - self.data, ord=1)
+            + np.dot(dual.flatten(), self.data.flatten()))
+
+
+class DataFidelity_KL(DataFidelityBase):
+    """KullbackLeibler data-fidelity class.
+    """
+
+    __data_fidelity_name__ = 'KL'
+
+    def _compute_sigma_data(self):
+        self.sigma_data = 4 * self.sigma * np.fmax(self.data, 0)
+
+    def apply_proximal(self, dual):
+        dual[:] = (1 + dual[:] - np.sqrt((dual[:] - 1) ** 2 + self.sigma_data[:])) / 2
+
+    def compute_primal_dual_gap(self, proj_primal, dual):
+        return (
+            np.linalg.norm(
+                proj_primal - self.data * (1 - np.log(self.data) + np.log(np.abs(proj_primal))), ord=1)
+            - np.linalg.norm(self.data * np.log(np.abs(1 - dual)), ord=1))
+
+
+# ---- Solvers ----
 
 
 class Solver(object):
@@ -480,10 +577,22 @@ class CP(Solver):
     def __init__(
             self, verbose=False, tolerance=None, relaxation=0.95,
             data_term='l2', regularizer=None):
-        Solver.__init__(
-            self, verbose=verbose, tolerance=tolerance, relaxation=relaxation)
-        self.data_term = data_term
+        super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation)
+        self.data_term = self._initialize_data_fidelity_function(data_term)
         self.regularizer = regularizer
+
+    def _initialize_data_fidelity_function(self, data_term):
+        if isinstance(data_term, str):
+            if data_term.lower() == 'l2':
+                return DataFidelity_l2()
+            if data_term.lower() == 'l1':
+                return DataFidelity_l1()
+            if data_term.lower() == 'kl':
+                return DataFidelity_KL()
+            else:
+                raise ValueError('Unknown data term: "%s", accepted terms are: "l2" | "l2" | "kl".' % data_term)
+        else:
+            return data_term
 
     def power_method(self, A, At, b, iterations=5):
         data_type = b.dtype
@@ -553,19 +662,13 @@ class CP(Solver):
         else:
             (x_shape, sigma, tau) = self._get_data_sigma_tau_unpreconditioned(A, At, b)
 
-        sigma1 = 1 / (1 + sigma)
-
         if x0 is None:
             x0 = np.zeros(x_shape, data_type)
         x = x0
         x_relax = x
 
-        p = np.zeros(b.shape, dtype=data_type)
-
-        if self.data_term.lower() == 'kl':
-            b_prox = 4 * sigma * b
-        else:
-            b_prox = sigma * b
+        self.data_term.assign_data(b, sigma)
+        p = self.data_term.initialize_dual()
 
         if self.regularizer is not None:
             q = self.regularizer.initialize_dual(x)
@@ -583,24 +686,15 @@ class CP(Solver):
             if self.regularizer is not None:
                 reg_info = '-' + self.regularizer.upper()
             print("- Performing %s-%s%s iterations (init: %g seconds): " % (
-                    self.upper(), self.data_term, reg_info, c_init - c_in), end='', flush=True)
+                    self.upper(), self.data_term.upper(), reg_info, c_init - c_in), end='', flush=True)
         for ii in range(iterations):
             if self.verbose:
                 prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
                 print(prnt_str, end='', flush=True)
 
-            p += A(x_relax) * sigma
-
-            if self.data_term.lower() == 'kl':
-                p = (1 + p - np.sqrt((p - 1) ** 2 + b_prox)) / 2
-            else:
-                p -= b_prox
-                if self.data_term.lower() == 'l1':
-                    p /= np.fmax(1, np.abs(p))
-                elif self.data_term.lower() == 'l2':
-                    p *= sigma1
-                else:
-                    raise ValueError("Unknown data term: %s" % self.data_term)
+            Ax_rlx = A(x_relax)
+            self.data_term.update_dual(p, Ax_rlx)
+            self.data_term.apply_proximal(p)
 
             if b_mask is not None:
                 p *= b_mask
