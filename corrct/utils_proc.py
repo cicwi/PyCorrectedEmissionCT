@@ -8,6 +8,9 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 
+from . import operators
+from . import solvers
+
 
 def get_circular_mask(vol_shape_yx, radius_offset=0, mask_drop_off='const', data_type=np.float32):
     """Computes a circular mask for the reconstruction volume.
@@ -103,3 +106,46 @@ def apply_minus_log(projs):
     :rtype: numpy.array_like
     """
     return np.fmax(-np.log(projs), 0.0)
+
+
+def denoise_image(img, reg_weight=1e-2, stddev=None, iterations=250, verbose=False):
+    """Image denoiser based on (weighted) least-squares and wavelets.
+    The weighted least-squares requires the local pixel-wise standard deviations.
+    It can be used to denoise sinograms and projections.
+
+    :param img: The image or sinogram to denoise.
+    :type img: `numpy.array_like`
+    :param reg_weight: Weight of the regularization term, defaults to 1e-2
+    :type reg_weight: float, optional
+    :param stddev: The local standard deviations. If None, it performs a standard least-squares.
+    :type stddev: `numpy.array_like`, optional
+    :param iterations: Number of iterations, defaults to 250
+    :type iterations: int, optional
+    :param verbose: Turn verbosity on, defaults to False
+    :type verbose: boolean, optional
+
+    :return: Denoised image or sinogram.
+    :rtype: `numpy.array_like`
+    """
+
+    def compute_wls_weights(stddev, At, reg_weights):
+        stddev_zeros = stddev == 0
+        stddev_valid = np.invert(stddev_zeros)
+        min_valid_stddev = np.min(stddev[stddev_valid])
+
+        reg_weights = reg_weights * (At(stddev_zeros) == 0) * min_valid_stddev
+        img_weights = min_valid_stddev / np.fmax(stddev, min_valid_stddev)
+        return (img_weights, reg_weights)
+
+    if stddev is not None:
+        OpI = operators.TranformIdentity(img.shape)
+        (img_weight, reg_weight) = compute_wls_weights(stddev, OpI.T, reg_weight)
+        data_term = solvers.DataFidelity_wl2(img_weight)
+    else:
+        data_term = 'l2'
+
+    reg_wl = solvers.Regularizer_l1wl(reg_weight, 'db4', 4)
+    sol_wls_wl = solvers.CP(verbose=verbose, regularizer=reg_wl, data_term=data_term)
+
+    (denoised_img, _) = sol_wls_wl(OpI, img, iterations, x0=img)
+    return denoised_img

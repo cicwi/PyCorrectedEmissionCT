@@ -279,7 +279,7 @@ class DataFidelityBase(object):
         raise NotImplementedError()
 
     def compute_update_primal(self, dual):
-        raise NotImplementedError()
+        return dual
 
 
 class DataFidelity_l2(DataFidelityBase):
@@ -299,6 +299,29 @@ class DataFidelity_l2(DataFidelityBase):
     def compute_primal_dual_gap(self, proj_primal, dual):
         return (
             (np.linalg.norm(proj_primal - self.data, ord=2) + np.linalg.norm(dual, ord=2)) / 2
+            + np.dot(dual.flatten(), self.data.flatten()))
+
+
+class DataFidelity_wl2(DataFidelity_l2):
+    """Weighted l2-norm data-fidelity class.
+    """
+
+    __data_fidelity_name__ = 'wl2'
+
+    def __init__(self, weights):
+        self.weights = weights
+
+    def assign_data(self, data, sigma=1):
+        data = data * self.weights
+        sigma = sigma * self.weights
+        super().assign_data(data=data, sigma=sigma)
+
+    def compute_update_primal(self, dual):
+        return dual * self.weights
+
+    def compute_primal_dual_gap(self, proj_primal, dual):
+        return (
+            (np.linalg.norm(proj_primal * self.weights - self.data, ord=2) + np.linalg.norm(dual, ord=2)) / 2
             + np.dot(dual.flatten(), self.data.flatten()))
 
 
@@ -703,7 +726,7 @@ class CP(Solver):
                 self.regularizer.update_dual(q, x_relax)
                 self.regularizer.apply_proximal(q)
 
-            upd = At(p)
+            upd = At(self.data_term.compute_update_primal(p))
             if self.regularizer is not None:
                 upd += self.regularizer.compute_update_primal(q)
             x_new = x - upd * tau
