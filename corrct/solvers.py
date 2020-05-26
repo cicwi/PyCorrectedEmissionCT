@@ -232,7 +232,7 @@ class Regularizer_l1wl(BaseRegularizer):
         return self.weight
 
     def initialize_dual(self, primal):
-        self.H = operators.TranformWavelet(
+        self.H = operators.TransformWavelet(
             primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes, pad_on_demand=self.pad_on_demand)
         return np.zeros(self.H.adj_shape, dtype=primal.dtype)
 

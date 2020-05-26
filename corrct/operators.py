@@ -135,7 +135,7 @@ class ProjectorOperator(BaseTransform):
         return self.bp(x)
 
 
-class TranformIdentity(BaseTransform):
+class TransformIdentity(BaseTransform):
     """Identity operator.
     """
 
@@ -156,7 +156,7 @@ class TranformIdentity(BaseTransform):
         return x
 
 
-class TranformDiagonalScaling(BaseTransform):
+class TransformDiagonalScaling(BaseTransform):
     """Diagonal scaling operator.
     """
 
@@ -180,7 +180,7 @@ class TranformDiagonalScaling(BaseTransform):
         :returns: The absolute value operator
         :rtype: Diagonal operator of the absolute values
         """
-        return TranformDiagonalScaling(self.dir_shape, np.abs(self.scale))
+        return TransformDiagonalScaling(self.dir_shape, np.abs(self.scale))
 
     def _op_direct(self, x):
         return self.scale * x
@@ -189,12 +189,12 @@ class TranformDiagonalScaling(BaseTransform):
         return self.scale * x
 
 
-class TranformWavelet(BaseTransform):
-    """Wavelet tranform operator.
+class TransformWavelet(BaseTransform):
+    """Wavelet Transform operator.
     """
 
     def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand='constant'):
-        """Wavelet tranform operator.
+        """Wavelet Transform operator.
 
         :param x_shape: Shape of the data to be wavelet transformed.
         :type x_shape: `numpy.array_like`
@@ -402,7 +402,7 @@ class TransformLaplacian(BaseTransform):
 if __name__ == '__main__':
     test_vol = np.zeros((10, 10), dtype=np.float32)
 
-    H = TranformWavelet(test_vol.shape, 'db1', 2)
+    H = TransformWavelet(test_vol.shape, 'db1', 2)
     Htw = H.T.explicit()
     Hw = H.explicit()
 

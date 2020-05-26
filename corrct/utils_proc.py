@@ -138,7 +138,7 @@ def denoise_image(img, reg_weight=1e-2, stddev=None, iterations=250, verbose=Fal
         return (img_weights, reg_weights)
 
     if stddev is not None:
-        OpI = operators.TranformIdentity(img.shape)
+        OpI = operators.TransformIdentity(img.shape)
         (img_weight, reg_weight) = compute_wls_weights(stddev, OpI.T, reg_weight)
         data_term = solvers.DataFidelity_wl2(img_weight)
     else:

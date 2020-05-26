@@ -25,7 +25,7 @@ class TestOperators(unittest.TestCase):
         """Tear down test fixtures, if any."""
 
 
-class TestTranformGradient(TestOperators):
+class TestTransformGradient(TestOperators):
     """Test for TransformGradient class in `corrct.operators` package."""
 
     def test_000_gradient(self):
@@ -76,7 +76,7 @@ class TestTranformGradient(TestOperators):
         assert np.all(np.isclose(d0, de, atol=eps))
 
 
-class TestTranformLaplacian(TestOperators):
+class TestTransformLaplacian(TestOperators):
     """Test for TransformLaplacian class in `corrct.operators` package."""
 
     def test_000_laplcian(self):
@@ -128,7 +128,7 @@ class TestTransformWavelet(TestOperators):
     def test_000_transform(self):
         """Test Haar wavelet transform in 2D."""
         wl_dec_level = 3
-        H = operators.TranformWavelet(self.vol_ones_2d.shape, 'db1', wl_dec_level)
+        H = operators.TransformWavelet(self.vol_ones_2d.shape, 'db1', wl_dec_level)
 
         w = H(self.vol_ones_2d)
         assert np.all(w.shape[1:] == self.round_to_pow2(self.vol_ones_2d.shape, wl_dec_level))
@@ -143,7 +143,7 @@ class TestTransformWavelet(TestOperators):
 
     def test_001_explicit_transform(self):
         """Test explicit Haar transform in 2D."""
-        H = operators.TranformWavelet(self.vol_ones_2d.shape, 'db1', 3)
+        H = operators.TransformWavelet(self.vol_ones_2d.shape, 'db1', 3)
         w0 = H(self.vol_ones_2d)
 
         He = H.explicit()
@@ -155,7 +155,7 @@ class TestTransformWavelet(TestOperators):
 
     def test_002_explicit_inverse_transform(self):
         """Test explicit inverse Haar transform in 2D."""
-        H = operators.TranformWavelet(self.vol_ones_2d.shape, 'db1', 2)
+        H = operators.TransformWavelet(self.vol_ones_2d.shape, 'db1', 2)
         wt0 = H.T(np.ones((H.adj_shape)))
 
         Hte = H.T.explicit()
