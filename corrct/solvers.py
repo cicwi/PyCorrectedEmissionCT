@@ -531,9 +531,6 @@ class Sirt(Solver):
             x0 = At(b * sigma) * tau
         x = x0
 
-        if self.regularizer is not None:
-            q = self.regularizer.initialize_dual(x)
-
         if self.tolerance is not None:
             res_norm_0 = np.linalg.norm(b.flatten())
             res_norm_rel = np.ones((iterations, )) * self.tolerance
@@ -561,6 +558,7 @@ class Sirt(Solver):
                     break
 
             if self.regularizer is not None:
+                q = self.regularizer.initialize_dual(x)
                 self.regularizer.update_dual(q, x)
                 self.regularizer.apply_proximal(q)
 
