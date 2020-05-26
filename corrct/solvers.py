@@ -127,35 +127,35 @@ class Regularizer_lap(BaseRegularizer):
 
     __reg_name__ = 'lap'
 
-    def __init__(self, weight, ndims=2):
+    def __init__(self, weight, ndims=2, axes=None):
         BaseRegularizer.__init__(self, weight=weight)
+
+        if axes is None:
+            axes = np.arange(-ndims, 0, dtype=np.int)
+        elif not ndims == len(axes):
+            print('WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.')
+            ndims = len(axes)
         self.ndims = ndims
+        self.axes = axes
+
+        self.L = None
 
     def initialize_sigma_tau(self):
         self.sigma = 0.25
         return self.weight * 4 * self.ndims
 
     def initialize_dual(self, primal):
-        return np.zeros(primal.shape, dtype=primal.dtype)
+        self.L = operators.TransformLaplacian(primal.shape, axes=self.axes)
+        return np.zeros(self.L.adj_shape, dtype=primal.dtype)
 
     def update_dual(self, dual, primal):
-        dual += self.sigma * self.laplacian(primal)
+        dual += self.sigma * self.L(primal)
 
     def apply_proximal(self, dual):
         dual /= np.fmax(1, np.abs(dual))
 
     def compute_update_primal(self, dual):
-        return self.weight * self.laplacian(dual)
-
-    def laplacian(self, x):
-        d = [None] * self.ndims
-        for ii in range(self.ndims):
-            ind = -(ii + 1)
-            padding = [(0, 0)] * self.ndims
-            padding[ind] = (1, 1)
-            temp_x = np.pad(x, padding, mode='edge')
-            d[ind] = np.diff(temp_x, n=2, axis=ind)
-        return np.sum(d, axis=0)
+        return self.weight * self.L.T(dual)
 
 
 class Regularizer_lap2D(Regularizer_lap):

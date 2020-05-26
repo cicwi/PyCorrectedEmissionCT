@@ -354,6 +354,51 @@ class TransformGradient(BaseTransform):
         return - self.divergence(y)
 
 
+class TransformLaplacian(BaseTransform):
+
+    def __init__(self, x_shape, axes=None):
+        """Laplacian transform.
+
+        :param x_shape: Shape of the data to be wavelet transformed.
+        :type x_shape: `numpy.array_like`
+        :param axes: Axes along which to do the gradient, defaults to None
+        :type axes: int or tuple of int, optional
+        """
+        if axes is None:
+            axes = np.arange(-len(x_shape), 0, dtype=np.int)
+        self.axes = axes
+        self.ndims = len(x_shape)
+
+        self.dir_shape = np.array(x_shape)
+        self.adj_shape = np.array(x_shape)
+
+        super().__init__()
+
+    def laplacian(self, x):
+        """Computes the laplacian.
+
+        :param x: Input data.
+        :type x: `numpy.array_like`
+
+        :return: Gradient of data.
+        :rtype: `numpy.array_like`
+        """
+        d = [None] * len(self.axes)
+        for ii in range(len(self.axes)):
+            ind = -(ii + 1)
+            padding = [(0, 0)] * self.ndims
+            padding[ind] = (1, 1)
+            temp_x = np.pad(x, padding, mode='edge')
+            d[ind] = np.diff(temp_x, n=2, axis=ind)
+        return np.sum(d, axis=0)
+
+    def _op_direct(self, x):
+        return self.laplacian(x)
+
+    def _op_adjoint(self, y):
+        return self.laplacian(y)
+
+
 if __name__ == '__main__':
     test_vol = np.zeros((10, 10), dtype=np.float32)
 

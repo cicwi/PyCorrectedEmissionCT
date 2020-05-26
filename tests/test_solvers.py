@@ -115,9 +115,29 @@ class TestRegularizers(unittest.TestCase):
         reg.update_dual(dual, vol)
         assert np.all(np.isclose(dual, copy_dual + reg.D(vol) / 2))
 
-        dual = np.ones_like(dual)
+        dual = np.random.random(dual.shape)
         upd = reg.compute_update_primal(dual)
         assert np.all(np.isclose(reg.D.T(dual) * weight, upd))
+
+    def _test_Regularizer_lap(self, vol):
+        weight = 0.25
+        ndims = len(vol.shape)
+        reg = solvers.Regularizer_lap(weight, ndims=ndims)
+
+        tau = reg.initialize_sigma_tau()
+        assert tau == (weight * 4 * ndims)
+
+        dual = reg.initialize_dual(vol)
+        assert np.all(dual.shape == vol.shape)
+        assert np.all(dual == 0)
+
+        copy_dual = cp.deepcopy(dual)
+        reg.update_dual(dual, vol)
+        assert np.all(np.isclose(dual, copy_dual + reg.L(vol) / 4))
+
+        dual = np.random.random(dual.shape)
+        upd = reg.compute_update_primal(dual)
+        assert np.all(np.isclose(reg.L.T(dual) * weight, upd))
 
     def test_000_Regularizer_l1_2D(self):
         """Test l1-min regularizer in 2D."""
@@ -142,6 +162,14 @@ class TestRegularizers(unittest.TestCase):
     def test_005_Regularizer_TV_3D(self):
         """Test l1-min wavelet regularizer in 3D."""
         self._test_Regularizer_TV(self.vol_rand_3d)
+
+    def test_004_Regularizer_lap_2D(self):
+        """Test l1-min laplacian regularizer in 2D."""
+        self._test_Regularizer_lap(self.vol_rand_2d)
+
+    def test_005_Regularizer_lap_3D(self):
+        """Test l1-min laplacian regularizer in 3D."""
+        self._test_Regularizer_lap(self.vol_rand_3d)
 
 
 class TestSolvers(unittest.TestCase):

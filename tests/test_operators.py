@@ -76,6 +76,36 @@ class TestTranformGradient(TestOperators):
         assert np.all(np.isclose(d0, de, atol=eps))
 
 
+class TestTranformLaplacian(TestOperators):
+    """Test for TransformLaplacian class in `corrct.operators` package."""
+
+    def test_000_laplcian(self):
+        """Test laplacian operator 2D."""
+        L = operators.TransformLaplacian(self.vol_ones_2d.shape)
+
+        g = L(self.vol_ones_2d)
+        assert np.all(g.shape == self.vol_ones_2d.shape)
+        assert np.all(np.isclose(g, 0, atol=eps))
+
+        test_line = np.ones((3, ))
+        test_line[1] = 0
+        L = operators.TransformLaplacian(test_line.shape)
+        g = L(test_line)
+        assert np.all(np.isclose(g, [-1, 2, -1], atol=eps))
+
+    def test_001_explicit_gradient(self):
+        """Test explicit laplacian operator 2D."""
+        L = operators.TransformLaplacian(self.vol_ones_2d.shape)
+        g0 = L(self.vol_ones_2d)
+
+        Le = L.explicit()
+        ge = Le.dot(self.vol_ones_2d.flatten())
+        assert g0.size == ge.size
+
+        ge = np.reshape(ge, L.adj_shape)
+        assert np.all(np.isclose(g0, ge, atol=eps))
+
+
 class TestTransformWavelet(TestOperators):
     """Tests for the TransformWavelet class in `corrct.operators` package."""
 
