@@ -38,7 +38,7 @@ class TestRegularizers(unittest.TestCase):
         :param data_type: data type of the output
         :type data_type: `numpy.dtype`
 
-        :return: DESCRIPTION
+        :return: Rounding up of input
         :rtype: dtype specified by data_type
         """
         return np.ceil(np.array(x) / (2 ** p)).astype(data_type) * (2 ** p)
@@ -156,11 +156,11 @@ class TestRegularizers(unittest.TestCase):
         self._test_Regularizer_l1wl(self.vol_rand_3d)
 
     def test_004_Regularizer_TV_2D(self):
-        """Test l1-min wavelet regularizer in 2D."""
+        """Test TV regularizer in 2D."""
         self._test_Regularizer_TV(self.vol_rand_2d)
 
     def test_005_Regularizer_TV_3D(self):
-        """Test l1-min wavelet regularizer in 3D."""
+        """Test TV regularizer in 3D."""
         self._test_Regularizer_TV(self.vol_rand_3d)
 
     def test_004_Regularizer_lap_2D(self):

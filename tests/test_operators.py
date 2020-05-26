@@ -120,7 +120,7 @@ class TestTransformWavelet(TestOperators):
         :param data_type: data type of the output
         :type data_type: `numpy.dtype`
 
-        :return: DESCRIPTION
+        :return: Rounding up of input
         :rtype: dtype specified by data_type
         """
         return np.ceil(np.array(x) / (2 ** p)).astype(data_type) * (2 ** p)
