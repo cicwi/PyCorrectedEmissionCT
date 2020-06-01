@@ -17,6 +17,10 @@ from . import operators
 
 import astra
 
+has_cuda = astra.astra.use_cuda()
+if not has_cuda:
+    print('WARNING: CUDA is not available. Only 2D operations on CPU are available.')
+
 
 class ProjectorBase(operators.ProjectorOperator):
     """Basic projection class, which implements the forward and back projection
@@ -48,15 +52,17 @@ class ProjectorBase(operators.ProjectorOperator):
             raise ValueError("Only 2D or 3D volumes")
         if not vol_shape[0] == vol_shape[1]:
             raise ValueError("Only square volumes")
+        if len(vol_shape) == 3 and not has_cuda:
+            raise ValueError("CUDA is not available: only 2D volumes are allowed!")
 
         self.proj_id = []
         self.has_individual_projs = create_single_projs
         self.super_sampling = super_sampling
         self.dispose_projectors()
 
-        self.angles_rot_rad = angles_rot_rad
+        self.angles_rot_rad = np.array(angles_rot_rad)
 
-        num_angles = angles_rot_rad.size
+        num_angles = self.angles_rot_rad.size
         if proj_intensities is not None:
             proj_intensities = np.squeeze(proj_intensities)
             num_proj_ints = len(proj_intensities)
@@ -75,12 +81,12 @@ class ProjectorBase(operators.ProjectorOperator):
 
             vectors = np.empty([num_angles, 12])
             # source
-            vectors[:, 0] = -np.sin(angles_rot_rad)
-            vectors[:, 1] = -np.cos(angles_rot_rad)
+            vectors[:, 0] = -np.sin(self.angles_rot_rad)
+            vectors[:, 1] = -np.cos(self.angles_rot_rad)
             vectors[:, 2] = 0
             # vector from detector pixel (0,0) to (0,1)
-            vectors[:, 6] = np.cos(angles_rot_rad)
-            vectors[:, 7] = -np.sin(angles_rot_rad)
+            vectors[:, 6] = np.cos(self.angles_rot_rad)
+            vectors[:, 7] = -np.sin(self.angles_rot_rad)
             vectors[:, 8] = 0
             # center of detector
             vectors[:, 3:6] = rot_axis_shift_pix * vectors[:, 6:9]
@@ -103,11 +109,11 @@ class ProjectorBase(operators.ProjectorOperator):
 
             vectors = np.empty([num_angles, 6])
             # source
-            vectors[:, 0] = np.sin(angles_rot_rad)
-            vectors[:, 1] = -np.cos(angles_rot_rad)
+            vectors[:, 0] = np.sin(self.angles_rot_rad)
+            vectors[:, 1] = -np.cos(self.angles_rot_rad)
             # vector from detector pixel 0 to 1
-            vectors[:, 4] = np.cos(angles_rot_rad)
-            vectors[:, 5] = np.sin(angles_rot_rad)
+            vectors[:, 4] = np.cos(self.angles_rot_rad)
+            vectors[:, 5] = np.sin(self.angles_rot_rad)
             # center of detector
             vectors[:, 2:4] = rot_axis_shift_pix * vectors[:, 4:6]
 
@@ -131,7 +137,10 @@ class ProjectorBase(operators.ProjectorOperator):
         if self.is_3d:
             projector_type = 'cuda3d'
         else:
-            projector_type = 'cuda'
+            if has_cuda:
+                projector_type = 'cuda'
+            else:
+                projector_type = 'linear'
 
         opts = {'VoxelSuperSampling': self.super_sampling, 'DetectorSuperSampling': self.super_sampling}
 
