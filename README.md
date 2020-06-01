@@ -20,8 +20,8 @@ This package provides the following functionality:
 It contains the code used for the following paper, which also provides a
 mathematical description of the concepts and algorithms used here:
 
-* N. Viganò and V. A. Solé, “Physically corrected forward operators for
-induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
+* N. Viganò and V. A. Solé, "Physically corrected forward operators for
+induced emission tomography: a simulation study," Meas. Sci. Technol., no.
 Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.
 
 Other useful information:
