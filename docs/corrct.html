@@ -86,6 +86,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">corrct package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-corrct.corrct">corrct.corrct module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-corrct.operators">corrct.operators module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-corrct.projectors">corrct.projectors module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-corrct.solvers">corrct.solvers module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-corrct.utils_proc">corrct.utils_proc module</a></li>
@@ -232,6 +233,210 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <dd class="field-even"><p>numpy.array_like</p>
 </dd>
 </dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-corrct.operators">
+<span id="corrct-operators-module"></span><h2>corrct.operators module<a class="headerlink" href="#module-corrct.operators" title="Permalink to this headline">¶</a></h2>
+<p>Created on Fri May  8 15:36:39 2020</p>
+<p>&#64;author: VIGANO</p>
+<dl class="class">
+<dt id="corrct.operators.BaseTransform">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.operators.</code><code class="sig-name descname">BaseTransform</code><a class="reference internal" href="_modules/corrct/operators.html#BaseTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.BaseTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.linalg.interface.LinearOperator</span></code></p>
+<p>Base operator class, that implements the linear operator behavior that
+can be used with the solvers in the <cite>.solvers</cite> module and the solvers in
+<cite>scipy.sparse.linalg</cite>.</p>
+<dl class="method">
+<dt id="corrct.operators.BaseTransform.absolute">
+<code class="sig-name descname">absolute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#BaseTransform.absolute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.BaseTransform.absolute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the projection operator using the absolute value of the
+projection coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The absolute value operator</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#corrct.operators.ProjectorOperator" title="corrct.operators.ProjectorOperator">ProjectorOperator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="corrct.operators.BaseTransform.explicit">
+<code class="sig-name descname">explicit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#BaseTransform.explicit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.BaseTransform.explicit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the explicit transformation matrix associated to the operator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The explicit transformation matrix</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>numpy.array_like</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="corrct.operators.BaseTransform.rmatvec">
+<code class="sig-name descname">rmatvec</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#BaseTransform.rmatvec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.BaseTransform.rmatvec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement the direct operator for row vectors from the left.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>numpy.array_like</em>) – Either row from the left or column from the right on transpose.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="corrct.operators.ProjectorOperator">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.operators.</code><code class="sig-name descname">ProjectorOperator</code><a class="reference internal" href="_modules/corrct/operators.html#ProjectorOperator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.ProjectorOperator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Base projector class that fixes the projection interface.</p>
+<dl class="method">
+<dt id="corrct.operators.ProjectorOperator.bp">
+<code class="sig-name descname">bp</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#ProjectorOperator.bp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.ProjectorOperator.bp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.operators.ProjectorOperator.fp">
+<code class="sig-name descname">fp</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#ProjectorOperator.fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.ProjectorOperator.fp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="corrct.operators.TransformDiagonalScaling">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.operators.</code><code class="sig-name descname">TransformDiagonalScaling</code><span class="sig-paren">(</span><em class="sig-param">x_shape</em>, <em class="sig-param">scale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformDiagonalScaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformDiagonalScaling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Diagonal scaling operator.</p>
+<dl class="method">
+<dt id="corrct.operators.TransformDiagonalScaling.absolute">
+<code class="sig-name descname">absolute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformDiagonalScaling.absolute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformDiagonalScaling.absolute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the projection operator using the absolute value of the
+projection coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The absolute value operator</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Diagonal operator of the absolute values</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="corrct.operators.TransformGradient">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.operators.</code><code class="sig-name descname">TransformGradient</code><span class="sig-paren">(</span><em class="sig-param">x_shape</em>, <em class="sig-param">axes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformGradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformGradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<dl class="method">
+<dt id="corrct.operators.TransformGradient.divergence">
+<code class="sig-name descname">divergence</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformGradient.divergence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformGradient.divergence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the divergence (transpose of gradient).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<cite>numpy.array_like</cite>) – Input data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Divergence of data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>numpy.array_like</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="corrct.operators.TransformGradient.gradient">
+<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformGradient.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformGradient.gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the gradient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<cite>numpy.array_like</cite>) – Input data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Gradient of data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>numpy.array_like</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="corrct.operators.TransformIdentity">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.operators.</code><code class="sig-name descname">TransformIdentity</code><span class="sig-paren">(</span><em class="sig-param">x_shape</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformIdentity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformIdentity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Identity operator.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="corrct.operators.TransformLaplacian">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.operators.</code><code class="sig-name descname">TransformLaplacian</code><span class="sig-paren">(</span><em class="sig-param">x_shape</em>, <em class="sig-param">axes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformLaplacian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformLaplacian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<dl class="method">
+<dt id="corrct.operators.TransformLaplacian.laplacian">
+<code class="sig-name descname">laplacian</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformLaplacian.laplacian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformLaplacian.laplacian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the laplacian.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<cite>numpy.array_like</cite>) – Input data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Gradient of data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>numpy.array_like</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="corrct.operators.TransformWavelet">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.operators.</code><code class="sig-name descname">TransformWavelet</code><span class="sig-paren">(</span><em class="sig-param">x_shape</em>, <em class="sig-param">wavelet</em>, <em class="sig-param">level</em>, <em class="sig-param">axes=None</em>, <em class="sig-param">pad_on_demand='constant'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformWavelet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformWavelet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Wavelet Transform operator.</p>
+<dl class="method">
+<dt id="corrct.operators.TransformWavelet.direct_swt">
+<code class="sig-name descname">direct_swt</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformWavelet.direct_swt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformWavelet.direct_swt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the direct wavelet transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<cite>numpy.array_like</cite>) – Data to transform.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Transformed data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="corrct.operators.TransformWavelet.inverse_swt">
+<code class="sig-name descname">inverse_swt</code><span class="sig-paren">(</span><em class="sig-param">y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformWavelet.inverse_swt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformWavelet.inverse_swt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the inverse wavelet transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>list</em>) – Data to anti-transform.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Anti-transformed data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>numpy.array_like</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -405,7 +610,7 @@ Transactions on, 23(11), 4750-4762.</p>
 <dl class="class">
 <dt id="corrct.projectors.ProjectorBase">
 <em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorBase</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">angles_rot_rad</em>, <em class="sig-param">rot_axis_shift_pix=0</em>, <em class="sig-param">proj_intensities=None</em>, <em class="sig-param">create_single_projs=True</em>, <em class="sig-param">super_sampling=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#corrct.projectors.ProjectorOperator" title="corrct.projectors.ProjectorOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.projectors.ProjectorOperator</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.ProjectorOperator" title="corrct.operators.ProjectorOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.operators.ProjectorOperator</span></code></a></p>
 <p>Basic projection class, which implements the forward and back projection
 of the single lines of a sinogram.
 It takes care of initializing and disposing the ASTRA projectors when used
@@ -496,51 +701,6 @@ applies the attenuation corrections if the projector is symmetric.</p>
 <dt id="corrct.projectors.ProjectorBase.initialize_projectors">
 <code class="sig-name descname">initialize_projectors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorBase.initialize_projectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorBase.initialize_projectors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialization of the ASTRA projectors.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="corrct.projectors.ProjectorOperator">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.projectors.</code><code class="sig-name descname">ProjectorOperator</code><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorOperator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorOperator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.linalg.interface.LinearOperator</span></code></p>
-<p>Base projector class, that implements the linear operator behavior that
-can be used with the solvers in the <cite>.solvers</cite> module and the solvers in
-<cite>scipy.sparse.linalg</cite>.</p>
-<dl class="method">
-<dt id="corrct.projectors.ProjectorOperator.absolute">
-<code class="sig-name descname">absolute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorOperator.absolute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorOperator.absolute" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the projection operator using the absolute value of the
-projection coefficients.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The absolute value operator</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#corrct.projectors.ProjectorOperator" title="corrct.projectors.ProjectorOperator">ProjectorOperator</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="corrct.projectors.ProjectorOperator.bp">
-<code class="sig-name descname">bp</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorOperator.bp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorOperator.bp" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="corrct.projectors.ProjectorOperator.fp">
-<code class="sig-name descname">fp</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorOperator.fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorOperator.fp" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="corrct.projectors.ProjectorOperator.rmatvec">
-<code class="sig-name descname">rmatvec</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/projectors.html#ProjectorOperator.rmatvec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.projectors.ProjectorOperator.rmatvec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implement the transpose operator.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>numpy.array_like</em>) – Either the projection data or the volume.</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -645,8 +805,128 @@ based on the BaseRegularizer interface.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="corrct.solvers.DataFidelityBase">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">DataFidelityBase</code><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelityBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelityBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base data-fidelity class that defines the object interface.</p>
+<dl class="method">
+<dt id="corrct.solvers.DataFidelityBase.apply_proximal">
+<code class="sig-name descname">apply_proximal</code><span class="sig-paren">(</span><em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelityBase.apply_proximal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelityBase.apply_proximal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelityBase.assign_data">
+<code class="sig-name descname">assign_data</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">sigma=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelityBase.assign_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelityBase.assign_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelityBase.compute_update_primal">
+<code class="sig-name descname">compute_update_primal</code><span class="sig-paren">(</span><em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelityBase.compute_update_primal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelityBase.compute_update_primal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelityBase.initialize_dual">
+<code class="sig-name descname">initialize_dual</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelityBase.initialize_dual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelityBase.initialize_dual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelityBase.lower">
+<code class="sig-name descname">lower</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelityBase.lower"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelityBase.lower" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelityBase.update_dual">
+<code class="sig-name descname">update_dual</code><span class="sig-paren">(</span><em class="sig-param">dual</em>, <em class="sig-param">proj_primal</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelityBase.update_dual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelityBase.update_dual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelityBase.upper">
+<code class="sig-name descname">upper</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelityBase.upper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelityBase.upper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="corrct.solvers.DataFidelity_KL">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">DataFidelity_KL</code><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_KL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_KL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.solvers.DataFidelityBase" title="corrct.solvers.DataFidelityBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.DataFidelityBase</span></code></a></p>
+<p>KullbackLeibler data-fidelity class.</p>
+<dl class="method">
+<dt id="corrct.solvers.DataFidelity_KL.apply_proximal">
+<code class="sig-name descname">apply_proximal</code><span class="sig-paren">(</span><em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_KL.apply_proximal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_KL.apply_proximal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelity_KL.compute_primal_dual_gap">
+<code class="sig-name descname">compute_primal_dual_gap</code><span class="sig-paren">(</span><em class="sig-param">proj_primal</em>, <em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_KL.compute_primal_dual_gap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_KL.compute_primal_dual_gap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="corrct.solvers.DataFidelity_l1">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">DataFidelity_l1</code><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_l1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_l1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.solvers.DataFidelityBase" title="corrct.solvers.DataFidelityBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.DataFidelityBase</span></code></a></p>
+<p>l1-norm data-fidelity class.</p>
+<dl class="method">
+<dt id="corrct.solvers.DataFidelity_l1.apply_proximal">
+<code class="sig-name descname">apply_proximal</code><span class="sig-paren">(</span><em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_l1.apply_proximal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_l1.apply_proximal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelity_l1.compute_primal_dual_gap">
+<code class="sig-name descname">compute_primal_dual_gap</code><span class="sig-paren">(</span><em class="sig-param">proj_primal</em>, <em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_l1.compute_primal_dual_gap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_l1.compute_primal_dual_gap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="corrct.solvers.DataFidelity_l2">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">DataFidelity_l2</code><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_l2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_l2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.solvers.DataFidelityBase" title="corrct.solvers.DataFidelityBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.DataFidelityBase</span></code></a></p>
+<p>l2-norm data-fidelity class.</p>
+<dl class="method">
+<dt id="corrct.solvers.DataFidelity_l2.apply_proximal">
+<code class="sig-name descname">apply_proximal</code><span class="sig-paren">(</span><em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_l2.apply_proximal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_l2.apply_proximal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelity_l2.assign_data">
+<code class="sig-name descname">assign_data</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">sigma=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_l2.assign_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_l2.assign_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelity_l2.compute_primal_dual_gap">
+<code class="sig-name descname">compute_primal_dual_gap</code><span class="sig-paren">(</span><em class="sig-param">proj_primal</em>, <em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_l2.compute_primal_dual_gap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_l2.compute_primal_dual_gap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="corrct.solvers.DataFidelity_wl2">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">DataFidelity_wl2</code><span class="sig-paren">(</span><em class="sig-param">weights</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_wl2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_wl2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.solvers.DataFidelity_l2" title="corrct.solvers.DataFidelity_l2"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.DataFidelity_l2</span></code></a></p>
+<p>Weighted l2-norm data-fidelity class.</p>
+<dl class="method">
+<dt id="corrct.solvers.DataFidelity_wl2.assign_data">
+<code class="sig-name descname">assign_data</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">sigma=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_wl2.assign_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_wl2.assign_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelity_wl2.compute_primal_dual_gap">
+<code class="sig-name descname">compute_primal_dual_gap</code><span class="sig-paren">(</span><em class="sig-param">proj_primal</em>, <em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_wl2.compute_primal_dual_gap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_wl2.compute_primal_dual_gap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="corrct.solvers.DataFidelity_wl2.compute_update_primal">
+<code class="sig-name descname">compute_update_primal</code><span class="sig-paren">(</span><em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#DataFidelity_wl2.compute_update_primal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.DataFidelity_wl2.compute_update_primal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="corrct.solvers.Regularizer_TV">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_TV</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">ndims=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_TV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_TV" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_TV</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">ndims=2</em>, <em class="sig-param">axes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_TV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_TV" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.BaseRegularizer" title="corrct.solvers.BaseRegularizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.BaseRegularizer</span></code></a></p>
 <p>Total Variation (TV) regularizer. It can be used to promote piece-wise
 constant reconstructions.</p>
@@ -658,16 +938,6 @@ constant reconstructions.</p>
 <dl class="method">
 <dt id="corrct.solvers.Regularizer_TV.compute_update_primal">
 <code class="sig-name descname">compute_update_primal</code><span class="sig-paren">(</span><em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_TV.compute_update_primal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_TV.compute_update_primal" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="corrct.solvers.Regularizer_TV.divergence">
-<code class="sig-name descname">divergence</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_TV.divergence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_TV.divergence" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="corrct.solvers.Regularizer_TV.gradient">
-<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_TV.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_TV.gradient" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -689,7 +959,7 @@ constant reconstructions.</p>
 
 <dl class="class">
 <dt id="corrct.solvers.Regularizer_TV2D">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_TV2D</code><span class="sig-paren">(</span><em class="sig-param">weight</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_TV2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_TV2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_TV2D</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">axes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_TV2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_TV2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Regularizer_TV" title="corrct.solvers.Regularizer_TV"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Regularizer_TV</span></code></a></p>
 <p>Total Variation (TV) regularizer in 2D. It can be used to promote
 piece-wise constant reconstructions.</p>
@@ -697,7 +967,7 @@ piece-wise constant reconstructions.</p>
 
 <dl class="class">
 <dt id="corrct.solvers.Regularizer_TV3D">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_TV3D</code><span class="sig-paren">(</span><em class="sig-param">weight</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_TV3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_TV3D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_TV3D</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">axes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_TV3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_TV3D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Regularizer_TV" title="corrct.solvers.Regularizer_TV"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Regularizer_TV</span></code></a></p>
 <p>Total Variation (TV) regularizer in 3D. It can be used to promote
 piece-wise constant reconstructions.</p>
@@ -737,9 +1007,9 @@ piece-wise constant reconstructions.</p>
 
 <dl class="class">
 <dt id="corrct.solvers.Regularizer_l1wl">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_l1wl</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">wavelet</em>, <em class="sig-param">level</em>, <em class="sig-param">ndims=2</em>, <em class="sig-param">axes=None</em>, <em class="sig-param">pad_on_demand=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_l1wl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_l1wl" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_l1wl</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">wavelet</em>, <em class="sig-param">level</em>, <em class="sig-param">ndims=2</em>, <em class="sig-param">axes=None</em>, <em class="sig-param">pad_on_demand='constant'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_l1wl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_l1wl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.BaseRegularizer" title="corrct.solvers.BaseRegularizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.BaseRegularizer</span></code></a></p>
-<p>l1-norm regularizer. It can be used to promote sparse reconstructions.</p>
+<p>l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions.</p>
 <dl class="method">
 <dt id="corrct.solvers.Regularizer_l1wl.apply_proximal">
 <code class="sig-name descname">apply_proximal</code><span class="sig-paren">(</span><em class="sig-param">dual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_l1wl.apply_proximal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_l1wl.apply_proximal" title="Permalink to this definition">¶</a></dt>
@@ -769,7 +1039,7 @@ piece-wise constant reconstructions.</p>
 
 <dl class="class">
 <dt id="corrct.solvers.Regularizer_lap">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_lap</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">ndims=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_lap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_lap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_lap</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">ndims=2</em>, <em class="sig-param">axes=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_lap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_lap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.BaseRegularizer" title="corrct.solvers.BaseRegularizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.BaseRegularizer</span></code></a></p>
 <p>Laplacian regularizer. It can be used to promote smooth reconstructions.</p>
 <dl class="method">
@@ -790,11 +1060,6 @@ piece-wise constant reconstructions.</p>
 <dl class="method">
 <dt id="corrct.solvers.Regularizer_lap.initialize_sigma_tau">
 <code class="sig-name descname">initialize_sigma_tau</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_lap.initialize_sigma_tau"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_lap.initialize_sigma_tau" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="corrct.solvers.Regularizer_lap.laplacian">
-<code class="sig-name descname">laplacian</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_lap.laplacian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_lap.laplacian" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -900,14 +1165,40 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="corrct.utils_proc.denoise_image">
+<code class="sig-prename descclassname">corrct.utils_proc.</code><code class="sig-name descname">denoise_image</code><span class="sig-paren">(</span><em class="sig-param">img</em>, <em class="sig-param">reg_weight=0.01</em>, <em class="sig-param">stddev=None</em>, <em class="sig-param">iterations=250</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/utils_proc.html#denoise_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.utils_proc.denoise_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Image denoiser based on (weighted) least-squares and wavelets.
+The weighted least-squares requires the local pixel-wise standard deviations.
+It can be used to denoise sinograms and projections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<cite>numpy.array_like</cite>) – The image or sinogram to denoise.</p></li>
+<li><p><strong>reg_weight</strong> (<em>float</em><em>, </em><em>optional</em>) – Weight of the regularization term, defaults to 1e-2</p></li>
+<li><p><strong>stddev</strong> (<cite>numpy.array_like</cite>, optional) – The local standard deviations. If None, it performs a standard least-squares.</p></li>
+<li><p><strong>iterations</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of iterations, defaults to 250</p></li>
+<li><p><strong>verbose</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Turn verbosity on, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Denoised image or sinogram.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>numpy.array_like</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="corrct.utils_proc.get_circular_mask">
-<code class="sig-prename descclassname">corrct.utils_proc.</code><code class="sig-name descname">get_circular_mask</code><span class="sig-paren">(</span><em class="sig-param">vol_shape_yx</em>, <em class="sig-param">radius_offset=0</em>, <em class="sig-param">mask_drop_off='const'</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/utils_proc.html#get_circular_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.utils_proc.get_circular_mask" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">corrct.utils_proc.</code><code class="sig-name descname">get_circular_mask</code><span class="sig-paren">(</span><em class="sig-param">vol_shape</em>, <em class="sig-param">radius_offset=0</em>, <em class="sig-param">coords_ball=None</em>, <em class="sig-param">mask_drop_off='const'</em>, <em class="sig-param">data_type=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/utils_proc.html#get_circular_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.utils_proc.get_circular_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes a circular mask for the reconstruction volume.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vol_shape_yx</strong> (<em>numpy.array_like</em>) – The size of the volume.</p></li>
+<li><p><strong>vol_shape</strong> (<em>numpy.array_like</em>) – The size of the volume.</p></li>
 <li><p><strong>radius_offset</strong> (<em>float. Optional</em><em>, </em><em>default: 0</em>) – The offset with respect to the volume edge.</p></li>
+<li><p><strong>coords_ball</strong> (<em>list of dimensions. Optional</em><em>, </em><em>default: None</em>) – The coordinates to consider for the non-masked region.</p></li>
 <li><p><strong>data_type</strong> (<em>numpy.dtype. Optional</em><em>, </em><em>default: np.float32</em>) – The mask data type.</p></li>
 </ul>
 </dd>

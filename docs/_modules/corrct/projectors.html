@@ -155,90 +155,21 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">import</span> <span class="nn">scipy.sparse.linalg</span> <span class="k">as</span> <span class="nn">spsla</span>
 <span class="kn">import</span> <span class="nn">scipy.ndimage</span> <span class="k">as</span> <span class="nn">spimg</span>
 <span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">spsig</span>
 
 <span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
 
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">operators</span>
+
 <span class="kn">import</span> <span class="nn">astra</span>
 
-
-<div class="viewcode-block" id="ProjectorOperator"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorOperator">[docs]</a><span class="k">class</span> <span class="nc">ProjectorOperator</span><span class="p">(</span><span class="n">spsla</span><span class="o">.</span><span class="n">LinearOperator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base projector class, that implements the linear operator behavior that</span>
-<span class="sd">    can be used with the solvers in the `.solvers` module and the solvers in</span>
-<span class="sd">    `scipy.sparse.linalg`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">num_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">)</span>
-        <span class="n">num_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="p">[</span><span class="n">num_rows</span><span class="p">,</span> <span class="n">num_cols</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_fwd_operator</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="k">def</span> <span class="nf">_matvec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Implement the operator.</span>
-
-<span class="sd">        :param x: Either the volume or the projection data.</span>
-<span class="sd">        :type x: numpy.array_like</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fwd_operator</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-
-<div class="viewcode-block" id="ProjectorOperator.rmatvec"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorOperator.rmatvec">[docs]</a>    <span class="k">def</span> <span class="nf">rmatvec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Implement the transpose operator.</span>
-
-<span class="sd">        :param x: Either the projection data or the volume.</span>
-<span class="sd">        :type x: numpy.array_like</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fwd_operator</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span></div>
-
-    <span class="k">def</span> <span class="nf">_transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create the transpose operator.</span>
-
-<span class="sd">        :returns: The transpose operator</span>
-<span class="sd">        :rtype: ProjectorOperator</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">Op_t</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">Op_t</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="n">Op_t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Op_t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-        <span class="n">Op_t</span><span class="o">.</span><span class="n">is_fwd_operator</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">return</span> <span class="n">Op_t</span>
-
-    <span class="k">def</span> <span class="nf">_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose</span><span class="p">()</span>
-
-<div class="viewcode-block" id="ProjectorOperator.absolute"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorOperator.absolute">[docs]</a>    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the projection operator using the absolute value of the</span>
-<span class="sd">        projection coefficients.</span>
-
-<span class="sd">        :returns: The absolute value operator</span>
-<span class="sd">        :rtype: ProjectorOperator</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fwd_operator</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-<div class="viewcode-block" id="ProjectorOperator.fp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorOperator.fp">[docs]</a>    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="ProjectorOperator.bp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorOperator.bp">[docs]</a>    <span class="k">def</span> <span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
+<span class="n">has_cuda</span> <span class="o">=</span> <span class="n">astra</span><span class="o">.</span><span class="n">astra</span><span class="o">.</span><span class="n">use_cuda</span><span class="p">()</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">has_cuda</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: CUDA is not available. Only 2D operations on CPU are available.&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ProjectorBase"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorBase">[docs]</a><span class="k">class</span> <span class="nc">ProjectorBase</span><span class="p">(</span><span class="n">ProjectorOperator</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorBase"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorBase">[docs]</a><span class="k">class</span> <span class="nc">ProjectorBase</span><span class="p">(</span><span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Basic projection class, which implements the forward and back projection</span>
 <span class="sd">    of the single lines of a sinogram.</span>
 <span class="sd">    It takes care of initializing and disposing the ASTRA projectors when used</span>
@@ -268,15 +199,17 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only 2D or 3D volumes&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">vol_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">vol_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only square volumes&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_cuda</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CUDA is not available: only 2D volumes are allowed!&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">proj_id</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">has_individual_projs</span> <span class="o">=</span> <span class="n">create_single_projs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">super_sampling</span> <span class="o">=</span> <span class="n">super_sampling</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispose_projectors</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span> <span class="o">=</span> <span class="n">angles_rot_rad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angles_rot_rad</span><span class="p">)</span>
 
-        <span class="n">num_angles</span> <span class="o">=</span> <span class="n">angles_rot_rad</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">num_angles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="o">.</span><span class="n">size</span>
         <span class="k">if</span> <span class="n">proj_intensities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">proj_intensities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">proj_intensities</span><span class="p">)</span>
             <span class="n">num_proj_ints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">proj_intensities</span><span class="p">)</span>
@@ -295,12 +228,12 @@
 
             <span class="n">vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">num_angles</span><span class="p">,</span> <span class="mi">12</span><span class="p">])</span>
             <span class="c1"># source</span>
-            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angles_rot_rad</span><span class="p">)</span>
-            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angles_rot_rad</span><span class="p">)</span>
+            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
+            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
             <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="c1"># vector from detector pixel (0,0) to (0,1)</span>
-            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angles_rot_rad</span><span class="p">)</span>
-            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angles_rot_rad</span><span class="p">)</span>
+            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
+            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
             <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="c1"># center of detector</span>
             <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">rot_axis_shift_pix</span> <span class="o">*</span> <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span>
@@ -323,11 +256,11 @@
 
             <span class="n">vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">num_angles</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
             <span class="c1"># source</span>
-            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angles_rot_rad</span><span class="p">)</span>
-            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angles_rot_rad</span><span class="p">)</span>
+            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
+            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
             <span class="c1"># vector from detector pixel 0 to 1</span>
-            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angles_rot_rad</span><span class="p">)</span>
-            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angles_rot_rad</span><span class="p">)</span>
+            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
+            <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
             <span class="c1"># center of detector</span>
             <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">rot_axis_shift_pix</span> <span class="o">*</span> <span class="n">vectors</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
 
@@ -351,7 +284,10 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_3d</span><span class="p">:</span>
             <span class="n">projector_type</span> <span class="o">=</span> <span class="s1">&#39;cuda3d&#39;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">projector_type</span> <span class="o">=</span> <span class="s1">&#39;cuda&#39;</span>
+            <span class="k">if</span> <span class="n">has_cuda</span><span class="p">:</span>
+                <span class="n">projector_type</span> <span class="o">=</span> <span class="s1">&#39;cuda&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">projector_type</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
 
         <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;VoxelSuperSampling&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">super_sampling</span><span class="p">,</span> <span class="s1">&#39;DetectorSuperSampling&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">super_sampling</span><span class="p">}</span>
 

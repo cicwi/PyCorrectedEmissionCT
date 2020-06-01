@@ -12,6 +12,14 @@ corrct.corrct module
    :undoc-members:
    :show-inheritance:
 
+corrct.operators module
+-----------------------
+
+.. automodule:: corrct.operators
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.projectors module
 ------------------------
 
