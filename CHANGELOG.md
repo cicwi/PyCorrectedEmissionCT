@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.2.4...develop
+
 <!--
 ## [Unreleased]
 ### Added
@@ -11,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - <insert-bugs-fixed-not-in-a-release-yet>
 -->
+
+## 0.2.4 - 2020-06-01
+### Added
+- Operator form (based on scipy.linalg.LinearOperator) for regularizers and projectors
+- Data fidelity function classes, including weighted least-squares
+- More test coverage
+- Support for non GPU reconstructions (in 2D)
+- Multi-dimensional volume mask creation
+### Fixed
+- SIRT regularization
+- Windows conda package build, and Python 3.8 target
+- Laplacian regularizer norm
+- Wavelet regularizer normalization
 
 ## 0.2.3 - 2020-05-05
 ### Added
@@ -62,5 +77,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release, with corrected forward and back-projections.
 - SIRT, SART, and Chambolle-Pock solvers.
 - TV-min and l1-norm based regularizers.
-
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.2.3...develop
