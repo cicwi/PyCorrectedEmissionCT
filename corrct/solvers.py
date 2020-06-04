@@ -208,7 +208,8 @@ class Regularizer_l1wl(BaseRegularizer):
 
     __reg_name__ = 'l1wl'
 
-    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant'):
+    def __init__(
+            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', normalized=False):
         if not has_pywt:
             raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
         if not use_swtn:
@@ -216,6 +217,7 @@ class Regularizer_l1wl(BaseRegularizer):
         BaseRegularizer.__init__(self, weight=weight)
         self.wavelet = wavelet
         self.level = level
+        self.normalized = normalized
 
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
@@ -227,17 +229,31 @@ class Regularizer_l1wl(BaseRegularizer):
 
         self.pad_on_demand = pad_on_demand
 
+        self.scaling_func_mult = 2 ** np.arange(self.level, 0, -1)
+        self.scaling_func_mult = np.tile(self.scaling_func_mult[:, None], [1, (2 ** self.ndims) - 1])
+        self.scaling_func_mult = np.concatenate(([self.scaling_func_mult[0, 0]], self.scaling_func_mult.flatten()))
+
     def initialize_sigma_tau(self):
-        self.sigma = 1  # Because the transform is normalized
-        return self.weight
+        if self.normalized:
+            self.sigma = 1
+            return self.weight * self.scaling_func_mult.size
+        else:
+            self.sigma = 1 / self.scaling_func_mult
+            tau = np.ones_like(self.scaling_func_mult) * (2 ** self.level - 1)
+            tau[0] += 1
+            return self.weight * np.sum(tau / self.scaling_func_mult)
 
     def initialize_dual(self, primal):
         self.H = operators.TransformWavelet(
-            primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes, pad_on_demand=self.pad_on_demand)
+            primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes,
+            pad_on_demand=self.pad_on_demand, normalized=self.normalized)
         return np.zeros(self.H.adj_shape, dtype=primal.dtype)
 
     def update_dual(self, dual, primal):
-        dual += self.H(primal)
+        upd = self.H(primal)
+        if not self.normalized:
+            upd *= np.reshape(self.sigma, [-1] + [1] * len(primal.shape))
+        dual += upd
 
     def apply_proximal(self, dual):
         dual /= np.fmax(1, np.abs(dual))

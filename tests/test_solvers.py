@@ -79,8 +79,7 @@ class TestRegularizers(unittest.TestCase):
         level = 2
         reg = solvers.Regularizer_l1wl(weight, 'db1', level, ndims=ndims)
 
-        tau = reg.initialize_sigma_tau()
-        assert tau == weight
+        reg.initialize_sigma_tau()
 
         dual = reg.initialize_dual(vol)
         assert np.all(dual.shape[1:] == self.round_to_pow2(vol.shape, level))
@@ -89,10 +88,11 @@ class TestRegularizers(unittest.TestCase):
 
         copy_dual = cp.deepcopy(dual)
         reg.update_dual(dual, vol)
-        assert np.all(np.isclose(dual, copy_dual + reg.H(vol)))
+        sigma_shape = [-1] + [1] * (len(reg.H.adj_shape)-1)
+        assert np.all(np.isclose(dual, copy_dual + reg.H(vol) * np.reshape(reg.sigma, sigma_shape)))
 
         upd = reg.compute_update_primal(dual)
-        assert np.all(np.isclose(vol * weight, upd))
+        assert np.all(np.isclose(upd, weight * reg.H.T(dual)))
 
         copy_dual = cp.deepcopy(dual)
         reg.apply_proximal(dual)
