@@ -125,8 +125,9 @@ def apply_minus_log(projs):
     return np.fmax(-np.log(projs), 0.0)
 
 
-def denoise_image(img, reg_weight=1e-2, stddev=None, iterations=250, verbose=False):
-    """Image denoiser based on (weighted) least-squares and wavelets.
+def denoise_image(
+        img, reg_weight=1e-2, stddev=None, error_method='deadzone', iterations=250, verbose=False):
+    """Image denoiser based on (simple, weighted or dead-zone) least-squares and wavelets.
     The weighted least-squares requires the local pixel-wise standard deviations.
     It can be used to denoise sinograms and projections.
 
@@ -136,6 +137,8 @@ def denoise_image(img, reg_weight=1e-2, stddev=None, iterations=250, verbose=Fal
     :type reg_weight: float, optional
     :param stddev: The local standard deviations. If None, it performs a standard least-squares.
     :type stddev: `numpy.array_like`, optional
+    :param error_method: The error weighting mechanism. Options are: {'deadzone'} | 'weighted'.
+    :type error_method: str, optional
     :param iterations: Number of iterations, defaults to 250
     :type iterations: int, optional
     :param verbose: Turn verbosity on, defaults to False
@@ -154,11 +157,24 @@ def denoise_image(img, reg_weight=1e-2, stddev=None, iterations=250, verbose=Fal
         img_weights = min_valid_stddev / np.fmax(stddev, min_valid_stddev)
         return (img_weights, reg_weights)
 
+    def compute_lsb_weights(stddev):
+        stddev_zeros = stddev == 0
+        stddev_valid = np.invert(stddev_zeros)
+        min_valid_stddev = np.min(stddev[stddev_valid])
+        return np.fmax(stddev, min_valid_stddev)
+
     OpI = operators.TransformIdentity(img.shape)
 
     if stddev is not None:
-        (img_weight, reg_weight) = compute_wls_weights(stddev, OpI.T, reg_weight)
-        data_term = solvers.DataFidelity_wl2(img_weight)
+        if error_method.lower() == 'deadzone':
+            img_weight = compute_lsb_weights(stddev)
+            data_term = solvers.DataFidelity_l2b(img_weight)
+        elif error_method.lower() == 'weighted':
+            (img_weight, reg_weight) = compute_wls_weights(stddev, OpI.T, reg_weight)
+            data_term = solvers.DataFidelity_wl2(img_weight)
+        else:
+            raise ValueError(
+                'Unknown error method: "%s". Options are: {"deadzone"} | "weighted"' % error_method)
     else:
         data_term = 'l2'
 

@@ -341,6 +341,32 @@ class DataFidelity_wl2(DataFidelity_l2):
             + np.dot(dual.flatten(), self.data.flatten()))
 
 
+class DataFidelity_l2b(DataFidelity_l2):
+    """l2-norm ball data-fidelity class.
+    """
+
+    __data_fidelity_name__ = 'l2b'
+
+    def __init__(self, local_error):
+        self.local_error = local_error
+
+    def assign_data(self, data, sigma=1):
+        self.sigma_error = sigma * self.local_error
+        super().assign_data(data=data, sigma=sigma)
+
+    def apply_proximal(self, dual):
+        dual -= self.sigma_data
+        abs_dual = np.abs(dual)
+        valid_dual = abs_dual > 0
+        dual[valid_dual] *= np.fmax((abs_dual[valid_dual] - self.sigma_error[valid_dual]) / abs_dual[valid_dual], 0)
+
+    def compute_primal_dual_gap(self, proj_primal, dual):
+        return (
+            (np.linalg.norm(np.fmax(np.abs(proj_primal - self.data) - self.local_error, 0), ord=2)
+             + np.linalg.norm(np.sqrt(self.local_error) * dual, ord=2)) / 2
+            + np.dot(dual.flatten(), self.data.flatten()))
+
+
 class DataFidelity_l1(DataFidelityBase):
     """l1-norm data-fidelity class.
     """
