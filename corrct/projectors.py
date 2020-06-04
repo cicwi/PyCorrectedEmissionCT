@@ -537,7 +537,11 @@ class ProjectorUncorrected(ProjectorBase):
             super_sampling=super_sampling)
 
     def _astra_fbp(self, projs, fbp_filter):
-        cfg = astra.astra_dict('FBP_CUDA')
+        if has_cuda:
+            fbp_type = 'FBP_CUDA'
+        else:
+            fbp_type = 'FBP'
+        cfg = astra.astra_dict(fbp_type)
         cfg['ProjectorId'] = self.proj_id[-1]
         cfg['FilterType'] = fbp_filter
 
