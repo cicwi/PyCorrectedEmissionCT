@@ -8,6 +8,7 @@ import numpy as np
 import unittest
 
 from corrct import operators
+from corrct import utils_test
 
 
 eps = np.finfo(np.float32).eps
@@ -109,29 +110,13 @@ class TestTransformLaplacian(TestOperators):
 class TestTransformWavelet(TestOperators):
     """Tests for the TransformWavelet class in `corrct.operators` package."""
 
-    @staticmethod
-    def round_to_pow2(x, p, data_type=np.int):
-        """Rounds first argument to the power of 2 indicated by second argument.
-
-        :param x: Number to round up
-        :type x: int or float
-        :param p: Power of 2
-        :type p: int
-        :param data_type: data type of the output
-        :type data_type: `numpy.dtype`
-
-        :return: Rounding up of input
-        :rtype: dtype specified by data_type
-        """
-        return np.ceil(np.array(x) / (2 ** p)).astype(data_type) * (2 ** p)
-
     def test_000_transform(self):
         """Test Haar wavelet transform in 2D."""
         wl_dec_level = 3
         H = operators.TransformWavelet(self.vol_ones_2d.shape, 'db1', wl_dec_level)
 
         w = H(self.vol_ones_2d)
-        assert np.all(w.shape[1:] == self.round_to_pow2(self.vol_ones_2d.shape, wl_dec_level))
+        assert np.all(w.shape[1:] == utils_test.roundup_to_pow2(self.vol_ones_2d.shape, wl_dec_level))
         assert w.shape[0] == 10
 
         wtw = H.T(w)

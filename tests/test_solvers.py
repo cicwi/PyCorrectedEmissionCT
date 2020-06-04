@@ -10,6 +10,7 @@ import unittest
 
 from corrct import solvers
 from corrct import utils_proc
+from corrct import utils_test
 
 
 eps = np.finfo(np.float32).eps
@@ -26,22 +27,6 @@ class TestRegularizers(unittest.TestCase):
 
     def tearDown(self):
         """Tear down test fixtures, if any."""
-
-    @staticmethod
-    def round_to_pow2(x, p, data_type=np.int):
-        """Rounds first argument to the power of 2 indicated by second argument.
-
-        :param x: Number to round up
-        :type x: int or float
-        :param p: Power of 2
-        :type p: int
-        :param data_type: data type of the output
-        :type data_type: `numpy.dtype`
-
-        :return: Rounding up of input
-        :rtype: dtype specified by data_type
-        """
-        return np.ceil(np.array(x) / (2 ** p)).astype(data_type) * (2 ** p)
 
     def _test_Regularizer_l1(self, vol):
         weight = 0.5
@@ -82,7 +67,7 @@ class TestRegularizers(unittest.TestCase):
         reg.initialize_sigma_tau()
 
         dual = reg.initialize_dual(vol)
-        assert np.all(dual.shape[1:] == self.round_to_pow2(vol.shape, level))
+        assert np.all(dual.shape[1:] == utils_test.roundup_to_pow2(vol.shape, level))
         assert dual.shape[0] == ((2 ** ndims - 1) * level + 1)
         assert np.all(dual == 0)
 
