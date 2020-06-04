@@ -193,7 +193,7 @@ class TransformWavelet(BaseTransform):
     """Wavelet Transform operator.
     """
 
-    def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand='constant'):
+    def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand='constant', normalized=True):
         """Wavelet Transform operator.
 
         :param x_shape: Shape of the data to be wavelet transformed.
@@ -206,6 +206,8 @@ class TransformWavelet(BaseTransform):
         :type axes: int or tuple of int, optional
         :param pad_on_demand: Padding type to fit the `2 ** level` shape requirements, defaults to 'constant'
         :type pad_on_demand: string, optional. Options are all the `numpy.pad` padding modes.
+        :param normalized: Whether to use a normalized transform. Defaults to True.
+        :type normalized: boolean, optional.
 
         :raises ValueError: In case the pywavelets package is not available or its version is not adequate.
         """
@@ -216,6 +218,7 @@ class TransformWavelet(BaseTransform):
 
         self.wavelet = wavelet
         self.level = level
+        self.normalized = normalized
 
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=np.int)
@@ -257,7 +260,8 @@ class TransformWavelet(BaseTransform):
                 pad_width = [(0, 0)] * len(x.shape)
                 pad_width[self.axes[ax]] = (pad_l, pad_h)
                 x = np.pad(x, pad_width, mode=self.pad_on_demand)
-        return pywt.swtn(x, wavelet=self.wavelet, axes=self.axes, norm=True, level=self.level, trim_approx=True)
+        return pywt.swtn(
+            x, wavelet=self.wavelet, axes=self.axes, norm=self.normalized, level=self.level, trim_approx=True)
 
     def inverse_swt(self, y):
         """Performs the inverse wavelet transform.
@@ -268,7 +272,8 @@ class TransformWavelet(BaseTransform):
         :return: Anti-transformed data.
         :rtype: `numpy.array_like`
         """
-        x = pywt.iswtn(y, wavelet=self.wavelet, axes=self.axes, norm=True)
+        x = pywt.iswtn(
+            y, wavelet=self.wavelet, axes=self.axes, norm=self.normalized)
         if self.pad_on_demand is not None and np.any(self.pad_axes):
             for ax in np.nonzero(self.pad_axes)[0]:
                 pad_l = np.ceil(self.pad_axes[ax] / 2).astype(np.int)
