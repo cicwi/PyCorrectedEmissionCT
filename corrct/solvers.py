@@ -239,7 +239,7 @@ class Regularizer_l1wl(BaseRegularizer):
             return self.weight * self.scaling_func_mult.size
         else:
             self.sigma = 1 / self.scaling_func_mult
-            tau = np.ones_like(self.scaling_func_mult) * (2 ** self.level - 1)
+            tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
             tau[0] += 1
             return self.weight * np.sum(tau / self.scaling_func_mult)
 
