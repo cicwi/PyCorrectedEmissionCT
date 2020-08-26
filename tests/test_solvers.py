@@ -32,10 +32,10 @@ class TestRegularizers(unittest.TestCase):
         weight = 0.5
         reg = solvers.Regularizer_l1(weight)
 
-        tau = reg.initialize_sigma_tau()
+        tau = reg.initialize_sigma_tau(vol)
         assert tau == weight
 
-        dual = reg.initialize_dual(vol)
+        dual = reg.initialize_dual()
         assert np.all(dual.shape == vol.shape)
         assert np.all(dual == 0)
 
@@ -64,20 +64,20 @@ class TestRegularizers(unittest.TestCase):
         level = 2
         reg = solvers.Regularizer_l1wl(weight, 'db1', level, ndims=ndims)
 
-        reg.initialize_sigma_tau()
+        reg.initialize_sigma_tau(vol)
 
-        dual = reg.initialize_dual(vol)
+        dual = reg.initialize_dual()
         assert np.all(dual.shape[1:] == utils_test.roundup_to_pow2(vol.shape, level))
         assert dual.shape[0] == ((2 ** ndims - 1) * level + 1)
         assert np.all(dual == 0)
 
         copy_dual = cp.deepcopy(dual)
         reg.update_dual(dual, vol)
-        sigma_shape = [-1] + [1] * (len(reg.H.adj_shape)-1)
-        assert np.all(np.isclose(dual, copy_dual + reg.H(vol) * np.reshape(reg.sigma, sigma_shape)))
+        sigma_shape = [-1] + [1] * (len(reg.op.adj_shape)-1)
+        assert np.all(np.isclose(dual, copy_dual + reg.op(vol) * np.reshape(reg.sigma, sigma_shape)))
 
         upd = reg.compute_update_primal(dual)
-        assert np.all(np.isclose(upd, weight * reg.H.T(dual)))
+        assert np.all(np.isclose(upd, weight * reg.op.T(dual)))
 
         copy_dual = cp.deepcopy(dual)
         reg.apply_proximal(dual)
@@ -88,41 +88,41 @@ class TestRegularizers(unittest.TestCase):
         ndims = len(vol.shape)
         reg = solvers.Regularizer_TV(weight, ndims=ndims)
 
-        tau = reg.initialize_sigma_tau()
+        tau = reg.initialize_sigma_tau(vol)
         assert tau == (weight * 2 * ndims)
 
-        dual = reg.initialize_dual(vol)
+        dual = reg.initialize_dual()
         assert np.all(dual.shape[1:] == vol.shape)
         assert dual.shape[0] == ndims
         assert np.all(dual == 0)
 
         copy_dual = cp.deepcopy(dual)
         reg.update_dual(dual, vol)
-        assert np.all(np.isclose(dual, copy_dual + reg.D(vol) / 2))
+        assert np.all(np.isclose(dual, copy_dual + reg.op(vol) / 2))
 
         dual = np.random.random(dual.shape)
         upd = reg.compute_update_primal(dual)
-        assert np.all(np.isclose(reg.D.T(dual) * weight, upd))
+        assert np.all(np.isclose(reg.op.T(dual) * weight, upd))
 
     def _test_Regularizer_lap(self, vol):
         weight = 0.25
         ndims = len(vol.shape)
         reg = solvers.Regularizer_lap(weight, ndims=ndims)
 
-        tau = reg.initialize_sigma_tau()
+        tau = reg.initialize_sigma_tau(vol)
         assert tau == (weight * 4 * ndims)
 
-        dual = reg.initialize_dual(vol)
+        dual = reg.initialize_dual()
         assert np.all(dual.shape == vol.shape)
         assert np.all(dual == 0)
 
         copy_dual = cp.deepcopy(dual)
         reg.update_dual(dual, vol)
-        assert np.all(np.isclose(dual, copy_dual + reg.L(vol) / 4))
+        assert np.all(np.isclose(dual, copy_dual + reg.op(vol) / 4))
 
         dual = np.random.random(dual.shape)
         upd = reg.compute_update_primal(dual)
-        assert np.all(np.isclose(reg.L.T(dual) * weight, upd))
+        assert np.all(np.isclose(reg.op.T(dual) * weight, upd))
 
     def test_000_Regularizer_l1_2D(self):
         """Test l1-min regularizer in 2D."""

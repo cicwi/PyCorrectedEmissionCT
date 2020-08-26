@@ -37,6 +37,8 @@ class BaseRegularizer(object):
 
     def __init__(self, weight):
         self.weight = weight
+        self.dtype = None
+        self.op = None
 
     def upper(self):
         return self.__reg_name__.upper()
@@ -44,11 +46,11 @@ class BaseRegularizer(object):
     def lower(self):
         return self.__reg_name__.lower()
 
-    def initialize_sigma_tau(self):
+    def initialize_sigma_tau(self, primal):
         raise NotImplementedError()
 
-    def initialize_dual(self, primal):
-        raise NotImplementedError()
+    def initialize_dual(self):
+        return np.zeros(self.op.adj_shape, dtype=self.dtype)
 
     def update_dual(self, dual, primal):
         raise NotImplementedError()
@@ -78,25 +80,22 @@ class Regularizer_TV(BaseRegularizer):
         self.ndims = ndims
         self.axes = axes
 
-        self.D = None
+    def initialize_sigma_tau(self, primal):
+        self.dtype = primal.dtype
+        self.op = operators.TransformGradient(primal.shape, axes=self.axes)
 
-    def initialize_sigma_tau(self):
         self.sigma = 0.5
         return self.weight * 2 * self.ndims
 
-    def initialize_dual(self, primal):
-        self.D = operators.TransformGradient(primal.shape, axes=self.axes)
-        return np.zeros(self.D.adj_shape, dtype=primal.dtype)
-
     def update_dual(self, dual, primal):
-        dual += self.sigma * self.D(primal)
+        dual += self.sigma * self.op(primal)
 
     def apply_proximal(self, dual):
         dual_dir_norm_l2 = np.linalg.norm(dual, ord=2, axis=0, keepdims=True)
         dual /= np.fmax(1, dual_dir_norm_l2)
 
     def compute_update_primal(self, dual):
-        return self.weight * self.D.T(dual)
+        return self.weight * self.op.T(dual)
 
 
 class Regularizer_TV2D(Regularizer_TV):
@@ -138,24 +137,21 @@ class Regularizer_lap(BaseRegularizer):
         self.ndims = ndims
         self.axes = axes
 
-        self.L = None
+    def initialize_sigma_tau(self, primal):
+        self.dtype = primal.dtype
+        self.op = operators.TransformLaplacian(primal.shape, axes=self.axes)
 
-    def initialize_sigma_tau(self):
         self.sigma = 0.25
         return self.weight * 4 * self.ndims
 
-    def initialize_dual(self, primal):
-        self.L = operators.TransformLaplacian(primal.shape, axes=self.axes)
-        return np.zeros(self.L.adj_shape, dtype=primal.dtype)
-
     def update_dual(self, dual, primal):
-        dual += self.sigma * self.L(primal)
+        dual += self.sigma * self.op(primal)
 
     def apply_proximal(self, dual):
         dual /= np.fmax(1, np.abs(dual))
 
     def compute_update_primal(self, dual):
-        return self.weight * self.L.T(dual)
+        return self.weight * self.op.T(dual)
 
 
 class Regularizer_lap2D(Regularizer_lap):
@@ -186,11 +182,11 @@ class Regularizer_l1(BaseRegularizer):
 
     __reg_name__ = 'l1'
 
-    def initialize_sigma_tau(self):
-        return self.weight
+    def initialize_sigma_tau(self, primal):
+        self.dtype = primal.dtype
+        self.op = operators.TransformIdentity(primal.shape)
 
-    def initialize_dual(self, primal):
-        return np.zeros(primal.shape, dtype=primal.dtype)
+        return self.weight
 
     def update_dual(self, dual, primal):
         dual += primal
@@ -233,7 +229,12 @@ class Regularizer_l1wl(BaseRegularizer):
         self.scaling_func_mult = np.tile(self.scaling_func_mult[:, None], [1, (2 ** self.ndims) - 1])
         self.scaling_func_mult = np.concatenate(([self.scaling_func_mult[0, 0]], self.scaling_func_mult.flatten()))
 
-    def initialize_sigma_tau(self):
+    def initialize_sigma_tau(self, primal):
+        self.dtype = primal.dtype
+        self.op = operators.TransformStationaryWavelet(
+            primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes,
+            pad_on_demand=self.pad_on_demand, normalized=self.normalized)
+
         if self.normalized:
             self.sigma = 1
             return self.weight * self.scaling_func_mult.size
@@ -243,23 +244,17 @@ class Regularizer_l1wl(BaseRegularizer):
             tau[0] += 1
             return self.weight * np.sum(tau / self.scaling_func_mult)
 
-    def initialize_dual(self, primal):
-        self.H = operators.TransformStationaryWavelet(
-            primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes,
-            pad_on_demand=self.pad_on_demand, normalized=self.normalized)
-        return np.zeros(self.H.adj_shape, dtype=primal.dtype)
-
     def update_dual(self, dual, primal):
-        upd = self.H(primal)
+        upd = self.op(primal)
         if not self.normalized:
-            upd *= np.reshape(self.sigma, [-1] + [1] * len(primal.shape))
+            upd *= np.reshape(self.sigma, [-1] + [1] * len(self.op.dir_shape))
         dual += upd
 
     def apply_proximal(self, dual):
         dual /= np.fmax(1, np.abs(dual))
 
     def compute_update_primal(self, dual):
-        return self.weight * self.H.T(dual)
+        return self.weight * self.op.T(dual)
 
 
 # ---- Data Fidelity terms ----
@@ -557,7 +552,7 @@ class Sirt(Solver):
             tau *= b_mask
         tau = np.abs(At(tau))
         if self.regularizer is not None:
-            tau += self.regularizer.initialize_sigma_tau()
+            tau += self.regularizer.initialize_sigma_tau(tau)
         tau[(tau / np.max(tau)) < 1e-5] = 1
         tau = self.relaxation / tau
 
@@ -600,7 +595,7 @@ class Sirt(Solver):
                     break
 
             if self.regularizer is not None:
-                q = self.regularizer.initialize_dual(x)
+                q = self.regularizer.initialize_dual()
                 self.regularizer.update_dual(q, x)
                 self.regularizer.apply_proximal(q)
 
@@ -680,7 +675,8 @@ class CP(Solver):
         (L, x_shape) = self.power_method(A, At, b)
         tau = L
         if self.regularizer is not None:
-            tau += self.regularizer.initialize_sigma_tau()
+            dummy_x = np.empty(x_shape, dtype=b.dtype)
+            tau += self.regularizer.initialize_sigma_tau(dummy_x)
         tau = self.relaxation / tau
         sigma = 0.95 / L
         return (x_shape, sigma, tau)
@@ -710,7 +706,7 @@ class CP(Solver):
                 tau *= b_mask
             tau = np.abs(At_abs(tau))
             if self.regularizer is not None:
-                tau += self.regularizer.initialize_sigma_tau()
+                tau += self.regularizer.initialize_sigma_tau(tau)
             tau[(tau / np.max(tau)) < 1e-5] = 1
             tau = self.relaxation / tau
 
@@ -734,7 +730,7 @@ class CP(Solver):
         p = self.data_term.initialize_dual()
 
         if self.regularizer is not None:
-            q = self.regularizer.initialize_dual(x)
+            q = self.regularizer.initialize_dual()
 
         if self.tolerance is not None:
             res_norm_0 = np.linalg.norm(b.flatten())
