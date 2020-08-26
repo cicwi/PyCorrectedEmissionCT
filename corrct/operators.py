@@ -189,12 +189,12 @@ class TransformDiagonalScaling(BaseTransform):
         return self.scale * x
 
 
-class TransformWavelet(BaseTransform):
-    """Wavelet Transform operator.
+class TransformStationaryWavelet(BaseTransform):
+    """Stationary avelet Transform operator.
     """
 
     def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand='constant', normalized=True):
-        """Wavelet Transform operator.
+        """Stationary wavelet Transform operator.
 
         :param x_shape: Shape of the data to be wavelet transformed.
         :type x_shape: `numpy.array_like`
@@ -407,7 +407,7 @@ class TransformLaplacian(BaseTransform):
 if __name__ == '__main__':
     test_vol = np.zeros((10, 10), dtype=np.float32)
 
-    H = TransformWavelet(test_vol.shape, 'db1', 2)
+    H = TransformStationaryWavelet(test_vol.shape, 'db1', 2)
     Htw = H.T.explicit()
     Hw = H.explicit()
 
