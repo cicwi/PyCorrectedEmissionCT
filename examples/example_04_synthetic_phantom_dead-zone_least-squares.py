@@ -35,7 +35,7 @@ psf = None
 
 (ph, vol_att_in, vol_att_out) = cct.utils_test.phantom_assign_concentration(ph_or)
 (sino, angles, expected_ph) = cct.utils_test.create_sino(
-    ph, 120, psf=psf, add_poisson=True)  # , vol_att_in=vol_att_in, vol_att_out=vol_att_out
+    ph, 120, psf=psf, add_poisson=True, dwell_time_s=1e-2)  # , vol_att_in=vol_att_in, vol_att_out=vol_att_out
 
 num_iterations = 250
 # reg_weight = 1e-2
@@ -55,7 +55,9 @@ solver_lsb = corrct.solvers.CP(verbose=True, data_term=data_term_lsb)  # , regul
 with corrct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     print('Reconstructing:')
     (rec_cpls, _) = solver_ls(A, sino, num_iterations)
+    print('- Phantom power: %g, noise power: %g' % cct.utils_test.compute_error_power(expected_ph, rec_cpls))
     (rec_cplsb, _) = solver_lsb(A, sino, num_iterations)
+    print('- Phantom power: %g, noise power: %g' % cct.utils_test.compute_error_power(expected_ph, rec_cplsb))
 
 (f, axes) = plt.subplots(2, 2)
 im_ph = axes[0, 0].imshow(expected_ph)
@@ -82,8 +84,6 @@ ax.grid()
 
 plt.tight_layout()
 plt.show(block=False)
-
-print(np.std(expected_ph - rec_cpls), np.std(expected_ph - rec_cplsb))
 
 print(np.std((expected_ph - rec_cpls) / (expected_ph + (expected_ph == 0))))
 print(np.std((expected_ph - rec_cplsb) / (expected_ph + (expected_ph == 0))))
