@@ -189,6 +189,87 @@ class TransformDiagonalScaling(BaseTransform):
         return self.scale * x
 
 
+class TransformDecimatedWavelet(BaseTransform):
+    """Decimated wavelet Transform operator.
+    """
+
+    def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand='constant'):
+        """Decimated wavelet Transform operator.
+
+        :param x_shape: Shape of the data to be wavelet transformed.
+        :type x_shape: `numpy.array_like`
+        :param wavelet: Wavelet type
+        :type wavelet: string
+        :param level: Numer of wavelet decomposition levels
+        :type level: int
+        :param axes: Axes along which to do the transform, defaults to None
+        :type axes: int or tuple of int, optional
+        :param pad_on_demand: Padding type to fit the `2 ** level` shape requirements, defaults to 'constant'
+        :type pad_on_demand: string, optional. Options are all the `numpy.pad` padding modes.
+
+        :raises ValueError: In case the pywavelets package is not available or its version is not adequate.
+        """
+        if not has_pywt:
+            raise ValueError('Cannot use Wavelet transform because pywavelets is not installed.')
+
+        self.wavelet = wavelet
+        self.level = level
+
+        if axes is None:
+            axes = np.arange(-len(x_shape), 0, dtype=np.int)
+        self.axes = axes
+
+        self.pad_on_demand = pad_on_demand
+
+        num_axes = len(self.axes)
+
+        self.dir_shape = np.array(x_shape)
+
+        self.sub_band_shapes = pywt.wavedecn_shapes(
+            self.dir_shape, self.wavelet, mode=self.pad_on_demand, level=self.level, axes=self.axes)
+        self.adj_size = self.sub_band_shapes[0] + np.sum(
+            [self.sub_band_shapes[x]['d' * num_axes] for x in range(1, self.level+1)], axis=0)
+        self.slicing_info = None
+
+        super().__init__()
+
+    def direct_dwt(self, x):
+        """Performs the direct wavelet transform.
+
+        :param x: Data to transform.
+        :type x: `numpy.array_like`
+
+        :return: Transformed data.
+        :rtype: list
+        """
+        return pywt.wavedecn(
+            x, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand, level=self.level)
+
+    def inverse_dwt(self, y):
+        """Performs the inverse wavelet transform.
+
+        :param x: Data to anti-transform.
+        :type x: list
+
+        :return: Anti-transformed data.
+        :rtype: `numpy.array_like`
+        """
+        return pywt.waverecn(
+            y, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand)
+
+    def _op_direct(self, x):
+        c = self.direct_dwt(x)
+        y, self.slicing_info = pywt.coeffs_to_array(c, axes=self.axes)
+        return y
+
+    def _op_adjoint(self, y):
+        if self.slicing_info is None:
+            _ = self._op_direct(np.zeros(self.dir_shape))
+
+        c = pywt.array_to_coeffs(y, self.slicing_info)
+        return self.inverse_dwt(c)
+
+
 class TransformStationaryWavelet(BaseTransform):
     """Stationary avelet Transform operator.
     """

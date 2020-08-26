@@ -257,6 +257,62 @@ class Regularizer_l1wl(BaseRegularizer):
         return self.weight * self.op.T(dual)
 
 
+class Regularizer_l1dwl(BaseRegularizer):
+    """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions.
+    """
+
+    __reg_name__ = 'l1wl'
+
+    def __init__(
+            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant'):
+        if not has_pywt:
+            raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
+        if not use_swtn:
+            raise ValueError('Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).')
+        BaseRegularizer.__init__(self, weight=weight)
+        self.wavelet = wavelet
+        self.level = level
+
+        if axes is None:
+            axes = np.arange(-ndims, 0, dtype=np.int)
+        elif not ndims == len(axes):
+            print('WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.')
+            ndims = len(axes)
+        self.ndims = ndims
+        self.axes = axes
+
+        self.pad_on_demand = pad_on_demand
+
+        self.scaling_func_mult = 2 ** np.arange(self.level, 0, -1)
+
+    def initialize_sigma_tau(self, primal):
+        self.dtype = primal.dtype
+        self.op = operators.TransformDecimatedWavelet(
+            primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes,
+            pad_on_demand=self.pad_on_demand)
+
+        self.sigma = [np.ones(self.op.sub_band_shapes[0], self.dtype) * self.scaling_func_mult[0]]
+        for ii_l in range(self.level):
+            d = {}
+            for label in self.op.sub_band_shapes[ii_l+1].keys():
+                d[label] = np.ones(self.op.sub_band_shapes[ii_l+1][label], self.dtype) * self.scaling_func_mult[ii_l]
+            self.sigma.append(d)
+        self.sigma, _ = pywt.coeffs_to_array(self.sigma)
+
+        tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
+        tau[0] += 1
+        return self.weight * np.sum(tau / self.scaling_func_mult)
+
+    def update_dual(self, dual, primal):
+        dual += self.op(primal) * self.sigma
+
+    def apply_proximal(self, dual):
+        dual /= np.fmax(1, np.abs(dual))
+
+    def compute_update_primal(self, dual):
+        return self.weight * self.op.T(dual)
+
+
 # ---- Data Fidelity terms ----
 
 
