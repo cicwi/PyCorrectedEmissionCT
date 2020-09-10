@@ -110,7 +110,7 @@ def create_sino(
         ph, num_angles, start_angle_deg=0, end_angle_deg=180,
         dwell_time_s=1, photon_flux=1e9, detectors_pos_rad=(np.pi/2),
         vol_att_in=None, vol_att_out=None, psf=None,
-        background_std=None, add_poisson=False, readout_noise_std=None,
+        background_avg=None, background_std=None, add_poisson=False, readout_noise_std=None,
         data_type=np.float32):
     """Computes the sinogram from a given phantom
 
@@ -134,6 +134,8 @@ def create_sino(
     :type vol_att_out: `numpy.array_like`, optional
     :param psf: Point spread function or probing beam profile, defaults to None
     :type psf: `numpy.array_like`, optional
+    :param background_avg: Background average value, defaults to None
+    :type background_avg: float, optional
     :param background_std: Background sigma, defaults to None
     :type background_std: float, optional
     :param add_poisson: Switch to turn on Poisson noise, defaults to False
@@ -154,9 +156,6 @@ def create_sino(
     num_photons = photon_flux * dwell_time_s
     detector_solidangle_sr = (2.4 / 2 / 16 / 2) ** 2
 
-    if background_std is not None:
-        ph = ph + np.abs(np.random.normal(0, background_std, ph.shape))
-
     if vol_att_in is None and vol_att_out is None:
         with projectors.ProjectorUncorrected(ph.shape, angles_rad) as p:
             sino = num_photons * detector_solidangle_sr * p.fp(ph)
@@ -167,13 +166,22 @@ def create_sino(
             sino = num_photons * detector_solidangle_sr * p.fp(ph)
 
     # Adding noise
-    sino_noise = sino
+    sino_noise = sino.copy()
+    if background_avg is not None:
+        if background_std is None:
+            background_std = background_avg * 5e-2
+        sino_noise += (
+            num_photons * detector_solidangle_sr * np.abs(np.random.normal(background_avg, background_std, sino.shape))
+        )
+
+    background = np.mean((sino_noise - sino).flatten())
+
     if add_poisson:
         sino_noise = np.random.poisson(sino_noise).astype(np.float32)
     if readout_noise_std is not None:
-        sino_noise = sino_noise + np.random.normal(0, readout_noise_std, sino.shape)
+        sino_noise += np.random.normal(0, readout_noise_std, sino.shape)
 
-    return (sino_noise, angles_rad, ph * num_photons * detector_solidangle_sr)
+    return (sino_noise, angles_rad, ph * num_photons * detector_solidangle_sr, background)
 
 
 def compute_error_power(expected_vol, computed_vol):
