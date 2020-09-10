@@ -227,7 +227,7 @@ class TransformDecimatedWavelet(BaseTransform):
 
         self.sub_band_shapes = pywt.wavedecn_shapes(
             self.dir_shape, self.wavelet, mode=self.pad_on_demand, level=self.level, axes=self.axes)
-        self.adj_size = self.sub_band_shapes[0] + np.sum(
+        self.adj_shape = self.sub_band_shapes[0] + np.sum(
             [self.sub_band_shapes[x]['d' * num_axes] for x in range(1, self.level+1)], axis=0)
         self.slicing_info = None
 
