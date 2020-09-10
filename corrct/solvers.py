@@ -40,6 +40,9 @@ class BaseRegularizer(object):
         self.dtype = None
         self.op = None
 
+    def info(self):
+        return self.__reg_name__ + '(w:%g' % self.weight + ')'
+
     def upper(self):
         return self.__reg_name__.upper()
 
@@ -202,7 +205,10 @@ class Regularizer_l1wl(BaseRegularizer):
     """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions.
     """
 
-    __reg_name__ = 'l1wl'
+    __reg_name__ = 'l1swl'
+
+    def info(self):
+        return self.__reg_name__ + '(t:' + self.wavelet + '-l:%d' % self.level + '-w:%g' % self.weight + ')'
 
     def __init__(
             self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', normalized=False):
@@ -261,7 +267,10 @@ class Regularizer_l1dwl(BaseRegularizer):
     """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions.
     """
 
-    __reg_name__ = 'l1wl'
+    __reg_name__ = 'l1dwl'
+
+    def info(self):
+        return self.__reg_name__ + '(t:' + self.wavelet + '-l:%d' % self.level + '-w:%g' % self.weight + ')'
 
     def __init__(
             self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant'):
@@ -324,6 +333,16 @@ class DataFidelityBase(object):
 
     def __init__(self, background=None):
         self.background = background
+
+    def info(self):
+        if self.background is not None:
+            if np.array(self.background).size > 1:
+                bckgrnd_str = '(B:<array>)'
+            else:
+                bckgrnd_str = '(B:%g)' % self.background
+        else:
+            bckgrnd_str = ''
+        return self.__data_fidelity_name__ + bckgrnd_str
 
     def assign_data(self, data, sigma=1):
         self.data = data
@@ -516,6 +535,9 @@ class Solver(object):
         self.verbose = verbose
         self.relaxation = relaxation
         self.tolerance = tolerance
+
+    def info(self):
+        return type(self).__name__
 
     def upper(self):
         return type(self).__name__.upper()
@@ -746,6 +768,13 @@ class CP(Solver):
         super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation)
         self.data_term = self._initialize_data_fidelity_function(data_term)
         self.regularizer = regularizer
+
+    def info(self):
+        if self.regularizer is not None:
+            reg_info = '-' + self.regularizer.info()
+        else:
+            reg_info = ''
+        return Solver.info(self) +  '-' + self.data_term.info() + reg_info
 
     def _initialize_data_fidelity_function(self, data_term):
         if isinstance(data_term, str):
