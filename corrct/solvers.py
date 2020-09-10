@@ -9,6 +9,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 import scipy.sparse as sps
+import scipy.ndimage as spimg
 
 from numpy import random as rnd
 
@@ -320,6 +321,52 @@ class Regularizer_l1dwl(BaseRegularizer):
 
     def compute_update_primal(self, dual):
         return self.weight * self.op.T(dual)
+
+
+class BaseRegularizer_med(BaseRegularizer):
+    """Median filter regularizer. It can be used to promote filtered reconstructions.
+    """
+
+    __reg_name__ = 'med'
+
+    def info(self):
+        return self.__reg_name__ + '(s:%s' % np.array(self.filt_size) + '-w:%g' % self.weight + ')'
+
+    def __init__(self, weight, filt_size=3):
+        BaseRegularizer.__init__(self, weight=weight)
+        self.filt_size = filt_size
+
+    def initialize_sigma_tau(self, primal):
+        self.dtype = primal.dtype
+        self.op = operators.TransformIdentity(primal.shape)
+
+        return self.weight
+
+    def update_dual(self, dual, primal):
+        dual += (primal - spimg.median_filter(primal, self.filt_size))
+
+    def compute_update_primal(self, dual):
+        return self.weight * dual
+
+
+class Regularizer_l1med(BaseRegularizer_med):
+    """l1-norm median filter regularizer. It can be used to promote filtered reconstructions.
+    """
+
+    __reg_name__ = 'l1med'
+
+    def apply_proximal(self, dual):
+        dual /= np.fmax(1, np.abs(dual))
+
+
+class Regularizer_l2med(BaseRegularizer_med):
+    """l2-norm median filter regularizer. It can be used to promote filtered reconstructions.
+    """
+
+    __reg_name__ = 'l2med'
+
+    def apply_proximal(self, dual):
+        dual /= 2
 
 
 # ---- Data Fidelity terms ----
