@@ -144,7 +144,7 @@ def reconstruct(  # noqa: C901
                     verbose=True, data_term=data_term, regularizer=regularizer)
             (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask, precondition=precondition)
         elif algo.upper() == 'CPWL':
-            regularizer = solvers.Regularizer_l1wl(weight=lambda_reg, pad_on_demand=True)
+            regularizer = solvers.Regularizer_l1swl(weight=lambda_reg, pad_on_demand=True)
             algo = solvers.CP(
                     verbose=True, data_term=data_term, regularizer=regularizer)
             (vol, _) = algo(A, sino, iterations, At=At, x_mask=x_mask, precondition=precondition)

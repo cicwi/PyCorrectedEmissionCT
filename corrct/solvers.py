@@ -297,10 +297,11 @@ class BaseRegularizer(object):
 
     __reg_name__ = ''
 
-    def __init__(self, weight):
+    def __init__(self, weight, norm):
         self.weight = weight
         self.dtype = None
         self.op = None
+        self.norm = norm
 
     def info(self):
         return self.__reg_name__ + '(w:%g' % self.weight + ')'
@@ -321,21 +322,21 @@ class BaseRegularizer(object):
         raise NotImplementedError()
 
     def apply_proximal(self, dual):
-        raise NotImplementedError()
+        self.norm.apply_proximal(dual)
 
     def compute_update_primal(self, dual):
         raise NotImplementedError()
 
 
-class Regularizer_TV(BaseRegularizer):
+class Regularizer_Grad(BaseRegularizer):
     """Total Variation (TV) regularizer. It can be used to promote piece-wise
     constant reconstructions.
     """
 
     __reg_name__ = 'TV'
 
-    def __init__(self, weight, ndims=2, axes=None):
-        BaseRegularizer.__init__(self, weight=weight)
+    def __init__(self, weight, ndims=2, axes=None, norm=DataFidelity_l12()):
+        super().__init__(weight=weight, norm=norm)
 
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
@@ -350,39 +351,59 @@ class Regularizer_TV(BaseRegularizer):
         self.op = operators.TransformGradient(primal.shape, axes=self.axes)
 
         self.sigma = 0.5
+        self.norm.assign_data(0, sigma=self.sigma)
+
         return self.weight * 2 * self.ndims
 
     def update_dual(self, dual, primal):
         dual += self.sigma * self.op(primal)
 
-    def apply_proximal(self, dual):
-        dual_dir_norm_l2 = np.linalg.norm(dual, ord=2, axis=0, keepdims=True)
-        dual /= np.fmax(1, dual_dir_norm_l2)
-
     def compute_update_primal(self, dual):
         return self.weight * self.op.T(dual)
 
 
-class Regularizer_TV2D(Regularizer_TV):
+class Regularizer_TV2D(Regularizer_Grad):
     """Total Variation (TV) regularizer in 2D. It can be used to promote
     piece-wise constant reconstructions.
     """
 
     __reg_name__ = 'TV2D'
 
-    def __init__(self, weight, axes=None):
-        Regularizer_TV.__init__(self, weight=weight, ndims=2, axes=axes)
+    def __init__(self, weight, axes=None, norm=DataFidelity_l12()):
+        super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
 
 
-class Regularizer_TV3D(Regularizer_TV):
+class Regularizer_TV3D(Regularizer_Grad):
     """Total Variation (TV) regularizer in 3D. It can be used to promote
     piece-wise constant reconstructions.
     """
 
     __reg_name__ = 'TV3D'
 
-    def __init__(self, weight, axes=None):
-        Regularizer_TV.__init__(self, weight=weight, ndims=3, axes=axes)
+    def __init__(self, weight, axes=None, norm=DataFidelity_l12()):
+        super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
+
+
+class Regularizer_HubTV2D(Regularizer_Grad):
+    """Total Variation (TV) regularizer in 2D. It can be used to promote
+    piece-wise constant reconstructions.
+    """
+
+    __reg_name__ = 'HubTV2D'
+
+    def __init__(self, weight, huber_size, axes=None):
+        super().__init__(weight=weight, ndims=2, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
+
+
+class Regularizer_HubTV3D(Regularizer_Grad):
+    """Total Variation (TV) regularizer in 3D. It can be used to promote
+    piece-wise constant reconstructions.
+    """
+
+    __reg_name__ = 'HubTV3D'
+
+    def __init__(self, weight, huber_size, axes=None):
+        super().__init__(weight=weight, ndims=3, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
 
 
 class Regularizer_lap(BaseRegularizer):
@@ -392,7 +413,7 @@ class Regularizer_lap(BaseRegularizer):
     __reg_name__ = 'lap'
 
     def __init__(self, weight, ndims=2, axes=None):
-        BaseRegularizer.__init__(self, weight=weight)
+        super().__init__(weight=weight, norm=DataFidelity_l1())
 
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
@@ -407,13 +428,12 @@ class Regularizer_lap(BaseRegularizer):
         self.op = operators.TransformLaplacian(primal.shape, axes=self.axes)
 
         self.sigma = 0.25
+        self.norm.assign_data(0, sigma=self.sigma)
+
         return self.weight * 4 * self.ndims
 
     def update_dual(self, dual, primal):
         dual += self.sigma * self.op(primal)
-
-    def apply_proximal(self, dual):
-        dual /= np.fmax(1, np.abs(dual))
 
     def compute_update_primal(self, dual):
         return self.weight * self.op.T(dual)
@@ -447,38 +467,42 @@ class Regularizer_l1(BaseRegularizer):
 
     __reg_name__ = 'l1'
 
+    def __init__(self, weight):
+        super().__init__(weight=weight, norm=DataFidelity_l1())
+
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
+
+        self.norm.assign_data(0, sigma=1)
 
         return self.weight
 
     def update_dual(self, dual, primal):
         dual += primal
 
-    def apply_proximal(self, dual):
-        dual /= np.fmax(1, np.abs(dual))
-
     def compute_update_primal(self, dual):
         return self.weight * dual
 
 
-class Regularizer_l1wl(BaseRegularizer):
-    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions.
+class Regularizer_swl(BaseRegularizer):
+    """Base stationary wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain.
     """
 
-    __reg_name__ = 'l1swl'
+    __reg_name__ = 'swl'
 
     def info(self):
         return self.__reg_name__ + '(t:' + self.wavelet + '-l:%d' % self.level + '-w:%g' % self.weight + ')'
 
     def __init__(
-            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', normalized=False):
+            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', normalized=False,
+            norm=DataFidelity_l1()
+        ):
         if not has_pywt:
             raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
         if not use_swtn:
             raise ValueError('Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).')
-        BaseRegularizer.__init__(self, weight=weight)
+        super().__init__(weight=weight, norm=norm)
         self.wavelet = wavelet
         self.level = level
         self.normalized = normalized
@@ -505,9 +529,13 @@ class Regularizer_l1wl(BaseRegularizer):
 
         if self.normalized:
             self.sigma = 1
+            self.norm.assign_data(0, sigma=self.sigma)
+
             return self.weight * self.scaling_func_mult.size
         else:
-            self.sigma = 1 / self.scaling_func_mult
+            self.sigma = np.reshape(1 / self.scaling_func_mult, [-1] + [1] * len(self.op.dir_shape))
+            self.norm.assign_data(0, sigma=self.sigma)
+
             tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
             tau[0] += 1
             return self.weight * np.sum(tau / self.scaling_func_mult)
@@ -515,32 +543,57 @@ class Regularizer_l1wl(BaseRegularizer):
     def update_dual(self, dual, primal):
         upd = self.op(primal)
         if not self.normalized:
-            upd *= np.reshape(self.sigma, [-1] + [1] * len(self.op.dir_shape))
+            upd *= self.sigma
         dual += upd
-
-    def apply_proximal(self, dual):
-        dual /= np.fmax(1, np.abs(dual))
 
     def compute_update_primal(self, dual):
         return self.weight * self.op.T(dual)
 
 
-class Regularizer_l1dwl(BaseRegularizer):
-    """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions.
+class Regularizer_l1swl(Regularizer_swl):
+    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions.
     """
 
-    __reg_name__ = 'l1dwl'
+    __reg_name__ = 'l1swl'
+
+    def __init__(
+            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', normalized=False):
+        super().__init__(
+            weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, normalized=normalized,
+            norm=DataFidelity_l1()
+        )
+
+
+class Regularizer_Hub_swl(Regularizer_swl):
+    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions.
+    """
+
+    __reg_name__ = 'Hubswl'
+
+    def __init__(
+            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', normalized=False, huber_size=None):
+        super().__init__(
+            weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, normalized=normalized,
+            norm=DataFidelity_Huber(huber_size)
+        )
+
+
+class Regularizer_dwl(BaseRegularizer):
+    """Base decimated wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain.
+    """
+
+    __reg_name__ = 'dwl'
 
     def info(self):
         return self.__reg_name__ + '(t:' + self.wavelet + '-l:%d' % self.level + '-w:%g' % self.weight + ')'
 
     def __init__(
-            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant'):
+            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', norm=DataFidelityBase()):
         if not has_pywt:
             raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
         if not use_swtn:
             raise ValueError('Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).')
-        BaseRegularizer.__init__(self, weight=weight)
+        super().__init__(weight=weight, norm=norm)
         self.wavelet = wavelet
         self.level = level
 
@@ -569,6 +622,7 @@ class Regularizer_l1dwl(BaseRegularizer):
                 d[label] = np.ones(self.op.sub_band_shapes[ii_l+1][label], self.dtype) * self.scaling_func_mult[ii_l]
             self.sigma.append(d)
         self.sigma, _ = pywt.coeffs_to_array(self.sigma)
+        self.norm.assign_data(0, sigma=self.sigma)
 
         tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
         tau[0] += 1
@@ -577,15 +631,35 @@ class Regularizer_l1dwl(BaseRegularizer):
     def update_dual(self, dual, primal):
         dual += self.op(primal) * self.sigma
 
-    def apply_proximal(self, dual):
-        dual /= np.fmax(1, np.abs(dual))
-
     def compute_update_primal(self, dual):
         return self.weight * self.op.T(dual)
 
 
+class Regularizer_l1dwl(Regularizer_dwl):
+    """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions.
+    """
+
+    __reg_name__ = 'l1dwl'
+
+    def __init__(
+            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant'):
+        super().__init__(weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, norm=DataFidelity_l1())
+
+
+class Regularizer_Hub_dwl(Regularizer_dwl):
+    """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions.
+    """
+
+    __reg_name__ = 'Hubdwl'
+
+    def __init__(
+            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', huber_size=None):
+        super().__init__(
+            weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, norm=DataFidelity_Huber(huber_size))
+
+
 class BaseRegularizer_med(BaseRegularizer):
-    """Median filter regularizer. It can be used to promote filtered reconstructions.
+    """Median filter regularizer base class. It can be used to promote filtered reconstructions.
     """
 
     __reg_name__ = 'med'
@@ -593,13 +667,14 @@ class BaseRegularizer_med(BaseRegularizer):
     def info(self):
         return self.__reg_name__ + '(s:%s' % np.array(self.filt_size) + '-w:%g' % self.weight + ')'
 
-    def __init__(self, weight, filt_size=3):
-        BaseRegularizer.__init__(self, weight=weight)
+    def __init__(self, weight, filt_size=3, norm=DataFidelityBase()):
+        super().__init__(weight=weight, norm=norm)
         self.filt_size = filt_size
 
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
+        self.norm.assign_data(0, sigma=1)
 
         return self.weight
 
@@ -616,8 +691,8 @@ class Regularizer_l1med(BaseRegularizer_med):
 
     __reg_name__ = 'l1med'
 
-    def apply_proximal(self, dual):
-        dual /= np.fmax(1, np.abs(dual))
+    def __init__(self, weight, filt_size=3):
+        BaseRegularizer_med.__init__(self, weight, filt_size=filt_size, norm=DataFidelity_l1())
 
 
 class Regularizer_l2med(BaseRegularizer_med):
@@ -626,8 +701,8 @@ class Regularizer_l2med(BaseRegularizer_med):
 
     __reg_name__ = 'l2med'
 
-    def apply_proximal(self, dual):
-        dual /= 2
+    def __init__(self, weight, filt_size=3):
+        BaseRegularizer_med.__init__(self, weight, filt_size=filt_size, norm=DataFidelity_l2())
 
 
 # ---- Solvers ----

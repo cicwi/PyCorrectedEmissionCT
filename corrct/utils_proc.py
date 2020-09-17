@@ -178,7 +178,7 @@ def denoise_image(
     else:
         data_term = 'l2'
 
-    reg_wl = solvers.Regularizer_l1wl(reg_weight, 'sym4', 2, normalized=False)
+    reg_wl = solvers.Regularizer_l1swl(reg_weight, 'bior4.4', 2, normalized=False)
     sol_wls_wl = solvers.CP(verbose=verbose, regularizer=reg_wl, data_term=data_term)
 
     (denoised_img, _) = sol_wls_wl(OpI, img, iterations, x0=img)

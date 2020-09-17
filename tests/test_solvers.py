@@ -58,11 +58,11 @@ class TestRegularizers(unittest.TestCase):
         upd = reg.compute_update_primal(dual)
         assert np.all(np.isclose(dual * weight, upd))
 
-    def _test_Regularizer_l1wl(self, vol):
+    def _test_Regularizer_l1swl(self, vol):
         weight = 0.5
         ndims = len(vol.shape)
         level = 2
-        reg = solvers.Regularizer_l1wl(weight, 'db1', level, ndims=ndims)
+        reg = solvers.Regularizer_l1swl(weight, 'db1', level, ndims=ndims)
 
         reg.initialize_sigma_tau(vol)
 
@@ -86,7 +86,7 @@ class TestRegularizers(unittest.TestCase):
     def _test_Regularizer_TV(self, vol):
         weight = 0.5
         ndims = len(vol.shape)
-        reg = solvers.Regularizer_TV(weight, ndims=ndims)
+        reg = solvers.Regularizer_Grad(weight, ndims=ndims)
 
         tau = reg.initialize_sigma_tau(vol)
         assert tau == (weight * 2 * ndims)
@@ -132,13 +132,13 @@ class TestRegularizers(unittest.TestCase):
         """Test l1-min regularizer in 3D."""
         self._test_Regularizer_l1(self.vol_rand_3d)
 
-    def test_002_Regularizer_l1wl_2D(self):
+    def test_002_Regularizer_l1swl_2D(self):
         """Test l1-min wavelet regularizer in 2D."""
-        self._test_Regularizer_l1wl(self.vol_rand_2d)
+        self._test_Regularizer_l1swl(self.vol_rand_2d)
 
-    def test_003_Regularizer_l1wl_3D(self):
+    def test_003_Regularizer_l1swl_3D(self):
         """Test l1-min wavelet regularizer in 3D."""
-        self._test_Regularizer_l1wl(self.vol_rand_3d)
+        self._test_Regularizer_l1swl(self.vol_rand_3d)
 
     def test_004_Regularizer_TV_2D(self):
         """Test TV regularizer in 2D."""
