@@ -126,7 +126,7 @@ def apply_minus_log(projs):
 
 
 def denoise_image(
-        img, reg_weight=1e-2, stddev=None, error_method='deadzone', iterations=250, verbose=False):
+        img, reg_weight=1e-2, stddev=None, error_norm='l2b', iterations=250, verbose=False):
     """Image denoiser based on (simple, weighted or dead-zone) least-squares and wavelets.
     The weighted least-squares requires the local pixel-wise standard deviations.
     It can be used to denoise sinograms and projections.
@@ -137,8 +137,9 @@ def denoise_image(
     :type reg_weight: float, optional
     :param stddev: The local standard deviations. If None, it performs a standard least-squares.
     :type stddev: `numpy.array_like`, optional
-    :param error_method: The error weighting mechanism. Options are: {'deadzone'} | 'weighted'.
-    :type error_method: str, optional
+    :param error_norm: The error weighting mechanism. Options are: {'l2b'} | 'hub' | 'wl2'
+    (corresponding to: 'dead-zone', 'Huber', 'weighted least-squares').
+    :type error_norm: str, optional
     :param iterations: Number of iterations, defaults to 250
     :type iterations: int, optional
     :param verbose: Turn verbosity on, defaults to False
@@ -166,15 +167,18 @@ def denoise_image(
     OpI = operators.TransformIdentity(img.shape)
 
     if stddev is not None:
-        if error_method.lower() == 'deadzone':
+        if error_norm.lower() == 'l2b':
             img_weight = compute_lsb_weights(stddev)
             data_term = solvers.DataFidelity_l2b(img_weight)
-        elif error_method.lower() == 'weighted':
+        elif error_norm.lower() == 'hub':
+            img_weight = compute_lsb_weights(stddev)
+            data_term = solvers.DataFidelity_Huber(img_weight)
+        elif error_norm.lower() == 'wl2':
             (img_weight, reg_weight) = compute_wls_weights(stddev, OpI.T, reg_weight)
             data_term = solvers.DataFidelity_wl2(img_weight)
         else:
             raise ValueError(
-                'Unknown error method: "%s". Options are: {"deadzone"} | "weighted"' % error_method)
+                'Unknown error method: "%s". Options are: {"l2b"} | "hub" | "wl2"' % error_norm)
     else:
         data_term = 'l2'
 
