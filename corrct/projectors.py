@@ -603,7 +603,7 @@ class ProjectorUncorrected(ProjectorBase):
             return self._astra_fbp(projs, fbp_filter)
         else:
             projs = fbp_filter(projs, self)
-            return self.bp(projs)
+            return self.bp(projs) / self.angles_rot_rad.size
 
 
 class FilterMR(object):
@@ -694,7 +694,7 @@ class FilterMR(object):
 
         for ii, bas in enumerate(self.basis):
             img = self.apply_filter(sinogram, bas)
-            img = projector.bp(img)
+            img = projector.bp(img) / self.sinogram_angles_num
 
             astra.extrautils.clipCircle(img)
             A[:sino_size, ii] = projector.fp(img).flatten()
