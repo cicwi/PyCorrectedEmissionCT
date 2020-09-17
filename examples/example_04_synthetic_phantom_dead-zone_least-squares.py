@@ -34,8 +34,9 @@ ph_or = ph_or[:, :, 1]
 psf = None
 
 (ph, vol_att_in, vol_att_out) = cct.utils_test.phantom_assign_concentration(ph_or)
-(sino, angles, expected_ph) = cct.utils_test.create_sino(
-    ph, 120, psf=psf, add_poisson=True, dwell_time_s=1e-2)  # , vol_att_in=vol_att_in, vol_att_out=vol_att_out
+(sino, angles, expected_ph, background_avg) = cct.utils_test.create_sino(
+    ph, 30, psf=psf, add_poisson=True, dwell_time_s=1e-2, background_avg=1e-3, background_std=1e-4)
+# , vol_att_in=vol_att_in, vol_att_out=vol_att_out
 
 num_iterations = 250
 # reg_weight = 1e-2

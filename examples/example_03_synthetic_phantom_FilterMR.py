@@ -28,7 +28,7 @@ vol_shape_xy = [256, 256]
 ph = np.squeeze(phantom.modified_shepp_logan([*vol_shape_xy, 3]).astype(np.float32))
 ph = ph[:, :, 1]
 
-(sino, angles_rad, expected_ph) = cct.utils_test.create_sino(ph, 30, add_poisson=True, photon_flux=1e4)
+(sino, angles_rad, expected_ph, _) = cct.utils_test.create_sino(ph, 30, add_poisson=True, photon_flux=1e4)
 
 print('Reconstructing sino:')
 with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:

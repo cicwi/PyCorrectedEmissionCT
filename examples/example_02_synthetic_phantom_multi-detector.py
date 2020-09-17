@@ -34,7 +34,7 @@ psf = None
 det_angles = [+np.pi/2, -np.pi/2]
 
 (ph, vol_att_in, vol_att_out) = cct.utils_test.phantom_assign_concentration(ph_or)
-(sino, angles, expected_ph) = cct.utils_test.create_sino(
+(sino, angles, expected_ph, _) = cct.utils_test.create_sino(
     ph, 120, detectors_pos_rad=det_angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out, psf=psf)
 
 apply_corrections = True
