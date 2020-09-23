@@ -318,7 +318,7 @@ class TransformStationaryWavelet(BaseTransform):
             self.pad_axes = (alignment - x_axes % alignment) % alignment
 
             adj_x_shape = cp.deepcopy(self.dir_shape)
-            adj_x_shape[self.axes] += self.pad_axes
+            adj_x_shape[np.array(self.axes)] += self.pad_axes
         else:
             adj_x_shape = self.dir_shape
         self.adj_shape = np.array((self.level * (2 ** len(self.axes) - 1) + 1, *adj_x_shape))
