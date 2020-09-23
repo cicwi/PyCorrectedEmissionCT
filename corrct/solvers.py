@@ -27,6 +27,9 @@ except ImportError:
     print('WARNING - pywt was not found')
 
 
+eps = np.finfo(np.float32).eps
+
+
 # ---- Data Fidelity terms ----
 
 
@@ -49,19 +52,37 @@ class DataFidelityBase(object):
             bckgrnd_str = ''
         return self.__data_fidelity_name__ + bckgrnd_str
 
-    def assign_data(self, data, sigma=1):
+    def upper(self):
+        return self.info().upper()
+
+    def lower(self):
+        return self.info().lower()
+
+    def assign_data(self, data=None, sigma=1):
         self.data = data
         self.sigma = sigma
-        self._compute_sigma_data()
+        if self.data is not None:
+            self._compute_sigma_data()
+        else:
+            self.sigma_data = None
+
+    def compute_residual(self, proj_primal, mask=None):
+        if self.data is not None:
+            residual = self.data - proj_primal
+        else:
+            residual = np.copy(proj_primal)
+        if mask is not None:
+            residual *= mask
+        return residual
 
     def _compute_sigma_data(self):
         self.sigma_data = self.sigma * self.data
 
-    def upper(self):
-        return self.__data_fidelity_name__.upper()
-
-    def lower(self):
-        return self.__data_fidelity_name__.lower()
+    def compute_data_dual_dot(self, dual, mask=None):
+        if self.data is not None:
+            return np.dot(dual.flatten(), self.data.flatten())
+        else:
+            return 0
 
     def initialize_dual(self):
         return np.zeros_like(self.data)
@@ -78,6 +99,9 @@ class DataFidelityBase(object):
     def compute_update_primal(self, dual):
         return dual
 
+    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
+        raise NotImplementedError()
+
 
 class DataFidelity_l2(DataFidelityBase):
     """l2-norm data-fidelity class.
@@ -93,15 +117,17 @@ class DataFidelity_l2(DataFidelityBase):
         self.sigma1 = 1 / (1 + sigma)
 
     def apply_proximal(self, dual):
-        dual -= self.sigma_data
+        if self.data is not None:
+            dual -= self.sigma_data
         dual *= self.sigma1
 
-    def compute_primal_dual_gap(self, proj_primal, dual):
+    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
         return (
-            (np.linalg.norm(proj_primal - self.data, ord=2) + np.linalg.norm(dual, ord=2)) / 2
-            + np.dot(dual.flatten(), self.data.flatten()))
+            (np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2) + np.linalg.norm(dual, ord=2)) / 2
+            + self.compute_data_dual_dot(dual)
+        )
 
 
 class DataFidelity_wl2(DataFidelity_l2):
@@ -119,16 +145,17 @@ class DataFidelity_wl2(DataFidelity_l2):
         sigma = sigma * self.weights
         super().assign_data(data=data, sigma=sigma)
 
+    def compute_residual(self, proj_primal, mask=None):
+        if self.data is not None:
+            residual = self.data - proj_primal * self.weights
+        else:
+            residual = proj_primal * self.weights
+        if mask is not None:
+            residual *= mask
+        return residual
+
     def compute_update_primal(self, dual):
         return dual * self.weights
-
-    def compute_primal_dual_gap(self, proj_primal, dual):
-        if self.background is not None:
-            proj_primal = proj_primal + self.background
-        return (
-            (np.linalg.norm(proj_primal * self.weights - self.data, ord=2) + np.linalg.norm(dual, ord=2)) / 2
-            + np.dot(dual.flatten(), self.data.flatten())
-        )
 
 
 class DataFidelity_l2b(DataFidelity_l2):
@@ -145,20 +172,31 @@ class DataFidelity_l2b(DataFidelity_l2):
         self.sigma_error = sigma * self.local_error
         super().assign_data(data=data, sigma=sigma)
 
+    def compute_residual(self, proj_primal, mask=None):
+        residual = super().compute_residual(proj_primal, mask)
+        return np.sign(residual) * np.fmax(np.abs(residual) - self.local_error, 0)
+
     def apply_proximal(self, dual):
-        dual -= self.sigma_data
+        if self.data is not None:
+            dual -= self.sigma_data
+
         abs_dual = np.abs(dual)
         valid_dual = abs_dual > 0
-        dual[valid_dual] *= np.fmax((abs_dual[valid_dual] - self.sigma_error[valid_dual]) / abs_dual[valid_dual], 0)
+        if isinstance(self.sigma_error, (float, int)) or self.sigma_error.size == 1:
+            local_sigma_error = self.sigma_error
+        else:
+            local_sigma_error = self.sigma_error[valid_dual]
+        dual[valid_dual] *= np.fmax((abs_dual[valid_dual] - local_sigma_error) / abs_dual[valid_dual], 0)
+
         dual *= self.sigma1
 
-    def compute_primal_dual_gap(self, proj_primal, dual):
+    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
         return (
-            (np.linalg.norm(np.fmax(np.abs(proj_primal - self.data) - self.local_error, 0), ord=2)
+            (np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2)
              + np.linalg.norm(np.sqrt(self.local_error) * dual, ord=2)) / 2
-            + np.dot(dual.flatten(), self.data.flatten()))
+            + self.compute_data_dual_dot(dual))
 
 
 class DataFidelity_Huber(DataFidelityBase):
@@ -178,21 +216,24 @@ class DataFidelity_Huber(DataFidelityBase):
         super().assign_data(data=data, sigma=sigma)
 
     def apply_proximal(self, dual):
-        dual -= self.sigma_data
+        if self.data is not None:
+            dual -= self.sigma_data
+
         dual *= self.one_sigma_error
+
         if self.l2_axis is None:
             dual /= np.fmax(1, np.abs(dual))
         else:
             dual_dir_norm_l2 = np.linalg.norm(dual, ord=2, axis=self.l2_axis, keepdims=True)
             dual /= np.fmax(1, dual_dir_norm_l2)
 
-    def compute_primal_dual_gap(self, proj_primal, dual):
+    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
         return (
-            np.linalg.norm(proj_primal - self.data, ord=2)
-            - np.dot(dual.flatten(), self.data.flatten())
-            - self.local_error * np.linalg.norm(dual, ord=2)
+            np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2)
+            + self.compute_data_dual_dot(dual)
+            + self.local_error * np.linalg.norm(dual, ord=2)
         )
 
 
@@ -206,13 +247,14 @@ class DataFidelity_l1(DataFidelityBase):
         super().__init__(background=background)
 
     def apply_proximal(self, dual):
-        dual -= self.sigma_data
+        if self.data is not None:
+            dual -= self.sigma_data
         dual /= np.fmax(1, np.abs(dual))
 
-    def compute_primal_dual_gap(self, proj_primal, dual):
+    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
-        return np.linalg.norm(proj_primal - self.data, ord=1) + np.dot(dual.flatten(), self.data.flatten())
+        return np.linalg.norm(self.compute_residual(proj_primal, mask), ord=1) + self.compute_data_dual_dot(dual)
 
 
 class DataFidelity_l12(DataFidelityBase):
@@ -226,16 +268,17 @@ class DataFidelity_l12(DataFidelityBase):
         self.l2_axis = l2_axis
 
     def apply_proximal(self, dual):
-        dual -= self.sigma_data
+        if self.data is not None:
+            dual -= self.sigma_data
         dual_dir_norm_l2 = np.linalg.norm(dual, ord=2, axis=self.l2_axis, keepdims=True)
         dual /= np.fmax(1, dual_dir_norm_l2)
 
-    def compute_primal_dual_gap(self, proj_primal, dual):
+    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
         return (
-            np.linalg.norm(np.linalg.norm(proj_primal - self.data, ord=2, axis=self.l2_axis), ord=1)
-            + np.dot(dual.flatten(), self.data.flatten())
+            np.linalg.norm(np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2, axis=self.l2_axis), ord=1)
+            + self.compute_data_dual_dot(dual)
          )
 
 
@@ -254,18 +297,26 @@ class DataFidelity_l1b(DataFidelityBase):
         super().assign_data(data=data, sigma=sigma)
 
     def apply_proximal(self, dual):
-        dual -= self.sigma_data
+        if self.data is not None:
+            dual -= self.sigma_data
+
         abs_dual = np.abs(dual)
         valid_dual = abs_dual > 0
-        dual[valid_dual] *= np.fmax((abs_dual[valid_dual] - self.sigma_error[valid_dual]) / abs_dual[valid_dual], 0)
+        if isinstance(self.sigma_error, (float, int)) or self.sigma_error.size == 1:
+            local_sigma_error = self.sigma_error
+        else:
+            local_sigma_error = self.sigma_error[valid_dual]
+        dual[valid_dual] *= np.fmax((abs_dual[valid_dual] - local_sigma_error) / abs_dual[valid_dual], 0)
+
         dual /= np.fmax(1, np.abs(dual))
 
-    def compute_primal_dual_gap(self, proj_primal, dual):
+    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
         return (
-            np.linalg.norm(np.fmax(np.abs(proj_primal - self.data) - self.local_error, 0), ord=1)
-            + np.dot(dual.flatten(), self.data.flatten()))
+            np.linalg.norm(np.fmax(np.abs(self.compute_residual(proj_primal, mask)) - self.local_error, 0), ord=1)
+            + self.compute_data_dual_dot(dual)
+        )
 
 
 class DataFidelity_KL(DataFidelityBase):
@@ -278,14 +329,33 @@ class DataFidelity_KL(DataFidelityBase):
         self.sigma_data = 4 * self.sigma * np.fmax(self.data, 0)
 
     def apply_proximal(self, dual):
-        dual[:] = (1 + dual[:] - np.sqrt((dual[:] - 1) ** 2 + self.sigma_data[:])) / 2
+        if self.data is not None:
+            dual[:] = (1 + dual[:] - np.sqrt((dual[:] - 1) ** 2 + self.sigma_data[:])) / 2
+        else:
+            dual[:] = (1 + dual[:] - np.sqrt((dual[:] - 1) ** 2)) / 2
 
-    def compute_primal_dual_gap(self, proj_primal, dual):
+    def compute_residual(self, proj_primal, mask=None):
+        # we take the Moreau envelope here, and apply the proximal to it
+        residual = np.fmax(proj_primal, eps) * self.sigma
+        self.apply_proximal(residual)
+        if mask is not None:
+            residual *= mask
+        return -residual
+
+    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
-        return (
-            np.linalg.norm(proj_primal - self.data * (1 - np.log(self.data) + np.log(np.abs(proj_primal))), ord=1)
-            - np.linalg.norm(self.data * np.log(np.abs(1 - dual)), ord=1))
+
+        if self.data is not None:
+            data_nn = np.fmax(self.data, eps)
+            proj_primal_nn = np.fmax(proj_primal, eps)
+            residual = proj_primal_nn - data_nn * (1 - np.log(data_nn) + np.log(proj_primal_nn))
+        else:
+            residual = np.copy(proj_primal)
+        if mask is not None:
+            residual *= mask
+
+        return np.linalg.norm(residual, ord=1)
 
 
 # ---- Regularizers ----
@@ -351,7 +421,7 @@ class Regularizer_Grad(BaseRegularizer):
         self.op = operators.TransformGradient(primal.shape, axes=self.axes)
 
         self.sigma = 0.5
-        self.norm.assign_data(0, sigma=self.sigma)
+        self.norm.assign_data(None, sigma=self.sigma)
 
         return self.weight * 2 * self.ndims
 
@@ -428,7 +498,7 @@ class Regularizer_lap(BaseRegularizer):
         self.op = operators.TransformLaplacian(primal.shape, axes=self.axes)
 
         self.sigma = 0.25
-        self.norm.assign_data(0, sigma=self.sigma)
+        self.norm.assign_data(None, sigma=self.sigma)
 
         return self.weight * 4 * self.ndims
 
@@ -474,7 +544,7 @@ class Regularizer_l1(BaseRegularizer):
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
 
-        self.norm.assign_data(0, sigma=1)
+        self.norm.assign_data(None, sigma=1)
 
         return self.weight
 
@@ -529,12 +599,12 @@ class Regularizer_swl(BaseRegularizer):
 
         if self.normalized:
             self.sigma = 1
-            self.norm.assign_data(0, sigma=self.sigma)
+            self.norm.assign_data(None, sigma=self.sigma)
 
             return self.weight * self.scaling_func_mult.size
         else:
             self.sigma = np.reshape(1 / self.scaling_func_mult, [-1] + [1] * len(self.op.dir_shape))
-            self.norm.assign_data(0, sigma=self.sigma)
+            self.norm.assign_data(None, sigma=self.sigma)
 
             tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
             tau[0] += 1
@@ -622,7 +692,7 @@ class Regularizer_dwl(BaseRegularizer):
                 d[label] = np.ones(self.op.sub_band_shapes[ii_l+1][label], self.dtype) * self.scaling_func_mult[ii_l]
             self.sigma.append(d)
         self.sigma, _ = pywt.coeffs_to_array(self.sigma)
-        self.norm.assign_data(0, sigma=self.sigma)
+        self.norm.assign_data(None, sigma=self.sigma)
 
         tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
         tau[0] += 1
@@ -674,7 +744,7 @@ class BaseRegularizer_med(BaseRegularizer):
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
-        self.norm.assign_data(0, sigma=1)
+        self.norm.assign_data(None, sigma=1)
 
         return self.weight
 
