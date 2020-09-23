@@ -1035,8 +1035,7 @@ class CP(Solver):
     """
 
     def __init__(
-            self, verbose=False, tolerance=None, relaxation=0.95,
-            data_term='l2', regularizer=None):
+            self, verbose=False, tolerance=None, relaxation=0.95, data_term='l2', regularizer=None):
         super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation)
         self.data_term = self._initialize_data_fidelity_function(data_term)
         self.regularizer = regularizer
@@ -1057,7 +1056,7 @@ class CP(Solver):
             if data_term.lower() == 'kl':
                 return DataFidelity_KL()
             else:
-                raise ValueError('Unknown data term: "%s", accepted terms are: "l2" | "l2" | "kl".' % data_term)
+                raise ValueError('Unknown data term: "%s", accepted terms are: "l2" | "l1" | "kl".' % data_term)
         else:
             return data_term
 
@@ -1142,7 +1141,7 @@ class CP(Solver):
             q = self.regularizer.initialize_dual()
 
         if self.tolerance is not None:
-            res_norm_0 = np.linalg.norm(b.flatten())
+            res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0))
             res_norm_rel = np.ones((iterations, )) * self.tolerance
         else:
             res_norm_rel = None
@@ -1193,7 +1192,7 @@ class CP(Solver):
 
             if self.tolerance is not None:
                 Ax = A(x)
-                res = b - Ax
+                res = self.data_term.compute_residual(Ax, b_mask)
                 res_norm_rel[ii] = np.linalg.norm(res.flatten()) / res_norm_0
                 if self.tolerance > res_norm_rel[ii]:
                     break
