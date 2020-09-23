@@ -272,8 +272,9 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">projs</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="denoise_image"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.denoise_image">[docs]</a><span class="k">def</span> <span class="nf">denoise_image</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">reg_weight</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Image denoiser based on (weighted) least-squares and wavelets.</span>
+<div class="viewcode-block" id="denoise_image"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.denoise_image">[docs]</a><span class="k">def</span> <span class="nf">denoise_image</span><span class="p">(</span>
+        <span class="n">img</span><span class="p">,</span> <span class="n">reg_weight</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error_norm</span><span class="o">=</span><span class="s1">&#39;l2b&#39;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">lower_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Image denoiser based on (simple, weighted or dead-zone) least-squares and wavelets.</span>
 <span class="sd">    The weighted least-squares requires the local pixel-wise standard deviations.</span>
 <span class="sd">    It can be used to denoise sinograms and projections.</span>
 
@@ -283,8 +284,16 @@
 <span class="sd">    :type reg_weight: float, optional</span>
 <span class="sd">    :param stddev: The local standard deviations. If None, it performs a standard least-squares.</span>
 <span class="sd">    :type stddev: `numpy.array_like`, optional</span>
+<span class="sd">    :param error_norm: The error weighting mechanism.</span>
+<span class="sd">    When using std_dev, options are: {&#39;l2b&#39;} | &#39;l1b&#39; | &#39;hub&#39; | &#39;wl2&#39;</span>
+<span class="sd">    (corresponding to: &#39;l2 dead-zone&#39;, &#39;l1 dead-zone&#39;, &#39;Huber&#39;, &#39;weighted least-squares&#39;).</span>
+<span class="sd">    :type error_norm: str, optional</span>
 <span class="sd">    :param iterations: Number of iterations, defaults to 250</span>
 <span class="sd">    :type iterations: int, optional</span>
+<span class="sd">    :param axes: Axes along which the regularization should be done, defaults to (-2, -1)</span>
+<span class="sd">    :type iterations: int or tuple, optional</span>
+<span class="sd">    :param lower_limit: Lower clipping limit of the image, defaults to None</span>
+<span class="sd">    :type iterations: float, optional</span>
 <span class="sd">    :param verbose: Turn verbosity on, defaults to False</span>
 <span class="sd">    :type verbose: boolean, optional</span>
 
@@ -301,17 +310,40 @@
         <span class="n">img_weights</span> <span class="o">=</span> <span class="n">min_valid_stddev</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">stddev</span><span class="p">,</span> <span class="n">min_valid_stddev</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">img_weights</span><span class="p">,</span> <span class="n">reg_weights</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">stddev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">OpI</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-        <span class="p">(</span><span class="n">img_weight</span><span class="p">,</span> <span class="n">reg_weight</span><span class="p">)</span> <span class="o">=</span> <span class="n">compute_wls_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">,</span> <span class="n">OpI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">reg_weight</span><span class="p">)</span>
-        <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_wl2</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">data_term</span> <span class="o">=</span> <span class="s1">&#39;l2&#39;</span>
+    <span class="k">def</span> <span class="nf">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">):</span>
+        <span class="n">stddev_zeros</span> <span class="o">=</span> <span class="n">stddev</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="n">stddev_valid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">stddev_zeros</span><span class="p">)</span>
+        <span class="n">min_valid_stddev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">stddev</span><span class="p">[</span><span class="n">stddev_valid</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">stddev</span><span class="p">,</span> <span class="n">min_valid_stddev</span><span class="p">)</span>
 
-    <span class="n">reg_wl</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1wl</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">,</span> <span class="s1">&#39;db4&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">OpI</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">stddev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;l2b&#39;</span><span class="p">:</span>
+            <span class="n">img_weight</span> <span class="o">=</span> <span class="n">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">)</span>
+            <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_l2b</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;l1b&#39;</span><span class="p">:</span>
+            <span class="n">img_weight</span> <span class="o">=</span> <span class="n">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">)</span>
+            <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_l1b</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;hub&#39;</span><span class="p">:</span>
+            <span class="n">img_weight</span> <span class="o">=</span> <span class="n">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">)</span>
+            <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_Huber</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;wl2&#39;</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">img_weight</span><span class="p">,</span> <span class="n">reg_weight</span><span class="p">)</span> <span class="o">=</span> <span class="n">compute_wls_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">,</span> <span class="n">OpI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">reg_weight</span><span class="p">)</span>
+            <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_wl2</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Unknown error method: &quot;</span><span class="si">%s</span><span class="s1">&quot;. Options are: {&quot;l2b&quot;} | &quot;l1b&quot; | &quot;hub&quot; | &quot;wl2&quot;&#39;</span> <span class="o">%</span> <span class="n">error_norm</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_term</span> <span class="o">=</span> <span class="n">error_norm</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="n">reg_wl</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1swl</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">,</span> <span class="s1">&#39;bior4.4&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">sol_wls_wl</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg_wl</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
 
-    <span class="p">(</span><span class="n">denoised_img</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">sol_wls_wl</span><span class="p">(</span><span class="n">OpI</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">img</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">denoised_img</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">sol_wls_wl</span><span class="p">(</span><span class="n">OpI</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">img</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">denoised_img</span></div>
 </pre></div>
 
@@ -325,7 +357,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Author
+        &copy; Copyright 2018, Nicola VIGANO
 
     </p>
   </div>

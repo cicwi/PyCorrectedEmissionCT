@@ -291,7 +291,7 @@
                     <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">regularizer</span><span class="p">)</span>
             <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">,</span> <span class="n">precondition</span><span class="o">=</span><span class="n">precondition</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;CPWL&#39;</span><span class="p">:</span>
-            <span class="n">regularizer</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1wl</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">lambda_reg</span><span class="p">,</span> <span class="n">pad_on_demand</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">regularizer</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1swl</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">lambda_reg</span><span class="p">,</span> <span class="n">pad_on_demand</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span>
                     <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">regularizer</span><span class="p">)</span>
             <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">,</span> <span class="n">precondition</span><span class="o">=</span><span class="n">precondition</span><span class="p">)</span>
@@ -311,7 +311,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Author
+        &copy; Copyright 2018, Nicola VIGANO
 
     </p>
   </div>

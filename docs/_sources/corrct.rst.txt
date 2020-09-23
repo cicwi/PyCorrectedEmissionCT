@@ -44,6 +44,13 @@ corrct.utils\_proc module
    :undoc-members:
    :show-inheritance:
 
+corrct.utils\_test module
+-------------------------
+
+.. automodule:: corrct.utils_test
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------

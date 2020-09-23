@@ -684,7 +684,11 @@
             <span class="n">super_sampling</span><span class="o">=</span><span class="n">super_sampling</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_astra_fbp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projs</span><span class="p">,</span> <span class="n">fbp_filter</span><span class="p">):</span>
-        <span class="n">cfg</span> <span class="o">=</span> <span class="n">astra</span><span class="o">.</span><span class="n">astra_dict</span><span class="p">(</span><span class="s1">&#39;FBP_CUDA&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">has_cuda</span><span class="p">:</span>
+            <span class="n">fbp_type</span> <span class="o">=</span> <span class="s1">&#39;FBP_CUDA&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fbp_type</span> <span class="o">=</span> <span class="s1">&#39;FBP&#39;</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">astra</span><span class="o">.</span><span class="n">astra_dict</span><span class="p">(</span><span class="n">fbp_type</span><span class="p">)</span>
         <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;ProjectorId&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_id</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;FilterType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fbp_filter</span>
 
@@ -746,7 +750,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_astra_fbp</span><span class="p">(</span><span class="n">projs</span><span class="p">,</span> <span class="n">fbp_filter</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">projs</span> <span class="o">=</span> <span class="n">fbp_filter</span><span class="p">(</span><span class="n">projs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">projs</span><span class="p">)</span></div></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">projs</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="o">.</span><span class="n">size</span></div></div>
 
 
 <div class="viewcode-block" id="FilterMR"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR">[docs]</a><span class="k">class</span> <span class="nc">FilterMR</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -837,7 +841,7 @@
 
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">bas</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">):</span>
             <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">sinogram</span><span class="p">,</span> <span class="n">bas</span><span class="p">)</span>
-            <span class="n">img</span> <span class="o">=</span> <span class="n">projector</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">projector</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinogram_angles_num</span>
 
             <span class="n">astra</span><span class="o">.</span><span class="n">extrautils</span><span class="o">.</span><span class="n">clipCircle</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
             <span class="n">A</span><span class="p">[:</span><span class="n">sino_size</span><span class="p">,</span> <span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">projector</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">img</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
@@ -896,7 +900,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Author
+        &copy; Copyright 2018, Nicola VIGANO
 
     </p>
   </div>
