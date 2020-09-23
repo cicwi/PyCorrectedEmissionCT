@@ -126,7 +126,7 @@ def apply_minus_log(projs):
 
 
 def denoise_image(
-        img, reg_weight=1e-2, stddev=None, error_norm='l2b', iterations=250, verbose=False):
+        img, reg_weight=1e-2, stddev=None, error_norm='l2b', iterations=250, axes=(-2, -1), lower_limit=None, verbose=False):
     """Image denoiser based on (simple, weighted or dead-zone) least-squares and wavelets.
     The weighted least-squares requires the local pixel-wise standard deviations.
     It can be used to denoise sinograms and projections.
@@ -137,11 +137,16 @@ def denoise_image(
     :type reg_weight: float, optional
     :param stddev: The local standard deviations. If None, it performs a standard least-squares.
     :type stddev: `numpy.array_like`, optional
-    :param error_norm: The error weighting mechanism. Options are: {'l2b'} | 'hub' | 'wl2'
-    (corresponding to: 'dead-zone', 'Huber', 'weighted least-squares').
+    :param error_norm: The error weighting mechanism.
+    When using std_dev, options are: {'l2b'} | 'l1b' | 'hub' | 'wl2'
+    (corresponding to: 'l2 dead-zone', 'l1 dead-zone', 'Huber', 'weighted least-squares').
     :type error_norm: str, optional
     :param iterations: Number of iterations, defaults to 250
     :type iterations: int, optional
+    :param axes: Axes along which the regularization should be done, defaults to (-2, -1)
+    :type iterations: int or tuple, optional
+    :param lower_limit: Lower clipping limit of the image, defaults to None
+    :type iterations: float, optional
     :param verbose: Turn verbosity on, defaults to False
     :type verbose: boolean, optional
 
@@ -170,6 +175,9 @@ def denoise_image(
         if error_norm.lower() == 'l2b':
             img_weight = compute_lsb_weights(stddev)
             data_term = solvers.DataFidelity_l2b(img_weight)
+        elif error_norm.lower() == 'l1b':
+            img_weight = compute_lsb_weights(stddev)
+            data_term = solvers.DataFidelity_l1b(img_weight)
         elif error_norm.lower() == 'hub':
             img_weight = compute_lsb_weights(stddev)
             data_term = solvers.DataFidelity_Huber(img_weight)
@@ -178,12 +186,15 @@ def denoise_image(
             data_term = solvers.DataFidelity_wl2(img_weight)
         else:
             raise ValueError(
-                'Unknown error method: "%s". Options are: {"l2b"} | "hub" | "wl2"' % error_norm)
+                'Unknown error method: "%s". Options are: {"l2b"} | "l1b" | "hub" | "wl2"' % error_norm)
     else:
-        data_term = 'l2'
+        data_term = error_norm
 
-    reg_wl = solvers.Regularizer_l1swl(reg_weight, 'bior4.4', 2, normalized=False)
+    if isinstance(axes, int):
+        axes = (axes, )
+
+    reg_wl = solvers.Regularizer_l1swl(reg_weight, 'bior4.4', 2, axes=axes, normalized=False)
     sol_wls_wl = solvers.CP(verbose=verbose, regularizer=reg_wl, data_term=data_term)
 
-    (denoised_img, _) = sol_wls_wl(OpI, img, iterations, x0=img)
+    (denoised_img, _) = sol_wls_wl(OpI, img, iterations, x0=img, lower_limit=lower_limit)
     return denoised_img
