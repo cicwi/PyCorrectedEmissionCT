@@ -775,6 +775,67 @@ class Regularizer_l2med(BaseRegularizer_med):
         BaseRegularizer_med.__init__(self, weight, filt_size=filt_size, norm=DataFidelity_l2())
 
 
+# ---- Constraints ----
+
+
+class Constraint_LowerLimit(BaseRegularizer):
+    """Lower limit constraint. It can be used to promote reconstructions in certain regions of solution space.
+    """
+
+    __reg_name__ = 'lowlim'
+
+    def __init__(self, limit, norm=DataFidelityBase()):
+        super().__init__(weight=1, norm=norm)
+        self.limit = limit
+
+    def initialize_sigma_tau(self, primal):
+        self.dtype = primal.dtype
+        self.op = operators.TransformIdentity(primal.shape)
+
+        self.norm.assign_data(self.limit, sigma=1)
+
+        return self.weight
+
+    def update_dual(self, dual, primal):
+        dual += primal
+
+    def apply_proximal(self, dual):
+        dual[dual > self.limit] = self.limit
+        self.norm.apply_proximal(dual)
+
+    def compute_update_primal(self, dual):
+        return self.weight * dual
+
+
+class Constraint_UpperLimit(BaseRegularizer):
+    """Upper limit constraint. It can be used to promote reconstructions in certain regions of solution space.
+    """
+
+    __reg_name__ = 'uplim'
+
+    def __init__(self, limit, norm=DataFidelityBase()):
+        super().__init__(weight=1, norm=norm)
+        self.limit = limit
+
+    def initialize_sigma_tau(self, primal):
+        self.dtype = primal.dtype
+        self.op = operators.TransformIdentity(primal.shape)
+
+        self.norm.assign_data(self.limit, sigma=1)
+
+        return self.weight
+
+    def update_dual(self, dual, primal):
+        dual += primal
+
+    def apply_proximal(self, dual):
+        dual[dual < self.limit] = self.limit
+        self.norm.apply_proximal(dual)
+
+    def compute_update_primal(self, dual):
+        return self.weight * dual
+
+
 # ---- Solvers ----
 
 
