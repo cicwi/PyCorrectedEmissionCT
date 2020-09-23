@@ -25,16 +25,15 @@
 # -- Support markdown -----------------------------------------------------
 # See: <https://blog.readthedocs.com/adding-markdown-support/>
 
-from recommonmark.parser import CommonMarkParser
-source_parsers = {'.md': CommonMarkParser}
-source_suffix = ['.rst', '.md']
+# from recommonmark.parser import CommonMarkParser
+# source_parsers = {'.md': CommonMarkParser}
 
 
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-# needs_sphinx = '1.0'
+needs_sphinx = '1.8'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -43,6 +42,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
+    'recommonmark',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -51,8 +51,7 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 
 # The encoding of source files.
 #
@@ -63,8 +62,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PyCorrectedEmissionCT'
-copyright = '2018, Author'
-author = 'Author'
+copyright = '2018, Nicola VIGANO'
+author = 'Nicola VIGANO'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
