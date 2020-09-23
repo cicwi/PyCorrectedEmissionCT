@@ -910,11 +910,28 @@ class Sirt(Solver):
     """
 
     def __init__(
-            self, verbose=False, tolerance=None, relaxation=1.95,
-            regularizer=None):
-        Solver.__init__(
-            self, verbose=verbose, tolerance=tolerance, relaxation=relaxation)
+            self, verbose=False, tolerance=None, relaxation=1.95, data_term='l2',regularizer=None):
+        super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation)
+        self.data_term = self._initialize_data_fidelity_function(data_term)
         self.regularizer = regularizer
+
+    def _initialize_data_fidelity_function(self, data_term):
+        if isinstance(data_term, str):
+            if data_term.lower() == 'l2':
+                return DataFidelity_l2()
+            else:
+                raise ValueError('Unknown data term: "%s", only accepted terms are: "l2".' % data_term)
+        elif isinstance(data_term, (DataFidelity_l2, DataFidelity_KL)):
+            return data_term
+        else:
+            raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
+
+    def info(self):
+        if self.regularizer is not None:
+            reg_info = '-' + self.regularizer.info()
+        else:
+            reg_info = ''
+        return Solver.info(self) +  '-' + self.data_term.info() + reg_info
 
     def __call__(  # noqa: C901
             self, A, b, iterations, x0=None, At=None, lower_limit=None,
@@ -949,8 +966,10 @@ class Sirt(Solver):
             x0 = At(b * sigma) * tau
         x = x0
 
+        self.data_term.assign_data(b, sigma)
+
         if self.tolerance is not None:
-            res_norm_0 = np.linalg.norm(b.flatten())
+            res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0))
             res_norm_rel = np.ones((iterations, )) * self.tolerance
         else:
             res_norm_rel = None
@@ -958,17 +977,19 @@ class Sirt(Solver):
         c_init = tm.time()
 
         if self.verbose:
-            print("- Performing %s iterations (init: %g seconds): " % (
-                    self.upper(), c_init - c_in), end='', flush=True)
+            reg_info = ''
+            if self.regularizer is not None:
+                reg_info = '-' + self.regularizer.upper()
+            print("- Performing %s-%s%s iterations (init: %g seconds): " % (
+                    self.upper(), self.data_term.upper(), reg_info, c_init - c_in), end='', flush=True)
         for ii in range(iterations):
             if self.verbose:
                 prnt_str = "%03d/%03d (avg: %g seconds)" % (
                         ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
                 print(prnt_str, end='', flush=True)
 
-            res = b - A(x)
-            if b_mask is not None:
-                res *= b_mask
+            Ax = A(x)
+            res = self.data_term.compute_residual(Ax, b_mask)
 
             if self.tolerance is not None:
                 res_norm_rel[ii] = np.linalg.norm(res.flatten()) / res_norm_0
@@ -980,7 +1001,7 @@ class Sirt(Solver):
                 self.regularizer.update_dual(q, x)
                 self.regularizer.apply_proximal(q)
 
-            upd = At(res * sigma)
+            upd = At(self.data_term.compute_update_primal(res) * sigma)
             if self.regularizer is not None:
                 upd -= self.regularizer.compute_update_primal(q)
             x += upd * tau
