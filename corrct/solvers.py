@@ -476,6 +476,26 @@ class Regularizer_HubTV3D(Regularizer_Grad):
         super().__init__(weight=weight, ndims=3, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
 
 
+class Regularizer_Smooth2D(Regularizer_Grad):
+    """It can be used to promote smooth reconstructions.
+    """
+
+    __reg_name__ = 'Smooth2D'
+
+    def __init__(self, weight, axes=None, norm=DataFidelity_l2()):
+        super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
+
+
+class Regularizer_Smooth3D(Regularizer_Grad):
+    """It can be used to promote smooth reconstructions.
+    """
+
+    __reg_name__ = 'Smooth3D'
+
+    def __init__(self, weight, axes=None, norm=DataFidelity_l2()):
+        super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
+
+
 class Regularizer_lap(BaseRegularizer):
     """Laplacian regularizer. It can be used to promote smooth reconstructions.
     """
