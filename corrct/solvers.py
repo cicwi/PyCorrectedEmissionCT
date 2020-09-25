@@ -804,6 +804,9 @@ class Constraint_LowerLimit(BaseRegularizer):
 
     __reg_name__ = 'lowlim'
 
+    def info(self):
+        return self.__reg_name__ + '(l:%g' % self.limit + ')'
+
     def __init__(self, limit, norm=DataFidelityBase()):
         super().__init__(weight=1, norm=norm)
         self.limit = limit
@@ -832,6 +835,9 @@ class Constraint_UpperLimit(BaseRegularizer):
     """
 
     __reg_name__ = 'uplim'
+
+    def info(self):
+        return self.__reg_name__ + '(l:%g' % self.limit + ')'
 
     def __init__(self, limit, norm=DataFidelityBase()):
         super().__init__(weight=1, norm=norm)
@@ -877,7 +883,8 @@ class Solver(object):
     def lower(self):
         return type(self).__name__.lower()
 
-    def _initialize_data_operators(self, A, At):
+    @staticmethod
+    def _initialize_data_operators(A, At):
         if At is None:
             if isinstance(A, np.ndarray):
                 At = A.transpose((1, 0))
@@ -891,6 +898,23 @@ class Solver(object):
             A_m = A
             A = A_m.dot
         return (A, At)
+
+    @staticmethod
+    def _initialize_regularizer(regularizer):
+        if regularizer is None:
+            return []
+        elif isinstance(regularizer, BaseRegularizer):
+            return [regularizer]
+        elif isinstance(regularizer, (list, tuple)):
+            check_regs_ok = [isinstance(r, BaseRegularizer) for r in regularizer]
+            if not np.all(check_regs_ok):
+                raise ValueError(
+                    'The following regularizers are not derived from the BaseRegularizer class: %s' %
+                    np.array(np.arange(len(check_regs_ok))[np.array(check_regs_ok, dtype=np.bool)]) )
+            else:
+                return list(regularizer)
+        else:
+            raise ValueError('Unknown regularizer type.')
 
 
 class Sart(Solver):
@@ -994,7 +1018,7 @@ class Sirt(Solver):
             self, verbose=False, tolerance=None, relaxation=1.95, data_term='l2',regularizer=None):
         super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation)
         self.data_term = self._initialize_data_fidelity_function(data_term)
-        self.regularizer = regularizer
+        self.regularizer = self._initialize_regularizer(regularizer)
 
     def _initialize_data_fidelity_function(self, data_term):
         if isinstance(data_term, str):
@@ -1008,10 +1032,7 @@ class Sirt(Solver):
             raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
 
     def info(self):
-        if self.regularizer is not None:
-            reg_info = '-' + self.regularizer.info()
-        else:
-            reg_info = ''
+        reg_info = ''.join(['-' + r.info().upper() for r in self.regularizer])
         return Solver.info(self) +  '-' + self.data_term.info() + reg_info
 
     def __call__(  # noqa: C901
@@ -1030,8 +1051,8 @@ class Sirt(Solver):
         if b_mask is not None:
             tau *= b_mask
         tau = np.abs(At(tau))
-        if self.regularizer is not None:
-            tau += self.regularizer.initialize_sigma_tau(tau)
+        for reg in self.regularizer:
+            tau += reg.initialize_sigma_tau(tau)
         tau[(tau / np.max(tau)) < 1e-5] = 1
         tau = self.relaxation / tau
 
@@ -1058,9 +1079,7 @@ class Sirt(Solver):
         c_init = tm.time()
 
         if self.verbose:
-            reg_info = ''
-            if self.regularizer is not None:
-                reg_info = '-' + self.regularizer.upper()
+            reg_info = ''.join(['-' + r.info().upper() for r in self.regularizer])
             print("- Performing %s-%s%s iterations (init: %g seconds): " % (
                     self.upper(), self.data_term.upper(), reg_info, c_init - c_in), end='', flush=True)
         for ii in range(iterations):
@@ -1077,14 +1096,14 @@ class Sirt(Solver):
                 if self.tolerance > res_norm_rel[ii]:
                     break
 
-            if self.regularizer is not None:
-                q = self.regularizer.initialize_dual()
-                self.regularizer.update_dual(q, x)
-                self.regularizer.apply_proximal(q)
+            q = [reg.initialize_dual() for reg in self.regularizer]
+            for q_r, reg in zip(q, self.regularizer):
+                reg.update_dual(q_r, x)
+                reg.apply_proximal(q_r)
 
             upd = At(self.data_term.compute_update_primal(res) * sigma)
-            if self.regularizer is not None:
-                upd -= self.regularizer.compute_update_primal(q)
+            for q_r, reg in zip(q, self.regularizer):
+                upd -= reg.compute_update_primal(q_r)
             x += upd * tau
 
             if lower_limit is not None:
@@ -1119,16 +1138,14 @@ class CP(Solver):
             self, verbose=False, tolerance=None, relaxation=0.95, data_term='l2', regularizer=None):
         super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation)
         self.data_term = self._initialize_data_fidelity_function(data_term)
-        self.regularizer = regularizer
+        self.regularizer = self._initialize_regularizer(regularizer)
 
     def info(self):
-        if self.regularizer is not None:
-            reg_info = '-' + self.regularizer.info()
-        else:
-            reg_info = ''
+        reg_info = ''.join(['-' + r.info().upper() for r in self.regularizer])
         return Solver.info(self) +  '-' + self.data_term.info() + reg_info
 
-    def _initialize_data_fidelity_function(self, data_term):
+    @staticmethod
+    def _initialize_data_fidelity_function(data_term):
         if isinstance(data_term, str):
             if data_term.lower() == 'l2':
                 return DataFidelity_l2()
@@ -1163,9 +1180,11 @@ class CP(Solver):
     def _get_data_sigma_tau_unpreconditioned(self, A, At, b):
         (L, x_shape) = self.power_method(A, At, b)
         tau = L
-        if self.regularizer is not None:
-            dummy_x = np.empty(x_shape, dtype=b.dtype)
-            tau += self.regularizer.initialize_sigma_tau(dummy_x)
+
+        dummy_x = np.empty(x_shape, dtype=b.dtype)
+        for reg in self.regularizer:
+            tau += reg.initialize_sigma_tau(dummy_x)
+
         tau = self.relaxation / tau
         sigma = 0.95 / L
         return (x_shape, sigma, tau)
@@ -1194,8 +1213,8 @@ class CP(Solver):
             if b_mask is not None:
                 tau *= b_mask
             tau = np.abs(At_abs(tau))
-            if self.regularizer is not None:
-                tau += self.regularizer.initialize_sigma_tau(tau)
+            for reg in self.regularizer:
+                tau += reg.initialize_sigma_tau(tau)
             tau[(tau / np.max(tau)) < 1e-5] = 1
             tau = self.relaxation / tau
 
@@ -1218,8 +1237,7 @@ class CP(Solver):
         self.data_term.assign_data(b, sigma)
         p = self.data_term.initialize_dual()
 
-        if self.regularizer is not None:
-            q = self.regularizer.initialize_dual()
+        q = [reg.initialize_dual() for reg in self.regularizer]
 
         if self.tolerance is not None:
             res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0))
@@ -1230,9 +1248,7 @@ class CP(Solver):
         c_init = tm.time()
 
         if self.verbose:
-            reg_info = ''
-            if self.regularizer is not None:
-                reg_info = '-' + self.regularizer.upper()
+            reg_info = ''.join(['-' + r.info().upper() for r in self.regularizer])
             print("- Performing %s-%s%s iterations (init: %g seconds): " % (
                     self.upper(), self.data_term.upper(), reg_info, c_init - c_in), end='', flush=True)
         for ii in range(iterations):
@@ -1247,13 +1263,13 @@ class CP(Solver):
             if b_mask is not None:
                 p *= b_mask
 
-            if self.regularizer is not None:
-                self.regularizer.update_dual(q, x_relax)
-                self.regularizer.apply_proximal(q)
+            for q_r, reg in zip(q, self.regularizer):
+                reg.update_dual(q_r, x_relax)
+                reg.apply_proximal(q_r)
 
             upd = At(self.data_term.compute_update_primal(p))
-            if self.regularizer is not None:
-                upd += self.regularizer.compute_update_primal(q)
+            for q_r, reg in zip(q, self.regularizer):
+                upd += reg.compute_update_primal(q_r)
             x_new = x - upd * tau
 
             if lower_limit is not None:
