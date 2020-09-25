@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - CP and SIRT report better information on regularization.
     - Use of data term to compute residual correctly.
 - More flexibility and options to image denoiser.
-- New module for easying development of tests and examples.
+- New module for easing development of tests and examples.
 ### Fixed
 - Python hard crash when CUDA not available.
 - Examples to comply with recent changes.
