@@ -181,6 +181,7 @@ class DataFidelity_l2b(DataFidelity_l2):
     def assign_data(self, data, sigma=1):
         self.sigma_error = sigma * self.local_error
         super().assign_data(data=data, sigma=sigma)
+        self.sigma1 = 1 / (1 + self.sigma_error)
 
     def compute_residual(self, proj_primal, mask=None):
         residual = super().compute_residual(proj_primal, mask)
