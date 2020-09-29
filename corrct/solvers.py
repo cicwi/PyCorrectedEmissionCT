@@ -78,6 +78,16 @@ class DataFidelityBase(object):
     def _compute_sigma_data(self):
         self.sigma_data = self.sigma * self.data
 
+    @staticmethod
+    def _soft_threshold(values, threshold):
+        abs_values = np.abs(values)
+        valid_values = abs_values > 0
+        if isinstance(threshold, (float, int)) or threshold.size == 1:
+            local_threshold = threshold
+        else:
+            local_threshold = threshold[valid_values]
+        values[valid_values] *= np.fmax((abs_values[valid_values] - local_threshold) / abs_values[valid_values], 0)
+
     def compute_data_dual_dot(self, dual, mask=None):
         if self.data is not None:
             return np.dot(dual.flatten(), self.data.flatten())
@@ -179,15 +189,7 @@ class DataFidelity_l2b(DataFidelity_l2):
     def apply_proximal(self, dual):
         if self.data is not None:
             dual -= self.sigma_data
-
-        abs_dual = np.abs(dual)
-        valid_dual = abs_dual > 0
-        if isinstance(self.sigma_error, (float, int)) or self.sigma_error.size == 1:
-            local_sigma_error = self.sigma_error
-        else:
-            local_sigma_error = self.sigma_error[valid_dual]
-        dual[valid_dual] *= np.fmax((abs_dual[valid_dual] - local_sigma_error) / abs_dual[valid_dual], 0)
-
+        self._soft_threshold(dual, self.sigma_error)
         dual *= self.sigma1
 
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
@@ -299,15 +301,7 @@ class DataFidelity_l1b(DataFidelityBase):
     def apply_proximal(self, dual):
         if self.data is not None:
             dual -= self.sigma_data
-
-        abs_dual = np.abs(dual)
-        valid_dual = abs_dual > 0
-        if isinstance(self.sigma_error, (float, int)) or self.sigma_error.size == 1:
-            local_sigma_error = self.sigma_error
-        else:
-            local_sigma_error = self.sigma_error[valid_dual]
-        dual[valid_dual] *= np.fmax((abs_dual[valid_dual] - local_sigma_error) / abs_dual[valid_dual], 0)
-
+        self._soft_threshold(dual, self.sigma_error)
         dual /= np.fmax(1, np.abs(dual))
 
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
