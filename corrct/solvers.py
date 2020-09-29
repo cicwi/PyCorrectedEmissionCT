@@ -151,13 +151,12 @@ class DataFidelity_wl2(DataFidelity_l2):
         self.weights = weights
 
     def assign_data(self, data, sigma=1):
-        data = data * self.weights
-        sigma = sigma * self.weights
         super().assign_data(data=data, sigma=sigma)
+        self.sigma1 = 1 / (1 + sigma / self.weights)
 
     def compute_residual(self, proj_primal, mask=None):
         if self.data is not None:
-            residual = self.data - proj_primal * self.weights
+            residual = (self.data - proj_primal) * self.weights
         else:
             residual = proj_primal * self.weights
         if mask is not None:
@@ -1262,7 +1261,7 @@ class CP(Solver):
                 reg.update_dual(q_r, x_relax)
                 reg.apply_proximal(q_r)
 
-            upd = At(self.data_term.compute_update_primal(p))
+            upd = At(p)
             for q_r, reg in zip(q, self.regularizer):
                 upd += reg.compute_update_primal(q_r)
             x_new = x - upd * tau
