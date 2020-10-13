@@ -254,8 +254,12 @@ class TransformDecimatedWavelet(BaseTransform):
         :return: Anti-transformed data.
         :rtype: `numpy.array_like`
         """
-        return pywt.waverecn(
+        rec = pywt.waverecn(
             y, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand)
+        if not np.all(rec.shape == self.dir_shape):
+            slices = [slice(0, s) for s in self.dir_shape]
+            rec = rec[tuple(slices)]
+        return rec
 
     def _op_direct(self, x):
         c = self.direct_dwt(x)
