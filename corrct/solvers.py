@@ -789,6 +789,44 @@ class Regularizer_l2med(BaseRegularizer_med):
         BaseRegularizer_med.__init__(self, weight, filt_size=filt_size, norm=DataFidelity_l2())
 
 
+class Regularizer_fft(BaseRegularizer):
+    """Base decimated wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain.
+    """
+
+    __reg_name__ = 'fft'
+
+    def __init__(
+            self, weight, ndims=2, axes=None, norm=DataFidelity_l12()):
+        if not has_pywt:
+            raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
+        if not use_swtn:
+            raise ValueError('Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).')
+        super().__init__(weight=weight, norm=norm)
+
+        if axes is None:
+            axes = np.arange(-ndims, 0, dtype=np.int)
+        elif not ndims == len(axes):
+            print('WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.')
+            ndims = len(axes)
+        self.ndims = ndims
+        self.axes = axes
+
+    def initialize_sigma_tau(self, primal):
+        self.dtype = primal.dtype
+        self.op = operators.TransformFourier(primal.shape, axes=self.axes)
+
+        self.sigma = 1
+        self.norm.assign_data(None, sigma=self.sigma)
+
+        return self.weight
+
+    def update_dual(self, dual, primal):
+        dual += self.op(primal) * self.sigma
+
+    def compute_update_primal(self, dual):
+        return self.weight * self.op.T(dual)
+
+
 # ---- Constraints ----
 
 

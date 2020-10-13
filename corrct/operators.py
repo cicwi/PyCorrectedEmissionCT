@@ -444,6 +444,60 @@ class TransformGradient(BaseTransform):
         return - self.divergence(y)
 
 
+class TransformFourier(BaseTransform):
+
+    def __init__(self, x_shape, axes=None):
+        """Fourier transform.
+
+        :param x_shape: Shape of the data to be wavelet transformed.
+        :type x_shape: `numpy.array_like`
+        :param axes: Axes along which to do the gradient, defaults to None
+        :type axes: int or tuple of int, optional
+        """
+        if axes is None:
+            axes = np.arange(-len(x_shape), 0, dtype=np.int)
+        self.axes = axes
+        self.ndims = len(x_shape)
+
+        self.dir_shape = np.array(x_shape)
+        self.adj_shape = np.array((2, *self.dir_shape))
+
+        super().__init__()
+
+    def fft(self, x):
+        """Computes the fft.
+
+        :param x: Input data.
+        :type x: `numpy.array_like`
+
+        :return: FFT of data.
+        :rtype: `numpy.array_like`
+        """
+        d = np.empty(self.adj_shape, dtype=x.dtype)
+        x_f = np.fft.fftn(x, axes=self.axes, norm='ortho')
+        d[0, ...] = x_f.real
+        d[1, ...] = x_f.imag
+        return d
+
+    def ifft(self, x):
+        """Computes the inverse of the fft.
+
+        :param x: Input data.
+        :type x: `numpy.array_like`
+
+        :return: iFFT of data.
+        :rtype: `numpy.array_like`
+        """
+        d = x[0, ...] + 1j * x[1, ...]
+        return np.fft.ifftn(d, axes=self.axes, norm='ortho').real
+
+    def _op_direct(self, x):
+        return self.fft(x)
+
+    def _op_adjoint(self, y):
+        return self.ifft(y)
+
+
 class TransformLaplacian(BaseTransform):
 
     def __init__(self, x_shape, axes=None):
