@@ -790,17 +790,12 @@ class Regularizer_l2med(BaseRegularizer_med):
 
 
 class Regularizer_fft(BaseRegularizer):
-    """Base decimated wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain.
+    """Fourier regularizer. It can be used to promote sparse reconstructions in the Fourier domain.
     """
 
     __reg_name__ = 'fft'
 
-    def __init__(
-            self, weight, ndims=2, axes=None, norm=DataFidelity_l12()):
-        if not has_pywt:
-            raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
-        if not use_swtn:
-            raise ValueError('Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).')
+    def __init__(self, weight, ndims=2, axes=None, norm=DataFidelity_l12()):
         super().__init__(weight=weight, norm=norm)
 
         if axes is None:
