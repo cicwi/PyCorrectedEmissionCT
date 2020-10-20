@@ -834,6 +834,101 @@ class TransformLaplacian(BaseTransform):
         return self.laplacian(y)
 
 
+class TransformSVD(BaseTransform):
+    """Singular value decomposition based decomposition operator."""
+
+    def __init__(self, x_shape, axes_rows=(0,), axes_cols=(-1,)):
+        """Singular value decomposition operator.
+
+        The SVD decomposition will be done over the flattened rows vs flatted cols.
+        This means that the channels should always be the rows (expected to be only
+        one dimension, usually), while the volume dimensions should always be the
+        columns (expected to be the last two or three dimensions).
+
+        :param x_shape: Shape of the data to be wavelet transformed.
+        :type x_shape: `numpy.array_like`
+        :param axes_rows: Axes expanded in rows of the SVD, defaults to (0, )
+        :type axes_rows: tuple of int, optional
+        :param axes_cols: Axes expanded in cols of the SVD, defaults to (-1, )
+        :type axes_cols: tuple of int, optional
+
+        :raises IndexError: In case the the axes are outside the range.
+        """
+        self.dir_shape = np.array(x_shape)
+
+        self.axes_rows = np.atleast_1d(axes_rows) % len(self.dir_shape)
+        self.axes_cols = np.atleast_1d(axes_cols) % len(self.dir_shape)
+
+        # Dimensions to decompose
+        self.append_dims = np.concatenate((self.axes_rows, self.axes_cols)).astype(int)
+        # Dimensions to NOT decompose
+        temp_dims = np.arange(len(self.dir_shape), dtype=int)
+        self.invariant_dims = np.delete(temp_dims, self.append_dims)
+        self.invariant_dims_shape = self.dir_shape[self.invariant_dims]
+
+        # Transpose operation to prepare data for decomposition
+        self.fwd_transpose = np.concatenate((self.invariant_dims, self.append_dims))
+        # Transpose operation to recover data after re-composition
+        self.bwd_transpose = np.argsort(self.fwd_transpose)
+
+        self.axes_rows_shape = self.dir_shape[self.axes_rows]
+        self.axes_cols_shape = self.dir_shape[self.axes_cols]
+        self.axes_rows_size = (np.prod(self.axes_rows_shape),)
+        self.axes_cols_size = (np.prod(self.axes_cols_shape),)
+
+        # Reshape operation to prepare data for decomposition
+        self.fwd_shape = np.concatenate((self.invariant_dims_shape, self.axes_rows_size, self.axes_cols_size))
+        # Reshape operation to recover data after re-composition
+        self.bwd_shape = np.concatenate((self.invariant_dims_shape, self.axes_rows_shape, self.axes_cols_shape))
+
+        self.adj_shape = np.concatenate((self.invariant_dims_shape, np.fmin(self.axes_rows_size, self.axes_cols_size)))
+
+        self.U = None
+        self.Vt = None
+
+        super().__init__()
+
+    def direct_svd(self, x):
+        """Performs the SVD decomposition.
+
+        :param x: Data to transform.
+        :type x: `numpy.array_like`
+
+        :return: Transformed data.
+        :rtype: tuple(U, s, Vt)
+        """
+        return np.linalg.svd(x, full_matrices=False)
+
+    def inverse_svd(self, U, s, Vt):
+        """Performs the inverse SVD decomposition.
+
+        :param U: Rows of the SVD dcomposition.
+        :type U: `numpy.array_like`
+        :param s: Singular values.
+        :type s: `numpy.array_like`
+        :param Vt: Columns of the SVD dcomposition.
+        :type Vt: `numpy.array_like`
+
+        :return: Anti-transformed data.
+        :rtype: `numpy.array_like`
+        """
+        return np.matmul(U, s[..., None] * Vt)
+
+    def _op_direct(self, x):
+        x = np.transpose(x, self.fwd_transpose)
+        x = np.reshape(x, self.fwd_shape)
+        (self.U, s, self.Vt) = self.direct_svd(x)
+        s /= np.sqrt(self.Vt.shape[-1] * self.U.shape[-2])
+        self.Vt *= np.sqrt(self.Vt.shape[-1])
+        self.U *= np.sqrt(self.U.shape[-2])
+        return s
+
+    def _op_adjoint(self, y):
+        x = self.inverse_svd(self.U, y, self.Vt)
+        x = np.reshape(x, self.bwd_shape)
+        return np.transpose(x, self.bwd_transpose)
+
+
 if __name__ == "__main__":
     test_vol = np.zeros((10, 10), dtype=np.float32)
 

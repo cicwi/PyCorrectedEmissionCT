@@ -44,6 +44,7 @@ DataFidelity_l1 = data_terms.DataFidelity_l1
 DataFidelity_l1b = data_terms.DataFidelity_l1b
 DataFidelity_Huber = data_terms.DataFidelity_Huber
 DataFidelity_KL = data_terms.DataFidelity_KL
+DataFidelity_ln = data_terms.DataFidelity_ln
 
 
 # ---- Regularizers ----
@@ -779,6 +780,296 @@ class Regularizer_fft(BaseRegularizer):
             return self.weight
         else:
             return 1
+
+
+# Multi-channel regularizers
+
+
+class Regularizer_TNV(Regularizer_Grad):
+    """Total Nuclear Variation (TNV) regularizer.
+
+    It can be used to promote piece-wise constant reconstructions, for multi-channel volumes.
+    """
+
+    __reg_name__ = "TNV"
+
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        pad_mode: str = "edge",
+        spectral_norm: DataFidelityBase = DataFidelity_l1(),
+        x_ref: Optional[ArrayLike] = None,
+    ):
+        super().__init__(weight=weight, ndims=ndims, axes=axes, pad_mode=pad_mode)
+
+        # Here we assume that the channels will be the rows and the derivatives the columns
+        self.norm = DataFidelity_ln(ln_axes=(1, 0), spectral_norm=spectral_norm)
+        self.x_ref = x_ref
+
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+        tau = super().initialize_sigma_tau(primal)
+
+        if self.x_ref is not None:
+            self.q_ref = self.op(self.x_ref)
+            self.q_ref = np.expand_dims(self.q_ref, axis=1)
+
+        return tau
+
+
+class Regularizer_VTV(Regularizer_Grad):
+    """Vectorial Total Variation (VTV) regularizer.
+
+    It can be used to promote piece-wise constant reconstructions, for multi-channel volumes.
+    """
+
+    __reg_name__ = "VTV"
+
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        ndims: int = 2,
+        pwise_der_norm: Union[int, float] = 2,
+        pwise_chan_norm: Union[int, float] = np.inf,
+        x_ref: Optional[ArrayLike] = None,
+    ):
+        super().__init__(weight=weight, ndims=ndims)
+
+        self.pwise_der_norm = pwise_der_norm
+        if self.pwise_der_norm not in [1, 2, np.Inf]:
+            self._raise_pwise_norm_error()
+
+        self.pwise_chan_norm = pwise_chan_norm
+        if self.pwise_chan_norm not in [1, 2, np.Inf]:
+            self._raise_pwise_norm_error()
+
+        if x_ref is not None:
+            self.initialize_sigma_tau()
+            q_ref = self.initialize_dual(x_ref)
+            self.update_dual(q_ref, x_ref)
+            self.q_ref = np.expand_dims(q_ref, axis=1)
+        else:
+            self.q_ref = None
+
+    def _raise_pwise_norm_error(self):
+        raise ValueError(
+            "The only supported point-wise norm exponents are: 1, 2, and Inf."
+            + f" Provided the following instead: derivatives={self.pwise_der_norm}, channel={self.pwise_chan_norm}"
+        )
+
+    def apply_proximal(self, dual: ArrayLike) -> None:
+        # Following assignments will detach the local array from the original one
+        dual_tmp = dual
+
+        dual_is_scalar = len(dual_tmp.shape) == (self.ndims + 1)
+        if dual_is_scalar:
+            dual_tmp = np.expand_dims(dual_tmp, axis=1)
+
+        if self.q_ref is not None:
+            dual_tmp = np.concatenate((dual_tmp, self.q_ref), axis=1)
+
+        if self.pwise_der_norm == 1:
+            grad_norm = np.abs(dual_tmp)
+        elif self.pwise_der_norm == 2:
+            grad_norm = np.linalg.norm(dual_tmp, axis=0, ord=2, keepdims=True)
+        elif self.pwise_der_norm == np.inf:
+            grad_norm = np.linalg.norm(dual_tmp, axis=0, ord=1, keepdims=True)
+        else:
+            self._raise_pwise_norm_error()
+
+        if self.pwise_chan_norm == 1:
+            dual_norm = grad_norm
+        elif self.pwise_chan_norm == 2:
+            dual_norm = np.linalg.norm(grad_norm, axis=1, ord=2, keepdims=True)
+        elif self.pwise_chan_norm == np.inf:
+            dual_norm = np.linalg.norm(grad_norm, axis=1, ord=1, keepdims=True)
+        else:
+            self._raise_pwise_norm_error()
+
+        dual_tmp /= np.fmax(dual_norm, self.weight)
+        dual_tmp *= self.weight
+
+        if self.q_ref is not None:
+            dual_tmp = dual_tmp[:, : dual_tmp.shape[1] - 1 :, ...]
+
+        if dual_is_scalar:
+            dual_tmp = np.squeeze(dual_tmp, axis=1)
+
+        dual[:] = dual_tmp[:]  # Replacing values
+
+
+class Regularizer_lnswl(Regularizer_l1swl):
+    """Nuclear-norm Wavelet regularizer.
+
+    It can be used to promote compressed multi-channel reconstructions.
+    """
+
+    __reg_name__ = "lnswl"
+
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        wavelet: str,
+        level: int,
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        pad_on_demand: str = "constant",
+        normalized: bool = False,
+        min_approx: bool = True,
+        spectral_norm: DataFidelityBase = DataFidelity_l1(),
+        x_ref: Optional[ArrayLike] = None,
+    ):
+        super().__init__(
+            weight,
+            wavelet,
+            level,
+            ndims=ndims,
+            axes=axes,
+            pad_on_demand=pad_on_demand,
+            normalized=normalized,
+            min_approx=min_approx,
+        )
+
+        self.norm = DataFidelity_ln(ln_axes=(1, 0), spectral_norm=spectral_norm)
+        self.x_ref = x_ref
+
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+        tau = super().initialize_sigma_tau(primal)
+
+        if self.x_ref is not None:
+            self.q_ref = self.op(self.x_ref)
+            self.q_ref = np.expand_dims(self.q_ref, axis=1)
+
+        return tau
+
+
+class Regularizer_vl1wl(Regularizer_l1swl):
+    """l1-norm vectorial Wavelet regularizer. It can be used to promote compressed reconstructions."""
+
+    __reg_name__ = "vl1wl"
+
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        wavelet: str,
+        level: int,
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        pad_on_demand: str = "constant",
+        normalized: bool = False,
+        min_approx: bool = True,
+        pwise_lvl_norm: Union[int, float] = 1,
+        pwise_chan_norm: Union[int, float] = np.Inf,
+        x_ref: ArrayLike = None,
+    ):
+        super().__init__(
+            weight,
+            wavelet,
+            level,
+            ndims=ndims,
+            axes=axes,
+            pad_on_demand=pad_on_demand,
+            normalized=normalized,
+            min_approx=min_approx,
+        )
+
+        self.pwise_lvl_norm = pwise_lvl_norm
+        if self.pwise_lvl_norm not in [1, 2, np.Inf]:
+            self._raise_pwise_norm_error()
+
+        self.pwise_chan_norm = pwise_chan_norm
+        if self.pwise_chan_norm not in [1, 2, np.Inf]:
+            self._raise_pwise_norm_error()
+
+        self.x_ref = x_ref
+        self.q_ref = None
+
+    def _raise_pwise_norm_error(self):
+        raise ValueError(
+            "The only supported point-wise norm exponents are: 1, 2, and Inf."
+            + f" Provided the following instead: level={self.pwise_lvl_norm}, channel={self.pwise_chan_norm}"
+        )
+
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+        tau = super().initialize_sigma_tau(primal)
+
+        if self.x_ref is not None:
+            self.q_ref = self.op(self.x_ref)
+
+        return tau
+
+    def apply_proximal(self, dual: ArrayLike) -> None:
+        dual_tmp = dual
+
+        if self.q_ref is not None:
+            dual_tmp = np.concatenate((dual_tmp, self.q_ref), axis=1)
+
+        if self.pwise_lvl_norm == 1:
+            lvl_norm = np.abs(dual_tmp)
+        elif self.pwise_lvl_norm == 2:
+            lvl_norm = np.linalg.norm(dual_tmp, axis=0, ord=2, keepdims=True)
+        elif self.pwise_lvl_norm == np.inf:
+            lvl_norm = np.linalg.norm(dual_tmp, axis=0, ord=1, keepdims=True)
+        else:
+            self._raise_pwise_norm_error()
+
+        if self.pwise_chan_norm == 1:
+            dual_norm = lvl_norm
+        elif self.pwise_chan_norm == 2:
+            dual_norm = np.linalg.norm(lvl_norm, axis=1, ord=2, keepdims=True)
+        elif self.pwise_chan_norm == np.inf:
+            dual_norm = np.linalg.norm(lvl_norm, axis=1, ord=1, keepdims=True)
+        else:
+            self._raise_pwise_norm_error()
+
+        dual_tmp /= np.fmax(dual_norm, self.weight)
+        dual_tmp *= self.weight
+
+        if self.q_ref is not None:
+            dual_tmp = dual_tmp[:, : dual_tmp.shape[0] - 1 :, ...]
+
+        dual[:] = dual_tmp[:]
+
+
+class Regularizer_vSVD(BaseRegularizer):
+    """Regularizer based on the Singular Value Decomposition.
+
+    It can be used to promote similar reconstructions across different channels.
+    """
+
+    __reg_name__ = "vsvd"
+
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        axis_channels: Sequence[int] = (0,),
+        norm: DataFidelityBase = DataFidelity_l1(),
+    ):
+        super().__init__(weight=weight, norm=norm)
+
+        if axes is None:
+            axes = np.arange(-ndims, 0, dtype=int)
+        elif not ndims == len(axes):
+            print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
+            ndims = len(axes)
+        self.ndims = ndims
+        self.axes = axes
+        self.axis_channels = axis_channels
+
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+        self.dtype = primal.dtype
+        self.op = operators.TransformSVD(primal.shape, axes_rows=self.axis_channels, axes_cols=self.axes)
+
+        self.sigma = 1
+        self.norm.assign_data(None, sigma=self.sigma)
+
+        if not isinstance(self.norm, DataFidelity_l1):
+            return 1
+        else:
+            return self.weight
 
 
 # ---- Constraints ----

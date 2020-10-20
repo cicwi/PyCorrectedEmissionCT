@@ -7,9 +7,12 @@ Data fidelity classes.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+from typing import Sequence
 import numpy as np
 
 from abc import ABC, abstractmethod
+
+from . import operators
 
 
 eps = np.finfo(np.float32).eps
@@ -371,3 +374,61 @@ class DataFidelity_KL(DataFidelityBase):
             residual *= mask
 
         return np.linalg.norm(residual, ord=1)
+
+
+class DataFidelity_ln(DataFidelityBase):
+    """nuclear-norm data-fidelity class."""
+
+    __data_fidelity_name__ = "ln"
+
+    def __init__(self, background=None, ln_axes: Sequence[int] = (1, -1), spectral_norm: DataFidelityBase = DataFidelity_l1()):
+        super().__init__(background=background)
+        self.ln_axes = ln_axes
+        self.spectral_norm = spectral_norm
+        self.use_fallback = False
+
+    def apply_proximal(self, dual):
+        dual_tmp = dual.copy()
+
+        if self.data is not None:
+            # If we have a bias term, we interpret it as an addition to the rows in the SVD decomposition.
+            # Performing this operation before the transpose is a waste of computation, but it simplifies the logic.
+            dual_tmp = np.concatenate((dual_tmp, self.sigma_data), axis=self.ln_axes[0])
+
+        if self.use_fallback:
+            t_range = [*range(len(dual_tmp.shape))]
+            t_range.append(t_range.pop(self.ln_axes[0]))
+            t_range.append(t_range.pop(self.ln_axes[1]))
+            dual_tmp = np.transpose(dual_tmp, t_range)
+
+            U, s_p, Vt = np.linalg.svd(dual_tmp, full_matrices=False)
+
+            self.spectral_norm.apply_proximal(s_p)
+
+            dual_tmp = np.matmul(U, s_p[..., None] * Vt)
+            dual_tmp = np.transpose(dual_tmp, np.argsort(t_range))
+        else:
+            op_svd = operators.TransformSVD(dual_tmp.shape, axes_rows=self.ln_axes[0], axes_cols=self.ln_axes[1])
+            s_p = op_svd(dual_tmp)
+
+            self.spectral_norm.apply_proximal(s_p)
+
+            dual_tmp = op_svd.T(s_p)
+
+        if self.data is not None:
+            # We now strip the bias data, to make sure that we don't change dimensionality.
+            # dual_tmp = dual_tmp[..., : dual_tmp.shape[-2] - 1 :, :]
+            dual_tmp = np.take(dual_tmp, np.arange(dual_tmp.shape[self.ln_axes[0]] - 1), axis=self.ln_axes[0])
+
+        dual[:] = dual_tmp[:]
+
+    def compute_residual_norm(self, dual):
+        temp_dual = np.linalg.norm(dual, ord=2, axis=self.l2_axis)
+        return np.linalg.norm(temp_dual.flatten(), ord=1)
+
+    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
+        if self.background is not None:
+            proj_primal = proj_primal + self.background
+        return np.linalg.norm(
+            np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2, axis=self.l2_axis), ord=1
+        ) + self.compute_data_dual_dot(dual)
