@@ -371,6 +371,46 @@ projection coefficients.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="corrct.operators.TransformFourier">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.operators.</code><code class="sig-name descname">TransformFourier</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformFourier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformFourier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<dl class="py method">
+<dt id="corrct.operators.TransformFourier.fft">
+<code class="sig-name descname">fft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformFourier.fft"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformFourier.fft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the fft.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<cite>numpy.array_like</cite>) – Input data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>FFT of data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>numpy.array_like</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="corrct.operators.TransformFourier.ifft">
+<code class="sig-name descname">ifft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformFourier.ifft"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformFourier.ifft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the inverse of the fft.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<cite>numpy.array_like</cite>) – Input data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>iFFT of data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>numpy.array_like</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="corrct.operators.TransformGradient">
 <em class="property">class </em><code class="sig-prename descclassname">corrct.operators.</code><code class="sig-name descname">TransformGradient</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/operators.html#TransformGradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.operators.TransformGradient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
@@ -899,6 +939,11 @@ based on the BaseRegularizer interface.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt id="corrct.solvers.Constraint_LowerLimit.info">
+<code class="sig-name descname">info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Constraint_LowerLimit.info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Constraint_LowerLimit.info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="corrct.solvers.Constraint_LowerLimit.initialize_sigma_tau">
 <code class="sig-name descname">initialize_sigma_tau</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">primal</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Constraint_LowerLimit.initialize_sigma_tau"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Constraint_LowerLimit.initialize_sigma_tau" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -923,6 +968,11 @@ based on the BaseRegularizer interface.</p>
 <dl class="py method">
 <dt id="corrct.solvers.Constraint_UpperLimit.compute_update_primal">
 <code class="sig-name descname">compute_update_primal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dual</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Constraint_UpperLimit.compute_update_primal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Constraint_UpperLimit.compute_update_primal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="corrct.solvers.Constraint_UpperLimit.info">
+<code class="sig-name descname">info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Constraint_UpperLimit.info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Constraint_UpperLimit.info" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1225,6 +1275,20 @@ piece-wise constant reconstructions.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="corrct.solvers.Regularizer_Smooth2D">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_Smooth2D</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">axes=None</em>, <em class="sig-param">norm=&lt;corrct.solvers.DataFidelity_l2 object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_Smooth2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_Smooth2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Regularizer_Grad" title="corrct.solvers.Regularizer_Grad"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Regularizer_Grad</span></code></a></p>
+<p>It can be used to promote smooth reconstructions.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="corrct.solvers.Regularizer_Smooth3D">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_Smooth3D</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">axes=None</em>, <em class="sig-param">norm=&lt;corrct.solvers.DataFidelity_l2 object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_Smooth3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_Smooth3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Regularizer_Grad" title="corrct.solvers.Regularizer_Grad"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Regularizer_Grad</span></code></a></p>
+<p>It can be used to promote smooth reconstructions.</p>
+</dd></dl>
+
+<dl class="py class">
 <dt id="corrct.solvers.Regularizer_TV2D">
 <em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_TV2D</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">axes=None</em>, <em class="sig-param">norm=&lt;corrct.solvers.DataFidelity_l12 object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_TV2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_TV2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Regularizer_Grad" title="corrct.solvers.Regularizer_Grad"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Regularizer_Grad</span></code></a></p>
@@ -1263,6 +1327,28 @@ piece-wise constant reconstructions.</p>
 <dl class="py method">
 <dt id="corrct.solvers.Regularizer_dwl.update_dual">
 <code class="sig-name descname">update_dual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dual</span></em>, <em class="sig-param"><span class="n">primal</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_dwl.update_dual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_dwl.update_dual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="corrct.solvers.Regularizer_fft">
+<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_fft</code><span class="sig-paren">(</span><em class="sig-param">weight</em>, <em class="sig-param">ndims=2</em>, <em class="sig-param">axes=None</em>, <em class="sig-param">norm=&lt;corrct.solvers.DataFidelity_l12 object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_fft"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_fft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.solvers.BaseRegularizer" title="corrct.solvers.BaseRegularizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.BaseRegularizer</span></code></a></p>
+<p>Fourier regularizer. It can be used to promote sparse reconstructions in the Fourier domain.</p>
+<dl class="py method">
+<dt id="corrct.solvers.Regularizer_fft.compute_update_primal">
+<code class="sig-name descname">compute_update_primal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dual</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_fft.compute_update_primal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_fft.compute_update_primal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="corrct.solvers.Regularizer_fft.initialize_sigma_tau">
+<code class="sig-name descname">initialize_sigma_tau</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">primal</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_fft.initialize_sigma_tau"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_fft.initialize_sigma_tau" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="corrct.solvers.Regularizer_fft.update_dual">
+<code class="sig-name descname">update_dual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dual</span></em>, <em class="sig-param"><span class="n">primal</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_fft.update_dual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_fft.update_dual" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1308,13 +1394,6 @@ piece-wise constant reconstructions.</p>
 <em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_l1swl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">weight</span></em>, <em class="sig-param"><span class="n">wavelet</span></em>, <em class="sig-param"><span class="n">level</span></em>, <em class="sig-param"><span class="n">ndims</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">axes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pad_on_demand</span><span class="o">=</span><span class="default_value">'constant'</span></em>, <em class="sig-param"><span class="n">normalized</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_l1swl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_l1swl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Regularizer_swl" title="corrct.solvers.Regularizer_swl"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Regularizer_swl</span></code></a></p>
 <p>l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt id="corrct.solvers.Regularizer_l2dwl">
-<em class="property">class </em><code class="sig-prename descclassname">corrct.solvers.</code><code class="sig-name descname">Regularizer_l2dwl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">weight</span></em>, <em class="sig-param"><span class="n">wavelet</span></em>, <em class="sig-param"><span class="n">level</span></em>, <em class="sig-param"><span class="n">ndims</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">axes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pad_on_demand</span><span class="o">=</span><span class="default_value">'constant'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/solvers.html#Regularizer_l2dwl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#corrct.solvers.Regularizer_l2dwl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#corrct.solvers.Regularizer_dwl" title="corrct.solvers.Regularizer_dwl"><code class="xref py py-class docutils literal notranslate"><span class="pre">corrct.solvers.Regularizer_dwl</span></code></a></p>
-<p>l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions.</p>
 </dd></dl>
 
 <dl class="py class">
