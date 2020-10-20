@@ -14,6 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - <insert-bugs-fixed-not-in-a-release-yet>
 -->
 
+## 0.3.1 - 2020-10-20
+### Added
+- FFT operator, and FFT regularizer.
+- l2-gradient (smooth) regularizer.
+- Support for multiple regularizers.
+### Fixed
+- Norm l2b (deadzone) is also weighted now.
+- Weighted least-squares implementation.
+- Crop inverse DWT output when necessary.
+- Changelog of 0.3.0
+
 ## 0.3.0 - 2020-09-23
 ### Added
 - Data fidelity classes:
