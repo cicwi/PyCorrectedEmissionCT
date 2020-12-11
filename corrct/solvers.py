@@ -705,7 +705,7 @@ class Regularizer_dwl(BaseRegularizer):
             for label in self.op.sub_band_shapes[ii_l+1].keys():
                 d[label] = np.ones(self.op.sub_band_shapes[ii_l+1][label], self.dtype) * self.scaling_func_mult[ii_l]
             self.sigma.append(d)
-        self.sigma, _ = pywt.coeffs_to_array(self.sigma)
+        self.sigma, _ = pywt.coeffs_to_array(self.sigma, axes=self.axes)
         self.norm.assign_data(None, sigma=self.sigma)
 
         tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
