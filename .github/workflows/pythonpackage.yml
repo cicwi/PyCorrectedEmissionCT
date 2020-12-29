@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -48,28 +48,31 @@ jobs:
     strategy:
       max-parallel: 3
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7]  # , 3.8 <- Astra not available on windows, yet.
 
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        # C:\Miniconda\condabin\conda.bat env update --file environment.yml --name base
+        # C:\Miniconda\condabin\conda.bat env update --file environment.yml --name test_env
+        C:\Miniconda\condabin\conda.bat config --set auto_activate_base false
         C:\Miniconda\condabin\conda.bat init powershell
-        # Activate the base environment
-        C:\Miniconda\condabin\conda.bat activate base
+        # Activate the test_env environment
+        C:\Miniconda\condabin\conda.bat create -n test_env python=${{ matrix.python-version }}
+        C:\Miniconda\condabin\conda.bat activate test_env
+        C:\Miniconda\condabin\conda.bat info --envs
         C:\Miniconda\condabin\conda.bat update --all
         # Install corrct's dependencies
         C:\Miniconda\condabin\conda.bat install astra-toolbox -c astra-toolbox/label/dev
         C:\Miniconda\condabin\conda.bat install pywavelets -c conda-forge
     - name: Lint with flake8
       run: |
-        # Activate the base environment
-        C:\Miniconda\condabin\conda.bat activate base
+        # Activate the test_env environment
+        C:\Miniconda\condabin\conda.bat activate test_env
         C:\Miniconda\condabin\conda.bat install flake8
         # stop the build if there are Python syntax errors or undefined names
         flake8 corrct tests examples --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -77,7 +80,7 @@ jobs:
         flake8 corrct tests examples --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        # Activate the base environment
-        C:\Miniconda\condabin\conda.bat activate base
+        # Activate the test_env environment
+        C:\Miniconda\condabin\conda.bat activate test_env
         C:\Miniconda\condabin\conda.bat install pytest
         pytest
