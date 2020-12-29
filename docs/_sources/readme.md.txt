@@ -14,15 +14,16 @@ This package provides the following functionality:
   - Simultaneous Iterative Reconstruction Technique (SIRT).
   - Simultaneous Algebraic Reconstruction Technique (SART).
   - Primal-dual optimization from Chambolle-Pock, with:
-    * Gaussian and Poisson noise modelling
-    * Optional TV-min, l1-min, laplacian, and wavelet based regularization.
+    * Various data fitting terms, including Gaussian and Poisson noise modelling.
+    * Various optional regularization terms, including: TV-min, l1-min, laplacian, and wavelet l1-min.
 
 It contains the code used for the following paper, which also provides a
 mathematical description of the concepts and algorithms used here:
 
 * N. Viganò and V. A. Solé, “Physically corrected forward operators for
 induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
-Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.
+Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.  
+[https://doi.org/10.1088/1361-6501/aa9d54](https://doi.org/10.1088/1361-6501/aa9d54)
 
 Other useful information:
 
