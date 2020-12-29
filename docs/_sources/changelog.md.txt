@@ -4,15 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.3.0...develop
-
-<!--
-## [Unreleased]
-### Added
-- <insert-features-not-in-a-release-yet>
-### Fixed
-- <insert-bugs-fixed-not-in-a-release-yet>
--->
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.3.1...develop
 
 ## 0.3.1 - 2020-10-20
 ### Added
@@ -28,18 +20,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.3.0 - 2020-09-23
 ### Added
 - Data fidelity classes:
-    - Use as norms for regularizers.
-    - New classes: Huber norm, l12, l2b (l2 with deadzone), l1b (l1 with deadzone).
-    - Residual computation.
-    - Background bias support.
+  - Use as norms for regularizers.
+  - New classes: Huber norm, l12, l2b (l2 with deadzone), l1b (l1 with deadzone).
+  - Residual computation.
+  - Background bias support.
 - Regularization:
-    - New classes: smoothness based on gradient, Huber TV, decimated wavelets, Huber wavelet, median filter.
-    - Constraint classes (lower and upper limits) based on regularization.
-    - Simplified and unified code.
+  - New classes: smoothness based on gradient, Huber TV, decimated wavelets, Huber wavelet, median filter.
+  - Constraint classes (lower and upper limits) based on regularization.
+  - Simplified and unified code.
 - Solvers:
-    - SIRT now supports various l2 norm data terms.
-    - CP and SIRT report better information on regularization.
-    - Use of data term to compute residual correctly.
+  - SIRT now supports various l2 norm data terms.
+  - CP and SIRT report better information on regularization.
+  - Use of data term to compute residual correctly.
 - More flexibility and options to image denoiser.
 - New module for easing development of tests and examples.
 ### Fixed
