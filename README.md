@@ -14,8 +14,8 @@ This package provides the following functionality:
   - Simultaneous Iterative Reconstruction Technique (SIRT).
   - Simultaneous Algebraic Reconstruction Technique (SART).
   - Primal-dual optimization from Chambolle-Pock, with:
-    * Gaussian and Poisson noise modelling
-    * Optional TV-min, l1-min, laplacian, and wavelet based regularization.
+    * Various data fitting terms, including Gaussian and Poisson noise modelling.
+    * Various optional regularization terms, including: TV-min, l1-min, laplacian, and wavelet l_1-min.
 
 It contains the code used for the following paper, which also provides a
 mathematical description of the concepts and algorithms used here:

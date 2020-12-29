@@ -68,7 +68,7 @@ def pad_sinogram(sinogram, width, pad_axis=-1, mode='edge', **kwds):
     :type pad_axis: int. Optional, default: -1
     :param mode: The padding type (from numpy.pad).
     :type mode: string. Optional, default: 'edge'.
-    :param **kwds: The numpy.pad arguments.
+    :param kwds: The numpy.pad arguments.
 
     :returns: The padded sinogram.
     :rtype: (numpy.array_like)
@@ -137,8 +137,7 @@ def denoise_image(
     :type reg_weight: float, optional
     :param stddev: The local standard deviations. If None, it performs a standard least-squares.
     :type stddev: `numpy.array_like`, optional
-    :param error_norm: The error weighting mechanism.
-    When using std_dev, options are: {'l2b'} | 'l1b' | 'hub' | 'wl2'
+    :param error_norm: The error weighting mechanism. When using std_dev, options are: {'l2b'} | 'l1b' | 'hub' | 'wl2' \
     (corresponding to: 'l2 dead-zone', 'l1 dead-zone', 'Huber', 'weighted least-squares').
     :type error_norm: str, optional
     :param iterations: Number of iterations, defaults to 250
