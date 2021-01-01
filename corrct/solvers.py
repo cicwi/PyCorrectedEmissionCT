@@ -1098,7 +1098,7 @@ class Sirt(Solver):
         self.data_term.assign_data(b, sigma)
 
         if self.tolerance is not None:
-            res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0))
+            res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0, b_mask))
             res_norm_rel = np.ones((iterations, )) * self.tolerance
         else:
             res_norm_rel = None
@@ -1267,7 +1267,7 @@ class CP(Solver):
         q = [reg.initialize_dual() for reg in self.regularizer]
 
         if self.tolerance is not None:
-            res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0))
+            res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0, b_mask))
             res_norm_rel = np.ones((iterations, )) * self.tolerance
         else:
             res_norm_rel = None
