@@ -160,7 +160,7 @@ def create_sino(
         with projectors.ProjectorUncorrected(ph.shape, angles_rad) as p:
             sino = num_photons * detector_solidangle_sr * p.fp(ph)
     else:
-        with projectors.AttenuationProjector(
+        with projectors.ProjectorAttenuationXRF(
                 ph.shape, angles_rad, att_in=vol_att_in, att_out=vol_att_out,
                 angles_detectors_rad=detectors_pos_rad, psf=psf) as p:
             sino = num_photons * detector_solidangle_sr * p.fp(ph)

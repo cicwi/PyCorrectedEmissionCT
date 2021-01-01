@@ -40,7 +40,7 @@ def create_sino(
     :returns: The simulated sinogram
     :rtype: numpy.array_like
     """
-    with projectors.AttenuationProjector(
+    with projectors.ProjectorAttenuationXRF(
             vol.shape, angles_rad, att_in=vol_att_in, att_out=vol_att_out,
             angles_detectors_rad=angles_detectors_rad,
             weights_detectors=weights_detectors,
@@ -100,7 +100,7 @@ def reconstruct(  # noqa: C901
     if apply_circ_mask:
         x_mask = utils_proc.get_circular_mask(vol_shape, radius_offset=-1)
 
-    with projectors.AttenuationProjector(
+    with projectors.ProjectorAttenuationXRF(
             vol_shape, angles_rad, att_in=vol_att_in, att_out=vol_att_out,
             angles_detectors_rad=angles_detectors_rad,
             weights_detectors=weights_detectors, psf=psf, is_symmetric=symm,

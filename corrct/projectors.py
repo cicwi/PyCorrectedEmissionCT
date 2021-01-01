@@ -229,8 +229,8 @@ class ProjectorBase(operators.ProjectorOperator):
         return self.W_all.BP(data)
 
 
-class AttenuationProjector(ProjectorBase):
-    """Attenuation corrected projection class, with multi-detector support.
+class ProjectorAttenuationXRF(ProjectorBase):
+    """Attenuation corrected projection class for XRF, with multi-detector support.
     It includes the computation of the attenuation volumes.
     """
 
