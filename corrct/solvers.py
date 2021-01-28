@@ -75,6 +75,9 @@ class DataFidelityBase(object):
             residual *= mask
         return residual
 
+    def compute_residual_norm(self, dual):
+        raise NotImplementedError()
+
     def _compute_sigma_data(self):
         self.sigma_data = self.sigma * self.data
 
@@ -125,6 +128,9 @@ class DataFidelity_l2(DataFidelityBase):
     def assign_data(self, data, sigma=1):
         super().assign_data(data=data, sigma=sigma)
         self.sigma1 = 1 / (1 + sigma)
+
+    def compute_residual_norm(self, dual):
+        return np.linalg.norm(dual.flatten(), ord=2) ** 2
 
     def apply_proximal(self, dual):
         if self.data is not None:
@@ -217,6 +223,11 @@ class DataFidelity_Huber(DataFidelityBase):
         self.one_sigma_error = 1 / (1 + sigma * self.local_error)
         super().assign_data(data=data, sigma=sigma)
 
+    def compute_residual_norm(self, dual):
+        l2_points = dual <= self.local_error
+        l1_points = 1 - l2_points
+        return np.linalg.norm(dual[l2_points].flatten(), ord=2) ** 2 + np.linalg.norm(dual[l1_points].flatten(), ord=1)
+
     def apply_proximal(self, dual):
         if self.data is not None:
             dual -= self.sigma_data
@@ -253,6 +264,9 @@ class DataFidelity_l1(DataFidelityBase):
             dual -= self.sigma_data
         dual /= np.fmax(1, np.abs(dual))
 
+    def compute_residual_norm(self, dual):
+        return np.linalg.norm(dual.flatten(), ord=1)
+
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
@@ -275,6 +289,10 @@ class DataFidelity_l12(DataFidelityBase):
         dual_dir_norm_l2 = np.linalg.norm(dual, ord=2, axis=self.l2_axis, keepdims=True)
         dual /= np.fmax(1, dual_dir_norm_l2)
 
+    def compute_residual_norm(self, dual):
+        temp_dual = np.linalg.norm(dual, ord=2, axis=self.l2_axis)
+        return np.linalg.norm(temp_dual.flatten(), ord=1)
+
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
@@ -284,7 +302,7 @@ class DataFidelity_l12(DataFidelityBase):
          )
 
 
-class DataFidelity_l1b(DataFidelityBase):
+class DataFidelity_l1b(DataFidelity_l1):
     """l1-norm ball data-fidelity class.
     """
 
@@ -335,6 +353,9 @@ class DataFidelity_KL(DataFidelityBase):
         if mask is not None:
             residual *= mask
         return -residual
+
+    def compute_residual_norm(self, dual):
+        return np.linalg.norm(dual.flatten(), ord=1)
 
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
