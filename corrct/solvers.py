@@ -954,8 +954,6 @@ class Sart(Solver):
             lower_limit=None, upper_limit=None, x_mask=None, b_mask=None):
         """
         """
-        data_type = b.dtype
-
         c_in = tm.time()
 
         # Back-projection diagonal re-scaling
@@ -968,7 +966,7 @@ class Sart(Solver):
         tau = self.relaxation / tau
 
         # Forward-projection diagonal re-scaling
-        x_ones = np.ones(tau.shape[1:], dtype=data_type)
+        x_ones = np.ones(tau.shape[1:], dtype=tau.dtype)
         if x_mask is not None:
             x_ones *= x_mask
         sigma = [A(x_ones, ii) for ii in range(A_num_rows)]
@@ -1069,12 +1067,10 @@ class Sirt(Solver):
         """
         (A, At) = self._initialize_data_operators(A, At)
 
-        data_type = b.dtype
-
         c_in = tm.time()
 
         # Back-projection diagonal re-scaling
-        tau = np.ones(b.shape, data_type)
+        tau = np.ones_like(b)
         if b_mask is not None:
             tau *= b_mask
         tau = np.abs(At(tau))
@@ -1084,7 +1080,7 @@ class Sirt(Solver):
         tau = self.relaxation / tau
 
         # Forward-projection diagonal re-scaling
-        sigma = np.ones(tau.shape, dtype=data_type)
+        sigma = np.ones_like(tau)
         if x_mask is not None:
             sigma *= x_mask
         sigma = np.abs(A(sigma))
@@ -1186,9 +1182,7 @@ class CP(Solver):
             return data_term
 
     def power_method(self, A, At, b, iterations=5):
-        data_type = b.dtype
-
-        x = np.random.rand(*b.shape).astype(data_type)
+        x = np.random.rand(*b.shape).astype(b.dtype)
         x /= np.linalg.norm(x)
         x = At(x)
 
@@ -1202,19 +1196,19 @@ class CP(Solver):
             x_norm = np.linalg.norm(x)
             L = np.sqrt(x_norm)
 
-        return (L, x.shape)
+        return (L, x.shape, x.dtype)
 
     def _get_data_sigma_tau_unpreconditioned(self, A, At, b):
-        (L, x_shape) = self.power_method(A, At, b)
+        (L, x_shape, x_dtype) = self.power_method(A, At, b)
         tau = L
 
-        dummy_x = np.empty(x_shape, dtype=b.dtype)
+        dummy_x = np.empty(x_shape, dtype=x_dtype)
         for reg in self.regularizer:
             tau += reg.initialize_sigma_tau(dummy_x)
 
         tau = self.relaxation / tau
         sigma = 0.95 / L
-        return (x_shape, sigma, tau)
+        return (x_shape, x_dtype, sigma, tau)
 
     def __call__(  # noqa: C901
             self, A, b, iterations, x0=None, At=None, upper_limit=None,
@@ -1231,12 +1225,10 @@ class CP(Solver):
                 print('WARNING: Turning off preconditioning because system matrix does not support absolute')
                 precondition = False
 
-        data_type = b.dtype
-
         c_in = tm.time()
 
         if precondition:
-            tau = np.ones(b.shape, data_type)
+            tau = np.ones_like(b)
             if b_mask is not None:
                 tau *= b_mask
             tau = np.abs(At_abs(tau))
@@ -1246,18 +1238,19 @@ class CP(Solver):
             tau = self.relaxation / tau
 
             x_shape = tau.shape
+            x_dtype = tau.dtype
 
-            sigma = np.ones(tau.shape, dtype=data_type)
+            sigma = np.ones_like(tau)
             if x_mask is not None:
                 sigma *= x_mask
             sigma = np.abs(A_abs(sigma))
             sigma[(sigma / np.max(sigma)) < 1e-5] = 1
             sigma = 0.95 / sigma
         else:
-            (x_shape, sigma, tau) = self._get_data_sigma_tau_unpreconditioned(A, At, b)
+            (x_shape, x_dtype, sigma, tau) = self._get_data_sigma_tau_unpreconditioned(A, At, b)
 
         if x0 is None:
-            x0 = np.zeros(x_shape, data_type)
+            x0 = np.zeros(x_shape, dtype=x_dtype)
         x = x0
         x_relax = x
 
