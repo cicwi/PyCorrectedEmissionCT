@@ -795,7 +795,7 @@ class Regularizer_fft(BaseRegularizer):
 
     __reg_name__ = 'fft'
 
-    def __init__(self, weight, ndims=2, axes=None, norm=DataFidelity_l12()):
+    def __init__(self, weight, ndims=2, axes=None, mask='exp', norm=DataFidelity_l12()):
         super().__init__(weight=weight, norm=norm)
 
         if axes is None:
@@ -806,11 +806,31 @@ class Regularizer_fft(BaseRegularizer):
         self.ndims = ndims
         self.axes = axes
 
+        self.mask = mask
+
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
         self.op = operators.TransformFourier(primal.shape, axes=self.axes)
 
-        self.sigma = 1
+        if isinstance(self.mask, str):
+            coords = [np.fft.fftfreq(s) for s in self.op.adj_shape[self.axes]]
+            coords = np.array(np.meshgrid(*coords, indexing='ij'))
+
+            if self.mask.lower() == 'delta':
+                self.sigma = 1 - np.all(coords == 0, axis=0)
+            elif self.mask.lower() == 'exp':
+                self.sigma = 1 - np.exp(-np.sqrt(np.sum(coords ** 2, axis=0)) * 12)
+            elif self.mask.lower() == 'exp2':
+                self.sigma = 1 - np.exp(-np.sum(coords ** 2, axis=0) * 36)
+            else:
+                raise ValueError('Unknown FFT mask: %s. Options are: "delta", "exp". and "exp2".' % self.mask)
+
+            new_shape = np.ones_like(self.op.adj_shape)
+            new_shape[self.axes] = self.op.adj_shape[self.axes]
+            self.sigma = np.reshape(self.sigma, new_shape)
+        else:
+            self.sigma = 1
+
         self.norm.assign_data(None, sigma=self.sigma)
 
         return self.weight
