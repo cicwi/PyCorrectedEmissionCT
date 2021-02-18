@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri May  8 15:36:39 2020
+Operators module.
 
-@author: VIGANO
+@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
@@ -23,12 +25,17 @@ except ImportError:
 
 
 class BaseTransform(spsla.LinearOperator):
-    """Base operator class, that implements the linear operator behavior that
-    can be used with the solvers in the `.solvers` module and the solvers in
-    `scipy.sparse.linalg`.
+    """Base operator class.
+
+    It implements the linear operator behavior that can be used with the solvers in the `.solvers` module,
+    and by the solvers in `scipy.sparse.linalg`.
     """
 
     def __init__(self):
+        """Initialize the base operator class.
+
+        It assumes that the fields `dir_shape` and `adj_shape` have been set during the initialization of the derived classes.
+        """
         num_cols = np.prod(self.dir_shape)
         num_rows = np.prod(self.adj_shape)
         super().__init__(np.float32, [num_rows, num_cols])
@@ -41,10 +48,10 @@ class BaseTransform(spsla.LinearOperator):
         :type x: numpy.array_like
         """
         if self.is_dir_operator:
-            x = np.reshape(x, self.dir_shape)
+            x = x.reshape(self.dir_shape)
             return self._op_direct(x).flatten()
         else:
-            x = np.reshape(x, self.adj_shape)
+            x = x.reshape(self.adj_shape)
             return self._op_adjoint(x).flatten()
 
     def rmatvec(self, x):
@@ -54,10 +61,10 @@ class BaseTransform(spsla.LinearOperator):
         :type x: numpy.array_like
         """
         if self.is_dir_operator:
-            x = np.reshape(x, self.adj_shape)
+            x = x.reshape(self.adj_shape)
             return self._op_adjoint(x).flatten()
         else:
-            x = np.reshape(x, self.dir_shape)
+            x = x.reshape(self.dir_shape)
             return self._op_direct(x).flatten()
 
     def _transpose(self):
@@ -75,8 +82,7 @@ class BaseTransform(spsla.LinearOperator):
         return self._transpose()
 
     def absolute(self):
-        """Returns the projection operator using the absolute value of the
-        projection coefficients.
+        """Return the projection operator using the absolute value of the projection coefficients.
 
         :returns: The absolute value operator
         :rtype: ProjectorOperator
@@ -84,7 +90,7 @@ class BaseTransform(spsla.LinearOperator):
         return self
 
     def explicit(self):
-        """Returns the explicit transformation matrix associated to the operator.
+        """Return the explicit transformation matrix associated to the operator.
 
         :returns: The explicit transformation matrix
         :rtype: `numpy.array_like`
@@ -101,6 +107,14 @@ class BaseTransform(spsla.LinearOperator):
         return He
 
     def __call__(self, x):
+        """Apply the operator to the input vector.
+
+        :param x: Input vector.
+        :type x: `numpy.array_like`
+
+        :returns: The result of the application of the operator on the input vector.
+        :rtype: `numpy.array_like`
+        """
         if self.is_dir_operator:
             return self._op_direct(x)
         else:
@@ -114,18 +128,38 @@ class BaseTransform(spsla.LinearOperator):
 
 
 class ProjectorOperator(BaseTransform):
-    """Base projector class that fixes the projection interface.
-    """
+    """Base projector class that fixes the projection interface."""
 
     def __init__(self):
+        """Initialize the projector operator class.
+
+        It sets the fields `dir_shape` and `adj_shape`, from the fields `vol_shape` and `proj_shape` respectively.
+        These two other fields need to have been defined in a derived class.
+        """
         self.dir_shape = self.vol_shape
         self.adj_shape = self.proj_shape
         super().__init__()
 
     def fp(self, x):
+        """Define the interface for the forward-projection.
+
+        :param x: Input volume.
+        :type x: `numpy.array_like`
+
+        :returns: The projection data.
+        :rtype: `numpy.array_like`
+        """
         raise NotImplementedError()
 
     def bp(self, x):
+        """Define the interface for the back-projection.
+
+        :param x: Input projection data.
+        :type x: `numpy.array_like`
+
+        :returns: The back-projected volume.
+        :rtype: `numpy.array_like`
+        """
         raise NotImplementedError()
 
     def _op_direct(self, x):
@@ -136,8 +170,7 @@ class ProjectorOperator(BaseTransform):
 
 
 class TransformIdentity(BaseTransform):
-    """Identity operator.
-    """
+    """Identity operator."""
 
     def __init__(self, x_shape):
         """Identity operator.
@@ -157,8 +190,7 @@ class TransformIdentity(BaseTransform):
 
 
 class TransformDiagonalScaling(BaseTransform):
-    """Diagonal scaling operator.
-    """
+    """Diagonal scaling operator."""
 
     def __init__(self, x_shape, scale):
         """Diagonal scaling operator.
@@ -174,8 +206,7 @@ class TransformDiagonalScaling(BaseTransform):
         super().__init__()
 
     def absolute(self):
-        """Returns the projection operator using the absolute value of the
-        projection coefficients.
+        """Return the projection operator using the absolute value of the projection coefficients.
 
         :returns: The absolute value operator
         :rtype: Diagonal operator of the absolute values
@@ -190,8 +221,7 @@ class TransformDiagonalScaling(BaseTransform):
 
 
 class TransformDecimatedWavelet(BaseTransform):
-    """Decimated wavelet Transform operator.
-    """
+    """Decimated wavelet Transform operator."""
 
     def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand='constant'):
         """Decimated wavelet Transform operator.
@@ -234,7 +264,7 @@ class TransformDecimatedWavelet(BaseTransform):
         super().__init__()
 
     def direct_dwt(self, x):
-        """Performs the direct wavelet transform.
+        """Perform the direct wavelet transform.
 
         :param x: Data to transform.
         :type x: `numpy.array_like`
@@ -246,7 +276,7 @@ class TransformDecimatedWavelet(BaseTransform):
             x, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand, level=self.level)
 
     def inverse_dwt(self, y):
-        """Performs the inverse wavelet transform.
+        """Perform the inverse wavelet transform.
 
         :param x: Data to anti-transform.
         :type x: list
@@ -275,8 +305,7 @@ class TransformDecimatedWavelet(BaseTransform):
 
 
 class TransformStationaryWavelet(BaseTransform):
-    """Stationary avelet Transform operator.
-    """
+    """Stationary avelet Transform operator."""
 
     def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand='constant', normalized=True):
         """Stationary wavelet Transform operator.
@@ -330,7 +359,7 @@ class TransformStationaryWavelet(BaseTransform):
         super().__init__()
 
     def direct_swt(self, x):
-        """Performs the direct wavelet transform.
+        """Perform the direct wavelet transform.
 
         :param x: Data to transform.
         :type x: `numpy.array_like`
@@ -349,7 +378,7 @@ class TransformStationaryWavelet(BaseTransform):
             x, wavelet=self.wavelet, axes=self.axes, norm=self.normalized, level=self.level, trim_approx=True)
 
     def inverse_swt(self, y):
-        """Performs the inverse wavelet transform.
+        """Perform the inverse wavelet transform.
 
         :param x: Data to anti-transform.
         :type x: list
@@ -370,18 +399,22 @@ class TransformStationaryWavelet(BaseTransform):
 
     def _op_direct(self, x):
         y = self.direct_swt(x)
-        y = [y[0]] + [y[l][x] for l in range(1, self.level + 1) for x in self.labels]
+        y = [y[0]] + [y[lvl][x] for lvl in range(1, self.level + 1) for x in self.labels]
         return np.array(y)
 
     def _op_adjoint(self, y):
-        def get_lvl_pos(l):
-            return (l - 1) * (2 ** len(self.axes) - 1) + 1
+        def get_lvl_pos(lvl):
+            return (lvl - 1) * (2 ** len(self.axes) - 1) + 1
         y = [y[0]] + [
-            dict(((k, y[ii + get_lvl_pos(l), ...]) for ii, k in enumerate(self.labels))) for l in range(1, self.level + 1)]
+            dict(
+                ((k, y[ii_lbl + get_lvl_pos(lvl), ...]) for ii_lbl, k in enumerate(self.labels))
+            ) for lvl in range(1, self.level + 1)
+        ]
         return self.inverse_swt(y)
 
 
 class TransformGradient(BaseTransform):
+    """Gradient operator."""
 
     def __init__(self, x_shape, axes=None):
         """Gradient transform.
@@ -402,7 +435,7 @@ class TransformGradient(BaseTransform):
         super().__init__()
 
     def gradient(self, x):
-        """Computes the gradient.
+        """Compute the gradient.
 
         :param x: Input data.
         :type x: `numpy.array_like`
@@ -420,7 +453,7 @@ class TransformGradient(BaseTransform):
         return np.stack(d, axis=0)
 
     def divergence(self, x):
-        """Computes the divergence (transpose of gradient).
+        """Compute the divergence - transpose of gradient.
 
         :param x: Input data.
         :type x: `numpy.array_like`
@@ -445,6 +478,7 @@ class TransformGradient(BaseTransform):
 
 
 class TransformFourier(BaseTransform):
+    """Fourier transform operator."""
 
     def __init__(self, x_shape, axes=None):
         """Fourier transform.
@@ -465,7 +499,7 @@ class TransformFourier(BaseTransform):
         super().__init__()
 
     def fft(self, x):
-        """Computes the fft.
+        """Compute the fft.
 
         :param x: Input data.
         :type x: `numpy.array_like`
@@ -480,7 +514,7 @@ class TransformFourier(BaseTransform):
         return d
 
     def ifft(self, x):
-        """Computes the inverse of the fft.
+        """Compute the inverse of the fft.
 
         :param x: Input data.
         :type x: `numpy.array_like`
@@ -499,6 +533,7 @@ class TransformFourier(BaseTransform):
 
 
 class TransformLaplacian(BaseTransform):
+    """Laplacian transform operator."""
 
     def __init__(self, x_shape, axes=None):
         """Laplacian transform.
@@ -519,7 +554,7 @@ class TransformLaplacian(BaseTransform):
         super().__init__()
 
     def laplacian(self, x):
-        """Computes the laplacian.
+        """Compute the laplacian.
 
         :param x: Input data.
         :type x: `numpy.array_like`

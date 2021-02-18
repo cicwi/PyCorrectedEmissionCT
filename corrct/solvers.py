@@ -34,8 +34,7 @@ eps = np.finfo(np.float32).eps
 
 
 class DataFidelityBase(object):
-    """Base data-fidelity class that defines the object interface.
-    """
+    """Base data-fidelity class that defines the object interface."""
 
     __data_fidelity_name__ = ''
 
@@ -117,8 +116,7 @@ class DataFidelityBase(object):
 
 
 class DataFidelity_l2(DataFidelityBase):
-    """l2-norm data-fidelity class.
-    """
+    """l2-norm data-fidelity class."""
 
     __data_fidelity_name__ = 'l2'
 
@@ -147,8 +145,7 @@ class DataFidelity_l2(DataFidelityBase):
 
 
 class DataFidelity_wl2(DataFidelity_l2):
-    """Weighted l2-norm data-fidelity class.
-    """
+    """Weighted l2-norm data-fidelity class."""
 
     __data_fidelity_name__ = 'wl2'
 
@@ -174,8 +171,7 @@ class DataFidelity_wl2(DataFidelity_l2):
 
 
 class DataFidelity_l2b(DataFidelity_l2):
-    """l2-norm ball data-fidelity class.
-    """
+    """l2-norm ball data-fidelity class."""
 
     __data_fidelity_name__ = 'l2b'
 
@@ -208,9 +204,7 @@ class DataFidelity_l2b(DataFidelity_l2):
 
 
 class DataFidelity_Huber(DataFidelityBase):
-    """Huber-norm data-fidelity class. Given a parameter a:
-    l2-norm for x < a, and l1-norm for x > a.
-    """
+    """Huber-norm data-fidelity class. Given a parameter a: l2-norm for x < a, and l1-norm for x > a."""
 
     __data_fidelity_name__ = 'Hub'
 
@@ -251,8 +245,7 @@ class DataFidelity_Huber(DataFidelityBase):
 
 
 class DataFidelity_l1(DataFidelityBase):
-    """l1-norm data-fidelity class.
-    """
+    """l1-norm data-fidelity class."""
 
     __data_fidelity_name__ = 'l1'
 
@@ -274,8 +267,7 @@ class DataFidelity_l1(DataFidelityBase):
 
 
 class DataFidelity_l12(DataFidelityBase):
-    """l12-norm data-fidelity class.
-    """
+    """l12-norm data-fidelity class."""
 
     __data_fidelity_name__ = 'l12'
 
@@ -303,8 +295,7 @@ class DataFidelity_l12(DataFidelityBase):
 
 
 class DataFidelity_l1b(DataFidelity_l1):
-    """l1-norm ball data-fidelity class.
-    """
+    """l1-norm ball data-fidelity class."""
 
     __data_fidelity_name__ = 'l1b'
 
@@ -332,8 +323,7 @@ class DataFidelity_l1b(DataFidelity_l1):
 
 
 class DataFidelity_KL(DataFidelityBase):
-    """KullbackLeibler data-fidelity class.
-    """
+    """KullbackLeibler data-fidelity class."""
 
     __data_fidelity_name__ = 'KL'
 
@@ -377,8 +367,7 @@ class DataFidelity_KL(DataFidelityBase):
 
 
 class BaseRegularizer(object):
-    """Base regularizer class that defines the Regularizer object interface.
-    """
+    """Base regularizer class that defines the Regularizer object interface."""
 
     __reg_name__ = ''
 
@@ -414,9 +403,7 @@ class BaseRegularizer(object):
 
 
 class Regularizer_Grad(BaseRegularizer):
-    """Total Variation (TV) regularizer. It can be used to promote piece-wise
-    constant reconstructions.
-    """
+    """Total Variation (TV) regularizer. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = 'TV'
 
@@ -448,9 +435,7 @@ class Regularizer_Grad(BaseRegularizer):
 
 
 class Regularizer_TV2D(Regularizer_Grad):
-    """Total Variation (TV) regularizer in 2D. It can be used to promote
-    piece-wise constant reconstructions.
-    """
+    """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = 'TV2D'
 
@@ -459,9 +444,7 @@ class Regularizer_TV2D(Regularizer_Grad):
 
 
 class Regularizer_TV3D(Regularizer_Grad):
-    """Total Variation (TV) regularizer in 3D. It can be used to promote
-    piece-wise constant reconstructions.
-    """
+    """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = 'TV3D'
 
@@ -470,9 +453,7 @@ class Regularizer_TV3D(Regularizer_Grad):
 
 
 class Regularizer_HubTV2D(Regularizer_Grad):
-    """Total Variation (TV) regularizer in 2D. It can be used to promote
-    piece-wise constant reconstructions.
-    """
+    """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = 'HubTV2D'
 
@@ -481,9 +462,7 @@ class Regularizer_HubTV2D(Regularizer_Grad):
 
 
 class Regularizer_HubTV3D(Regularizer_Grad):
-    """Total Variation (TV) regularizer in 3D. It can be used to promote
-    piece-wise constant reconstructions.
-    """
+    """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = 'HubTV3D'
 
@@ -492,8 +471,7 @@ class Regularizer_HubTV3D(Regularizer_Grad):
 
 
 class Regularizer_Smooth2D(Regularizer_Grad):
-    """It can be used to promote smooth reconstructions.
-    """
+    """It can be used to promote smooth reconstructions."""
 
     __reg_name__ = 'Smooth2D'
 
@@ -502,8 +480,7 @@ class Regularizer_Smooth2D(Regularizer_Grad):
 
 
 class Regularizer_Smooth3D(Regularizer_Grad):
-    """It can be used to promote smooth reconstructions.
-    """
+    """It can be used to promote smooth reconstructions."""
 
     __reg_name__ = 'Smooth3D'
 
@@ -512,8 +489,7 @@ class Regularizer_Smooth3D(Regularizer_Grad):
 
 
 class Regularizer_lap(BaseRegularizer):
-    """Laplacian regularizer. It can be used to promote smooth reconstructions.
-    """
+    """Laplacian regularizer. It can be used to promote smooth reconstructions."""
 
     __reg_name__ = 'lap'
 
@@ -545,9 +521,7 @@ class Regularizer_lap(BaseRegularizer):
 
 
 class Regularizer_lap2D(Regularizer_lap):
-    """Laplacian regularizer in 2D. It can be used to promote smooth
-    reconstructions.
-    """
+    """Laplacian regularizer in 2D. It can be used to promote smooth reconstructions."""
 
     __reg_name__ = 'lap2D'
 
@@ -556,9 +530,7 @@ class Regularizer_lap2D(Regularizer_lap):
 
 
 class Regularizer_lap3D(Regularizer_lap):
-    """Laplacian regularizer in 3D. It can be used to promote smooth
-    reconstructions.
-    """
+    """Laplacian regularizer in 3D. It can be used to promote smooth reconstructions."""
 
     __reg_name__ = 'lap3D'
 
@@ -567,8 +539,7 @@ class Regularizer_lap3D(Regularizer_lap):
 
 
 class Regularizer_l1(BaseRegularizer):
-    """l1-norm regularizer. It can be used to promote sparse reconstructions.
-    """
+    """l1-norm regularizer. It can be used to promote sparse reconstructions."""
 
     __reg_name__ = 'l1'
 
@@ -591,8 +562,7 @@ class Regularizer_l1(BaseRegularizer):
 
 
 class Regularizer_swl(BaseRegularizer):
-    """Base stationary wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain.
-    """
+    """Base stationary wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
 
     __reg_name__ = 'swl'
 
@@ -656,8 +626,7 @@ class Regularizer_swl(BaseRegularizer):
 
 
 class Regularizer_l1swl(Regularizer_swl):
-    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions.
-    """
+    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions."""
 
     __reg_name__ = 'l1swl'
 
@@ -670,8 +639,7 @@ class Regularizer_l1swl(Regularizer_swl):
 
 
 class Regularizer_Hub_swl(Regularizer_swl):
-    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions.
-    """
+    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions."""
 
     __reg_name__ = 'Hubswl'
 
@@ -684,8 +652,7 @@ class Regularizer_Hub_swl(Regularizer_swl):
 
 
 class Regularizer_dwl(BaseRegularizer):
-    """Base decimated wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain.
-    """
+    """Base decimated wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
 
     __reg_name__ = 'dwl'
 
@@ -741,8 +708,7 @@ class Regularizer_dwl(BaseRegularizer):
 
 
 class Regularizer_l1dwl(Regularizer_dwl):
-    """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions.
-    """
+    """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions."""
 
     __reg_name__ = 'l1dwl'
 
@@ -752,8 +718,7 @@ class Regularizer_l1dwl(Regularizer_dwl):
 
 
 class Regularizer_Hub_dwl(Regularizer_dwl):
-    """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions.
-    """
+    """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions."""
 
     __reg_name__ = 'Hubdwl'
 
@@ -764,8 +729,7 @@ class Regularizer_Hub_dwl(Regularizer_dwl):
 
 
 class BaseRegularizer_med(BaseRegularizer):
-    """Median filter regularizer base class. It can be used to promote filtered reconstructions.
-    """
+    """Median filter regularizer base class. It can be used to promote filtered reconstructions."""
 
     __reg_name__ = 'med'
 
@@ -791,8 +755,7 @@ class BaseRegularizer_med(BaseRegularizer):
 
 
 class Regularizer_l1med(BaseRegularizer_med):
-    """l1-norm median filter regularizer. It can be used to promote filtered reconstructions.
-    """
+    """l1-norm median filter regularizer. It can be used to promote filtered reconstructions."""
 
     __reg_name__ = 'l1med'
 
@@ -801,8 +764,7 @@ class Regularizer_l1med(BaseRegularizer_med):
 
 
 class Regularizer_l2med(BaseRegularizer_med):
-    """l2-norm median filter regularizer. It can be used to promote filtered reconstructions.
-    """
+    """l2-norm median filter regularizer. It can be used to promote filtered reconstructions."""
 
     __reg_name__ = 'l2med'
 
@@ -811,8 +773,7 @@ class Regularizer_l2med(BaseRegularizer_med):
 
 
 class Regularizer_fft(BaseRegularizer):
-    """Fourier regularizer. It can be used to promote sparse reconstructions in the Fourier domain.
-    """
+    """Fourier regularizer. It can be used to promote sparse reconstructions in the Fourier domain."""
 
     __reg_name__ = 'fft'
 
@@ -867,8 +828,7 @@ class Regularizer_fft(BaseRegularizer):
 
 
 class Constraint_LowerLimit(BaseRegularizer):
-    """Lower limit constraint. It can be used to promote reconstructions in certain regions of solution space.
-    """
+    """Lower limit constraint. It can be used to promote reconstructions in certain regions of solution space."""
 
     __reg_name__ = 'lowlim'
 
@@ -899,8 +859,7 @@ class Constraint_LowerLimit(BaseRegularizer):
 
 
 class Constraint_UpperLimit(BaseRegularizer):
-    """Upper limit constraint. It can be used to promote reconstructions in certain regions of solution space.
-    """
+    """Upper limit constraint. It can be used to promote reconstructions in certain regions of solution space."""
 
     __reg_name__ = 'uplim'
 
@@ -934,8 +893,7 @@ class Constraint_UpperLimit(BaseRegularizer):
 
 
 class Solver(object):
-    """Base solver class.
-    """
+    """Base solver class."""
 
     def __init__(self, verbose=False, relaxation=1, tolerance=None):
         self.verbose = verbose
@@ -986,9 +944,7 @@ class Solver(object):
 
 
 class Sart(Solver):
-    """Solver class implementing the Simultaneous Algebraic Reconstruction
-    Technique (SART) algorithm.
-    """
+    """Solver class implementing the Simultaneous Algebraic Reconstruction Technique (SART) algorithm."""
 
     def __call__(  # noqa: C901
             self, A, b, iterations, A_num_rows, x0=None, At=None,
@@ -1076,9 +1032,7 @@ class Sart(Solver):
 
 
 class Sirt(Solver):
-    """Solver class implementing the Simultaneous Iterative Reconstruction
-    Technique (SIRT) algorithm.
-    """
+    """Solver class implementing the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm."""
 
     def __init__(
             self, verbose=False, tolerance=None, relaxation=1.95, data_term='l2',regularizer=None):
@@ -1189,8 +1143,8 @@ class Sirt(Solver):
 
 
 class CP(Solver):
-    """Solver class implementing the primal-dual algorithm from Chambolle and
-    Pock.
+    """Solver class implementing the primal-dual algorithm from Chambolle and Pock.
+
     It allows to specify two types of data fidelity terms: l2-norm and
     Kulback-Leibler. The first assumes Gaussian noise and the second Poisson
     noise as dominant sources of noise in the data.
