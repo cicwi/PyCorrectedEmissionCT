@@ -312,26 +312,12 @@ class ProjectorAttenuationXRF(ProjectorBase):
         else:
             self.att_vol_angles = None
 
-    def compute_attenuation(self, vol, direction, sampling=1, invert=False):
-        """Computes the attenuation experienced by the photons emitted in every
-        point of the volume, along a certain direction.
-        """
-
+    @staticmethod
+    def _compute_attenuation(vol, direction, sampling=1, invert=False):
         def pad_vol(vol, edges):
             paddings = [(0, )] * len(vol.shape)
             paddings[-2], paddings[-1] = (edges[0], ), (edges[1], )
             return np.pad(vol, paddings, mode='constant')
-
-        vol = np.array(vol)
-        if not len(vol.shape) in [2, 3]:
-            raise ValueError(
-                "Maps can only be 2D or 3D Arrays. A %d-dimensional was passed" % (len(vol.shape)))
-        if not np.all(np.equal(vol.shape[-2:], self.vol_shape[:2])):
-            raise ValueError(
-                "Mismatching volume shape of input volume (%s) with vol_shape (%s in 2D -> %s)" % (
-                    " ".join(("%d" % x for x in vol.shape)),
-                    " ".join(("%d" % x for x in self.vol_shape)),
-                    " ".join(("%d" % x for x in self.vol_shape[:2]))))
 
         size_lims = np.array(vol.shape[-2:])
         min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
@@ -356,6 +342,26 @@ class ProjectorAttenuationXRF(ProjectorBase):
         cum_arr = np.exp(-cum_arr)
 
         return cum_arr
+
+    def compute_attenuation(self, vol, direction, sampling=1, invert=False):
+        """Computes the attenuation experienced by the photons emitted in every
+        point of the volume, along a certain direction.
+        """
+
+        vol = np.array(vol)
+        if not len(vol.shape) in [2, 3]:
+            raise ValueError("Maps can only be 2D or 3D Arrays. A %d-dimensional was passed" % (len(vol.shape)))
+        if not np.all(np.equal(vol.shape[-2:], self.vol_shape[:2])):
+            raise ValueError(
+                "Mismatching volume shape of input volume (%s) with vol_shape (%s in 2D -> %s)"
+                % (
+                    " ".join(("%d" % x for x in vol.shape)),
+                    " ".join(("%d" % x for x in self.vol_shape)),
+                    " ".join(("%d" % x for x in self.vol_shape[:2])),
+                )
+            )
+
+        return self._compute_attenuation(vol, direction, sampling=1, invert=False)
 
     def _compute_attenuation_angle_in(self, angle):
         direction_in = [np.sin(angle), np.cos(angle)]
