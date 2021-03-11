@@ -19,12 +19,13 @@ from . import operators
 
 try:
     import pywt
+
     has_pywt = True
-    use_swtn = pywt.version.version >= '1.0.2'
+    use_swtn = pywt.version.version >= "1.0.2"
 except ImportError:
     has_pywt = False
     use_swtn = False
-    print('WARNING - pywt was not found')
+    print("WARNING - pywt was not found")
 
 
 eps = np.finfo(np.float32).eps
@@ -36,7 +37,7 @@ eps = np.finfo(np.float32).eps
 class DataFidelityBase(object):
     """Base data-fidelity class that defines the object interface."""
 
-    __data_fidelity_name__ = ''
+    __data_fidelity_name__ = ""
 
     def __init__(self, background=None):
         self.background = background
@@ -44,11 +45,11 @@ class DataFidelityBase(object):
     def info(self):
         if self.background is not None:
             if np.array(self.background).size > 1:
-                bckgrnd_str = '(B:<array>)'
+                bckgrnd_str = "(B:<array>)"
             else:
-                bckgrnd_str = '(B:%g)' % self.background
+                bckgrnd_str = "(B:%g)" % self.background
         else:
-            bckgrnd_str = ''
+            bckgrnd_str = ""
         return self.__data_fidelity_name__ + bckgrnd_str
 
     def upper(self):
@@ -118,7 +119,7 @@ class DataFidelityBase(object):
 class DataFidelity_l2(DataFidelityBase):
     """l2-norm data-fidelity class."""
 
-    __data_fidelity_name__ = 'l2'
+    __data_fidelity_name__ = "l2"
 
     def __init__(self, background=None):
         super().__init__(background=background)
@@ -139,15 +140,14 @@ class DataFidelity_l2(DataFidelityBase):
         if self.background is not None:
             proj_primal = proj_primal + self.background
         return (
-            (np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2) + np.linalg.norm(dual, ord=2)) / 2
-            + self.compute_data_dual_dot(dual)
-        )
+            np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2) + np.linalg.norm(dual, ord=2)
+        ) / 2 + self.compute_data_dual_dot(dual)
 
 
 class DataFidelity_wl2(DataFidelity_l2):
     """Weighted l2-norm data-fidelity class."""
 
-    __data_fidelity_name__ = 'wl2'
+    __data_fidelity_name__ = "wl2"
 
     def __init__(self, weights, background=None):
         super().__init__(background=background)
@@ -173,7 +173,7 @@ class DataFidelity_wl2(DataFidelity_l2):
 class DataFidelity_l2b(DataFidelity_l2):
     """l2-norm ball data-fidelity class."""
 
-    __data_fidelity_name__ = 'l2b'
+    __data_fidelity_name__ = "l2b"
 
     def __init__(self, local_error, background=None):
         super().__init__(background=background)
@@ -198,15 +198,15 @@ class DataFidelity_l2b(DataFidelity_l2):
         if self.background is not None:
             proj_primal = proj_primal + self.background
         return (
-            (np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2)
-             + np.linalg.norm(np.sqrt(self.local_error) * dual, ord=2)) / 2
-            + self.compute_data_dual_dot(dual))
+            np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2)
+            + np.linalg.norm(np.sqrt(self.local_error) * dual, ord=2)
+        ) / 2 + self.compute_data_dual_dot(dual)
 
 
 class DataFidelity_Huber(DataFidelityBase):
     """Huber-norm data-fidelity class. Given a parameter a: l2-norm for x < a, and l1-norm for x > a."""
 
-    __data_fidelity_name__ = 'Hub'
+    __data_fidelity_name__ = "Hub"
 
     def __init__(self, local_error, background=None, l2_axis=None):
         super().__init__(background=background)
@@ -247,7 +247,7 @@ class DataFidelity_Huber(DataFidelityBase):
 class DataFidelity_l1(DataFidelityBase):
     """l1-norm data-fidelity class."""
 
-    __data_fidelity_name__ = 'l1'
+    __data_fidelity_name__ = "l1"
 
     def __init__(self, background=None):
         super().__init__(background=background)
@@ -269,7 +269,7 @@ class DataFidelity_l1(DataFidelityBase):
 class DataFidelity_l12(DataFidelityBase):
     """l12-norm data-fidelity class."""
 
-    __data_fidelity_name__ = 'l12'
+    __data_fidelity_name__ = "l12"
 
     def __init__(self, background=None, l2_axis=0):
         super().__init__(background=background)
@@ -288,16 +288,15 @@ class DataFidelity_l12(DataFidelityBase):
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
-        return (
-            np.linalg.norm(np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2, axis=self.l2_axis), ord=1)
-            + self.compute_data_dual_dot(dual)
-         )
+        return np.linalg.norm(
+            np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2, axis=self.l2_axis), ord=1
+        ) + self.compute_data_dual_dot(dual)
 
 
 class DataFidelity_l1b(DataFidelity_l1):
     """l1-norm ball data-fidelity class."""
 
-    __data_fidelity_name__ = 'l1b'
+    __data_fidelity_name__ = "l1b"
 
     def __init__(self, local_error, background=None):
         super().__init__(background=background)
@@ -316,16 +315,15 @@ class DataFidelity_l1b(DataFidelity_l1):
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
-        return (
-            np.linalg.norm(np.fmax(np.abs(self.compute_residual(proj_primal, mask)) - self.local_error, 0), ord=1)
-            + self.compute_data_dual_dot(dual)
-        )
+        return np.linalg.norm(
+            np.fmax(np.abs(self.compute_residual(proj_primal, mask)) - self.local_error, 0), ord=1
+        ) + self.compute_data_dual_dot(dual)
 
 
 class DataFidelity_KL(DataFidelityBase):
     """KullbackLeibler data-fidelity class."""
 
-    __data_fidelity_name__ = 'KL'
+    __data_fidelity_name__ = "KL"
 
     def _compute_sigma_data(self):
         self.sigma_data = 4 * self.sigma * np.fmax(self.data, 0)
@@ -369,7 +367,7 @@ class DataFidelity_KL(DataFidelityBase):
 class BaseRegularizer(object):
     """Base regularizer class that defines the Regularizer object interface."""
 
-    __reg_name__ = ''
+    __reg_name__ = ""
 
     def __init__(self, weight, norm):
         self.weight = weight
@@ -378,7 +376,7 @@ class BaseRegularizer(object):
         self.norm = norm
 
     def info(self):
-        return self.__reg_name__ + '(w:%g' % self.weight + ')'
+        return self.__reg_name__ + "(w:%g" % self.weight + ")"
 
     def upper(self):
         return self.__reg_name__.upper()
@@ -405,7 +403,7 @@ class BaseRegularizer(object):
 class Regularizer_Grad(BaseRegularizer):
     """Total Variation (TV) regularizer. It can be used to promote piece-wise constant reconstructions."""
 
-    __reg_name__ = 'TV'
+    __reg_name__ = "TV"
 
     def __init__(self, weight, ndims=2, axes=None, norm=DataFidelity_l12()):
         super().__init__(weight=weight, norm=norm)
@@ -413,7 +411,7 @@ class Regularizer_Grad(BaseRegularizer):
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
         elif not ndims == len(axes):
-            print('WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.')
+            print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
         self.ndims = ndims
         self.axes = axes
@@ -437,7 +435,7 @@ class Regularizer_Grad(BaseRegularizer):
 class Regularizer_TV2D(Regularizer_Grad):
     """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
 
-    __reg_name__ = 'TV2D'
+    __reg_name__ = "TV2D"
 
     def __init__(self, weight, axes=None, norm=DataFidelity_l12()):
         super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
@@ -446,7 +444,7 @@ class Regularizer_TV2D(Regularizer_Grad):
 class Regularizer_TV3D(Regularizer_Grad):
     """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
 
-    __reg_name__ = 'TV3D'
+    __reg_name__ = "TV3D"
 
     def __init__(self, weight, axes=None, norm=DataFidelity_l12()):
         super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
@@ -455,7 +453,7 @@ class Regularizer_TV3D(Regularizer_Grad):
 class Regularizer_HubTV2D(Regularizer_Grad):
     """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
 
-    __reg_name__ = 'HubTV2D'
+    __reg_name__ = "HubTV2D"
 
     def __init__(self, weight, huber_size, axes=None):
         super().__init__(weight=weight, ndims=2, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
@@ -464,7 +462,7 @@ class Regularizer_HubTV2D(Regularizer_Grad):
 class Regularizer_HubTV3D(Regularizer_Grad):
     """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
 
-    __reg_name__ = 'HubTV3D'
+    __reg_name__ = "HubTV3D"
 
     def __init__(self, weight, huber_size, axes=None):
         super().__init__(weight=weight, ndims=3, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
@@ -473,7 +471,7 @@ class Regularizer_HubTV3D(Regularizer_Grad):
 class Regularizer_Smooth2D(Regularizer_Grad):
     """It can be used to promote smooth reconstructions."""
 
-    __reg_name__ = 'Smooth2D'
+    __reg_name__ = "Smooth2D"
 
     def __init__(self, weight, axes=None, norm=DataFidelity_l2()):
         super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
@@ -482,7 +480,7 @@ class Regularizer_Smooth2D(Regularizer_Grad):
 class Regularizer_Smooth3D(Regularizer_Grad):
     """It can be used to promote smooth reconstructions."""
 
-    __reg_name__ = 'Smooth3D'
+    __reg_name__ = "Smooth3D"
 
     def __init__(self, weight, axes=None, norm=DataFidelity_l2()):
         super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
@@ -491,7 +489,7 @@ class Regularizer_Smooth3D(Regularizer_Grad):
 class Regularizer_lap(BaseRegularizer):
     """Laplacian regularizer. It can be used to promote smooth reconstructions."""
 
-    __reg_name__ = 'lap'
+    __reg_name__ = "lap"
 
     def __init__(self, weight, ndims=2, axes=None):
         super().__init__(weight=weight, norm=DataFidelity_l1())
@@ -499,7 +497,7 @@ class Regularizer_lap(BaseRegularizer):
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
         elif not ndims == len(axes):
-            print('WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.')
+            print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
         self.ndims = ndims
         self.axes = axes
@@ -523,7 +521,7 @@ class Regularizer_lap(BaseRegularizer):
 class Regularizer_lap2D(Regularizer_lap):
     """Laplacian regularizer in 2D. It can be used to promote smooth reconstructions."""
 
-    __reg_name__ = 'lap2D'
+    __reg_name__ = "lap2D"
 
     def __init__(self, weight):
         Regularizer_lap.__init__(self, weight=weight, ndims=2)
@@ -532,7 +530,7 @@ class Regularizer_lap2D(Regularizer_lap):
 class Regularizer_lap3D(Regularizer_lap):
     """Laplacian regularizer in 3D. It can be used to promote smooth reconstructions."""
 
-    __reg_name__ = 'lap3D'
+    __reg_name__ = "lap3D"
 
     def __init__(self, weight):
         Regularizer_lap.__init__(self, weight=weight, ndims=3)
@@ -541,7 +539,7 @@ class Regularizer_lap3D(Regularizer_lap):
 class Regularizer_l1(BaseRegularizer):
     """l1-norm regularizer. It can be used to promote sparse reconstructions."""
 
-    __reg_name__ = 'l1'
+    __reg_name__ = "l1"
 
     def __init__(self, weight):
         super().__init__(weight=weight, norm=DataFidelity_l1())
@@ -564,19 +562,18 @@ class Regularizer_l1(BaseRegularizer):
 class Regularizer_swl(BaseRegularizer):
     """Base stationary wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
 
-    __reg_name__ = 'swl'
+    __reg_name__ = "swl"
 
     def info(self):
-        return self.__reg_name__ + '(t:' + self.wavelet + '-l:%d' % self.level + '-w:%g' % self.weight + ')'
+        return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight + ")"
 
     def __init__(
-            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', normalized=False,
-            norm=DataFidelity_l1()
-        ):
+        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", normalized=False, norm=DataFidelity_l1()
+    ):
         if not has_pywt:
-            raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
+            raise ValueError("Cannot use l1wl regularizer because pywavelets is not installed.")
         if not use_swtn:
-            raise ValueError('Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).')
+            raise ValueError("Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).")
         super().__init__(weight=weight, norm=norm)
         self.wavelet = wavelet
         self.level = level
@@ -585,7 +582,7 @@ class Regularizer_swl(BaseRegularizer):
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
         elif not ndims == len(axes):
-            print('WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.')
+            print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
         self.ndims = ndims
         self.axes = axes
@@ -599,8 +596,13 @@ class Regularizer_swl(BaseRegularizer):
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
         self.op = operators.TransformStationaryWavelet(
-            primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes,
-            pad_on_demand=self.pad_on_demand, normalized=self.normalized)
+            primal.shape,
+            wavelet=self.wavelet,
+            level=self.level,
+            axes=self.axes,
+            pad_on_demand=self.pad_on_demand,
+            normalized=self.normalized,
+        )
 
         if self.normalized:
             self.sigma = 1
@@ -628,43 +630,54 @@ class Regularizer_swl(BaseRegularizer):
 class Regularizer_l1swl(Regularizer_swl):
     """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions."""
 
-    __reg_name__ = 'l1swl'
+    __reg_name__ = "l1swl"
 
-    def __init__(
-            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', normalized=False):
+    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", normalized=False):
         super().__init__(
-            weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, normalized=normalized,
-            norm=DataFidelity_l1()
+            weight,
+            wavelet,
+            level,
+            ndims=ndims,
+            axes=axes,
+            pad_on_demand=pad_on_demand,
+            normalized=normalized,
+            norm=DataFidelity_l1(),
         )
 
 
 class Regularizer_Hub_swl(Regularizer_swl):
     """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions."""
 
-    __reg_name__ = 'Hubswl'
+    __reg_name__ = "Hubswl"
 
     def __init__(
-            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', normalized=False, huber_size=None):
+        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", normalized=False, huber_size=None
+    ):
         super().__init__(
-            weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, normalized=normalized,
-            norm=DataFidelity_Huber(huber_size)
+            weight,
+            wavelet,
+            level,
+            ndims=ndims,
+            axes=axes,
+            pad_on_demand=pad_on_demand,
+            normalized=normalized,
+            norm=DataFidelity_Huber(huber_size),
         )
 
 
 class Regularizer_dwl(BaseRegularizer):
     """Base decimated wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
 
-    __reg_name__ = 'dwl'
+    __reg_name__ = "dwl"
 
     def info(self):
-        return self.__reg_name__ + '(t:' + self.wavelet + '-l:%d' % self.level + '-w:%g' % self.weight + ')'
+        return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight + ")"
 
-    def __init__(
-            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', norm=DataFidelityBase()):
+    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", norm=DataFidelityBase()):
         if not has_pywt:
-            raise ValueError('Cannot use l1wl regularizer because pywavelets is not installed.')
+            raise ValueError("Cannot use l1wl regularizer because pywavelets is not installed.")
         if not use_swtn:
-            raise ValueError('Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).')
+            raise ValueError("Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).")
         super().__init__(weight=weight, norm=norm)
         self.wavelet = wavelet
         self.level = level
@@ -672,7 +685,7 @@ class Regularizer_dwl(BaseRegularizer):
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
         elif not ndims == len(axes):
-            print('WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.')
+            print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
         self.ndims = ndims
         self.axes = axes
@@ -684,14 +697,14 @@ class Regularizer_dwl(BaseRegularizer):
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
         self.op = operators.TransformDecimatedWavelet(
-            primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes,
-            pad_on_demand=self.pad_on_demand)
+            primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes, pad_on_demand=self.pad_on_demand
+        )
 
         self.sigma = [np.ones(self.op.sub_band_shapes[0], self.dtype) * self.scaling_func_mult[0]]
         for ii_l in range(self.level):
             d = {}
-            for label in self.op.sub_band_shapes[ii_l+1].keys():
-                d[label] = np.ones(self.op.sub_band_shapes[ii_l+1][label], self.dtype) * self.scaling_func_mult[ii_l]
+            for label in self.op.sub_band_shapes[ii_l + 1].keys():
+                d[label] = np.ones(self.op.sub_band_shapes[ii_l + 1][label], self.dtype) * self.scaling_func_mult[ii_l]
             self.sigma.append(d)
         self.sigma, _ = pywt.coeffs_to_array(self.sigma, axes=self.axes)
         self.norm.assign_data(None, sigma=self.sigma)
@@ -710,31 +723,30 @@ class Regularizer_dwl(BaseRegularizer):
 class Regularizer_l1dwl(Regularizer_dwl):
     """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions."""
 
-    __reg_name__ = 'l1dwl'
+    __reg_name__ = "l1dwl"
 
-    def __init__(
-            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant'):
+    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant"):
         super().__init__(weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, norm=DataFidelity_l1())
 
 
 class Regularizer_Hub_dwl(Regularizer_dwl):
     """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions."""
 
-    __reg_name__ = 'Hubdwl'
+    __reg_name__ = "Hubdwl"
 
-    def __init__(
-            self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand='constant', huber_size=None):
+    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", huber_size=None):
         super().__init__(
-            weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, norm=DataFidelity_Huber(huber_size))
+            weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, norm=DataFidelity_Huber(huber_size)
+        )
 
 
 class BaseRegularizer_med(BaseRegularizer):
     """Median filter regularizer base class. It can be used to promote filtered reconstructions."""
 
-    __reg_name__ = 'med'
+    __reg_name__ = "med"
 
     def info(self):
-        return self.__reg_name__ + '(s:%s' % np.array(self.filt_size) + '-w:%g' % self.weight + ')'
+        return self.__reg_name__ + "(s:%s" % np.array(self.filt_size) + "-w:%g" % self.weight + ")"
 
     def __init__(self, weight, filt_size=3, norm=DataFidelityBase()):
         super().__init__(weight=weight, norm=norm)
@@ -748,7 +760,7 @@ class BaseRegularizer_med(BaseRegularizer):
         return self.weight
 
     def update_dual(self, dual, primal):
-        dual += (primal - spimg.median_filter(primal, self.filt_size))
+        dual += primal - spimg.median_filter(primal, self.filt_size)
 
     def compute_update_primal(self, dual):
         return self.weight * dual
@@ -757,7 +769,7 @@ class BaseRegularizer_med(BaseRegularizer):
 class Regularizer_l1med(BaseRegularizer_med):
     """l1-norm median filter regularizer. It can be used to promote filtered reconstructions."""
 
-    __reg_name__ = 'l1med'
+    __reg_name__ = "l1med"
 
     def __init__(self, weight, filt_size=3):
         BaseRegularizer_med.__init__(self, weight, filt_size=filt_size, norm=DataFidelity_l1())
@@ -766,7 +778,7 @@ class Regularizer_l1med(BaseRegularizer_med):
 class Regularizer_l2med(BaseRegularizer_med):
     """l2-norm median filter regularizer. It can be used to promote filtered reconstructions."""
 
-    __reg_name__ = 'l2med'
+    __reg_name__ = "l2med"
 
     def __init__(self, weight, filt_size=3):
         BaseRegularizer_med.__init__(self, weight, filt_size=filt_size, norm=DataFidelity_l2())
@@ -775,15 +787,15 @@ class Regularizer_l2med(BaseRegularizer_med):
 class Regularizer_fft(BaseRegularizer):
     """Fourier regularizer. It can be used to promote sparse reconstructions in the Fourier domain."""
 
-    __reg_name__ = 'fft'
+    __reg_name__ = "fft"
 
-    def __init__(self, weight, ndims=2, axes=None, mask='exp', norm=DataFidelity_l12()):
+    def __init__(self, weight, ndims=2, axes=None, mask="exp", norm=DataFidelity_l12()):
         super().__init__(weight=weight, norm=norm)
 
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
         elif not ndims == len(axes):
-            print('WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.')
+            print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
         self.ndims = ndims
         self.axes = axes
@@ -796,13 +808,13 @@ class Regularizer_fft(BaseRegularizer):
 
         if isinstance(self.mask, str):
             coords = [np.fft.fftfreq(s) for s in self.op.adj_shape[self.axes]]
-            coords = np.array(np.meshgrid(*coords, indexing='ij'))
+            coords = np.array(np.meshgrid(*coords, indexing="ij"))
 
-            if self.mask.lower() == 'delta':
+            if self.mask.lower() == "delta":
                 self.sigma = 1 - np.all(coords == 0, axis=0)
-            elif self.mask.lower() == 'exp':
+            elif self.mask.lower() == "exp":
                 self.sigma = 1 - np.exp(-np.sqrt(np.sum(coords ** 2, axis=0)) * 12)
-            elif self.mask.lower() == 'exp2':
+            elif self.mask.lower() == "exp2":
                 self.sigma = 1 - np.exp(-np.sum(coords ** 2, axis=0) * 36)
             else:
                 raise ValueError('Unknown FFT mask: %s. Options are: "delta", "exp". and "exp2".' % self.mask)
@@ -830,10 +842,10 @@ class Regularizer_fft(BaseRegularizer):
 class Constraint_LowerLimit(BaseRegularizer):
     """Lower limit constraint. It can be used to promote reconstructions in certain regions of solution space."""
 
-    __reg_name__ = 'lowlim'
+    __reg_name__ = "lowlim"
 
     def info(self):
-        return self.__reg_name__ + '(l:%g' % self.limit + ')'
+        return self.__reg_name__ + "(l:%g" % self.limit + ")"
 
     def __init__(self, limit, norm=DataFidelityBase()):
         super().__init__(weight=1, norm=norm)
@@ -861,10 +873,10 @@ class Constraint_LowerLimit(BaseRegularizer):
 class Constraint_UpperLimit(BaseRegularizer):
     """Upper limit constraint. It can be used to promote reconstructions in certain regions of solution space."""
 
-    __reg_name__ = 'uplim'
+    __reg_name__ = "uplim"
 
     def info(self):
-        return self.__reg_name__ + '(l:%g' % self.limit + ')'
+        return self.__reg_name__ + "(l:%g" % self.limit + ")"
 
     def __init__(self, limit, norm=DataFidelityBase()):
         super().__init__(weight=1, norm=norm)
@@ -935,20 +947,21 @@ class Solver(object):
             check_regs_ok = [isinstance(r, BaseRegularizer) for r in regularizer]
             if not np.all(check_regs_ok):
                 raise ValueError(
-                    'The following regularizers are not derived from the BaseRegularizer class: %s' %
-                    np.array(np.arange(len(check_regs_ok))[np.array(check_regs_ok, dtype=np.bool)]) )
+                    "The following regularizers are not derived from the BaseRegularizer class: %s"
+                    % np.array(np.arange(len(check_regs_ok))[np.array(check_regs_ok, dtype=np.bool)])
+                )
             else:
                 return list(regularizer)
         else:
-            raise ValueError('Unknown regularizer type.')
+            raise ValueError("Unknown regularizer type.")
 
 
 class Sart(Solver):
     """Solver class implementing the Simultaneous Algebraic Reconstruction Technique (SART) algorithm."""
 
     def __call__(  # noqa: C901
-            self, A, b, iterations, A_num_rows, x0=None, At=None,
-            lower_limit=None, upper_limit=None, x_mask=None, b_mask=None):
+        self, A, b, iterations, A_num_rows, x0=None, At=None, lower_limit=None, upper_limit=None, x_mask=None, b_mask=None
+    ):
         """
         """
         c_in = tm.time()
@@ -977,7 +990,7 @@ class Sart(Solver):
 
         if self.tolerance is not None:
             res_norm_0 = np.linalg.norm((b * b_mask).flatten())
-            res_norm_rel = np.ones((iterations, )) * self.tolerance
+            res_norm_rel = np.ones((iterations,)) * self.tolerance
         else:
             res_norm_rel = None
 
@@ -986,13 +999,11 @@ class Sart(Solver):
         rows_sequence = rnd.permutation(A_num_rows)
 
         if self.verbose:
-            print("- Performing %s iterations (init: %g seconds): " % (
-                    self.upper(), c_init - c_in), end='', flush=True)
+            print("- Performing %s iterations (init: %g seconds): " % (self.upper(), c_init - c_in), end="", flush=True)
         for ii in range(iterations):
             if self.verbose:
-                prnt_str = "%03d/%03d (avg: %g seconds)" % (
-                        ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
-                print(prnt_str, end='', flush=True)
+                prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
+                print(prnt_str, end="", flush=True)
 
             for ii_a in rows_sequence:
 
@@ -1010,9 +1021,9 @@ class Sart(Solver):
                     x *= x_mask
 
             if self.verbose:
-                print(('\b') * len(prnt_str), end='', flush=True)
-                print((' ') * len(prnt_str), end='', flush=True)
-                print(('\b') * len(prnt_str), end='', flush=True)
+                print(("\b") * len(prnt_str), end="", flush=True)
+                print((" ") * len(prnt_str), end="", flush=True)
+                print(("\b") * len(prnt_str), end="", flush=True)
 
             if self.tolerance is not None:
                 res = np.empty_like(b)
@@ -1034,15 +1045,14 @@ class Sart(Solver):
 class Sirt(Solver):
     """Solver class implementing the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm."""
 
-    def __init__(
-            self, verbose=False, tolerance=None, relaxation=1.95, data_term='l2',regularizer=None):
+    def __init__(self, verbose=False, tolerance=None, relaxation=1.95, data_term="l2", regularizer=None):
         super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation)
         self.data_term = self._initialize_data_fidelity_function(data_term)
         self.regularizer = self._initialize_regularizer(regularizer)
 
     def _initialize_data_fidelity_function(self, data_term):
         if isinstance(data_term, str):
-            if data_term.lower() == 'l2':
+            if data_term.lower() == "l2":
                 return DataFidelity_l2()
             else:
                 raise ValueError('Unknown data term: "%s", only accepted terms are: "l2".' % data_term)
@@ -1052,12 +1062,12 @@ class Sirt(Solver):
             raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
 
     def info(self):
-        reg_info = ''.join(['-' + r.info().upper() for r in self.regularizer])
-        return Solver.info(self) +  '-' + self.data_term.info() + reg_info
+        reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+        return Solver.info(self) + "-" + self.data_term.info() + reg_info
 
     def __call__(  # noqa: C901
-            self, A, b, iterations, x0=None, At=None, lower_limit=None,
-            upper_limit=None, x_mask=None, b_mask=None):
+        self, A, b, iterations, x0=None, At=None, lower_limit=None, upper_limit=None, x_mask=None, b_mask=None
+    ):
         """
         """
         (A, At) = self._initialize_data_operators(A, At)
@@ -1090,21 +1100,24 @@ class Sirt(Solver):
 
         if self.tolerance is not None:
             res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0, b_mask))
-            res_norm_rel = np.ones((iterations, )) * self.tolerance
+            res_norm_rel = np.ones((iterations,)) * self.tolerance
         else:
             res_norm_rel = None
 
         c_init = tm.time()
 
         if self.verbose:
-            reg_info = ''.join(['-' + r.info().upper() for r in self.regularizer])
-            print("- Performing %s-%s%s iterations (init: %g seconds): " % (
-                    self.upper(), self.data_term.upper(), reg_info, c_init - c_in), end='', flush=True)
+            reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+            print(
+                "- Performing %s-%s%s iterations (init: %g seconds): "
+                % (self.upper(), self.data_term.upper(), reg_info, c_init - c_in),
+                end="",
+                flush=True,
+            )
         for ii in range(iterations):
             if self.verbose:
-                prnt_str = "%03d/%03d (avg: %g seconds)" % (
-                        ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
-                print(prnt_str, end='', flush=True)
+                prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
+                print(prnt_str, end="", flush=True)
 
             Ax = A(x)
             res = self.data_term.compute_residual(Ax, b_mask)
@@ -1130,9 +1143,9 @@ class Sirt(Solver):
                 x *= x_mask
 
             if self.verbose:
-                print(('\b') * len(prnt_str), end='', flush=True)
-                print((' ') * len(prnt_str), end='', flush=True)
-                print(('\b') * len(prnt_str), end='', flush=True)
+                print(("\b") * len(prnt_str), end="", flush=True)
+                print((" ") * len(prnt_str), end="", flush=True)
+                print(("\b") * len(prnt_str), end="", flush=True)
 
         if self.verbose:
             print("Done %d in %g seconds." % (iterations, tm.time() - c_in))
@@ -1150,24 +1163,23 @@ class CP(Solver):
     based on the BaseRegularizer interface.
     """
 
-    def __init__(
-            self, verbose=False, tolerance=None, relaxation=0.95, data_term='l2', regularizer=None):
+    def __init__(self, verbose=False, tolerance=None, relaxation=0.95, data_term="l2", regularizer=None):
         super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation)
         self.data_term = self._initialize_data_fidelity_function(data_term)
         self.regularizer = self._initialize_regularizer(regularizer)
 
     def info(self):
-        reg_info = ''.join(['-' + r.info().upper() for r in self.regularizer])
-        return Solver.info(self) +  '-' + self.data_term.info() + reg_info
+        reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+        return Solver.info(self) + "-" + self.data_term.info() + reg_info
 
     @staticmethod
     def _initialize_data_fidelity_function(data_term):
         if isinstance(data_term, str):
-            if data_term.lower() == 'l2':
+            if data_term.lower() == "l2":
                 return DataFidelity_l2()
-            if data_term.lower() == 'l1':
+            if data_term.lower() == "l1":
                 return DataFidelity_l1()
-            if data_term.lower() == 'kl':
+            if data_term.lower() == "kl":
                 return DataFidelity_KL()
             else:
                 raise ValueError('Unknown data term: "%s", accepted terms are: "l2" | "l1" | "kl".' % data_term)
@@ -1204,8 +1216,18 @@ class CP(Solver):
         return (x_shape, x_dtype, sigma, tau)
 
     def __call__(  # noqa: C901
-            self, A, b, iterations, x0=None, At=None, upper_limit=None,
-            lower_limit=None, x_mask=None, b_mask=None, precondition=False):
+        self,
+        A,
+        b,
+        iterations,
+        x0=None,
+        At=None,
+        upper_limit=None,
+        lower_limit=None,
+        x_mask=None,
+        b_mask=None,
+        precondition=False,
+    ):
         """
         """
         (A, At) = self._initialize_data_operators(A, At)
@@ -1215,7 +1237,7 @@ class CP(Solver):
                 A_abs = A.absolute()
             except AttributeError:
                 print(A, At)
-                print('WARNING: Turning off preconditioning because system matrix does not support absolute')
+                print("WARNING: Turning off preconditioning because system matrix does not support absolute")
                 precondition = False
 
         c_in = tm.time()
@@ -1254,20 +1276,24 @@ class CP(Solver):
 
         if self.tolerance is not None:
             res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0, b_mask))
-            res_norm_rel = np.ones((iterations, )) * self.tolerance
+            res_norm_rel = np.ones((iterations,)) * self.tolerance
         else:
             res_norm_rel = None
 
         c_init = tm.time()
 
         if self.verbose:
-            reg_info = ''.join(['-' + r.info().upper() for r in self.regularizer])
-            print("- Performing %s-%s%s iterations (init: %g seconds): " % (
-                    self.upper(), self.data_term.upper(), reg_info, c_init - c_in), end='', flush=True)
+            reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+            print(
+                "- Performing %s-%s%s iterations (init: %g seconds): "
+                % (self.upper(), self.data_term.upper(), reg_info, c_init - c_in),
+                end="",
+                flush=True,
+            )
         for ii in range(iterations):
             if self.verbose:
                 prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
-                print(prnt_str, end='', flush=True)
+                print(prnt_str, end="", flush=True)
 
             Ax_rlx = A(x_relax)
             self.data_term.update_dual(p, Ax_rlx)
@@ -1294,9 +1320,9 @@ class CP(Solver):
             x = x_new
 
             if self.verbose:
-                print(('\b') * len(prnt_str), end='', flush=True)
-                print((' ') * len(prnt_str), end='', flush=True)
-                print(('\b') * len(prnt_str), end='', flush=True)
+                print(("\b") * len(prnt_str), end="", flush=True)
+                print((" ") * len(prnt_str), end="", flush=True)
+                print(("\b") * len(prnt_str), end="", flush=True)
 
             if self.tolerance is not None:
                 Ax = A(x)

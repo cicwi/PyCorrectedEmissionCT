@@ -14,14 +14,15 @@ import copy as cp
 
 try:
     import pywt
+
     has_pywt = True
-    use_swtn = pywt.version.version >= '1.0.2'
+    use_swtn = pywt.version.version >= "1.0.2"
     if not use_swtn:
-        print('WARNING - pywavelets version is too old (<1.0.2)')
+        print("WARNING - pywavelets version is too old (<1.0.2)")
 except ImportError:
     has_pywt = False
     use_swtn = False
-    print('WARNING - pywt was not found')
+    print("WARNING - pywt was not found")
 
 
 class BaseTransform(spsla.LinearOperator):
@@ -101,7 +102,7 @@ class BaseTransform(spsla.LinearOperator):
         else:
             dim_size = np.prod(self.adj_shape)
         for ii in range(dim_size):
-            xii = np.zeros((dim_size, ))
+            xii = np.zeros((dim_size,))
             xii[ii] = 1
             He[:, ii] = self * xii
         return He
@@ -223,7 +224,7 @@ class TransformDiagonalScaling(BaseTransform):
 class TransformDecimatedWavelet(BaseTransform):
     """Decimated wavelet Transform operator."""
 
-    def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand='constant'):
+    def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand="constant"):
         """Decimated wavelet Transform operator.
 
         :param x_shape: Shape of the data to be wavelet transformed.
@@ -240,7 +241,7 @@ class TransformDecimatedWavelet(BaseTransform):
         :raises ValueError: In case the pywavelets package is not available or its version is not adequate.
         """
         if not has_pywt:
-            raise ValueError('Cannot use Wavelet transform because pywavelets is not installed.')
+            raise ValueError("Cannot use Wavelet transform because pywavelets is not installed.")
 
         self.wavelet = wavelet
         self.level = level
@@ -256,9 +257,11 @@ class TransformDecimatedWavelet(BaseTransform):
         self.dir_shape = np.array(x_shape)
 
         self.sub_band_shapes = pywt.wavedecn_shapes(
-            self.dir_shape, self.wavelet, mode=self.pad_on_demand, level=self.level, axes=self.axes)
+            self.dir_shape, self.wavelet, mode=self.pad_on_demand, level=self.level, axes=self.axes
+        )
         self.adj_shape = self.sub_band_shapes[0] + np.sum(
-            [self.sub_band_shapes[x]['d' * num_axes] for x in range(1, self.level+1)], axis=0)
+            [self.sub_band_shapes[x]["d" * num_axes] for x in range(1, self.level + 1)], axis=0
+        )
         self.slicing_info = None
 
         super().__init__()
@@ -272,8 +275,7 @@ class TransformDecimatedWavelet(BaseTransform):
         :return: Transformed data.
         :rtype: list
         """
-        return pywt.wavedecn(
-            x, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand, level=self.level)
+        return pywt.wavedecn(x, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand, level=self.level)
 
     def inverse_dwt(self, y):
         """Perform the inverse wavelet transform.
@@ -284,8 +286,7 @@ class TransformDecimatedWavelet(BaseTransform):
         :return: Anti-transformed data.
         :rtype: `numpy.array_like`
         """
-        rec = pywt.waverecn(
-            y, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand)
+        rec = pywt.waverecn(y, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand)
         if not np.all(rec.shape == self.dir_shape):
             slices = [slice(0, s) for s in self.dir_shape]
             rec = rec[tuple(slices)]
@@ -307,7 +308,7 @@ class TransformDecimatedWavelet(BaseTransform):
 class TransformStationaryWavelet(BaseTransform):
     """Stationary avelet Transform operator."""
 
-    def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand='constant', normalized=True):
+    def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand="constant", normalized=True):
         """Stationary wavelet Transform operator.
 
         :param x_shape: Shape of the data to be wavelet transformed.
@@ -326,9 +327,9 @@ class TransformStationaryWavelet(BaseTransform):
         :raises ValueError: In case the pywavelets package is not available or its version is not adequate.
         """
         if not has_pywt:
-            raise ValueError('Cannot use Wavelet transform because pywavelets is not installed.')
+            raise ValueError("Cannot use Wavelet transform because pywavelets is not installed.")
         if not use_swtn:
-            raise ValueError('Cannot use Wavelet transform because pywavelets is too old (<1.0.2).')
+            raise ValueError("Cannot use Wavelet transform because pywavelets is too old (<1.0.2).")
 
         self.wavelet = wavelet
         self.level = level
@@ -341,8 +342,7 @@ class TransformStationaryWavelet(BaseTransform):
         self.pad_on_demand = pad_on_demand
 
         num_axes = len(self.axes)
-        self.labels = [
-            bin(x)[2:].zfill(num_axes).replace('0', 'a').replace('1', 'd') for x in range(1, 2 ** num_axes)]
+        self.labels = [bin(x)[2:].zfill(num_axes).replace("0", "a").replace("1", "d") for x in range(1, 2 ** num_axes)]
 
         self.dir_shape = np.array(x_shape)
         if self.pad_on_demand is not None:
@@ -374,8 +374,7 @@ class TransformStationaryWavelet(BaseTransform):
                 pad_width = [(0, 0)] * len(x.shape)
                 pad_width[self.axes[ax]] = (pad_l, pad_h)
                 x = np.pad(x, pad_width, mode=self.pad_on_demand)
-        return pywt.swtn(
-            x, wavelet=self.wavelet, axes=self.axes, norm=self.normalized, level=self.level, trim_approx=True)
+        return pywt.swtn(x, wavelet=self.wavelet, axes=self.axes, norm=self.normalized, level=self.level, trim_approx=True)
 
     def inverse_swt(self, y):
         """Perform the inverse wavelet transform.
@@ -386,14 +385,13 @@ class TransformStationaryWavelet(BaseTransform):
         :return: Anti-transformed data.
         :rtype: `numpy.array_like`
         """
-        x = pywt.iswtn(
-            y, wavelet=self.wavelet, axes=self.axes, norm=self.normalized)
+        x = pywt.iswtn(y, wavelet=self.wavelet, axes=self.axes, norm=self.normalized)
         if self.pad_on_demand is not None and np.any(self.pad_axes):
             for ax in np.nonzero(self.pad_axes)[0]:
                 pad_l = np.ceil(self.pad_axes[ax] / 2).astype(np.int)
                 pad_h = np.floor(self.pad_axes[ax] / 2).astype(np.int)
                 slices = [slice(None)] * len(x.shape)
-                slices[self.axes[ax]] = slice(pad_l, x.shape[self.axes[ax]]-pad_h, 1)
+                slices[self.axes[ax]] = slice(pad_l, x.shape[self.axes[ax]] - pad_h, 1)
                 x = x[tuple(slices)]
         return x
 
@@ -405,10 +403,10 @@ class TransformStationaryWavelet(BaseTransform):
     def _op_adjoint(self, y):
         def get_lvl_pos(lvl):
             return (lvl - 1) * (2 ** len(self.axes) - 1) + 1
+
         y = [y[0]] + [
-            dict(
-                ((k, y[ii_lbl + get_lvl_pos(lvl), ...]) for ii_lbl, k in enumerate(self.labels))
-            ) for lvl in range(1, self.level + 1)
+            dict(((k, y[ii_lbl + get_lvl_pos(lvl), ...]) for ii_lbl, k in enumerate(self.labels)))
+            for lvl in range(1, self.level + 1)
         ]
         return self.inverse_swt(y)
 
@@ -448,7 +446,7 @@ class TransformGradient(BaseTransform):
             ind = -(ii + 1)
             padding = [(0, 0)] * self.ndims
             padding[ind] = (0, 1)
-            temp_x = np.pad(x, padding, mode='constant')
+            temp_x = np.pad(x, padding, mode="constant")
             d[ind] = np.diff(temp_x, n=1, axis=ind)
         return np.stack(d, axis=0)
 
@@ -466,7 +464,7 @@ class TransformGradient(BaseTransform):
             ind = -(ii + 1)
             padding = [(0, 0)] * self.ndims
             padding[ind] = (1, 0)
-            temp_x = np.pad(x[ind, ...], padding, mode='constant')
+            temp_x = np.pad(x[ind, ...], padding, mode="constant")
             d[ind] = np.diff(temp_x, n=1, axis=ind)
         return np.sum(np.stack(d, axis=0), axis=0)
 
@@ -474,7 +472,7 @@ class TransformGradient(BaseTransform):
         return self.gradient(x)
 
     def _op_adjoint(self, y):
-        return - self.divergence(y)
+        return -self.divergence(y)
 
 
 class TransformFourier(BaseTransform):
@@ -508,7 +506,7 @@ class TransformFourier(BaseTransform):
         :rtype: `numpy.array_like`
         """
         d = np.empty(self.adj_shape, dtype=x.dtype)
-        x_f = np.fft.fftn(x, axes=self.axes, norm='ortho')
+        x_f = np.fft.fftn(x, axes=self.axes, norm="ortho")
         d[0, ...] = x_f.real
         d[1, ...] = x_f.imag
         return d
@@ -523,7 +521,7 @@ class TransformFourier(BaseTransform):
         :rtype: `numpy.array_like`
         """
         d = x[0, ...] + 1j * x[1, ...]
-        return np.fft.ifftn(d, axes=self.axes, norm='ortho').real
+        return np.fft.ifftn(d, axes=self.axes, norm="ortho").real
 
     def _op_direct(self, x):
         return self.fft(x)
@@ -567,7 +565,7 @@ class TransformLaplacian(BaseTransform):
             ind = -(ii + 1)
             padding = [(0, 0)] * self.ndims
             padding[ind] = (1, 1)
-            temp_x = np.pad(x, padding, mode='edge')
+            temp_x = np.pad(x, padding, mode="edge")
             d[ind] = np.diff(temp_x, n=2, axis=ind)
         return np.sum(d, axis=0)
 
@@ -578,10 +576,10 @@ class TransformLaplacian(BaseTransform):
         return self.laplacian(y)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_vol = np.zeros((10, 10), dtype=np.float32)
 
-    H = TransformStationaryWavelet(test_vol.shape, 'db1', 2)
+    H = TransformStationaryWavelet(test_vol.shape, "db1", 2)
     Htw = H.T.explicit()
     Hw = H.explicit()
 

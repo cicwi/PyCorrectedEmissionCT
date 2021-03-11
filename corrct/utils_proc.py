@@ -12,8 +12,7 @@ from . import operators
 from . import solvers
 
 
-def get_circular_mask(
-        vol_shape, radius_offset=0, coords_ball=None, mask_drop_off='const', data_type=np.float32):
+def get_circular_mask(vol_shape, radius_offset=0, coords_ball=None, mask_drop_off="const", data_type=np.float32):
     """Computes a circular mask for the reconstruction volume.
 
     :param vol_shape: The size of the volume.
@@ -30,8 +29,8 @@ def get_circular_mask(
     """
     vol_shape = np.array(vol_shape, dtype=np.int)
 
-    coords = [np.linspace(- (s - 1) / 2, (s - 1) / 2, s, dtype=data_type) for s in vol_shape]
-    coords = np.meshgrid(*coords, indexing='ij')
+    coords = [np.linspace(-(s - 1) / 2, (s - 1) / 2, s, dtype=data_type) for s in vol_shape]
+    coords = np.meshgrid(*coords, indexing="ij")
 
     if coords_ball is None:
         coords_ball = np.arange(-np.fmin(2, len(vol_shape)), 0, dtype=np.int)
@@ -46,18 +45,18 @@ def get_circular_mask(
     else:
         dists = np.sqrt(np.sum(coords[coords_ball, ...] ** 2, axis=0))
 
-    if mask_drop_off.lower() == 'const':
+    if mask_drop_off.lower() == "const":
         return dists <= radius
-    elif mask_drop_off.lower() == 'sinc':
+    elif mask_drop_off.lower() == "sinc":
         cut_off = np.min(vol_shape[coords_ball]) / np.sqrt(2) - radius
         outter_region = 1 - (dists <= radius)
         outter_vals = 1 - np.sinc((dists - radius) / cut_off)
         return np.fmax(1 - outter_region * outter_vals, 0)
     else:
-        raise ValueError('Unknown drop-off function: %s' % mask_drop_off)
+        raise ValueError("Unknown drop-off function: %s" % mask_drop_off)
 
 
-def pad_sinogram(sinogram, width, pad_axis=-1, mode='edge', **kwds):
+def pad_sinogram(sinogram, width, pad_axis=-1, mode="edge", **kwds):
     """Pads the sinogram.
 
     :param sinogram: The sinogram to pad.
@@ -99,10 +98,10 @@ def apply_flat_field(projs, flats, darks=None, crop=None, data_type=np.float32):
     :rtype: numpy.array_like
     """
     if crop is not None:
-        projs = projs[..., crop[0]:crop[2], crop[1]:crop[3]]
-        flats = flats[..., crop[0]:crop[2], crop[1]:crop[3]]
+        projs = projs[..., crop[0] : crop[2], crop[1] : crop[3]]
+        flats = flats[..., crop[0] : crop[2], crop[1] : crop[3]]
         if darks is not None:
-            darks = darks[..., crop[0]:crop[2], crop[1]:crop[3]]
+            darks = darks[..., crop[0] : crop[2], crop[1] : crop[3]]
 
     if darks is not None:
         projs -= darks
@@ -126,7 +125,8 @@ def apply_minus_log(projs):
 
 
 def denoise_image(
-        img, reg_weight=1e-2, stddev=None, error_norm='l2b', iterations=250, axes=(-2, -1), lower_limit=None, verbose=False):
+    img, reg_weight=1e-2, stddev=None, error_norm="l2b", iterations=250, axes=(-2, -1), lower_limit=None, verbose=False
+):
     """Image denoiser based on (simple, weighted or dead-zone) least-squares and wavelets.
     The weighted least-squares requires the local pixel-wise standard deviations.
     It can be used to denoise sinograms and projections.
@@ -171,28 +171,27 @@ def denoise_image(
     OpI = operators.TransformIdentity(img.shape)
 
     if stddev is not None:
-        if error_norm.lower() == 'l2b':
+        if error_norm.lower() == "l2b":
             img_weight = compute_lsb_weights(stddev)
             data_term = solvers.DataFidelity_l2b(img_weight)
-        elif error_norm.lower() == 'l1b':
+        elif error_norm.lower() == "l1b":
             img_weight = compute_lsb_weights(stddev)
             data_term = solvers.DataFidelity_l1b(img_weight)
-        elif error_norm.lower() == 'hub':
+        elif error_norm.lower() == "hub":
             img_weight = compute_lsb_weights(stddev)
             data_term = solvers.DataFidelity_Huber(img_weight)
-        elif error_norm.lower() == 'wl2':
+        elif error_norm.lower() == "wl2":
             (img_weight, reg_weight) = compute_wls_weights(stddev, OpI.T, reg_weight)
             data_term = solvers.DataFidelity_wl2(img_weight)
         else:
-            raise ValueError(
-                'Unknown error method: "%s". Options are: {"l2b"} | "l1b" | "hub" | "wl2"' % error_norm)
+            raise ValueError('Unknown error method: "%s". Options are: {"l2b"} | "l1b" | "hub" | "wl2"' % error_norm)
     else:
         data_term = error_norm
 
     if isinstance(axes, int):
-        axes = (axes, )
+        axes = (axes,)
 
-    reg_wl = solvers.Regularizer_l1swl(reg_weight, 'bior4.4', 2, axes=axes, normalized=False)
+    reg_wl = solvers.Regularizer_l1swl(reg_weight, "bior4.4", 2, axes=axes, normalized=False)
     sol_wls_wl = solvers.CP(verbose=verbose, regularizer=reg_wl, data_term=data_term)
 
     (denoised_img, _) = sol_wls_wl(OpI, img, iterations, x0=img, lower_limit=lower_limit)

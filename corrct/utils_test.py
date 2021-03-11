@@ -33,19 +33,23 @@ def download_phantom():
     """Downloads the phantom generation module from Nicolas Barbey's repository
     on github.
     """
-    phantom_url = 'https://raw.githubusercontent.com/nbarbey/TomograPy/master/tomograpy/phantom.py'
-    phantom_path = './phantom.py'
+    phantom_url = "https://raw.githubusercontent.com/nbarbey/TomograPy/master/tomograpy/phantom.py"
+    phantom_path = "./phantom.py"
 
-    print("""This example uses the phantom definition from the package Tomograpy,
-            developed by Nicolas Barbey. The needed module will be downloaded from: %s""" % phantom_url)
+    print(
+        """This example uses the phantom definition from the package Tomograpy,
+            developed by Nicolas Barbey. The needed module will be downloaded from: %s"""
+        % phantom_url
+    )
 
     import urllib
+
     urllib.request.urlretrieve(phantom_url, phantom_path)
 
-    with open(phantom_path, 'r') as f:
+    with open(phantom_path, "r") as f:
         file_content = f.read()
-    with open(phantom_path, 'w') as f:
-        f.write(file_content.replace('xrange', 'range'))
+    with open(phantom_path, "w") as f:
+        f.write(file_content.replace("xrange", "range"))
 
 
 def phantom_assign_concentration(ph_or, data_type=np.float32):
@@ -71,47 +75,63 @@ def phantom_assign_concentration(ph_or, data_type=np.float32):
     conv_um_to_mm = 1e-3
     voxel_size_um = 0.5
     voxel_size_cm = voxel_size_um * conv_um_to_mm * conv_mm_to_cm  # cm to micron
-    print('Sample size: [%g %g] um' % (ph_or.shape[0] * voxel_size_um, ph_or.shape[1] * voxel_size_um))
+    print("Sample size: [%g %g] um" % (ph_or.shape[0] * voxel_size_um, ph_or.shape[1] * voxel_size_um))
 
     import xraylib
-    xraylib.XRayInit()
-    cp_fo = xraylib.GetCompoundDataNISTByName('Ferric Oxide')
-    cp_co = xraylib.GetCompoundDataNISTByName('Calcium Oxide')
-    cp_cc = xraylib.GetCompoundDataNISTByName('Calcium Carbonate')
 
-    ca_an = xraylib.SymbolToAtomicNumber('Ca')
+    xraylib.XRayInit()
+    cp_fo = xraylib.GetCompoundDataNISTByName("Ferric Oxide")
+    cp_co = xraylib.GetCompoundDataNISTByName("Calcium Oxide")
+    cp_cc = xraylib.GetCompoundDataNISTByName("Calcium Carbonate")
+
+    ca_an = xraylib.SymbolToAtomicNumber("Ca")
     ca_kal = xraylib.LineEnergy(ca_an, xraylib.KA_LINE)
 
     in_energy_keV = 20
     out_energy_keV = ca_kal
 
-    ph_lin_att_in = ph_FeO * xraylib.CS_Total_CP('Ferric Oxide', in_energy_keV) * cp_fo['density'] \
-        + ph_CaC * xraylib.CS_Total_CP('Calcium Carbonate', in_energy_keV) * cp_cc['density'] \
-        + ph_CaO * xraylib.CS_Total_CP('Calcium Oxide', in_energy_keV) * cp_co['density']
+    ph_lin_att_in = (
+        ph_FeO * xraylib.CS_Total_CP("Ferric Oxide", in_energy_keV) * cp_fo["density"]
+        + ph_CaC * xraylib.CS_Total_CP("Calcium Carbonate", in_energy_keV) * cp_cc["density"]
+        + ph_CaO * xraylib.CS_Total_CP("Calcium Oxide", in_energy_keV) * cp_co["density"]
+    )
 
-    ph_lin_att_out = ph_FeO * xraylib.CS_Total_CP('Ferric Oxide', out_energy_keV) * cp_fo['density'] \
-        + ph_CaC * xraylib.CS_Total_CP('Calcium Carbonate', out_energy_keV) * cp_cc['density'] \
-        + ph_CaO * xraylib.CS_Total_CP('Calcium Oxide', out_energy_keV) * cp_co['density']
+    ph_lin_att_out = (
+        ph_FeO * xraylib.CS_Total_CP("Ferric Oxide", out_energy_keV) * cp_fo["density"]
+        + ph_CaC * xraylib.CS_Total_CP("Calcium Carbonate", out_energy_keV) * cp_cc["density"]
+        + ph_CaO * xraylib.CS_Total_CP("Calcium Oxide", out_energy_keV) * cp_co["density"]
+    )
 
     vol_att_in = ph_lin_att_in * voxel_size_cm
     vol_att_out = ph_lin_att_out * voxel_size_cm
 
     ca_cs = xraylib.CS_FluorLine_Kissel(ca_an, xraylib.KA_LINE, in_energy_keV)  # fluo production for cm2/g
-    ph_CaC_mass_fract = cp_cc['massFractions'][np.where(np.array(cp_cc['Elements']) == ca_an)[0][0]]
-    ph_CaO_mass_fract = cp_co['massFractions'][np.where(np.array(cp_co['Elements']) == ca_an)[0][0]]
+    ph_CaC_mass_fract = cp_cc["massFractions"][np.where(np.array(cp_cc["Elements"]) == ca_an)[0][0]]
+    ph_CaO_mass_fract = cp_co["massFractions"][np.where(np.array(cp_co["Elements"]) == ca_an)[0][0]]
 
-    ph = ph_CaC * ph_CaC_mass_fract * cp_cc['density'] + ph_CaO * ph_CaO_mass_fract * cp_co['density']
+    ph = ph_CaC * ph_CaC_mass_fract * cp_cc["density"] + ph_CaO * ph_CaO_mass_fract * cp_co["density"]
     ph = ph * ca_cs * voxel_size_cm
 
     return (ph, vol_att_in, vol_att_out)
 
 
 def create_sino(
-        ph, num_angles, start_angle_deg=0, end_angle_deg=180,
-        dwell_time_s=1, photon_flux=1e9, detectors_pos_rad=(np.pi/2),
-        vol_att_in=None, vol_att_out=None, psf=None,
-        background_avg=None, background_std=None, add_poisson=False, readout_noise_std=None,
-        data_type=np.float32):
+    ph,
+    num_angles,
+    start_angle_deg=0,
+    end_angle_deg=180,
+    dwell_time_s=1,
+    photon_flux=1e9,
+    detectors_pos_rad=(np.pi / 2),
+    vol_att_in=None,
+    vol_att_out=None,
+    psf=None,
+    background_avg=None,
+    background_std=None,
+    add_poisson=False,
+    readout_noise_std=None,
+    data_type=np.float32,
+):
     """Computes the sinogram from a given phantom
 
     :param ph: The phantom volume, with the expected average photon production per voxel per impinging photon
@@ -148,7 +168,7 @@ def create_sino(
     :return: The sinogram (detecto readings), the angular positions, and the expected average phton production per voxel
     :rtype: tuple(`numpy.array_like`, `numpy.array_like`, `numpy.array_like`)
     """
-    print('Creating Sino with %d angles' % num_angles)
+    print("Creating Sino with %d angles" % num_angles)
     angles_deg = np.linspace(start_angle_deg, end_angle_deg, num_angles, endpoint=False)
     angles_rad = np.deg2rad(angles_deg)
     print(angles_deg)
@@ -161,8 +181,8 @@ def create_sino(
             sino = num_photons * detector_solidangle_sr * p.fp(ph)
     else:
         with projectors.ProjectorAttenuationXRF(
-                ph.shape, angles_rad, att_in=vol_att_in, att_out=vol_att_out,
-                angles_detectors_rad=detectors_pos_rad, psf=psf) as p:
+            ph.shape, angles_rad, att_in=vol_att_in, att_out=vol_att_out, angles_detectors_rad=detectors_pos_rad, psf=psf
+        ) as p:
             sino = num_photons * detector_solidangle_sr * p.fp(ph)
 
     # Adding noise

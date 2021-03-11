@@ -19,7 +19,7 @@ import astra
 
 has_cuda = astra.astra.use_cuda()
 if not has_cuda:
-    print('WARNING: CUDA is not available. Only 2D operations on CPU are available.')
+    print("WARNING: CUDA is not available. Only 2D operations on CPU are available.")
 
 
 class ProjectorBase(operators.ProjectorOperator):
@@ -31,8 +31,14 @@ class ProjectorBase(operators.ProjectorOperator):
     """
 
     def __init__(
-            self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
-            proj_intensities=None, create_single_projs=True, super_sampling=1):
+        self,
+        vol_shape,
+        angles_rot_rad,
+        rot_axis_shift_pix=0,
+        proj_intensities=None,
+        create_single_projs=True,
+        super_sampling=1,
+    ):
         """
         :param vol_shape: The volume shape in X Y and optionally Z
         :type vol_shape: numpy.array_like
@@ -68,16 +74,16 @@ class ProjectorBase(operators.ProjectorOperator):
             num_proj_ints = len(proj_intensities)
             if num_proj_ints > 1 and not num_proj_ints == num_angles:
                 raise ValueError(
-                    'Non-singleton number of projection intensities differs from number of angles:' +
-                    ' num_angles = {}, num_proj_intensities = {}'.format(num_angles, num_proj_ints))
+                    "Non-singleton number of projection intensities differs from number of angles:"
+                    + " num_angles = {}, num_proj_intensities = {}".format(num_angles, num_proj_ints)
+                )
             elif num_proj_ints == 1:
                 proj_intensities = np.tile(proj_intensities, num_angles)
         self.proj_intensities = proj_intensities
 
         self.is_3d = len(vol_shape) == 3
         if self.is_3d:
-            self.vol_geom = astra.create_vol_geom(
-                (vol_shape[1], vol_shape[0], vol_shape[2]))
+            self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0], vol_shape[2]))
 
             vectors = np.empty([num_angles, 12])
             # source
@@ -98,12 +104,12 @@ class ProjectorBase(operators.ProjectorOperator):
             if self.has_individual_projs:
                 self.proj_geom_ind = [
                     astra.create_proj_geom(
-                        'parallel3d_vec', vol_shape[2], vol_shape[0],
-                        np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1]))
-                    for ii in range(num_angles)]
+                        "parallel3d_vec", vol_shape[2], vol_shape[0], np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1])
+                    )
+                    for ii in range(num_angles)
+                ]
 
-            self.proj_geom_all = astra.create_proj_geom(
-                'parallel3d_vec', vol_shape[2], vol_shape[0], vectors)
+            self.proj_geom_all = astra.create_proj_geom("parallel3d_vec", vol_shape[2], vol_shape[0], vectors)
         else:
             self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0]))
 
@@ -119,13 +125,11 @@ class ProjectorBase(operators.ProjectorOperator):
 
             if self.has_individual_projs:
                 self.proj_geom_ind = [
-                    astra.create_proj_geom(
-                        'parallel_vec', vol_shape[0],
-                        np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1]))
-                    for ii in range(num_angles)]
+                    astra.create_proj_geom("parallel_vec", vol_shape[0], np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1]))
+                    for ii in range(num_angles)
+                ]
 
-            self.proj_geom_all = astra.create_proj_geom(
-                'parallel_vec', vol_shape[0], vectors)
+            self.proj_geom_all = astra.create_proj_geom("parallel_vec", vol_shape[0], vectors)
 
         self.vol_shape = astra.functions.geom_size(self.vol_geom)
         self.proj_shape = astra.functions.geom_size(self.proj_geom_all)
@@ -135,14 +139,14 @@ class ProjectorBase(operators.ProjectorOperator):
         """Initialization of the ASTRA projectors.
         """
         if self.is_3d:
-            projector_type = 'cuda3d'
+            projector_type = "cuda3d"
         else:
             if has_cuda:
-                projector_type = 'cuda'
+                projector_type = "cuda"
             else:
-                projector_type = 'linear'
+                projector_type = "linear"
 
-        opts = {'VoxelSuperSampling': self.super_sampling, 'DetectorSuperSampling': self.super_sampling}
+        opts = {"VoxelSuperSampling": self.super_sampling, "DetectorSuperSampling": self.super_sampling}
 
         if self.has_individual_projs:
             self.proj_id = [astra.create_projector(projector_type, pg, self.vol_geom, opts) for pg in self.proj_geom_ind]
@@ -177,7 +181,7 @@ class ProjectorBase(operators.ProjectorOperator):
         :rtype: numpy.array_like
         """
         if not self.has_individual_projs:
-            raise ValueError('Individual projectors not available!')
+            raise ValueError("Individual projectors not available!")
         x = self.W_ind[angle_ind].FP(vol)[0, ...]
         if self.proj_intensities is not None:
             x *= self.proj_intensities[angle_ind]
@@ -194,7 +198,7 @@ class ProjectorBase(operators.ProjectorOperator):
         :rtype: numpy.array_like
         """
         if not self.has_individual_projs:
-            raise ValueError('Individual projectors not available!')
+            raise ValueError("Individual projectors not available!")
         sino = np.empty([2, *np.squeeze(sino_line).shape], dtype=sino_line.dtype)
         sino[0, ...] = sino_line
         sino[1, ...] = 0
@@ -235,11 +239,22 @@ class ProjectorAttenuationXRF(ProjectorBase):
     """
 
     def __init__(
-            self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
-            proj_intensities=None, super_sampling=1, att_in=None, att_out=None,
-            angles_detectors_rad=(np.pi/2), weights_detectors=None, psf=None,
-            precompute_attenuation=True, is_symmetric=False, weights_angles=None,
-            data_type=np.float32):
+        self,
+        vol_shape,
+        angles_rot_rad,
+        rot_axis_shift_pix=0,
+        proj_intensities=None,
+        super_sampling=1,
+        att_in=None,
+        att_out=None,
+        angles_detectors_rad=(np.pi / 2),
+        weights_detectors=None,
+        psf=None,
+        precompute_attenuation=True,
+        is_symmetric=False,
+        weights_angles=None,
+        data_type=np.float32,
+    ):
         """
         :param vol_shape: The volume shape in X Y and optionally Z
         :type vol_shape: numpy.array_like
@@ -271,14 +286,19 @@ class ProjectorAttenuationXRF(ProjectorBase):
         :type data_type: numpy.dtype, optional
         """
         ProjectorBase.__init__(
-            self, vol_shape, angles_rot_rad, rot_axis_shift_pix,
-            proj_intensities=proj_intensities, super_sampling=super_sampling)
+            self,
+            vol_shape,
+            angles_rot_rad,
+            rot_axis_shift_pix,
+            proj_intensities=proj_intensities,
+            super_sampling=super_sampling,
+        )
 
         self.data_type = data_type
 
         if precompute_attenuation:
             if att_in is None and att_out is None:
-                print('Turning off precomputation of attenuation.')
+                print("Turning off precomputation of attenuation.")
                 precompute_attenuation = False
 
         self.att_in = att_in
@@ -295,8 +315,9 @@ class ProjectorAttenuationXRF(ProjectorBase):
                 self.weights_det = np.tile(self.weights_det, [num_det_angles])
             elif num_det_weights > 1 and not num_det_weights == num_det_angles:
                 raise ValueError(
-                        'Number of detector weights differs from number of' +
-                        ' detector angles: %d vs %d' % (num_det_weights, num_det_angles))
+                    "Number of detector weights differs from number of"
+                    + " detector angles: %d vs %d" % (num_det_weights, num_det_angles)
+                )
 
         if weights_angles is None:
             weights_angles = np.ones((len(angles_rot_rad), num_det_angles))
@@ -315,9 +336,9 @@ class ProjectorAttenuationXRF(ProjectorBase):
     @staticmethod
     def _compute_attenuation(vol, direction, sampling=1, invert=False):
         def pad_vol(vol, edges):
-            paddings = [(0, )] * len(vol.shape)
-            paddings[-2], paddings[-1] = (edges[0], ), (edges[1], )
-            return np.pad(vol, paddings, mode='constant')
+            paddings = [(0,)] * len(vol.shape)
+            paddings[-2], paddings[-1] = (edges[0],), (edges[1],)
+            return np.pad(vol, paddings, mode="constant")
 
         size_lims = np.array(vol.shape[-2:])
         min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
@@ -337,7 +358,7 @@ class ProjectorAttenuationXRF(ProjectorBase):
         cum_arr = np.cumsum(cum_arr / 2, axis=-1)
 
         cum_arr = spimg.interpolation.rotate(cum_arr, -rot_angle, reshape=False, order=1, axes=(-2, -1))
-        cum_arr = cum_arr[..., edges[0]:-edges[0], edges[1]:-edges[1]]
+        cum_arr = cum_arr[..., edges[0] : -edges[0], edges[1] : -edges[1]]
 
         cum_arr = np.exp(-cum_arr)
 
@@ -379,11 +400,11 @@ class ProjectorAttenuationXRF(ProjectorBase):
         """Computes the corrections for each angle.
         """
         if self.att_in is None and self.att_out is None:
-            raise ValueError('No attenuation volumes were given')
+            raise ValueError("No attenuation volumes were given")
 
         self.att_vol_angles = np.ones(
-                [len(self.angles_rot_rad), len(self.angles_det_rad), *self.vol_shape[:3]],
-                dtype=self.data_type)
+            [len(self.angles_rot_rad), len(self.angles_det_rad), *self.vol_shape[:3]], dtype=self.data_type
+        )
 
         if self.att_in is not None:
             for ii, a in enumerate(self.angles_rot_rad):
@@ -418,7 +439,7 @@ class ProjectorAttenuationXRF(ProjectorBase):
         :rtype: numpy.array_like
         """
         temp_vol = cp.deepcopy(vol)[np.newaxis, ...]
-        temp_vol = np.tile(temp_vol, (len(self.angles_det_rad), *((1, ) * len(self.vol_shape))))
+        temp_vol = np.tile(temp_vol, (len(self.angles_det_rad), *((1,) * len(self.vol_shape))))
 
         if self.precompute_attenuation:
             temp_vol *= self.att_vol_angles[angle_ind, ...]
@@ -431,12 +452,12 @@ class ProjectorAttenuationXRF(ProjectorBase):
 
         weights = self.weights_det * self.weights_angles[angle_ind, :]
         sino_line = [
-                weights[ii] * ProjectorBase.fp_angle(self, temp_vol[ii], angle_ind)
-                for ii in range(len(self.angles_det_rad))]
+            weights[ii] * ProjectorBase.fp_angle(self, temp_vol[ii], angle_ind) for ii in range(len(self.angles_det_rad))
+        ]
         sino_line = np.stack(sino_line, axis=0)
 
         if self.psf is not None:
-            sino_line = spsig.convolve(sino_line, self.psf, mode='same')
+            sino_line = spsig.convolve(sino_line, self.psf, mode="same")
 
         if sino_line.shape[0] == 1:
             sino_line = np.squeeze(sino_line, axis=0)
@@ -460,13 +481,13 @@ class ProjectorAttenuationXRF(ProjectorBase):
             sino_line = sino[angle_ind, ...]
 
         if self.psf is not None:
-            sino_line = spsig.convolve(sino_line, self.psf, mode='same')
+            sino_line = spsig.convolve(sino_line, self.psf, mode="same")
 
-        sino_line = np.reshape(sino_line, [len(self.weights_det), *sino_line.shape[-(len(self.vol_shape)-1):]])
+        sino_line = np.reshape(sino_line, [len(self.weights_det), *sino_line.shape[-(len(self.vol_shape) - 1) :]])
         weights = self.weights_det * self.weights_angles[angle_ind, :]
         vol = [
-                weights[ii] * ProjectorBase.bp_angle(self, sino_line[ii, ...], angle_ind)
-                for ii in range(len(self.angles_det_rad))]
+            weights[ii] * ProjectorBase.bp_angle(self, sino_line[ii, ...], angle_ind) for ii in range(len(self.angles_det_rad))
+        ]
         vol = np.stack(vol, axis=0)
 
         if self.is_symmetric:
@@ -490,9 +511,7 @@ class ProjectorAttenuationXRF(ProjectorBase):
         :returns: The forward-projected sinogram
         :rtype: numpy.array_like
         """
-        return np.stack(
-                [self.fp_angle(vol, ii) for ii in range(len(self.angles_rot_rad))],
-                axis=0)
+        return np.stack([self.fp_angle(vol, ii) for ii in range(len(self.angles_rot_rad))], axis=0)
 
     def bp(self, sino):
         """Back-projection of the sinogram to the volume.
@@ -503,9 +522,7 @@ class ProjectorAttenuationXRF(ProjectorBase):
         :rtype: numpy.array_like
         """
         if self.is_symmetric:
-            return np.sum(
-                    [self.bp_angle(sino, ii) for ii in range(len(self.angles_rot_rad))],
-                    axis=0)
+            return np.sum([self.bp_angle(sino, ii) for ii in range(len(self.angles_rot_rad))], axis=0)
         else:
             return ProjectorBase.bp(self, sino)
 
@@ -519,8 +536,14 @@ class ProjectorUncorrected(ProjectorBase):
     """
 
     def __init__(
-            self, vol_shape, angles_rot_rad, rot_axis_shift_pix=0,
-            proj_intensities=None, create_single_projs=False, super_sampling=1):
+        self,
+        vol_shape,
+        angles_rot_rad,
+        rot_axis_shift_pix=0,
+        proj_intensities=None,
+        create_single_projs=False,
+        super_sampling=1,
+    ):
         """
         :param vol_shape: The volume shape in X Y and optionally Z
         :type vol_shape: numpy.array_like
@@ -537,19 +560,23 @@ class ProjectorUncorrected(ProjectorBase):
         :type super_sampling: int, optional
         """
         ProjectorBase.__init__(
-            self, vol_shape, angles_rot_rad, rot_axis_shift_pix,
+            self,
+            vol_shape,
+            angles_rot_rad,
+            rot_axis_shift_pix,
             proj_intensities=proj_intensities,
             create_single_projs=create_single_projs,
-            super_sampling=super_sampling)
+            super_sampling=super_sampling,
+        )
 
     def _astra_fbp(self, projs, fbp_filter):
         if has_cuda:
-            fbp_type = 'FBP_CUDA'
+            fbp_type = "FBP_CUDA"
         else:
-            fbp_type = 'FBP'
+            fbp_type = "FBP"
         cfg = astra.astra_dict(fbp_type)
-        cfg['ProjectorId'] = self.proj_id[-1]
-        cfg['FilterType'] = fbp_filter
+        cfg["ProjectorId"] = self.proj_id[-1]
+        cfg["FilterType"] = fbp_filter
 
         proj_geom = astra.projector.projection_geometry(self.proj_id[-1])
         vol_geom = astra.projector.volume_geometry(self.proj_id[-1])
@@ -559,11 +586,11 @@ class ProjectorUncorrected(ProjectorBase):
             vols = [None] * num_lines
 
             for ii_v in range(num_lines):
-                sino_id = astra.data2d.create('-sino', proj_geom, projs[:, ii_v, :])
-                vol_id = astra.data2d.create('-vol', vol_geom, 0)
+                sino_id = astra.data2d.create("-sino", proj_geom, projs[:, ii_v, :])
+                vol_id = astra.data2d.create("-vol", vol_geom, 0)
 
-                cfg['ProjectionDataId'] = sino_id
-                cfg['ReconstructionDataId'] = vol_id
+                cfg["ProjectionDataId"] = sino_id
+                cfg["ReconstructionDataId"] = vol_id
                 alg_id = astra.algorithm.create(cfg)
                 astra.algorithm.run(alg_id)
                 astra.algorithm.delete(alg_id)
@@ -574,11 +601,11 @@ class ProjectorUncorrected(ProjectorBase):
 
             return np.stack(vols, axis=0)
         else:
-            sino_id = astra.data2d.create('-sino', proj_geom, projs)
-            vol_id = astra.data2d.create('-vol', vol_geom, 0)
+            sino_id = astra.data2d.create("-sino", proj_geom, projs)
+            vol_id = astra.data2d.create("-vol", vol_geom, 0)
 
-            cfg['ProjectionDataId'] = sino_id
-            cfg['ReconstructionDataId'] = vol_id
+            cfg["ProjectionDataId"] = sino_id
+            cfg["ReconstructionDataId"] = vol_id
             alg_id = astra.algorithm.create(cfg)
             astra.algorithm.run(alg_id)
             astra.algorithm.delete(alg_id)
@@ -589,7 +616,7 @@ class ProjectorUncorrected(ProjectorBase):
 
             return vol
 
-    def fbp(self, projs, fbp_filter='shepp-logan'):
+    def fbp(self, projs, fbp_filter="shepp-logan"):
         """Computes the filtered back-projection of the projection data to the
         volume.
         The data could either be a sinogram, or a stack of sinograms.
@@ -603,7 +630,7 @@ class ProjectorUncorrected(ProjectorBase):
         :rtype: numpy.array_like
         """
         if self.is_3d:
-            raise ValueError('FBP not supported with 3D projector')
+            raise ValueError("FBP not supported with 3D projector")
 
         if isinstance(fbp_filter, str):
             return self._astra_fbp(projs, fbp_filter)
@@ -623,8 +650,8 @@ class FilterMR(object):
     """
 
     def __init__(
-            self, sinogram_pixels_num=None, sinogram_angles_num=None,
-            start_exp_binning=2, lambda_smooth=None, data_type=np.float32):
+        self, sinogram_pixels_num=None, sinogram_angles_num=None, start_exp_binning=2, lambda_smooth=None, data_type=np.float32
+    ):
         """
         :param sinogram_pixels_num: Number of sinogram pixels (int)
         :param sinogram_angles_num: Number of sinogram angles (int)
@@ -646,9 +673,9 @@ class FilterMR(object):
         """ Filter initialization function.
         """
         if self.sinogram_pixels_num is None:
-            raise ValueError('No sinogram pixels number was given!')
+            raise ValueError("No sinogram pixels number was given!")
         if self.sinogram_angles_num is None:
-            raise ValueError('No sinogram angles number was given!')
+            raise ValueError("No sinogram angles number was given!")
 
         filter_center = np.floor(self.sinogram_pixels_num / 2).astype(np.int)
         self.filter_size = filter_center * 2 + 1
@@ -710,11 +737,11 @@ class FilterMR(object):
                 d = np.concatenate((dx.flatten(), dy.flatten()))
                 A[sino_size:, ii] = self.lambda_smooth * d
 
-        b = np.zeros((nrows, ), dtype=self.data_type)
+        b = np.zeros((nrows,), dtype=self.data_type)
         b[:sino_size] = sinogram.flatten()
         fitted_components = np.linalg.lstsq(A, b, rcond=None)
 
-        computed_filter = np.zeros((self.filter_size, ), dtype=self.data_type)
+        computed_filter = np.zeros((self.filter_size,), dtype=self.data_type)
         for ii, bas in enumerate(self.basis):
             computed_filter += fitted_components[0][ii] * bas
         return computed_filter
@@ -728,7 +755,7 @@ class FilterMR(object):
         :returns: The filtered sinogram
         :rtype: numpy.array_like
         """
-        return spsig.fftconvolve(sinogram, computed_filter[np.newaxis, ...], 'same')
+        return spsig.fftconvolve(sinogram, computed_filter[np.newaxis, ...], "same")
 
     def __call__(self, sinogram, projector):
         """ Filters the sinogram, by first computing the filter, and then
