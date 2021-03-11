@@ -907,10 +907,11 @@ class Constraint_UpperLimit(BaseRegularizer):
 class Solver(object):
     """Base solver class."""
 
-    def __init__(self, verbose=False, relaxation=1, tolerance=None):
+    def __init__(self, verbose=False, relaxation=1, tolerance=None, data_term_test=DataFidelity_l2()):
         self.verbose = verbose
         self.relaxation = relaxation
         self.tolerance = tolerance
+        self.data_term_test = data_term_test
 
     def info(self):
         return type(self).__name__
@@ -954,6 +955,17 @@ class Solver(object):
                 return list(regularizer)
         else:
             raise ValueError("Unknown regularizer type.")
+
+    @staticmethod
+    def _initialize_b_masks(b, b_mask, b_test_mask):
+        if b_test_mask is not None:
+            if b_mask is None:
+                b_mask = np.ones_like(b)
+            # As we are being passed a test residual pixel mask, we need
+            # to make sure to mask those pixels out from the reconstruction.
+            # At the same time, we need to remove any masked pixel from the test count.
+            b_mask, b_test_mask = b_mask * (1 - b_test_mask), b_test_mask * b_mask
+        return (b_mask, b_test_mask)
 
 
 class Sart(Solver):
@@ -1036,8 +1048,16 @@ class Sart(Solver):
 class Sirt(Solver):
     """Solver class implementing the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm."""
 
-    def __init__(self, verbose=False, tolerance=None, relaxation=1.95, data_term="l2", regularizer=None):
-        super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation)
+    def __init__(
+        self,
+        verbose=False,
+        tolerance=None,
+        relaxation=1.95,
+        data_term="l2",
+        regularizer=None,
+        data_term_test=DataFidelity_l2(),
+    ):
+        super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation, data_term_test=data_term_test)
         self.data_term = self._initialize_data_fidelity_function(data_term)
         self.regularizer = self._initialize_regularizer(regularizer)
 
@@ -1057,11 +1077,23 @@ class Sirt(Solver):
         return Solver.info(self) + "-" + self.data_term.info() + reg_info
 
     def __call__(  # noqa: C901
-        self, A, b, iterations, x0=None, At=None, lower_limit=None, upper_limit=None, x_mask=None, b_mask=None
+        self,
+        A,
+        b,
+        iterations,
+        x0=None,
+        At=None,
+        lower_limit=None,
+        upper_limit=None,
+        x_mask=None,
+        b_mask=None,
+        b_test_mask=None,
     ):
         """
         """
         (A, At) = self._initialize_data_operators(A, At)
+
+        (b_mask, b_test_mask) = self._initialize_b_masks(b, b_mask, b_test_mask)
 
         # Back-projection diagonal re-scaling
         tau = np.ones_like(b)
@@ -1087,8 +1119,15 @@ class Sirt(Solver):
 
         self.data_term.assign_data(b, sigma)
 
+        if b_test_mask is not None:
+            res_test_0 = self.data_term.compute_residual(0, b_test_mask)
+            res_test_norm_0 = self.data_term_test.compute_residual_norm(res_test_0)
+            res_test_norm_rel = np.ones((iterations,))
+        else:
+            res_test_norm_rel = None
+
         if self.tolerance is not None:
-            res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0, b_mask))
+            res_norm_0 = self.data_term.compute_residual_norm(self.data_term.compute_residual(0, b_mask))
             res_norm_rel = np.ones((iterations,)) * self.tolerance
         else:
             res_norm_rel = None
@@ -1107,8 +1146,12 @@ class Sirt(Solver):
             Ax = A(x)
             res = self.data_term.compute_residual(Ax, b_mask)
 
+            if b_test_mask is not None:
+                res_test = self.data_term.compute_residual(Ax, b_test_mask)
+                res_test_norm_rel[ii] = self.data_term_test.compute_residual_norm(res_test.flatten()) / res_test_norm_0
+
             if self.tolerance is not None:
-                res_norm_rel[ii] = np.linalg.norm(res.flatten()) / res_norm_0
+                res_norm_rel[ii] = self.data_term.compute_residual_norm(res.flatten()) / res_norm_0
                 if self.tolerance > res_norm_rel[ii]:
                     break
 
@@ -1127,7 +1170,7 @@ class Sirt(Solver):
             if x_mask is not None:
                 x *= x_mask
 
-        return (x, res_norm_rel)
+        return (x, (res_norm_rel, res_test_norm_rel, ii))
 
 
 class CP(Solver):
@@ -1140,8 +1183,16 @@ class CP(Solver):
     based on the BaseRegularizer interface.
     """
 
-    def __init__(self, verbose=False, tolerance=None, relaxation=0.95, data_term="l2", regularizer=None):
-        super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation)
+    def __init__(
+        self,
+        verbose=False,
+        tolerance=None,
+        relaxation=0.95,
+        data_term="l2",
+        regularizer=None,
+        data_term_test=DataFidelity_l2(),
+    ):
+        super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation, data_term_test=data_term_test)
         self.data_term = self._initialize_data_fidelity_function(data_term)
         self.regularizer = self._initialize_regularizer(regularizer)
 
@@ -1203,6 +1254,7 @@ class CP(Solver):
         lower_limit=None,
         x_mask=None,
         b_mask=None,
+        b_test_mask=None,
         precondition=False,
     ):
         """
@@ -1216,6 +1268,8 @@ class CP(Solver):
                 print(A, At)
                 print("WARNING: Turning off preconditioning because system matrix does not support absolute")
                 precondition = False
+
+        (b_mask, b_test_mask) = self._initialize_b_masks(b, b_mask, b_test_mask)
 
         if precondition:
             tau = np.ones_like(b)
@@ -1249,8 +1303,15 @@ class CP(Solver):
 
         q = [reg.initialize_dual() for reg in self.regularizer]
 
+        if b_test_mask is not None:
+            res_test_0 = self.data_term.compute_residual(0, b_test_mask)
+            res_test_norm_0 = self.data_term_test.compute_residual_norm(res_test_0)
+            res_test_norm_rel = np.ones((iterations,))
+        else:
+            res_test_norm_rel = None
+
         if self.tolerance is not None:
-            res_norm_0 = np.linalg.norm(self.data_term.compute_residual(0, b_mask))
+            res_norm_0 = self.data_term.compute_residual_norm(self.data_term.compute_residual(0, b_mask))
             res_norm_rel = np.ones((iterations,)) * self.tolerance
         else:
             res_norm_rel = None
@@ -1290,11 +1351,17 @@ class CP(Solver):
             x_relax = x_new + (x_new - x)
             x = x_new
 
-            if self.tolerance is not None:
+            if b_test_mask is not None or self.tolerance is not None:
                 Ax = A(x)
+
+            if b_test_mask is not None:
+                res_test = self.data_term.compute_residual(Ax, b_test_mask)
+                res_test_norm_rel[ii] = self.data_term_test.compute_residual_norm(res_test.flatten()) / res_test_norm_0
+
+            if self.tolerance is not None:
                 res = self.data_term.compute_residual(Ax, b_mask)
-                res_norm_rel[ii] = np.linalg.norm(res.flatten()) / res_norm_0
+                res_norm_rel[ii] = self.data_term.compute_residual_norm(res.flatten()) / res_norm_0
                 if self.tolerance > res_norm_rel[ii]:
                     break
 
-        return (x, res_norm_rel)
+        return (x, (res_norm_rel, res_test_norm_rel, ii))
