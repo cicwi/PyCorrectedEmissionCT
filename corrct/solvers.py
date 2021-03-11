@@ -1124,10 +1124,8 @@ class Sirt(Solver):
                 upd -= reg.compute_update_primal(q_r)
             x += upd * tau
 
-            if lower_limit is not None:
-                x = np.fmax(x, lower_limit)
-            if upper_limit is not None:
-                x = np.fmin(x, upper_limit)
+            if lower_limit is not None or upper_limit is not None:
+                x = x.clip(lower_limit, upper_limit)
             if x_mask is not None:
                 x *= x_mask
 
@@ -1287,10 +1285,8 @@ class CP(Solver):
                 upd += reg.compute_update_primal(q_r)
             x_new = x - upd * tau
 
-            if lower_limit is not None:
-                x_new = np.fmax(x_new, lower_limit)
-            if upper_limit is not None:
-                x_new = np.fmin(x_new, upper_limit)
+            if lower_limit is not None or upper_limit is not None:
+                x_new = x_new.clip(lower_limit, upper_limit)
             if x_mask is not None:
                 x_new *= x_mask
 
