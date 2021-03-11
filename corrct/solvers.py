@@ -8,12 +8,10 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
+import numpy.random
+
 import scipy.sparse as sps
 import scipy.ndimage as spimg
-
-from numpy import random as rnd
-
-import time as tm
 
 from . import operators
 
@@ -26,6 +24,8 @@ except ImportError:
     has_pywt = False
     use_swtn = False
     print("WARNING - pywt was not found")
+
+from tqdm import tqdm
 
 
 eps = np.finfo(np.float32).eps
@@ -964,8 +964,6 @@ class Sart(Solver):
     ):
         """
         """
-        c_in = tm.time()
-
         # Back-projection diagonal re-scaling
         b_ones = np.ones_like(b)
         if b_mask is not None:
@@ -994,19 +992,20 @@ class Sart(Solver):
         else:
             res_norm_rel = None
 
-        c_init = tm.time()
-
-        rows_sequence = rnd.permutation(A_num_rows)
+        rows_sequence = np.random.permutation(A_num_rows)
 
         if self.verbose:
-            print("- Performing %s iterations (init: %g seconds): " % (self.upper(), c_init - c_in), end="", flush=True)
-        for ii in range(iterations):
-            if self.verbose:
-                prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
-                print(prnt_str, end="", flush=True)
+            algo_info = "- Performing %s iterations: " % self.upper()
+
+            def progressbar(x):
+                return tqdm(x, desc=algo_info)
+        else:
+            def progressbar(x):
+                return x
+
+        for ii in progressbar(range(iterations)):
 
             for ii_a in rows_sequence:
-
                 res = A(x, ii_a) - b[ii_a, ...]
                 if b_mask is not None:
                     res *= b_mask[ii_a, ...]
@@ -1020,11 +1019,6 @@ class Sart(Solver):
                 if x_mask is not None:
                     x *= x_mask
 
-            if self.verbose:
-                print(("\b") * len(prnt_str), end="", flush=True)
-                print((" ") * len(prnt_str), end="", flush=True)
-                print(("\b") * len(prnt_str), end="", flush=True)
-
             if self.tolerance is not None:
                 res = np.empty_like(b)
                 for ii_a in rows_sequence:
@@ -1035,9 +1029,6 @@ class Sart(Solver):
 
                 if self.tolerance > res_norm_rel[ii]:
                     break
-
-        if self.verbose:
-            print("Done %d in %g seconds." % (iterations, tm.time() - c_in))
 
         return (x, res_norm_rel)
 
@@ -1072,8 +1063,6 @@ class Sirt(Solver):
         """
         (A, At) = self._initialize_data_operators(A, At)
 
-        c_in = tm.time()
-
         # Back-projection diagonal re-scaling
         tau = np.ones_like(b)
         if b_mask is not None:
@@ -1104,21 +1093,17 @@ class Sirt(Solver):
         else:
             res_norm_rel = None
 
-        c_init = tm.time()
-
         if self.verbose:
             reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-            print(
-                "- Performing %s-%s%s iterations (init: %g seconds): "
-                % (self.upper(), self.data_term.upper(), reg_info, c_init - c_in),
-                end="",
-                flush=True,
-            )
-        for ii in range(iterations):
-            if self.verbose:
-                prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
-                print(prnt_str, end="", flush=True)
+            algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
 
+            def progressbar(x):
+                return tqdm(x, desc=algo_info)
+        else:
+            def progressbar(x):
+                return x
+
+        for ii in progressbar(range(iterations)):
             Ax = A(x)
             res = self.data_term.compute_residual(Ax, b_mask)
 
@@ -1141,14 +1126,6 @@ class Sirt(Solver):
                 x = x.clip(lower_limit, upper_limit)
             if x_mask is not None:
                 x *= x_mask
-
-            if self.verbose:
-                print(("\b") * len(prnt_str), end="", flush=True)
-                print((" ") * len(prnt_str), end="", flush=True)
-                print(("\b") * len(prnt_str), end="", flush=True)
-
-        if self.verbose:
-            print("Done %d in %g seconds." % (iterations, tm.time() - c_in))
 
         return (x, res_norm_rel)
 
@@ -1240,8 +1217,6 @@ class CP(Solver):
                 print("WARNING: Turning off preconditioning because system matrix does not support absolute")
                 precondition = False
 
-        c_in = tm.time()
-
         if precondition:
             tau = np.ones_like(b)
             if b_mask is not None:
@@ -1280,21 +1255,17 @@ class CP(Solver):
         else:
             res_norm_rel = None
 
-        c_init = tm.time()
-
         if self.verbose:
             reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-            print(
-                "- Performing %s-%s%s iterations (init: %g seconds): "
-                % (self.upper(), self.data_term.upper(), reg_info, c_init - c_in),
-                end="",
-                flush=True,
-            )
-        for ii in range(iterations):
-            if self.verbose:
-                prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, iterations, (tm.time() - c_init) / np.fmax(ii, 1))
-                print(prnt_str, end="", flush=True)
+            algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
 
+            def progressbar(x):
+                return tqdm(x, desc=algo_info)
+        else:
+            def progressbar(x):
+                return x
+
+        for ii in progressbar(range(iterations)):
             Ax_rlx = A(x_relax)
             self.data_term.update_dual(p, Ax_rlx)
             self.data_term.apply_proximal(p)
@@ -1319,19 +1290,11 @@ class CP(Solver):
             x_relax = x_new + (x_new - x)
             x = x_new
 
-            if self.verbose:
-                print(("\b") * len(prnt_str), end="", flush=True)
-                print((" ") * len(prnt_str), end="", flush=True)
-                print(("\b") * len(prnt_str), end="", flush=True)
-
             if self.tolerance is not None:
                 Ax = A(x)
                 res = self.data_term.compute_residual(Ax, b_mask)
                 res_norm_rel[ii] = np.linalg.norm(res.flatten()) / res_norm_0
                 if self.tolerance > res_norm_rel[ii]:
                     break
-
-        if self.verbose:
-            print("Done %d in %g seconds." % (iterations, tm.time() - c_in))
 
         return (x, res_norm_rel)

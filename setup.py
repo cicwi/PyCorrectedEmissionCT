@@ -12,16 +12,21 @@ with open('README.md') as readme_file:
 with open('CHANGELOG.md') as history_file:
     history = history_file.read()
 
-with open(os.path.join('corrct','VERSION')) as version_file:
+with open(os.path.join('corrct', 'VERSION')) as version_file:
     version = version_file.read().strip()
 
 requirements = [
     'astra-toolbox',
+    'tqdm',
+    'scipy',
+    'numpy'
 ]
 
-setup_requirements = [ ]
+setup_requirements = []
 
-test_requirements = [ ]
+test_requirements = [
+    'matplotlib',
+]
 
 dev_requirements = [
     'autopep8',
@@ -40,8 +45,7 @@ dev_requirements = [
     # Other
     'watchdog',
     'coverage',
-
-    ]
+]
 
 setup(
     author="Nicola VIGANÒ",
@@ -68,7 +72,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    extras_require={ 'dev': dev_requirements },
+    extras_require={'dev': dev_requirements},
     url='https://github.com/cicwi/corrct',
     version=version,
     zip_safe=False,
