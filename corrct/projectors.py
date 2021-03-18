@@ -15,161 +15,284 @@ import copy as cp
 
 from . import operators
 
-import astra
+try:
+    import astra
 
-has_cuda = astra.astra.use_cuda()
-if not has_cuda:
-    print("WARNING: CUDA is not available. Only 2D operations on CPU are available.")
+    has_astra = True
+    has_cuda = astra.astra.use_cuda()
+    if not has_cuda:
+        print("WARNING: CUDA is not available. Only 2D operations on CPU are available.")
+except ImportError:
+    has_astra = False
+    print("WARNING: ASTRA is not available. Only 2D operations on CPU are available (scikit-image will be used).")
+
+import skimage.transform as skt
 
 
 class ProjectorBase(operators.ProjectorOperator):
-    """Basic projection class, which implements the forward and back projection
-    of the single lines of a sinogram.
-    It takes care of initializing and disposing the ASTRA projectors when used
-    in a *with* statement.
+    """Basic projection class.
+
+    It implements the forward and back projection of the single lines of a sinogram.
+    It takes care of initializing and disposing the ASTRA projectors when used in a *with* statement.
     It supports both 2D and 3D geometries.
     """
+
+    class ProjectorBackend(object):
+
+        def __init__(self, vol_shape_yxz, angles_rot_rad):
+            self.vol_shape = [*vol_shape_yxz[2:], vol_shape_yxz[0], vol_shape_yxz[1]]
+            self.angles_rot_rad = angles_rot_rad
+            self.prj_shape = [*vol_shape_yxz[2:], len(self.angles_rot_rad), vol_shape_yxz[1]]
+
+        def get_vol_shape(self):
+            return self.vol_shape
+
+        def get_prj_shape(self):
+            return self.prj_shape
+
+        def initialize(self):
+            pass
+
+        def dispose(self):
+            pass
+
+        def fp(self, vol, angle_ind: int = None):
+            raise NotImplementedError("Method FP not implemented.")
+
+        def bp(self, prj, angle_ind: int = None):
+            raise NotImplementedError("Method BP not implemented.")
+
+    class ProjectorBackendSKimage(ProjectorBackend):
+
+        def __init__(self, vol_shape, angles_rot_rad, rot_axis_shift_pix: float = 0.0):
+            if len(vol_shape) == 3:
+                raise ValueError("With the scikit-image backend only 2D volumes are allowed!")
+            if not float(rot_axis_shift_pix) == 0.0:
+                raise ValueError("With the scikit-image rotation axis shift is not supported!")
+
+            self.angles_rot_deg = np.rad2deg(angles_rot_rad)
+
+            super().__init__(vol_shape, np.array(angles_rot_rad))
+
+        def fp(self, vol, angle_ind: int = None):
+            if angle_ind is None:
+                prj = np.empty(self.prj_shape, dtype=vol.dtype)
+                for ii_a, a in enumerate(self.angles_rot_deg):
+                    prj[ii_a, :] = np.squeeze(skt.radon(vol, [a]))
+                return prj
+            else:
+                return np.squeeze(skt.radon(vol, self.angles_rot_deg[angle_ind:angle_ind+1:]))
+
+        def bp(self, prj, angle_ind: int = None):
+            if angle_ind is None:
+                vol = np.empty([self.prj_shape[-1], *self.vol_shape], dtype=prj.dtype)
+                for ii_a, a in enumerate(self.angles_rot_deg):
+                    vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], filter=None)
+                return prj.sum(axis=0)
+            else:
+                return skt.iradon(prj[:, np.newaxis], self.angles_rot_deg[angle_ind:angle_ind+1:], filter=None)
+
+    class ProjectorBackendASTRA(ProjectorBackend):
+
+        def __init__(
+            self,
+            vol_shape,
+            angles_rot_rad,
+            rot_axis_shift_pix: float = 0.0,
+            create_single_projs: bool = True,
+            super_sampling: int = 1
+        ):
+            if len(vol_shape) == 3 and not has_cuda:
+                raise ValueError("CUDA is not available: only 2D volumes are allowed!")
+
+            super().__init__(vol_shape, np.array(angles_rot_rad))
+
+            self.proj_id = []
+            self.has_individual_projs = create_single_projs
+            self.super_sampling = super_sampling
+            self.dispose()
+
+            num_angles = self.angles_rot_rad.size
+
+            self.is_3d = len(vol_shape) == 3
+            if self.is_3d:
+                self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0], vol_shape[2]))
+
+                vectors = np.empty([num_angles, 12])
+                # source
+                vectors[:, 0] = -np.sin(self.angles_rot_rad)
+                vectors[:, 1] = -np.cos(self.angles_rot_rad)
+                vectors[:, 2] = 0
+                # vector from detector pixel (0,0) to (0,1)
+                vectors[:, 6] = np.cos(self.angles_rot_rad)
+                vectors[:, 7] = -np.sin(self.angles_rot_rad)
+                vectors[:, 8] = 0
+                # center of detector
+                vectors[:, 3:6] = rot_axis_shift_pix * vectors[:, 6:9]
+                # vector from detector pixel (0,0) to (1,0)
+                vectors[:, 9] = 0
+                vectors[:, 10] = 0
+                vectors[:, 11] = 1
+
+                if self.has_individual_projs:
+                    self.proj_geom_ind = [
+                        astra.create_proj_geom(
+                            "parallel3d_vec", vol_shape[2], vol_shape[0], np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1])
+                        )
+                        for ii in range(num_angles)
+                    ]
+
+                self.proj_geom_all = astra.create_proj_geom("parallel3d_vec", vol_shape[2], vol_shape[0], vectors)
+            else:
+                self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0]))
+
+                vectors = np.empty([num_angles, 6])
+                # source
+                vectors[:, 0] = np.sin(self.angles_rot_rad)
+                vectors[:, 1] = -np.cos(self.angles_rot_rad)
+                # vector from detector pixel 0 to 1
+                vectors[:, 4] = np.cos(self.angles_rot_rad)
+                vectors[:, 5] = np.sin(self.angles_rot_rad)
+                # center of detector
+                vectors[:, 2:4] = rot_axis_shift_pix * vectors[:, 4:6]
+
+                if self.has_individual_projs:
+                    self.proj_geom_ind = [
+                        astra.create_proj_geom(
+                            "parallel_vec", vol_shape[0], np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1])
+                        )
+                        for ii in range(num_angles)
+                    ]
+
+                self.proj_geom_all = astra.create_proj_geom("parallel_vec", vol_shape[0], vectors)
+
+        def get_vol_shape(self):
+            return astra.functions.geom_size(self.vol_geom)
+
+        def get_prj_shape(self):
+            return astra.functions.geom_size(self.proj_geom_all)
+
+        def initialize(self):
+            """Initialization of the ASTRA projectors."""
+            if self.is_3d:
+                projector_type = "cuda3d"
+            else:
+                if has_cuda:
+                    projector_type = "cuda"
+                else:
+                    projector_type = "linear"
+
+            opts = {"VoxelSuperSampling": self.super_sampling, "DetectorSuperSampling": self.super_sampling}
+
+            if self.has_individual_projs:
+                self.proj_id = [astra.create_projector(projector_type, pg, self.vol_geom, opts) for pg in self.proj_geom_ind]
+                self.W_ind = [astra.OpTomo(p_id) for p_id in self.proj_id]
+
+            self.proj_id.append(astra.create_projector(projector_type, self.proj_geom_all, self.vol_geom, opts))
+            self.W_all = astra.OpTomo(self.proj_id[-1])
+
+        def dispose(self):
+            """Disposal of the ASTRA projectors."""
+            for p in self.proj_id:
+                astra.projector.delete(p)
+            self.proj_id = []
+            self.W_ind = []
+            self.W_all = []
+
+        def fp(self, vol, angle_ind: int = None):
+            if angle_ind is None:
+                return self.W_all.FP(vol)
+            else:
+                if not self.has_individual_projs:
+                    raise ValueError("Individual projectors not available!")
+                return self.W_ind[angle_ind].FP(vol)[0, ...]
+
+        def bp(self, prj, angle_ind: int = None):
+            if angle_ind is None:
+                return self.W_all.BP(prj)
+            else:
+                if not self.has_individual_projs:
+                    raise ValueError("Individual projectors not available!")
+                sino = np.empty([2, *np.squeeze(prj).shape], dtype=prj.dtype)
+                sino[0, ...] = prj
+                sino[1, ...] = 0
+                return self.W_ind[angle_ind].BP(sino)
 
     def __init__(
         self,
         vol_shape,
         angles_rot_rad,
-        rot_axis_shift_pix=0,
-        proj_intensities=None,
-        create_single_projs=True,
-        super_sampling=1,
+        rot_axis_shift_pix: float = 0.0,
+        proj_intensities: np.ndarray = None,
+        use_astra: bool = True,
+        create_single_projs: bool = True,
+        super_sampling: int = 1
     ):
         """
-        :param vol_shape: The volume shape in X Y and optionally Z
-        :type vol_shape: numpy.array_like
-        :param angles_rot_rad: The rotation angles
-        :type angles_rot_rad: numpy.array_like
-        :param rot_axis_shift_pix: The rotation axis shift(s) in pixels, defaults to 0
-        :type rot_axis_shift_pix: float or numpy.array_like, optional
-        :param proj_intensities: Projection scaling factor, defaults to None
-        :type proj_intensities: float or numpy.array_like, optional
-        :param create_single_projs: Specifies whether to create projectors for single projections.
-        Useful for corrections and SART, defaults to True
-        :type create_single_projs: boolean, optional
-        :param super_sampling: pixel and voxel super-sampling, defaults to 1
-        :type super_sampling: int, optional
+        ProjectorBase class initialization.
+
+        Parameters
+        ----------
+        vol_shape : numpy.array_like
+            The volume shape in Y X and optionally Z.
+        angles_rot_rad : numpy.array_like
+            The rotation angles.
+        rot_axis_shift_pix : float or numpy.array_like, optional
+            The rotation axis shift(s) in pixels. The default is 0.
+        proj_intensities : float or numpy.array_like, optional
+            Projection scaling factor. The default is None.
+        use_astra : bool, optional
+            Whether to use ASTRA or fall back to scikit-image. The default is True.
+        create_single_projs : bool, optional
+            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
+        super_sampling : int, optional
+            pixel and voxel super-sampling. The default is 1.
+
+        Raises
+        ------
+        ValueError
+            When the geometry is not correct.
+
+        Returns
+        -------
+        None.
         """
+        if not has_astra and use_astra:
+            use_astra = False
+            print("WARNING: ASTRA requested but not available. Falling back to scikit-image.")
+
         if len(vol_shape) < 2 or len(vol_shape) > 3:
             raise ValueError("Only 2D or 3D volumes")
         if not vol_shape[0] == vol_shape[1]:
             raise ValueError("Only square volumes")
-        if len(vol_shape) == 3 and not has_cuda:
-            raise ValueError("CUDA is not available: only 2D volumes are allowed!")
 
-        self.proj_id = []
-        self.has_individual_projs = create_single_projs
-        self.super_sampling = super_sampling
-        self.dispose_projectors()
+        if use_astra:
+            self.projector_backend = ProjectorBase.ProjectorBackendASTRA(
+                vol_shape,
+                angles_rot_rad,
+                rot_axis_shift_pix=rot_axis_shift_pix,
+                create_single_projs=create_single_projs,
+                super_sampling=super_sampling
+            )
+        else:
+            self.projector_backend = ProjectorBase.ProjectorBackendSKimage(
+                vol_shape, angles_rot_rad, rot_axis_shift_pix=rot_axis_shift_pix
+            )
 
-        self.angles_rot_rad = np.array(angles_rot_rad)
-
-        num_angles = self.angles_rot_rad.size
-        if proj_intensities is not None:
-            proj_intensities = np.squeeze(proj_intensities)
-            num_proj_ints = len(proj_intensities)
-            if num_proj_ints > 1 and not num_proj_ints == num_angles:
-                raise ValueError(
-                    "Non-singleton number of projection intensities differs from number of angles:"
-                    + " num_angles = {}, num_proj_intensities = {}".format(num_angles, num_proj_ints)
-                )
-            elif num_proj_ints == 1:
-                proj_intensities = np.tile(proj_intensities, num_angles)
+        self.angles_rot_rad = angles_rot_rad
+        self.is_3d = len(vol_shape) == 3
         self.proj_intensities = proj_intensities
 
-        self.is_3d = len(vol_shape) == 3
-        if self.is_3d:
-            self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0], vol_shape[2]))
-
-            vectors = np.empty([num_angles, 12])
-            # source
-            vectors[:, 0] = -np.sin(self.angles_rot_rad)
-            vectors[:, 1] = -np.cos(self.angles_rot_rad)
-            vectors[:, 2] = 0
-            # vector from detector pixel (0,0) to (0,1)
-            vectors[:, 6] = np.cos(self.angles_rot_rad)
-            vectors[:, 7] = -np.sin(self.angles_rot_rad)
-            vectors[:, 8] = 0
-            # center of detector
-            vectors[:, 3:6] = rot_axis_shift_pix * vectors[:, 6:9]
-            # vector from detector pixel (0,0) to (1,0)
-            vectors[:, 9] = 0
-            vectors[:, 10] = 0
-            vectors[:, 11] = 1
-
-            if self.has_individual_projs:
-                self.proj_geom_ind = [
-                    astra.create_proj_geom(
-                        "parallel3d_vec", vol_shape[2], vol_shape[0], np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1])
-                    )
-                    for ii in range(num_angles)
-                ]
-
-            self.proj_geom_all = astra.create_proj_geom("parallel3d_vec", vol_shape[2], vol_shape[0], vectors)
-        else:
-            self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0]))
-
-            vectors = np.empty([num_angles, 6])
-            # source
-            vectors[:, 0] = np.sin(self.angles_rot_rad)
-            vectors[:, 1] = -np.cos(self.angles_rot_rad)
-            # vector from detector pixel 0 to 1
-            vectors[:, 4] = np.cos(self.angles_rot_rad)
-            vectors[:, 5] = np.sin(self.angles_rot_rad)
-            # center of detector
-            vectors[:, 2:4] = rot_axis_shift_pix * vectors[:, 4:6]
-
-            if self.has_individual_projs:
-                self.proj_geom_ind = [
-                    astra.create_proj_geom("parallel_vec", vol_shape[0], np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1]))
-                    for ii in range(num_angles)
-                ]
-
-            self.proj_geom_all = astra.create_proj_geom("parallel_vec", vol_shape[0], vectors)
-
-        self.vol_shape = astra.functions.geom_size(self.vol_geom)
-        self.proj_shape = astra.functions.geom_size(self.proj_geom_all)
+        self.vol_shape = self.projector_backend.get_vol_shape()
+        self.proj_shape = self.projector_backend.get_prj_shape()
         super().__init__()
 
-    def initialize_projectors(self):
-        """Initialization of the ASTRA projectors.
-        """
-        if self.is_3d:
-            projector_type = "cuda3d"
-        else:
-            if has_cuda:
-                projector_type = "cuda"
-            else:
-                projector_type = "linear"
-
-        opts = {"VoxelSuperSampling": self.super_sampling, "DetectorSuperSampling": self.super_sampling}
-
-        if self.has_individual_projs:
-            self.proj_id = [astra.create_projector(projector_type, pg, self.vol_geom, opts) for pg in self.proj_geom_ind]
-            self.W_ind = [astra.OpTomo(p_id) for p_id in self.proj_id]
-
-        self.proj_id.append(astra.create_projector(projector_type, self.proj_geom_all, self.vol_geom, opts))
-        self.W_all = astra.OpTomo(self.proj_id[-1])
-
-    def dispose_projectors(self):
-        """Disposal of the ASTRA projectors.
-        """
-        for p in self.proj_id:
-            astra.projector.delete(p)
-        self.proj_id = []
-        self.W_ind = []
-        self.W_all = []
-
     def __enter__(self):
-        self.initialize_projectors()
+        self.projector_backend.initialize()
         return self
 
     def __exit__(self, *args):
-        self.dispose_projectors()
+        self.projector_backend.dispose()
 
     def fp_angle(self, vol, angle_ind):
         """Forward-projection of the volume to a single sinogram line.
@@ -180,9 +303,7 @@ class ProjectorBase(operators.ProjectorOperator):
         :returns: The forward-projected sinogram line
         :rtype: numpy.array_like
         """
-        if not self.has_individual_projs:
-            raise ValueError("Individual projectors not available!")
-        x = self.W_ind[angle_ind].FP(vol)[0, ...]
+        x = self.projector_backend.fp(vol, angle_ind)
         if self.proj_intensities is not None:
             x *= self.proj_intensities[angle_ind]
         return x
@@ -197,14 +318,9 @@ class ProjectorBase(operators.ProjectorOperator):
         :returns: The back-projected volume
         :rtype: numpy.array_like
         """
-        if not self.has_individual_projs:
-            raise ValueError("Individual projectors not available!")
-        sino = np.empty([2, *np.squeeze(sino_line).shape], dtype=sino_line.dtype)
-        sino[0, ...] = sino_line
-        sino[1, ...] = 0
         if self.proj_intensities is not None:
-            sino[0, ...] *= self.proj_intensities[angle_ind]
-        return self.W_ind[angle_ind].BP(sino)
+            sino_line = sino_line * self.proj_intensities[angle_ind]  # It will make a copy
+        return self.projector_backend.bp(sino_line, angle_ind)
 
     def fp(self, vol):
         """Forward-projection of the volume to the projection data.
@@ -215,7 +331,7 @@ class ProjectorBase(operators.ProjectorOperator):
         :returns: The forward-projected projection data
         :rtype: numpy.array_like
         """
-        x = self.W_all.FP(vol)
+        x = self.projector_backend.fp(vol)
         if self.proj_intensities is not None:
             x *= self.proj_intensities[:, np.newaxis]
         return x
@@ -230,7 +346,7 @@ class ProjectorBase(operators.ProjectorOperator):
         """
         if self.proj_intensities is not None:
             data = data * self.proj_intensities[:, np.newaxis]  # Needs copy
-        return self.W_all.BP(data)
+        return self.projector_backend.bp(data)
 
 
 class ProjectorAttenuationXRF(ProjectorBase):
@@ -353,11 +469,11 @@ class ProjectorAttenuationXRF(ProjectorBase):
 
         cum_arr = pad_vol(vol, edges)
 
-        cum_arr = spimg.interpolation.rotate(cum_arr, rot_angle, reshape=False, order=1, axes=(-2, -1))
+        cum_arr = skt.rotate(cum_arr, rot_angle, order=1)
         cum_arr += np.roll(cum_arr, 1, axis=-1)
         cum_arr = np.cumsum(cum_arr / 2, axis=-1)
 
-        cum_arr = spimg.interpolation.rotate(cum_arr, -rot_angle, reshape=False, order=1, axes=(-2, -1))
+        cum_arr = skt.rotate(cum_arr, -rot_angle, order=1)
         cum_arr = cum_arr[..., edges[0] : -edges[0], edges[1] : -edges[1]]
 
         cum_arr = np.exp(-cum_arr)
@@ -418,8 +534,7 @@ class ProjectorAttenuationXRF(ProjectorBase):
             self.att_vol_angles = self.att_vol_angles[:, :, np.newaxis, ...]
 
     def collapse_detectors(self):
-        """Converts multi-detector configurations into single-detector.
-        """
+        """Converts multi-detector configurations into single-detector."""
         weights = np.reshape(self.weights_det, [1, -1, 1, 1]) / np.sum(self.weights_det)
         self.att_vol_angles = np.sum(self.att_vol_angles * weights, axis=1)
 
@@ -447,7 +562,7 @@ class ProjectorAttenuationXRF(ProjectorBase):
             a = self.angles_rot_rad[angle_ind]
             if self.att_in is not None:
                 temp_vol *= self._compute_attenuation_angle_in(a)
-            if self.vol_att_out is not None:
+            if self.att_out is not None:
                 temp_vol *= self._compute_attenuation_angle_out(a)
 
         weights = self.weights_det * self.weights_angles[angle_ind, :]
@@ -497,7 +612,7 @@ class ProjectorAttenuationXRF(ProjectorBase):
                 a = self.angles_rot_rad[angle_ind]
                 if self.att_in is not None:
                     vol *= self._compute_attenuation_angle_in(a)
-                if self.vol_att_out is not None:
+                if self.att_out is not None:
                     vol *= self._compute_attenuation_angle_out(a)
 
         return np.sum(vol, axis=0)
