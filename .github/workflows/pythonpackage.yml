@@ -23,32 +23,34 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Add conda to system path
+      run: |
+        echo $CONDA/bin >> $GITHUB_PATH
     - name: Install dependencies
       run: |
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
-        # $CONDA/bin/conda env update --file environment.yml --name base
-        $CONDA/bin/conda update --all
         # Install corrct's dependencies
-        $CONDA/bin/conda install astra-toolbox -c astra-toolbox/label/dev
-        $CONDA/bin/conda install pywavelets -c conda-forge
+        # conda env update --file environment.yml --name base
+        # $CONDA/bin/conda install astra-toolbox -c astra-toolbox/label/dev
+        conda install scikit-image
+        conda install pywavelets -c conda-forge
     - name: Lint with flake8
       run: |
-        $CONDA/bin/conda install flake8
+        conda install flake8
         # stop the build if there are Python syntax errors or undefined names
-        $CONDA/bin/flake8 corrct tests examples --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 corrct tests examples --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        $CONDA/bin/flake8 corrct tests examples --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        flake8 corrct tests examples --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        $CONDA/bin/conda install pytest
-        $CONDA/bin/pytest
+        conda install pytest
+        pytest
 
   build-windows:
     runs-on: windows-latest
     strategy:
       max-parallel: 3
       matrix:
-        python-version: [3.6, 3.7]  # , 3.8 <- Astra not available on windows, yet.
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -72,13 +74,9 @@ jobs:
         # C:\Miniconda\condabin\conda.bat activate test_env
         conda activate base
         # Install corrct's dependencies
-        conda install astra-toolbox
+        # conda install astra-toolbox
+        conda install scikit-image
         conda install pywavelets
-        # C:\Miniconda\condabin\conda.bat info --envs
-        # C:\Miniconda\condabin\conda.bat update --all
-        # # Install corrct's dependencies
-        # C:\Miniconda\condabin\conda.bat install astra-toolbox -c astra-toolbox/label/dev
-        # C:\Miniconda\condabin\conda.bat install pywavelets -c conda-forge
     - name: Lint with flake8
       run: |
         # # Activate the test_env environment
