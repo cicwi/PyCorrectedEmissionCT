@@ -8,25 +8,14 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 
-import scipy.ndimage as spimg
 import scipy.signal as spsig
+import skimage.transform as skt
 
 import copy as cp
 
 from . import operators
-
-try:
-    import astra
-
-    has_astra = True
-    has_cuda = astra.astra.use_cuda()
-    if not has_cuda:
-        print("WARNING: CUDA is not available. Only 2D operations on CPU are available.")
-except ImportError:
-    has_astra = False
-    print("WARNING: ASTRA is not available. Only 2D operations on CPU are available (scikit-image will be used).")
-
-import skimage.transform as skt
+from . import _projector_backends as prj_backends
+from . import utils_proc
 
 
 class ProjectorBase(operators.ProjectorOperator):
@@ -36,187 +25,6 @@ class ProjectorBase(operators.ProjectorOperator):
     It takes care of initializing and disposing the ASTRA projectors when used in a *with* statement.
     It supports both 2D and 3D geometries.
     """
-
-    class ProjectorBackend(object):
-
-        def __init__(self, vol_shape_yxz, angles_rot_rad):
-            self.vol_shape = [*vol_shape_yxz[2:], vol_shape_yxz[0], vol_shape_yxz[1]]
-            self.angles_rot_rad = angles_rot_rad
-            self.prj_shape = [*vol_shape_yxz[2:], len(self.angles_rot_rad), vol_shape_yxz[1]]
-
-        def get_vol_shape(self):
-            return self.vol_shape
-
-        def get_prj_shape(self):
-            return self.prj_shape
-
-        def initialize(self):
-            pass
-
-        def dispose(self):
-            pass
-
-        def fp(self, vol, angle_ind: int = None):
-            raise NotImplementedError("Method FP not implemented.")
-
-        def bp(self, prj, angle_ind: int = None):
-            raise NotImplementedError("Method BP not implemented.")
-
-    class ProjectorBackendSKimage(ProjectorBackend):
-
-        def __init__(self, vol_shape, angles_rot_rad, rot_axis_shift_pix: float = 0.0):
-            if len(vol_shape) == 3:
-                raise ValueError("With the scikit-image backend only 2D volumes are allowed!")
-            if not float(rot_axis_shift_pix) == 0.0:
-                raise ValueError("With the scikit-image rotation axis shift is not supported!")
-
-            self.angles_rot_deg = np.rad2deg(angles_rot_rad)
-
-            super().__init__(vol_shape, np.array(angles_rot_rad))
-
-        def fp(self, vol, angle_ind: int = None):
-            if angle_ind is None:
-                prj = np.empty(self.prj_shape, dtype=vol.dtype)
-                for ii_a, a in enumerate(self.angles_rot_deg):
-                    prj[ii_a, :] = np.squeeze(skt.radon(vol, [a]))
-                return prj
-            else:
-                return np.squeeze(skt.radon(vol, self.angles_rot_deg[angle_ind:angle_ind+1:]))
-
-        def bp(self, prj, angle_ind: int = None):
-            if angle_ind is None:
-                vol = np.empty([self.prj_shape[-1], *self.vol_shape], dtype=prj.dtype)
-                for ii_a, a in enumerate(self.angles_rot_deg):
-                    vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], filter=None)
-                return prj.sum(axis=0)
-            else:
-                return skt.iradon(prj[:, np.newaxis], self.angles_rot_deg[angle_ind:angle_ind+1:], filter=None)
-
-    class ProjectorBackendASTRA(ProjectorBackend):
-
-        def __init__(
-            self,
-            vol_shape,
-            angles_rot_rad,
-            rot_axis_shift_pix: float = 0.0,
-            create_single_projs: bool = True,
-            super_sampling: int = 1
-        ):
-            if len(vol_shape) == 3 and not has_cuda:
-                raise ValueError("CUDA is not available: only 2D volumes are allowed!")
-
-            super().__init__(vol_shape, np.array(angles_rot_rad))
-
-            self.proj_id = []
-            self.has_individual_projs = create_single_projs
-            self.super_sampling = super_sampling
-            self.dispose()
-
-            num_angles = self.angles_rot_rad.size
-
-            self.is_3d = len(vol_shape) == 3
-            if self.is_3d:
-                self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0], vol_shape[2]))
-
-                vectors = np.empty([num_angles, 12])
-                # source
-                vectors[:, 0] = -np.sin(self.angles_rot_rad)
-                vectors[:, 1] = -np.cos(self.angles_rot_rad)
-                vectors[:, 2] = 0
-                # vector from detector pixel (0,0) to (0,1)
-                vectors[:, 6] = np.cos(self.angles_rot_rad)
-                vectors[:, 7] = -np.sin(self.angles_rot_rad)
-                vectors[:, 8] = 0
-                # center of detector
-                vectors[:, 3:6] = rot_axis_shift_pix * vectors[:, 6:9]
-                # vector from detector pixel (0,0) to (1,0)
-                vectors[:, 9] = 0
-                vectors[:, 10] = 0
-                vectors[:, 11] = 1
-
-                if self.has_individual_projs:
-                    self.proj_geom_ind = [
-                        astra.create_proj_geom(
-                            "parallel3d_vec", vol_shape[2], vol_shape[0], np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1])
-                        )
-                        for ii in range(num_angles)
-                    ]
-
-                self.proj_geom_all = astra.create_proj_geom("parallel3d_vec", vol_shape[2], vol_shape[0], vectors)
-            else:
-                self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0]))
-
-                vectors = np.empty([num_angles, 6])
-                # source
-                vectors[:, 0] = np.sin(self.angles_rot_rad)
-                vectors[:, 1] = -np.cos(self.angles_rot_rad)
-                # vector from detector pixel 0 to 1
-                vectors[:, 4] = np.cos(self.angles_rot_rad)
-                vectors[:, 5] = np.sin(self.angles_rot_rad)
-                # center of detector
-                vectors[:, 2:4] = rot_axis_shift_pix * vectors[:, 4:6]
-
-                if self.has_individual_projs:
-                    self.proj_geom_ind = [
-                        astra.create_proj_geom(
-                            "parallel_vec", vol_shape[0], np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1])
-                        )
-                        for ii in range(num_angles)
-                    ]
-
-                self.proj_geom_all = astra.create_proj_geom("parallel_vec", vol_shape[0], vectors)
-
-        def get_vol_shape(self):
-            return astra.functions.geom_size(self.vol_geom)
-
-        def get_prj_shape(self):
-            return astra.functions.geom_size(self.proj_geom_all)
-
-        def initialize(self):
-            """Initialization of the ASTRA projectors."""
-            if self.is_3d:
-                projector_type = "cuda3d"
-            else:
-                if has_cuda:
-                    projector_type = "cuda"
-                else:
-                    projector_type = "linear"
-
-            opts = {"VoxelSuperSampling": self.super_sampling, "DetectorSuperSampling": self.super_sampling}
-
-            if self.has_individual_projs:
-                self.proj_id = [astra.create_projector(projector_type, pg, self.vol_geom, opts) for pg in self.proj_geom_ind]
-                self.W_ind = [astra.OpTomo(p_id) for p_id in self.proj_id]
-
-            self.proj_id.append(astra.create_projector(projector_type, self.proj_geom_all, self.vol_geom, opts))
-            self.W_all = astra.OpTomo(self.proj_id[-1])
-
-        def dispose(self):
-            """Disposal of the ASTRA projectors."""
-            for p in self.proj_id:
-                astra.projector.delete(p)
-            self.proj_id = []
-            self.W_ind = []
-            self.W_all = []
-
-        def fp(self, vol, angle_ind: int = None):
-            if angle_ind is None:
-                return self.W_all.FP(vol)
-            else:
-                if not self.has_individual_projs:
-                    raise ValueError("Individual projectors not available!")
-                return self.W_ind[angle_ind].FP(vol)[0, ...]
-
-        def bp(self, prj, angle_ind: int = None):
-            if angle_ind is None:
-                return self.W_all.BP(prj)
-            else:
-                if not self.has_individual_projs:
-                    raise ValueError("Individual projectors not available!")
-                sino = np.empty([2, *np.squeeze(prj).shape], dtype=prj.dtype)
-                sino[0, ...] = prj
-                sino[1, ...] = 0
-                return self.W_ind[angle_ind].BP(sino)
 
     def __init__(
         self,
@@ -257,7 +65,7 @@ class ProjectorBase(operators.ProjectorOperator):
         -------
         None.
         """
-        if not has_astra and use_astra:
+        if not prj_backends.has_astra and use_astra:
             use_astra = False
             print("WARNING: ASTRA requested but not available. Falling back to scikit-image.")
 
@@ -267,7 +75,7 @@ class ProjectorBase(operators.ProjectorOperator):
             raise ValueError("Only square volumes")
 
         if use_astra:
-            self.projector_backend = ProjectorBase.ProjectorBackendASTRA(
+            self.projector_backend = prj_backends.ProjectorBackendASTRA(
                 vol_shape,
                 angles_rot_rad,
                 rot_axis_shift_pix=rot_axis_shift_pix,
@@ -275,7 +83,7 @@ class ProjectorBase(operators.ProjectorOperator):
                 super_sampling=super_sampling
             )
         else:
-            self.projector_backend = ProjectorBase.ProjectorBackendSKimage(
+            self.projector_backend = prj_backends.ProjectorBackendSKimage(
                 vol_shape, angles_rot_rad, rot_axis_shift_pix=rot_axis_shift_pix
             )
 
@@ -684,53 +492,6 @@ class ProjectorUncorrected(ProjectorBase):
             super_sampling=super_sampling,
         )
 
-    def _astra_fbp(self, projs, fbp_filter):
-        if has_cuda:
-            fbp_type = "FBP_CUDA"
-        else:
-            fbp_type = "FBP"
-        cfg = astra.astra_dict(fbp_type)
-        cfg["ProjectorId"] = self.proj_id[-1]
-        cfg["FilterType"] = fbp_filter
-
-        proj_geom = astra.projector.projection_geometry(self.proj_id[-1])
-        vol_geom = astra.projector.volume_geometry(self.proj_id[-1])
-
-        if len(projs.shape) > 2:
-            num_lines = projs.shape[1]
-            vols = [None] * num_lines
-
-            for ii_v in range(num_lines):
-                sino_id = astra.data2d.create("-sino", proj_geom, projs[:, ii_v, :])
-                vol_id = astra.data2d.create("-vol", vol_geom, 0)
-
-                cfg["ProjectionDataId"] = sino_id
-                cfg["ReconstructionDataId"] = vol_id
-                alg_id = astra.algorithm.create(cfg)
-                astra.algorithm.run(alg_id)
-                astra.algorithm.delete(alg_id)
-
-                vols[ii_v] = astra.data2d.get(vol_id)
-                astra.data2d.delete(vol_id)
-                astra.data2d.delete(sino_id)
-
-            return np.stack(vols, axis=0)
-        else:
-            sino_id = astra.data2d.create("-sino", proj_geom, projs)
-            vol_id = astra.data2d.create("-vol", vol_geom, 0)
-
-            cfg["ProjectionDataId"] = sino_id
-            cfg["ReconstructionDataId"] = vol_id
-            alg_id = astra.algorithm.create(cfg)
-            astra.algorithm.run(alg_id)
-            astra.algorithm.delete(alg_id)
-
-            vol = astra.data2d.get(vol_id)
-            astra.data2d.delete(vol_id)
-            astra.data2d.delete(sino_id)
-
-            return vol
-
     def fbp(self, projs, fbp_filter="shepp-logan"):
         """Computes the filtered back-projection of the projection data to the
         volume.
@@ -748,7 +509,7 @@ class ProjectorUncorrected(ProjectorBase):
             raise ValueError("FBP not supported with 3D projector")
 
         if isinstance(fbp_filter, str):
-            return self._astra_fbp(projs, fbp_filter)
+            return self.projector_backend.fbp(projs, fbp_filter)
         else:
             projs = fbp_filter(projs, self)
             return self.bp(projs) / self.angles_rot_rad.size
@@ -839,12 +600,13 @@ class FilterMR(object):
             nrows += 2 * grad_vol_size
 
         A = np.zeros((nrows, ncols), dtype=self.data_type)
+        vol_mask = utils_proc.get_circular_mask([self.sinogram_pixels_num] * 2)
 
         for ii, bas in enumerate(self.basis):
             img = self.apply_filter(sinogram, bas)
             img = projector.bp(img) / self.sinogram_angles_num
+            img *= vol_mask
 
-            astra.extrautils.clipCircle(img)
             A[:sino_size, ii] = projector.fp(img).flatten()
             if self.lambda_smooth:
                 dx = np.diff(img, axis=0)
