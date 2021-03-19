@@ -103,7 +103,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         self.projector_backend.dispose()
 
     def fp_angle(self, vol, angle_ind):
-        """Forward-projection of the volume to a single sinogram line.
+        """
+        Forward-projection of the volume to a single sinogram line.
 
         :param vol: The volume to forward-project (numpy.array_like)
         :param angle_ind: The angle index to foward project (int)
@@ -117,8 +118,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         return x
 
     def bp_angle(self, sino_line, angle_ind):
-        """Back-projection of a single sinogram line to the volume. It only
-        applies the attenuation corrections if the projector is symmetric.
+        """
+        Back-projection of a single sinogram line to the volume.
 
         :param sino_line: The sinogram to back-project or a single line (numpy.array_like)
         :param angle_ind: The angle index to foward project (int)
@@ -131,7 +132,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         return self.projector_backend.bp(sino_line, angle_ind)
 
     def fp(self, vol):
-        """Forward-projection of the volume to the projection data.
+        """
+        Forward-projection of the volume to the projection data.
 
         :param vol: The volume to forward-project.
         :type vol: numpy.array_like
@@ -145,7 +147,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         return x
 
     def bp(self, data):
-        """Back-projection of the projection data to the volume.
+        """
+        Back-projection of the projection data to the volume.
 
         :param data: The projection data to back-project (numpy.array_like)
 
@@ -205,6 +208,8 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         data_type=np.float32,
     ):
         """
+        Attenuation corrected projection class for XRF.
+
         :param vol_shape: The volume shape in X Y and optionally Z
         :type vol_shape: numpy.array_like
         :param angles_rot_rad: The rotation angles
@@ -346,8 +351,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         return atts
 
     def compute_attenuation_volumes(self):
-        """Computes the corrections for each angle.
-        """
+        """Computes the corrections for each angle."""
         if self.att_in is None and self.att_out is None:
             raise ValueError("No attenuation volumes were given")
 
@@ -377,8 +381,10 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         self.weights_det = np.sum(self.weights_det, keepdims=True)
 
     def fp_angle(self, vol, angle_ind):
-        """Forward-projection of the volume to a single sinogram line. It
-        applies the attenuation corrections.
+        """
+        Forward-projection of the volume to a single sinogram line.
+
+        It applies the attenuation corrections.
 
         :param vol: The volume to forward-project (numpy.array_like)
         :param angle_ind: The angle index to foward project (int)
@@ -414,8 +420,10 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         return sino_line
 
     def bp_angle(self, sino, angle_ind, single_line=False):
-        """Back-projection of a single sinogram line to the volume. It only
-        applies the attenuation corrections if the projector is symmetric.
+        """
+        Back-projection of a single sinogram line to the volume.
+
+        It only applies the attenuation corrections if the projector is symmetric.
 
         :param sino: The sinogram to back-project or a single line (numpy.array_like)
         :param angle_ind: The angle index to foward project (int)
@@ -453,8 +461,10 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         return np.sum(vol, axis=0)
 
     def fp(self, vol):
-        """Forward-projection of the volume to the sinogram. It applies the
-        attenuation corrections.
+        """
+        Forward-projection of the volume to the sinogram.
+
+        It applies the attenuation corrections.
 
         :param vol: The volume to forward-project (numpy.array_like)
 
