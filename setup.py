@@ -16,7 +16,7 @@ with open(os.path.join('corrct', 'VERSION')) as version_file:
     version = version_file.read().strip()
 
 requirements = [
-    'astra-toolbox',
+    'scikit-image',
     'tqdm',
     'scipy',
     'numpy'
