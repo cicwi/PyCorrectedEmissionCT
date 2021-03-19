@@ -196,7 +196,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
             vol = np.empty([self.prj_shape[-1], *self.vol_shape], dtype=prj.dtype)
             for ii_a, a in enumerate(self.angles_rot_deg):
                 vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], filter=None)
-            return prj.sum(axis=0)
+            return vol.sum(axis=0)
         else:
             return skt.iradon(prj[:, np.newaxis], self.angles_rot_deg[angle_ind:angle_ind+1:], filter=None)
 
@@ -216,6 +216,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
         vol : numpy.array_like
             The reconstructed volume.
         """
+        fbp_filter = fbp_filter.lower()
         if len(prj.shape) > 2:
             num_lines = prj.shape[1]
             vol = np.empty([num_lines, *self.vol_shape], dtype=prj.dtype)
@@ -224,7 +225,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
                 vol[ii_v, ...] = skt.iradon(prj[ii_v, ...].transpose(), self.angles_rot_deg, filter=fbp_filter)
             return vol
         else:
-            skt.iradon(prj.transpose(), self.angles_rot_deg, filter=fbp_filter)
+            return skt.iradon(prj.transpose(), self.angles_rot_deg, filter=fbp_filter)
 
 
 class ProjectorBackendASTRA(ProjectorBackend):
