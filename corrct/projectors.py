@@ -18,8 +18,8 @@ from . import _projector_backends as prj_backends
 from . import utils_proc
 
 
-class ProjectorBase(operators.ProjectorOperator):
-    """Basic projection class.
+class ProjectorUncorrected(operators.ProjectorOperator):
+    """Base projection class.
 
     It implements the forward and back projection of the single lines of a sinogram.
     It takes care of initializing and disposing the ASTRA projectors when used in a *with* statement.
@@ -37,7 +37,7 @@ class ProjectorBase(operators.ProjectorOperator):
         super_sampling: int = 1
     ):
         """
-        ProjectorBase class initialization.
+        ProjectorUncorrected class initialization.
 
         Parameters
         ----------
@@ -156,9 +156,34 @@ class ProjectorBase(operators.ProjectorOperator):
             data = data * self.proj_intensities[:, np.newaxis]  # Needs copy
         return self.projector_backend.bp(data)
 
+    def fbp(self, projs, fbp_filter="shepp-logan"):
+        """
+        Computes the filtered back-projection of the projection data to the volume.
 
-class ProjectorAttenuationXRF(ProjectorBase):
-    """Attenuation corrected projection class for XRF, with multi-detector support.
+        The data could either be a sinogram, or a stack of sinograms.
+
+        :param projs: The projection data to back-project
+        :type projs: numpy.array_like
+        :param fbp_filter: The FBP filter to use
+        :type fbp_filter: str or function
+
+        :returns: The FBP reconstructed volume
+        :rtype: numpy.array_like
+        """
+        if self.is_3d:
+            raise ValueError("FBP not supported with 3D projector")
+
+        if isinstance(fbp_filter, str):
+            return self.projector_backend.fbp(projs, fbp_filter)
+        else:
+            projs = fbp_filter(projs, self)
+            return self.bp(projs) / self.angles_rot_rad.size
+
+
+class ProjectorAttenuationXRF(ProjectorUncorrected):
+    """
+    Attenuation corrected projection class for XRF, with multi-detector support.
+
     It includes the computation of the attenuation volumes.
     """
 
@@ -209,7 +234,7 @@ class ProjectorAttenuationXRF(ProjectorBase):
         :param data_type: Data type, defaults to np.float32
         :type data_type: numpy.dtype, optional
         """
-        ProjectorBase.__init__(
+        ProjectorUncorrected.__init__(
             self,
             vol_shape,
             angles_rot_rad,
@@ -375,7 +400,8 @@ class ProjectorAttenuationXRF(ProjectorBase):
 
         weights = self.weights_det * self.weights_angles[angle_ind, :]
         sino_line = [
-            weights[ii] * ProjectorBase.fp_angle(self, temp_vol[ii], angle_ind) for ii in range(len(self.angles_det_rad))
+            weights[ii] * ProjectorUncorrected.fp_angle(self, temp_vol[ii], angle_ind)
+            for ii in range(len(self.angles_det_rad))
         ]
         sino_line = np.stack(sino_line, axis=0)
 
@@ -409,7 +435,8 @@ class ProjectorAttenuationXRF(ProjectorBase):
         sino_line = np.reshape(sino_line, [len(self.weights_det), *sino_line.shape[-(len(self.vol_shape) - 1) :]])
         weights = self.weights_det * self.weights_angles[angle_ind, :]
         vol = [
-            weights[ii] * ProjectorBase.bp_angle(self, sino_line[ii, ...], angle_ind) for ii in range(len(self.angles_det_rad))
+            weights[ii] * ProjectorUncorrected.bp_angle(self, sino_line[ii, ...], angle_ind)
+            for ii in range(len(self.angles_det_rad))
         ]
         vol = np.stack(vol, axis=0)
 
@@ -447,72 +474,7 @@ class ProjectorAttenuationXRF(ProjectorBase):
         if self.is_symmetric:
             return np.sum([self.bp_angle(sino, ii) for ii in range(len(self.angles_rot_rad))], axis=0)
         else:
-            return ProjectorBase.bp(self, sino)
-
-
-class ProjectorUncorrected(ProjectorBase):
-    """Uncorrected projection class, which implements the forward and back
-    projection of the whole projection data.
-    It takes care of initializing and disposing the ASTRA projectors when used
-    in a *with* statement.
-    It supports both 2D and 3D geometries.
-    """
-
-    def __init__(
-        self,
-        vol_shape,
-        angles_rot_rad,
-        rot_axis_shift_pix=0,
-        proj_intensities=None,
-        create_single_projs=False,
-        super_sampling=1,
-    ):
-        """
-        :param vol_shape: The volume shape in X Y and optionally Z
-        :type vol_shape: numpy.array_like
-        :param angles_rot_rad: The rotation angles
-        :type angles_rot_rad: numpy.array_like
-        :param rot_axis_shift_pix: The rotation axis shift(s) in pixels, defaults to 0
-        :type rot_axis_shift_pix: float or numpy.array_like, optional
-        :param proj_intensities: Projection scaling factor, defaults to None
-        :type proj_intensities: float or numpy.array_like, optional
-        :param create_single_projs: Specifies whether to create projectors for single projections.
-        Useful for corrections and SART, defaults to False
-        :type create_single_projs: boolean, optional
-        :param super_sampling: pixel and voxel super-sampling, defaults to 1
-        :type super_sampling: int, optional
-        """
-        ProjectorBase.__init__(
-            self,
-            vol_shape,
-            angles_rot_rad,
-            rot_axis_shift_pix,
-            proj_intensities=proj_intensities,
-            create_single_projs=create_single_projs,
-            super_sampling=super_sampling,
-        )
-
-    def fbp(self, projs, fbp_filter="shepp-logan"):
-        """Computes the filtered back-projection of the projection data to the
-        volume.
-        The data could either be a sinogram, or a stack of sinograms.
-
-        :param projs: The projection data to back-project
-        :type projs: numpy.array_like
-        :param fbp_filter: The FBP filter to use
-        :type fbp_filter: str or function
-
-        :returns: The FBP reconstructed volume
-        :rtype: numpy.array_like
-        """
-        if self.is_3d:
-            raise ValueError("FBP not supported with 3D projector")
-
-        if isinstance(fbp_filter, str):
-            return self.projector_backend.fbp(projs, fbp_filter)
-        else:
-            projs = fbp_filter(projs, self)
-            return self.bp(projs) / self.angles_rot_rad.size
+            return ProjectorUncorrected.bp(self, sino)
 
 
 class FilterMR(object):
