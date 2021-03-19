@@ -32,7 +32,7 @@ class ProjectorBase(operators.ProjectorOperator):
         angles_rot_rad,
         rot_axis_shift_pix: float = 0.0,
         proj_intensities: np.ndarray = None,
-        use_astra: bool = True,
+        use_astra: bool = prj_backends.has_cuda,
         create_single_projs: bool = True,
         super_sampling: int = 1
     ):
@@ -50,7 +50,7 @@ class ProjectorBase(operators.ProjectorOperator):
         proj_intensities : float or numpy.array_like, optional
             Projection scaling factor. The default is None.
         use_astra : bool, optional
-            Whether to use ASTRA or fall back to scikit-image. The default is True.
+            Whether to use ASTRA or fall back to scikit-image. The default is True if CUDA is available, otherwise False.
         create_single_projs : bool, optional
             Whether to create projectors for single projections. Used for corrections and SART. The default is True.
         super_sampling : int, optional

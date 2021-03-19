@@ -15,9 +15,12 @@ try:
     has_astra = True
     has_cuda = astra.astra.use_cuda()
     if not has_cuda:
-        print("WARNING: CUDA is not available. Only 2D operations on CPU are available.")
+        print(
+            "WARNING: CUDA is not available. Only 2D operations on CPU are available (scikit-image will be used as default)."
+        )
 except ImportError:
     has_astra = False
+    has_cuda = False
     print("WARNING: ASTRA is not available. Only 2D operations on CPU are available (scikit-image will be used).")
 
 
