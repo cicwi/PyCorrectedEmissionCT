@@ -1122,14 +1122,17 @@ class Sirt(Solver):
         self.data_term.assign_data(b, sigma)
 
         if b_test_mask is not None:
-            res_test_0 = self.data_term.compute_residual(0, b_test_mask)
+            self.data_term_test.assign_data(b, sigma)
+
+            res_test_0 = self.data_term_test.compute_residual(0, mask=b_test_mask)
             res_test_norm_0 = self.data_term_test.compute_residual_norm(res_test_0)
             res_test_norm_rel = np.ones((iterations,))
         else:
             res_test_norm_rel = None
 
         if self.tolerance is not None:
-            res_norm_0 = self.data_term.compute_residual_norm(self.data_term.compute_residual(0, b_mask))
+            res_0 = self.data_term.compute_residual(0, mask=b_mask)
+            res_norm_0 = self.data_term.compute_residual_norm(res_0)
             res_norm_rel = np.ones((iterations,)) * self.tolerance
         else:
             res_norm_rel = None
@@ -1146,10 +1149,10 @@ class Sirt(Solver):
 
         for ii in progressbar(range(iterations)):
             Ax = A(x)
-            res = self.data_term.compute_residual(Ax, b_mask)
+            res = self.data_term.compute_residual(Ax, mask=b_mask)
 
             if b_test_mask is not None:
-                res_test = self.data_term.compute_residual(Ax, b_test_mask)
+                res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
                 res_test_norm_rel[ii] = self.data_term_test.compute_residual_norm(res_test.flatten()) / res_test_norm_0
 
             if self.tolerance is not None:
@@ -1306,14 +1309,17 @@ class CP(Solver):
         q = [reg.initialize_dual() for reg in self.regularizer]
 
         if b_test_mask is not None:
-            res_test_0 = self.data_term.compute_residual(0, b_test_mask)
+            self.data_term_test.assign_data(b, sigma)
+
+            res_test_0 = self.data_term_test.compute_residual(0, mask=b_test_mask)
             res_test_norm_0 = self.data_term_test.compute_residual_norm(res_test_0)
             res_test_norm_rel = np.ones((iterations,))
         else:
             res_test_norm_rel = None
 
         if self.tolerance is not None:
-            res_norm_0 = self.data_term.compute_residual_norm(self.data_term.compute_residual(0, b_mask))
+            res_0 = self.data_term.compute_residual(0, mask=b_mask)
+            res_norm_0 = self.data_term.compute_residual_norm(res_0)
             res_norm_rel = np.ones((iterations,)) * self.tolerance
         else:
             res_norm_rel = None
@@ -1357,11 +1363,11 @@ class CP(Solver):
                 Ax = A(x)
 
             if b_test_mask is not None:
-                res_test = self.data_term.compute_residual(Ax, b_test_mask)
+                res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
                 res_test_norm_rel[ii] = self.data_term_test.compute_residual_norm(res_test.flatten()) / res_test_norm_0
 
             if self.tolerance is not None:
-                res = self.data_term.compute_residual(Ax, b_mask)
+                res = self.data_term.compute_residual(Ax, mask=b_mask)
                 res_norm_rel[ii] = self.data_term.compute_residual_norm(res.flatten()) / res_norm_0
                 if self.tolerance > res_norm_rel[ii]:
                     break
