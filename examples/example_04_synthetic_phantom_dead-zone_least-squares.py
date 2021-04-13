@@ -47,9 +47,9 @@ vol_mask = corrct.utils_proc.get_circular_mask(ph_or.shape)
 
 sino_substract = sino - background_avg
 
-sino_stddev = np.sqrt(np.abs(sino))
-min_nonzero_stddev = np.min(sino_stddev[sino > 0])
-sino_tolerances = np.fmax(sino_stddev, min_nonzero_stddev)
+sino_variance = np.abs(sino)
+min_nonzero_variance = np.min(sino_variance[sino > 0])
+sino_tolerances = np.fmax(sino_variance, min_nonzero_variance)
 sino_weights = 1 / sino_tolerances
 
 lowlim_l2 = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_l2())
@@ -57,7 +57,7 @@ lowlim_l2w = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFid
 
 data_term_ls = corrct.solvers.DataFidelity_l2()
 data_term_lsw = corrct.solvers.DataFidelity_wl2(sino_weights)
-data_term_lsb = corrct.solvers.DataFidelity_l2b(sino_tolerances)
+data_term_lsb = corrct.solvers.DataFidelity_l2b(sino_variance)
 
 with corrct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     solver_ls = corrct.solvers.CP(verbose=True, data_term=data_term_ls)

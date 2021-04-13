@@ -42,15 +42,15 @@ bckgnd_weight = np.sqrt(background_avg / (vol_shape[0] * np.sqrt(2)))
 
 prec = True
 num_iterations = 200
-reg_weight = 1/4
+reg_weight = 1/5
 lower_limit = None
 vol_mask = corrct.utils_proc.get_circular_mask(ph_or.shape)
 
 sino_substract = sino - background_avg
 
-sino_stddev = np.sqrt(np.abs(sino))
-min_nonzero_stddev = np.min(sino_stddev[sino > 0])
-sino_tolerances = np.fmax(sino_stddev, min_nonzero_stddev)
+sino_variance = np.abs(sino)
+min_nonzero_variance = np.min(sino_variance[sino > 0])
+sino_tolerances = np.fmax(sino_variance, min_nonzero_variance)
 sino_weights = 1 / sino_tolerances
 
 reg_tv = corrct.solvers.Regularizer_TV2D(reg_weight)
@@ -77,9 +77,9 @@ data_term_kl = corrct.solvers.DataFidelity_KL()
 data_term_kl_bck = corrct.solvers.DataFidelity_KL(background=background_avg)
 
 data_term_lsw = corrct.solvers.DataFidelity_wl2(sino_weights)
-data_term_lsb = corrct.solvers.DataFidelity_l2b(sino_tolerances)
-data_term_l1b = corrct.solvers.DataFidelity_l1b(sino_tolerances)
-data_term_hub = corrct.solvers.DataFidelity_Huber(sino_tolerances)
+data_term_lsb = corrct.solvers.DataFidelity_l2b(sino_variance)
+data_term_l1b = corrct.solvers.DataFidelity_l1b(sino_variance)
+data_term_hub = corrct.solvers.DataFidelity_Huber(sino_variance)
 
 solver_1 = corrct.solvers.CP(
     verbose=True, data_term=data_term_ls, regularizer=reg_1, tolerance=0, data_term_test=data_term_lsw)
