@@ -13,6 +13,8 @@ import numpy.random
 import scipy.sparse as sps
 import scipy.ndimage as spimg
 
+import copy as cp
+
 from . import operators
 
 try:
@@ -67,6 +69,8 @@ class DataFidelityBase(object):
             self.sigma_data = None
 
     def compute_residual(self, proj_primal, mask=None):
+        if self.background is not None:
+            proj_primal = proj_primal + self.background
         if self.data is not None:
             residual = self.data - proj_primal
         else:
@@ -137,8 +141,6 @@ class DataFidelity_l2(DataFidelityBase):
         dual *= self.sigma1
 
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
-        if self.background is not None:
-            proj_primal = proj_primal + self.background
         return (
             np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2) + np.linalg.norm(dual, ord=2)
         ) / 2 + self.compute_data_dual_dot(dual)
@@ -158,6 +160,8 @@ class DataFidelity_wl2(DataFidelity_l2):
         self.sigma1 = 1 / (1 + sigma / self.weights)
 
     def compute_residual(self, proj_primal, mask=None):
+        if self.background is not None:
+            proj_primal = proj_primal + self.background
         if self.data is not None:
             residual = (self.data - proj_primal) * self.weights
         else:
@@ -197,8 +201,6 @@ class DataFidelity_l2b(DataFidelity_l2):
         dual *= self.sigma1
 
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
-        if self.background is not None:
-            proj_primal = proj_primal + self.background
         return (
             np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2)
             + np.linalg.norm(np.sqrt(self.local_error) * dual, ord=2)
@@ -337,6 +339,8 @@ class DataFidelity_KL(DataFidelityBase):
             dual[:] = (1 + dual[:] - np.sqrt((dual[:] - 1) ** 2)) / 2
 
     def compute_residual(self, proj_primal, mask=None):
+        if self.background is not None:
+            proj_primal = proj_primal + self.background
         # we take the Moreau envelope here, and apply the proximal to it
         residual = np.fmax(proj_primal, eps) * self.sigma
         self.apply_proximal(residual)
@@ -913,7 +917,7 @@ class Solver(object):
         self.verbose = verbose
         self.relaxation = relaxation
         self.tolerance = tolerance
-        self.data_term_test = data_term_test
+        self.data_term_test = cp.deepcopy(data_term_test)
 
     def info(self):
         return type(self).__name__
@@ -1122,6 +1126,9 @@ class Sirt(Solver):
         self.data_term.assign_data(b, sigma)
 
         if b_test_mask is not None:
+            if self.data_term_test.background != self.data_term.background:
+                print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
+                self.data_term_test.background = self.data_term.background
             self.data_term_test.assign_data(b, sigma)
 
             res_test_0 = self.data_term_test.compute_residual(0, mask=b_test_mask)
@@ -1309,6 +1316,9 @@ class CP(Solver):
         q = [reg.initialize_dual() for reg in self.regularizer]
 
         if b_test_mask is not None:
+            if self.data_term_test.background != self.data_term.background:
+                print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
+                self.data_term_test.background = self.data_term.background
             self.data_term_test.assign_data(b, sigma)
 
             res_test_0 = self.data_term_test.compute_residual(0, mask=b_test_mask)
