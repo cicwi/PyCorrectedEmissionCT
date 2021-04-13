@@ -181,17 +181,19 @@ class DataFidelity_l2b(DataFidelity_l2):
 
     def assign_data(self, data, sigma=1):
         self.sigma_error = sigma * self.local_error
+        self.sigma_sqrt_error = sigma * np.sqrt(self.local_error)
         super().assign_data(data=data, sigma=sigma)
         self.sigma1 = 1 / (1 + self.sigma_error)
 
     def compute_residual(self, proj_primal, mask=None):
         residual = super().compute_residual(proj_primal, mask)
-        return np.sign(residual) * np.fmax(np.abs(residual) - self.local_error, 0)
+        self._soft_threshold(residual, self.sigma_sqrt_error)
+        return residual
 
     def apply_proximal(self, dual):
         if self.data is not None:
             dual -= self.sigma_data
-        self._soft_threshold(dual, self.sigma_error)
+        self._soft_threshold(dual, self.sigma_sqrt_error)
         dual *= self.sigma1
 
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
