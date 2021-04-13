@@ -18,6 +18,47 @@ from . import _projector_backends as prj_backends
 from . import utils_proc
 
 
+class ProjectorMatrix(operators.ProjectorOperator):
+    """Projector that uses an explicit projection matrix."""
+
+    def __init__(self, A, vol_shape, proj_shape):
+        self.vol_shape = vol_shape
+        self.proj_shape = proj_shape
+
+        self.A = A
+        super().__init__()
+
+    def absolute(self):
+        """Return the projection operator using the absolute value of the projection coefficients.
+
+        :returns: The absolute value operator
+        :rtype: ProjectorMatrix
+        """
+        return ProjectorMatrix(np.abs(self.A), self.vol_shape, self.proj_shape)
+
+    def fp(self, x):
+        """Define the interface for the forward-projection.
+
+        :param x: Input volume.
+        :type x: `numpy.array_like`
+
+        :returns: The projection data.
+        :rtype: `numpy.array_like`
+        """
+        return self.A.dot(x.flatten()).reshape(self.proj_shape)
+
+    def bp(self, x):
+        """Define the interface for the back-projection.
+
+        :param x: Input projection data.
+        :type x: `numpy.array_like`
+
+        :returns: The back-projected volume.
+        :rtype: `numpy.array_like`
+        """
+        return self.A.transpose().dot(x.flatten()).reshape(self.vol_shape)
+
+
 class ProjectorUncorrected(operators.ProjectorOperator):
     """Base projection class.
 
