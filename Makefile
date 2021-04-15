@@ -91,3 +91,7 @@ install_dev:
 conda_package:
 	conda install conda-build -y
 	conda build conda/
+
+pip_package:
+	conda install setuptools wheel twine -y
+	python setup.py sdist bdist_wheel
