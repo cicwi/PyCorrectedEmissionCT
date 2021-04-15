@@ -73,7 +73,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     extras_require={'dev': dev_requirements},
-    url='https://github.com/cicwi/corrct',
+    url='https://github.com/cicwi/PyCorrectedEmissionCT',
     version=version,
     zip_safe=False,
 )

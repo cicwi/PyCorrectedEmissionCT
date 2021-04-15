@@ -1,6 +1,6 @@
 # PyCorrectedEmissionCT
 
-![Python Package using Anaconda](https://github.com/cicwi/PyCorrectedEmissionCT/workflows/Python%20Package%20using%20Anaconda/badge.svg)
+[![Python package](https://github.com/cicwi/PyCorrectedEmissionCT/actions/workflows/pythonpackage.yml/badge.svg)](https://github.com/cicwi/PyCorrectedEmissionCT/actions/workflows/pythonpackage.yml)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/cicwi/PyCorrectedEmissionCT)
 ![License](https://img.shields.io/github/license/cicwi/PyCorrectedEmissionCT)
 [![DOI](https://zenodo.org/badge/218092017.svg)](https://zenodo.org/badge/latestdoi/218092017)
