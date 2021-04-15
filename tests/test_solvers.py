@@ -222,14 +222,14 @@ class TestSolvers(unittest.TestCase):
 
         (A, At) = self.get_A_At('2d')
         reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.CP(regularizer=reg)
+        algo = solvers.Sirt(regularizer=reg)
         (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At)
 
         print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_flat_2d - sol))),
               end='', flush=True)
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
 
-    def test_003_CPLSTV_unconstrained(self):
+    def test_003_CPLSTV(self):
         """Test Chambolle-Pock unconstrained least-squares TV-min algorithm in 2D."""
 
         (A, At) = self.get_A_At('2d')
@@ -241,7 +241,19 @@ class TestSolvers(unittest.TestCase):
               end='', flush=True)
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
 
-    def test_004_CPLSTV_constrained01(self):
+    def test_004_CPLSTV_unconstrained(self):
+        """Test Chambolle-Pock unconstrained least-squares TV-min algorithm in 2D."""
+
+        (A, At) = self.get_A_At('2d')
+        reg = solvers.Regularizer_TV2D(1e-4)
+        algo = solvers.CP(regularizer=reg)
+        (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At)
+
+        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_flat_2d - sol))),
+              end='', flush=True)
+        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
+
+    def test_005_CPLSTV_constrained01(self):
         """Test Chambolle-Pock constrained [0, 1] least-squares TV-min algorithm in 2D."""
 
         (A, At) = self.get_A_At('2d')
@@ -253,7 +265,7 @@ class TestSolvers(unittest.TestCase):
               end='', flush=True)
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
 
-    def test_005_CPLSTV_unconstrained_precond(self):
+    def test_006_CPLSTV_unconstrained_precond(self):
         """Test Chambolle-Pock preconditioned, unconstrained least-squares TV-min algorithm in 2D."""
 
         (A, At) = self.get_A_At('2d')
