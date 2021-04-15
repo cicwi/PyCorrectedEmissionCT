@@ -69,6 +69,7 @@ setup(
     keywords='corrct',
     name='corrct',
     packages=find_packages(include=['corrct']),
+    python_requires='>=3.5',
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
