@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,18 +12,12 @@
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -33,6 +28,10 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -48,7 +47,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> PyCorrectedEmissionCT
+            <a href="../../index.html" class="icon icon-home"> PyCorrectedEmissionCT
           
 
           
@@ -71,7 +70,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -88,7 +86,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -127,7 +124,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -161,8 +158,7 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">solvers</span>
 
 
-<div class="viewcode-block" id="get_circular_mask"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_circular_mask">[docs]</a><span class="k">def</span> <span class="nf">get_circular_mask</span><span class="p">(</span>
-        <span class="n">vol_shape</span><span class="p">,</span> <span class="n">radius_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">coords_ball</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask_drop_off</span><span class="o">=</span><span class="s1">&#39;const&#39;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+<div class="viewcode-block" id="get_circular_mask"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_circular_mask">[docs]</a><span class="k">def</span> <span class="nf">get_circular_mask</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">,</span> <span class="n">radius_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">coords_ball</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask_drop_off</span><span class="o">=</span><span class="s2">&quot;const&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Computes a circular mask for the reconstruction volume.</span>
 
 <span class="sd">    :param vol_shape: The size of the volume.</span>
@@ -179,8 +175,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">vol_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
 
-    <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">vol_shape</span><span class="p">]</span>
-    <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">vol_shape</span><span class="p">]</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">coords_ball</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">coords_ball</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">)),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
@@ -195,18 +191,18 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">coords_ball</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">mask_drop_off</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;const&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">mask_drop_off</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;const&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">dists</span> <span class="o">&lt;=</span> <span class="n">radius</span>
-    <span class="k">elif</span> <span class="n">mask_drop_off</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;sinc&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">mask_drop_off</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;sinc&quot;</span><span class="p">:</span>
         <span class="n">cut_off</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">[</span><span class="n">coords_ball</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">radius</span>
         <span class="n">outter_region</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">dists</span> <span class="o">&lt;=</span> <span class="n">radius</span><span class="p">)</span>
         <span class="n">outter_vals</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sinc</span><span class="p">((</span><span class="n">dists</span> <span class="o">-</span> <span class="n">radius</span><span class="p">)</span> <span class="o">/</span> <span class="n">cut_off</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">outter_region</span> <span class="o">*</span> <span class="n">outter_vals</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown drop-off function: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mask_drop_off</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown drop-off function: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">mask_drop_off</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="pad_sinogram"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.pad_sinogram">[docs]</a><span class="k">def</span> <span class="nf">pad_sinogram</span><span class="p">(</span><span class="n">sinogram</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">pad_axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<div class="viewcode-block" id="pad_sinogram"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.pad_sinogram">[docs]</a><span class="k">def</span> <span class="nf">pad_sinogram</span><span class="p">(</span><span class="n">sinogram</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">pad_axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Pads the sinogram.</span>
 
 <span class="sd">    :param sinogram: The sinogram to pad.</span>
@@ -248,10 +244,10 @@
 <span class="sd">    :rtype: numpy.array_like</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">crop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">projs</span> <span class="o">=</span> <span class="n">projs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
-        <span class="n">flats</span> <span class="o">=</span> <span class="n">flats</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+        <span class="n">projs</span> <span class="o">=</span> <span class="n">projs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+        <span class="n">flats</span> <span class="o">=</span> <span class="n">flats</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
         <span class="k">if</span> <span class="n">darks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">darks</span> <span class="o">=</span> <span class="n">darks</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+            <span class="n">darks</span> <span class="o">=</span> <span class="n">darks</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
 
     <span class="k">if</span> <span class="n">darks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">projs</span> <span class="o">-=</span> <span class="n">darks</span>
@@ -275,7 +271,8 @@
 
 
 <div class="viewcode-block" id="denoise_image"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.denoise_image">[docs]</a><span class="k">def</span> <span class="nf">denoise_image</span><span class="p">(</span>
-        <span class="n">img</span><span class="p">,</span> <span class="n">reg_weight</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error_norm</span><span class="o">=</span><span class="s1">&#39;l2b&#39;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">lower_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">img</span><span class="p">,</span> <span class="n">reg_weight</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error_norm</span><span class="o">=</span><span class="s2">&quot;l2b&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">lower_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Image denoiser based on (simple, weighted or dead-zone) least-squares and wavelets.</span>
 <span class="sd">    The weighted least-squares requires the local pixel-wise standard deviations.</span>
 <span class="sd">    It can be used to denoise sinograms and projections.</span>
@@ -320,28 +317,27 @@
     <span class="n">OpI</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">stddev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;l2b&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;l2b&quot;</span><span class="p">:</span>
             <span class="n">img_weight</span> <span class="o">=</span> <span class="n">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">)</span>
             <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_l2b</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;l1b&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;l1b&quot;</span><span class="p">:</span>
             <span class="n">img_weight</span> <span class="o">=</span> <span class="n">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">)</span>
             <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_l1b</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;hub&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;hub&quot;</span><span class="p">:</span>
             <span class="n">img_weight</span> <span class="o">=</span> <span class="n">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">)</span>
             <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_Huber</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;wl2&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;wl2&quot;</span><span class="p">:</span>
             <span class="p">(</span><span class="n">img_weight</span><span class="p">,</span> <span class="n">reg_weight</span><span class="p">)</span> <span class="o">=</span> <span class="n">compute_wls_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">,</span> <span class="n">OpI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">reg_weight</span><span class="p">)</span>
             <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_wl2</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Unknown error method: &quot;</span><span class="si">%s</span><span class="s1">&quot;. Options are: {&quot;l2b&quot;} | &quot;l1b&quot; | &quot;hub&quot; | &quot;wl2&quot;&#39;</span> <span class="o">%</span> <span class="n">error_norm</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown error method: &quot;</span><span class="si">%s</span><span class="s1">&quot;. Options are: {&quot;l2b&quot;} | &quot;l1b&quot; | &quot;hub&quot; | &quot;wl2&quot;&#39;</span> <span class="o">%</span> <span class="n">error_norm</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">data_term</span> <span class="o">=</span> <span class="n">error_norm</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="n">axes</span> <span class="o">=</span> <span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">)</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">(</span><span class="n">axes</span><span class="p">,)</span>
 
-    <span class="n">reg_wl</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1swl</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">,</span> <span class="s1">&#39;bior4.4&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">reg_wl</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1swl</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">,</span> <span class="s2">&quot;bior4.4&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">sol_wls_wl</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg_wl</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
 
     <span class="p">(</span><span class="n">denoised_img</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">sol_wls_wl</span><span class="p">(</span><span class="n">OpI</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">img</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">)</span>
@@ -358,19 +354,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2018, Nicola VIGANO
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -381,6 +369,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

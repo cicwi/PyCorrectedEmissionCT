@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,18 +12,12 @@
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -33,6 +28,10 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -48,7 +47,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> PyCorrectedEmissionCT
+            <a href="../../index.html" class="icon icon-home"> PyCorrectedEmissionCT
           
 
           
@@ -71,7 +70,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -88,7 +86,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -127,7 +124,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -182,19 +179,23 @@
     <span class="sd">&quot;&quot;&quot;Downloads the phantom generation module from Nicolas Barbey&#39;s repository</span>
 <span class="sd">    on github.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">phantom_url</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/nbarbey/TomograPy/master/tomograpy/phantom.py&#39;</span>
-    <span class="n">phantom_path</span> <span class="o">=</span> <span class="s1">&#39;./phantom.py&#39;</span>
+    <span class="n">phantom_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/nbarbey/TomograPy/master/tomograpy/phantom.py&quot;</span>
+    <span class="n">phantom_path</span> <span class="o">=</span> <span class="s2">&quot;./phantom.py&quot;</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;This example uses the phantom definition from the package Tomograpy,</span>
-<span class="s2">            developed by Nicolas Barbey. The needed module will be downloaded from: </span><span class="si">%s</span><span class="s2">&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">phantom_url</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="sd">&quot;&quot;&quot;This example uses the phantom definition from the package Tomograpy,</span>
+<span class="sd">            developed by Nicolas Barbey. The needed module will be downloaded from: %s&quot;&quot;&quot;</span>
+        <span class="o">%</span> <span class="n">phantom_url</span>
+    <span class="p">)</span>
 
     <span class="kn">import</span> <span class="nn">urllib</span>
+
     <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">phantom_url</span><span class="p">,</span> <span class="n">phantom_path</span><span class="p">)</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">phantom_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">phantom_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">file_content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">phantom_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;xrange&#39;</span><span class="p">,</span> <span class="s1">&#39;range&#39;</span><span class="p">))</span></div>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">phantom_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;xrange&quot;</span><span class="p">,</span> <span class="s2">&quot;range&quot;</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="phantom_assign_concentration"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.phantom_assign_concentration">[docs]</a><span class="k">def</span> <span class="nf">phantom_assign_concentration</span><span class="p">(</span><span class="n">ph_or</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
@@ -220,47 +221,63 @@
     <span class="n">conv_um_to_mm</span> <span class="o">=</span> <span class="mf">1e-3</span>
     <span class="n">voxel_size_um</span> <span class="o">=</span> <span class="mf">0.5</span>
     <span class="n">voxel_size_cm</span> <span class="o">=</span> <span class="n">voxel_size_um</span> <span class="o">*</span> <span class="n">conv_um_to_mm</span> <span class="o">*</span> <span class="n">conv_mm_to_cm</span>  <span class="c1"># cm to micron</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sample size: [</span><span class="si">%g</span><span class="s1"> </span><span class="si">%g</span><span class="s1">] um&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ph_or</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">voxel_size_um</span><span class="p">,</span> <span class="n">ph_or</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">voxel_size_um</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample size: [</span><span class="si">%g</span><span class="s2"> </span><span class="si">%g</span><span class="s2">] um&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ph_or</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">voxel_size_um</span><span class="p">,</span> <span class="n">ph_or</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">voxel_size_um</span><span class="p">))</span>
 
     <span class="kn">import</span> <span class="nn">xraylib</span>
-    <span class="n">xraylib</span><span class="o">.</span><span class="n">XRayInit</span><span class="p">()</span>
-    <span class="n">cp_fo</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="s1">&#39;Ferric Oxide&#39;</span><span class="p">)</span>
-    <span class="n">cp_co</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="s1">&#39;Calcium Oxide&#39;</span><span class="p">)</span>
-    <span class="n">cp_cc</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="s1">&#39;Calcium Carbonate&#39;</span><span class="p">)</span>
 
-    <span class="n">ca_an</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">SymbolToAtomicNumber</span><span class="p">(</span><span class="s1">&#39;Ca&#39;</span><span class="p">)</span>
+    <span class="n">xraylib</span><span class="o">.</span><span class="n">XRayInit</span><span class="p">()</span>
+    <span class="n">cp_fo</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="s2">&quot;Ferric Oxide&quot;</span><span class="p">)</span>
+    <span class="n">cp_co</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="s2">&quot;Calcium Oxide&quot;</span><span class="p">)</span>
+    <span class="n">cp_cc</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="s2">&quot;Calcium Carbonate&quot;</span><span class="p">)</span>
+
+    <span class="n">ca_an</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">SymbolToAtomicNumber</span><span class="p">(</span><span class="s2">&quot;Ca&quot;</span><span class="p">)</span>
     <span class="n">ca_kal</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">LineEnergy</span><span class="p">(</span><span class="n">ca_an</span><span class="p">,</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">KA_LINE</span><span class="p">)</span>
 
     <span class="n">in_energy_keV</span> <span class="o">=</span> <span class="mi">20</span>
     <span class="n">out_energy_keV</span> <span class="o">=</span> <span class="n">ca_kal</span>
 
-    <span class="n">ph_lin_att_in</span> <span class="o">=</span> <span class="n">ph_FeO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s1">&#39;Ferric Oxide&#39;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_fo</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span> \
-        <span class="o">+</span> <span class="n">ph_CaC</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s1">&#39;Calcium Carbonate&#39;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span> \
-        <span class="o">+</span> <span class="n">ph_CaO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s1">&#39;Calcium Oxide&#39;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_co</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span>
+    <span class="n">ph_lin_att_in</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">ph_FeO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Ferric Oxide&quot;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_fo</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">ph_CaC</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Calcium Carbonate&quot;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">ph_CaO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Calcium Oxide&quot;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_co</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
 
-    <span class="n">ph_lin_att_out</span> <span class="o">=</span> <span class="n">ph_FeO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s1">&#39;Ferric Oxide&#39;</span><span class="p">,</span> <span class="n">out_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_fo</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span> \
-        <span class="o">+</span> <span class="n">ph_CaC</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s1">&#39;Calcium Carbonate&#39;</span><span class="p">,</span> <span class="n">out_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span> \
-        <span class="o">+</span> <span class="n">ph_CaO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s1">&#39;Calcium Oxide&#39;</span><span class="p">,</span> <span class="n">out_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_co</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span>
+    <span class="n">ph_lin_att_out</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">ph_FeO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Ferric Oxide&quot;</span><span class="p">,</span> <span class="n">out_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_fo</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">ph_CaC</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Calcium Carbonate&quot;</span><span class="p">,</span> <span class="n">out_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">ph_CaO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Calcium Oxide&quot;</span><span class="p">,</span> <span class="n">out_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_co</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
 
     <span class="n">vol_att_in</span> <span class="o">=</span> <span class="n">ph_lin_att_in</span> <span class="o">*</span> <span class="n">voxel_size_cm</span>
     <span class="n">vol_att_out</span> <span class="o">=</span> <span class="n">ph_lin_att_out</span> <span class="o">*</span> <span class="n">voxel_size_cm</span>
 
     <span class="n">ca_cs</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_FluorLine_Kissel</span><span class="p">(</span><span class="n">ca_an</span><span class="p">,</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">KA_LINE</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span>  <span class="c1"># fluo production for cm2/g</span>
-    <span class="n">ph_CaC_mass_fract</span> <span class="o">=</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s1">&#39;massFractions&#39;</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cp_cc</span><span class="p">[</span><span class="s1">&#39;Elements&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">ca_an</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-    <span class="n">ph_CaO_mass_fract</span> <span class="o">=</span> <span class="n">cp_co</span><span class="p">[</span><span class="s1">&#39;massFractions&#39;</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cp_co</span><span class="p">[</span><span class="s1">&#39;Elements&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">ca_an</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">ph_CaC_mass_fract</span> <span class="o">=</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cp_cc</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="n">ca_an</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">ph_CaO_mass_fract</span> <span class="o">=</span> <span class="n">cp_co</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cp_co</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="n">ca_an</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
 
-    <span class="n">ph</span> <span class="o">=</span> <span class="n">ph_CaC</span> <span class="o">*</span> <span class="n">ph_CaC_mass_fract</span> <span class="o">*</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">ph_CaO</span> <span class="o">*</span> <span class="n">ph_CaO_mass_fract</span> <span class="o">*</span> <span class="n">cp_co</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span>
+    <span class="n">ph</span> <span class="o">=</span> <span class="n">ph_CaC</span> <span class="o">*</span> <span class="n">ph_CaC_mass_fract</span> <span class="o">*</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">ph_CaO</span> <span class="o">*</span> <span class="n">ph_CaO_mass_fract</span> <span class="o">*</span> <span class="n">cp_co</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
     <span class="n">ph</span> <span class="o">=</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">ca_cs</span> <span class="o">*</span> <span class="n">voxel_size_cm</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">ph</span><span class="p">,</span> <span class="n">vol_att_in</span><span class="p">,</span> <span class="n">vol_att_out</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="create_sino"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.create_sino">[docs]</a><span class="k">def</span> <span class="nf">create_sino</span><span class="p">(</span>
-        <span class="n">ph</span><span class="p">,</span> <span class="n">num_angles</span><span class="p">,</span> <span class="n">start_angle_deg</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_angle_deg</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
-        <span class="n">dwell_time_s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">photon_flux</span><span class="o">=</span><span class="mf">1e9</span><span class="p">,</span> <span class="n">detectors_pos_rad</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
-        <span class="n">vol_att_in</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vol_att_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">background_avg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">background_std</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_poisson</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">readout_noise_std</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+    <span class="n">ph</span><span class="p">,</span>
+    <span class="n">num_angles</span><span class="p">,</span>
+    <span class="n">start_angle_deg</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">end_angle_deg</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
+    <span class="n">dwell_time_s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">photon_flux</span><span class="o">=</span><span class="mf">1e9</span><span class="p">,</span>
+    <span class="n">detectors_pos_rad</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">vol_att_in</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">vol_att_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">background_avg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">background_std</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">add_poisson</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">readout_noise_std</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Computes the sinogram from a given phantom</span>
 
 <span class="sd">    :param ph: The phantom volume, with the expected average photon production per voxel per impinging photon</span>
@@ -297,7 +314,7 @@
 <span class="sd">    :return: The sinogram (detecto readings), the angular positions, and the expected average phton production per voxel</span>
 <span class="sd">    :rtype: tuple(`numpy.array_like`, `numpy.array_like`, `numpy.array_like`)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating Sino with </span><span class="si">%d</span><span class="s1"> angles&#39;</span> <span class="o">%</span> <span class="n">num_angles</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating Sino with </span><span class="si">%d</span><span class="s2"> angles&quot;</span> <span class="o">%</span> <span class="n">num_angles</span><span class="p">)</span>
     <span class="n">angles_deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start_angle_deg</span><span class="p">,</span> <span class="n">end_angle_deg</span><span class="p">,</span> <span class="n">num_angles</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">angles_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">angles_deg</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">angles_deg</span><span class="p">)</span>
@@ -309,9 +326,9 @@
         <span class="k">with</span> <span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
             <span class="n">sino</span> <span class="o">=</span> <span class="n">num_photons</span> <span class="o">*</span> <span class="n">detector_solidangle_sr</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">ph</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">projectors</span><span class="o">.</span><span class="n">AttenuationProjector</span><span class="p">(</span>
-                <span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">att_in</span><span class="o">=</span><span class="n">vol_att_in</span><span class="p">,</span> <span class="n">att_out</span><span class="o">=</span><span class="n">vol_att_out</span><span class="p">,</span>
-                <span class="n">angles_detectors_rad</span><span class="o">=</span><span class="n">detectors_pos_rad</span><span class="p">,</span> <span class="n">psf</span><span class="o">=</span><span class="n">psf</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorAttenuationXRF</span><span class="p">(</span>
+            <span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">att_in</span><span class="o">=</span><span class="n">vol_att_in</span><span class="p">,</span> <span class="n">att_out</span><span class="o">=</span><span class="n">vol_att_out</span><span class="p">,</span> <span class="n">angles_detectors_rad</span><span class="o">=</span><span class="n">detectors_pos_rad</span><span class="p">,</span> <span class="n">psf</span><span class="o">=</span><span class="n">psf</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
             <span class="n">sino</span> <span class="o">=</span> <span class="n">num_photons</span> <span class="o">*</span> <span class="n">detector_solidangle_sr</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">ph</span><span class="p">)</span>
 
     <span class="c1"># Adding noise</span>
@@ -359,19 +376,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2018, Nicola VIGANO
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -382,6 +391,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

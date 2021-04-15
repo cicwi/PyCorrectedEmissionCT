@@ -4,7 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.3.1...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.3.2...develop
+
+## 0.3.2 - 2021-04-15
+### Added
+- scikit-image backend, as preferred in 2D non-GPU reconstructions.
+- Renamed AttenuationProjector into ProjectorAttenuationXRF.
+- Support for test/cross-validation sets in solvers.
+- Residual calculation with different data-fidelity terms.
+- Projection matrix based projector.
+### Fixed
+- PyWavelets interface change.
+- Background usage in the data terms.
+- Examples on the different data-fidelity terms.
+- Github workflows to use pip instead of conda.
 
 ## 0.3.1 - 2020-10-20
 ### Added
