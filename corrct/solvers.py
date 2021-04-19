@@ -1017,7 +1017,9 @@ class Sart(Solver):
 
             def progressbar(x):
                 return tqdm(x, desc=algo_info)
+
         else:
+
             def progressbar(x):
                 return x
 
@@ -1150,7 +1152,9 @@ class Sirt(Solver):
 
             def progressbar(x):
                 return tqdm(x, desc=algo_info)
+
         else:
+
             def progressbar(x):
                 return x
 
@@ -1340,7 +1344,9 @@ class CP(Solver):
 
             def progressbar(x):
                 return tqdm(x, desc=algo_info)
+
         else:
+
             def progressbar(x):
                 return x
 
