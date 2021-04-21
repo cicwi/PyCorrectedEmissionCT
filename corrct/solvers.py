@@ -574,7 +574,16 @@ class Regularizer_swl(BaseRegularizer):
         return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight + ")"
 
     def __init__(
-        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", normalized=False, norm=DataFidelity_l1()
+        self,
+        weight,
+        wavelet,
+        level,
+        ndims=2,
+        axes=None,
+        pad_on_demand="constant",
+        normalized=False,
+        min_approx=False,
+        norm=DataFidelity_l1(),
     ):
         if not has_pywt:
             raise ValueError("Cannot use l1wl regularizer because pywavelets is not installed.")
@@ -584,6 +593,7 @@ class Regularizer_swl(BaseRegularizer):
         self.wavelet = wavelet
         self.level = level
         self.normalized = normalized
+        self.min_approx = min_approx
 
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
@@ -628,6 +638,8 @@ class Regularizer_swl(BaseRegularizer):
         if not self.normalized:
             upd *= self.sigma
         dual += upd
+        if not self.min_approx:
+            dual[0, ...] = 0
 
     def compute_update_primal(self, dual):
         return self.weight * self.op.T(dual)
@@ -638,7 +650,9 @@ class Regularizer_l1swl(Regularizer_swl):
 
     __reg_name__ = "l1swl"
 
-    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", normalized=False):
+    def __init__(
+        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", normalized=False, min_approx=False
+    ):
         super().__init__(
             weight,
             wavelet,
@@ -647,6 +661,7 @@ class Regularizer_l1swl(Regularizer_swl):
             axes=axes,
             pad_on_demand=pad_on_demand,
             normalized=normalized,
+            min_approx=min_approx,
             norm=DataFidelity_l1(),
         )
 
@@ -657,7 +672,16 @@ class Regularizer_Hub_swl(Regularizer_swl):
     __reg_name__ = "Hubswl"
 
     def __init__(
-        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", normalized=False, huber_size=None
+        self,
+        weight,
+        wavelet,
+        level,
+        ndims=2,
+        axes=None,
+        pad_on_demand="constant",
+        normalized=False,
+        min_approx=False,
+        huber_size=None,
     ):
         super().__init__(
             weight,
@@ -667,6 +691,7 @@ class Regularizer_Hub_swl(Regularizer_swl):
             axes=axes,
             pad_on_demand=pad_on_demand,
             normalized=normalized,
+            min_approx=min_approx,
             norm=DataFidelity_Huber(huber_size),
         )
 
@@ -720,7 +745,7 @@ class Regularizer_dwl(BaseRegularizer):
         return self.weight * np.sum(tau / self.scaling_func_mult)
 
     def update_dual(self, dual, primal):
-        dual += self.op(primal) * self.sigma
+        dual += self.sigma * self.op(primal)
 
     def compute_update_primal(self, dual):
         return self.weight * self.op.T(dual)
@@ -836,7 +861,7 @@ class Regularizer_fft(BaseRegularizer):
         return self.weight
 
     def update_dual(self, dual, primal):
-        dual += self.op(primal) * self.sigma
+        dual += self.sigma * self.op(primal)
 
     def compute_update_primal(self, dual):
         return self.weight * self.op.T(dual)
