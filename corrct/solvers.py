@@ -586,9 +586,9 @@ class Regularizer_swl(BaseRegularizer):
         norm=DataFidelity_l1(),
     ):
         if not has_pywt:
-            raise ValueError("Cannot use l1wl regularizer because pywavelets is not installed.")
+            raise ValueError("Cannot use wavelet regularizer because pywavelets is not installed.")
         if not use_swtn:
-            raise ValueError("Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).")
+            raise ValueError("Cannot use stationary wavelet regularizer because pywavelets is too old (<1.0.2).")
         super().__init__(weight=weight, norm=norm)
         self.wavelet = wavelet
         self.level = level
@@ -706,9 +706,7 @@ class Regularizer_dwl(BaseRegularizer):
 
     def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", norm=DataFidelityBase()):
         if not has_pywt:
-            raise ValueError("Cannot use l1wl regularizer because pywavelets is not installed.")
-        if not use_swtn:
-            raise ValueError("Cannot use l1wl regularizer because pywavelets is too old (<1.0.2).")
+            raise ValueError("Cannot use wavelet regularizer because pywavelets is not installed.")
         super().__init__(weight=weight, norm=norm)
         self.wavelet = wavelet
         self.level = level
