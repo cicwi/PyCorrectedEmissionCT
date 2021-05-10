@@ -62,7 +62,7 @@ class TestRegularizers(unittest.TestCase):
         weight = 0.5
         ndims = len(vol.shape)
         level = 2
-        reg = solvers.Regularizer_l1swl(weight, 'db1', level, ndims=ndims)
+        reg = solvers.Regularizer_l1swl(weight, 'db1', level, ndims=ndims, min_approx=True)
 
         reg.initialize_sigma_tau(vol)
 
