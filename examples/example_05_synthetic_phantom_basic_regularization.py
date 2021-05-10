@@ -56,7 +56,7 @@ sino_weights = 1 / sino_tolerances
 reg_tv = corrct.solvers.Regularizer_TV2D(reg_weight)
 reg_tv_hub = corrct.solvers.Regularizer_HubTV2D(reg_weight, huber_size=0.05)
 reg_lap = corrct.solvers.Regularizer_lap2D(reg_weight)
-reg_smooth = corrct.solvers.Regularizer_Smooth2D(reg_weight)
+reg_smooth = corrct.solvers.Regularizer_smooth2D(reg_weight)
 reg_l1med = corrct.solvers.Regularizer_l1med(reg_weight)
 reg_l2med = corrct.solvers.Regularizer_l2med(reg_weight, filt_size=5)
 reg_dwl = corrct.solvers.Regularizer_l1dwl(reg_weight, 'haar', 4)

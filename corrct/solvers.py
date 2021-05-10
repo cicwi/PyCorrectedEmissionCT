@@ -409,7 +409,7 @@ class BaseRegularizer(object):
 class Regularizer_Grad(BaseRegularizer):
     """Total Variation (TV) regularizer. It can be used to promote piece-wise constant reconstructions."""
 
-    __reg_name__ = "TV"
+    __reg_name__ = "grad"
 
     def __init__(self, weight, ndims=2, axes=None, norm=DataFidelity_l12()):
         super().__init__(weight=weight, norm=norm)
@@ -474,19 +474,19 @@ class Regularizer_HubTV3D(Regularizer_Grad):
         super().__init__(weight=weight, ndims=3, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
 
 
-class Regularizer_Smooth2D(Regularizer_Grad):
+class Regularizer_smooth2D(Regularizer_Grad):
     """It can be used to promote smooth reconstructions."""
 
-    __reg_name__ = "Smooth2D"
+    __reg_name__ = "smooth2D"
 
     def __init__(self, weight, axes=None, norm=DataFidelity_l2()):
         super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
 
 
-class Regularizer_Smooth3D(Regularizer_Grad):
+class Regularizer_smooth3D(Regularizer_Grad):
     """It can be used to promote smooth reconstructions."""
 
-    __reg_name__ = "Smooth3D"
+    __reg_name__ = "smooth3D"
 
     def __init__(self, weight, axes=None, norm=DataFidelity_l2()):
         super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
