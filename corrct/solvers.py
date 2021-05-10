@@ -704,12 +704,15 @@ class Regularizer_dwl(BaseRegularizer):
     def info(self):
         return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight + ")"
 
-    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", norm=DataFidelityBase()):
+    def __init__(
+        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", min_approx=False, norm=DataFidelityBase()
+    ):
         if not has_pywt:
             raise ValueError("Cannot use wavelet regularizer because pywavelets is not installed.")
         super().__init__(weight=weight, norm=norm)
         self.wavelet = wavelet
         self.level = level
+        self.min_approx = min_approx
 
         if axes is None:
             axes = np.arange(-ndims, 0, dtype=np.int)
@@ -744,6 +747,9 @@ class Regularizer_dwl(BaseRegularizer):
 
     def update_dual(self, dual, primal):
         dual += self.sigma * self.op(primal)
+        if not self.min_approx:
+            slices = [slice(0, x) for x in self.op.sub_band_shapes[0]]
+            dual[tuple(slices)] = 0
 
     def compute_update_primal(self, dual):
         return self.weight * self.op.T(dual)
