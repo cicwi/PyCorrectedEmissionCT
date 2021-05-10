@@ -13,7 +13,7 @@ import numpy as np
 from . import projectors
 
 
-def roundup_to_pow2(x, p, data_type=np.int):
+def roundup_to_pow2(x, p, data_type=np.intp):
     """Rounds first argument to the power of 2 indicated by second argument.
 
     :param x: Number to round up

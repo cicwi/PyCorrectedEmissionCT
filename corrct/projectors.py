@@ -566,7 +566,7 @@ class FilterMR(object):
         if self.sinogram_angles_num is None:
             raise ValueError("No sinogram angles number was given!")
 
-        filter_center = np.floor(self.sinogram_pixels_num / 2).astype(np.int)
+        filter_center = np.floor(self.sinogram_pixels_num / 2).astype(np.intp)
         self.filter_size = filter_center * 2 + 1
 
         window_size = 1

@@ -415,7 +415,7 @@ class Regularizer_Grad(BaseRegularizer):
         super().__init__(weight=weight, norm=norm)
 
         if axes is None:
-            axes = np.arange(-ndims, 0, dtype=np.int)
+            axes = np.arange(-ndims, 0, dtype=np.intp)
         elif not ndims == len(axes):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
@@ -501,7 +501,7 @@ class Regularizer_lap(BaseRegularizer):
         super().__init__(weight=weight, norm=DataFidelity_l1())
 
         if axes is None:
-            axes = np.arange(-ndims, 0, dtype=np.int)
+            axes = np.arange(-ndims, 0, dtype=np.intp)
         elif not ndims == len(axes):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
@@ -596,7 +596,7 @@ class Regularizer_swl(BaseRegularizer):
         self.min_approx = min_approx
 
         if axes is None:
-            axes = np.arange(-ndims, 0, dtype=np.int)
+            axes = np.arange(-ndims, 0, dtype=np.intp)
         elif not ndims == len(axes):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
@@ -715,7 +715,7 @@ class Regularizer_dwl(BaseRegularizer):
         self.min_approx = min_approx
 
         if axes is None:
-            axes = np.arange(-ndims, 0, dtype=np.int)
+            axes = np.arange(-ndims, 0, dtype=np.intp)
         elif not ndims == len(axes):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
@@ -828,7 +828,7 @@ class Regularizer_fft(BaseRegularizer):
         super().__init__(weight=weight, norm=norm)
 
         if axes is None:
-            axes = np.arange(-ndims, 0, dtype=np.int)
+            axes = np.arange(-ndims, 0, dtype=np.intp)
         elif not ndims == len(axes):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)

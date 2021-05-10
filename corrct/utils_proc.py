@@ -27,15 +27,15 @@ def get_circular_mask(vol_shape, radius_offset=0, coords_ball=None, mask_drop_of
     :returns: The circular mask.
     :rtype: (numpy.array_like)
     """
-    vol_shape = np.array(vol_shape, dtype=np.int)
+    vol_shape = np.array(vol_shape, dtype=np.intp)
 
     coords = [np.linspace(-(s - 1) / 2, (s - 1) / 2, s, dtype=data_type) for s in vol_shape]
     coords = np.meshgrid(*coords, indexing="ij")
 
     if coords_ball is None:
-        coords_ball = np.arange(-np.fmin(2, len(vol_shape)), 0, dtype=np.int)
+        coords_ball = np.arange(-np.fmin(2, len(vol_shape)), 0, dtype=np.intp)
     else:
-        coords_ball = np.array(coords_ball, dtype=np.int)
+        coords_ball = np.array(coords_ball, dtype=np.intp)
 
     radius = np.min(vol_shape[coords_ball]) / 2 + radius_offset
 
