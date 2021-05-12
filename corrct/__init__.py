@@ -21,4 +21,5 @@ __version__ = __get_version()
 from .corrct import *  # noqa: F401, F402, F403
 from . import projectors  # noqa: F401, F402
 from . import solvers  # noqa: F401, F402
+from . import utils_reg  # noqa: F401, F402
 from . import utils_proc  # noqa: F401, F402
