@@ -198,10 +198,10 @@ class ProjectorBackendSKimage(ProjectorBackend):
         if angle_ind is None:
             vol = np.empty([self.prj_shape[-1], *self.vol_shape], dtype=prj.dtype)
             for ii_a, a in enumerate(self.angles_rot_deg):
-                vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], filter=None)
+                vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], filter_name=None)
             return vol.sum(axis=0)
         else:
-            return skt.iradon(prj[:, np.newaxis], self.angles_rot_deg[angle_ind:angle_ind+1:], filter=None)
+            return skt.iradon(prj[:, np.newaxis], self.angles_rot_deg[angle_ind:angle_ind+1:], filter_name=None)
 
     def fbp(self, prj: np.ndarray, fbp_filter: str):
         """
