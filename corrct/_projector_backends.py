@@ -7,7 +7,16 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
+import skimage
 import skimage.transform as skt
+
+
+def _set_filter_name(filt):
+    if skimage.__version__ >= "0.18":
+        return dict(filter_name=filt)
+    else:
+        return dict(filter=filt)
+
 
 try:
     import astra
@@ -25,10 +34,10 @@ except ImportError:
 
 
 class ProjectorBackend(object):
+    """Base projector backend class."""
 
     def __init__(self, vol_shape_yxz, angles_rot_rad):
-        """
-        Base projector backend class. All backends should inherit from this class.
+        """Initialize base projector backend class. All backends should inherit from this class.
 
         Parameters
         ----------
@@ -44,8 +53,7 @@ class ProjectorBackend(object):
         self.is_initialized = False
 
     def get_vol_shape(self):
-        """
-        Returns the expected and produced volume shape (in ZYX coordinates).
+        """Return the expected and produced volume shape (in ZYX coordinates).
 
         Returns
         -------
@@ -55,8 +63,7 @@ class ProjectorBackend(object):
         return self.vol_shape
 
     def get_prj_shape(self):
-        """
-        Returns the expected and produced projection shape (in VWU coordinates).
+        """Return the expected and produced projection shape (in VWU coordinates).
 
         Returns
         -------
@@ -66,27 +73,27 @@ class ProjectorBackend(object):
         return self.prj_shape
 
     def initialize(self):
-        """
-        Initialization of the projector.
+        """Initialize the projector.
 
         It should make sure that all the resources have been allocated.
         """
         self.is_initialized = True
 
     def dispose(self):
-        """
-        De-initialization of the projector.
+        """De-initialize the projector.
 
         It should make sure that all the resources have been de-allocated.
         """
         self.is_initialized = False
 
     def __del__(self):
+        """De-initialize projector on deletion."""
         if self.is_initialized:
             self.dispose()
 
     def fp(self, vol, angle_ind: int = None):
-        """
+        """Forward-project volume.
+
         Forward-projection interface. Derived backends need to implement this method.
 
         Parameters
@@ -99,7 +106,8 @@ class ProjectorBackend(object):
         raise NotImplementedError("Method FP not implemented.")
 
     def bp(self, prj, angle_ind: int = None):
-        """
+        """Back-project data.
+
         Back-projection interface. Derived backends need to implement this method.
 
         Parameters
@@ -112,7 +120,8 @@ class ProjectorBackend(object):
         raise NotImplementedError("Method BP not implemented.")
 
     def fbp(self, prj, fbp_filter):
-        """
+        """Apply FBP.
+
         Filtered back-projection interface. Derived backends need to implement this method.
 
         Parameters
@@ -126,10 +135,10 @@ class ProjectorBackend(object):
 
 
 class ProjectorBackendSKimage(ProjectorBackend):
+    """Projector backend based on scikit-image."""
 
     def __init__(self, vol_shape, angles_rot_rad, rot_axis_shift_pix: float = 0.0):
-        """
-        Projector backend based on scikit-image.
+        """Initialize projector backend based on scikit-image.
 
         Parameters
         ----------
@@ -156,8 +165,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
         self.is_initialized = True
 
     def fp(self, vol: np.ndarray, angle_ind: int = None):
-        """
-        Forward-projection of the volume to the sinogram or a single sinogram line.
+        """Forward-projection of the volume to the sinogram or a single sinogram line.
 
         Parameters
         ----------
@@ -177,11 +185,10 @@ class ProjectorBackendSKimage(ProjectorBackend):
                 prj[ii_a, :] = np.squeeze(skt.radon(vol, [a]))
             return prj
         else:
-            return np.squeeze(skt.radon(vol, self.angles_rot_deg[angle_ind:angle_ind+1:]))
+            return np.squeeze(skt.radon(vol, self.angles_rot_deg[angle_ind : angle_ind + 1 :]))
 
     def bp(self, prj: np.ndarray, angle_ind: int = None):
-        """
-        Back-projection of a single sinogram line to the volume.
+        """Back-projection of a single sinogram line to the volume.
 
         Parameters
         ----------
@@ -195,17 +202,17 @@ class ProjectorBackendSKimage(ProjectorBackend):
         numpy.array_like
             The back-projected volume.
         """
+        filter_name = _set_filter_name(None)
         if angle_ind is None:
             vol = np.empty([self.prj_shape[-1], *self.vol_shape], dtype=prj.dtype)
             for ii_a, a in enumerate(self.angles_rot_deg):
-                vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], filter_name=None)
+                vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], **filter_name)
             return vol.sum(axis=0)
         else:
-            return skt.iradon(prj[:, np.newaxis], self.angles_rot_deg[angle_ind:angle_ind+1:], filter_name=None)
+            return skt.iradon(prj[:, np.newaxis], self.angles_rot_deg[angle_ind : angle_ind + 1 :], **filter_name)
 
     def fbp(self, prj: np.ndarray, fbp_filter: str):
-        """
-        Filtered back-projection of a sinogram or stack of sinograms
+        """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
         ----------
@@ -219,19 +226,20 @@ class ProjectorBackendSKimage(ProjectorBackend):
         vol : numpy.array_like
             The reconstructed volume.
         """
-        fbp_filter = fbp_filter.lower()
+        filter_name = _set_filter_name(fbp_filter.lower())
         if len(prj.shape) > 2:
             num_lines = prj.shape[1]
             vol = np.empty([num_lines, *self.vol_shape], dtype=prj.dtype)
 
             for ii_v in range(num_lines):
-                vol[ii_v, ...] = skt.iradon(prj[ii_v, ...].transpose(), self.angles_rot_deg, filter=fbp_filter)
+                vol[ii_v, ...] = skt.iradon(prj[ii_v, ...].transpose(), self.angles_rot_deg, **filter_name)
             return vol
         else:
-            return skt.iradon(prj.transpose(), self.angles_rot_deg, filter=fbp_filter)
+            return skt.iradon(prj.transpose(), self.angles_rot_deg, **filter_name)
 
 
 class ProjectorBackendASTRA(ProjectorBackend):
+    """Projector backend based on astra-toolbox."""
 
     def __init__(
         self,
@@ -239,10 +247,9 @@ class ProjectorBackendASTRA(ProjectorBackend):
         angles_rot_rad,
         rot_axis_shift_pix: float = 0.0,
         create_single_projs: bool = True,
-        super_sampling: int = 1
+        super_sampling: int = 1,
     ):
-        """
-        Projector backend based on astra-toolbox.
+        """Initialize projector backend based on astra-toolbox.
 
         Parameters
         ----------
@@ -318,17 +325,14 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
             if self.has_individual_projs:
                 self.proj_geom_ind = [
-                    astra.create_proj_geom(
-                        "parallel_vec", vol_shape[0], np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1])
-                    )
+                    astra.create_proj_geom("parallel_vec", vol_shape[0], np.tile(np.reshape(vectors[ii, :], [1, -1]), [2, 1]))
                     for ii in range(num_angles)
                 ]
 
             self.proj_geom_all = astra.create_proj_geom("parallel_vec", vol_shape[0], vectors)
 
     def get_vol_shape(self):
-        """
-        Returns the expected and produced volume shape (in ZYX coordinates).
+        """Return the expected and produced volume shape (in ZYX coordinates).
 
         Returns
         -------
@@ -338,8 +342,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         return astra.functions.geom_size(self.vol_geom)
 
     def get_prj_shape(self):
-        """
-        Returns the expected and produced projection shape (in VWU coordinates).
+        """Return the expected and produced projection shape (in VWU coordinates).
 
         Returns
         -------
@@ -349,7 +352,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         return astra.functions.geom_size(self.proj_geom_all)
 
     def initialize(self):
-        """Initialization of the ASTRA projectors."""
+        """Initialize the ASTRA projectors."""
         if not self.is_initialized:
             if self.is_3d:
                 projector_type = "cuda3d"
@@ -371,7 +374,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         super().initialize()
 
     def dispose(self):
-        """De-initialization of the ASTRA projectors."""
+        """De-initialize the ASTRA projectors."""
         for p in self.proj_id:
             astra.projector.delete(p)
         self.proj_id = []
@@ -381,8 +384,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         super().dispose()
 
     def fp(self, vol, angle_ind: int = None):
-        """
-        Forward-projection of the volume to the sinogram or a single sinogram line.
+        """Apply forward-projection of the volume to the sinogram or a single sinogram line.
 
         Parameters
         ----------
@@ -406,8 +408,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
             return self.W_ind[angle_ind].FP(vol)[0, ...]
 
     def bp(self, prj, angle_ind: int = None):
-        """
-        Back-projection of a single sinogram line to the volume.
+        """Apply back-projection of a single sinogram line to the volume.
 
         Parameters
         ----------
@@ -434,8 +435,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
             return self.W_ind[angle_ind].BP(sino)
 
     def fbp(self, prj, fbp_filter):
-        """
-        Filtered back-projection of a sinogram or stack of sinograms
+        """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
         ----------
