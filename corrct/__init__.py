@@ -32,6 +32,8 @@ from . import param_tuning  # noqa: F401, F402
 from . import processing  # noqa: F401, F402
 from . import denoisers  # noqa: F401, F402
 
+from . import struct_illum  # noqa: F401, F402
+
 try:
     from . import physics  # noqa: F401, F402
 except ImportError as exc:
