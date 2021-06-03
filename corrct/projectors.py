@@ -75,7 +75,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         proj_intensities: np.ndarray = None,
         use_astra: bool = prj_backends.has_cuda,
         create_single_projs: bool = True,
-        super_sampling: int = 1
+        super_sampling: int = 1,
     ):
         """
         ProjectorUncorrected class initialization.
@@ -121,7 +121,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
                 angles_rot_rad,
                 rot_axis_shift_pix=rot_axis_shift_pix,
                 create_single_projs=create_single_projs,
-                super_sampling=super_sampling
+                super_sampling=super_sampling,
             )
         else:
             self.projector_backend = prj_backends.ProjectorBackendSKimage(
@@ -143,30 +143,40 @@ class ProjectorUncorrected(operators.ProjectorOperator):
     def __exit__(self, *args):
         self.projector_backend.dispose()
 
-    def fp_angle(self, vol, angle_ind):
-        """
-        Forward-projection of the volume to a single sinogram line.
+    def fp_angle(self, vol, angle_ind: int):
+        """Forward-project a volume to a single sinogram line.
 
-        :param vol: The volume to forward-project (numpy.array_like)
-        :param angle_ind: The angle index to foward project (int)
+        Parameters
+        ----------
+        vol : numpy.array_like
+            The volume to forward-project.
+        angle_ind : int
+            The angle index to foward project.
 
-        :returns: The forward-projected sinogram line
-        :rtype: numpy.array_like
+        Returns
+        -------
+        x : numpy.array_like
+            The forward-projected sinogram line.
         """
         x = self.projector_backend.fp(vol, angle_ind)
         if self.proj_intensities is not None:
             x *= self.proj_intensities[angle_ind]
         return x
 
-    def bp_angle(self, sino_line, angle_ind):
-        """
-        Back-projection of a single sinogram line to the volume.
+    def bp_angle(self, sino_line, angle_ind: int):
+        """Back-project a single sinogram line to the volume.
 
-        :param sino_line: The sinogram to back-project or a single line (numpy.array_like)
-        :param angle_ind: The angle index to foward project (int)
+        Parameters
+        ----------
+        sino_line : numpy.array_like
+            The sinogram to back-project or a single line.
+        angle_ind : int
+            The angle index to foward project.
 
-        :returns: The back-projected volume
-        :rtype: numpy.array_like
+        Returns
+        -------
+        numpy.array_like
+            The back-projected volume.
         """
         if self.proj_intensities is not None:
             sino_line = sino_line * self.proj_intensities[angle_ind]  # It will make a copy
@@ -264,7 +274,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         :param att_in: Attenuation volume of the incoming beam, defaults to None
         :type att_in: numpy.array_like, optional
         :param att_out: Attenuation volume of the outgoing beam, defaults to None
-        :type att_out: TYPE, optional
+        :type att_out: numpy.array_like, optional
         :param angles_detectors_rad: Angles of the detector elements with respect to incident beam, defaults to (np.pi/2)
         :type angles_detectors_rad: numpy.array_like, optional
         :param weights_detectors: Weights (e.g. solid angle, efficiency, etc) of the detector elements, defaults to None
