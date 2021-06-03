@@ -339,7 +339,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             self.att_vol_angles = None
 
     @staticmethod
-    def _compute_attenuation(vol, direction, sampling=1, invert=False):
+    def _compute_attenuation(vol, direction, invert: bool = False):
         def pad_vol(vol, edges):
             paddings = [(0,)] * len(vol.shape)
             paddings[-2], paddings[-1] = (edges[0],), (edges[1],)
@@ -369,7 +369,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return cum_arr
 
-    def compute_attenuation(self, vol, direction, sampling=1, invert=False):
+    def compute_attenuation(self, vol, angle, invert=False):
         """Computes the attenuation experienced by the photons emitted in every
         point of the volume, along a certain direction.
         """
@@ -387,7 +387,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
                 )
             )
 
-        return self._compute_attenuation(vol, direction, sampling=1, invert=False)
+        return self._compute_attenuation(vol, angle, invert=False)
 
     def _compute_attenuation_angle_in(self, angle):
         direction_in = [np.sin(angle), np.cos(angle)]
