@@ -370,8 +370,29 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         return cum_arr
 
     def compute_attenuation(self, vol, angle, invert=False):
-        """Computes the attenuation experienced by the photons emitted in every
-        point of the volume, along a certain direction.
+        """Compute the attenuation local attenuation for a given attenuation volume.
+
+        This means the attenuation experienced by the photons emitted in each
+        point of the volume, along a given direction.
+
+        Parameters
+        ----------
+        vol : numpy.array_like
+            The attenuation volume.
+        angles_rad : numpy.array_like
+            The rotation angles.
+        invert : bool, optional
+            Whether to reverse the direction of propagation. The default is False.
+
+        Raises
+        ------
+        ValueError
+            In case of non matching volume shape between the projector volumes and input attenuation volumes.
+
+        Returns
+        -------
+        numpy.array_like
+            The stack of local attenuation volumes.
         """
 
         vol = np.array(vol)
