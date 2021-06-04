@@ -358,11 +358,11 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         cum_arr = pad_vol(vol, edges)
 
-        cum_arr = skt.rotate(cum_arr, rot_angle, order=1)
+        cum_arr = skt.rotate(cum_arr, rot_angle, order=1, clip=False)
         cum_arr += np.roll(cum_arr, 1, axis=-1)
         cum_arr = np.cumsum(cum_arr / 2, axis=-1)
 
-        cum_arr = skt.rotate(cum_arr, -rot_angle, order=1)
+        cum_arr = skt.rotate(cum_arr, -rot_angle, order=1, clip=False)
         cum_arr = cum_arr[..., edges[0] : -edges[0], edges[1] : -edges[1]]
 
         cum_arr = np.exp(-cum_arr)
