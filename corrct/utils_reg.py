@@ -391,17 +391,11 @@ class CrossValidation(BaseRegularizationEstimation):
         min_val : float
             Expected objective function cost of the fitted minimum.
         """
-        min_pos = np.argmin(f_vals)
-        if min_pos == 0 or min_pos == (len(f_vals) - 1):
-            print("WARNING - minimum value at the edge of the lambda range.")
-            return lams_reg[min_pos], f_vals[min_pos]
-        elif self.verbose:
-            print(
-                "Fitting minimum within the parameter interval [%g, %g]: " % (lams_reg[min_pos - 1], lams_reg[min_pos + 1]),
-                end="",
-                flush=True,
+        if len(lams_reg) < 3 or len(f_vals) < 3 or len(lams_reg) != len(f_vals):
+            raise ValueError(
+                "Lengths of the lambdas and function values should be identical and >= 3."
+                "Given: lams=%d, vals=%d" % (len(lams_reg), len(f_vals))
             )
-            c = tm.time()
 
         if scale.lower() == "log":
             to_fit = np.log10
@@ -418,12 +412,34 @@ class CrossValidation(BaseRegularizationEstimation):
         else:
             raise ValueError("Parameter 'scale' should be either 'log' or 'linear', given '%s' instead" % scale)
 
-        lams_reg_fit = to_fit(lams_reg[min_pos - 1 : min_pos + 2])
-        f_vals_fit = f_vals[min_pos - 1 : min_pos + 2]
+        min_pos = np.argmin(f_vals)
+        if min_pos == 0:
+            print("WARNING: minimum value at the beginning of the lambda range.")
+            lams_reg_fit = to_fit(lams_reg[:3])
+            f_vals_fit = f_vals[:3]
+        elif min_pos == (len(f_vals) - 1):
+            print("WARNING: minimum value at the end of the lambda range.")
+            lams_reg_fit = to_fit(lams_reg[-3:])
+            f_vals_fit = f_vals[-3:]
+        else:
+            lams_reg_fit = to_fit(lams_reg[min_pos - 1 : min_pos + 2])
+            f_vals_fit = f_vals[min_pos - 1 : min_pos + 2]
+
+        if self.verbose:
+            print(
+                "Fitting minimum within the parameter interval [%g, %g]: " % (lams_reg[min_pos - 1], lams_reg[min_pos + 1]),
+                end="",
+                flush=True,
+            )
+            c = tm.time()
+
         # using Polynomial.fit, because it is supposed to be more numerically
         # stable than previous solutions (according to numpy).
         poly = Polynomial.fit(lams_reg_fit, f_vals_fit, deg=2)
         coeffs = poly.convert().coef
+        if coeffs[2] <= 0:
+            print("WARNING: fitted curve is concave. Returning minimum measured point.")
+            return lams_reg[min_pos], f_vals[min_pos]
 
         # For a 1D parabola `f(x) = c + bx + ax^2`, the vertex position is:
         # x_v = -b / 2a.
@@ -431,6 +447,13 @@ class CrossValidation(BaseRegularizationEstimation):
         vertex_val = coeffs[0] + vertex_pos * coeffs[1] / 2
 
         min_lam, min_val = from_fit(vertex_pos), vertex_val
+        if min_lam < lams_reg[0] or min_lam > lams_reg[-1]:
+            print(
+                "WARNING: fitted lambda %g is outside the bounds of input lambdas [%g, %g]."
+                % (min_lam, lams_reg[0], lams_reg[-1])
+                + " Returning minimum measured point."
+            )
+            return lams_reg[min_pos], f_vals[min_pos]
 
         if self.verbose:
             print("Found at %g, in %g seconds.\n" % (min_lam, tm.time() - c))
