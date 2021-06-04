@@ -15,7 +15,7 @@ import mpl_toolkits.axes_grid1 as ax_g
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 import corrct as cct
-import corrct.utils_test
+import cct.utils_test
 
 try:
     import phantom
@@ -43,7 +43,7 @@ ph_or = ph_or[:, :, 1]
 prec = True
 iterations = 200
 lower_limit = 0
-vol_mask = corrct.utils_proc.get_circular_mask(ph_or.shape)
+vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
 
 # Subtract background from sinogram
 sino_substr = sinogram - background_avg
@@ -54,19 +54,19 @@ min_nonzero_variance = np.min(sino_variances[sino_variances > 0])
 sino_weights = 1 / np.fmax(sino_variances, min_nonzero_variance)
 
 # Data fitting term: weighted least-squares, based on the standard deviation of the noise.
-data_term_lsw = corrct.solvers.DataFidelity_wl2(sino_weights)
+data_term_lsw = cct.solvers.DataFidelity_wl2(sino_weights)
 
-reg = corrct.solvers.Regularizer_TV2D
-# reg = corrct.solvers.Regularizer_smooth2D
-# reg = lambda l: corrct.solvers.Regularizer_l1swl(l, "haar", 4)
-# reg = corrct.solvers.Regularizer_fft
+reg = cct.solvers.Regularizer_TV2D
+# reg = cct.solvers.Regularizer_smooth2D
+# reg = lambda l: cct.solvers.Regularizer_l1swl(l, "haar", 4)
+# reg = cct.solvers.Regularizer_fft
 
 print("Reconstructing:")
-with corrct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
+with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     # Instantiates the solver object, that is later used for computing the reconstruction
     def solver_spawn(lam_reg):
         # Using the PDHG solver from Chambolle and Pock
-        return corrct.solvers.CP(verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw)
+        return cct.solvers.CP(verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw)
 
     # Computes the reconstruction for a given solver and a given cross-validation data mask
     def solver_call(solver, b_test_mask=None):
@@ -102,7 +102,7 @@ with corrct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     (rec, rec_info) = solver_call(solver, None)
 
     # Unregularized weighted least-squares solver (PDHG), for reference
-    solver_wls = corrct.solvers.CP(verbose=True, data_term=data_term_lsw)
+    solver_wls = cct.solvers.CP(verbose=True, data_term=data_term_lsw)
     rec_wls, _ = solver_wls(A, sino_substr, iterations, x_mask=vol_mask, lower_limit=0, precondition=prec)
 
     # Create the regularization weight finding helper object (using L-curve)
@@ -177,7 +177,7 @@ ax_ph.set_title("Phantom")
 f.colorbar(im_ph, ax=ax_ph)
 
 ax_sino_clean = f.add_subplot(gs[0, 1])
-with corrct.projectors.ProjectorUncorrected(ph_or.shape, angles) as p:
+with cct.projectors.ProjectorUncorrected(ph_or.shape, angles) as p:
     sino_clean = p.fp(expected_ph)
 im_sino_clean = ax_sino_clean.imshow(sino_clean)
 ax_sino_clean.set_title("Clean sinogram")
