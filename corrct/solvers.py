@@ -376,13 +376,13 @@ class BaseRegularizer(object):
     __reg_name__ = ""
 
     def __init__(self, weight, norm):
-        self.weight = weight
+        self.weight = np.array(weight)
         self.dtype = None
         self.op = None
         self.norm = norm
 
     def info(self):
-        return self.__reg_name__ + "(w:%g" % self.weight + ")"
+        return self.__reg_name__ + "(w:%g" % self.weight.max() + ")"
 
     def upper(self):
         return self.__reg_name__.upper()
@@ -571,7 +571,7 @@ class Regularizer_swl(BaseRegularizer):
     __reg_name__ = "swl"
 
     def info(self):
-        return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight + ")"
+        return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight.max() + ")"
 
     def __init__(
         self,
@@ -702,7 +702,7 @@ class Regularizer_dwl(BaseRegularizer):
     __reg_name__ = "dwl"
 
     def info(self):
-        return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight + ")"
+        return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight.max() + ")"
 
     def __init__(
         self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", min_approx=False, norm=DataFidelityBase()
@@ -781,7 +781,7 @@ class BaseRegularizer_med(BaseRegularizer):
     __reg_name__ = "med"
 
     def info(self):
-        return self.__reg_name__ + "(s:%s" % np.array(self.filt_size) + "-w:%g" % self.weight + ")"
+        return self.__reg_name__ + "(s:%s" % np.array(self.filt_size) + "-w:%g" % self.weight.max() + ")"
 
     def __init__(self, weight, filt_size=3, norm=DataFidelityBase()):
         super().__init__(weight=weight, norm=norm)
