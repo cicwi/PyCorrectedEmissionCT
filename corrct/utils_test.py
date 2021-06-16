@@ -12,8 +12,15 @@ import numpy as np
 
 from . import projectors
 
+from dataclasses import dataclass
+
 from typing import Union, Sequence, Optional
 
+import copy as cp
+
+import xraylib
+
+xraylib.XRayInit()
 
 
 def roundup_to_pow2(x, p: int, data_type=np.intp):
@@ -57,6 +64,232 @@ def download_phantom():
         f.write(file_content.replace("xrange", "range"))
 
 
+@dataclass
+class DetectorXRF(object):
+    """Simple XRF detector model."""
+
+    surface_mm2: float
+    distance_mm: float
+    angle_rad: float = (np.pi / 2)
+
+    @property
+    def solid_angle_sr(self):
+        """Compute the solid angle covered by the detector.
+
+        Returns
+        -------
+        float | nunmpy.array_like
+            The computed solid angle of the detector geometry.
+        """
+        return self.surface_mm2 / (np.pi * self.distance_mm ** 2)
+
+
+class Phantom(object):
+    """Base phantom class."""
+
+    def __init__(self, phase_fractions: Sequence, phase_compounds: Sequence, voxel_size_cm: float):
+        if len(phase_fractions) != len(phase_compounds):
+            raise ValueError(
+                "Phase fractions (# %d) and phase compounds (# %d) should have the same length"
+                % (len(phase_fractions), len(phase_compounds))
+            )
+        if len(phase_fractions) == 0:
+            raise ValueError("Phase list is empty")
+
+        self.phase_fractions = list(phase_fractions)
+        self.shape = np.array(self.phase_fractions[0].shape)
+        for ii, ph in enumerate(self.phase_fractions):
+            if len(self.shape) != len(ph.shape):
+                raise ValueError("All phantom phase fraction volumes should have the same number of dimensions")
+            if not np.all(self.shape == ph.shape):
+                raise ValueError("Phantom phase fraction volumes should all have the same shape")
+            if ph.dtype == bool:
+                self.phase_fractions[ii] = ph.astype(np.float32)
+        self.dtype = self.phase_fractions[0].dtype
+
+        self.phase_compounds = [
+            xraylib.GetCompoundDataNISTByName(cmp) if isinstance(cmp, str) else cmp for cmp in phase_compounds
+        ]
+
+        self.voxel_size_cm = voxel_size_cm
+
+    @staticmethod
+    def get_element_number(element: Union[str, int]) -> int:
+        """Compute the element number from the symbol.
+
+        Parameters
+        ----------
+        element : str | int
+            The element symbol (or number, which won't be converted).
+
+        Returns
+        -------
+        int
+            The corresponding element number.
+        """
+        if isinstance(element, int):
+            return element
+        else:
+            return xraylib.SymbolToAtomicNumber(element)
+
+    def get_attenuation(self, energy_keV: float):
+        """Compute the local attenuation for each voxel.
+
+        Parameters
+        ----------
+        energy_keV : float
+            The X-ray energy.
+
+        Returns
+        -------
+        nunmpy.array_like
+            The computed local attenuation volume.
+        """
+        ph_lin_att = np.zeros(self.shape, self.dtype)
+        for ph, cmp in zip(self.phase_fractions, self.phase_compounds):
+            try:
+                cmp_cs = xraylib.CS_Total_CP(cmp["name"], energy_keV)
+            except ValueError:
+                cmp_cs = np.sum(
+                    [xraylib.CS_Total(el, energy_keV) * cmp["massFractions"][ii] for ii, el in enumerate(cmp["Elements"])],
+                    axis=0,
+                )
+            ph_lin_att += ph * cmp["density"] * cmp_cs
+        return ph_lin_att * self.voxel_size_cm
+
+    def get_element_mass_fraction(self, element: Union[str, int]):
+        """Compute the local element mass fraction through out all the phases.
+
+        Parameters
+        ----------
+        element : str | int
+            The element to look for.
+
+        Returns
+        -------
+        mass_fraction : nunmpy.array_like
+            The local mass fraction in each voxel.
+        """
+        el_num = self.get_element_number(element)
+
+        mass_fraction = np.zeros(self.shape, self.dtype)
+        for ph, cmp in zip(self.phase_fractions, self.phase_compounds):
+            if el_num in cmp["Elements"]:
+                el_ind = np.where(np.array(cmp["Elements"]) == el_num)[0][0]
+                mass_fraction += ph * cmp["density"] * cmp["massFractions"][el_ind]
+        return mass_fraction
+
+    def _check_parallax_detector(self, detector: DetectorXRF, tolerance: float = 1e-2):
+        half_sample_size = np.max(self.voxel_size_cm * self.shape) / 2
+
+        if isinstance(detector.distance_mm, float) or (
+            isinstance(detector.distance_mm, np.ndarray) and detector.distance_mm.size == 1
+        ):
+            dets = cp.deepcopy(detector)
+            dets.distance_mm = dets.distance_mm + np.array([-half_sample_size, half_sample_size])
+        else:
+            dets = detector
+
+        solid_angles = dets.solid_angle_sr
+        max_parallax = np.max(solid_angles) - np.min(solid_angles)
+        return max_parallax < tolerance
+
+    def get_compton_scattering(
+        self, energy_in_keV: float, angle_rad: Optional[float] = None, detector: Optional[DetectorXRF] = None
+    ):
+        """Compute the local Compton scattering.
+
+        Parameters
+        ----------
+        energy_in_keV : float
+            Incoming beam energy.
+        angle_rad : float, optional
+            The detector angle, with respect to incoming beam direction. The default is None.
+        detector : DetectorXRF, optional
+            The detector object. The default is None.
+
+        Raises
+        ------
+        ValueError
+            In case neither of `angle_rad` nor `detector` have been passed.
+
+        Returns
+        -------
+        energy_out_keV : float
+            The energy of the Compton radiation received by the detector.
+        cmptn_yield : nunmpy.array_like
+            Local yield of Compton radiation.
+
+        Either `angle_rad` or `detector` need to be supplied.
+        """
+        if angle_rad is None and detector is None:
+            raise ValueError("Either 'angle_rad' or 'detector' should be passed.")
+        if detector:
+            if not self._check_parallax_detector(detector):
+                print("WARNING - detector parallax is above 1e-2")
+            if angle_rad is None:
+                angle_rad = detector.angle_rad
+
+        cmptn_yield = np.zeros(self.shape, self.dtype)
+        for ph, cmp in zip(self.phase_fractions, self.phase_compounds):
+            try:
+                cmptn_cmp_cs = xraylib.DCS_Compt_CP(cmp["name"], energy_in_keV, angle_rad)
+            except ValueError:
+                cmptn_cmp_cs = np.sum(
+                    [
+                        xraylib.DCS_Compt(el, energy_in_keV, angle_rad) * cmp["massFractions"][ii]
+                        for ii, el in enumerate(cmp["Elements"])
+                    ],
+                    axis=0,
+                )
+            cmptn_yield += ph * cmp["density"] * cmptn_cmp_cs
+        cmptn_yield *= self.voxel_size_cm
+
+        if detector:
+            cmptn_yield *= detector.solid_angle_sr
+
+        energy_out_keV = xraylib.ComptonEnergy(energy_in_keV, angle_rad)
+        return (energy_out_keV, cmptn_yield)
+
+    def get_fluo_yield(
+        self, element: Union[str, int], energy_in_keV: float, fluo_line: int, detector: Optional[DetectorXRF] = None
+    ):
+        """Compute the local fluorescence yield, for the given line of the given element.
+
+        Parameters
+        ----------
+        element : str | int
+            The element to consider.
+        energy_in_keV : float
+            The incombing X-ray beam energy.
+        fluo_line : int
+            The fluorescence line to consider.
+        detector : DetectorXRF, optional
+            The detector geometry. The default is None.
+
+        Returns
+        -------
+        energy_out_keV : float
+            The emitted fluorescence energy.
+        el_yield : nunmpy.array_like
+            The local fluorescence yield in each voxel.
+        """
+        if detector:
+            if not self._check_parallax_detector(detector):
+                print("WARNING - detector parallax is above 1e-2")
+
+        el_num = self.get_element_number(element)
+
+        el_cs = xraylib.CS_FluorLine_Kissel(el_num, fluo_line, energy_in_keV)  # fluo production for cm2/g
+        el_yield = self.get_element_mass_fraction(el_num) * el_cs * self.voxel_size_cm
+
+        if detector:
+            el_yield *= detector.solid_angle_sr
+
+        energy_out_keV = xraylib.LineEnergy(el_num, fluo_line)
+        return (energy_out_keV, el_yield)
+
+
 def phantom_assign_concentration(ph_or, element: str = "Ca", in_energy_keV: float = 20.0):
     """Build an XRF phantom.
 
@@ -79,7 +312,7 @@ def phantom_assign_concentration(ph_or, element: str = "Ca", in_energy_keV: floa
     vol_att_out : numpy.array_like
         Voxel-wise attenuation at the emitted energy.
     """
-    # ph_air = ph_or < 0.1
+    ph_air = ph_or < 0.1
     ph_FeO = 0.5 < ph_or
     ph_CaO = np.logical_and(0.25 < ph_or, ph_or < 0.5)
     ph_CaC = np.logical_and(0.1 < ph_or, ph_or < 0.25)
@@ -90,42 +323,17 @@ def phantom_assign_concentration(ph_or, element: str = "Ca", in_energy_keV: floa
     voxel_size_cm = voxel_size_um * conv_um_to_mm * conv_mm_to_cm  # cm to micron
     print("Sample size: [%g %g] um" % (ph_or.shape[0] * voxel_size_um, ph_or.shape[1] * voxel_size_um))
 
-    import xraylib
+    phase_fractions = (ph_air, ph_FeO, ph_CaO, ph_CaC)
+    phase_compound_names = ("Air, Dry (near sea level)", "Ferric Oxide", "Calcium Oxide", "Calcium Carbonate")
 
-    xraylib.XRayInit()
-    cp_fo = xraylib.GetCompoundDataNISTByName("Ferric Oxide")
-    cp_co = xraylib.GetCompoundDataNISTByName("Calcium Oxide")
-    cp_cc = xraylib.GetCompoundDataNISTByName("Calcium Carbonate")
+    phantom = Phantom(phase_fractions, phase_compound_names, voxel_size_cm)
 
-    ca_an = xraylib.SymbolToAtomicNumber("Ca")
-    ca_kal = xraylib.LineEnergy(ca_an, xraylib.KA_LINE)
+    out_energy_keV, vol_fluo_yield = phantom.get_fluo_yield(element, in_energy_keV, xraylib.KA_LINE)
 
-    in_energy_keV = 20
-    out_energy_keV = ca_kal
+    vol_lin_att_in = phantom.get_attenuation(in_energy_keV)
+    vol_lin_att_out = phantom.get_attenuation(out_energy_keV)
 
-    ph_lin_att_in = (
-        ph_FeO * xraylib.CS_Total_CP("Ferric Oxide", in_energy_keV) * cp_fo["density"]
-        + ph_CaC * xraylib.CS_Total_CP("Calcium Carbonate", in_energy_keV) * cp_cc["density"]
-        + ph_CaO * xraylib.CS_Total_CP("Calcium Oxide", in_energy_keV) * cp_co["density"]
-    )
-
-    ph_lin_att_out = (
-        ph_FeO * xraylib.CS_Total_CP("Ferric Oxide", out_energy_keV) * cp_fo["density"]
-        + ph_CaC * xraylib.CS_Total_CP("Calcium Carbonate", out_energy_keV) * cp_cc["density"]
-        + ph_CaO * xraylib.CS_Total_CP("Calcium Oxide", out_energy_keV) * cp_co["density"]
-    )
-
-    vol_att_in = ph_lin_att_in * voxel_size_cm
-    vol_att_out = ph_lin_att_out * voxel_size_cm
-
-    ca_cs = xraylib.CS_FluorLine_Kissel(ca_an, xraylib.KA_LINE, in_energy_keV)  # fluo production for cm2/g
-    ph_CaC_mass_fract = cp_cc["massFractions"][np.where(np.array(cp_cc["Elements"]) == ca_an)[0][0]]
-    ph_CaO_mass_fract = cp_co["massFractions"][np.where(np.array(cp_co["Elements"]) == ca_an)[0][0]]
-
-    ph = ph_CaC * ph_CaC_mass_fract * cp_cc["density"] + ph_CaO * ph_CaO_mass_fract * cp_co["density"]
-    ph = ph * ca_cs * voxel_size_cm
-
-    return (ph, vol_att_in, vol_att_out)
+    return (vol_fluo_yield, vol_lin_att_in, vol_lin_att_out)
 
 
 def create_sino(
