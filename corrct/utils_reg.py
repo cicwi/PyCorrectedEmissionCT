@@ -427,7 +427,7 @@ class CrossValidation(BaseRegularizationEstimation):
 
         if self.verbose:
             print(
-                "Fitting minimum within the parameter interval [%g, %g]: " % (lams_reg[min_pos - 1], lams_reg[min_pos + 1]),
+                "Fitting minimum within the parameter interval [%g, %g]: " % (from_fit(lams_reg_fit[0]), from_fit(lams_reg[-1])),
                 end="",
                 flush=True,
             )
