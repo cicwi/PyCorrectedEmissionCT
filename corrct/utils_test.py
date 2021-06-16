@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jun  4 12:28:21 2020
+Provides useful functions for testing routines and functionalities.
 
-This module provides useful functions for testing routines and functionalities.
+Created on Thu Jun  4 12:28:21 2020
 
 @author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
 and ESRF - The European Synchrotron, Grenoble, France
@@ -12,27 +12,32 @@ import numpy as np
 
 from . import projectors
 
+from typing import Union, Sequence, Optional
 
-def roundup_to_pow2(x, p, data_type=np.intp):
-    """Rounds first argument to the power of 2 indicated by second argument.
 
-    :param x: Number to round up
-    :type x: int or float
-    :param p: Power of 2
-    :type p: int
-    :param data_type: data type of the output
-    :type data_type: `numpy.dtype`
 
-    :return: Rounding up of input
-    :rtype: dtype specified by data_type
+def roundup_to_pow2(x, p: int, data_type=np.intp):
+    """Round first argument to the power of 2 indicated by second argument.
+
+    Parameters
+    ----------
+    x : int | float | numpy.array_like
+        Number to round up.
+    p : int
+        Power of 2.
+    data_type : numpy.dtype, optional
+        data type of the output. The default is np.intp.
+
+    Returns
+    -------
+    int | float | numpy.array_like
+        Rounding up of input.
     """
     return np.ceil(np.array(x) / (2 ** p)).astype(data_type) * (2 ** p)
 
 
 def download_phantom():
-    """Downloads the phantom generation module from Nicolas Barbey's repository
-    on github.
-    """
+    """Download the phantom generation module from Nicolas Barbey's repository on github."""
     phantom_url = "https://raw.githubusercontent.com/nbarbey/TomograPy/master/tomograpy/phantom.py"
     phantom_path = "./phantom.py"
 
@@ -52,19 +57,27 @@ def download_phantom():
         f.write(file_content.replace("xrange", "range"))
 
 
-def phantom_assign_concentration(ph_or, data_type=np.float32):
-    """Builds the phantom used in:
+def phantom_assign_concentration(ph_or, element: str = "Ca", in_energy_keV: float = 20.0):
+    """Build an XRF phantom.
+
+    The created phantom has been used in:
     - N. Viganò and V. A. Solé, “Physically corrected forward operators for
     induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
     Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.
 
-    :param ph_or: DESCRIPTION
-    :type ph_or: TYPE
-    :param data_type: DESCRIPTION, defaults to np.float32
-    :type data_type: TYPE, optional
+    Parameters
+    ----------
+    ph_or : numpy.array_like
+        The phases phantom map.
 
-    :return: DESCRIPTION
-    :rtype: TYPE
+    Returns
+    -------
+    vol_fluo_yield : numpy.array_like
+        Voxel-wise fluorescence yields.
+    vol_att_in : numpy.array_like
+        Voxel-wise attenuation at the incoming beam energy.
+    vol_att_out : numpy.array_like
+        Voxel-wise attenuation at the emitted energy.
     """
     # ph_air = ph_or < 0.1
     ph_FeO = 0.5 < ph_or
@@ -117,56 +130,60 @@ def phantom_assign_concentration(ph_or, data_type=np.float32):
 
 def create_sino(
     ph,
-    num_angles,
-    start_angle_deg=0,
-    end_angle_deg=180,
-    dwell_time_s=1,
-    photon_flux=1e9,
-    detectors_pos_rad=(np.pi / 2),
+    num_angles: int,
+    start_angle_deg: float = 0,
+    end_angle_deg: float = 180,
+    dwell_time_s: float = 1,
+    photon_flux: float = 1e9,
+    detectors_pos_rad: Union[float, Sequence] = (np.pi / 2),
     vol_att_in=None,
     vol_att_out=None,
     psf=None,
-    background_avg=None,
-    background_std=None,
-    add_poisson=False,
-    readout_noise_std=None,
+    background_avg: Optional[float] = None,
+    background_std: Optional[float] = None,
+    add_poisson: bool = False,
+    readout_noise_std: Optional[float] = None,
     data_type=np.float32,
-):
-    """Computes the sinogram from a given phantom
+) -> tuple:
+    """Compute the sinogram from a given phantom.
 
-    :param ph: The phantom volume, with the expected average photon production per voxel per impinging photon
-    :type ph: `numpy.array_like`
-    :param num_angles: Number of angles
-    :type num_angles: int
-    :param start_angle_deg: Initial scan angle in degrees
-    :type start_angle_deg: float
-    :param end_angle_deg: Final scan angle in degrees
-    :type end_angle_deg: float
-    :param dwell_time_s: The acquisition time per sinogram point
-    :type dwell_time_s: float
-    :param photon_flux: The impinging photon flux per unit time (second)
-    :type photon_flux: float
-    :param detectors_pos_rad: Detector(s) positions in radians, with respect to incoming beam
-    :type detectors_pos_rad: float or `numpy.array_like`
-    :param vol_att_in: Attenuation volume for the incoming beam, defaults to None
-    :type vol_att_in: `numpy.array_like`, optional
-    :param vol_att_out: Attenuation volume for the outgoing beam, defaults to None
-    :type vol_att_out: `numpy.array_like`, optional
-    :param psf: Point spread function or probing beam profile, defaults to None
-    :type psf: `numpy.array_like`, optional
-    :param background_avg: Background average value, defaults to None
-    :type background_avg: float, optional
-    :param background_std: Background sigma, defaults to None
-    :type background_std: float, optional
-    :param add_poisson: Switch to turn on Poisson noise, defaults to False
-    :type add_poisson: boolean, optional
-    :param readout_noise_std: Read-out noise sigma, defaults to None
-    :type readout_noise_std: float, optional
-    :param data_type: Volumes' data type, defaults to np.float32
-    :type data_type: `numpy.dtype`, optional
+    Parameters
+    ----------
+    ph : numpy.array_like
+        The phantom volume, with the expected average photon production per voxel per impinging photon.
+    num_angles : int
+        The number of angles.
+    start_angle_deg : float, optional
+        Initial scan angle in degrees. The default is 0.
+    end_angle_deg : float, optional
+        Final scan angle in degrees. The default is 180.
+    dwell_time_s : float, optional
+        The acquisition time per sinogram point. The default is 1.
+    photon_flux : float, optional
+        The impinging photon flux per unit time (second). The default is 1e9.
+    detectors_pos_rad : float | tuple | list | numpy.array_like, optional
+        Detector(s) positions in radians, with respect to incoming beam. The default is (np.pi / 2).
+    vol_att_in : numpy.array_like, optional
+        Attenuation volume for the incoming beam. The default is None.
+    vol_att_out : numpy.array_like, optional
+        Attenuation volume for the outgoing beam. The default is None.
+    psf : numpy.array_like, optional
+        Point spread function or probing beam profile. The default is None.
+    background_avg : float, optional
+        Background average value. The default is None.
+    background_std : float, optional
+        Background standard deviation. The default is None.
+    add_poisson : bool, optional
+        Switch to turn on Poisson noise. The default is False.
+    readout_noise_std : float, optional
+        Read-out noise standard deviation. The default is None.
+    data_type : numpy.dtype, optional
+        Output datatype. The default is np.float32.
 
-    :return: The sinogram (detecto readings), the angular positions, and the expected average phton production per voxel
-    :rtype: tuple(`numpy.array_like`, `numpy.array_like`, `numpy.array_like`)
+    Returns
+    -------
+    tuple(numpy.array_like, numpy.array_like, numpy.array_like)
+        The sinogram (detector readings), the angular positions, and the expected average phton production per voxel.
     """
     print("Creating Sino with %d angles" % num_angles)
     angles_deg = np.linspace(start_angle_deg, end_angle_deg, num_angles, endpoint=False)
@@ -204,16 +221,20 @@ def create_sino(
     return (sino_noise, angles_rad, ph * num_photons * detector_solidangle_sr, background)
 
 
-def compute_error_power(expected_vol, computed_vol):
-    """Computes the expected volume signal power, and computed volume error power.
+def compute_error_power(expected_vol, computed_vol) -> tuple:
+    """Compute the expected volume signal power, and computed volume error power.
 
-    :param expected_vol: The expected volume
-    :type expected_vol: `numpy.array_like`
-    :param computed_vol: The computed volume
-    :type computed_vol: `numpy.array_like`
+    Parameters
+    ----------
+    expected_vol : numpy.array_like
+        The expected volume.
+    computed_vol : numpy.array_like
+        The computed volume.
 
-    :return: The expected volume signal power, and the computed volume
-    :rtype: tuple(float, float)
+    Returns
+    -------
+    tuple(float, float)
+        The expected volume signal power, and the computed volume.
     """
     vol_power = np.sqrt(np.sum((expected_vol) ** 2) / expected_vol.size)
     error_power = np.sqrt(np.sum(np.abs(expected_vol - computed_vol) ** 2) / expected_vol.size)
