@@ -21,7 +21,7 @@ import concurrent.futures as cf
 import multiprocessing as mp
 
 
-num_threads = mp.cpu_count()
+num_threads = round(np.log2(mp.cpu_count() + 1))
 
 
 class ProjectorMatrix(operators.ProjectorOperator):
@@ -348,6 +348,18 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         else:
             self.att_vol_angles = None
 
+    def __enter__(self):
+        """Initialize the with statement block."""
+        if self.use_multithreading and isinstance(self.projector_backend, prj_backends.ProjectorBackendSKimage):
+            self.executor = cf.ThreadPoolExecutor(max_workers=num_threads)
+        return super().__enter__()
+
+    def __exit__(self, *args):
+        """De-initialize the with statement block."""
+        super().__exit__()
+        if self.use_multithreading and isinstance(self.projector_backend, prj_backends.ProjectorBackendSKimage):
+            self.executor.shutdown()
+
     @staticmethod
     def _compute_attenuation(vol, direction, invert: bool = False):
         def pad_vol(vol, edges):
@@ -579,9 +591,8 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         numpy.array_like
             The forward-projected sinogram.
         """
-        if self.use_multithreading:
-            with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                sino_lines = executor.map(lambda x: self.fp_angle(vol, x), range(len(self.angles_rot_rad)))
+        if self.use_multithreading and isinstance(self.projector_backend, prj_backends.ProjectorBackendSKimage):
+            sino_lines = self.executor.map(lambda x: self.fp_angle(vol, x), range(len(self.angles_rot_rad)))
             sino_lines = [*sino_lines]
         else:
             sino_lines = [self.fp_angle(vol, ii) for ii in range(len(self.angles_rot_rad))]
@@ -602,9 +613,8 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             The back-projected volume.
         """
         if self.is_symmetric:
-            if self.use_multithreading:
-                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    vols = executor.map(lambda x: self.bp_angle(sino, x), range(len(self.angles_rot_rad)))
+            if self.use_multithreading and isinstance(self.projector_backend, prj_backends.ProjectorBackendSKimage):
+                vols = self.executor.map(lambda x: self.bp_angle(sino, x), range(len(self.angles_rot_rad)))
                 vols = [*vols]
             else:
                 vols = [self.bp_angle(sino, ii) for ii in range(len(self.angles_rot_rad))]
