@@ -78,7 +78,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         super_sampling: int = 1,
     ):
         """
-        ProjectorUncorrected class initialization.
+        Initialize ProjectorUncorrected class.
 
         Parameters
         ----------
@@ -137,10 +137,12 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         super().__init__()
 
     def __enter__(self):
+        """Initialize the with statement block."""
         self.projector_backend.initialize()
         return self
 
     def __exit__(self, *args):
+        """De-initialize the with statement block."""
         self.projector_backend.dispose()
 
     def fp_angle(self, vol, angle_ind: int):
@@ -212,7 +214,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
     def fbp(self, projs, fbp_filter="shepp-logan"):
         """
-        Computes the filtered back-projection of the projection data to the volume.
+        Compute the filtered back-projection of the projection data to the volume.
 
         The data could either be a sinogram, or a stack of sinograms.
 
@@ -253,8 +255,8 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         angles_detectors_rad=(np.pi / 2),
         weights_detectors=None,
         psf=None,
-        precompute_attenuation=True,
-        is_symmetric=False,
+        precompute_attenuation: bool = True,
+        is_symmetric: bool = False,
         weights_angles=None,
         data_type=np.float32,
     ):
@@ -369,7 +371,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return cum_arr
 
-    def compute_attenuation(self, vol, angle, invert=False):
+    def compute_attenuation(self, vol, angle: float, invert: bool = False):
         """Compute the attenuation local attenuation for a given attenuation volume.
 
         This means the attenuation experienced by the photons emitted in each
@@ -379,8 +381,8 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         ----------
         vol : numpy.array_like
             The attenuation volume.
-        angles_rad : numpy.array_like
-            The rotation angles.
+        angle : float
+            The rotation angle.
         invert : bool, optional
             Whether to reverse the direction of propagation. The default is False.
 
@@ -394,7 +396,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         numpy.array_like
             The stack of local attenuation volumes.
         """
-
         vol = np.array(vol)
         if not len(vol.shape) in [2, 3]:
             raise ValueError("Maps can only be 2D or 3D Arrays. A %d-dimensional was passed" % (len(vol.shape)))
@@ -423,7 +424,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         return atts
 
     def compute_attenuation_volumes(self):
-        """Computes the corrections for each angle."""
+        """Compute the corrections for each angle."""
         if self.att_in is None and self.att_out is None:
             raise ValueError("No attenuation volumes were given")
 
@@ -443,7 +444,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             self.att_vol_angles = self.att_vol_angles[:, :, np.newaxis, ...]
 
     def collapse_detectors(self):
-        """Converts multi-detector configurations into single-detector."""
+        """Convert multi-detector configurations into single-detector."""
         weights = np.reshape(self.weights_det, [1, -1, 1, 1]) / np.sum(self.weights_det)
         self.att_vol_angles = np.sum(self.att_vol_angles * weights, axis=1)
 
@@ -452,17 +453,22 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         self.weights_angles = np.sum(self.weights_angles * weights, axis=1, keepdims=True)
         self.weights_det = np.sum(self.weights_det, keepdims=True)
 
-    def fp_angle(self, vol, angle_ind):
-        """
-        Forward-projection of the volume to a single sinogram line.
+    def fp_angle(self, vol, angle_ind: int):
+        """Forward-project the volume to a single sinogram line.
 
         It applies the attenuation corrections.
 
-        :param vol: The volume to forward-project (numpy.array_like)
-        :param angle_ind: The angle index to foward project (int)
+        Parameters
+        ----------
+        vol : numpy.array_like
+            The volume to forward-project.
+        angle_ind : int
+            The angle index to foward project.
 
-        :returns: The forward-projected sinogram line
-        :rtype: numpy.array_like
+        Returns
+        -------
+        sino_line : numpy.array_like
+            The forward-projected sinogram line.
         """
         temp_vol = cp.deepcopy(vol)[np.newaxis, ...]
         temp_vol = np.tile(temp_vol, (len(self.angles_det_rad), *((1,) * len(self.vol_shape))))
@@ -491,18 +497,24 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return sino_line
 
-    def bp_angle(self, sino, angle_ind, single_line=False):
-        """
-        Back-projection of a single sinogram line to the volume.
+    def bp_angle(self, sino, angle_ind: int, single_line: bool = False):
+        """Back-project a single sinogram line to the volume.
 
         It only applies the attenuation corrections if the projector is symmetric.
 
-        :param sino: The sinogram to back-project or a single line (numpy.array_like)
-        :param angle_ind: The angle index to foward project (int)
-        :param single_line: Whether the input is a single sinogram line (boolean, default: False)
+        Parameters
+        ----------
+        sino : numpy.array_like
+            The sinogram to back-project or a single line.
+        angle_ind : int
+            The angle index to foward project.
+        single_line : bool, optional
+            Whether the input is a single sinogram line. The default is False.
 
-        :returns: The back-projected volume
-        :rtype: numpy.array_like
+        Returns
+        -------
+        numpy.array_like
+            The back-projected volume.
         """
         if single_line:
             sino_line = sino
@@ -533,25 +545,34 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         return np.sum(vol, axis=0)
 
     def fp(self, vol):
-        """
-        Forward-projection of the volume to the sinogram.
+        """Forward-project the volume to the sinogram.
 
         It applies the attenuation corrections.
 
-        :param vol: The volume to forward-project (numpy.array_like)
+        Parameters
+        ----------
+        vol : numpy.array_like
+            The volume to forward-project.
 
-        :returns: The forward-projected sinogram
-        :rtype: numpy.array_like
+        Returns
+        -------
+        numpy.array_like
+            The forward-projected sinogram.
         """
         return np.stack([self.fp_angle(vol, ii) for ii in range(len(self.angles_rot_rad))], axis=0)
 
     def bp(self, sino):
         """Back-projection of the sinogram to the volume.
 
-        :param sino: The sinogram to back-project (numpy.array_like)
+        Parameters
+        ----------
+        sino : numpy.array_like
+            The sinogram to back-project.
 
-        :returns: The back-projected volume
-        :rtype: numpy.array_like
+        Returns
+        -------
+        numpy.array_like
+            The back-projected volume.
         """
         if self.is_symmetric:
             return np.sum([self.bp_angle(sino, ii) for ii in range(len(self.angles_rot_rad))], axis=0)
@@ -560,7 +581,9 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
 
 class FilterMR(object):
-    """Data dependent FBP filter. This is a simplified implementation from:
+    """Data dependent FBP filter.
+
+    This is a simplified implementation from:
 
     [1] Pelt, D. M., & Batenburg, K. J. (2014). Improving filtered backprojection
     reconstruction by data-dependent filtering. Image Processing, IEEE
@@ -570,14 +593,27 @@ class FilterMR(object):
     """
 
     def __init__(
-        self, sinogram_pixels_num=None, sinogram_angles_num=None, start_exp_binning=2, lambda_smooth=None, data_type=np.float32
+        self,
+        sinogram_pixels_num: int = None,
+        sinogram_angles_num: int = None,
+        start_exp_binning: int = 2,
+        lambda_smooth: float = None,
+        data_type=np.float32,
     ):
-        """
-        :param sinogram_pixels_num: Number of sinogram pixels (int)
-        :param sinogram_angles_num: Number of sinogram angles (int)
-        :param start_exp_binning: From which distance to start exponentional binning (int)
-        :param lambda_smooth: Smoothing parameter (float)
-        :param data_type: Filter data type (numpy data type)
+        """Initialize FilterMR class.
+
+        Parameters
+        ----------
+        sinogram_pixels_num : int, optional
+            Number of sinogram pixels. The default is None.
+        sinogram_angles_num : int, optional
+            Number of sinogram angles. The default is None.
+        start_exp_binning : int, optional
+            From which distance to start exponentional binning. The default is 2.
+        lambda_smooth : float, optional
+            Smoothing parameter. The default is None.
+        data_type : numpy.dtype, optional
+            Filter data type. The default is np.float32.
         """
         self.data_type = data_type
         self.start_exp_binning = start_exp_binning
@@ -590,8 +626,7 @@ class FilterMR(object):
             self.initialize()
 
     def initialize(self):
-        """ Filter initialization function.
-        """
+        """Filter initialization function."""
         if self.sinogram_pixels_num is None:
             raise ValueError("No sinogram pixels number was given!")
         if self.sinogram_angles_num is None:
@@ -626,14 +661,20 @@ class FilterMR(object):
 
         self.is_initialized = True
 
-    def compute_filter(self, sinogram, projector):
-        """ Computes the filter.
+    def compute_filter(self, sinogram, projector: operators.ProjectorOperator):
+        """Compute the filter.
 
-        :param sinogram: The sinogram (np.array_like)
-        :param projector: The projector used in the FBP (object)
+        Parameters
+        ----------
+        sinogram : numpy.array_like
+            The sinogram.
+        projector : operators.ProjectorOperator
+            The projector used in the FBP.
 
-        :returns: The computed filter
-        :rtype: numpy.array_like
+        Returns
+        -------
+        computed_filter : numpy.array_like
+            The computed filter.
         """
         sino_size = self.sinogram_angles_num * self.sinogram_pixels_num
         nrows = sino_size
@@ -668,25 +709,36 @@ class FilterMR(object):
         return computed_filter
 
     def apply_filter(self, sinogram, computed_filter):
-        """ Applies the filter to the sinogram.
+        """Apply the filter to the sinogram.
 
-        :param sinogram: The sinogram (np.array_like)
-        :param computed_filter: The computed filter (np.array_like)
+        Parameters
+        ----------
+        sinogram : numpy.array_like
+            The sinogram.
+        computed_filter : numpy.array_like
+            The computed filter.
 
-        :returns: The filtered sinogram
-        :rtype: numpy.array_like
+        Returns
+        -------
+        numpy.array_like
+            The filtered sinogram.
         """
         return spsig.fftconvolve(sinogram, computed_filter[np.newaxis, ...], "same")
 
-    def __call__(self, sinogram, projector):
-        """ Filters the sinogram, by first computing the filter, and then
-        applying it.
+    def __call__(self, sinogram, projector: operators.ProjectorOperator):
+        """Filter the sinogram, by first computing the filter, and then applying it.
 
-        :param sinogram: The sinogram (np.array_like)
-        :param projector: The projector used in the FBP (object)
+        Parameters
+        ----------
+        sinogram : numpy.array_like
+            The unfiltered sinogram.
+        projector : operators.ProjectorOperator
+            The projector used in the FBP.
 
-        :returns: The filtered sinogram
-        :rtype: numpy.array_like
+        Returns
+        -------
+        numpy.array_like
+            The filtered sinogram.
         """
         if not self.is_initialized:
             self.sinogram_angles_num = sinogram.shape[0]
