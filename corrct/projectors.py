@@ -17,6 +17,12 @@ from . import operators
 from . import _projector_backends as prj_backends
 from . import utils_proc
 
+import concurrent.futures as cf
+import multiprocessing as mp
+
+
+num_threads = mp.cpu_count()
+
 
 class ProjectorMatrix(operators.ProjectorOperator):
     """Projector that uses an explicit projection matrix."""
@@ -258,6 +264,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         precompute_attenuation: bool = True,
         is_symmetric: bool = False,
         weights_angles=None,
+        use_multithreading: bool = True,
         data_type=np.float32,
     ):
         """
@@ -302,6 +309,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         )
 
         self.data_type = data_type
+        self.use_multithreading = use_multithreading
 
         if precompute_attenuation:
             if att_in is None and att_out is None:
@@ -433,12 +441,24 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         )
 
         if self.att_in is not None:
-            for ii, a in enumerate(self.angles_rot_rad):
-                self.att_vol_angles[ii, ...] *= self._compute_attenuation_angle_in(a)
+            if self.use_multithreading:
+                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
+                    angle_atts = executor.map(self._compute_attenuation_angle_in, self.angles_rot_rad)
+                for ii, a in enumerate(angle_atts):
+                    self.att_vol_angles[ii, ...] *= a
+            else:
+                for ii, a in enumerate(self.angles_rot_rad):
+                    self.att_vol_angles[ii, ...] *= self._compute_attenuation_angle_in(a)
 
         if self.att_out is not None:
-            for ii, a in enumerate(self.angles_rot_rad):
-                self.att_vol_angles[ii, ...] *= self._compute_attenuation_angle_out(a)
+            if self.use_multithreading:
+                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
+                    angle_atts = executor.map(self._compute_attenuation_angle_out, self.angles_rot_rad)
+                for ii, a in enumerate(angle_atts):
+                    self.att_vol_angles[ii, ...] *= a
+            else:
+                for ii, a in enumerate(self.angles_rot_rad):
+                    self.att_vol_angles[ii, ...] *= self._compute_attenuation_angle_out(a)
 
         if self.is_3d:
             self.att_vol_angles = self.att_vol_angles[:, :, np.newaxis, ...]
@@ -559,7 +579,14 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         numpy.array_like
             The forward-projected sinogram.
         """
-        return np.stack([self.fp_angle(vol, ii) for ii in range(len(self.angles_rot_rad))], axis=0)
+        if self.use_multithreading:
+            with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
+                sino_lines = executor.map(lambda x: self.fp_angle(vol, x), range(len(self.angles_rot_rad)))
+            sino_lines = [*sino_lines]
+        else:
+            sino_lines = [self.fp_angle(vol, ii) for ii in range(len(self.angles_rot_rad))]
+
+        return np.ascontiguousarray(np.stack(sino_lines, axis=0))
 
     def bp(self, sino):
         """Back-projection of the sinogram to the volume.
@@ -575,7 +602,14 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             The back-projected volume.
         """
         if self.is_symmetric:
-            return np.sum([self.bp_angle(sino, ii) for ii in range(len(self.angles_rot_rad))], axis=0)
+            if self.use_multithreading:
+                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
+                    vols = executor.map(lambda x: self.bp_angle(sino, x), range(len(self.angles_rot_rad)))
+                vols = [*vols]
+            else:
+                vols = [self.bp_angle(sino, ii) for ii in range(len(self.angles_rot_rad))]
+
+            return np.sum(vols, axis=0)
         else:
             return ProjectorUncorrected.bp(self, sino)
 
