@@ -18,9 +18,16 @@ from typing import Union, Sequence, Optional
 
 import copy as cp
 
-import xraylib
+try:
+    import xraylib
 
-xraylib.XRayInit()
+    xraylib.XRayInit()
+
+    __has_xraylib__ = True
+except ImportError as exc:
+    print("WARNING:", exc)
+
+    __has_xraylib__ = False
 
 
 def roundup_to_pow2(x, p: int, data_type=np.intp):
@@ -88,6 +95,9 @@ class Phantom(object):
     """Base phantom class."""
 
     def __init__(self, phase_fractions: Sequence, phase_compounds: Sequence, voxel_size_cm: float):
+        if not __has_xraylib__:
+            raise ValueError("Realistic phantoms not available without xraylib.")
+
         if len(phase_fractions) != len(phase_compounds):
             raise ValueError(
                 "Phase fractions (# %d) and phase compounds (# %d) should have the same length"
