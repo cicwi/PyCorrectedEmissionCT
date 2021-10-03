@@ -19,7 +19,8 @@ requirements = [
     'scikit-image',
     'tqdm',
     'scipy',
-    'numpy'
+    'numpy',
+    'dataclasses'
 ]
 
 setup_requirements = []
