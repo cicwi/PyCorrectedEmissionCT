@@ -15,7 +15,7 @@ import mpl_toolkits.axes_grid1 as ax_g
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 import corrct as cct
-import cct.utils_test
+import corrct.utils_test
 
 try:
     import phantom
@@ -61,56 +61,61 @@ reg = cct.solvers.Regularizer_TV2D
 # reg = lambda l: cct.solvers.Regularizer_l1swl(l, "haar", 4)
 # reg = cct.solvers.Regularizer_fft
 
-print("Reconstructing:")
-with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
-    # Instantiates the solver object, that is later used for computing the reconstruction
-    def solver_spawn(lam_reg):
-        # Using the PDHG solver from Chambolle and Pock
-        return cct.solvers.CP(verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw)
 
-    # Computes the reconstruction for a given solver and a given cross-validation data mask
-    def solver_call(solver, b_test_mask=None):
+# Instantiates the solver object, that is later used for computing the reconstruction
+def solver_spawn(lam_reg):
+    # Using the PDHG solver from Chambolle and Pock
+    return cct.solvers.CP(verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw)
+
+
+# Computes the reconstruction for a given solver and a given cross-validation data mask
+def solver_call(solver, b_test_mask=None):
+    with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
         return solver(
             A, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, precondition=prec, b_test_mask=b_test_mask
         )
 
-    # Computes the isotropic TV semi-norm. Used in the L-curve.
-    def iso_tv_seminorm(x):
-        op = cct.operators.TransformGradient(x.shape)
-        d = op(x)
-        d = np.linalg.norm(d, axis=0, ord=2)
-        return np.linalg.norm(d.flatten(), ord=1)
 
-    # Create the regularization weight finding helper object (using cross-validation)
-    reg_help_cv = cct.utils_reg.CrossValidation(sinogram.shape, verbose=True, num_averages=5)
-    reg_help_cv.solver_spawning_function = solver_spawn
-    reg_help_cv.solver_calling_function = solver_call
+# Computes the isotropic TV semi-norm. Used in the L-curve.
+def iso_tv_seminorm(x):
+    op = cct.operators.TransformGradient(x.shape)
+    d = op(x)
+    d = np.linalg.norm(d, axis=0, ord=2)
+    return np.linalg.norm(d.flatten(), ord=1)
 
-    # Define the regularization weight range
-    lams_reg = reg_help_cv.get_lambda_range(1e-3, 1e1, num_per_order=4)
 
-    # Compute the loss function values for all the regularization weights
-    f_avgs, f_stds, _ = reg_help_cv.compute_loss_values(lams_reg)
-    # Compute the error values for all the regularization weights
-    err_l1, err_l2 = reg_help_cv.compute_reconstruction_error(lams_reg, expected_ph)
+print("Reconstructing:")
+# Create the regularization weight finding helper object (using cross-validation)
+reg_help_cv = cct.utils_reg.CrossValidation(sinogram.shape, verbose=True, num_averages=5)
+reg_help_cv.solver_spawning_function = solver_spawn
+reg_help_cv.solver_calling_function = solver_call
 
-    # parabolic fit of minimum over the computer curve
-    lam_min, _ = reg_help_cv.fit_loss_min(lams_reg, f_avgs)
+# Define the regularization weight range
+lams_reg = reg_help_cv.get_lambda_range(1e-3, 1e1, num_per_order=4)
 
-    # Regularized weighted least-squares solver (PDHG), on the whole dataset
-    solver = solver_spawn(lam_min)
-    (rec, rec_info) = solver_call(solver, None)
+# Compute the loss function values for all the regularization weights
+f_avgs, f_stds, _ = reg_help_cv.compute_loss_values(lams_reg)
+# Compute the error values for all the regularization weights
+err_l1, err_l2 = reg_help_cv.compute_reconstruction_error(lams_reg, expected_ph)
 
+# parabolic fit of minimum over the computer curve
+lam_min, _ = reg_help_cv.fit_loss_min(lams_reg, f_avgs)
+
+# Regularized weighted least-squares solver (PDHG), on the whole dataset
+solver = solver_spawn(lam_min)
+(rec, rec_info) = solver_call(solver, None)
+
+with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     # Unregularized weighted least-squares solver (PDHG), for reference
     solver_wls = cct.solvers.CP(verbose=True, data_term=data_term_lsw)
     rec_wls, _ = solver_wls(A, sino_substr, iterations, x_mask=vol_mask, lower_limit=0, precondition=prec)
 
-    # Create the regularization weight finding helper object (using L-curve)
-    reg_help_lc = cct.utils_reg.LCurve(iso_tv_seminorm, verbose=True, plot_result=True)
-    reg_help_lc.solver_spawning_function = solver_spawn
-    reg_help_lc.solver_calling_function = solver_call
+# Create the regularization weight finding helper object (using L-curve)
+reg_help_lc = cct.utils_reg.LCurve(iso_tv_seminorm, verbose=True, plot_result=True)
+reg_help_lc.solver_spawning_function = solver_spawn
+reg_help_lc.solver_calling_function = solver_call
 
-    f_vals_lc = reg_help_lc.compute_loss_values(lams_reg)
+f_vals_lc = reg_help_lc.compute_loss_values(lams_reg)
 
 
 save_figs = False
