@@ -429,7 +429,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
                 )
             )
 
-        return self._compute_attenuation(vol, angle, invert=False)
+        return self._compute_attenuation(vol, angle, invert=invert)
 
     def _compute_attenuation_angle_in(self, angle):
         direction_in = [np.sin(angle), np.cos(angle)]
