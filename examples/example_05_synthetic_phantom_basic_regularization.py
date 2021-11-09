@@ -42,9 +42,9 @@ bckgnd_weight = np.sqrt(background_avg / (vol_shape[0] * np.sqrt(2)))
 
 prec = True
 num_iterations = 200
-reg_weight = 1/5
+reg_weight = 1 / 5
 lower_limit = None
-vol_mask = corrct.utils_proc.get_circular_mask(ph_or.shape)
+vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
 
 sino_substract = sino - background_avg
 
@@ -60,7 +60,7 @@ reg_smooth = corrct.solvers.Regularizer_smooth2D(reg_weight)
 reg_l1med = corrct.solvers.Regularizer_l1med(reg_weight)
 reg_l2med = corrct.solvers.Regularizer_l2med(reg_weight, filt_size=5)
 reg_dwl = corrct.solvers.Regularizer_l1dwl(reg_weight, 'haar', 4)
-reg_swl = corrct.solvers.Regularizer_l1swl(reg_weight, 'haar', 4)
+reg_swl = corrct.solvers.Regularizer_l1swl(reg_weight, 'bior4.4', 3)
 
 lowlim_l2 = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_l2())
 lowlim_l2w = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_wl2(1 / bckgnd_weight))
