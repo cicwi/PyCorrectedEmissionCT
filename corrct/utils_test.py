@@ -312,6 +312,10 @@ def phantom_assign_concentration(ph_or, element: str = "Ca", in_energy_keV: floa
     ----------
     ph_or : numpy.array_like
         The phases phantom map.
+    element : str, optional
+        Element symbol. The default is "Ca".
+    in_energy_keV : float, optional
+        Incoming beam energy in keV. The default is 20.0.
 
     Returns
     -------
