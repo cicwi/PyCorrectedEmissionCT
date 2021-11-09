@@ -1152,6 +1152,8 @@ class Sirt(Solver):
 
         if x0 is None:
             x0 = At(b * sigma) * tau
+        else:
+            x0 = x0.copy()
         x = x0
 
         self.data_term.assign_data(b, sigma)
@@ -1340,8 +1342,10 @@ class CP(Solver):
 
         if x0 is None:
             x0 = np.zeros(x_shape, dtype=x_dtype)
+        else:
+            x0 = x0.copy()
         x = x0
-        x_relax = x
+        x_relax = x.copy()
 
         self.data_term.assign_data(b, sigma)
         p = self.data_term.initialize_dual()
