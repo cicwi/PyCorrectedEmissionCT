@@ -7,25 +7,50 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
+import scipy as sp
+import scipy.signal
 
 from . import operators
 from . import solvers
+from . import utils_reg
+
+from typing import Sequence, Optional, Union, Tuple
+
+from numpy.typing import ArrayLike, DTypeLike
 
 
-def get_circular_mask(vol_shape, radius_offset=0, coords_ball=None, mask_drop_off="const", data_type=np.float32):
-    """Computes a circular mask for the reconstruction volume.
+def get_circular_mask(
+    vol_shape: ArrayLike,
+    radius_offset: float = 0,
+    coords_ball: Optional[Sequence[int]] = None,
+    mask_drop_off: str = "const",
+    data_type: DTypeLike = np.float32
+) -> ArrayLike:
+    """
+    Compute a circular mask for the reconstruction volume.
 
-    :param vol_shape: The size of the volume.
-    :type vol_shape: numpy.array_like
-    :param radius_offset: The offset with respect to the volume edge.
-    :type radius_offset: float. Optional, default: 0
-    :param coords_ball: The coordinates to consider for the non-masked region.
-    :type coords_ball: list of dimensions. Optional, default: None
-    :param data_type: The mask data type.
-    :type data_type: numpy.dtype. Optional, default: np.float32
+    Parameters
+    ----------
+    vol_shape : ArrayLike
+        The size of the volume.
+    radius_offset : float, optional
+        The offset with respect to the volume edge. The default is 0.
+    coords_ball : Optional[Sequence[int]], optional
+        The coordinates to consider for the non-masked region. The default is None.
+    mask_drop_off : str, optional
+        The mask data type. Allowed types: "const" | "sinc". The default is "const".
+    data_type : DTypeLike, optional
+        The type of mask. The default is np.float32.
 
-    :returns: The circular mask.
-    :rtype: (numpy.array_like)
+    Raises
+    ------
+    ValueError
+        In case of unknown mask_drop_off value.
+
+    Returns
+    -------
+    ArrayLike
+        The circular mask.
     """
     vol_shape = np.array(vol_shape, dtype=np.intp)
 
@@ -56,21 +81,29 @@ def get_circular_mask(vol_shape, radius_offset=0, coords_ball=None, mask_drop_of
         raise ValueError("Unknown drop-off function: %s" % mask_drop_off)
 
 
-def pad_sinogram(sinogram, width, pad_axis=-1, mode="edge", **kwds):
-    """Pads the sinogram.
+def pad_sinogram(
+    sinogram: ArrayLike, width: Union[int, Sequence[int]], pad_axis: int = -1, mode: str = "edge", **kwds
+) -> ArrayLike:
+    """
+    Pad the sinogram.
 
-    :param sinogram: The sinogram to pad.
-    :type sinogram: numpy.array_like
-    :param width: The width of the padding.
-    :type width: either an int or tuple(int, int)
-    :param pad_axis: The axis to pad.
-    :type pad_axis: int. Optional, default: -1
-    :param mode: The padding type (from numpy.pad).
-    :type mode: string. Optional, default: 'edge'.
-    :param kwds: The numpy.pad arguments.
+    Parameters
+    ----------
+    sinogram : ArrayLike
+        The sinogram to pad.
+    width : Union[int, Sequence[int]]
+        The width of the padding. Normally, it should either be an int or a tuple(int, int).
+    pad_axis : int, optional
+        The axis to pad. The default is -1.
+    mode : str, optional
+        The padding type (from numpy.pad). The default is "edge".
+    **kwds :
+        The numpy.pad arguments.
 
-    :returns: The padded sinogram.
-    :rtype: (numpy.array_like)
+    Returns
+    -------
+    ArrayLike
+        The padded sinogram.
     """
     pad_size = [(0, 0)] * len(sinogram.shape)
     if len(width) == 1:
@@ -80,22 +113,33 @@ def pad_sinogram(sinogram, width, pad_axis=-1, mode="edge", **kwds):
     return np.pad(sinogram, pad_size, mode=mode, **kwds)
 
 
-def apply_flat_field(projs, flats, darks=None, crop=None, data_type=np.float32):
-    """Apply flat field.
+def apply_flat_field(
+    projs: ArrayLike,
+    flats: ArrayLike,
+    darks: Optional[ArrayLike] = None,
+    crop: Optional[Sequence[int]] = None,
+    data_type: DTypeLike = np.float32
+) -> ArrayLike:
+    """
+    Apply flat field.
 
-    :param projs: Projections
-    :type projs: numpy.array_like
-    :param flats: Flat fields
-    :type flats: numpy.array_like
-    :param darks: Dark noise, defaults to None
-    :type darks: numpy.array_like, optional
-    :param crop: Crop region, defaults to None
-    :type crop: numpy.array_like, optional
-    :param data_type: numpy.dtype, defaults to np.float32
-    :type data_type: Data type of the processed data, optional
+    Parameters
+    ----------
+    projs : ArrayLike
+        Projections.
+    flats : ArrayLike
+        Flat fields.
+    darks : Optional[ArrayLike], optional
+        Dark noise. The default is None.
+    crop : Optional[Sequence[int]], optional
+        Crop region. The default is None.
+    data_type : DTypeLike, optional
+        Data type of the processed data. The default is np.float32.
 
-    :return: Falt-field corrected and linearized projections
-    :rtype: numpy.array_like
+    Returns
+    -------
+    ArrayLike
+        Falt-field corrected and linearized projections.
     """
     if crop is not None:
         projs = projs[..., crop[0] : crop[2], crop[1] : crop[3]]
@@ -112,87 +156,108 @@ def apply_flat_field(projs, flats, darks=None, crop=None, data_type=np.float32):
     return projs.astype(data_type) / flats
 
 
-def apply_minus_log(projs):
-    """Apply -log.
+def apply_minus_log(projs: ArrayLike) -> ArrayLike:
+    """
+    Apply -log.
 
-    :param projs: Projections
-    :type projs: numpy.array_like
+    Parameters
+    ----------
+    projs : ArrayLike
+        Projections.
 
-    :return: Falt-field corrected and linearized projections
-    :rtype: numpy.array_like
+    Returns
+    -------
+    ArrayLike
+        Linearized projections.
     """
     return np.fmax(-np.log(projs), 0.0)
 
 
 def denoise_image(
-    img, reg_weight=1e-2, stddev=None, error_norm="l2b", iterations=250, axes=(-2, -1), lower_limit=None, verbose=False
-):
-    """Image denoiser based on (simple, weighted or dead-zone) least-squares and wavelets.
-    The weighted least-squares requires the local pixel-wise standard deviations.
+    img: ArrayLike,
+    reg_weight: Union[float, Sequence[float], ArrayLike] = 1e-2,
+    variances: Optional[ArrayLike] = None,
+    iterations: int = 250,
+    axes: Sequence[int] = (-2, -1),
+    lower_limit: Optional[float] = None,
+    verbose: bool = False
+) -> ArrayLike:
+    """
+    Denoise an image.
+
+    Image denoiser based on (flat or weighted) least-squares, with wavelet minimization regularization.
+    The weighted least-squares requires the local pixel-wise variances.
     It can be used to denoise sinograms and projections.
 
-    :param img: The image or sinogram to denoise.
-    :type img: `numpy.array_like`
-    :param reg_weight: Weight of the regularization term, defaults to 1e-2
-    :type reg_weight: float, optional
-    :param stddev: The local standard deviations. If None, it performs a standard least-squares.
-    :type stddev: `numpy.array_like`, optional
-    :param error_norm: The error weighting mechanism. When using std_dev, options are: {'l2b'} | 'l1b' | 'hub' | 'wl2' \
-    (corresponding to: 'l2 dead-zone', 'l1 dead-zone', 'Huber', 'weighted least-squares').
-    :type error_norm: str, optional
-    :param iterations: Number of iterations, defaults to 250
-    :type iterations: int, optional
-    :param axes: Axes along which the regularization should be done, defaults to (-2, -1)
-    :type iterations: int or tuple, optional
-    :param lower_limit: Lower clipping limit of the image, defaults to None
-    :type iterations: float, optional
-    :param verbose: Turn verbosity on, defaults to False
-    :type verbose: boolean, optional
+    Parameters
+    ----------
+    img : ArrayLike
+        The image or sinogram to denoise.
+    reg_weight : Union[float, Sequence[float], ArrayLike], optional
+        Weight of the regularization term. The default is 1e-2.
+        If a sequence / array is passed, all the different values will be tested.
+        The one minimizing the error over the cross-validation set will be chosen and returned.
+    variances : Optional[ArrayLike], optional
+        The local variance of the pixels, for a weighted least-squares minimization.
+        If None, a standard least-squares minimization is performed.
+        The default is None.
+    iterations : int, optional
+        Number of iterations. The default is 250.
+    axes : Sequence[int], optional
+        Axes along which the regularization should be done. The default is (-2, -1).
+    lower_limit : Optional[float], optional
+        Lower clipping limit of the image. The default is None.
+    verbose : bool, optional
+        Turn verbosity on. The default is False.
 
-    :return: Denoised image or sinogram.
-    :rtype: `numpy.array_like`
+    Returns
+    -------
+    ArrayLike
+        Denoised image or sinogram.
     """
-
-    def compute_wls_weights(stddev, At, reg_weights):
-        stddev_zeros = stddev == 0
-        stddev_valid = np.invert(stddev_zeros)
-        min_valid_stddev = np.min(stddev[stddev_valid])
-
-        reg_weights = reg_weights * (At(stddev_zeros) == 0) * min_valid_stddev
-        img_weights = min_valid_stddev / np.fmax(stddev, min_valid_stddev)
-        return (img_weights, reg_weights)
-
-    def compute_lsb_weights(stddev):
-        stddev_zeros = stddev == 0
-        stddev_valid = np.invert(stddev_zeros)
-        min_valid_stddev = np.min(stddev[stddev_valid])
-        return np.fmax(stddev, min_valid_stddev)
-
     OpI = operators.TransformIdentity(img.shape)
 
-    if stddev is not None:
-        if error_norm.lower() == "l2b":
-            img_weight = compute_lsb_weights(stddev)
-            data_term = solvers.DataFidelity_l2b(img_weight)
-        elif error_norm.lower() == "l1b":
-            img_weight = compute_lsb_weights(stddev)
-            data_term = solvers.DataFidelity_l1b(img_weight)
-        elif error_norm.lower() == "hub":
-            img_weight = compute_lsb_weights(stddev)
-            data_term = solvers.DataFidelity_Huber(img_weight)
-        elif error_norm.lower() == "wl2":
-            (img_weight, reg_weight) = compute_wls_weights(stddev, OpI.T, reg_weight)
-            data_term = solvers.DataFidelity_wl2(img_weight)
-        else:
-            raise ValueError('Unknown error method: "%s". Options are: {"l2b"} | "l1b" | "hub" | "wl2"' % error_norm)
+    if variances is not None:
+        variances = np.abs(variances)
+        min_nonzero_vars = np.min(variances[variances > 0])
+        img_weights = 1 / np.fmax(variances, min_nonzero_vars)
+
+        data_term = solvers.DataFidelity_wl2(img_weights)
     else:
-        data_term = error_norm
+        data_term = solvers.DataFidelity_l2()
 
     if isinstance(axes, int):
         axes = (axes,)
 
-    reg_wl = solvers.Regularizer_l1swl(reg_weight, "bior4.4", 2, axes=axes, normalized=False)
-    sol_wls_wl = solvers.CP(verbose=verbose, regularizer=reg_wl, data_term=data_term)
+    def solver_spawn(lam_reg):
+        # Using the PDHG solver from Chambolle and Pock
+        # reg = solvers.Regularizer_Grad(lam_reg, axes=axes)
+        reg = solvers.Regularizer_l1swl(lam_reg, "bior4.4", 3, axes=axes, normalized=False)
+        return solvers.CP(verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term)
 
-    (denoised_img, _) = sol_wls_wl(OpI, img, iterations, x0=img, lower_limit=lower_limit)
+    def solver_call(solver, b_test_mask=None):
+        if b_test_mask is not None:
+            med_img = sp.signal.medfilt2d(img, kernel_size=11)
+            masked_pixels = b_test_mask > 0.5
+            x0 = img.copy()
+            x0[masked_pixels] = med_img[masked_pixels]
+        else:
+            x0 = img.copy()
+
+        return solver(
+            OpI, img, iterations, x0=x0, lower_limit=lower_limit, b_test_mask=b_test_mask
+        )
+
+    reg_weight = np.array(reg_weight)
+    if reg_weight.size > 1:
+        reg_help_cv = utils_reg.CrossValidation(img.shape, verbose=True, num_averages=5, plot_result=True)
+        reg_help_cv.solver_spawning_function = solver_spawn
+        reg_help_cv.solver_calling_function = solver_call
+
+        f_avgs, f_stds, _ = reg_help_cv.compute_loss_values(reg_weight)
+
+        reg_weight, _ = reg_help_cv.fit_loss_min(reg_weight, f_avgs)
+
+    solver = solver_spawn(reg_weight)
+    (denoised_img, _) = solver_call(solver, None)
     return denoised_img
