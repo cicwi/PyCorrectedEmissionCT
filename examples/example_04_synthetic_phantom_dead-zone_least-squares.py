@@ -150,3 +150,19 @@ axs[1].grid()
 
 plt.tight_layout()
 plt.show(block=False)
+
+# Comparing FRCs for each reconstruction
+frcs = [None] * 3
+for ii, rec in enumerate([rec_ls, rec_wls, rec_lsb]):
+    frcs[ii], T = cct.utils_proc.compute_frc(expected_ph, rec, snrt=0.4142)
+
+(f_prof, axs) = plt.subplots(1, 1, sharex=True, sharey=True)
+axs.plot(np.squeeze(frcs[0]), label=solver_ls.info().upper())
+axs.plot(np.squeeze(frcs[1]), label=solver_wls.info().upper())
+axs.plot(np.squeeze(frcs[2]), label=solver_lsb.info().upper())
+axs.plot(np.squeeze(T), label="T 1/2 bit")
+axs.legend()
+axs.grid()
+
+plt.tight_layout()
+plt.show(block=False)
