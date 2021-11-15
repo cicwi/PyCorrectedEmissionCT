@@ -12,7 +12,8 @@ from numpy.polynomial.polynomial import Polynomial
 
 import matplotlib.pyplot as plt
 
-from typing import Callable
+from typing import Callable, Sequence, Optional, Tuple
+from numpy.typing import ArrayLike, DTypeLike
 import inspect
 
 import time as tm
@@ -25,11 +26,39 @@ except ImportError:
     has_distributed = False
 
 
+def create_random_test_mask(
+    data_shape: Sequence[int], test_fraction: float = 0.05, data_dtype: DTypeLike = np.float32
+) -> ArrayLike:
+    """
+    Create a random mask for cross-validation.
+
+    Parameters
+    ----------
+    data_shape : Sequence[int]
+        The shape of the data.
+    test_fraction : float, optional
+        The fraction of pixels to mask. The default is 0.05.
+    data_dtype : DTypeLike, optional
+        The data type of the mask. The default is np.float32.
+
+    Returns
+    -------
+    data_test_mask : type defined by data_dtype
+        The pixel mask.
+    """
+    data_test_mask = np.zeros(data_shape, dtype=data_dtype)
+    num_test_pixels = int(np.ceil(data_test_mask.size * test_fraction))
+    test_pixels = np.random.permutation(data_test_mask.size)
+    test_pixels = np.unravel_index(test_pixels[:num_test_pixels], data_shape)
+    data_test_mask[test_pixels] = 1
+    return data_test_mask
+
+
 class BaseRegularizationEstimation(object):
     """Base class for regularization parameter estimation class."""
 
     def __init__(
-        self, data_dtype: np.dtype = np.float32, parallel_eval: bool = False, verbose: bool = False, plot_result: bool = False
+        self, data_dtype: DTypeLike = np.float32, parallel_eval: bool = False, verbose: bool = False, plot_result: bool = False
     ):
         self.data_dtype = data_dtype
 
@@ -70,7 +99,7 @@ class BaseRegularizationEstimation(object):
         self._solver_calling_function = c
 
     @staticmethod
-    def get_lambda_range(start, end, num_per_order: int = 4):
+    def get_lambda_range(start: float, end: float, num_per_order: int = 4) -> ArrayLike:
         """Compute regularization weights within an interval.
 
         Parameters
@@ -84,19 +113,19 @@ class BaseRegularizationEstimation(object):
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             List of regularization weights.
         """
         step_size = 10 ** (1 / num_per_order)
         num_steps = np.ceil(num_per_order * np.log10(end / start) - 1e-3)
         return start * (step_size ** np.arange(num_steps + 1))
 
-    def compute_reconstruction_and_loss(self, lam_reg, *args, **kwds):
+    def compute_reconstruction_and_loss(self, lam_reg: float, *args, **kwds) -> Tuple[Optional[ArrayLike], ArrayLike]:
         """Compute objective function cost for the given regularization weight.
 
         Parameters
         ----------
-        lam_reg : numpy.array_like
+        lam_reg : float
             Regularization weight.
         *args :
             Optional positional arguments for the reconstruction.
@@ -107,7 +136,7 @@ class BaseRegularizationEstimation(object):
         -------
         cost
             Cost of the given regularization weight.
-        rec : numpy.array_like
+        rec : ArrayLike
             Reconstruction at the given weight.
         """
         solver = self._solver_spawning_function(lam_reg)
@@ -119,21 +148,21 @@ class BaseRegularizationEstimation(object):
         else:
             return None, rec
 
-    def compute_reconstruction_error(self, lams_reg, gnd_truth):
+    def compute_reconstruction_error(self, lams_reg: ArrayLike, gnd_truth: ArrayLike) -> Tuple[ArrayLike, ArrayLike]:
         """Compute the reconstructions for each regularization weight error against the ground truth.
 
         Parameters
         ----------
-        lams_reg : numpy.array_like
+        lams_reg : ArrayLike
             List of regularization weights.
-        gnd_truth : numpy.array_like
+        gnd_truth : ArrayLike
             Expected reconstruction.
 
         Returns
         -------
-        err_l1 : numpy.array_like
+        err_l1 : ArrayLike
             l1-norm errors for each reconstruction.
-        err_l2 : numpy.array_like
+        err_l2 : ArrayLike
             l2-norm errors for each reconstruction.
         """
         if self.verbose:
@@ -172,12 +201,12 @@ class BaseRegularizationEstimation(object):
 
         return err_l1, err_l2
 
-    def compute_loss_values(self, lams_reg):
+    def compute_loss_values(self, lams_reg: ArrayLike) -> ArrayLike:
         """Compute the objective function costs for a list of regularization weights.
 
         Parameters
         ----------
-        lams_reg : numpy.array_like
+        lams_reg : ArrayLike
             List of regularization weights.
 
         Raises
@@ -194,7 +223,7 @@ class LCurve(BaseRegularizationEstimation):
     def __init__(
         self,
         loss_function: Callable,
-        data_dtype: np.dtype = np.float32,
+        data_dtype: DTypeLike = np.float32,
         parallel_eval: bool = False,
         verbose: bool = False,
         plot_result: bool = False,
@@ -205,7 +234,7 @@ class LCurve(BaseRegularizationEstimation):
         ----------
         loss_function : Callable
             The loss function for the computation of the L-curve values.
-        data_dtype : numpy.dtype, optional
+        data_dtype : DTypeLike, optional
             Type of the input data. The default is np.float32.
         parallel_eval : bool, optional
             Compute loss and error values in parallel. The default is False.
@@ -230,17 +259,17 @@ class LCurve(BaseRegularizationEstimation):
             raise ValueError("The callable 'loss_function', should have one parameter")
         self.loss_function = loss_function
 
-    def compute_loss_values(self, lams_reg):
+    def compute_loss_values(self, lams_reg: ArrayLike) -> ArrayLike:
         """Compute objective function values for all regularization weights.
 
         Parameters
         ----------
-        lams_reg : numpy.array_like
+        lams_reg : ArrayLike
             Regularization weights to use for computing the different objective function values.
 
         Returns
         -------
-        f_vals : numpy.array_like
+        f_vals : ArrayLike
             Objective function cost for each regularization weight.
         """
         if self.verbose:
@@ -282,8 +311,8 @@ class CrossValidation(BaseRegularizationEstimation):
 
     def __init__(
         self,
-        data_shape,
-        data_dtype: np.dtype = np.float32,
+        data_shape: ArrayLike,
+        data_dtype: DTypeLike = np.float32,
         test_fraction: float = 0.1,
         num_averages: int = 7,
         parallel_eval: bool = False,
@@ -294,9 +323,9 @@ class CrossValidation(BaseRegularizationEstimation):
 
         Parameters
         ----------
-        data_shape : numpy.array_like
+        data_shape : ArrayLike
             Shape of the projection data.
-        data_dtype : numpy.dtype, optional
+        data_dtype : DTypeLike, optional
             Type of the input data. The default is np.float32.
         test_fraction : float, optional
             Fraction of detector points to use for the leave-out set. The default is 0.1.
@@ -316,29 +345,24 @@ class CrossValidation(BaseRegularizationEstimation):
 
         self.data_test_masks = [self._create_random_test_mask() for ii in range(self.num_averages)]
 
-    def _create_random_test_mask(self):
-        data_test_mask = np.zeros(self.data_shape, dtype=self.data_dtype)
-        num_test_pixels = int(np.ceil(data_test_mask.size * self.test_fraction))
-        test_pixels = np.random.permutation(data_test_mask.size)
-        test_pixels = np.unravel_index(test_pixels[:num_test_pixels], self.data_shape)
-        data_test_mask[test_pixels] = 1
-        return data_test_mask
+    def _create_random_test_mask(self) -> ArrayLike:
+        return create_random_test_mask(self.data_shape, self.test_fraction, self.data_dtype)
 
-    def compute_loss_values(self, lams_reg):
+    def compute_loss_values(self, lams_reg: ArrayLike) -> Tuple[ArrayLike, ArrayLike, ArrayLike]:
         """Compute objective function values for all regularization weights.
 
         Parameters
         ----------
-        lams_reg : numpy.array_like
+        lams_reg : ArrayLike
             Regularization weights to use for computing the different objective function values.
 
         Returns
         -------
-        f_avgs : numpy.array_like
+        f_avgs : ArrayLike
             Average objective function costs for each regularization weight.
-        f_stds : numpy.array_like
+        f_stds : ArrayLike
             Standard deviation of objective function costs for each regularization weight.
-        f_vals : numpy.array_like
+        f_vals : ArrayLike
             Objective function costs for each regularization weight.
         """
         if self.verbose:
@@ -372,14 +396,14 @@ class CrossValidation(BaseRegularizationEstimation):
 
         return f_avgs, f_stds, f_vals
 
-    def fit_loss_min(self, lams_reg, f_vals, scale: str = "log"):
+    def fit_loss_min(self, lams_reg: ArrayLike, f_vals: ArrayLike, scale: str = "log") -> Tuple[float, float]:
         """Parabolic fit of objective function costs for the different regularization weights.
 
         Parameters
         ----------
-        lams_reg : numpy.array_like
+        lams_reg : ArrayLike
             Regularization weights.
-        f_vals : numpy.array_like
+        f_vals : ArrayLike
             Objective function costs of each regularization weight.
         scale : str, optional
             Scale of the fit. Options are: "log" | "linear". The default is "log".
@@ -427,7 +451,8 @@ class CrossValidation(BaseRegularizationEstimation):
 
         if self.verbose:
             print(
-                "Fitting minimum within the parameter interval [%g, %g]: " % (from_fit(lams_reg_fit[0]), from_fit(lams_reg[-1])),
+                "Fitting minimum within the parameter interval [%g, %g]: "
+                % (from_fit(lams_reg_fit[0]), from_fit(lams_reg[-1])),
                 end="",
                 flush=True,
             )
