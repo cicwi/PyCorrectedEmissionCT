@@ -261,3 +261,199 @@ def denoise_image(
     solver = solver_spawn(reg_weight)
     (denoised_img, _) = solver_call(solver, None)
     return denoised_img
+
+
+def azimuthal_integration(img: ArrayLike, axes: Sequence[int] = (-2, -1), domain: str = "direct") -> ArrayLike:
+    """
+    Compute the azimuthal integration of a n-dimensional image or a stack of them.
+
+    Parameters
+    ----------
+    img : ArrayLike
+        The image or stack of images.
+    axes : tuple(int, int), optional
+        Axes of that need to be azimuthally integrated. The default is (-2, -1).
+    domain : string, optional
+        Domain of the integration. Options are: "direct" | "fourier". Default is "direct".
+
+    Raises
+    ------
+    ValueError
+        Error returned when not passing images or wrong axes.
+
+    Returns
+    -------
+    ArrayLike
+        The azimuthally integrated profile.
+    """
+    num_dims_int = len(axes)
+    num_dims_img = len(img.shape)
+
+    if num_dims_img < num_dims_int:
+        raise ValueError(
+            "Input image ({num_dims_img}D) should be at least the same dimensionality"
+            " of the axes for the integration (#{num_dims_int})."
+        )
+    if len(axes) == 0:
+        raise ValueError("Input axes should be at least 1.")
+
+    # Compute the coordinates of the pixels along the chosen axes
+    img_axes_dims = np.array(np.array(img.shape)[list(axes)], ndmin=1)
+    if domain.lower() == "direct":
+        half_dims = (img_axes_dims - 1) / 2
+        coords = [np.linspace(-h, h, d) for h, d in zip(half_dims, img_axes_dims)]
+    else:
+        coords = [np.fft.fftfreq(d, 1 / d) for d in img_axes_dims]
+    coords = np.stack(np.meshgrid(*coords, indexing='ij'))
+    r = np.sqrt(np.sum(coords ** 2, axis=0))
+
+    # Reshape the volume to have the axes to be integrates as right-most axes
+    img_tr_op = [*range(len(img.shape))]
+    for a in axes:
+        img_tr_op.append(img_tr_op.pop(a))
+    img = np.transpose(img, img_tr_op)
+    if num_dims_img > num_dims_int:
+        img_old_shape = img.shape[:-num_dims_int]
+        img = np.reshape(img, [-1, *img_axes_dims])
+
+    # Compute the linear interpolation coefficients
+    r_l = np.floor(r)
+    r_u = r_l + 1
+    w_l = (r_u - r) * img
+    w_u = (r - r_l) * img
+
+    # Do the azimuthal integration as a histogram operation
+    r_all = np.concatenate((r_l.flatten(), r_u.flatten())).astype(int)
+    if num_dims_img > num_dims_int:
+        num_imgs = img.shape[0]
+        az_img = [None] * num_imgs
+        for ii in range(num_imgs):
+            w_all = np.concatenate((w_l[ii, ...].flatten(), w_u[ii, ...].flatten()))
+            az_img[ii] = np.bincount(r_all, weights=w_all)
+        az_img = np.array(az_img)
+        return np.reshape(az_img, (*img_old_shape, az_img.shape[-1]))
+    else:
+        w_all = np.concatenate((w_l.flatten(), w_u.flatten()))
+        return np.bincount(r_all, weights=w_all)
+
+
+def compute_frc(
+    img1: ArrayLike,
+    img2: ArrayLike,
+    snrt: float = 0.2071,
+    axes: Optional[Sequence[int]] = None,
+    smooth: Optional[int] = 5,
+    supersampling: int = 1
+) -> Tuple[ArrayLike, ArrayLike]:
+    """
+    Compute the FRC/FSC (Fourier ring/shell correlation) between two images / volumes.
+
+    Please refer to the following article for more information:
+        M. van Heel and M. Schatz, “Fourier shell correlation threshold criteria,”
+        J. Struct. Biol., vol. 151, no. 3, pp. 250–262, Sep. 2005.
+
+    Parameters
+    ----------
+    img1 : ArrayLike
+        First image / volume.
+    img2 : ArrayLike
+        Second image / volume.
+    snrt : float, optional
+        SNR to be used for generating the threshold curve for resolution definition.
+        The SNR value of 0.4142 corresponds to the hald-bit curve for a full dataset.
+        When splitting datasets in two sub-datasets, that value needs to be halved.
+        The default is 0.2071, which corresponds to the half-bit threashold for half dataset.
+    axes : Sequence[int], optional
+        The axes over which we want to compute the FRC/FSC.
+        If None, all axes will be used The default is None.
+    smooth : Optional[int], optional
+        Size of the Hann smoothing window. The default is 5.
+    supersampling : int, optional
+        Supersampling factor of the images.
+        Larger values increase the high-frequency range of the FRC/FSC function.
+        The default is 1, which corresponds to the Nyquist frequency.
+
+    Raises
+    ------
+    ValueError
+        Error returned when not passing images of the same shape.
+
+    Returns
+    -------
+    ArrayLike
+        The computed FRC/FSC.
+    ArrayLike
+        The threshold curve corresponding to the given threshod SNR.
+    """
+    img1_shape = np.array(img1.shape)
+
+    if axes is None:
+        axes = np.arange(-len(img1_shape), 0)
+
+    if img2 is None:
+        if np.any(img1_shape[list(axes)] % 2 == 1):
+            raise ValueError(
+                f"Image shape {img1_shape} along the chosen axes {axes} needs to be even."
+            )
+        raise NotImplementedError("Self FRC not implemented, yet.")
+    else:
+        img2_shape = np.array(img2.shape)
+        if len(img1_shape) != len(img2_shape) or np.any(img1_shape != img2_shape):
+            raise ValueError(
+                f"Image #1 size {img1_shape} and image #2 size {img2_shape} are different, while they should be equal."
+            )
+
+    if supersampling > 1:
+        base_grid = [np.linspace(-(d - 1) / 2, (d - 1) / 2, d) for d in img1_shape]
+
+        interp_grid = [np.linspace(-(d - 1) / 2, (d - 1) / 2, d) for d in img1_shape]
+        for a in axes:
+            d = img1_shape[a] * 2
+            interp_grid[a] = np.linspace(-(d - 1) / 4, (d - 1) / 4, d)
+        interp_grid = np.meshgrid(*interp_grid, indexing="ij")
+        interp_grid = np.transpose(interp_grid, [*range(1, len(img1_shape) + 1), 0])
+
+        img1 = sp.interpolate.interpn(base_grid, img1, interp_grid, bounds_error=False, fill_value=None)
+        img2 = sp.interpolate.interpn(base_grid, img2, interp_grid, bounds_error=False, fill_value=None)
+
+        img1_shape = np.array(img1.shape)
+
+    axes_shape = img1_shape[list(axes)]
+    cut_off = np.min(axes_shape) // 2
+
+    img1_f = np.fft.fftn(img1, axes=axes)
+    img2_f = np.fft.fftn(img2, axes=axes)
+
+    fc = img1_f * np.conj(img2_f)
+    f1 = np.abs(img1_f) ** 2
+    f2 = np.abs(img2_f) ** 2
+
+    fc_r_int = azimuthal_integration(fc.real, axes=axes, domain="fourier")
+    fc_i_int = azimuthal_integration(fc.imag, axes=axes, domain="fourier")
+    fc_int = np.sqrt((fc_r_int ** 2) + (fc_i_int ** 2))
+    f1_int = azimuthal_integration(f1, axes=axes, domain="fourier")
+    f2_int = azimuthal_integration(f2, axes=axes, domain="fourier")
+
+    f1s_f2s = f1_int * f2_int
+    f1s_f2s = f1s_f2s + (f1s_f2s == 0)
+    frc = fc_int / np.sqrt(f1s_f2s)
+
+    rings_size = azimuthal_integration(np.ones_like(img1), axes=axes, domain="fourier")
+    # Alternatively:
+    # # The number of pixels in a ring is given by the surface.
+    # # We compute the n-dimensional hyper-sphere surface, where n is given by the number of axes.
+    # n = len(axes)
+    # num_surf = 2 * np.pi ** (n / 2)
+    # den_surf = sp.special.gamma(n / 2)
+    # rings_size = np.concatenate(((1.0, ), num_surf / den_surf * np.arange(1, len(frc)) ** (n - 1)))
+
+    Tnum = snrt + (2 * np.sqrt(snrt) + 1) / np.sqrt(rings_size)
+    Tden = snrt + 1 + 2 * np.sqrt(snrt) / np.sqrt(rings_size)
+    Thb = Tnum / Tden
+
+    if smooth is not None and smooth > 1:
+        win = sp.signal.windows.hann(smooth)
+        win /= np.sum(win)
+        frc = sp.ndimage.convolve(frc, win , mode="nearest")
+
+    return frc[:cut_off], Thb[:cut_off]
