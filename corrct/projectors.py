@@ -361,7 +361,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             self.executor.shutdown()
 
     @staticmethod
-    def _compute_attenuation(vol, direction, invert: bool = False):
+    def _compute_attenuation(vol, angle_rad: float, invert: bool = False):
         def pad_vol(vol, edges):
             paddings = [(0,)] * len(vol.shape)
             paddings[-2], paddings[-1] = (edges[0],), (edges[1],)
@@ -371,27 +371,25 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
         edges = np.ceil((min_size - size_lims) / 2).astype(np.intp)
 
-        direction = np.array(direction)
         if invert:
-            direction = -direction
-        direction = direction / np.sqrt(np.sum(direction ** 2))
+            angle_rad += np.pi
 
-        rot_angle = np.rad2deg(np.arctan2(direction[1], direction[0]))
+        rot_angle_deg = np.rad2deg(angle_rad)
 
         cum_arr = pad_vol(vol, edges)
 
-        cum_arr = skt.rotate(cum_arr, rot_angle, order=1, clip=False)
-        cum_arr += np.roll(cum_arr, 1, axis=-1)
-        cum_arr = np.cumsum(cum_arr / 2, axis=-1)
+        cum_arr = skt.rotate(cum_arr, rot_angle_deg, order=1, clip=False)
+        cum_arr += np.roll(cum_arr, 1, axis=-2)
+        cum_arr = np.cumsum(cum_arr / 2, axis=-2)
 
-        cum_arr = skt.rotate(cum_arr, -rot_angle, order=1, clip=False)
+        cum_arr = skt.rotate(cum_arr, -rot_angle_deg, order=1, clip=False)
         cum_arr = cum_arr[..., edges[0] : -edges[0], edges[1] : -edges[1]]
 
         cum_arr = np.exp(-cum_arr)
 
         return cum_arr
 
-    def compute_attenuation(self, vol, angle: float, invert: bool = False):
+    def compute_attenuation(self, vol, angle_rad: float, invert: bool = False):
         """Compute the attenuation local attenuation for a given attenuation volume.
 
         This means the attenuation experienced by the photons emitted in each
@@ -401,8 +399,8 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         ----------
         vol : numpy.array_like
             The attenuation volume.
-        angle : float
-            The rotation angle.
+        angle_rad : float
+            The rotation angle in radians.
         invert : bool, optional
             Whether to reverse the direction of propagation. The default is False.
 
@@ -429,18 +427,16 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
                 )
             )
 
-        return self._compute_attenuation(vol, angle, invert=invert)
+        return self._compute_attenuation(vol, angle_rad, invert=invert)
 
-    def _compute_attenuation_angle_in(self, angle):
-        direction_in = [np.sin(angle), np.cos(angle)]
-        return self.compute_attenuation(self.att_in, direction_in)[np.newaxis, ...]
+    def _compute_attenuation_angle_in(self, angle_rad: float):
+        return self.compute_attenuation(self.att_in, angle_rad)[np.newaxis, ...]
 
-    def _compute_attenuation_angle_out(self, angle):
-        angle_det = angle - self.angles_det_rad
+    def _compute_attenuation_angle_out(self, angle_rad: float):
+        angle_det = angle_rad - self.angles_det_rad
         atts = np.zeros(self.att_vol_angles.shape[1:], dtype=self.data_type)
         for ii, a in enumerate(angle_det):
-            direction_out = [np.sin(a), np.cos(a)]
-            atts[ii, ...] = self.compute_attenuation(self.att_out, direction_out, invert=True)
+            atts[ii, ...] = self.compute_attenuation(self.att_out, a, invert=True)
         return atts
 
     def compute_attenuation_volumes(self):
