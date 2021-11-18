@@ -404,7 +404,8 @@ class ProjectorBackendASTRA(ProjectorBackend):
         self.initialize()
 
         if angle_ind is None:
-            return self.W_all.FP(vol)
+            prj = np.empty(self.prj_shape, dtype=np.float32)
+            return self.W_all.FP(vol, out=prj)
         else:
             if not self.has_individual_projs:
                 raise ValueError("Individual projectors not available!")
@@ -427,15 +428,17 @@ class ProjectorBackendASTRA(ProjectorBackend):
         """
         self.initialize()
 
+        vol = np.empty(self.vol_shape, dtype=np.float32)
         if angle_ind is None:
-            return self.W_all.BP(prj)
+            return self.W_all.BP(prj, out=vol)
         else:
             if not self.has_individual_projs:
                 raise ValueError("Individual projectors not available!")
-            sino = np.empty([2, *np.squeeze(prj).shape], dtype=prj.dtype)
+            prj = np.squeeze(prj)
+            sino = np.empty([*prj.shape[:-1], 2, prj.shape[-1]], dtype=np.float32)
             sino[0, ...] = prj
             sino[1, ...] = 0
-            return self.W_ind[angle_ind].BP(sino)
+            return self.W_ind[angle_ind].BP(sino, out=vol)
 
     def fbp(self, prj, fbp_filter):
         """Apply filtered back-projection of a sinogram or stack of sinograms.
@@ -470,7 +473,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
             vols = [None] * num_lines
 
             for ii_v in range(num_lines):
-                sino_id = astra.data2d.create("-sino", proj_geom, prj[:, ii_v, :])
+                sino_id = astra.data2d.link("-sino", proj_geom, prj[:, ii_v, :])
                 vol_id = astra.data2d.create("-vol", vol_geom, 0)
 
                 cfg["ProjectionDataId"] = sino_id
@@ -485,7 +488,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
             return np.stack(vols, axis=0)
         else:
-            sino_id = astra.data2d.create("-sino", proj_geom, prj)
+            sino_id = astra.data2d.link("-sino", proj_geom, prj)
             vol_id = astra.data2d.create("-vol", vol_geom, 0)
 
             cfg["ProjectionDataId"] = sino_id
