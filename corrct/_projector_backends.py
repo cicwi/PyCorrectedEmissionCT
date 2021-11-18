@@ -32,6 +32,15 @@ except ImportError:
     has_cuda = False
     print("WARNING: ASTRA is not available. Only 2D operations on CPU are available (scikit-image will be used).")
 
+if has_cuda:
+    try:
+        import astra.experimental
+
+        has_astra_direct = True
+    except ImportError:
+        has_astra_direct = False
+        print("WARNING: the experimental ASTRA direct interface is not available. The traditional interface will be used.")
+
 
 def compute_attenuation(vol: NDArray, angle_rad: float, invert: bool = False) -> NDArray:
     """
@@ -717,3 +726,174 @@ class ProjectorBackendASTRA(ProjectorBackend):
                 vols.append(self.bp(prj_v))
 
             return np.ascontiguousarray(np.stack(vols, axis=0))
+
+
+class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
+    """Experimental astra-toolbox functions projector."""
+
+    astra_vol_shape: tuple
+    astra_prj_shape: tuple
+    astra_angle_prj_shape: tuple
+    angle_prj_shape: tuple
+
+    def initialize_geometry(
+        self,
+        vol_geom: VolumeGeometry,
+        angles_rot_rad: Union[ArrayLike, NDArray],
+        rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
+        prj_geom: Optional[ProjectionGeometry] = None,
+        create_single_projs: bool = True,
+    ):
+        """Initialize projector backend based on experimental astra-toolbox functions.
+
+        Parameters
+        ----------
+        vol_geom : VolumeGeometry
+            The volume shape.
+        angles_rot_rad : ArrayLike
+            The projection angles.
+        rot_axis_shift_pix : float, optional
+            Relative position of the rotation center with respect to the volume center. The default is 0.0.
+        geom : ProjectionGeometry, optional
+            The fully specified projection geometry.
+            When active, the rotation axis shift is ignored. The default is None.
+        create_single_projs : bool, optional
+            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
+
+        Raises
+        ------
+        ValueError
+            In case CUDA is not available.
+        """
+        if not has_cuda:
+            raise ValueError("CUDA is not available, but it is required for the direct functions!")
+        if not has_astra_direct:
+            raise ValueError("ASTRA direct is not available, but it is required!")
+        if not (rot_axis_shift_pix is None or isinstance(rot_axis_shift_pix, (int, float, list, tuple, np.ndarray))):
+            raise ValueError(
+                "Rotation axis shift should either be None or one of the following: int, a float or a sequence of floats"
+                + f" ({type(rot_axis_shift_pix)} given instead)."
+            )
+
+        ProjectorBackend.initialize_geometry(self, vol_geom, angles_rot_rad, create_single_projs=create_single_projs)
+
+        self.proj_id = []
+        self.dispose()
+
+        num_angles = self.angles_w_rad.size
+
+        if not self.vol_geom.is_3D() and len(self.vol_geom.shape_xyz) == 2:
+            self.vol_geom._vol_shape_xyz = np.concatenate((self.vol_geom.shape_xyz, (1,)))
+
+        self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape_xyz[list([1, 0, 2])], *self.vol_geom.extent)
+        if prj_geom is None:
+            prj_geom = ProjectionGeometry.get_default_parallel(geom_type="3d", rot_axis_shift_pix=rot_axis_shift_pix)
+
+        if prj_geom.det_shape_vu is None:
+            prj_geom.det_shape_vu = np.array(self.vol_geom.shape_xyz[list([2, 0])], dtype=int)
+        else:
+            self.prj_shape_vwu = np.array([prj_geom.det_shape_vu[0], num_angles, prj_geom.det_shape_vu[1]])
+            self.prj_shape_vu = np.array([prj_geom.det_shape_vu[0], 1, prj_geom.det_shape_vu[1]])
+
+        rot_geom = prj_geom.rotate(self.angles_w_rad)
+
+        vectors = np.empty([num_angles, 12])
+        # source / beam direction
+        vectors[:, 0:3] = rot_geom.get_field_scaled("src_pos_xyz")
+        # center of detector
+        vectors[:, 3:6] = rot_geom.get_field_scaled("det_pos_xyz")
+        # vector from detector pixel (0, 0) to (0, 1)
+        vectors[:, 6:9] = rot_geom.get_field_scaled("det_u_xyz")
+        # vector from detector pixel (0, 0) to (1, 0)
+        vectors[:, 9:12] = rot_geom.get_field_scaled("det_v_xyz")
+
+        geom_type_str = prj_geom.geom_type
+
+        if self.has_individual_projs:
+            self.proj_geom_ind = [
+                astra.create_proj_geom(geom_type_str + "_vec", *prj_geom.det_shape_vu, vectors[ii : ii + 1 :, :])
+                for ii in range(num_angles)
+            ]
+
+        self.proj_geom_all = astra.create_proj_geom(geom_type_str + "_vec", *prj_geom.det_shape_vu, vectors)
+
+        self.astra_vol_shape = tuple(self.vol_geom.shape_zxy)
+        self.astra_prj_shape = (self.vol_geom.shape_xyz[2], num_angles, self.vol_geom.shape_xyz[0])
+        self.astra_angle_prj_shape = (self.vol_geom.shape_xyz[2], 1, self.vol_geom.shape_xyz[0])
+        self.angle_prj_shape = (self.vol_geom.shape_xyz[2], self.vol_geom.shape_xyz[0])
+
+    def make_ready(self):
+        """Initialize the ASTRA projectors."""
+        if not self.is_ready:
+            voxel_sampling = int(self.super_sampling * np.fmax(1, self.vol_geom.vox_size))
+            pixel_sampling = int(self.super_sampling / np.fmin(1, self.vol_geom.vox_size))
+            opts = {"VoxelSuperSampling": voxel_sampling, "DetectorSuperSampling": pixel_sampling}
+
+            if self.has_individual_projs:
+                self.proj_id = [astra.create_projector("cuda3d", pg, self.astra_vol_geom, opts) for pg in self.proj_geom_ind]
+
+            self.proj_id.append(astra.create_projector("cuda3d", self.proj_geom_all, self.astra_vol_geom, opts))
+
+        ProjectorBackend.make_ready(self)
+
+    def fp(self, vol: NDArray, angle_ind: Optional[int] = None):
+        """Apply forward-projection of the volume to the sinogram or a single sinogram line.
+
+        Parameters
+        ----------
+        vol : NDArray
+            The volume to forward-project.
+        angle_ind : int | None, optional
+            The angle index to foward project. The default is None.
+
+        Returns
+        -------
+        NDArray
+            The forward-projected sinogram or sinogram line.
+        """
+        self.make_ready()
+
+        if angle_ind is None:
+            prj = np.zeros(self.astra_prj_shape, dtype=np.float32)
+            proj_id = self.proj_id[-1]
+            out_shape = self.prj_shape_vwu
+        else:
+            if not self.has_individual_projs:
+                raise ValueError("Individual projectors not available!")
+            prj = np.zeros(self.astra_angle_prj_shape, dtype=np.float32)
+            proj_id = self.proj_id[angle_ind]
+            out_shape = self.angle_prj_shape
+
+        vol = self._check_data(vol, self.astra_vol_shape)
+        astra.experimental.direct_FP3D(proj_id, vol, prj)
+        return prj.reshape(out_shape)
+
+    def bp(self, prj: NDArray, angle_ind: Optional[int] = None):
+        """Apply back-projection of a single sinogram line to the volume.
+
+        Parameters
+        ----------
+        prj : NDArray
+            The sinogram to back-project or a single line.
+        angle_ind : int | None, optional
+            The angle index to foward project. The default is None.
+
+        Returns
+        -------
+        NDArray
+            The back-projected volume.
+        """
+        self.make_ready()
+
+        if angle_ind is None:
+            prj = self._check_data(prj, self.astra_prj_shape)
+            proj_id = self.proj_id[-1]
+        else:
+            if not self.has_individual_projs:
+                raise ValueError("Individual projectors not available!")
+            prj = self._check_data(prj, self.astra_angle_prj_shape)
+            proj_id = self.proj_id[angle_ind]
+
+        vol = np.zeros(self.astra_vol_shape, dtype=np.float32)
+        astra.experimental.direct_BP3D(proj_id, vol, prj)
+        return vol.reshape(self.vol_shape_zxy)
