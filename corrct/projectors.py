@@ -498,12 +498,11 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         sino_line : numpy.array_like
             The forward-projected sinogram line.
         """
-        temp_vol = cp.deepcopy(vol)[np.newaxis, ...]
-        temp_vol = np.tile(temp_vol, (len(self.angles_det_rad), *((1,) * len(self.vol_shape))))
-
         if self.precompute_attenuation:
-            temp_vol *= self.att_vol_angles[angle_ind, ...]
+            temp_vol = vol * self.att_vol_angles[angle_ind, ...]
         else:
+            temp_vol = np.tile(vol[np.newaxis, ...], (len(self.angles_det_rad), *((1,) * len(self.vol_shape))))
+
             a = self.angles_rot_rad[angle_ind]
             if self.att_in is not None:
                 temp_vol *= self._compute_attenuation_angle_in(a)
