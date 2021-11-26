@@ -1169,9 +1169,8 @@ class Sirt(Solver):
         else:
             res_norm_rel = None
 
-        if self.verbose:
-            reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-            algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
+        reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+        algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
 
         for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
             Ax = A(x)
@@ -1355,9 +1354,8 @@ class CP(Solver):
         else:
             res_norm_rel = None
 
-        if self.verbose:
-            reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-            algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
+        reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+        algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
 
         for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
             Ax_rlx = A(x_relax)
