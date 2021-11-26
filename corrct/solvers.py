@@ -1044,15 +1044,7 @@ class Sart(Solver):
         if self.verbose:
             algo_info = "- Performing %s iterations: " % self.upper()
 
-            def progressbar(x):
-                return tqdm(x, desc=algo_info)
-
-        else:
-
-            def progressbar(x):
-                return x
-
-        for ii in progressbar(range(iterations)):
+        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
 
             for ii_a in rows_sequence:
                 res = A(x, ii_a) - b[ii_a, ...]
@@ -1181,15 +1173,7 @@ class Sirt(Solver):
             reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
             algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
 
-            def progressbar(x):
-                return tqdm(x, desc=algo_info)
-
-        else:
-
-            def progressbar(x):
-                return x
-
-        for ii in progressbar(range(iterations)):
+        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
             Ax = A(x)
             res = self.data_term.compute_residual(Ax, mask=b_mask)
 
@@ -1375,15 +1359,7 @@ class CP(Solver):
             reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
             algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
 
-            def progressbar(x):
-                return tqdm(x, desc=algo_info)
-
-        else:
-
-            def progressbar(x):
-                return x
-
-        for ii in progressbar(range(iterations)):
+        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
             Ax_rlx = A(x_relax)
             self.data_term.update_dual(p, Ax_rlx)
             self.data_term.apply_proximal(p)
