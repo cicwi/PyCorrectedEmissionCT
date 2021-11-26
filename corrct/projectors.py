@@ -20,6 +20,8 @@ from . import utils_proc
 import concurrent.futures as cf
 import multiprocessing as mp
 
+from tqdm import tqdm
+
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
@@ -266,6 +268,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         weights_angles=None,
         use_multithreading: bool = True,
         data_type=np.float32,
+        verbose : bool = True
     ):
         """
         Attenuation corrected projection class for XRF.
@@ -310,6 +313,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         self.data_type = data_type
         self.use_multithreading = use_multithreading
+        self.verbose = verbose
 
         if precompute_attenuation:
             if att_in is None and att_out is None:
@@ -450,22 +454,32 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         if self.att_in is not None:
             if self.use_multithreading:
+                num_angles = len(self.angles_rot_rad)
+                r = [None] * num_angles
                 with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    angle_atts = executor.map(self._compute_attenuation_angle_in, self.angles_rot_rad)
-                for ii, a in enumerate(angle_atts):
-                    self.att_vol_angles[ii, ...] *= a
+                    # angle_atts = executor.map(self._compute_attenuation_angle_in, self.angles_rot_rad)
+                    for ii, a in enumerate(self.angles_rot_rad):
+                        r[ii] = executor.submit(self._compute_attenuation_angle_in, a)
+                    for ii in tqdm(range(num_angles), desc="Computing attenuation maps of incident beam: ", disable=(not self.verbose)):
+                        self.att_vol_angles[ii, ...] *= r[ii].result()
             else:
-                for ii, a in enumerate(self.angles_rot_rad):
+                for ii, a in enumerate(tqdm(self.angles_rot_rad, disable=(not self.verbose))):
                     self.att_vol_angles[ii, ...] *= self._compute_attenuation_angle_in(a)
 
         if self.att_out is not None:
             if self.use_multithreading:
+                num_angles = len(self.angles_rot_rad)
+                r = [None] * num_angles
                 with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    angle_atts = executor.map(self._compute_attenuation_angle_out, self.angles_rot_rad)
-                for ii, a in enumerate(angle_atts):
-                    self.att_vol_angles[ii, ...] *= a
+                    for ii, a in enumerate(self.angles_rot_rad):
+                        r[ii] = executor.submit(self._compute_attenuation_angle_out, a)
+                    for ii in tqdm(range(num_angles), desc="Computing attenuation maps of emitted photons: ", disable=(not self.verbose)):
+                        self.att_vol_angles[ii, ...] *= r[ii].result()
+                #     angle_atts = executor.map(self._compute_attenuation_angle_out, self.angles_rot_rad)
+                # for ii, a in enumerate(angle_atts):
+                #     self.att_vol_angles[ii, ...] *= a
             else:
-                for ii, a in enumerate(self.angles_rot_rad):
+                for ii, a in enumerate(tqdm(self.angles_rot_rad, disable=(not self.verbose))):
                     self.att_vol_angles[ii, ...] *= self._compute_attenuation_angle_out(a)
 
         if self.is_3d:
