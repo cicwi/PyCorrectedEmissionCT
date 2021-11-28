@@ -29,6 +29,8 @@ except ImportError:
 
 from tqdm import tqdm
 
+from typing import Optional, Union
+
 
 eps = np.finfo(np.float32).eps
 
@@ -942,11 +944,22 @@ class Constraint_UpperLimit(BaseRegularizer):
 class Solver(object):
     """Base solver class."""
 
-    def __init__(self, verbose=False, relaxation=1, tolerance=None, data_term_test=DataFidelity_l2()):
+    def __init__(
+        self,
+        verbose: bool = False,
+        relaxation: float = 1.0,
+        tolerance: float = None,
+        data_term: Union[str, DataFidelityBase] = "l2",
+        data_term_test: Optional[DataFidelityBase] = None,
+    ):
         self.verbose = verbose
         self.relaxation = relaxation
         self.tolerance = tolerance
-        self.data_term_test = cp.deepcopy(data_term_test)
+
+        self.data_term = self._initialize_data_fidelity_function(data_term)
+        if data_term_test is None:
+            data_term_test = self.data_term
+        self.data_term_test = cp.deepcopy(self.data_term)
 
     def info(self):
         return type(self).__name__
@@ -956,6 +969,18 @@ class Solver(object):
 
     def lower(self):
         return type(self).__name__.lower()
+
+    @staticmethod
+    def _initialize_data_fidelity_function(data_term):
+        if isinstance(data_term, str):
+            if data_term.lower() == "l2":
+                return DataFidelity_l2()
+            else:
+                raise ValueError('Unknown data term: "%s", only accepted terms are: "l2".' % data_term)
+        elif isinstance(data_term, (DataFidelity_l2, DataFidelity_KL)):
+            return cp.deepcopy(data_term)
+        else:
+            raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
 
     @staticmethod
     def _initialize_data_operators(A, At):
@@ -1079,27 +1104,17 @@ class Sirt(Solver):
 
     def __init__(
         self,
-        verbose=False,
-        tolerance=None,
-        relaxation=1.95,
-        data_term="l2",
-        regularizer=None,
-        data_term_test=DataFidelity_l2(),
+        verbose: bool = False,
+        relaxation: float = 1.95,
+        tolerance: Optional[float] = None,
+        regularizer: Optional[BaseRegularizer] = None,
+        data_term: Union[str, DataFidelityBase] = "l2",
+        data_term_test: Optional[DataFidelityBase] = None,
     ):
-        super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation, data_term_test=data_term_test)
-        self.data_term = self._initialize_data_fidelity_function(data_term)
+        super().__init__(
+            verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
+        )
         self.regularizer = self._initialize_regularizer(regularizer)
-
-    def _initialize_data_fidelity_function(self, data_term):
-        if isinstance(data_term, str):
-            if data_term.lower() == "l2":
-                return DataFidelity_l2()
-            else:
-                raise ValueError('Unknown data term: "%s", only accepted terms are: "l2".' % data_term)
-        elif isinstance(data_term, (DataFidelity_l2, DataFidelity_KL)):
-            return data_term
-        else:
-            raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
 
     def info(self):
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
@@ -1215,15 +1230,16 @@ class PDHG(Solver):
 
     def __init__(
         self,
-        verbose=False,
-        tolerance=None,
-        relaxation=0.95,
-        data_term="l2",
-        regularizer=None,
-        data_term_test=DataFidelity_l2(),
+        verbose: bool = False,
+        tolerance: Optional[float] = None,
+        relaxation: float = 0.95,
+        regularizer: Optional[BaseRegularizer] = None,
+        data_term: Union[str, DataFidelityBase] = "l2",
+        data_term_test: Optional[DataFidelityBase] = None,
     ):
-        super().__init__(verbose=verbose, tolerance=tolerance, relaxation=relaxation, data_term_test=data_term_test)
-        self.data_term = self._initialize_data_fidelity_function(data_term)
+        super().__init__(
+            verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
+        )
         self.regularizer = self._initialize_regularizer(regularizer)
 
     def info(self):
@@ -1242,7 +1258,7 @@ class PDHG(Solver):
             else:
                 raise ValueError('Unknown data term: "%s", accepted terms are: "l2" | "l1" | "kl".' % data_term)
         else:
-            return data_term
+            return cp.deepcopy(data_term)
 
     def power_method(self, A, At, b, iterations=5):
         x = np.random.rand(*b.shape).astype(b.dtype)
