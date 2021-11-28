@@ -1,64 +1,31 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.utils_proc &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-
-  
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> PyCorrectedEmissionCT
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -66,83 +33,37 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">PyCorrectedEmissionCT</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
-        
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>corrct.utils_proc</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for corrct.utils_proc</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -153,35 +74,60 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">operators</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">solvers</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils_reg</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span>
 
 
-<div class="viewcode-block" id="get_circular_mask"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_circular_mask">[docs]</a><span class="k">def</span> <span class="nf">get_circular_mask</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">,</span> <span class="n">radius_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">coords_ball</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask_drop_off</span><span class="o">=</span><span class="s2">&quot;const&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Computes a circular mask for the reconstruction volume.</span>
+<div class="viewcode-block" id="get_circular_mask"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_circular_mask">[docs]</a><span class="k">def</span> <span class="nf">get_circular_mask</span><span class="p">(</span>
+    <span class="n">vol_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">radius_offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">coords_ball</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mask_drop_off</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;const&quot;</span><span class="p">,</span>
+    <span class="n">data_type</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a circular mask for the reconstruction volume.</span>
 
-<span class="sd">    :param vol_shape: The size of the volume.</span>
-<span class="sd">    :type vol_shape: numpy.array_like</span>
-<span class="sd">    :param radius_offset: The offset with respect to the volume edge.</span>
-<span class="sd">    :type radius_offset: float. Optional, default: 0</span>
-<span class="sd">    :param coords_ball: The coordinates to consider for the non-masked region.</span>
-<span class="sd">    :type coords_ball: list of dimensions. Optional, default: None</span>
-<span class="sd">    :param data_type: The mask data type.</span>
-<span class="sd">    :type data_type: numpy.dtype. Optional, default: np.float32</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vol_shape : ArrayLike</span>
+<span class="sd">        The size of the volume.</span>
+<span class="sd">    radius_offset : float, optional</span>
+<span class="sd">        The offset with respect to the volume edge. The default is 0.</span>
+<span class="sd">    coords_ball : Optional[Sequence[int]], optional</span>
+<span class="sd">        The coordinates to consider for the non-masked region. The default is None.</span>
+<span class="sd">    mask_drop_off : str, optional</span>
+<span class="sd">        The mask data type. Allowed types: &quot;const&quot; | &quot;sinc&quot;. The default is &quot;const&quot;.</span>
+<span class="sd">    data_type : DTypeLike, optional</span>
+<span class="sd">        The type of mask. The default is np.float32.</span>
 
-<span class="sd">    :returns: The circular mask.</span>
-<span class="sd">    :rtype: (numpy.array_like)</span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        In case of unknown mask_drop_off value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        The circular mask.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">vol_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">vol_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
 
     <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">vol_shape</span><span class="p">]</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">coords_ball</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">coords_ball</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">)),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="n">coords_ball</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">)),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">coords_ball</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coords_ball</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="n">coords_ball</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coords_ball</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
 
     <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">[</span><span class="n">coords_ball</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">radius_offset</span>
 
@@ -202,21 +148,29 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown drop-off function: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">mask_drop_off</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="pad_sinogram"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.pad_sinogram">[docs]</a><span class="k">def</span> <span class="nf">pad_sinogram</span><span class="p">(</span><span class="n">sinogram</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">pad_axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Pads the sinogram.</span>
+<div class="viewcode-block" id="pad_sinogram"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.pad_sinogram">[docs]</a><span class="k">def</span> <span class="nf">pad_sinogram</span><span class="p">(</span>
+    <span class="n">sinogram</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span> <span class="n">pad_axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pad the sinogram.</span>
 
-<span class="sd">    :param sinogram: The sinogram to pad.</span>
-<span class="sd">    :type sinogram: numpy.array_like</span>
-<span class="sd">    :param width: The width of the padding.</span>
-<span class="sd">    :type width: either an int or tuple(int, int)</span>
-<span class="sd">    :param pad_axis: The axis to pad.</span>
-<span class="sd">    :type pad_axis: int. Optional, default: -1</span>
-<span class="sd">    :param mode: The padding type (from numpy.pad).</span>
-<span class="sd">    :type mode: string. Optional, default: &#39;edge&#39;.</span>
-<span class="sd">    :param kwds: The numpy.pad arguments.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sinogram : ArrayLike</span>
+<span class="sd">        The sinogram to pad.</span>
+<span class="sd">    width : Union[int, Sequence[int]]</span>
+<span class="sd">        The width of the padding. Normally, it should either be an int or a tuple(int, int).</span>
+<span class="sd">    pad_axis : int, optional</span>
+<span class="sd">        The axis to pad. The default is -1.</span>
+<span class="sd">    mode : str, optional</span>
+<span class="sd">        The padding type (from numpy.pad). The default is &quot;edge&quot;.</span>
+<span class="sd">    **kwds :</span>
+<span class="sd">        The numpy.pad arguments.</span>
 
-<span class="sd">    :returns: The padded sinogram.</span>
-<span class="sd">    :rtype: (numpy.array_like)</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        The padded sinogram.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pad_size</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sinogram</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -226,22 +180,33 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">sinogram</span><span class="p">,</span> <span class="n">pad_size</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="apply_flat_field"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.apply_flat_field">[docs]</a><span class="k">def</span> <span class="nf">apply_flat_field</span><span class="p">(</span><span class="n">projs</span><span class="p">,</span> <span class="n">flats</span><span class="p">,</span> <span class="n">darks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Apply flat field.</span>
+<div class="viewcode-block" id="apply_flat_field"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.apply_flat_field">[docs]</a><span class="k">def</span> <span class="nf">apply_flat_field</span><span class="p">(</span>
+    <span class="n">projs</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">flats</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">darks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crop</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_type</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply flat field.</span>
 
-<span class="sd">    :param projs: Projections</span>
-<span class="sd">    :type projs: numpy.array_like</span>
-<span class="sd">    :param flats: Flat fields</span>
-<span class="sd">    :type flats: numpy.array_like</span>
-<span class="sd">    :param darks: Dark noise, defaults to None</span>
-<span class="sd">    :type darks: numpy.array_like, optional</span>
-<span class="sd">    :param crop: Crop region, defaults to None</span>
-<span class="sd">    :type crop: numpy.array_like, optional</span>
-<span class="sd">    :param data_type: numpy.dtype, defaults to np.float32</span>
-<span class="sd">    :type data_type: Data type of the processed data, optional</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    projs : ArrayLike</span>
+<span class="sd">        Projections.</span>
+<span class="sd">    flats : ArrayLike</span>
+<span class="sd">        Flat fields.</span>
+<span class="sd">    darks : Optional[ArrayLike], optional</span>
+<span class="sd">        Dark noise. The default is None.</span>
+<span class="sd">    crop : Optional[Sequence[int]], optional</span>
+<span class="sd">        Crop region. The default is None.</span>
+<span class="sd">    data_type : DTypeLike, optional</span>
+<span class="sd">        Data type of the processed data. The default is np.float32.</span>
 
-<span class="sd">    :return: Falt-field corrected and linearized projections</span>
-<span class="sd">    :rtype: numpy.array_like</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        Falt-field corrected and linearized projections.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">crop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">projs</span> <span class="o">=</span> <span class="n">projs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
@@ -258,129 +223,334 @@
     <span class="k">return</span> <span class="n">projs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span> <span class="o">/</span> <span class="n">flats</span></div>
 
 
-<div class="viewcode-block" id="apply_minus_log"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.apply_minus_log">[docs]</a><span class="k">def</span> <span class="nf">apply_minus_log</span><span class="p">(</span><span class="n">projs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Apply -log.</span>
+<div class="viewcode-block" id="apply_minus_log"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.apply_minus_log">[docs]</a><span class="k">def</span> <span class="nf">apply_minus_log</span><span class="p">(</span><span class="n">projs</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply -log.</span>
 
-<span class="sd">    :param projs: Projections</span>
-<span class="sd">    :type projs: numpy.array_like</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    projs : ArrayLike</span>
+<span class="sd">        Projections.</span>
 
-<span class="sd">    :return: Falt-field corrected and linearized projections</span>
-<span class="sd">    :rtype: numpy.array_like</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        Linearized projections.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">projs</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="denoise_image"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.denoise_image">[docs]</a><span class="k">def</span> <span class="nf">denoise_image</span><span class="p">(</span>
-    <span class="n">img</span><span class="p">,</span> <span class="n">reg_weight</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error_norm</span><span class="o">=</span><span class="s2">&quot;l2b&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">lower_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
-<span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Image denoiser based on (simple, weighted or dead-zone) least-squares and wavelets.</span>
-<span class="sd">    The weighted least-squares requires the local pixel-wise standard deviations.</span>
+    <span class="n">img</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">reg_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
+    <span class="n">variances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Denoise an image.</span>
+
+<span class="sd">    Image denoiser based on (flat or weighted) least-squares, with wavelet minimization regularization.</span>
+<span class="sd">    The weighted least-squares requires the local pixel-wise variances.</span>
 <span class="sd">    It can be used to denoise sinograms and projections.</span>
 
-<span class="sd">    :param img: The image or sinogram to denoise.</span>
-<span class="sd">    :type img: `numpy.array_like`</span>
-<span class="sd">    :param reg_weight: Weight of the regularization term, defaults to 1e-2</span>
-<span class="sd">    :type reg_weight: float, optional</span>
-<span class="sd">    :param stddev: The local standard deviations. If None, it performs a standard least-squares.</span>
-<span class="sd">    :type stddev: `numpy.array_like`, optional</span>
-<span class="sd">    :param error_norm: The error weighting mechanism. When using std_dev, options are: {&#39;l2b&#39;} | &#39;l1b&#39; | &#39;hub&#39; | &#39;wl2&#39; \</span>
-<span class="sd">    (corresponding to: &#39;l2 dead-zone&#39;, &#39;l1 dead-zone&#39;, &#39;Huber&#39;, &#39;weighted least-squares&#39;).</span>
-<span class="sd">    :type error_norm: str, optional</span>
-<span class="sd">    :param iterations: Number of iterations, defaults to 250</span>
-<span class="sd">    :type iterations: int, optional</span>
-<span class="sd">    :param axes: Axes along which the regularization should be done, defaults to (-2, -1)</span>
-<span class="sd">    :type iterations: int or tuple, optional</span>
-<span class="sd">    :param lower_limit: Lower clipping limit of the image, defaults to None</span>
-<span class="sd">    :type iterations: float, optional</span>
-<span class="sd">    :param verbose: Turn verbosity on, defaults to False</span>
-<span class="sd">    :type verbose: boolean, optional</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img : ArrayLike</span>
+<span class="sd">        The image or sinogram to denoise.</span>
+<span class="sd">    reg_weight : Union[float, Sequence[float], ArrayLike], optional</span>
+<span class="sd">        Weight of the regularization term. The default is 1e-2.</span>
+<span class="sd">        If a sequence / array is passed, all the different values will be tested.</span>
+<span class="sd">        The one minimizing the error over the cross-validation set will be chosen and returned.</span>
+<span class="sd">    variances : Optional[ArrayLike], optional</span>
+<span class="sd">        The local variance of the pixels, for a weighted least-squares minimization.</span>
+<span class="sd">        If None, a standard least-squares minimization is performed.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    iterations : int, optional</span>
+<span class="sd">        Number of iterations. The default is 250.</span>
+<span class="sd">    axes : Sequence[int], optional</span>
+<span class="sd">        Axes along which the regularization should be done. The default is (-2, -1).</span>
+<span class="sd">    lower_limit : Optional[float], optional</span>
+<span class="sd">        Lower clipping limit of the image. The default is None.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Turn verbosity on. The default is False.</span>
 
-<span class="sd">    :return: Denoised image or sinogram.</span>
-<span class="sd">    :rtype: `numpy.array_like`</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        Denoised image or sinogram.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">compute_wls_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">,</span> <span class="n">At</span><span class="p">,</span> <span class="n">reg_weights</span><span class="p">):</span>
-        <span class="n">stddev_zeros</span> <span class="o">=</span> <span class="n">stddev</span> <span class="o">==</span> <span class="mi">0</span>
-        <span class="n">stddev_valid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">stddev_zeros</span><span class="p">)</span>
-        <span class="n">min_valid_stddev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">stddev</span><span class="p">[</span><span class="n">stddev_valid</span><span class="p">])</span>
-
-        <span class="n">reg_weights</span> <span class="o">=</span> <span class="n">reg_weights</span> <span class="o">*</span> <span class="p">(</span><span class="n">At</span><span class="p">(</span><span class="n">stddev_zeros</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">min_valid_stddev</span>
-        <span class="n">img_weights</span> <span class="o">=</span> <span class="n">min_valid_stddev</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">stddev</span><span class="p">,</span> <span class="n">min_valid_stddev</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">img_weights</span><span class="p">,</span> <span class="n">reg_weights</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">):</span>
-        <span class="n">stddev_zeros</span> <span class="o">=</span> <span class="n">stddev</span> <span class="o">==</span> <span class="mi">0</span>
-        <span class="n">stddev_valid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">stddev_zeros</span><span class="p">)</span>
-        <span class="n">min_valid_stddev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">stddev</span><span class="p">[</span><span class="n">stddev_valid</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">stddev</span><span class="p">,</span> <span class="n">min_valid_stddev</span><span class="p">)</span>
-
     <span class="n">OpI</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">stddev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;l2b&quot;</span><span class="p">:</span>
-            <span class="n">img_weight</span> <span class="o">=</span> <span class="n">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">)</span>
-            <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_l2b</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;l1b&quot;</span><span class="p">:</span>
-            <span class="n">img_weight</span> <span class="o">=</span> <span class="n">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">)</span>
-            <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_l1b</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;hub&quot;</span><span class="p">:</span>
-            <span class="n">img_weight</span> <span class="o">=</span> <span class="n">compute_lsb_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">)</span>
-            <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_Huber</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">error_norm</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;wl2&quot;</span><span class="p">:</span>
-            <span class="p">(</span><span class="n">img_weight</span><span class="p">,</span> <span class="n">reg_weight</span><span class="p">)</span> <span class="o">=</span> <span class="n">compute_wls_weights</span><span class="p">(</span><span class="n">stddev</span><span class="p">,</span> <span class="n">OpI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">reg_weight</span><span class="p">)</span>
-            <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_wl2</span><span class="p">(</span><span class="n">img_weight</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown error method: &quot;</span><span class="si">%s</span><span class="s1">&quot;. Options are: {&quot;l2b&quot;} | &quot;l1b&quot; | &quot;hub&quot; | &quot;wl2&quot;&#39;</span> <span class="o">%</span> <span class="n">error_norm</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">variances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">variances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">variances</span><span class="p">)</span>
+        <span class="n">min_nonzero_vars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">variances</span><span class="p">[</span><span class="n">variances</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">img_weights</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">variances</span><span class="p">,</span> <span class="n">min_nonzero_vars</span><span class="p">)</span>
+
+        <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_wl2</span><span class="p">(</span><span class="n">img_weights</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">data_term</span> <span class="o">=</span> <span class="n">error_norm</span>
+        <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">axes</span> <span class="o">=</span> <span class="p">(</span><span class="n">axes</span><span class="p">,)</span>
 
-    <span class="n">reg_wl</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1swl</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">,</span> <span class="s2">&quot;bior4.4&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">sol_wls_wl</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg_wl</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">solver_spawn</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">):</span>
+        <span class="c1"># Using the PDHG solver from Chambolle and Pock</span>
+        <span class="c1"># reg = solvers.Regularizer_Grad(lam_reg, axes=axes)</span>
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1swl</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">,</span> <span class="s2">&quot;bior4.4&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg</span><span class="p">,</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
 
-    <span class="p">(</span><span class="n">denoised_img</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">sol_wls_wl</span><span class="p">(</span><span class="n">OpI</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">img</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">b_test_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">med_img</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">medfilt2d</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+            <span class="n">masked_pixels</span> <span class="o">=</span> <span class="n">b_test_mask</span> <span class="o">&gt;</span> <span class="mf">0.5</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">x0</span><span class="p">[</span><span class="n">masked_pixels</span><span class="p">]</span> <span class="o">=</span> <span class="n">med_img</span><span class="p">[</span><span class="n">masked_pixels</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">solver</span><span class="p">(</span>
+            <span class="n">OpI</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="o">=</span><span class="n">b_test_mask</span>
+        <span class="p">)</span>
+
+    <span class="n">reg_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reg_weight</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">reg_help_cv</span> <span class="o">=</span> <span class="n">utils_reg</span><span class="o">.</span><span class="n">CrossValidation</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_averages</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">solver_spawning_function</span> <span class="o">=</span> <span class="n">solver_spawn</span>
+        <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">solver_calling_function</span> <span class="o">=</span> <span class="n">solver_call</span>
+
+        <span class="n">f_avgs</span><span class="p">,</span> <span class="n">f_stds</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">compute_loss_values</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
+
+        <span class="n">reg_weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">fit_loss_min</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">,</span> <span class="n">f_avgs</span><span class="p">)</span>
+
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">solver_spawn</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">denoised_img</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">denoised_img</span></div>
+
+
+<div class="viewcode-block" id="azimuthal_integration"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.azimuthal_integration">[docs]</a><span class="k">def</span> <span class="nf">azimuthal_integration</span><span class="p">(</span><span class="n">img</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;direct&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the azimuthal integration of a n-dimensional image or a stack of them.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img : ArrayLike</span>
+<span class="sd">        The image or stack of images.</span>
+<span class="sd">    axes : tuple(int, int), optional</span>
+<span class="sd">        Axes of that need to be azimuthally integrated. The default is (-2, -1).</span>
+<span class="sd">    domain : string, optional</span>
+<span class="sd">        Domain of the integration. Options are: &quot;direct&quot; | &quot;fourier&quot;. Default is &quot;direct&quot;.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Error returned when not passing images or wrong axes.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        The azimuthally integrated profile.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_dims_int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span>
+    <span class="n">num_dims_img</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">num_dims_img</span> <span class="o">&lt;</span> <span class="n">num_dims_int</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Input image (</span><span class="si">{num_dims_img}</span><span class="s2">D) should be at least the same dimensionality&quot;</span>
+            <span class="s2">&quot; of the axes for the integration (#</span><span class="si">{num_dims_int}</span><span class="s2">).&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input axes should be at least 1.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Compute the coordinates of the pixels along the chosen axes</span>
+    <span class="n">img_axes_dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">domain</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;direct&quot;</span><span class="p">:</span>
+        <span class="n">half_dims</span> <span class="o">=</span> <span class="p">(</span><span class="n">img_axes_dims</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">half_dims</span><span class="p">,</span> <span class="n">img_axes_dims</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">img_axes_dims</span><span class="p">]</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">))</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coords</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="c1"># Reshape the volume to have the axes to be integrates as right-most axes</span>
+    <span class="n">img_tr_op</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+        <span class="n">img_tr_op</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img_tr_op</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">img_tr_op</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">num_dims_img</span> <span class="o">&gt;</span> <span class="n">num_dims_int</span><span class="p">:</span>
+        <span class="n">img_old_shape</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="n">num_dims_int</span><span class="p">]</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">img_axes_dims</span><span class="p">])</span>
+
+    <span class="c1"># Compute the linear interpolation coefficients</span>
+    <span class="n">r_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="n">r_u</span> <span class="o">=</span> <span class="n">r_l</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">w_l</span> <span class="o">=</span> <span class="p">(</span><span class="n">r_u</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">img</span>
+    <span class="n">w_u</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="n">r_l</span><span class="p">)</span> <span class="o">*</span> <span class="n">img</span>
+
+    <span class="c1"># Do the azimuthal integration as a histogram operation</span>
+    <span class="n">r_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">r_l</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">r_u</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">num_dims_img</span> <span class="o">&gt;</span> <span class="n">num_dims_int</span><span class="p">:</span>
+        <span class="n">num_imgs</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">az_img</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_imgs</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_imgs</span><span class="p">):</span>
+            <span class="n">w_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">w_l</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">w_u</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span>
+            <span class="n">az_img</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">r_all</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w_all</span><span class="p">)</span>
+        <span class="n">az_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">az_img</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">az_img</span><span class="p">,</span> <span class="p">(</span><span class="o">*</span><span class="n">img_old_shape</span><span class="p">,</span> <span class="n">az_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">w_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">w_l</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">w_u</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">r_all</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w_all</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="compute_frc"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.compute_frc">[docs]</a><span class="k">def</span> <span class="nf">compute_frc</span><span class="p">(</span>
+    <span class="n">img1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">img2</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">snrt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2071</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">smooth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">supersampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the FRC/FSC (Fourier ring/shell correlation) between two images / volumes.</span>
+
+<span class="sd">    Please refer to the following article for more information:</span>
+<span class="sd">        M. van Heel and M. Schatz, “Fourier shell correlation threshold criteria,”</span>
+<span class="sd">        J. Struct. Biol., vol. 151, no. 3, pp. 250–262, Sep. 2005.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img1 : ArrayLike</span>
+<span class="sd">        First image / volume.</span>
+<span class="sd">    img2 : ArrayLike</span>
+<span class="sd">        Second image / volume.</span>
+<span class="sd">    snrt : float, optional</span>
+<span class="sd">        SNR to be used for generating the threshold curve for resolution definition.</span>
+<span class="sd">        The SNR value of 0.4142 corresponds to the hald-bit curve for a full dataset.</span>
+<span class="sd">        When splitting datasets in two sub-datasets, that value needs to be halved.</span>
+<span class="sd">        The default is 0.2071, which corresponds to the half-bit threashold for half dataset.</span>
+<span class="sd">    axes : Sequence[int], optional</span>
+<span class="sd">        The axes over which we want to compute the FRC/FSC.</span>
+<span class="sd">        If None, all axes will be used The default is None.</span>
+<span class="sd">    smooth : Optional[int], optional</span>
+<span class="sd">        Size of the Hann smoothing window. The default is 5.</span>
+<span class="sd">    supersampling : int, optional</span>
+<span class="sd">        Supersampling factor of the images.</span>
+<span class="sd">        Larger values increase the high-frequency range of the FRC/FSC function.</span>
+<span class="sd">        The default is 1, which corresponds to the Nyquist frequency.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Error returned when not passing images of the same shape.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        The computed FRC/FSC.</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        The threshold curve corresponding to the given threshod SNR.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">img1_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">img1_shape</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">img2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">img1_shape</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Image shape </span><span class="si">{</span><span class="n">img1_shape</span><span class="si">}</span><span class="s2"> along the chosen axes </span><span class="si">{</span><span class="n">axes</span><span class="si">}</span><span class="s2"> needs to be even.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Self FRC not implemented, yet.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">img2_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img2</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">img1_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">img2_shape</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">img1_shape</span> <span class="o">!=</span> <span class="n">img2_shape</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Image #1 size </span><span class="si">{</span><span class="n">img1_shape</span><span class="si">}</span><span class="s2"> and image #2 size </span><span class="si">{</span><span class="n">img2_shape</span><span class="si">}</span><span class="s2"> are different, while they should be equal.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">supersampling</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">base_grid</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">img1_shape</span><span class="p">]</span>
+
+        <span class="n">interp_grid</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">img1_shape</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">img1_shape</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+            <span class="n">interp_grid</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+        <span class="n">interp_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">interp_grid</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
+        <span class="n">interp_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">interp_grid</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">img1_shape</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">img1</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interpn</span><span class="p">(</span><span class="n">base_grid</span><span class="p">,</span> <span class="n">img1</span><span class="p">,</span> <span class="n">interp_grid</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">img2</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interpn</span><span class="p">(</span><span class="n">base_grid</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">interp_grid</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">img1_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">axes_shape</span> <span class="o">=</span> <span class="n">img1_shape</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]</span>
+    <span class="n">cut_off</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axes_shape</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+
+    <span class="n">img1_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+    <span class="n">img2_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">img2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+
+    <span class="n">fc</span> <span class="o">=</span> <span class="n">img1_f</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">img2_f</span><span class="p">)</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">img1_f</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">f2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">img2_f</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="n">fc_r_int</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">fc</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
+    <span class="n">fc_i_int</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">fc</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
+    <span class="n">fc_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">fc_r_int</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">fc_i_int</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">f1_int</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
+    <span class="n">f2_int</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
+
+    <span class="n">f1s_f2s</span> <span class="o">=</span> <span class="n">f1_int</span> <span class="o">*</span> <span class="n">f2_int</span>
+    <span class="n">f1s_f2s</span> <span class="o">=</span> <span class="n">f1s_f2s</span> <span class="o">+</span> <span class="p">(</span><span class="n">f1s_f2s</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">frc</span> <span class="o">=</span> <span class="n">fc_int</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f1s_f2s</span><span class="p">)</span>
+
+    <span class="n">rings_size</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">img1</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
+    <span class="c1"># Alternatively:</span>
+    <span class="c1"># # The number of pixels in a ring is given by the surface.</span>
+    <span class="c1"># # We compute the n-dimensional hyper-sphere surface, where n is given by the number of axes.</span>
+    <span class="c1"># n = len(axes)</span>
+    <span class="c1"># num_surf = 2 * np.pi ** (n / 2)</span>
+    <span class="c1"># den_surf = sp.special.gamma(n / 2)</span>
+    <span class="c1"># rings_size = np.concatenate(((1.0, ), num_surf / den_surf * np.arange(1, len(frc)) ** (n - 1)))</span>
+
+    <span class="n">Tnum</span> <span class="o">=</span> <span class="n">snrt</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">snrt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rings_size</span><span class="p">)</span>
+    <span class="n">Tden</span> <span class="o">=</span> <span class="n">snrt</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">snrt</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rings_size</span><span class="p">)</span>
+    <span class="n">Thb</span> <span class="o">=</span> <span class="n">Tnum</span> <span class="o">/</span> <span class="n">Tden</span>
+
+    <span class="k">if</span> <span class="n">smooth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">smooth</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">win</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">hann</span><span class="p">(</span><span class="n">smooth</span><span class="p">)</span>
+        <span class="n">win</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">win</span><span class="p">)</span>
+        <span class="n">frc</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">frc</span><span class="p">,</span> <span class="n">win</span> <span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">frc</span><span class="p">[:</span><span class="n">cut_off</span><span class="p">],</span> <span class="n">Thb</span><span class="p">[:</span><span class="n">cut_off</span><span class="p">]</span></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2018, Nicola VIGANO
-
-    </p>
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

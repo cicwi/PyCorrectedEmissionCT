@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.utils_reg &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>corrct.utils_reg</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for corrct.utils_reg</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Aided regularization parameter estimation.</span>
+
+<span class="sd">@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,</span>
+<span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.polynomial.polynomial</span> <span class="kn">import</span> <span class="n">Polynomial</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+
+<span class="kn">import</span> <span class="nn">time</span> <span class="k">as</span> <span class="nn">tm</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">dask.distributed</span> <span class="k">as</span> <span class="nn">dd</span>
+
+    <span class="n">has_distributed</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">has_distributed</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="create_random_test_mask"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.create_random_test_mask">[docs]</a><span class="k">def</span> <span class="nf">create_random_test_mask</span><span class="p">(</span>
+    <span class="n">data_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">test_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a random mask for cross-validation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_shape : Sequence[int]</span>
+<span class="sd">        The shape of the data.</span>
+<span class="sd">    test_fraction : float, optional</span>
+<span class="sd">        The fraction of pixels to mask. The default is 0.05.</span>
+<span class="sd">    data_dtype : DTypeLike, optional</span>
+<span class="sd">        The data type of the mask. The default is np.float32.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data_test_mask : type defined by data_dtype</span>
+<span class="sd">        The pixel mask.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data_test_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_dtype</span><span class="p">)</span>
+    <span class="n">num_test_pixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">data_test_mask</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="n">test_fraction</span><span class="p">))</span>
+    <span class="n">test_pixels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">data_test_mask</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">test_pixels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">test_pixels</span><span class="p">[:</span><span class="n">num_test_pixels</span><span class="p">],</span> <span class="n">data_shape</span><span class="p">)</span>
+    <span class="n">data_test_mask</span><span class="p">[</span><span class="n">test_pixels</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">data_test_mask</span></div>
+
+
+<div class="viewcode-block" id="BaseRegularizationEstimation"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.BaseRegularizationEstimation">[docs]</a><span class="k">class</span> <span class="nc">BaseRegularizationEstimation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for regularization parameter estimation class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">parallel_eval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">plot_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_dtype</span> <span class="o">=</span> <span class="n">data_dtype</span>
+
+        <span class="k">if</span> <span class="n">parallel_eval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_distributed</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: module dask.distributed is not available. Parallelization of computation will not be available.&quot;</span><span class="p">)</span>
+            <span class="n">parallel_eval</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallel_eval</span> <span class="o">=</span> <span class="n">parallel_eval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_result</span> <span class="o">=</span> <span class="n">plot_result</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_spawning_function</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_calling_function</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">solver_spawning_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_spawning_function</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">solver_calling_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_calling_function</span>
+
+    <span class="nd">@solver_spawning_function</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">solver_spawning_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Callable</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected a solver spawning function (callable)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Expected a solver spawning function (callable), whose only parameter is the regularization lambda&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_spawning_function</span> <span class="o">=</span> <span class="n">s</span>
+
+    <span class="nd">@solver_calling_function</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">solver_calling_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Callable</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected a solver calling function (callable)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected a solver calling function (callable), with at least one parameter (solver)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_calling_function</span> <span class="o">=</span> <span class="n">c</span>
+
+<div class="viewcode-block" id="BaseRegularizationEstimation.get_lambda_range"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.BaseRegularizationEstimation.get_lambda_range">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_lambda_range</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num_per_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute regularization weights within an interval.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        start : float</span>
+<span class="sd">            First regularization weight.</span>
+<span class="sd">        end : float</span>
+<span class="sd">            Last regularization weight.</span>
+<span class="sd">        num_per_order : int, optional</span>
+<span class="sd">            Number of steps per order of magnitude. The default is 4.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArrayLike</span>
+<span class="sd">            List of regularization weights.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">step_size</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">num_per_order</span><span class="p">)</span>
+        <span class="n">num_steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_per_order</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">end</span> <span class="o">/</span> <span class="n">start</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1e-3</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">start</span> <span class="o">*</span> <span class="p">(</span><span class="n">step_size</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="BaseRegularizationEstimation.compute_reconstruction_and_loss"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.BaseRegularizationEstimation.compute_reconstruction_and_loss">[docs]</a>    <span class="k">def</span> <span class="nf">compute_reconstruction_and_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam_reg</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">],</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute objective function cost for the given regularization weight.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lam_reg : float</span>
+<span class="sd">            Regularization weight.</span>
+<span class="sd">        *args :</span>
+<span class="sd">            Optional positional arguments for the reconstruction.</span>
+<span class="sd">        **kwds :</span>
+<span class="sd">            Optional keyword arguments for the reconstruction.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cost</span>
+<span class="sd">            Cost of the given regularization weight.</span>
+<span class="sd">        rec : ArrayLike</span>
+<span class="sd">            Reconstruction at the given weight.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">solver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_spawning_function</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="n">rec_info</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_calling_function</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="n">test_residuals</span> <span class="o">=</span> <span class="n">rec_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Output will be: test objective function cost, and reconstruction</span>
+        <span class="k">if</span> <span class="n">test_residuals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">test_residuals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">rec</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">rec</span></div>
+
+<div class="viewcode-block" id="BaseRegularizationEstimation.compute_reconstruction_error"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.BaseRegularizationEstimation.compute_reconstruction_error">[docs]</a>    <span class="k">def</span> <span class="nf">compute_reconstruction_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">gnd_truth</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the reconstructions for each regularization weight error against the ground truth.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lams_reg : ArrayLike</span>
+<span class="sd">            List of regularization weights.</span>
+<span class="sd">        gnd_truth : ArrayLike</span>
+<span class="sd">            Expected reconstruction.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        err_l1 : ArrayLike</span>
+<span class="sd">            l1-norm errors for each reconstruction.</span>
+<span class="sd">        err_l2 : ArrayLike</span>
+<span class="sd">            l2-norm errors for each reconstruction.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing reconstruction error:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- Regularization weights range: [</span><span class="si">%g</span><span class="s2">, </span><span class="si">%g</span><span class="s2">] in </span><span class="si">%d</span><span class="s2"> steps&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lams_reg</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lams_reg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">)))</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="n">err_l1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">),))</span>
+        <span class="n">err_l2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">),))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_eval</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_reconstruction_and_loss</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ii_l</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_eval</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">rec</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">ii_l</span><span class="p">]</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_reconstruction_and_loss</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+            <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">gnd_truth</span> <span class="o">-</span> <span class="n">rec</span><span class="p">)</span>
+            <span class="n">err_l1</span><span class="p">[</span><span class="n">ii_l</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">residual</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">err_l2</span><span class="p">[</span><span class="n">ii_l</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">residual</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done in </span><span class="si">%g</span><span class="s2"> seconds.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">c</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_result</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="n">nonpositive</span><span class="o">=</span><span class="s2">&quot;clip&quot;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">,</span> <span class="n">err_l1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Error - l1-norm&quot;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+            <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="n">nonpositive</span><span class="o">=</span><span class="s2">&quot;clip&quot;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">,</span> <span class="n">err_l2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Error - l2-norm ^ 2&quot;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">err_l1</span><span class="p">,</span> <span class="n">err_l2</span></div>
+
+<div class="viewcode-block" id="BaseRegularizationEstimation.compute_loss_values"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.BaseRegularizationEstimation.compute_loss_values">[docs]</a>    <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the objective function costs for a list of regularization weights.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lams_reg : ArrayLike</span>
+<span class="sd">            List of regularization weights.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            This is an interface method for derived classes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="LCurve"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.LCurve">[docs]</a><span class="k">class</span> <span class="nc">LCurve</span><span class="p">(</span><span class="n">BaseRegularizationEstimation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;L-curve based regularization parameter estimation class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">loss_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">data_dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="n">parallel_eval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create an L-curve regularization parameter estimation helper.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        loss_function : Callable</span>
+<span class="sd">            The loss function for the computation of the L-curve values.</span>
+<span class="sd">        data_dtype : DTypeLike, optional</span>
+<span class="sd">            Type of the input data. The default is np.float32.</span>
+<span class="sd">        parallel_eval : bool, optional</span>
+<span class="sd">            Compute loss and error values in parallel. The default is False.</span>
+<span class="sd">        verbose : bool, optional</span>
+<span class="sd">            Print verbose output. The default is False.</span>
+<span class="sd">        plot_result : bool, optional</span>
+<span class="sd">            Plot results. The default is False.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            In case &#39;loss_function&#39; is not callable or does not expose at least one argument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data_dtype</span><span class="o">=</span><span class="n">data_dtype</span><span class="p">,</span> <span class="n">parallel_eval</span><span class="o">=</span><span class="n">parallel_eval</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="n">plot_result</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loss_function</span><span class="p">,</span> <span class="n">Callable</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Expected a callable with one argument for the argument &#39;loss_function&#39;,&quot;</span>
+                <span class="s2">&quot; whose parameters are: the solver and the data test mask&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">loss_function</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The callable &#39;loss_function&#39;, should have one parameter&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">loss_function</span>
+
+<div class="viewcode-block" id="LCurve.compute_loss_values"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.LCurve.compute_loss_values">[docs]</a>    <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute objective function values for all regularization weights.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lams_reg : ArrayLike</span>
+<span class="sd">            Regularization weights to use for computing the different objective function values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        f_vals : ArrayLike</span>
+<span class="sd">            Objective function cost for each regularization weight.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing L-curve loss values:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- Regularization weights range: [</span><span class="si">%g</span><span class="s2">, </span><span class="si">%g</span><span class="s2">] in </span><span class="si">%d</span><span class="s2"> steps&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lams_reg</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lams_reg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">)))</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_eval</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_reconstruction_and_loss</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">)</span>
+
+        <span class="n">f_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">ii_l</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_eval</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">rec</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">ii_l</span><span class="p">]</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_reconstruction_and_loss</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+            <span class="n">f_vals</span><span class="p">[</span><span class="n">ii_l</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done in </span><span class="si">%g</span><span class="s2"> seconds.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">c</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_result</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;L-Curve loss values&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="n">nonpositive</span><span class="o">=</span><span class="s2">&quot;clip&quot;</span><span class="p">)</span>
+            <span class="c1"># ax.set_yscale(&quot;log&quot;, nonpositive=&quot;clip&quot;)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">,</span> <span class="n">f_vals</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">f_vals</span></div></div>
+
+
+<div class="viewcode-block" id="CrossValidation"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.CrossValidation">[docs]</a><span class="k">class</span> <span class="nc">CrossValidation</span><span class="p">(</span><span class="n">BaseRegularizationEstimation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cross-validation based regularization parameter estimation class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+        <span class="n">data_dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="n">test_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">num_averages</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>
+        <span class="n">parallel_eval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a cross-validation regularization parameter estimation helper.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_shape : ArrayLike</span>
+<span class="sd">            Shape of the projection data.</span>
+<span class="sd">        data_dtype : DTypeLike, optional</span>
+<span class="sd">            Type of the input data. The default is np.float32.</span>
+<span class="sd">        test_fraction : float, optional</span>
+<span class="sd">            Fraction of detector points to use for the leave-out set. The default is 0.1.</span>
+<span class="sd">        num_averages : int, optional</span>
+<span class="sd">            Number of averages random leave-out sets to use. The default is 7.</span>
+<span class="sd">        parallel_eval : bool, optional</span>
+<span class="sd">            Compute loss and error values in parallel. The default is False.</span>
+<span class="sd">        verbose : bool, optional</span>
+<span class="sd">            Print verbose output. The default is False.</span>
+<span class="sd">        plot_result : bool, optional</span>
+<span class="sd">            Plot results. The default is False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data_dtype</span><span class="o">=</span><span class="n">data_dtype</span><span class="p">,</span> <span class="n">parallel_eval</span><span class="o">=</span><span class="n">parallel_eval</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="n">plot_result</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_shape</span> <span class="o">=</span> <span class="n">data_shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_fraction</span> <span class="o">=</span> <span class="n">test_fraction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_averages</span> <span class="o">=</span> <span class="n">num_averages</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_test_masks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_random_test_mask</span><span class="p">()</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_averages</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="nf">_create_random_test_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">create_random_test_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_fraction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_dtype</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CrossValidation.compute_loss_values"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.CrossValidation.compute_loss_values">[docs]</a>    <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute objective function values for all regularization weights.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lams_reg : ArrayLike</span>
+<span class="sd">            Regularization weights to use for computing the different objective function values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        f_avgs : ArrayLike</span>
+<span class="sd">            Average objective function costs for each regularization weight.</span>
+<span class="sd">        f_stds : ArrayLike</span>
+<span class="sd">            Standard deviation of objective function costs for each regularization weight.</span>
+<span class="sd">        f_vals : ArrayLike</span>
+<span class="sd">            Objective function costs for each regularization weight.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing cross-validation loss values:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- Regularization weights range: [</span><span class="si">%g</span><span class="s2">, </span><span class="si">%g</span><span class="s2">] in </span><span class="si">%d</span><span class="s2"> steps&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lams_reg</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lams_reg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- Number of averages: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_averages</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- Leave-out pixel fraction: </span><span class="si">%g%%</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_fraction</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="n">f_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_averages</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">ii_avg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_averages</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Round: </span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ii_avg</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_averages</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">ii_l</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">):</span>
+                <span class="n">f_vals</span><span class="p">[</span><span class="n">ii_l</span><span class="p">,</span> <span class="n">ii_avg</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_reconstruction_and_loss</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_test_masks</span><span class="p">[</span><span class="n">ii_avg</span><span class="p">])</span>
+
+        <span class="n">f_avgs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">f_vals</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">f_stds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">f_vals</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done in </span><span class="si">%g</span><span class="s2"> seconds.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">c</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_result</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Cross-validation loss values (avgs: </span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_averages</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="n">nonpositive</span><span class="o">=</span><span class="s2">&quot;clip&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">,</span> <span class="n">f_avgs</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">f_stds</span><span class="p">,</span> <span class="n">ecolor</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">elinewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">f_avgs</span><span class="p">,</span> <span class="n">f_stds</span><span class="p">,</span> <span class="n">f_vals</span></div>
+
+<div class="viewcode-block" id="CrossValidation.fit_loss_min"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.CrossValidation.fit_loss_min">[docs]</a>    <span class="k">def</span> <span class="nf">fit_loss_min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">f_vals</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;log&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Parabolic fit of objective function costs for the different regularization weights.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lams_reg : ArrayLike</span>
+<span class="sd">            Regularization weights.</span>
+<span class="sd">        f_vals : ArrayLike</span>
+<span class="sd">            Objective function costs of each regularization weight.</span>
+<span class="sd">        scale : str, optional</span>
+<span class="sd">            Scale of the fit. Options are: &quot;log&quot; | &quot;linear&quot;. The default is &quot;log&quot;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        min_lam : float</span>
+<span class="sd">            Expected regularization weight of the fitted minimum.</span>
+<span class="sd">        min_val : float</span>
+<span class="sd">            Expected objective function cost of the fitted minimum.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">f_vals</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f_vals</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Lengths of the lambdas and function values should be identical and &gt;= 3.&quot;</span>
+                <span class="s2">&quot;Given: lams=</span><span class="si">%d</span><span class="s2">, vals=</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">f_vals</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">scale</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;log&quot;</span><span class="p">:</span>
+            <span class="n">to_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span>
+
+            <span class="k">def</span> <span class="nf">from_fit</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">x</span>
+
+        <span class="k">elif</span> <span class="n">scale</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+
+            <span class="k">def</span> <span class="nf">to_fit</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">x</span>
+
+            <span class="n">from_fit</span> <span class="o">=</span> <span class="n">to_fit</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;scale&#39; should be either &#39;log&#39; or &#39;linear&#39;, given &#39;</span><span class="si">%s</span><span class="s2">&#39; instead&quot;</span> <span class="o">%</span> <span class="n">scale</span><span class="p">)</span>
+
+        <span class="n">min_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">f_vals</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">min_pos</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: minimum value at the beginning of the lambda range.&quot;</span><span class="p">)</span>
+            <span class="n">lams_reg_fit</span> <span class="o">=</span> <span class="n">to_fit</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">f_vals_fit</span> <span class="o">=</span> <span class="n">f_vals</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">min_pos</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f_vals</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: minimum value at the end of the lambda range.&quot;</span><span class="p">)</span>
+            <span class="n">lams_reg_fit</span> <span class="o">=</span> <span class="n">to_fit</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:])</span>
+            <span class="n">f_vals_fit</span> <span class="o">=</span> <span class="n">f_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lams_reg_fit</span> <span class="o">=</span> <span class="n">to_fit</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">[</span><span class="n">min_pos</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">min_pos</span> <span class="o">+</span> <span class="mi">2</span><span class="p">])</span>
+            <span class="n">f_vals_fit</span> <span class="o">=</span> <span class="n">f_vals</span><span class="p">[</span><span class="n">min_pos</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">min_pos</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Fitting minimum within the parameter interval [</span><span class="si">%g</span><span class="s2">, </span><span class="si">%g</span><span class="s2">]: &quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">from_fit</span><span class="p">(</span><span class="n">lams_reg_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">from_fit</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])),</span>
+                <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># using Polynomial.fit, because it is supposed to be more numerically</span>
+        <span class="c1"># stable than previous solutions (according to numpy).</span>
+        <span class="n">poly</span> <span class="o">=</span> <span class="n">Polynomial</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">lams_reg_fit</span><span class="p">,</span> <span class="n">f_vals_fit</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">coeffs</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span><span class="o">.</span><span class="n">coef</span>
+        <span class="k">if</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: fitted curve is concave. Returning minimum measured point.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">lams_reg</span><span class="p">[</span><span class="n">min_pos</span><span class="p">],</span> <span class="n">f_vals</span><span class="p">[</span><span class="n">min_pos</span><span class="p">]</span>
+
+        <span class="c1"># For a 1D parabola `f(x) = c + bx + ax^2`, the vertex position is:</span>
+        <span class="c1"># x_v = -b / 2a.</span>
+        <span class="n">vertex_pos</span> <span class="o">=</span> <span class="o">-</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">vertex_val</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">vertex_pos</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="n">min_lam</span><span class="p">,</span> <span class="n">min_val</span> <span class="o">=</span> <span class="n">from_fit</span><span class="p">(</span><span class="n">vertex_pos</span><span class="p">),</span> <span class="n">vertex_val</span>
+        <span class="k">if</span> <span class="n">min_lam</span> <span class="o">&lt;</span> <span class="n">lams_reg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">min_lam</span> <span class="o">&gt;</span> <span class="n">lams_reg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;WARNING: fitted lambda </span><span class="si">%g</span><span class="s2"> is outside the bounds of input lambdas [</span><span class="si">%g</span><span class="s2">, </span><span class="si">%g</span><span class="s2">].&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">min_lam</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lams_reg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="o">+</span> <span class="s2">&quot; Returning minimum measured point.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">lams_reg</span><span class="p">[</span><span class="n">min_pos</span><span class="p">],</span> <span class="n">f_vals</span><span class="p">[</span><span class="n">min_pos</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found at </span><span class="si">%g</span><span class="s2">, in </span><span class="si">%g</span><span class="s2"> seconds.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">min_lam</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">c</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_result</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">nonpositive</span><span class="o">=</span><span class="s2">&quot;clip&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">,</span> <span class="n">f_vals</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lams_reg_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lams_reg_fit</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">from_fit</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">min_lam</span><span class="p">,</span> <span class="n">min_val</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">min_lam</span><span class="p">,</span> <span class="n">min_val</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

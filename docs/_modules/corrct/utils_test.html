@@ -1,64 +1,31 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.utils_test &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-
-  
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> PyCorrectedEmissionCT
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -66,89 +33,43 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">PyCorrectedEmissionCT</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
-        
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>corrct.utils_test</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for corrct.utils_test</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Created on Thu Jun  4 12:28:21 2020</span>
+<span class="sd">Provides useful functions for testing routines and functionalities.</span>
 
-<span class="sd">This module provides useful functions for testing routines and functionalities.</span>
+<span class="sd">Created on Thu Jun  4 12:28:21 2020</span>
 
 <span class="sd">@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,</span>
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
@@ -158,27 +79,47 @@
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">projectors</span>
 
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 
-<div class="viewcode-block" id="roundup_to_pow2"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.roundup_to_pow2">[docs]</a><span class="k">def</span> <span class="nf">roundup_to_pow2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Rounds first argument to the power of 2 indicated by second argument.</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span>
 
-<span class="sd">    :param x: Number to round up</span>
-<span class="sd">    :type x: int or float</span>
-<span class="sd">    :param p: Power of 2</span>
-<span class="sd">    :type p: int</span>
-<span class="sd">    :param data_type: data type of the output</span>
-<span class="sd">    :type data_type: `numpy.dtype`</span>
+<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
 
-<span class="sd">    :return: Rounding up of input</span>
-<span class="sd">    :rtype: dtype specified by data_type</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">xraylib</span>
+
+    <span class="n">xraylib</span><span class="o">.</span><span class="n">XRayInit</span><span class="p">()</span>
+
+    <span class="n">__has_xraylib__</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING:&quot;</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+
+    <span class="n">__has_xraylib__</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="roundup_to_pow2"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.roundup_to_pow2">[docs]</a><span class="k">def</span> <span class="nf">roundup_to_pow2</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Round first argument to the power of 2 indicated by second argument.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : int | float | ArrayLike</span>
+<span class="sd">        Number to round up.</span>
+<span class="sd">    p : int</span>
+<span class="sd">        Power of 2.</span>
+<span class="sd">    data_type : DTypeLike, optional</span>
+<span class="sd">        data type of the output. The default is np.intp.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int | float | ArrayLike</span>
+<span class="sd">        Rounding up of input.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">p</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">p</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="download_phantom"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.download_phantom">[docs]</a><span class="k">def</span> <span class="nf">download_phantom</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Downloads the phantom generation module from Nicolas Barbey&#39;s repository</span>
-<span class="sd">    on github.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Download the phantom generation module from Nicolas Barbey&#39;s repository on github.&quot;&quot;&quot;</span>
     <span class="n">phantom_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/nbarbey/TomograPy/master/tomograpy/phantom.py&quot;</span>
     <span class="n">phantom_path</span> <span class="o">=</span> <span class="s2">&quot;./phantom.py&quot;</span>
 
@@ -198,21 +139,264 @@
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;xrange&quot;</span><span class="p">,</span> <span class="s2">&quot;range&quot;</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="phantom_assign_concentration"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.phantom_assign_concentration">[docs]</a><span class="k">def</span> <span class="nf">phantom_assign_concentration</span><span class="p">(</span><span class="n">ph_or</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Builds the phantom used in:</span>
+<div class="viewcode-block" id="DetectorXRF"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.DetectorXRF">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">DetectorXRF</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simple XRF detector model.&quot;&quot;&quot;</span>
+
+    <span class="n">surface_mm2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">distance_mm</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">solid_angle_sr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the solid angle covered by the detector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float | ArrayLike</span>
+<span class="sd">            The computed solid angle of the detector geometry.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_mm2</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_mm</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Phantom"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.Phantom">[docs]</a><span class="k">class</span> <span class="nc">Phantom</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base phantom class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase_fractions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">phase_compounds</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">voxel_size_cm</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">__has_xraylib__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Realistic phantoms not available without xraylib.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase_compounds</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Phase fractions (# </span><span class="si">%d</span><span class="s2">) and phase compounds (# </span><span class="si">%d</span><span class="s2">) should have the same length&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase_compounds</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Phase list is empty&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All phantom phase fraction volumes should have the same number of dimensions&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Phantom phase fraction volumes should all have the same shape&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ph</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">ph</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_compounds</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="n">cmp</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cmp</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">cmp</span> <span class="k">for</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="n">phase_compounds</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span> <span class="o">=</span> <span class="n">voxel_size_cm</span>
+
+<div class="viewcode-block" id="Phantom.get_element_number"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.Phantom.get_element_number">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_element_number</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the element number from the symbol.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        element : str | int</span>
+<span class="sd">            The element symbol (or number, which won&#39;t be converted).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The corresponding element number.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">element</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">SymbolToAtomicNumber</span><span class="p">(</span><span class="n">element</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Phantom.get_attenuation"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.Phantom.get_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">get_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the local attenuation for each voxel.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        energy_keV : float</span>
+<span class="sd">            The X-ray energy.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArrayLike</span>
+<span class="sd">            The computed local attenuation volume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ph_lin_att</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ph</span><span class="p">,</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_compounds</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cmp_cs</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">energy_keV</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">cmp_cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span> <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])],</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">ph_lin_att</span> <span class="o">+=</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cmp_cs</span>
+        <span class="k">return</span> <span class="n">ph_lin_att</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span></div>
+
+<div class="viewcode-block" id="Phantom.get_element_mass_fraction"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.Phantom.get_element_mass_fraction">[docs]</a>    <span class="k">def</span> <span class="nf">get_element_mass_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the local element mass fraction through out all the phases.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        element : str | int</span>
+<span class="sd">            The element to look for.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mass_fraction : ArrayLike</span>
+<span class="sd">            The local mass fraction in each voxel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">el_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element_number</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+        <span class="n">mass_fraction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ph</span><span class="p">,</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_compounds</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">el_num</span> <span class="ow">in</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">]:</span>
+                <span class="n">el_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="n">el_num</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">mass_fraction</span> <span class="o">+=</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">el_ind</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">mass_fraction</span></div>
+
+    <span class="k">def</span> <span class="nf">_check_parallax_detector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detector</span><span class="p">:</span> <span class="n">DetectorXRF</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">half_sample_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">distance_mm</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">distance_mm</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">detector</span><span class="o">.</span><span class="n">distance_mm</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">):</span>
+            <span class="n">dets</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span>
+            <span class="n">dets</span><span class="o">.</span><span class="n">distance_mm</span> <span class="o">=</span> <span class="n">dets</span><span class="o">.</span><span class="n">distance_mm</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">half_sample_size</span><span class="p">,</span> <span class="n">half_sample_size</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dets</span> <span class="o">=</span> <span class="n">detector</span>
+
+        <span class="n">solid_angles</span> <span class="o">=</span> <span class="n">dets</span><span class="o">.</span><span class="n">solid_angle_sr</span>
+        <span class="n">max_parallax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">solid_angles</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">solid_angles</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">max_parallax</span> <span class="o">&lt;</span> <span class="n">tolerance</span>
+
+<div class="viewcode-block" id="Phantom.get_compton_scattering"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.Phantom.get_compton_scattering">[docs]</a>    <span class="k">def</span> <span class="nf">get_compton_scattering</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">energy_in_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">detector</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DetectorXRF</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the local Compton scattering.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        energy_in_keV : float</span>
+<span class="sd">            Incoming beam energy.</span>
+<span class="sd">        angle_rad : float, optional</span>
+<span class="sd">            The detector angle, with respect to incoming beam direction. The default is None.</span>
+<span class="sd">        detector : DetectorXRF, optional</span>
+<span class="sd">            The detector object. The default is None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            In case neither of `angle_rad` nor `detector` have been passed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        energy_out_keV : float</span>
+<span class="sd">            The energy of the Compton radiation received by the detector.</span>
+<span class="sd">        cmptn_yield : ArrayLike</span>
+<span class="sd">            Local yield of Compton radiation.</span>
+
+<span class="sd">        Either `angle_rad` or `detector` need to be supplied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">angle_rad</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">detector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either &#39;angle_rad&#39; or &#39;detector&#39; should be passed.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">detector</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_parallax_detector</span><span class="p">(</span><span class="n">detector</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING - detector parallax is above 1e-2&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">angle_rad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">angle_rad</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">angle_rad</span>
+
+        <span class="n">cmptn_yield</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ph</span><span class="p">,</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_compounds</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cmptn_cmp_cs</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">DCS_Compt_CP</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">energy_in_keV</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">cmptn_cmp_cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">xraylib</span><span class="o">.</span><span class="n">DCS_Compt</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">energy_in_keV</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])</span>
+                    <span class="p">],</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">cmptn_yield</span> <span class="o">+=</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cmptn_cmp_cs</span>
+        <span class="n">cmptn_yield</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span>
+
+        <span class="k">if</span> <span class="n">detector</span><span class="p">:</span>
+            <span class="n">cmptn_yield</span> <span class="o">*=</span> <span class="n">detector</span><span class="o">.</span><span class="n">solid_angle_sr</span>
+
+        <span class="n">energy_out_keV</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">ComptonEnergy</span><span class="p">(</span><span class="n">energy_in_keV</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">energy_out_keV</span><span class="p">,</span> <span class="n">cmptn_yield</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Phantom.get_fluo_yield"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.Phantom.get_fluo_yield">[docs]</a>    <span class="k">def</span> <span class="nf">get_fluo_yield</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">energy_in_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">fluo_line</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">detector</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DetectorXRF</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the local fluorescence yield, for the given line of the given element.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        element : str | int</span>
+<span class="sd">            The element to consider.</span>
+<span class="sd">        energy_in_keV : float</span>
+<span class="sd">            The incombing X-ray beam energy.</span>
+<span class="sd">        fluo_line : int</span>
+<span class="sd">            The fluorescence line to consider.</span>
+<span class="sd">        detector : DetectorXRF, optional</span>
+<span class="sd">            The detector geometry. The default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        energy_out_keV : float</span>
+<span class="sd">            The emitted fluorescence energy.</span>
+<span class="sd">        el_yield : ArrayLike</span>
+<span class="sd">            The local fluorescence yield in each voxel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">detector</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_parallax_detector</span><span class="p">(</span><span class="n">detector</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING - detector parallax is above 1e-2&quot;</span><span class="p">)</span>
+
+        <span class="n">el_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element_number</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+        <span class="n">el_cs</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_FluorLine_Kissel</span><span class="p">(</span><span class="n">el_num</span><span class="p">,</span> <span class="n">fluo_line</span><span class="p">,</span> <span class="n">energy_in_keV</span><span class="p">)</span>  <span class="c1"># fluo production for cm2/g</span>
+        <span class="n">el_yield</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element_mass_fraction</span><span class="p">(</span><span class="n">el_num</span><span class="p">)</span> <span class="o">*</span> <span class="n">el_cs</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span>
+
+        <span class="k">if</span> <span class="n">detector</span><span class="p">:</span>
+            <span class="n">el_yield</span> <span class="o">*=</span> <span class="n">detector</span><span class="o">.</span><span class="n">solid_angle_sr</span>
+
+        <span class="n">energy_out_keV</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">LineEnergy</span><span class="p">(</span><span class="n">el_num</span><span class="p">,</span> <span class="n">fluo_line</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">energy_out_keV</span><span class="p">,</span> <span class="n">el_yield</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="phantom_assign_concentration"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.phantom_assign_concentration">[docs]</a><span class="k">def</span> <span class="nf">phantom_assign_concentration</span><span class="p">(</span>
+    <span class="n">ph_or</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Ca&quot;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Build an XRF phantom.</span>
+
+<span class="sd">    The created phantom has been used in:</span>
 <span class="sd">    - N. Viganò and V. A. Solé, “Physically corrected forward operators for</span>
 <span class="sd">    induced emission tomography: a simulation study,” Meas. Sci. Technol., no.</span>
 <span class="sd">    Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.</span>
 
-<span class="sd">    :param ph_or: DESCRIPTION</span>
-<span class="sd">    :type ph_or: TYPE</span>
-<span class="sd">    :param data_type: DESCRIPTION, defaults to np.float32</span>
-<span class="sd">    :type data_type: TYPE, optional</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ph_or : ArrayLike</span>
+<span class="sd">        The phases phantom map.</span>
+<span class="sd">    element : str, optional</span>
+<span class="sd">        Element symbol. The default is &quot;Ca&quot;.</span>
+<span class="sd">    in_energy_keV : float, optional</span>
+<span class="sd">        Incoming beam energy in keV. The default is 20.0.</span>
 
-<span class="sd">    :return: DESCRIPTION</span>
-<span class="sd">    :rtype: TYPE</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vol_fluo_yield : ArrayLike</span>
+<span class="sd">        Voxel-wise fluorescence yields.</span>
+<span class="sd">    vol_att_in : ArrayLike</span>
+<span class="sd">        Voxel-wise attenuation at the incoming beam energy.</span>
+<span class="sd">    vol_att_out : ArrayLike</span>
+<span class="sd">        Voxel-wise attenuation at the emitted energy.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># ph_air = ph_or &lt; 0.1</span>
+    <span class="n">ph_air</span> <span class="o">=</span> <span class="n">ph_or</span> <span class="o">&lt;</span> <span class="mf">0.1</span>
     <span class="n">ph_FeO</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">&lt;</span> <span class="n">ph_or</span>
     <span class="n">ph_CaO</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="mf">0.25</span> <span class="o">&lt;</span> <span class="n">ph_or</span><span class="p">,</span> <span class="n">ph_or</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)</span>
     <span class="n">ph_CaC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">&lt;</span> <span class="n">ph_or</span><span class="p">,</span> <span class="n">ph_or</span> <span class="o">&lt;</span> <span class="mf">0.25</span><span class="p">)</span>
@@ -223,96 +407,75 @@
     <span class="n">voxel_size_cm</span> <span class="o">=</span> <span class="n">voxel_size_um</span> <span class="o">*</span> <span class="n">conv_um_to_mm</span> <span class="o">*</span> <span class="n">conv_mm_to_cm</span>  <span class="c1"># cm to micron</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample size: [</span><span class="si">%g</span><span class="s2"> </span><span class="si">%g</span><span class="s2">] um&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ph_or</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">voxel_size_um</span><span class="p">,</span> <span class="n">ph_or</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">voxel_size_um</span><span class="p">))</span>
 
-    <span class="kn">import</span> <span class="nn">xraylib</span>
+    <span class="n">phase_fractions</span> <span class="o">=</span> <span class="p">(</span><span class="n">ph_air</span><span class="p">,</span> <span class="n">ph_FeO</span><span class="p">,</span> <span class="n">ph_CaO</span><span class="p">,</span> <span class="n">ph_CaC</span><span class="p">)</span>
+    <span class="n">phase_compound_names</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Air, Dry (near sea level)&quot;</span><span class="p">,</span> <span class="s2">&quot;Ferric Oxide&quot;</span><span class="p">,</span> <span class="s2">&quot;Calcium Oxide&quot;</span><span class="p">,</span> <span class="s2">&quot;Calcium Carbonate&quot;</span><span class="p">)</span>
 
-    <span class="n">xraylib</span><span class="o">.</span><span class="n">XRayInit</span><span class="p">()</span>
-    <span class="n">cp_fo</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="s2">&quot;Ferric Oxide&quot;</span><span class="p">)</span>
-    <span class="n">cp_co</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="s2">&quot;Calcium Oxide&quot;</span><span class="p">)</span>
-    <span class="n">cp_cc</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="s2">&quot;Calcium Carbonate&quot;</span><span class="p">)</span>
+    <span class="n">phantom</span> <span class="o">=</span> <span class="n">Phantom</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="n">phase_compound_names</span><span class="p">,</span> <span class="n">voxel_size_cm</span><span class="p">)</span>
 
-    <span class="n">ca_an</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">SymbolToAtomicNumber</span><span class="p">(</span><span class="s2">&quot;Ca&quot;</span><span class="p">)</span>
-    <span class="n">ca_kal</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">LineEnergy</span><span class="p">(</span><span class="n">ca_an</span><span class="p">,</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">KA_LINE</span><span class="p">)</span>
+    <span class="n">out_energy_keV</span><span class="p">,</span> <span class="n">vol_fluo_yield</span> <span class="o">=</span> <span class="n">phantom</span><span class="o">.</span><span class="n">get_fluo_yield</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">,</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">KA_LINE</span><span class="p">)</span>
 
-    <span class="n">in_energy_keV</span> <span class="o">=</span> <span class="mi">20</span>
-    <span class="n">out_energy_keV</span> <span class="o">=</span> <span class="n">ca_kal</span>
+    <span class="n">vol_lin_att_in</span> <span class="o">=</span> <span class="n">phantom</span><span class="o">.</span><span class="n">get_attenuation</span><span class="p">(</span><span class="n">in_energy_keV</span><span class="p">)</span>
+    <span class="n">vol_lin_att_out</span> <span class="o">=</span> <span class="n">phantom</span><span class="o">.</span><span class="n">get_attenuation</span><span class="p">(</span><span class="n">out_energy_keV</span><span class="p">)</span>
 
-    <span class="n">ph_lin_att_in</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">ph_FeO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Ferric Oxide&quot;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_fo</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
-        <span class="o">+</span> <span class="n">ph_CaC</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Calcium Carbonate&quot;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
-        <span class="o">+</span> <span class="n">ph_CaO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Calcium Oxide&quot;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_co</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="n">ph_lin_att_out</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">ph_FeO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Ferric Oxide&quot;</span><span class="p">,</span> <span class="n">out_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_fo</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
-        <span class="o">+</span> <span class="n">ph_CaC</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Calcium Carbonate&quot;</span><span class="p">,</span> <span class="n">out_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
-        <span class="o">+</span> <span class="n">ph_CaO</span> <span class="o">*</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="s2">&quot;Calcium Oxide&quot;</span><span class="p">,</span> <span class="n">out_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cp_co</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="n">vol_att_in</span> <span class="o">=</span> <span class="n">ph_lin_att_in</span> <span class="o">*</span> <span class="n">voxel_size_cm</span>
-    <span class="n">vol_att_out</span> <span class="o">=</span> <span class="n">ph_lin_att_out</span> <span class="o">*</span> <span class="n">voxel_size_cm</span>
-
-    <span class="n">ca_cs</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_FluorLine_Kissel</span><span class="p">(</span><span class="n">ca_an</span><span class="p">,</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">KA_LINE</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">)</span>  <span class="c1"># fluo production for cm2/g</span>
-    <span class="n">ph_CaC_mass_fract</span> <span class="o">=</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cp_cc</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="n">ca_an</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-    <span class="n">ph_CaO_mass_fract</span> <span class="o">=</span> <span class="n">cp_co</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cp_co</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="n">ca_an</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-
-    <span class="n">ph</span> <span class="o">=</span> <span class="n">ph_CaC</span> <span class="o">*</span> <span class="n">ph_CaC_mass_fract</span> <span class="o">*</span> <span class="n">cp_cc</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">ph_CaO</span> <span class="o">*</span> <span class="n">ph_CaO_mass_fract</span> <span class="o">*</span> <span class="n">cp_co</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
-    <span class="n">ph</span> <span class="o">=</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">ca_cs</span> <span class="o">*</span> <span class="n">voxel_size_cm</span>
-
-    <span class="k">return</span> <span class="p">(</span><span class="n">ph</span><span class="p">,</span> <span class="n">vol_att_in</span><span class="p">,</span> <span class="n">vol_att_out</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">vol_fluo_yield</span><span class="p">,</span> <span class="n">vol_lin_att_in</span><span class="p">,</span> <span class="n">vol_lin_att_out</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="create_sino"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.create_sino">[docs]</a><span class="k">def</span> <span class="nf">create_sino</span><span class="p">(</span>
-    <span class="n">ph</span><span class="p">,</span>
-    <span class="n">num_angles</span><span class="p">,</span>
-    <span class="n">start_angle_deg</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">end_angle_deg</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
-    <span class="n">dwell_time_s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">photon_flux</span><span class="o">=</span><span class="mf">1e9</span><span class="p">,</span>
-    <span class="n">detectors_pos_rad</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
-    <span class="n">vol_att_in</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">vol_att_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">background_avg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">background_std</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">add_poisson</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">readout_noise_std</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-<span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Computes the sinogram from a given phantom</span>
+    <span class="n">ph</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">num_angles</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">start_angle_deg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">end_angle_deg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">180</span><span class="p">,</span>
+    <span class="n">dwell_time_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">photon_flux</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e9</span><span class="p">,</span>
+    <span class="n">detectors_pos_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">vol_att_in</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vol_att_out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">background_avg</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">background_std</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">add_poisson</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">readout_noise_std</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_type</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Compute the sinogram from a given phantom.</span>
 
-<span class="sd">    :param ph: The phantom volume, with the expected average photon production per voxel per impinging photon</span>
-<span class="sd">    :type ph: `numpy.array_like`</span>
-<span class="sd">    :param num_angles: Number of angles</span>
-<span class="sd">    :type num_angles: int</span>
-<span class="sd">    :param start_angle_deg: Initial scan angle in degrees</span>
-<span class="sd">    :type start_angle_deg: float</span>
-<span class="sd">    :param end_angle_deg: Final scan angle in degrees</span>
-<span class="sd">    :type end_angle_deg: float</span>
-<span class="sd">    :param dwell_time_s: The acquisition time per sinogram point</span>
-<span class="sd">    :type dwell_time_s: float</span>
-<span class="sd">    :param photon_flux: The impinging photon flux per unit time (second)</span>
-<span class="sd">    :type photon_flux: float</span>
-<span class="sd">    :param detectors_pos_rad: Detector(s) positions in radians, with respect to incoming beam</span>
-<span class="sd">    :type detectors_pos_rad: float or `numpy.array_like`</span>
-<span class="sd">    :param vol_att_in: Attenuation volume for the incoming beam, defaults to None</span>
-<span class="sd">    :type vol_att_in: `numpy.array_like`, optional</span>
-<span class="sd">    :param vol_att_out: Attenuation volume for the outgoing beam, defaults to None</span>
-<span class="sd">    :type vol_att_out: `numpy.array_like`, optional</span>
-<span class="sd">    :param psf: Point spread function or probing beam profile, defaults to None</span>
-<span class="sd">    :type psf: `numpy.array_like`, optional</span>
-<span class="sd">    :param background_avg: Background average value, defaults to None</span>
-<span class="sd">    :type background_avg: float, optional</span>
-<span class="sd">    :param background_std: Background sigma, defaults to None</span>
-<span class="sd">    :type background_std: float, optional</span>
-<span class="sd">    :param add_poisson: Switch to turn on Poisson noise, defaults to False</span>
-<span class="sd">    :type add_poisson: boolean, optional</span>
-<span class="sd">    :param readout_noise_std: Read-out noise sigma, defaults to None</span>
-<span class="sd">    :type readout_noise_std: float, optional</span>
-<span class="sd">    :param data_type: Volumes&#39; data type, defaults to np.float32</span>
-<span class="sd">    :type data_type: `numpy.dtype`, optional</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ph : ArrayLike</span>
+<span class="sd">        The phantom volume, with the expected average photon production per voxel per impinging photon.</span>
+<span class="sd">    num_angles : int</span>
+<span class="sd">        The number of angles.</span>
+<span class="sd">    start_angle_deg : float, optional</span>
+<span class="sd">        Initial scan angle in degrees. The default is 0.</span>
+<span class="sd">    end_angle_deg : float, optional</span>
+<span class="sd">        Final scan angle in degrees. The default is 180.</span>
+<span class="sd">    dwell_time_s : float, optional</span>
+<span class="sd">        The acquisition time per sinogram point. The default is 1.</span>
+<span class="sd">    photon_flux : float, optional</span>
+<span class="sd">        The impinging photon flux per unit time (second). The default is 1e9.</span>
+<span class="sd">    detectors_pos_rad : float | tuple | list | ArrayLike, optional</span>
+<span class="sd">        Detector(s) positions in radians, with respect to incoming beam. The default is (np.pi / 2).</span>
+<span class="sd">    vol_att_in : ArrayLike, optional</span>
+<span class="sd">        Attenuation volume for the incoming beam. The default is None.</span>
+<span class="sd">    vol_att_out : ArrayLike, optional</span>
+<span class="sd">        Attenuation volume for the outgoing beam. The default is None.</span>
+<span class="sd">    psf : ArrayLike, optional</span>
+<span class="sd">        Point spread function or probing beam profile. The default is None.</span>
+<span class="sd">    background_avg : float, optional</span>
+<span class="sd">        Background average value. The default is None.</span>
+<span class="sd">    background_std : float, optional</span>
+<span class="sd">        Background standard deviation. The default is None.</span>
+<span class="sd">    add_poisson : bool, optional</span>
+<span class="sd">        Switch to turn on Poisson noise. The default is False.</span>
+<span class="sd">    readout_noise_std : float, optional</span>
+<span class="sd">        Read-out noise standard deviation. The default is None.</span>
+<span class="sd">    data_type : numpy.dtype, optional</span>
+<span class="sd">        Output datatype. The default is np.float32.</span>
 
-<span class="sd">    :return: The sinogram (detecto readings), the angular positions, and the expected average phton production per voxel</span>
-<span class="sd">    :rtype: tuple(`numpy.array_like`, `numpy.array_like`, `numpy.array_like`)</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[ArrayLike, ArrayLike, ArrayLike]</span>
+<span class="sd">        The sinogram (detector readings), the angular positions, and the expected average phton production per voxel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating Sino with </span><span class="si">%d</span><span class="s2"> angles&quot;</span> <span class="o">%</span> <span class="n">num_angles</span><span class="p">)</span>
     <span class="n">angles_deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start_angle_deg</span><span class="p">,</span> <span class="n">end_angle_deg</span><span class="p">,</span> <span class="n">num_angles</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -350,59 +513,52 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">sino_noise</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">num_photons</span> <span class="o">*</span> <span class="n">detector_solidangle_sr</span><span class="p">,</span> <span class="n">background</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="compute_error_power"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.compute_error_power">[docs]</a><span class="k">def</span> <span class="nf">compute_error_power</span><span class="p">(</span><span class="n">expected_vol</span><span class="p">,</span> <span class="n">computed_vol</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Computes the expected volume signal power, and computed volume error power.</span>
+<div class="viewcode-block" id="compute_error_power"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.compute_error_power">[docs]</a><span class="k">def</span> <span class="nf">compute_error_power</span><span class="p">(</span><span class="n">expected_vol</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">computed_vol</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Compute the expected volume signal power, and computed volume error power.</span>
 
-<span class="sd">    :param expected_vol: The expected volume</span>
-<span class="sd">    :type expected_vol: `numpy.array_like`</span>
-<span class="sd">    :param computed_vol: The computed volume</span>
-<span class="sd">    :type computed_vol: `numpy.array_like`</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    expected_vol : ArrayLike</span>
+<span class="sd">        The expected volume.</span>
+<span class="sd">    computed_vol : ArrayLike</span>
+<span class="sd">        The computed volume.</span>
 
-<span class="sd">    :return: The expected volume signal power, and the computed volume</span>
-<span class="sd">    :rtype: tuple(float, float)</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[float, float]</span>
+<span class="sd">        The expected volume signal power, and the computed volume.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">vol_power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">expected_vol</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">expected_vol</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
     <span class="n">error_power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">expected_vol</span> <span class="o">-</span> <span class="n">computed_vol</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">expected_vol</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">vol_power</span><span class="p">,</span> <span class="n">error_power</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">vol_power</span><span class="p">,</span> <span class="n">error_power</span></div>
+
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2018, Nicola VIGANO
-
-    </p>
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

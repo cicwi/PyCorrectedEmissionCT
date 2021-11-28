@@ -1,64 +1,31 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.projectors &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-
-  
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> PyCorrectedEmissionCT
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -66,83 +33,37 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">PyCorrectedEmissionCT</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
-        
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>corrct.projectors</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for corrct.projectors</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -157,24 +78,37 @@
 <span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">spsig</span>
 <span class="kn">import</span> <span class="nn">skimage.transform</span> <span class="k">as</span> <span class="nn">skt</span>
 
-<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
-
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">operators</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_projector_backends</span> <span class="k">as</span> <span class="n">prj_backends</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils_proc</span>
 
+<span class="kn">import</span> <span class="nn">concurrent.futures</span> <span class="k">as</span> <span class="nn">cf</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+
+<span class="n">num_threads</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
 
 <div class="viewcode-block" id="ProjectorMatrix"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorMatrix">[docs]</a><span class="k">class</span> <span class="nc">ProjectorMatrix</span><span class="p">(</span><span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Projector that uses an explicit projection matrix.&quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">vol_shape</span><span class="p">,</span> <span class="n">proj_shape</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize a projector that uses an explicit projection matrix.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span> <span class="o">=</span> <span class="n">vol_shape</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span> <span class="o">=</span> <span class="n">proj_shape</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">A</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ProjectorMatrix.absolute"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorMatrix.absolute">[docs]</a>    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create the transpose operator.</span>
+
+<span class="sd">        :returns: The transpose operator</span>
+<span class="sd">        :rtype: ProjectorMatrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ProjectorMatrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ProjectorMatrix.absolute"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorMatrix.absolute">[docs]</a>    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return the projection operator using the absolute value of the projection coefficients.</span>
 
 <span class="sd">        :returns: The absolute value operator</span>
@@ -221,10 +155,10 @@
         <span class="n">proj_intensities</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_astra</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">has_cuda</span><span class="p">,</span>
         <span class="n">create_single_projs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        ProjectorUncorrected class initialization.</span>
+<span class="sd">        Initialize ProjectorUncorrected class.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -267,7 +201,7 @@
                 <span class="n">angles_rot_rad</span><span class="p">,</span>
                 <span class="n">rot_axis_shift_pix</span><span class="o">=</span><span class="n">rot_axis_shift_pix</span><span class="p">,</span>
                 <span class="n">create_single_projs</span><span class="o">=</span><span class="n">create_single_projs</span><span class="p">,</span>
-                <span class="n">super_sampling</span><span class="o">=</span><span class="n">super_sampling</span>
+                <span class="n">super_sampling</span><span class="o">=</span><span class="n">super_sampling</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span> <span class="o">=</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackendSKimage</span><span class="p">(</span>
@@ -283,36 +217,48 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the with statement block.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;De-initialize the with statement block.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ProjectorUncorrected.fp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Forward-projection of the volume to a single sinogram line.</span>
+<div class="viewcode-block" id="ProjectorUncorrected.fp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward-project a volume to a single sinogram line.</span>
 
-<span class="sd">        :param vol: The volume to forward-project (numpy.array_like)</span>
-<span class="sd">        :param angle_ind: The angle index to foward project (int)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vol : numpy.array_like</span>
+<span class="sd">            The volume to forward-project.</span>
+<span class="sd">        angle_ind : int</span>
+<span class="sd">            The angle index to foward project.</span>
 
-<span class="sd">        :returns: The forward-projected sinogram line</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        x : numpy.array_like</span>
+<span class="sd">            The forward-projected sinogram line.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="ProjectorUncorrected.bp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.bp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino_line</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Back-projection of a single sinogram line to the volume.</span>
+<div class="viewcode-block" id="ProjectorUncorrected.bp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.bp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino_line</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Back-project a single sinogram line to the volume.</span>
 
-<span class="sd">        :param sino_line: The sinogram to back-project or a single line (numpy.array_like)</span>
-<span class="sd">        :param angle_ind: The angle index to foward project (int)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sino_line : numpy.array_like</span>
+<span class="sd">            The sinogram to back-project or a single line.</span>
+<span class="sd">        angle_ind : int</span>
+<span class="sd">            The angle index to foward project.</span>
 
-<span class="sd">        :returns: The back-projected volume</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.array_like</span>
+<span class="sd">            The back-projected volume.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sino_line</span> <span class="o">=</span> <span class="n">sino_line</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">]</span>  <span class="c1"># It will make a copy</span>
@@ -348,7 +294,7 @@
 
 <div class="viewcode-block" id="ProjectorUncorrected.fbp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fbp">[docs]</a>    <span class="k">def</span> <span class="nf">fbp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projs</span><span class="p">,</span> <span class="n">fbp_filter</span><span class="o">=</span><span class="s2">&quot;shepp-logan&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Computes the filtered back-projection of the projection data to the volume.</span>
+<span class="sd">        Compute the filtered back-projection of the projection data to the volume.</span>
 
 <span class="sd">        The data could either be a sinogram, or a stack of sinograms.</span>
 
@@ -389,10 +335,12 @@
         <span class="n">angles_detectors_rad</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
         <span class="n">weights_detectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">precompute_attenuation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">is_symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">precompute_attenuation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">is_symmetric</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">weights_angles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_multithreading</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Attenuation corrected projection class for XRF.</span>
@@ -410,7 +358,7 @@
 <span class="sd">        :param att_in: Attenuation volume of the incoming beam, defaults to None</span>
 <span class="sd">        :type att_in: numpy.array_like, optional</span>
 <span class="sd">        :param att_out: Attenuation volume of the outgoing beam, defaults to None</span>
-<span class="sd">        :type att_out: TYPE, optional</span>
+<span class="sd">        :type att_out: numpy.array_like, optional</span>
 <span class="sd">        :param angles_detectors_rad: Angles of the detector elements with respect to incident beam, defaults to (np.pi/2)</span>
 <span class="sd">        :type angles_detectors_rad: numpy.array_like, optional</span>
 <span class="sd">        :param weights_detectors: Weights (e.g. solid angle, efficiency, etc) of the detector elements, defaults to None</span>
@@ -436,6 +384,8 @@
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_multithreading</span> <span class="o">=</span> <span class="n">use_multithreading</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
         <span class="k">if</span> <span class="n">precompute_attenuation</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">att_in</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">att_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -474,8 +424,20 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the with statement block.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_multithreading</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="p">,</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackendSKimage</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">num_threads</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__enter__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;De-initialize the with statement block.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__exit__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_multithreading</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="p">,</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackendSKimage</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_compute_attenuation</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">sampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_compute_attenuation</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">pad_vol</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">edges</span><span class="p">):</span>
             <span class="n">paddings</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             <span class="n">paddings</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">paddings</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">],)</span>
@@ -485,31 +447,49 @@
         <span class="n">min_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">size_lims</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
         <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">min_size</span> <span class="o">-</span> <span class="n">size_lims</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
 
-        <span class="n">direction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">invert</span><span class="p">:</span>
-            <span class="n">direction</span> <span class="o">=</span> <span class="o">-</span><span class="n">direction</span>
-        <span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">direction</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">angle_rad</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 
-        <span class="n">rot_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">direction</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">rot_angle_deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">angle_rad</span><span class="p">)</span>
 
         <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">pad_vol</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
 
-        <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">,</span> <span class="n">rot_angle</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">cum_arr</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">cum_arr</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">,</span> <span class="n">rot_angle_deg</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">cum_arr</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">cum_arr</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">,</span> <span class="o">-</span><span class="n">rot_angle</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">,</span> <span class="o">-</span><span class="n">rot_angle_deg</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">cum_arr</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
 
         <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">cum_arr</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">cum_arr</span>
 
-<div class="viewcode-block" id="ProjectorAttenuationXRF.compute_attenuation"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.compute_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">sampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Computes the attenuation experienced by the photons emitted in every</span>
-<span class="sd">        point of the volume, along a certain direction.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ProjectorAttenuationXRF.compute_attenuation"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.compute_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the attenuation local attenuation for a given attenuation volume.</span>
 
+<span class="sd">        This means the attenuation experienced by the photons emitted in each</span>
+<span class="sd">        point of the volume, along a given direction.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vol : numpy.array_like</span>
+<span class="sd">            The attenuation volume.</span>
+<span class="sd">        angle_rad : float</span>
+<span class="sd">            The rotation angle in radians.</span>
+<span class="sd">        invert : bool, optional</span>
+<span class="sd">            Whether to reverse the direction of propagation. The default is False.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            In case of non matching volume shape between the projector volumes and input attenuation volumes.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.array_like</span>
+<span class="sd">            The stack of local attenuation volumes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Maps can only be 2D or 3D Arrays. A </span><span class="si">%d</span><span class="s2">-dimensional was passed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span>
@@ -523,22 +503,20 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">sampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
-        <span class="n">direction_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_in</span><span class="p">,</span> <span class="n">direction_in</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_in</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
-        <span class="n">angle_det</span> <span class="o">=</span> <span class="n">angle</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span>
+    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">angle_det</span> <span class="o">=</span> <span class="n">angle_rad</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span>
         <span class="n">atts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">angle_det</span><span class="p">):</span>
-            <span class="n">direction_out</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)]</span>
-            <span class="n">atts</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_out</span><span class="p">,</span> <span class="n">direction_out</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">atts</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_out</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">atts</span>
 
 <div class="viewcode-block" id="ProjectorAttenuationXRF.compute_attenuation_volumes"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.compute_attenuation_volumes">[docs]</a>    <span class="k">def</span> <span class="nf">compute_attenuation_volumes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Computes the corrections for each angle.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Compute the corrections for each angle.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_in</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No attenuation volumes were given&quot;</span><span class="p">)</span>
 
@@ -547,18 +525,41 @@
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_in</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_in</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_multithreading</span><span class="p">:</span>
+                <span class="n">num_angles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_angles</span>
+                <span class="k">with</span> <span class="n">cf</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">num_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+                    <span class="c1"># angle_atts = executor.map(self._compute_attenuation_angle_in, self.angles_rot_rad)</span>
+                    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">):</span>
+                        <span class="n">r</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_in</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
+                        <span class="nb">range</span><span class="p">(</span><span class="n">num_angles</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Computing attenuation maps of incident beam: &quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+                    <span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="n">r</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">))):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_in</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_out</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_multithreading</span><span class="p">:</span>
+                <span class="n">num_angles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_angles</span>
+                <span class="k">with</span> <span class="n">cf</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">num_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">):</span>
+                        <span class="n">r</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_out</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
+                        <span class="nb">range</span><span class="p">(</span><span class="n">num_angles</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Computing attenuation maps of emitted photons: &quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+                    <span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="n">r</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">))):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_out</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_3d</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="ProjectorAttenuationXRF.collapse_detectors"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.collapse_detectors">[docs]</a>    <span class="k">def</span> <span class="nf">collapse_detectors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Converts multi-detector configurations into single-detector.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Convert multi-detector configurations into single-detector.&quot;&quot;&quot;</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span> <span class="o">*</span> <span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
@@ -567,24 +568,28 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">weights_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_angles</span> <span class="o">*</span> <span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProjectorAttenuationXRF.fp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.fp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Forward-projection of the volume to a single sinogram line.</span>
+<div class="viewcode-block" id="ProjectorAttenuationXRF.fp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.fp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward-project the volume to a single sinogram line.</span>
 
 <span class="sd">        It applies the attenuation corrections.</span>
 
-<span class="sd">        :param vol: The volume to forward-project (numpy.array_like)</span>
-<span class="sd">        :param angle_ind: The angle index to foward project (int)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vol : numpy.array_like</span>
+<span class="sd">            The volume to forward-project.</span>
+<span class="sd">        angle_ind : int</span>
+<span class="sd">            The angle index to foward project.</span>
 
-<span class="sd">        :returns: The forward-projected sinogram line</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sino_line : numpy.array_like</span>
+<span class="sd">            The forward-projected sinogram line.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">temp_vol</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">vol</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-        <span class="n">temp_vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">temp_vol</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">),</span> <span class="o">*</span><span class="p">((</span><span class="mi">1</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">))))</span>
-
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">precompute_attenuation</span><span class="p">:</span>
-            <span class="n">temp_vol</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+            <span class="n">temp_vol</span> <span class="o">=</span> <span class="n">vol</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="n">temp_vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">vol</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">),</span> <span class="o">*</span><span class="p">((</span><span class="mi">1</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">))))</span>
+
             <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_in</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">temp_vol</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_in</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
@@ -596,7 +601,7 @@
             <span class="n">weights</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="n">ProjectorUncorrected</span><span class="o">.</span><span class="n">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp_vol</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">angle_ind</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">))</span>
         <span class="p">]</span>
-        <span class="n">sino_line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">sino_line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sino_line</span> <span class="o">=</span> <span class="n">spsig</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
@@ -606,18 +611,24 @@
 
         <span class="k">return</span> <span class="n">sino_line</span></div>
 
-<div class="viewcode-block" id="ProjectorAttenuationXRF.bp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.bp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">,</span> <span class="n">single_line</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Back-projection of a single sinogram line to the volume.</span>
+<div class="viewcode-block" id="ProjectorAttenuationXRF.bp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.bp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">single_line</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Back-project a single sinogram line to the volume.</span>
 
 <span class="sd">        It only applies the attenuation corrections if the projector is symmetric.</span>
 
-<span class="sd">        :param sino: The sinogram to back-project or a single line (numpy.array_like)</span>
-<span class="sd">        :param angle_ind: The angle index to foward project (int)</span>
-<span class="sd">        :param single_line: Whether the input is a single sinogram line (boolean, default: False)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sino : numpy.array_like</span>
+<span class="sd">            The sinogram to back-project or a single line.</span>
+<span class="sd">        angle_ind : int</span>
+<span class="sd">            The angle index to foward project.</span>
+<span class="sd">        single_line : bool, optional</span>
+<span class="sd">            Whether the input is a single sinogram line. The default is False.</span>
 
-<span class="sd">        :returns: The back-projected volume</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.array_like</span>
+<span class="sd">            The back-projected volume.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">single_line</span><span class="p">:</span>
             <span class="n">sino_line</span> <span class="o">=</span> <span class="n">sino</span>
@@ -648,34 +659,57 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ProjectorAttenuationXRF.fp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.fp">[docs]</a>    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Forward-projection of the volume to the sinogram.</span>
+        <span class="sd">&quot;&quot;&quot;Forward-project the volume to the sinogram.</span>
 
 <span class="sd">        It applies the attenuation corrections.</span>
 
-<span class="sd">        :param vol: The volume to forward-project (numpy.array_like)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vol : numpy.array_like</span>
+<span class="sd">            The volume to forward-project.</span>
 
-<span class="sd">        :returns: The forward-projected sinogram</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.array_like</span>
+<span class="sd">            The forward-projected sinogram.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">fp_angle</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">))],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_multithreading</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="p">,</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackendSKimage</span><span class="p">):</span>
+            <span class="n">sino_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp_angle</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)))</span>
+            <span class="n">sino_lines</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">sino_lines</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sino_lines</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fp_angle</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">))]</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sino_lines</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="ProjectorAttenuationXRF.bp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.bp">[docs]</a>    <span class="k">def</span> <span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Back-projection of the sinogram to the volume.</span>
 
-<span class="sd">        :param sino: The sinogram to back-project (numpy.array_like)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sino : numpy.array_like</span>
+<span class="sd">            The sinogram to back-project.</span>
 
-<span class="sd">        :returns: The back-projected volume</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.array_like</span>
+<span class="sd">            The back-projected volume.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">bp_angle</span><span class="p">(</span><span class="n">sino</span><span class="p">,</span> <span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">))],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_multithreading</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="p">,</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackendSKimage</span><span class="p">):</span>
+                <span class="n">vols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp_angle</span><span class="p">(</span><span class="n">sino</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)))</span>
+                <span class="n">vols</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">vols</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vols</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">bp_angle</span><span class="p">(</span><span class="n">sino</span><span class="p">,</span> <span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">))]</span>
+
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vols</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ProjectorUncorrected</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="FilterMR"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR">[docs]</a><span class="k">class</span> <span class="nc">FilterMR</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data dependent FBP filter. This is a simplified implementation from:</span>
+    <span class="sd">&quot;&quot;&quot;Data dependent FBP filter.</span>
+
+<span class="sd">    This is a simplified implementation from:</span>
 
 <span class="sd">    [1] Pelt, D. M., &amp; Batenburg, K. J. (2014). Improving filtered backprojection</span>
 <span class="sd">    reconstruction by data-dependent filtering. Image Processing, IEEE</span>
@@ -685,14 +719,27 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">sinogram_pixels_num</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sinogram_angles_num</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_exp_binning</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">lambda_smooth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">sinogram_pixels_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sinogram_angles_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_exp_binning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">lambda_smooth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param sinogram_pixels_num: Number of sinogram pixels (int)</span>
-<span class="sd">        :param sinogram_angles_num: Number of sinogram angles (int)</span>
-<span class="sd">        :param start_exp_binning: From which distance to start exponentional binning (int)</span>
-<span class="sd">        :param lambda_smooth: Smoothing parameter (float)</span>
-<span class="sd">        :param data_type: Filter data type (numpy data type)</span>
+        <span class="sd">&quot;&quot;&quot;Initialize FilterMR class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sinogram_pixels_num : int, optional</span>
+<span class="sd">            Number of sinogram pixels. The default is None.</span>
+<span class="sd">        sinogram_angles_num : int, optional</span>
+<span class="sd">            Number of sinogram angles. The default is None.</span>
+<span class="sd">        start_exp_binning : int, optional</span>
+<span class="sd">            From which distance to start exponentional binning. The default is 2.</span>
+<span class="sd">        lambda_smooth : float, optional</span>
+<span class="sd">            Smoothing parameter. The default is None.</span>
+<span class="sd">        data_type : numpy.dtype, optional</span>
+<span class="sd">            Filter data type. The default is np.float32.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_exp_binning</span> <span class="o">=</span> <span class="n">start_exp_binning</span>
@@ -705,14 +752,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
 
 <div class="viewcode-block" id="FilterMR.initialize"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Filter initialization function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Filter initialization function.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinogram_pixels_num</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No sinogram pixels number was given!&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinogram_angles_num</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No sinogram angles number was given!&quot;</span><span class="p">)</span>
 
-        <span class="n">filter_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sinogram_pixels_num</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="n">filter_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sinogram_pixels_num</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filter_size</span> <span class="o">=</span> <span class="n">filter_center</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
 
         <span class="n">window_size</span> <span class="o">=</span> <span class="mi">1</span>
@@ -741,14 +787,20 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="FilterMR.compute_filter"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR.compute_filter">[docs]</a>    <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">,</span> <span class="n">projector</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Computes the filter.</span>
+<div class="viewcode-block" id="FilterMR.compute_filter"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR.compute_filter">[docs]</a>    <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">,</span> <span class="n">projector</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the filter.</span>
 
-<span class="sd">        :param sinogram: The sinogram (np.array_like)</span>
-<span class="sd">        :param projector: The projector used in the FBP (object)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sinogram : numpy.array_like</span>
+<span class="sd">            The sinogram.</span>
+<span class="sd">        projector : operators.ProjectorOperator</span>
+<span class="sd">            The projector used in the FBP.</span>
 
-<span class="sd">        :returns: The computed filter</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        computed_filter : numpy.array_like</span>
+<span class="sd">            The computed filter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sino_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinogram_angles_num</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinogram_pixels_num</span>
         <span class="n">nrows</span> <span class="o">=</span> <span class="n">sino_size</span>
@@ -783,25 +835,36 @@
         <span class="k">return</span> <span class="n">computed_filter</span></div>
 
 <div class="viewcode-block" id="FilterMR.apply_filter"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR.apply_filter">[docs]</a>    <span class="k">def</span> <span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">,</span> <span class="n">computed_filter</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Applies the filter to the sinogram.</span>
+        <span class="sd">&quot;&quot;&quot;Apply the filter to the sinogram.</span>
 
-<span class="sd">        :param sinogram: The sinogram (np.array_like)</span>
-<span class="sd">        :param computed_filter: The computed filter (np.array_like)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sinogram : numpy.array_like</span>
+<span class="sd">            The sinogram.</span>
+<span class="sd">        computed_filter : numpy.array_like</span>
+<span class="sd">            The computed filter.</span>
 
-<span class="sd">        :returns: The filtered sinogram</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.array_like</span>
+<span class="sd">            The filtered sinogram.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">spsig</span><span class="o">.</span><span class="n">fftconvolve</span><span class="p">(</span><span class="n">sinogram</span><span class="p">,</span> <span class="n">computed_filter</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="s2">&quot;same&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">,</span> <span class="n">projector</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Filters the sinogram, by first computing the filter, and then</span>
-<span class="sd">        applying it.</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">,</span> <span class="n">projector</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Filter the sinogram, by first computing the filter, and then applying it.</span>
 
-<span class="sd">        :param sinogram: The sinogram (np.array_like)</span>
-<span class="sd">        :param projector: The projector used in the FBP (object)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sinogram : numpy.array_like</span>
+<span class="sd">            The unfiltered sinogram.</span>
+<span class="sd">        projector : operators.ProjectorOperator</span>
+<span class="sd">            The projector used in the FBP.</span>
 
-<span class="sd">        :returns: The filtered sinogram</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.array_like</span>
+<span class="sd">            The filtered sinogram.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sinogram_angles_num</span> <span class="o">=</span> <span class="n">sinogram</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -813,42 +876,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2018, Nicola VIGANO
-
-    </p>
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

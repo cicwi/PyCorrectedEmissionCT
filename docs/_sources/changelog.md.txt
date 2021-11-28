@@ -4,7 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.3.2...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.4.0...develop
+
+## 0.4.0 - 2021-04-15
+### Added
+- Moved data terms and regularizers to dedicated module.
+- Conditional minimization of low pass (approximation) portion of wavelet decomposition.
+- Cross-validation and L-curve methods for selecting regularization parameters.
+- Support for different regularization weights across reconstruction volume.
+- Improved corrected projector performance.
+- Restructured and expanded test phantom creation.
+- Basic multi-threading support for CPU operations.
+- Initial type hinting.
+- FRC/FSC and azimuthal integration support.
+- Automatic image denoising (with cross-validation).
+### Fixed
+- Size of transformed volumes in dwt.
+- Deprecation warnings from recent numpy versions.
+- Warning in scikit-image projector backend.
+- Copy of x0 and data terms in solvers.
+- Angle consistency among different projectors.
+- ProjectorMatrix when using precondioned PDHG solver.
 
 ## 0.3.2 - 2021-04-15
 ### Added

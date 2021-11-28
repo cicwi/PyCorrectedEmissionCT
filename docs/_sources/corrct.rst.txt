@@ -12,6 +12,14 @@ corrct.corrct module
    :undoc-members:
    :show-inheritance:
 
+corrct.data\_terms module
+-------------------------
+
+.. automodule:: corrct.data_terms
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.operators module
 -----------------------
 
@@ -28,6 +36,14 @@ corrct.projectors module
    :undoc-members:
    :show-inheritance:
 
+corrct.regularizers module
+--------------------------
+
+.. automodule:: corrct.regularizers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.solvers module
 ---------------------
 
@@ -40,6 +56,14 @@ corrct.utils\_proc module
 -------------------------
 
 .. automodule:: corrct.utils_proc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+corrct.utils\_reg module
+------------------------
+
+.. automodule:: corrct.utils_reg
    :members:
    :undoc-members:
    :show-inheritance:
