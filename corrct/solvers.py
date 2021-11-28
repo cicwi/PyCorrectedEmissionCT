@@ -7,8 +7,11 @@ Solvers for the tomographic reconstruction problem.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+from typing import Optional, Union, Tuple
+
 import numpy as np
 import numpy.random
+from numpy.typing import ArrayLike
 
 import scipy.sparse as sps
 
@@ -18,8 +21,6 @@ from . import data_terms
 from . import regularizers
 
 from tqdm import tqdm
-
-from typing import Optional, Union
 
 
 eps = np.finfo(np.float32).eps
@@ -74,7 +75,6 @@ Constraint_UpperLimit = regularizers.Constraint_UpperLimit
 
 
 class Solver(object):
-
     def __init__(
         self,
         verbose: bool = False,
@@ -111,17 +111,17 @@ class Solver(object):
             data_term_test = self.data_term
         self.data_term_test = cp.deepcopy(self.data_term)
 
-    def info(self):
+    def info(self) -> str:
         return type(self).__name__
 
-    def upper(self):
+    def upper(self) -> str:
         return type(self).__name__.upper()
 
-    def lower(self):
+    def lower(self) -> str:
         return type(self).__name__.lower()
 
     @staticmethod
-    def _initialize_data_fidelity_function(data_term):
+    def _initialize_data_fidelity_function(data_term: Union[str, DataFidelityBase]) -> DataFidelityBase:
         if isinstance(data_term, str):
             if data_term.lower() == "l2":
                 return DataFidelity_l2()
@@ -133,7 +133,10 @@ class Solver(object):
             raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
 
     @staticmethod
-    def _initialize_data_operators(A, At):
+    def _initialize_data_operators(
+        A: Union[ArrayLike, sps.linalg.LinearOperator, sps.dia_matrix],
+        At: Optional[Union[ArrayLike, sps.linalg.LinearOperator, sps.dia_matrix]],
+    ):
         if At is None:
             if isinstance(A, np.ndarray):
                 At = A.transpose((1, 0))
@@ -149,7 +152,7 @@ class Solver(object):
         return (A, At)
 
     @staticmethod
-    def _initialize_regularizer(regularizer):
+    def _initialize_regularizer(regularizer: Optional[BaseRegularizer]) -> BaseRegularizer:
         if regularizer is None:
             return []
         elif isinstance(regularizer, BaseRegularizer):
@@ -167,7 +170,7 @@ class Solver(object):
             raise ValueError("Unknown regularizer type.")
 
     @staticmethod
-    def _initialize_b_masks(b, b_mask, b_test_mask):
+    def _initialize_b_masks(b: ArrayLike, b_mask: Optional[ArrayLike], b_test_mask: Optional[ArrayLike]):
         if b_test_mask is not None:
             if b_mask is None:
                 b_mask = np.ones_like(b)
@@ -182,8 +185,18 @@ class Sart(Solver):
     """Solver class implementing the Simultaneous Algebraic Reconstruction Technique (SART) algorithm."""
 
     def __call__(  # noqa: C901
-        self, A, b, iterations, A_num_rows, x0=None, At=None, lower_limit=None, upper_limit=None, x_mask=None, b_mask=None
-    ):
+        self,
+        A,
+        b: ArrayLike,
+        iterations: int,
+        A_num_rows: int,
+        x0: Optional[ArrayLike] = None,
+        At=None,
+        lower_limit: Union[float, ArrayLike] = None,
+        upper_limit: Union[float, ArrayLike] = None,
+        x_mask: Optional[ArrayLike] = None,
+        b_mask: Optional[ArrayLike] = None,
+    ) -> Tuple[ArrayLike, Optional[ArrayLike]]:
         """
         """
         # Back-projection diagonal re-scaling
@@ -293,16 +306,16 @@ class Sirt(Solver):
     def __call__(  # noqa: C901
         self,
         A,
-        b,
+        b: ArrayLike,
         iterations: int,
-        x0=None,
+        x0: Optional[ArrayLike] = None,
         At=None,
-        lower_limit=None,
-        upper_limit=None,
-        x_mask=None,
-        b_mask=None,
-        b_test_mask=None,
-    ):
+        lower_limit: Union[float, ArrayLike] = None,
+        upper_limit: Union[float, ArrayLike] = None,
+        x_mask: Optional[ArrayLike] = None,
+        b_mask: Optional[ArrayLike] = None,
+        b_test_mask: Optional[ArrayLike] = None,
+    ) -> Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]:
         """
         """
         (A, At) = self._initialize_data_operators(A, At)
@@ -431,7 +444,7 @@ class PDHG(Solver):
         return Solver.info(self) + "-" + self.data_term.info() + reg_info
 
     @staticmethod
-    def _initialize_data_fidelity_function(data_term):
+    def _initialize_data_fidelity_function(data_term: Union[str, DataFidelityBase]):
         if isinstance(data_term, str):
             if data_term.lower() == "l2":
                 return DataFidelity_l2()
@@ -444,7 +457,7 @@ class PDHG(Solver):
         else:
             return cp.deepcopy(data_term)
 
-    def power_method(self, A, At, b, iterations=5):
+    def power_method(self, A, At, b: ArrayLike, iterations: int = 5):
         x = np.random.rand(*b.shape).astype(b.dtype)
         x /= np.linalg.norm(x)
         x = At(x)
@@ -461,7 +474,7 @@ class PDHG(Solver):
 
         return (L, x.shape, x.dtype)
 
-    def _get_data_sigma_tau_unpreconditioned(self, A, At, b):
+    def _get_data_sigma_tau_unpreconditioned(self, A, At, b: ArrayLike):
         (L, x_shape, x_dtype) = self.power_method(A, At, b)
         tau = L
 
@@ -476,17 +489,17 @@ class PDHG(Solver):
     def __call__(  # noqa: C901
         self,
         A,
-        b,
+        b: ArrayLike,
         iterations: int,
-        x0=None,
+        x0: Optional[ArrayLike] = None,
         At=None,
-        upper_limit=None,
-        lower_limit=None,
-        x_mask=None,
-        b_mask=None,
-        b_test_mask=None,
-        precondition=False,
-    ):
+        lower_limit: Union[float, ArrayLike] = None,
+        upper_limit: Union[float, ArrayLike] = None,
+        x_mask: Optional[ArrayLike] = None,
+        b_mask: Optional[ArrayLike] = None,
+        b_test_mask: Optional[ArrayLike] = None,
+        precondition: bool = False,
+    ) -> Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]:
         """
         """
         (A, At) = self._initialize_data_operators(A, At)
