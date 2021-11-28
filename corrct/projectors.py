@@ -25,16 +25,23 @@ num_threads = round(np.log2(mp.cpu_count() + 1))
 
 
 class ProjectorMatrix(operators.ProjectorOperator):
-    """Projector that uses an explicit projection matrix."""
-
     def __init__(self, A, vol_shape, proj_shape):
+        """Initialize a projector that uses an explicit projection matrix."""
         self.vol_shape = vol_shape
         self.proj_shape = proj_shape
 
         self.A = A
         super().__init__()
 
-    def absolute(self):
+    def _transpose(self) -> operators.ProjectorOperator:
+        """Create the transpose operator.
+
+        :returns: The transpose operator
+        :rtype: ProjectorMatrix
+        """
+        return ProjectorMatrix(self.A.transpose(), self.proj_shape, self.vol_shape)
+
+    def absolute(self) -> operators.ProjectorOperator:
         """Return the projection operator using the absolute value of the projection coefficients.
 
         :returns: The absolute value operator
