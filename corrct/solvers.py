@@ -1203,7 +1203,7 @@ class Sirt(Solver):
         return (x, (res_norm_rel, res_test_norm_rel, ii))
 
 
-class CP(Solver):
+class PDHG(Solver):
     """Solver class implementing the primal-dual algorithm from Chambolle and Pock.
 
     It allows to specify two types of data fidelity terms: l2-norm and
@@ -1396,3 +1396,6 @@ class CP(Solver):
                     break
 
         return (x, (res_norm_rel, res_test_norm_rel, ii))
+
+
+CP = PDHG
