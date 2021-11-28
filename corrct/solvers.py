@@ -216,8 +216,7 @@ class Sart(Solver):
 
         rows_sequence = np.random.permutation(A_num_rows)
 
-        if self.verbose:
-            algo_info = "- Performing %s iterations: " % self.upper()
+        algo_info = "- Performing %s iterations: " % self.upper()
 
         for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
 
