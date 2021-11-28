@@ -8,6 +8,7 @@ import copy as cp
 
 import unittest
 
+from corrct import projectors
 from corrct import solvers
 from corrct import utils_proc
 from corrct import utils_test
@@ -73,7 +74,7 @@ class TestRegularizers(unittest.TestCase):
 
         copy_dual = cp.deepcopy(dual)
         reg.update_dual(dual, vol)
-        sigma_shape = [-1] + [1] * (len(reg.op.adj_shape)-1)
+        sigma_shape = [-1] + [1] * (len(reg.op.adj_shape) - 1)
         assert np.all(np.isclose(dual, copy_dual + reg.op(vol) * np.reshape(reg.sigma, sigma_shape)))
 
         upd = reg.compute_update_primal(dual)
@@ -160,33 +161,38 @@ class TestRegularizers(unittest.TestCase):
 class TestSolvers(unittest.TestCase):
     """Tests for the solvers in `corrct.solvers` package."""
 
+    __oversize_data = 5
+
     def setUp(self):
         """Set up test fixtures, if any."""
-        self.test_vols_shape = (10, 10, 5)
+        self.test_vols_shape = (10, 10)
+        self.test_prjs_shape = (self.__oversize_data, np.prod(self.test_vols_shape))
 
         self.vol_rand_2d = np.fmin(np.random.rand(*self.test_vols_shape[:2]) + eps, 1)
         self.vol_flat_2d = utils_proc.get_circular_mask(self.test_vols_shape[:2], -2)
 
-        self.proj_matrix_2d = (np.random.rand(5 * self.vol_rand_2d.size, self.vol_rand_2d.size) > 0.5).astype(np.float32)
+        self.proj_matrix_2d = (
+            np.random.rand(np.prod(self.test_prjs_shape), np.prod(self.test_vols_shape)) > 0.5
+        ).astype(np.float32)
 
-        self.data_rand_2d = self.fwd_op(self.proj_matrix_2d, self.vol_rand_2d)
+        self.data_rand_2d = self.fwd_op(self.proj_matrix_2d, self.vol_rand_2d, self.test_prjs_shape)
 
-        self.data_flat_2d = self.fwd_op(self.proj_matrix_2d, self.vol_flat_2d)
+        self.data_flat_2d = self.fwd_op(self.proj_matrix_2d, self.vol_flat_2d, self.test_prjs_shape)
         self.data_flat_2d += np.random.randn(*self.data_flat_2d.shape) * 1e-3
 
     def tearDown(self):
         """Tear down test fixtures, if any."""
 
-    def fwd_op(self, M, x):
-        return np.dot(M, x.flatten())
+    def fwd_op(self, M, x, y_shape):
+        return np.dot(M, x.flatten()).reshape(y_shape)
 
     def bwd_op(self, M, y, x_shape):
-        return np.reshape(np.dot(y.flatten(), M), x_shape)
+        return np.dot(y.flatten(), M).reshape(x_shape)
 
     def get_A_At(self, vol_dims):
         if vol_dims.lower() == '2d':
             def A(x):
-                return self.fwd_op(self.proj_matrix_2d, x)
+                return self.fwd_op(self.proj_matrix_2d, x, self.test_prjs_shape)
 
             def At(y):
                 return self.bwd_op(self.proj_matrix_2d, y, self.test_vols_shape[:2])
@@ -268,11 +274,22 @@ class TestSolvers(unittest.TestCase):
     def test_006_CPLSTV_unconstrained_precond(self):
         """Test Chambolle-Pock preconditioned, unconstrained least-squares TV-min algorithm in 2D."""
 
-        (A, At) = self.get_A_At('2d')
+        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.CP(regularizer=reg)
-        (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At, precondition=True)
+        (sol, residual) = algo(A, self.data_flat_2d, 2500, precondition=True)
 
         print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_flat_2d - sol))),
               end='', flush=True)
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
+
+    def test_007_OperatorMatrix_SIRT(self):
+        """Test SIRT algorithm in 2D."""
+
+        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
+        algo = solvers.Sirt()
+        (sol, residual) = algo(A, self.data_rand_2d, 2500)
+
+        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_rand_2d - sol))),
+              end='', flush=True)
+        assert np.all(np.isclose(sol, self.vol_rand_2d, atol=1e-3))
