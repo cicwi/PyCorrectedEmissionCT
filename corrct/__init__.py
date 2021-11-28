@@ -19,7 +19,13 @@ __version__ = __get_version()
 
 # Import all definitions from main module.
 from .corrct import *  # noqa: F401, F402, F403
+
+from . import operators  # noqa: F401, F402
 from . import projectors  # noqa: F401, F402
+
+from . import data_terms  # noqa: F401, F402
+from . import regularizers  # noqa: F401, F402
 from . import solvers  # noqa: F401, F402
+
 from . import utils_reg  # noqa: F401, F402
 from . import utils_proc  # noqa: F401, F402
