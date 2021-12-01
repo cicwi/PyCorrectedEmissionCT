@@ -29,6 +29,8 @@ class DataFidelityBase(object):
             The data background. The default is None.
         """
         self.background = background
+        self.data = None
+        self.sigma = None
 
     def info(self):
         if self.background is not None:

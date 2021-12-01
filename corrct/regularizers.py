@@ -220,8 +220,8 @@ class Regularizer_l1(BaseRegularizer):
 
     __reg_name__ = "l1"
 
-    def __init__(self, weight):
-        super().__init__(weight=weight, norm=DataFidelity_l1())
+    def __init__(self, weight, norm=DataFidelity_l1()):
+        super().__init__(weight=weight, norm=norm)
 
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
@@ -319,7 +319,7 @@ class Regularizer_swl(BaseRegularizer):
 
 
 class Regularizer_l1swl(Regularizer_swl):
-    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions."""
+    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
 
     __reg_name__ = "l1swl"
 
@@ -340,7 +340,7 @@ class Regularizer_l1swl(Regularizer_swl):
 
 
 class Regularizer_Hub_swl(Regularizer_swl):
-    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions."""
+    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
 
     __reg_name__ = "Hubswl"
 
