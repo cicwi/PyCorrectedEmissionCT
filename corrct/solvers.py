@@ -124,10 +124,10 @@ class Solver(object):
     def _initialize_data_fidelity_function(data_term: Union[str, DataFidelityBase]) -> DataFidelityBase:
         if isinstance(data_term, str):
             if data_term.lower() == "l2":
-                return DataFidelity_l2()
+                return data_terms.DataFidelity_l2()
             else:
                 raise ValueError('Unknown data term: "%s", only accepted terms are: "l2".' % data_term)
-        elif isinstance(data_term, (DataFidelity_l2, DataFidelity_KL)):
+        elif isinstance(data_term, (data_terms.DataFidelity_l2, data_terms.DataFidelity_KL)):
             return cp.deepcopy(data_term)
         else:
             raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
