@@ -483,7 +483,7 @@ class PDHG(Solver):
             tau += reg.initialize_sigma_tau(dummy_x)
 
         tau = self.relaxation / tau
-        sigma = 0.95 / L
+        sigma = self.relaxation / L
         return (x_shape, x_dtype, sigma, tau)
 
     def __call__(  # noqa: C901
@@ -532,7 +532,7 @@ class PDHG(Solver):
                 sigma *= x_mask
             sigma = np.abs(A_abs(sigma))
             sigma[(sigma / np.max(sigma)) < 1e-5] = 1
-            sigma = 0.95 / sigma
+            sigma = self.relaxation / sigma
         else:
             (x_shape, x_dtype, sigma, tau) = self._get_data_sigma_tau_unpreconditioned(A, At, b)
 
