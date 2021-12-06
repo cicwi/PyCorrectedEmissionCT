@@ -32,7 +32,7 @@ class DataFidelityBase(object):
         self.data = None
         self.sigma = None
 
-    def info(self):
+    def info(self) -> str:
         if self.background is not None:
             if np.array(self.background).size > 1:
                 bckgrnd_str = "(B:<array>)"
@@ -42,10 +42,10 @@ class DataFidelityBase(object):
             bckgrnd_str = ""
         return self.__data_fidelity_name__ + bckgrnd_str
 
-    def upper(self):
+    def upper(self) -> str:
         return self.info().upper()
 
-    def lower(self):
+    def lower(self) -> str:
         return self.info().lower()
 
     def assign_data(self, data=None, sigma=1):
@@ -70,11 +70,11 @@ class DataFidelityBase(object):
     def compute_residual_norm(self, dual):
         raise NotImplementedError()
 
-    def _compute_sigma_data(self):
+    def _compute_sigma_data(self) -> None:
         self.sigma_data = self.sigma * self.data
 
     @staticmethod
-    def _soft_threshold(values, threshold):
+    def _soft_threshold(values, threshold) -> None:
         abs_values = np.abs(values)
         valid_values = abs_values > 0
         if isinstance(threshold, (float, int)) or threshold.size == 1:
@@ -92,13 +92,13 @@ class DataFidelityBase(object):
     def initialize_dual(self):
         return np.zeros_like(self.data)
 
-    def update_dual(self, dual, proj_primal):
+    def update_dual(self, dual, proj_primal) -> None:
         if self.background is None:
             dual += proj_primal * self.sigma
         else:
             dual += (proj_primal + self.background) * self.sigma
 
-    def apply_proximal(self, dual):
+    def apply_proximal(self, dual) -> None:
         raise NotImplementedError()
 
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):

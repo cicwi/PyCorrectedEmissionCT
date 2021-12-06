@@ -54,13 +54,13 @@ class BaseRegularizer(object):
         self.op = None
         self.norm = norm
 
-    def info(self):
+    def info(self) -> str:
         return self.__reg_name__ + "(w:%g" % self.weight.max() + ")"
 
-    def upper(self):
+    def upper(self) -> str:
         return self.__reg_name__.upper()
 
-    def lower(self):
+    def lower(self) -> str:
         return self.__reg_name__.lower()
 
     def initialize_sigma_tau(self, primal):
@@ -88,7 +88,7 @@ class Regularizer_Grad(BaseRegularizer):
         super().__init__(weight=weight, norm=norm)
 
         if axes is None:
-            axes = np.arange(-ndims, 0, dtype=np.intp)
+            axes = np.arange(-ndims, 0, dtype=int)
         elif not ndims == len(axes):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
@@ -174,7 +174,7 @@ class Regularizer_lap(BaseRegularizer):
         super().__init__(weight=weight, norm=DataFidelity_l1())
 
         if axes is None:
-            axes = np.arange(-ndims, 0, dtype=np.intp)
+            axes = np.arange(-ndims, 0, dtype=int)
         elif not ndims == len(axes):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
@@ -269,7 +269,7 @@ class Regularizer_swl(BaseRegularizer):
         self.min_approx = min_approx
 
         if axes is None:
-            axes = np.arange(-ndims, 0, dtype=np.intp)
+            axes = np.arange(-ndims, 0, dtype=int)
         elif not ndims == len(axes):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
@@ -388,7 +388,7 @@ class Regularizer_dwl(BaseRegularizer):
         self.min_approx = min_approx
 
         if axes is None:
-            axes = np.arange(-ndims, 0, dtype=np.intp)
+            axes = np.arange(-ndims, 0, dtype=int)
         elif not ndims == len(axes):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
@@ -468,7 +468,7 @@ class BaseRegularizer_med(BaseRegularizer):
         return self.weight
 
     def update_dual(self, dual, primal):
-        dual += primal - spimg.median_filter(primal, self.filt_size)
+        dual += (primal - spimg.median_filter(primal, self.filt_size))
 
     def compute_update_primal(self, dual):
         return self.weight * dual
@@ -501,7 +501,7 @@ class Regularizer_fft(BaseRegularizer):
         super().__init__(weight=weight, norm=norm)
 
         if axes is None:
-            axes = np.arange(-ndims, 0, dtype=np.intp)
+            axes = np.arange(-ndims, 0, dtype=int)
         elif not ndims == len(axes):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
