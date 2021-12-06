@@ -291,7 +291,7 @@ class Regularizer_swl(BaseRegularizer):
         axes=None,
         pad_on_demand="constant",
         normalized=False,
-        min_approx=False,
+        min_approx=True,
         norm=DataFidelity_l1(),
     ):
         if not has_pywt:
@@ -361,7 +361,7 @@ class Regularizer_l1swl(Regularizer_swl):
     __reg_name__ = "l1swl"
 
     def __init__(
-        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", normalized=False, min_approx=False
+        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", normalized=False, min_approx=True
     ):
         super().__init__(
             weight,
@@ -390,7 +390,7 @@ class Regularizer_Hub_swl(Regularizer_swl):
         axes=None,
         pad_on_demand="constant",
         normalized=False,
-        min_approx=False,
+        min_approx=True,
         huber_size=None,
     ):
         super().__init__(
@@ -415,7 +415,7 @@ class Regularizer_dwl(BaseRegularizer):
         return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight.max() + ")"
 
     def __init__(
-        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", min_approx=False, norm=DataFidelityBase()
+        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", min_approx=True, norm=DataFidelityBase()
     ):
         if not has_pywt:
             raise ValueError("Cannot use wavelet regularizer because pywavelets is not installed.")
