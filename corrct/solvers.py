@@ -498,7 +498,7 @@ class PDHG(Solver):
         x_mask: Optional[ArrayLike] = None,
         b_mask: Optional[ArrayLike] = None,
         b_test_mask: Optional[ArrayLike] = None,
-        precondition: bool = False,
+        precondition: bool = True,
     ) -> Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]:
         """
         """
