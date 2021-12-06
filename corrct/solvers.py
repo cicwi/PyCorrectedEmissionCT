@@ -155,7 +155,7 @@ class Solver(object):
     def _initialize_regularizer(regularizer: Optional[BaseRegularizer]) -> BaseRegularizer:
         if regularizer is None:
             return []
-        elif isinstance(regularizer, BaseRegularizer):
+        elif isinstance(regularizer, regularizers.BaseRegularizer):
             return [regularizer]
         elif isinstance(regularizer, (list, tuple)):
             check_regs_ok = [isinstance(r, BaseRegularizer) for r in regularizer]
