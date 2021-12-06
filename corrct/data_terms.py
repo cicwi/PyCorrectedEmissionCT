@@ -238,21 +238,40 @@ class DataFidelity_l1(DataFidelityBase):
     def __init__(self, background=None):
         super().__init__(background=background)
 
-    def apply_proximal(self, dual):
-        if self.data is not None:
-            dual -= self.sigma_data
-        dual /= np.fmax(1, np.abs(dual))
+    def _get_inner_norm(self, dual):
+        return np.abs(dual)
+
+    def _apply_threshold(self, dual):
+        pass
+
+    def apply_proximal(self, dual, weight=1):
+        if weight > 0:
+            if self.data is not None:
+                dual -= self.sigma_data
+            self._apply_threshold(dual)
+            dual_inner_norm = self._get_inner_norm(dual)
+            dual /= np.fmax(dual_inner_norm, weight)
+            dual *= weight
+        else:
+            dual[:] = 0
 
     def compute_residual_norm(self, dual):
-        return np.linalg.norm(dual.flatten(), ord=1)
+        dual = dual.copy()
+        self._apply_threshold(dual)
+        dual_inner_norm = self._get_inner_norm(dual)
+        return np.linalg.norm(dual_inner_norm, ord=1)
 
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
-        return np.linalg.norm(self.compute_residual(proj_primal, mask), ord=1) + self.compute_data_dual_dot(dual)
+
+        residual = self.compute_residual(proj_primal, mask)
+        self._apply_threshold(residual)
+        residual_inner_norm = self._get_inner_norm(residual)
+        return np.linalg.norm(residual_inner_norm, ord=1) + self.compute_data_dual_dot(dual)
 
 
-class DataFidelity_l12(DataFidelityBase):
+class DataFidelity_l12(DataFidelity_l1):
     """l12-norm data-fidelity class."""
 
     __data_fidelity_name__ = "l12"
@@ -261,22 +280,8 @@ class DataFidelity_l12(DataFidelityBase):
         super().__init__(background=background)
         self.l2_axis = l2_axis
 
-    def apply_proximal(self, dual):
-        if self.data is not None:
-            dual -= self.sigma_data
-        dual_dir_norm_l2 = np.linalg.norm(dual, ord=2, axis=self.l2_axis, keepdims=True)
-        dual /= np.fmax(1, dual_dir_norm_l2)
-
-    def compute_residual_norm(self, dual):
-        temp_dual = np.linalg.norm(dual, ord=2, axis=self.l2_axis)
-        return np.linalg.norm(temp_dual.flatten(), ord=1)
-
-    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
-        if self.background is not None:
-            proj_primal = proj_primal + self.background
-        return np.linalg.norm(
-            np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2, axis=self.l2_axis), ord=1
-        ) + self.compute_data_dual_dot(dual)
+    def _get_inner_norm(self, dual):
+        return np.linalg.norm(dual, ord=2, axis=self.l2_axis, keepdims=True)
 
 
 class DataFidelity_l1b(DataFidelity_l1):
@@ -292,18 +297,8 @@ class DataFidelity_l1b(DataFidelity_l1):
         self.sigma_error = sigma * self.local_error
         super().assign_data(data=data, sigma=sigma)
 
-    def apply_proximal(self, dual):
-        if self.data is not None:
-            dual -= self.sigma_data
-        self._soft_threshold(dual, self.sigma_error)
-        dual /= np.fmax(1, np.abs(dual))
-
-    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
-        if self.background is not None:
-            proj_primal = proj_primal + self.background
-        return np.linalg.norm(
-            np.fmax(np.abs(self.compute_residual(proj_primal, mask)) - self.local_error, 0), ord=1
-        ) + self.compute_data_dual_dot(dual)
+    def _apply_threshold(self, dual):
+        self._soft_threshold(dual, self.local_error)
 
 
 class DataFidelity_KL(DataFidelityBase):

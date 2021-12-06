@@ -44,11 +44,20 @@ DataFidelity_KL = data_terms.DataFidelity_KL
 
 
 class BaseRegularizer(object):
-    """Base regularizer class that defines the Regularizer object interface."""
 
     __reg_name__ = ""
 
     def __init__(self, weight, norm):
+        """
+        Base regularizer class that defines the Regularizer object interface.
+
+        Parameters
+        ----------
+        weight : Union[float, ArrayLike]
+            The weight of the regularizer.
+        norm : DataFidelityBase
+            The norm of the regularizer minimization.
+        """
         self.weight = np.array(weight)
         self.dtype = None
         self.op = None
@@ -70,21 +79,42 @@ class BaseRegularizer(object):
         return np.zeros(self.op.adj_shape, dtype=self.dtype)
 
     def update_dual(self, dual, primal):
-        raise NotImplementedError()
+        dual += self.sigma * self.op(primal)
 
     def apply_proximal(self, dual):
-        self.norm.apply_proximal(dual)
+        if isinstance(self.norm, DataFidelity_l1):
+            self.norm.apply_proximal(dual, self.weight)
+        else:
+            self.norm.apply_proximal(dual)
 
     def compute_update_primal(self, dual):
-        raise NotImplementedError()
+        upd = self.op.T(dual)
+        if not isinstance(self.norm, DataFidelity_l1):
+            upd *= self.weight
+        return upd
 
 
 class Regularizer_Grad(BaseRegularizer):
-    """Total Variation (TV) regularizer. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = "grad"
 
-    def __init__(self, weight, ndims=2, axes=None, norm=DataFidelity_l12()):
+    def __init__(self, weight, ndims: int = 2, axes=None, norm: DataFidelityBase = DataFidelity_l12()):
+        """Gradient regularizer.
+
+        When used with l1-norms, it promotes piece-wise constant reconstructions.
+        When used with l2-norm, it promotes smooth reconstructions.
+
+        Parameters
+        ----------
+        weight : Union[float, ArrayLike]
+            The weight of the regularizer.
+        ndims : int, optional
+            The number of dimensions. The default is 2.
+        axes : Sequence, optional
+            The axes over which it computes the gradient. If None, it uses the last 2. The default is None.
+        norm : DataFidelityBase, optional
+            The norm of the regularizer minimization. The default is DataFidelity_l12().
+        """
         super().__init__(weight=weight, norm=norm)
 
         if axes is None:
@@ -95,6 +125,11 @@ class Regularizer_Grad(BaseRegularizer):
         self.ndims = ndims
         self.axes = axes
 
+        self.scale = 1  # Pixel/voxel scale factor - it can accellerate convergence
+
+    def update_dual(self, dual, primal):
+        dual += self.sigma * self.op(primal) * self.scale
+
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
         self.op = operators.TransformGradient(primal.shape, axes=self.axes)
@@ -102,49 +137,56 @@ class Regularizer_Grad(BaseRegularizer):
         self.sigma = 0.5
         self.norm.assign_data(None, sigma=self.sigma)
 
-        return self.weight * 2 * self.ndims
-
-    def update_dual(self, dual, primal):
-        dual += self.sigma * self.op(primal)
+        tau = 2 * self.ndims
+        if not isinstance(self.norm, DataFidelity_l1):
+            tau *= self.weight
+        return tau
 
     def compute_update_primal(self, dual):
-        return self.weight * self.op.T(dual)
+        upd = self.op.T(dual) * self.scale
+        if not isinstance(self.norm, DataFidelity_l1):
+            upd *= self.weight
+        return upd
 
 
 class Regularizer_TV2D(Regularizer_Grad):
-    """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = "TV2D"
 
     def __init__(self, weight, axes=None, norm=DataFidelity_l12()):
+        """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
         super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
+        self.scale = 10
 
 
 class Regularizer_TV3D(Regularizer_Grad):
-    """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = "TV3D"
 
     def __init__(self, weight, axes=None, norm=DataFidelity_l12()):
+        """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
         super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
+        self.scale = 10
 
 
 class Regularizer_HubTV2D(Regularizer_Grad):
-    """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = "HubTV2D"
 
     def __init__(self, weight, huber_size, axes=None):
+        """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
         super().__init__(weight=weight, ndims=2, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
+        self.scale = 10
 
 
 class Regularizer_HubTV3D(Regularizer_Grad):
-    """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = "HubTV3D"
 
     def __init__(self, weight, huber_size, axes=None):
+        """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
         super().__init__(weight=weight, ndims=3, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
+        self.scale = 10
 
 
 class Regularizer_smooth2D(Regularizer_Grad):
@@ -188,13 +230,7 @@ class Regularizer_lap(BaseRegularizer):
         self.sigma = 0.25
         self.norm.assign_data(None, sigma=self.sigma)
 
-        return self.weight * 4 * self.ndims
-
-    def update_dual(self, dual, primal):
-        dual += self.sigma * self.op(primal)
-
-    def compute_update_primal(self, dual):
-        return self.weight * self.op.T(dual)
+        return 4 * self.ndims
 
 
 class Regularizer_lap2D(Regularizer_lap):
@@ -229,13 +265,13 @@ class Regularizer_l1(BaseRegularizer):
 
         self.norm.assign_data(None, sigma=1)
 
-        return self.weight
+        return 1
 
     def update_dual(self, dual, primal):
         dual += primal
 
     def compute_update_primal(self, dual):
-        return self.weight * dual
+        return dual
 
 
 class Regularizer_swl(BaseRegularizer):
@@ -297,14 +333,18 @@ class Regularizer_swl(BaseRegularizer):
             self.sigma = 1
             self.norm.assign_data(None, sigma=self.sigma)
 
-            return self.weight * self.scaling_func_mult.size
+            tau = self.scaling_func_mult.size
         else:
             self.sigma = np.reshape(1 / self.scaling_func_mult, [-1] + [1] * len(self.op.dir_shape))
             self.norm.assign_data(None, sigma=self.sigma)
 
             tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
             tau[0] += 1
-            return self.weight * np.sum(tau / self.scaling_func_mult)
+            tau = np.sum(tau / self.scaling_func_mult)
+
+        if not isinstance(self.norm, DataFidelity_l1):
+            tau *= self.weight
+        return tau
 
     def update_dual(self, dual, primal):
         upd = self.op(primal)
@@ -313,9 +353,6 @@ class Regularizer_swl(BaseRegularizer):
         dual += upd
         if not self.min_approx:
             dual[0, ...] = 0
-
-    def compute_update_primal(self, dual):
-        return self.weight * self.op.T(dual)
 
 
 class Regularizer_l1swl(Regularizer_swl):
@@ -416,16 +453,17 @@ class Regularizer_dwl(BaseRegularizer):
 
         tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
         tau[0] += 1
-        return self.weight * np.sum(tau / self.scaling_func_mult)
+        tau = np.sum(tau / self.scaling_func_mult)
+
+        if not isinstance(self.norm, DataFidelity_l1):
+            tau *= self.weight
+        return tau
 
     def update_dual(self, dual, primal):
-        dual += self.sigma * self.op(primal)
+        super().update_dual(dual, primal)
         if not self.min_approx:
             slices = [slice(0, x) for x in self.op.sub_band_shapes[0]]
             dual[tuple(slices)] = 0
-
-    def compute_update_primal(self, dual):
-        return self.weight * self.op.T(dual)
 
 
 class Regularizer_l1dwl(Regularizer_dwl):
@@ -465,10 +503,13 @@ class BaseRegularizer_med(BaseRegularizer):
         self.op = operators.TransformIdentity(primal.shape)
         self.norm.assign_data(None, sigma=1)
 
-        return self.weight
+        if not isinstance(self.norm, DataFidelity_l1):
+            return self.weight
+        else:
+            return 1
 
     def update_dual(self, dual, primal):
-        dual += (primal - spimg.median_filter(primal, self.filt_size))
+        dual += primal - spimg.median_filter(primal, self.filt_size)
 
     def compute_update_primal(self, dual):
         return self.weight * dual
@@ -535,13 +576,10 @@ class Regularizer_fft(BaseRegularizer):
 
         self.norm.assign_data(None, sigma=self.sigma)
 
-        return self.weight
-
-    def update_dual(self, dual, primal):
-        dual += self.sigma * self.op(primal)
-
-    def compute_update_primal(self, dual):
-        return self.weight * self.op.T(dual)
+        if not isinstance(self.norm, DataFidelity_l1):
+            return self.weight
+        else:
+            return 1
 
 
 # ---- Constraints ----
@@ -565,7 +603,10 @@ class Constraint_LowerLimit(BaseRegularizer):
 
         self.norm.assign_data(self.limit, sigma=1)
 
-        return self.weight
+        if not isinstance(self.norm, DataFidelity_l1):
+            return self.weight
+        else:
+            return 1
 
     def update_dual(self, dual, primal):
         dual += primal
@@ -575,7 +616,7 @@ class Constraint_LowerLimit(BaseRegularizer):
         self.norm.apply_proximal(dual)
 
     def compute_update_primal(self, dual):
-        return self.weight * dual
+        return dual
 
 
 class Constraint_UpperLimit(BaseRegularizer):
@@ -596,7 +637,10 @@ class Constraint_UpperLimit(BaseRegularizer):
 
         self.norm.assign_data(self.limit, sigma=1)
 
-        return self.weight
+        if not isinstance(self.norm, DataFidelity_l1):
+            return self.weight
+        else:
+            return 1
 
     def update_dual(self, dual, primal):
         dual += primal
@@ -606,4 +650,4 @@ class Constraint_UpperLimit(BaseRegularizer):
         self.norm.apply_proximal(dual)
 
     def compute_update_primal(self, dual):
-        return self.weight * dual
+        return dual
