@@ -464,4 +464,3 @@ def compute_error_power(expected_vol: ArrayLike, computed_vol: ArrayLike) -> Tup
     vol_power = np.sqrt(np.sum((expected_vol) ** 2) / expected_vol.size)
     error_power = np.sqrt(np.sum(np.abs(expected_vol - computed_vol) ** 2) / expected_vol.size)
     return vol_power, error_power
-

@@ -33,9 +33,9 @@ class TestSolvers(unittest.TestCase):
         self.vol_rand_2d = np.fmin(np.random.rand(*self.test_vols_shape[:2]) + eps, 1)
         self.vol_flat_2d = utils_proc.get_circular_mask(self.test_vols_shape[:2], -2)
 
-        self.proj_matrix_2d = (
-            np.random.rand(np.prod(self.test_prjs_shape), np.prod(self.test_vols_shape)) > 0.5
-        ).astype(np.float32)
+        self.proj_matrix_2d = (np.random.rand(np.prod(self.test_prjs_shape), np.prod(self.test_vols_shape)) > 0.5).astype(
+            np.float32
+        )
 
         self.data_rand_2d = self.fwd_op(self.proj_matrix_2d, self.vol_rand_2d, self.test_prjs_shape)
 
@@ -52,7 +52,8 @@ class TestSolvers(unittest.TestCase):
         return np.dot(y.flatten(), M).reshape(x_shape)
 
     def get_A_At(self, vol_dims):
-        if vol_dims.lower() == '2d':
+        if vol_dims.lower() == "2d":
+
             def A(x):
                 return self.fwd_op(self.proj_matrix_2d, x, self.test_prjs_shape)
 
@@ -60,77 +61,71 @@ class TestSolvers(unittest.TestCase):
                 return self.bwd_op(self.proj_matrix_2d, y, self.test_vols_shape[:2])
 
         else:
-            raise ValueError('Only 2D implemented.')
+            raise ValueError("Only 2D implemented.")
         return (A, At)
 
     def test_000_SIRT(self):
         """Test SIRT algorithm in 2D."""
 
-        (A, At) = self.get_A_At('2d')
+        (A, At) = self.get_A_At("2d")
         algo = solvers.Sirt()
         (sol, residual) = algo(A, self.data_rand_2d, 2500, At=At)
 
-        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_rand_2d - sol))),
-              end='', flush=True)
+        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_rand_2d - sol))), end="", flush=True)
         assert np.all(np.isclose(sol, self.vol_rand_2d, atol=1e-3))
 
     def test_001_CPLS(self):
         """Test Chambolle-Pock least-squares algorithm in 2D."""
 
-        (A, At) = self.get_A_At('2d')
+        (A, At) = self.get_A_At("2d")
         algo = solvers.CP()
         (sol, residual) = algo(A, self.data_rand_2d, 2000, At=At)
 
-        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_rand_2d - sol))),
-              end='', flush=True)
+        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_rand_2d - sol))), end="", flush=True)
         assert np.all(np.isclose(sol, self.vol_rand_2d, atol=1e-3))
 
     def test_002_SIRTTV(self):
         """Test SIRT TV-min algorithm in 2D."""
 
-        (A, At) = self.get_A_At('2d')
+        (A, At) = self.get_A_At("2d")
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.Sirt(regularizer=reg)
         (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At)
 
-        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_flat_2d - sol))),
-              end='', flush=True)
+        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
 
     def test_003_CPLSTV(self):
         """Test Chambolle-Pock unconstrained least-squares TV-min algorithm in 2D."""
 
-        (A, At) = self.get_A_At('2d')
+        (A, At) = self.get_A_At("2d")
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.CP(regularizer=reg)
         (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At)
 
-        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_flat_2d - sol))),
-              end='', flush=True)
+        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
 
     def test_004_CPLSTV_unconstrained(self):
         """Test Chambolle-Pock unconstrained least-squares TV-min algorithm in 2D."""
 
-        (A, At) = self.get_A_At('2d')
+        (A, At) = self.get_A_At("2d")
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.CP(regularizer=reg)
         (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At)
 
-        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_flat_2d - sol))),
-              end='', flush=True)
+        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
 
     def test_005_CPLSTV_constrained01(self):
         """Test Chambolle-Pock constrained [0, 1] least-squares TV-min algorithm in 2D."""
 
-        (A, At) = self.get_A_At('2d')
+        (A, At) = self.get_A_At("2d")
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.CP(regularizer=reg)
         (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At, lower_limit=0, upper_limit=1)
 
-        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_flat_2d - sol))),
-              end='', flush=True)
+        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
 
     def test_006_CPLSTV_unconstrained_precond(self):
@@ -141,8 +136,7 @@ class TestSolvers(unittest.TestCase):
         algo = solvers.CP(regularizer=reg)
         (sol, residual) = algo(A, self.data_flat_2d, 2500, precondition=True)
 
-        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_flat_2d - sol))),
-              end='', flush=True)
+        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
 
     def test_007_OperatorMatrix_SIRT(self):
@@ -152,6 +146,5 @@ class TestSolvers(unittest.TestCase):
         algo = solvers.Sirt()
         (sol, residual) = algo(A, self.data_rand_2d, 2500)
 
-        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_rand_2d - sol))),
-              end='', flush=True)
+        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_rand_2d - sol))), end="", flush=True)
         assert np.all(np.isclose(sol, self.vol_rand_2d, atol=1e-3))

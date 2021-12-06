@@ -64,7 +64,7 @@ class TestRegularizers:
         weight = 0.5
         ndims = len(vol.shape)
         level = 2
-        reg = regularizers.Regularizer_l1swl(weight, 'db1', level, ndims=ndims, min_approx=True)
+        reg = regularizers.Regularizer_l1swl(weight, "db1", level, ndims=ndims, min_approx=True)
 
         reg.initialize_sigma_tau(vol)
 

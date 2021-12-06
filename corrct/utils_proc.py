@@ -27,7 +27,7 @@ def get_circular_mask(
     radius_offset: float = 0,
     coords_ball: Optional[Sequence[int]] = None,
     mask_drop_off: str = "const",
-    data_type: DTypeLike = np.float32
+    data_type: DTypeLike = np.float32,
 ) -> ArrayLike:
     """
     Compute a circular mask for the reconstruction volume.
@@ -121,7 +121,7 @@ def apply_flat_field(
     flats: ArrayLike,
     darks: Optional[ArrayLike] = None,
     crop: Optional[Sequence[int]] = None,
-    data_type: DTypeLike = np.float32
+    data_type: DTypeLike = np.float32,
 ) -> ArrayLike:
     """
     Apply flat field.
@@ -290,7 +290,7 @@ def denoise_image(
     iterations: int = 250,
     axes: Sequence[int] = (-2, -1),
     lower_limit: Optional[float] = None,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> ArrayLike:
     """
     Denoise an image.
@@ -354,9 +354,7 @@ def denoise_image(
         else:
             x0 = img.copy()
 
-        return solver(
-            OpI, img, iterations, x0=x0, lower_limit=lower_limit, b_test_mask=b_test_mask
-        )
+        return solver(OpI, img, iterations, x0=x0, lower_limit=lower_limit, b_test_mask=b_test_mask)
 
     reg_weight = np.array(reg_weight)
     if reg_weight.size > 1:
@@ -414,7 +412,7 @@ def azimuthal_integration(img: ArrayLike, axes: Sequence[int] = (-2, -1), domain
         coords = [np.linspace(-h, h, d) for h, d in zip(half_dims, img_axes_dims)]
     else:
         coords = [np.fft.fftfreq(d, 1 / d) for d in img_axes_dims]
-    coords = np.stack(np.meshgrid(*coords, indexing='ij'))
+    coords = np.stack(np.meshgrid(*coords, indexing="ij"))
     r = np.sqrt(np.sum(coords ** 2, axis=0))
 
     # Reshape the volume to have the axes to be integrates as right-most axes
@@ -453,7 +451,7 @@ def compute_frc(
     snrt: float = 0.2071,
     axes: Optional[Sequence[int]] = None,
     smooth: Optional[int] = 5,
-    supersampling: int = 1
+    supersampling: int = 1,
 ) -> Tuple[ArrayLike, ArrayLike]:
     """
     Compute the FRC/FSC (Fourier ring/shell correlation) between two images / volumes.
@@ -502,9 +500,7 @@ def compute_frc(
 
     if img2 is None:
         if np.any(img1_shape[list(axes)] % 2 == 1):
-            raise ValueError(
-                f"Image shape {img1_shape} along the chosen axes {axes} needs to be even."
-            )
+            raise ValueError(f"Image shape {img1_shape} along the chosen axes {axes} needs to be even.")
         raise NotImplementedError("Self FRC not implemented, yet.")
     else:
         img2_shape = np.array(img2.shape)
@@ -564,6 +560,6 @@ def compute_frc(
     if smooth is not None and smooth > 1:
         win = sp.signal.windows.hann(smooth)
         win /= np.sum(win)
-        frc = sp.ndimage.convolve(frc, win , mode="nearest")
+        frc = sp.ndimage.convolve(frc, win, mode="nearest")
 
     return frc[:cut_off], Thb[:cut_off]

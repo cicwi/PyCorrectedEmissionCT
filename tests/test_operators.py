@@ -88,7 +88,7 @@ class TestTransformLaplacian(TestOperators):
         assert np.all(g.shape == self.vol_ones_2d.shape)
         assert np.all(np.isclose(g, 0, atol=eps))
 
-        test_line = np.ones((3, ))
+        test_line = np.ones((3,))
         test_line[1] = 0
         L = operators.TransformLaplacian(test_line.shape)
         g = L(test_line)
@@ -113,7 +113,7 @@ class TestTransformStationaryWavelet(TestOperators):
     def test_000_transform(self):
         """Test Haar wavelet transform in 2D."""
         wl_dec_level = 3
-        H = operators.TransformStationaryWavelet(self.vol_ones_2d.shape, 'db1', wl_dec_level)
+        H = operators.TransformStationaryWavelet(self.vol_ones_2d.shape, "db1", wl_dec_level)
 
         w = H(self.vol_ones_2d)
         assert np.all(w.shape[1:] == utils_test.roundup_to_pow2(self.vol_ones_2d.shape, wl_dec_level))
@@ -122,13 +122,12 @@ class TestTransformStationaryWavelet(TestOperators):
         wtw = H.T(w)
         assert np.all(wtw.shape == self.vol_ones_2d.shape)
 
-        print('Max absolute deviation is: {}. '.format(np.max(np.abs(self.vol_ones_2d - wtw))),
-              end='', flush=True)
-        assert np.all(np.isclose(wtw, self.vol_ones_2d, atol=eps*1e2))
+        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_ones_2d - wtw))), end="", flush=True)
+        assert np.all(np.isclose(wtw, self.vol_ones_2d, atol=eps * 1e2))
 
     def test_001_explicit_transform(self):
         """Test explicit Haar transform in 2D."""
-        H = operators.TransformStationaryWavelet(self.vol_ones_2d.shape, 'db1', 3)
+        H = operators.TransformStationaryWavelet(self.vol_ones_2d.shape, "db1", 3)
         w0 = H(self.vol_ones_2d)
 
         He = H.explicit()
@@ -140,7 +139,7 @@ class TestTransformStationaryWavelet(TestOperators):
 
     def test_002_explicit_inverse_transform(self):
         """Test explicit inverse Haar transform in 2D."""
-        H = operators.TransformStationaryWavelet(self.vol_ones_2d.shape, 'db1', 2)
+        H = operators.TransformStationaryWavelet(self.vol_ones_2d.shape, "db1", 2)
         wt0 = H.T(np.ones((H.adj_shape)))
 
         Hte = H.T.explicit()
