@@ -19,6 +19,9 @@ from typing import Sequence, Optional, Union, Tuple
 from numpy.typing import ArrayLike, DTypeLike
 
 
+eps = np.finfo(np.float32).eps
+
+
 def get_circular_mask(
     vol_shape: ArrayLike,
     radius_offset: float = 0,
@@ -171,6 +174,113 @@ def apply_minus_log(projs: ArrayLike) -> ArrayLike:
         Linearized projections.
     """
     return np.fmax(-np.log(projs), 0.0)
+
+
+def compute_variance_poisson(
+    Is: ArrayLike, I0: Optional[ArrayLike] = None, var_I0: Optional[ArrayLike] = None, normalized: bool = True
+) -> ArrayLike:
+    """
+    Compute the variance of a signal subject to Poisson noise, against a reference intensity.
+
+    The reference intensity can also be subject to Poisson and Gaussian noise.
+    If the variance of the reference intensity is not passed, it will be assumed to be Poisson.
+
+    Parameters
+    ----------
+    Is : ArrayLike
+        The signal intensity.
+    I0 : Optional[ArrayLike], optional
+        The reference intensity. The default is None.
+    var_I0 : Optional[ArrayLike], optional
+        The variance of the reference intensity. The default is None.
+        If not given, it will be assumed to be equal to I0.
+    normalized : bool, optional
+        Whether to renormalize by the mean of the reference intensity.
+
+    Returns
+    -------
+    ArrayLike
+        The computed variance.
+    """
+    var_Is = np.abs(Is)
+    Is = np.fmax(Is, eps)
+
+    if I0 is not None:
+        if var_I0 is None:
+            var_I0 = np.abs(I0)
+        I0 = np.fmax(I0, eps)
+
+        Is2 = Is ** 2
+        I02 = I0 ** 2
+        variance = (Is2 / I02) * (var_Is / Is2 + var_I0 / I02)
+        if normalized:
+            variance *= np.mean(I0)
+        return variance
+    else:
+        return var_Is
+
+
+def compute_variance_transmission(
+    Is: ArrayLike, I0: ArrayLike, var_I0: Optional[ArrayLike] = None, normalized: bool = True
+) -> ArrayLike:
+    """
+    Compute the variance of a linearized attenuation (transmission) signal, against a reference intensity.
+
+    Parameters
+    ----------
+    Is : ArrayLike
+        The transmitted signal.
+    I0 : ArrayLike
+        The reference intensity.
+    var_I0 : Optional[ArrayLike], optional
+        The variance of the reference intensity. The default is None.
+        If not given, it will be assumed to be equal to I0.
+    normalized : bool, optional
+        Whether to renormalize by the mean of the reference intensity.
+
+    Returns
+    -------
+    ArrayLike
+        The computed variance.
+    """
+    var_Is = np.abs(Is)
+    Is = np.fmax(Is, eps)
+
+    if var_I0 is None:
+        var_I0 = np.abs(I0)
+    I0 = np.fmax(I0, eps)
+
+    Is2 = Is ** 2
+    I02 = I0 ** 2
+    variance = (Is / I0) * (var_Is / Is2 + var_I0 / I02)
+    if normalized:
+        variance *= np.mean(I0)
+    return variance
+
+
+def compute_variance_weigth(variance: ArrayLike, normalized: bool = False) -> ArrayLike:
+    """
+    Compute the weight associated to the given variance, in a weighted least-squares context.
+
+    Parameters
+    ----------
+    variance : ArrayLike
+        The variance of the signal.
+    normalized : bool, optional
+        Whether to scale the smallest variance to 1. The default is False.
+
+    Returns
+    -------
+    ArrayLike
+        The computed weights.
+    """
+    variance = np.abs(variance)
+    min_nonzero_variance = np.fmax(np.min(variance[variance > 0]), eps)
+    weight = np.fmax(variance, min_nonzero_variance)
+    if normalized:
+        return min_nonzero_variance / weight
+    else:
+        return 1 / weight
 
 
 def denoise_image(
