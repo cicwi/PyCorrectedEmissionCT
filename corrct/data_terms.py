@@ -9,11 +9,13 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 
+from abc import ABC, abstractmethod
+
 
 eps = np.finfo(np.float32).eps
 
 
-class DataFidelityBase(object):
+class DataFidelityBase(ABC):
 
     __data_fidelity_name__ = ""
 
@@ -67,6 +69,7 @@ class DataFidelityBase(object):
             residual *= mask
         return residual
 
+    @abstractmethod
     def compute_residual_norm(self, dual):
         raise NotImplementedError()
 
@@ -98,9 +101,11 @@ class DataFidelityBase(object):
         else:
             dual += (proj_primal + self.background) * self.sigma
 
+    @abstractmethod
     def apply_proximal(self, dual) -> None:
         raise NotImplementedError()
 
+    @abstractmethod
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         raise NotImplementedError()
 

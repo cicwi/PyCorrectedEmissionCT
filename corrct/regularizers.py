@@ -15,6 +15,8 @@ import scipy.ndimage as spimg
 from . import operators
 from . import data_terms
 
+from abc import ABC, abstractmethod
+
 try:
     import pywt
 
@@ -43,7 +45,7 @@ DataFidelity_KL = data_terms.DataFidelity_KL
 # ---- Regularizers ----
 
 
-class BaseRegularizer(object):
+class BaseRegularizer(ABC):
 
     __reg_name__ = ""
 
@@ -72,6 +74,7 @@ class BaseRegularizer(object):
     def lower(self) -> str:
         return self.__reg_name__.lower()
 
+    @abstractmethod
     def initialize_sigma_tau(self, primal):
         raise NotImplementedError()
 
@@ -415,7 +418,7 @@ class Regularizer_dwl(BaseRegularizer):
         return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight.max() + ")"
 
     def __init__(
-        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", min_approx=True, norm=DataFidelityBase()
+        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", min_approx=True, norm=DataFidelity_l1()
     ):
         if not has_pywt:
             raise ValueError("Cannot use wavelet regularizer because pywavelets is not installed.")
@@ -494,7 +497,7 @@ class BaseRegularizer_med(BaseRegularizer):
     def info(self):
         return self.__reg_name__ + "(s:%s" % np.array(self.filt_size) + "-w:%g" % self.weight.max() + ")"
 
-    def __init__(self, weight, filt_size=3, norm=DataFidelityBase()):
+    def __init__(self, weight, filt_size=3, norm=DataFidelity_l1()):
         super().__init__(weight=weight, norm=norm)
         self.filt_size = filt_size
 
@@ -593,7 +596,7 @@ class Constraint_LowerLimit(BaseRegularizer):
     def info(self):
         return self.__reg_name__ + "(l:%g" % self.limit + ")"
 
-    def __init__(self, limit, norm=DataFidelityBase()):
+    def __init__(self, limit, norm=DataFidelity_l2()):
         super().__init__(weight=1, norm=norm)
         self.limit = limit
 
@@ -627,7 +630,7 @@ class Constraint_UpperLimit(BaseRegularizer):
     def info(self):
         return self.__reg_name__ + "(l:%g" % self.limit + ")"
 
-    def __init__(self, limit, norm=DataFidelityBase()):
+    def __init__(self, limit, norm=DataFidelity_l2()):
         super().__init__(weight=1, norm=norm)
         self.limit = limit
 
