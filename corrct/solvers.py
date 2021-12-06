@@ -388,7 +388,7 @@ class Sirt(Solver):
                 reg.update_dual(q_r, x)
                 reg.apply_proximal(q_r)
 
-            upd = At(self.data_term.compute_update_primal(res) * sigma)
+            upd = At(res * sigma)
             for q_r, reg in zip(q, self.regularizer):
                 upd -= reg.compute_update_primal(q_r)
             x += upd * tau

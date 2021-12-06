@@ -101,9 +101,6 @@ class DataFidelityBase(object):
     def apply_proximal(self, dual):
         raise NotImplementedError()
 
-    def compute_update_primal(self, dual):
-        return dual
-
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         raise NotImplementedError()
 
@@ -157,9 +154,6 @@ class DataFidelity_wl2(DataFidelity_l2):
         if mask is not None:
             residual *= mask
         return residual
-
-    def compute_update_primal(self, dual):
-        return dual * self.weights
 
 
 class DataFidelity_l2b(DataFidelity_l2):
