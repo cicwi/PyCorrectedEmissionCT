@@ -198,6 +198,36 @@ class Sart(Solver):
         b_mask: Optional[ArrayLike] = None,
     ) -> Tuple[ArrayLike, Optional[ArrayLike]]:
         """
+        Reconstruct the data, using the SART algorithm.
+
+        Parameters
+        ----------
+        A : Union[Callable, BaseTransform]
+            Projection operator.
+        b : ArrayLike
+            Data to reconstruct.
+        iterations : int
+            Number of iterations.
+        A_num_rows : int
+            Number of projections.
+        x0 : Optional[ArrayLike], optional
+            Initial solution. The default is None.
+        At : Callable, optional
+            The back-projection operator. This is only needed if the projection operator does not have an adjoint.
+            The default is None.
+        lower_limit : Union[float, ArrayLike], optional
+            Lower clipping value. The default is None.
+        upper_limit : Union[float, ArrayLike], optional
+            Upper clipping value. The default is None.
+        x_mask : Optional[ArrayLike], optional
+            Solution mask. The default is None.
+        b_mask : Optional[ArrayLike], optional
+            Data mask. The default is None.
+
+        Returns
+        -------
+        Tuple[ArrayLike, Tuple[Optional[ArrayLike]]]
+            The reconstruction, and the residuals.
         """
         # Back-projection diagonal re-scaling
         b_ones = np.ones_like(b)
@@ -262,8 +292,6 @@ class Sart(Solver):
 
 
 class Sirt(Solver):
-    """Solver class implementing the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm."""
-
     def __init__(
         self,
         verbose: bool = False,
@@ -275,6 +303,8 @@ class Sirt(Solver):
     ):
         """
         Initialize the SIRT solver class.
+
+        This class implements the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm.
 
         Parameters
         ----------
@@ -317,6 +347,36 @@ class Sirt(Solver):
         b_test_mask: Optional[ArrayLike] = None,
     ) -> Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]:
         """
+        Reconstruct the data, using the SIRT algorithm.
+
+        Parameters
+        ----------
+        A : Union[Callable, BaseTransform]
+            Projection operator.
+        b : ArrayLike
+            Data to reconstruct.
+        iterations : int
+            Number of iterations.
+        x0 : Optional[ArrayLike], optional
+            Initial solution. The default is None.
+        At : Callable, optional
+            The back-projection operator. This is only needed if the projection operator does not have an adjoint.
+            The default is None.
+        lower_limit : Union[float, ArrayLike], optional
+            Lower clipping value. The default is None.
+        upper_limit : Union[float, ArrayLike], optional
+            Upper clipping value. The default is None.
+        x_mask : Optional[ArrayLike], optional
+            Solution mask. The default is None.
+        b_mask : Optional[ArrayLike], optional
+            Data mask. The default is None.
+        b_test_mask : Optional[ArrayLike], optional
+            Test data mask. The default is None.
+
+        Returns
+        -------
+        Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]
+            The reconstruction, and the residuals.
         """
         (A, At) = self._initialize_data_operators(A, At)
 
@@ -501,6 +561,38 @@ class PDHG(Solver):
         precondition: bool = True,
     ) -> Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]:
         """
+        Reconstruct the data, using the PDHG algorithm.
+
+        Parameters
+        ----------
+        A : Union[Callable, BaseTransform]
+            Projection operator.
+        b : ArrayLike
+            Data to reconstruct.
+        iterations : int
+            Number of iterations.
+        x0 : Optional[ArrayLike], optional
+            Initial solution. The default is None.
+        At : Callable, optional
+            The back-projection operator. This is only needed if the projection operator does not have an adjoint.
+            The default is None.
+        lower_limit : Union[float, ArrayLike], optional
+            Lower clipping value. The default is None.
+        upper_limit : Union[float, ArrayLike], optional
+            Upper clipping value. The default is None.
+        x_mask : Optional[ArrayLike], optional
+            Solution mask. The default is None.
+        b_mask : Optional[ArrayLike], optional
+            Data mask. The default is None.
+        b_test_mask : Optional[ArrayLike], optional
+            Test data mask. The default is None.
+        precondition : bool, optional
+            Whether to use the preconditioned version of the algorithm. The default is True.
+
+        Returns
+        -------
+        Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]
+            The reconstruction, and the residuals.
         """
         (A, At) = self._initialize_data_operators(A, At)
         if precondition:
