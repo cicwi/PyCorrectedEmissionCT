@@ -191,10 +191,10 @@
     <span class="k">def</span> <span class="nf">_initialize_data_fidelity_function</span><span class="p">(</span><span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataFidelityBase</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DataFidelityBase</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_term</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">data_term</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;l2&quot;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">DataFidelity_l2</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown data term: &quot;</span><span class="si">%s</span><span class="s1">&quot;, only accepted terms are: &quot;l2&quot;.&#39;</span> <span class="o">%</span> <span class="n">data_term</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_term</span><span class="p">,</span> <span class="p">(</span><span class="n">DataFidelity_l2</span><span class="p">,</span> <span class="n">DataFidelity_KL</span><span class="p">)):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_term</span><span class="p">,</span> <span class="p">(</span><span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_KL</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_term</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unsupported data term: &quot;</span><span class="si">%s</span><span class="s1">&quot;, only accepted terms are &quot;l2&quot;-based.&#39;</span> <span class="o">%</span> <span class="n">data_term</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
@@ -222,7 +222,7 @@
     <span class="k">def</span> <span class="nf">_initialize_regularizer</span><span class="p">(</span><span class="n">regularizer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BaseRegularizer</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">BaseRegularizer</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">regularizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">regularizer</span><span class="p">,</span> <span class="n">BaseRegularizer</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">regularizer</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">regularizer</span><span class="p">]</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">regularizer</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
             <span class="n">check_regs_ok</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">BaseRegularizer</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">regularizer</span><span class="p">]</span>
@@ -265,6 +265,36 @@
         <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reconstruct the data, using the SART algorithm.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        A : Union[Callable, BaseTransform]</span>
+<span class="sd">            Projection operator.</span>
+<span class="sd">        b : ArrayLike</span>
+<span class="sd">            Data to reconstruct.</span>
+<span class="sd">        iterations : int</span>
+<span class="sd">            Number of iterations.</span>
+<span class="sd">        A_num_rows : int</span>
+<span class="sd">            Number of projections.</span>
+<span class="sd">        x0 : Optional[ArrayLike], optional</span>
+<span class="sd">            Initial solution. The default is None.</span>
+<span class="sd">        At : Callable, optional</span>
+<span class="sd">            The back-projection operator. This is only needed if the projection operator does not have an adjoint.</span>
+<span class="sd">            The default is None.</span>
+<span class="sd">        lower_limit : Union[float, ArrayLike], optional</span>
+<span class="sd">            Lower clipping value. The default is None.</span>
+<span class="sd">        upper_limit : Union[float, ArrayLike], optional</span>
+<span class="sd">            Upper clipping value. The default is None.</span>
+<span class="sd">        x_mask : Optional[ArrayLike], optional</span>
+<span class="sd">            Solution mask. The default is None.</span>
+<span class="sd">        b_mask : Optional[ArrayLike], optional</span>
+<span class="sd">            Data mask. The default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[ArrayLike, Tuple[Optional[ArrayLike]]]</span>
+<span class="sd">            The reconstruction, and the residuals.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Back-projection diagonal re-scaling</span>
         <span class="n">b_ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
@@ -329,8 +359,6 @@
 
 
 <div class="viewcode-block" id="Sirt"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Sirt">[docs]</a><span class="k">class</span> <span class="nc">Sirt</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Solver class implementing the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm.&quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -342,6 +370,8 @@
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the SIRT solver class.</span>
+
+<span class="sd">        This class implements the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -384,6 +414,36 @@
         <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">],</span> <span class="nb">int</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reconstruct the data, using the SIRT algorithm.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        A : Union[Callable, BaseTransform]</span>
+<span class="sd">            Projection operator.</span>
+<span class="sd">        b : ArrayLike</span>
+<span class="sd">            Data to reconstruct.</span>
+<span class="sd">        iterations : int</span>
+<span class="sd">            Number of iterations.</span>
+<span class="sd">        x0 : Optional[ArrayLike], optional</span>
+<span class="sd">            Initial solution. The default is None.</span>
+<span class="sd">        At : Callable, optional</span>
+<span class="sd">            The back-projection operator. This is only needed if the projection operator does not have an adjoint.</span>
+<span class="sd">            The default is None.</span>
+<span class="sd">        lower_limit : Union[float, ArrayLike], optional</span>
+<span class="sd">            Lower clipping value. The default is None.</span>
+<span class="sd">        upper_limit : Union[float, ArrayLike], optional</span>
+<span class="sd">            Upper clipping value. The default is None.</span>
+<span class="sd">        x_mask : Optional[ArrayLike], optional</span>
+<span class="sd">            Solution mask. The default is None.</span>
+<span class="sd">        b_mask : Optional[ArrayLike], optional</span>
+<span class="sd">            Data mask. The default is None.</span>
+<span class="sd">        b_test_mask : Optional[ArrayLike], optional</span>
+<span class="sd">            Test data mask. The default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]</span>
+<span class="sd">            The reconstruction, and the residuals.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data_operators</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span>
 
@@ -455,7 +515,7 @@
                 <span class="n">reg</span><span class="o">.</span><span class="n">update_dual</span><span class="p">(</span><span class="n">q_r</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
                 <span class="n">reg</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">q_r</span><span class="p">)</span>
 
-            <span class="n">upd</span> <span class="o">=</span> <span class="n">At</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">compute_update_primal</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span>
+            <span class="n">upd</span> <span class="o">=</span> <span class="n">At</span><span class="p">(</span><span class="n">res</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">q_r</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span><span class="p">):</span>
                 <span class="n">upd</span> <span class="o">-=</span> <span class="n">reg</span><span class="o">.</span><span class="n">compute_update_primal</span><span class="p">(</span><span class="n">q_r</span><span class="p">)</span>
             <span class="n">x</span> <span class="o">+=</span> <span class="n">upd</span> <span class="o">*</span> <span class="n">tau</span>
@@ -550,7 +610,7 @@
             <span class="n">tau</span> <span class="o">+=</span> <span class="n">reg</span><span class="o">.</span><span class="n">initialize_sigma_tau</span><span class="p">(</span><span class="n">dummy_x</span><span class="p">)</span>
 
         <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">/</span> <span class="n">tau</span>
-        <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.95</span> <span class="o">/</span> <span class="n">L</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">/</span> <span class="n">L</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">x_dtype</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
@@ -565,9 +625,41 @@
         <span class="n">x_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">precondition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">precondition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">],</span> <span class="nb">int</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reconstruct the data, using the PDHG algorithm.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        A : Union[Callable, BaseTransform]</span>
+<span class="sd">            Projection operator.</span>
+<span class="sd">        b : ArrayLike</span>
+<span class="sd">            Data to reconstruct.</span>
+<span class="sd">        iterations : int</span>
+<span class="sd">            Number of iterations.</span>
+<span class="sd">        x0 : Optional[ArrayLike], optional</span>
+<span class="sd">            Initial solution. The default is None.</span>
+<span class="sd">        At : Callable, optional</span>
+<span class="sd">            The back-projection operator. This is only needed if the projection operator does not have an adjoint.</span>
+<span class="sd">            The default is None.</span>
+<span class="sd">        lower_limit : Union[float, ArrayLike], optional</span>
+<span class="sd">            Lower clipping value. The default is None.</span>
+<span class="sd">        upper_limit : Union[float, ArrayLike], optional</span>
+<span class="sd">            Upper clipping value. The default is None.</span>
+<span class="sd">        x_mask : Optional[ArrayLike], optional</span>
+<span class="sd">            Solution mask. The default is None.</span>
+<span class="sd">        b_mask : Optional[ArrayLike], optional</span>
+<span class="sd">            Data mask. The default is None.</span>
+<span class="sd">        b_test_mask : Optional[ArrayLike], optional</span>
+<span class="sd">            Test data mask. The default is None.</span>
+<span class="sd">        precondition : bool, optional</span>
+<span class="sd">            Whether to use the preconditioned version of the algorithm. The default is True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]</span>
+<span class="sd">            The reconstruction, and the residuals.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data_operators</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">precondition</span><span class="p">:</span>
@@ -599,7 +691,7 @@
                 <span class="n">sigma</span> <span class="o">*=</span> <span class="n">x_mask</span>
             <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A_abs</span><span class="p">(</span><span class="n">sigma</span><span class="p">))</span>
             <span class="n">sigma</span><span class="p">[(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sigma</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.95</span> <span class="o">/</span> <span class="n">sigma</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">/</span> <span class="n">sigma</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">x_dtype</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data_sigma_tau_unpreconditioned</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 
