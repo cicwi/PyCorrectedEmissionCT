@@ -358,7 +358,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
             if self.is_3d:
                 projector_type = "cuda3d"
                 self.algo_type = "3D_CUDA"
-                self.data_mod = self.data_mod
+                self.data_mod = astra.data3d
             else:
                 if has_cuda:
                     projector_type = "cuda"
