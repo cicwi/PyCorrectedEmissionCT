@@ -376,6 +376,14 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             paddings[-2], paddings[-1] = (edges[0],), (edges[1],)
             return np.pad(vol, paddings, mode="constant")
 
+        def compute_cumsum(vol, angle_deg):
+            vol = skt.rotate(vol, rot_angle_deg, order=1, clip=False)
+
+            vol += np.roll(vol, 1, axis=-2)
+            vol = np.cumsum(vol / 2, axis=-2)
+
+            return skt.rotate(vol, -rot_angle_deg, order=1, clip=False)
+
         size_lims = np.array(vol.shape[-2:])
         min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
         edges = np.ceil((min_size - size_lims) / 2).astype(np.intp)
@@ -387,11 +395,15 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         cum_arr = pad_vol(vol, edges)
 
-        cum_arr = skt.rotate(cum_arr, rot_angle_deg, order=1, clip=False)
-        cum_arr += np.roll(cum_arr, 1, axis=-2)
-        cum_arr = np.cumsum(cum_arr / 2, axis=-2)
-
-        cum_arr = skt.rotate(cum_arr, -rot_angle_deg, order=1, clip=False)
+        if cum_arr.ndim > 2:
+            prev_shape = np.array(cum_arr.shape, ndmin=1)
+            num_slices = np.prod(prev_shape[:-2])
+            cum_arr = cum_arr.reshape([num_slices, *prev_shape[-2:]])
+            for ii in range(num_slices):
+                cum_arr[ii] = compute_cumsum(cum_arr[ii], rot_angle_deg)
+            cum_arr = cum_arr.reshape(prev_shape)
+        else:
+            cum_arr = compute_cumsum(cum_arr, rot_angle_deg)
         cum_arr = cum_arr[..., edges[0] : -edges[0], edges[1] : -edges[1]]
 
         cum_arr = np.exp(-cum_arr)
