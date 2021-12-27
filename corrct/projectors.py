@@ -575,7 +575,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         if single_line:
             sino_line = sino
         else:
-            sino_line = sino[angle_ind, ...]
+            sino_line = sino[..., angle_ind, :]
 
         if self.psf is not None:
             sino_line = spsig.convolve(sino_line, self.psf, mode="same")
@@ -621,7 +621,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         else:
             sino_lines = [self.fp_angle(vol, ii) for ii in range(len(self.angles_rot_rad))]
 
-        return np.ascontiguousarray(np.stack(sino_lines, axis=0))
+        return np.ascontiguousarray(np.stack(sino_lines, axis=-2))
 
     def bp(self, sino):
         """Back-projection of the sinogram to the volume.
