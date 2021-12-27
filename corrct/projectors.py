@@ -438,13 +438,13 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         vol = np.array(vol)
         if not len(vol.shape) in [2, 3]:
             raise ValueError("Maps can only be 2D or 3D Arrays. A %d-dimensional was passed" % (len(vol.shape)))
-        if not np.all(np.equal(vol.shape[-2:], self.vol_shape[:2])):
+        if not np.all(np.equal(vol.shape[-2:], self.vol_shape[-2:])):
             raise ValueError(
                 "Mismatching volume shape of input volume (%s) with vol_shape (%s in 2D -> %s)"
                 % (
                     " ".join(("%d" % x for x in vol.shape)),
                     " ".join(("%d" % x for x in self.vol_shape)),
-                    " ".join(("%d" % x for x in self.vol_shape[:2])),
+                    " ".join(("%d" % x for x in self.vol_shape[-2:])),
                 )
             )
 
@@ -499,9 +499,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             else:
                 for ii, a in enumerate(tqdm(self.angles_rot_rad, disable=(not self.verbose))):
                     self.att_vol_angles[ii, ...] *= self._compute_attenuation_angle_out(a)
-
-        if self.is_3d:
-            self.att_vol_angles = self.att_vol_angles[:, :, np.newaxis, ...]
 
     def collapse_detectors(self):
         """Convert multi-detector configurations into single-detector."""
