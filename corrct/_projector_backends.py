@@ -270,11 +270,10 @@ class ProjectorBackendASTRA(ProjectorBackend):
         ValueError
             In case the volume dimensionality is larger than 2D and CUDA is not available.
         """
-        if len(vol_shape) == 3:
-            if not has_cuda:
-                raise ValueError("CUDA is not available: only 2D volumes are allowed!")
-        else:
-            angles_rot_rad = -angles_rot_rad
+        if len(vol_shape) == 3 and not has_cuda:
+            raise ValueError("CUDA is not available: only 2D volumes are allowed!")
+
+        angles_rot_rad = -angles_rot_rad
 
         super().__init__(vol_shape, np.array(angles_rot_rad))
 
