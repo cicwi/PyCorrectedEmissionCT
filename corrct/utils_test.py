@@ -12,6 +12,7 @@ import numpy as np
 
 from . import projectors
 
+from enum import Enum
 from dataclasses import dataclass
 
 from typing import Union, Sequence, Optional, Tuple
@@ -70,6 +71,114 @@ def download_phantom():
         file_content = f.read()
     with open(phantom_path, "w") as f:
         f.write(file_content.replace("xrange", "range"))
+
+
+class FluoLinesSiegbahn(Enum):
+    KA1 = xraylib.KA1_LINE
+    KA2 = xraylib.KA2_LINE
+    KA3 = xraylib.KA3_LINE
+    KB1 = xraylib.KB1_LINE
+    KB2 = xraylib.KB2_LINE
+    KB3 = xraylib.KB3_LINE
+    KB4 = xraylib.KB4_LINE
+    KB5 = xraylib.KB5_LINE
+    LA1 = xraylib.LA1_LINE
+    LA2 = xraylib.LA2_LINE
+    LB1 = xraylib.LB1_LINE
+    LB2 = xraylib.LB2_LINE
+    LB3 = xraylib.LB3_LINE
+    LB4 = xraylib.LB4_LINE
+    LB5 = xraylib.LB5_LINE
+    LB6 = xraylib.LB6_LINE
+    LB7 = xraylib.LB7_LINE
+    LB9 = xraylib.LB9_LINE
+    LB10 = xraylib.LB10_LINE
+    LB15 = xraylib.LB15_LINE
+    LB17 = xraylib.LB17_LINE
+    LG1 = xraylib.LG1_LINE
+    LG2 = xraylib.LG2_LINE
+    LG3 = xraylib.LG3_LINE
+    LG4 = xraylib.LG4_LINE
+    LG5 = xraylib.LG5_LINE
+    LG6 = xraylib.LG6_LINE
+    LG8 = xraylib.LG8_LINE
+    LE = xraylib.LE_LINE
+    LH = xraylib.LH_LINE
+    LL = xraylib.LL_LINE
+    LS = xraylib.LS_LINE
+    LT = xraylib.LT_LINE
+    LU = xraylib.LU_LINE
+    LV = xraylib.LV_LINE
+    MA1 = xraylib.MA1_LINE
+    MA2 = xraylib.MA2_LINE
+    MB = xraylib.MB_LINE
+    MG = xraylib.MG_LINE
+
+    @staticmethod
+    def get_lines(line: str) -> Sequence:
+        """
+        Return the list of xraylib line macro definitions for the requested family.
+
+        Parameters
+        ----------
+        line : str
+            The requested line. It can be a whole shell (transition to that shell),
+            or sub-shells.
+
+        Returns
+        -------
+        Sequence
+            List of corresponding lines.
+        """
+        return [f for f in FluoLinesSiegbahn if f.name[:len(line)] == line]
+
+    @staticmethod
+    def get_energy(element: Union[str, int], line: str, compute_average: bool = False) -> Union[float, Sequence[float]]:
+        """
+        Return the energy(ies) of the requested line for the given element.
+
+        Parameters
+        ----------
+        element : Union[str, int]
+            The requested element.
+        line : str
+            The requested line. It can be a whole shell (transition to that shell),
+            or sub-shells.
+        compute_average : bool, optional
+            Weighted averaging the lines, using the radiation rate. The default is False.
+
+        Returns
+        -------
+        energy_keV : Union[float, Sequence[float]]
+            Either the average energy or the list of different energies.
+        """
+        if isinstance(element, str):
+            el_sym = element
+            el_num = xraylib.SymbolToAtomicNumber(element)
+        else:
+            el_sym = xraylib.AtomicNumberToSymbol(element)
+            el_num = element
+
+        lines = FluoLinesSiegbahn.get_lines(line)
+        energy_keV = np.empty(len(lines), dtype=np.float32)
+        for ii, line in enumerate(lines):
+            try:
+                energy_keV[ii] = xraylib.LineEnergy(el_num, line.value)
+            except ValueError as exc:
+                print(f"Energy {exc}: {el_num=} ({el_sym}) {line=}")
+                energy_keV[ii] = 0
+
+        if compute_average:
+            rates = np.empty(energy_keV.shape)
+            for ii, line in enumerate(lines):
+                try:
+                    rates[ii] = xraylib.RadRate(el_num, line.value)
+                except ValueError as exc:
+                    print(f"RadRate {exc}: {el_num=} ({el_sym}) {line=}")
+                    rates[ii] = 0
+            energy_keV = np.sum(energy_keV * rates / np.sum(rates))
+
+        return energy_keV
 
 
 @dataclass
