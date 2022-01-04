@@ -317,10 +317,6 @@ class Regularizer_swl(BaseRegularizer):
 
         self.pad_on_demand = pad_on_demand
 
-        self.scaling_func_mult = 2 ** np.arange(self.level, 0, -1)
-        self.scaling_func_mult = np.tile(self.scaling_func_mult[:, None], [1, (2 ** self.ndims) - 1])
-        self.scaling_func_mult = np.concatenate(([self.scaling_func_mult[0, 0]], self.scaling_func_mult.flatten()))
-
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
         self.op = operators.TransformStationaryWavelet(
@@ -332,18 +328,32 @@ class Regularizer_swl(BaseRegularizer):
             normalized=self.normalized,
         )
 
+        filt_bank_l1norm = np.linalg.norm(self.op.w.filter_bank, ord=1, axis=-1)
+        lo_dec_mult = filt_bank_l1norm[0] ** self.ndims
+        lo_rec_mult = filt_bank_l1norm[2] ** self.ndims
+
+        self.dec_func_mult = self.op.wlet_dec_filter_mult[None, :] * (lo_dec_mult ** np.arange(self.level-1, -1, -1))[:, None]
+        self.dec_func_mult = np.concatenate(([lo_dec_mult ** self.level], self.dec_func_mult.flatten()))
+
+        self.rec_func_mult = self.op.wlet_rec_filter_mult[None, :] * (lo_rec_mult ** np.arange(self.level-1, -1, -1))[:, None]
+        self.rec_func_mult = np.concatenate(([lo_rec_mult ** self.level], self.rec_func_mult.flatten()))
+
+        # self.dec_func_mult = 2 ** np.arange(self.level, 0, -1)
+        # self.dec_func_mult = np.tile(self.dec_func_mult[:, None], [1, (2 ** self.ndims) - 1])
+        # self.dec_func_mult = np.concatenate(([self.dec_func_mult[0, 0]], self.dec_func_mult.flatten()))
+
         if self.normalized:
             self.sigma = 1
             self.norm.assign_data(None, sigma=self.sigma)
 
-            tau = self.scaling_func_mult.size
+            tau = self.dec_func_mult.size
         else:
-            self.sigma = np.reshape(1 / self.scaling_func_mult, [-1] + [1] * len(self.op.dir_shape))
+            self.sigma = np.reshape(1 / self.dec_func_mult, [-1] + [1] * len(self.op.dir_shape))
             self.norm.assign_data(None, sigma=self.sigma)
 
-            tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
+            tau = np.ones_like(self.rec_func_mult) * ((2 ** self.ndims) - 1)
             tau[0] += 1
-            tau = np.sum(tau / self.scaling_func_mult)
+            tau = np.sum(tau / self.rec_func_mult)
 
         if not isinstance(self.norm, DataFidelity_l1):
             tau *= self.weight
@@ -437,26 +447,40 @@ class Regularizer_dwl(BaseRegularizer):
 
         self.pad_on_demand = pad_on_demand
 
-        self.scaling_func_mult = 2 ** np.arange(self.level, 0, -1)
-
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
         self.op = operators.TransformDecimatedWavelet(
             primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes, pad_on_demand=self.pad_on_demand
         )
 
-        self.sigma = [np.ones(self.op.sub_band_shapes[0], self.dtype) * self.scaling_func_mult[0]]
+        filt_bank_l1norm = np.linalg.norm(self.op.w.filter_bank, ord=1, axis=-1)
+        lo_dec_mult = filt_bank_l1norm[0] ** self.ndims
+        lo_rec_mult = filt_bank_l1norm[2] ** self.ndims
+
+        self.dec_func_mult = self.op.wlet_dec_filter_mult[None, :] * (lo_dec_mult ** np.arange(self.level-1, -1, -1))[:, None]
+        self.dec_func_mult = np.concatenate(([lo_dec_mult ** self.level], self.dec_func_mult.flatten()))
+
+        self.rec_func_mult = self.op.wlet_rec_filter_mult[None, :] * (lo_rec_mult ** np.arange(self.level-1, -1, -1))[:, None]
+        self.rec_func_mult = np.concatenate(([lo_rec_mult ** self.level], self.rec_func_mult.flatten()))
+
+        # self.dec_func_mult = 2 ** np.arange(self.level, 0, -1)
+        # self.rec_func_mult = self.dec_func_mult
+
+        self.sigma = [np.ones(self.op.sub_band_shapes[0], self.dtype) * self.dec_func_mult[0]]
+        count = 0
         for ii_l in range(self.level):
             d = {}
             for label in self.op.sub_band_shapes[ii_l + 1].keys():
-                d[label] = np.ones(self.op.sub_band_shapes[ii_l + 1][label], self.dtype) * self.scaling_func_mult[ii_l]
+                # d[label] = np.ones(self.op.sub_band_shapes[ii_l + 1][label], self.dtype) * self.dec_func_mult[ii_l]
+                d[label] = np.ones(self.op.sub_band_shapes[ii_l + 1][label], self.dtype) * self.dec_func_mult[count]
+                count += 1
             self.sigma.append(d)
         self.sigma, _ = pywt.coeffs_to_array(self.sigma, axes=self.axes)
         self.norm.assign_data(None, sigma=self.sigma)
 
-        tau = np.ones_like(self.scaling_func_mult) * ((2 ** self.ndims) - 1)
+        tau = np.ones_like(self.rec_func_mult) * ((2 ** self.ndims) - 1)
         tau[0] += 1
-        tau = np.sum(tau / self.scaling_func_mult)
+        tau = np.sum(tau / self.rec_func_mult)
 
         if not isinstance(self.norm, DataFidelity_l1):
             tau *= self.weight

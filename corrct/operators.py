@@ -221,7 +221,22 @@ class TransformDiagonalScaling(BaseTransform):
         return self.scale * x
 
 
-class TransformDecimatedWavelet(BaseTransform):
+class BaseWaveletTransform(BaseTransform):
+    def _initialize_filter_bank(self):
+        num_axes = len(self.axes)
+        self.labels = [bin(x)[2:].zfill(num_axes).replace("0", "a").replace("1", "d") for x in range(1, 2 ** num_axes)]
+
+        self.w = pywt.Wavelet(self.wavelet)
+        filt_bank_l1norm = np.linalg.norm(self.w.filter_bank, ord=1, axis=-1)
+        self.wlet_dec_filter_mult = np.array([
+            (filt_bank_l1norm[0] ** lab.count("a")) * (filt_bank_l1norm[1] ** lab.count("d")) for lab in self.labels
+        ])
+        self.wlet_rec_filter_mult = np.array([
+            (filt_bank_l1norm[2] ** lab.count("a")) * (filt_bank_l1norm[3] ** lab.count("d")) for lab in self.labels
+        ])
+
+
+class TransformDecimatedWavelet(BaseWaveletTransform):
     """Decimated wavelet Transform operator."""
 
     def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand="constant"):
@@ -251,6 +266,8 @@ class TransformDecimatedWavelet(BaseTransform):
         self.axes = axes
 
         self.pad_on_demand = pad_on_demand
+
+        self._initialize_filter_bank()
 
         num_axes = len(self.axes)
 
@@ -307,7 +324,7 @@ class TransformDecimatedWavelet(BaseTransform):
         return self.inverse_dwt(c)
 
 
-class TransformStationaryWavelet(BaseTransform):
+class TransformStationaryWavelet(BaseWaveletTransform):
     """Stationary avelet Transform operator."""
 
     def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand="constant", normalized=True):
@@ -343,8 +360,7 @@ class TransformStationaryWavelet(BaseTransform):
 
         self.pad_on_demand = pad_on_demand
 
-        num_axes = len(self.axes)
-        self.labels = [bin(x)[2:].zfill(num_axes).replace("0", "a").replace("1", "d") for x in range(1, 2 ** num_axes)]
+        self._initialize_filter_bank()
 
         self.dir_shape = np.array(x_shape)
         if self.pad_on_demand is not None:
