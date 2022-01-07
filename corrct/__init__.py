@@ -29,3 +29,8 @@ from . import solvers  # noqa: F401, F402
 
 from . import utils_reg  # noqa: F401, F402
 from . import utils_proc  # noqa: F401, F402
+try:
+    from . import utils_phys  # noqa: F401, F402
+except ImportError as exc:
+    print(exc)
+    print("WARNING: X-ray physics support not available. Please install xraylib if you need it.")
