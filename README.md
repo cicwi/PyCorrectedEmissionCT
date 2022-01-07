@@ -44,6 +44,24 @@ Simply install with:
 conda install -c n-vigano corrct
 ```
 
+If you want fast tomographic projectors using the astra-toolbox:
+```
+conda install -c astra-toolbox astra-toolbox
+```
+
+### Installing from PyPI
+
+Simply install with:
+```
+pip install corrct
+```
+
+If you are on jupyter, and don't have the rights to install packages
+system-wide (e.g. on jupyter-slurm at ESRF), then you can install with:
+```
+! pip install --user corrct
+```
+
 ### Installing from source
 
 To install PyCorrectedEmissionCT, simply clone this GitHub
