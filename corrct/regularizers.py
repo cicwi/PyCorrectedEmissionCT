@@ -128,11 +128,6 @@ class Regularizer_Grad(BaseRegularizer):
         self.ndims = ndims
         self.axes = axes
 
-        self.scale = 1  # Pixel/voxel scale factor - it can accellerate convergence
-
-    def update_dual(self, dual, primal):
-        dual += self.sigma * self.op(primal) * self.scale
-
     def initialize_sigma_tau(self, primal):
         self.dtype = primal.dtype
         self.op = operators.TransformGradient(primal.shape, axes=self.axes)
@@ -145,12 +140,6 @@ class Regularizer_Grad(BaseRegularizer):
             tau *= self.weight
         return tau
 
-    def compute_update_primal(self, dual):
-        upd = self.op.T(dual) * self.scale
-        if not isinstance(self.norm, DataFidelity_l1):
-            upd *= self.weight
-        return upd
-
 
 class Regularizer_TV2D(Regularizer_Grad):
 
@@ -159,7 +148,6 @@ class Regularizer_TV2D(Regularizer_Grad):
     def __init__(self, weight, axes=None, norm=DataFidelity_l12()):
         """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
         super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
-        self.scale = 10
 
 
 class Regularizer_TV3D(Regularizer_Grad):
@@ -169,7 +157,6 @@ class Regularizer_TV3D(Regularizer_Grad):
     def __init__(self, weight, axes=None, norm=DataFidelity_l12()):
         """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
         super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
-        self.scale = 10
 
 
 class Regularizer_HubTV2D(Regularizer_Grad):
@@ -179,7 +166,6 @@ class Regularizer_HubTV2D(Regularizer_Grad):
     def __init__(self, weight, huber_size, axes=None):
         """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
         super().__init__(weight=weight, ndims=2, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
-        self.scale = 10
 
 
 class Regularizer_HubTV3D(Regularizer_Grad):
@@ -189,7 +175,6 @@ class Regularizer_HubTV3D(Regularizer_Grad):
     def __init__(self, weight, huber_size, axes=None):
         """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
         super().__init__(weight=weight, ndims=3, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
-        self.scale = 10
 
 
 class Regularizer_smooth2D(Regularizer_Grad):
