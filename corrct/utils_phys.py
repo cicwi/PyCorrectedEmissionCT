@@ -11,7 +11,6 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 
-from enum import Enum
 from dataclasses import dataclass
 
 from typing import Union, Sequence, Optional, Tuple
@@ -28,7 +27,54 @@ except ImportError:
     raise
 
 
-class FluoLines(Enum):
+@dataclass
+class FluoLine:
+    name: str
+    indx: int
+
+
+class FluoLinesSiegbahn:
+    lines = [
+        FluoLine(name="KA1", indx=xraylib.KA1_LINE),
+        FluoLine(name="KA2", indx=xraylib.KA2_LINE),
+        FluoLine(name="KA3", indx=xraylib.KA3_LINE),
+        FluoLine(name="KB1", indx=xraylib.KB1_LINE),
+        FluoLine(name="KB2", indx=xraylib.KB2_LINE),
+        FluoLine(name="KB3", indx=xraylib.KB3_LINE),
+        FluoLine(name="KB4", indx=xraylib.KB4_LINE),
+        FluoLine(name="KB5", indx=xraylib.KB5_LINE),
+        FluoLine(name="LA1", indx=xraylib.LA1_LINE),
+        FluoLine(name="LA2", indx=xraylib.LA2_LINE),
+        FluoLine(name="LB1", indx=xraylib.LB1_LINE),
+        FluoLine(name="LB2", indx=xraylib.LB2_LINE),
+        FluoLine(name="LB3", indx=xraylib.LB3_LINE),
+        FluoLine(name="LB4", indx=xraylib.LB4_LINE),
+        FluoLine(name="LB5", indx=xraylib.LB5_LINE),
+        FluoLine(name="LB6", indx=xraylib.LB6_LINE),
+        FluoLine(name="LB7", indx=xraylib.LB7_LINE),
+        FluoLine(name="LB9", indx=xraylib.LB9_LINE),
+        FluoLine(name="LB10", indx=xraylib.LB10_LINE),
+        FluoLine(name="LB15", indx=xraylib.LB15_LINE),
+        FluoLine(name="LB17", indx=xraylib.LB17_LINE),
+        FluoLine(name="LG1", indx=xraylib.LG1_LINE),
+        FluoLine(name="LG2", indx=xraylib.LG2_LINE),
+        FluoLine(name="LG3", indx=xraylib.LG3_LINE),
+        FluoLine(name="LG4", indx=xraylib.LG4_LINE),
+        FluoLine(name="LG5", indx=xraylib.LG5_LINE),
+        FluoLine(name="LG6", indx=xraylib.LG6_LINE),
+        FluoLine(name="LG8", indx=xraylib.LG8_LINE),
+        FluoLine(name="LE", indx=xraylib.LE_LINE),
+        FluoLine(name="LH", indx=xraylib.LH_LINE),
+        FluoLine(name="LL", indx=xraylib.LL_LINE),
+        FluoLine(name="LS", indx=xraylib.LS_LINE),
+        FluoLine(name="LT", indx=xraylib.LT_LINE),
+        FluoLine(name="LU", indx=xraylib.LU_LINE),
+        FluoLine(name="LV", indx=xraylib.LV_LINE),
+        FluoLine(name="MA1", indx=xraylib.MA1_LINE),
+        FluoLine(name="MA2", indx=xraylib.MA2_LINE),
+        FluoLine(name="MB", indx=xraylib.MB_LINE),
+        FluoLine(name="MG", indx=xraylib.MG_LINE),
+    ]
 
     @staticmethod
     def get_lines(line: str) -> Sequence:
@@ -46,71 +92,11 @@ class FluoLines(Enum):
         Sequence
             List of corresponding lines.
         """
-        raise NotImplementedError()
-
-
-class FluoLinesSiegbahn(FluoLines):
-    KA1 = xraylib.KA1_LINE
-    KA2 = xraylib.KA2_LINE
-    KA3 = xraylib.KA3_LINE
-    KB1 = xraylib.KB1_LINE
-    KB2 = xraylib.KB2_LINE
-    KB3 = xraylib.KB3_LINE
-    KB4 = xraylib.KB4_LINE
-    KB5 = xraylib.KB5_LINE
-    LA1 = xraylib.LA1_LINE
-    LA2 = xraylib.LA2_LINE
-    LB1 = xraylib.LB1_LINE
-    LB2 = xraylib.LB2_LINE
-    LB3 = xraylib.LB3_LINE
-    LB4 = xraylib.LB4_LINE
-    LB5 = xraylib.LB5_LINE
-    LB6 = xraylib.LB6_LINE
-    LB7 = xraylib.LB7_LINE
-    LB9 = xraylib.LB9_LINE
-    LB10 = xraylib.LB10_LINE
-    LB15 = xraylib.LB15_LINE
-    LB17 = xraylib.LB17_LINE
-    LG1 = xraylib.LG1_LINE
-    LG2 = xraylib.LG2_LINE
-    LG3 = xraylib.LG3_LINE
-    LG4 = xraylib.LG4_LINE
-    LG5 = xraylib.LG5_LINE
-    LG6 = xraylib.LG6_LINE
-    LG8 = xraylib.LG8_LINE
-    LE = xraylib.LE_LINE
-    LH = xraylib.LH_LINE
-    LL = xraylib.LL_LINE
-    LS = xraylib.LS_LINE
-    LT = xraylib.LT_LINE
-    LU = xraylib.LU_LINE
-    LV = xraylib.LV_LINE
-    MA1 = xraylib.MA1_LINE
-    MA2 = xraylib.MA2_LINE
-    MB = xraylib.MB_LINE
-    MG = xraylib.MG_LINE
-
-    @staticmethod
-    def get_lines(line: str) -> Sequence:
-        """
-        Return the list of xraylib line macro definitions for the requested family.
-
-        Parameters
-        ----------
-        line : str
-            The requested line. It can be a whole shell (transition to that shell),
-            or sub-shells.
-
-        Returns
-        -------
-        Sequence
-            List of corresponding lines.
-        """
-        return [f for f in FluoLinesSiegbahn if f.name[: len(line)] == line]
+        return [f for f in FluoLinesSiegbahn.lines if f.name[: len(line)] == line]
 
     @staticmethod
     def get_energy(
-        element: Union[str, int], lines: Union[str, FluoLines, Sequence[FluoLines]], compute_average: bool = False
+        element: Union[str, int], lines: Union[str, FluoLine, Sequence[FluoLine]], compute_average: bool = False
     ) -> Union[float, Sequence[float]]:
         """
         Return the energy(ies) of the requested line for the given element.
@@ -147,7 +133,7 @@ class FluoLinesSiegbahn(FluoLines):
         energy_keV = np.empty(len(lines), dtype=np.float32)
         for ii, line in enumerate(lines):
             try:
-                energy_keV[ii] = xraylib.LineEnergy(el_num, line.value)
+                energy_keV[ii] = xraylib.LineEnergy(el_num, line.indx)
             except ValueError as exc:
                 print(f"Energy {exc}: {el_num=} ({el_sym}) {line=}")
                 energy_keV[ii] = 0
@@ -156,7 +142,7 @@ class FluoLinesSiegbahn(FluoLines):
             rates = np.empty(energy_keV.shape)
             for ii, line in enumerate(lines):
                 try:
-                    rates[ii] = xraylib.RadRate(el_num, line.value)
+                    rates[ii] = xraylib.RadRate(el_num, line.indx)
                 except ValueError as exc:
                     print(f"RadRate {exc}: {el_num=} ({el_sym}) {line=}")
                     rates[ii] = 0
@@ -416,7 +402,7 @@ class VolumeMaterial(object):
         el_cs = np.empty((len(fluo_lines), ), self.dtype)
         for ii, line in enumerate(fluo_lines):
             try:
-                el_cs[ii] = xraylib.CS_FluorLine_Kissel(el_num, line.value, energy_in_keV)  # fluo production for cm2/g
+                el_cs[ii] = xraylib.CS_FluorLine_Kissel(el_num, line.indx, energy_in_keV)  # fluo production for cm2/g
             except ValueError as exc:
                 el_sym = xraylib.AtomicNumberToSymbol(el_num)
                 print(f"Energy {exc}: {el_num=} ({el_sym}) {line=}")
