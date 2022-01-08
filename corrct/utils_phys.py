@@ -128,14 +128,14 @@ class FluoLinesSiegbahn:
         elif isinstance(lines, str):
             lines = FluoLinesSiegbahn.get_lines(lines)
         elif len(lines) == 0:
-            raise ValueError(f"No line was passed! {lines=}")
+            raise ValueError(f"No line was passed! lines={lines}")
 
         energy_keV = np.empty(len(lines), dtype=np.float32)
         for ii, line in enumerate(lines):
             try:
                 energy_keV[ii] = xraylib.LineEnergy(el_num, line.indx)
             except ValueError as exc:
-                print(f"Energy {exc}: {el_num=} ({el_sym}) {line=}")
+                print(f"Energy {exc}: el_num={el_num} ({el_sym}) line={line}")
                 energy_keV[ii] = 0
 
         if compute_average:
@@ -144,7 +144,7 @@ class FluoLinesSiegbahn:
                 try:
                     rates[ii] = xraylib.RadRate(el_num, line.indx)
                 except ValueError as exc:
-                    print(f"RadRate {exc}: {el_num=} ({el_sym}) {line=}")
+                    print(f"RadRate {exc}: el_num={el_num} ({el_sym}) line={line}")
                     rates[ii] = 0
             energy_keV = np.sum(energy_keV * rates / np.sum(rates))
 
@@ -405,7 +405,7 @@ class VolumeMaterial(object):
                 el_cs[ii] = xraylib.CS_FluorLine_Kissel(el_num, line.indx, energy_in_keV)  # fluo production for cm2/g
             except ValueError as exc:
                 el_sym = xraylib.AtomicNumberToSymbol(el_num)
-                print(f"Energy {exc}: {el_num=} ({el_sym}) {line=}")
+                print(f"Energy {exc}: el_num={el_num} ({el_sym}) line={line}")
                 el_cs[ii] = 0
         el_yield = self.get_element_mass_fraction(el_num) * np.sum(el_cs) * self.voxel_size_cm
 
