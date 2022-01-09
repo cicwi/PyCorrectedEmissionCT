@@ -261,7 +261,7 @@ def compute_variance_transmission(
     return variance
 
 
-def compute_variance_weigth(variance: ArrayLike, normalized: bool = False) -> ArrayLike:
+def compute_variance_weigth(variance: ArrayLike, normalized: bool = False, semilog: bool = False) -> ArrayLike:
     """
     Compute the weight associated to the given variance, in a weighted least-squares context.
 
@@ -270,7 +270,10 @@ def compute_variance_weigth(variance: ArrayLike, normalized: bool = False) -> Ar
     variance : ArrayLike
         The variance of the signal.
     normalized : bool, optional
-        Whether to scale the smallest variance to 1. The default is False.
+        Scale the largest weight to 1. The default is False.
+    semilog : bool, optional
+        Scale the variance over a logarithmic curve. It can be beneficial with
+        high dynamic range data. The default is False.
 
     Returns
     -------
@@ -278,6 +281,8 @@ def compute_variance_weigth(variance: ArrayLike, normalized: bool = False) -> Ar
         The computed weights.
     """
     variance = np.abs(variance)
+    if semilog:
+        variance = np.log(variance + 1) - 1
     min_nonzero_variance = np.fmax(np.min(variance[variance > 0]), eps)
     weight = np.fmax(variance, min_nonzero_variance)
     if normalized:
