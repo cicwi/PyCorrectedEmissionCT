@@ -40,17 +40,14 @@ ph_or = ph_or[:, :, 1]
 
 bckgnd_weight = np.sqrt(background_avg / (vol_shape[0] * np.sqrt(2)))
 
-precond = True
 num_iterations = 200
-lower_limit = None
+lower_limit = 0
 vol_mask = corrct.utils_proc.get_circular_mask(ph_or.shape)
 
 sino_substract = sino - background_avg
 
-sino_variance = np.abs(sino)
-min_nonzero_variance = np.min(sino_variance[sino > 0])
-sino_tolerances = np.fmax(sino_variance, min_nonzero_variance)
-sino_weights = 1 / sino_tolerances
+sino_variance = cct.utils_proc.compute_variance_poisson(sino)
+sino_weights = cct.utils_proc.compute_variance_weigth(sino_variance)
 
 lowlim_l2 = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_l2())
 lowlim_l2w = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_wl2(1 / bckgnd_weight))
@@ -60,23 +57,23 @@ data_term_lsw = corrct.solvers.DataFidelity_wl2(sino_weights)
 data_term_lsb = corrct.solvers.DataFidelity_l2b(sino_variance)
 
 with corrct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
-    solver_ls = corrct.solvers.CP(verbose=True, data_term=data_term_ls)
-    rec_ls, _ = solver_ls(A, sino_substract, num_iterations, x_mask=vol_mask, precondition=precond, lower_limit=0)
+    solver_ls = corrct.solvers.PDHG(verbose=True, data_term=data_term_ls)
+    rec_ls, _ = solver_ls(A, sino_substract, num_iterations, x_mask=vol_mask, lower_limit=lower_limit)
 
-    solver_wls = corrct.solvers.CP(verbose=True, data_term=data_term_lsw)
-    rec_wls, _ = solver_wls(A, sino_substract, num_iterations, x_mask=vol_mask, precondition=precond, lower_limit=0)
+    solver_wls = corrct.solvers.PDHG(verbose=True, data_term=data_term_lsw)
+    rec_wls, _ = solver_wls(A, sino_substract, num_iterations, x_mask=vol_mask, lower_limit=lower_limit)
 
-    solver_lsb = corrct.solvers.CP(verbose=True, data_term=data_term_lsb)
-    rec_lsb, _ = solver_lsb(A, sino_substract, num_iterations, x_mask=vol_mask, precondition=precond, lower_limit=0)
+    solver_lsb = corrct.solvers.PDHG(verbose=True, data_term=data_term_lsb)
+    rec_lsb, _ = solver_lsb(A, sino_substract, num_iterations, x_mask=vol_mask, lower_limit=lower_limit)
 
-    solver_ls_l = corrct.solvers.CP(verbose=True, data_term=data_term_ls, regularizer=[lowlim_l2w])
-    rec_ls_l, _ = solver_ls_l(A, sino_substract, num_iterations, x_mask=vol_mask, precondition=precond)
+    solver_ls_l = corrct.solvers.PDHG(verbose=True, data_term=data_term_ls, regularizer=[lowlim_l2w])
+    rec_ls_l, _ = solver_ls_l(A, sino_substract, num_iterations, x_mask=vol_mask)
 
-    solver_wls_l = corrct.solvers.CP(verbose=True, data_term=data_term_lsw, regularizer=[lowlim_l2w])
-    rec_wls_l, _ = solver_wls_l(A, sino_substract, num_iterations, x_mask=vol_mask, precondition=precond)
+    solver_wls_l = corrct.solvers.PDHG(verbose=True, data_term=data_term_lsw, regularizer=[lowlim_l2w])
+    rec_wls_l, _ = solver_wls_l(A, sino_substract, num_iterations, x_mask=vol_mask)
 
-    solver_lsb_l = corrct.solvers.CP(verbose=True, data_term=data_term_lsb, regularizer=[lowlim_l2w])
-    rec_lsb_l, _ = solver_lsb_l(A, sino_substract, num_iterations, x_mask=vol_mask, precondition=precond)
+    solver_lsb_l = corrct.solvers.PDHG(verbose=True, data_term=data_term_lsb, regularizer=[lowlim_l2w])
+    rec_lsb_l, _ = solver_lsb_l(A, sino_substract, num_iterations, x_mask=vol_mask)
 
 # Reconstructions
 f = plt.figure(figsize=cm2inch([48, 24]))

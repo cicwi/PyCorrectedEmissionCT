@@ -40,7 +40,6 @@ ph_or = ph_or[:, :, 1]
     ph, 30, add_poisson=True, dwell_time_s=2e-2, background_avg=1e-2, background_std=1e-4
 )
 
-prec = True
 iterations = 200
 lower_limit = 0
 vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
@@ -49,9 +48,8 @@ vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
 sino_substr = sinogram - background_avg
 
 # The pixel weights are computed from their variances
-sino_variances = np.abs(sinogram)
-min_nonzero_variance = np.min(sino_variances[sino_variances > 0])
-sino_weights = 1 / np.fmax(sino_variances, min_nonzero_variance)
+sino_variance = cct.utils_proc.compute_variance_poisson(sinogram)
+sino_weights = cct.utils_proc.compute_variance_weigth(sino_variance)
 
 # Data fitting term: weighted least-squares, based on the standard deviation of the noise.
 data_term_lsw = cct.solvers.DataFidelity_wl2(sino_weights)
@@ -65,14 +63,14 @@ reg = cct.solvers.Regularizer_TV2D
 # Instantiates the solver object, that is later used for computing the reconstruction
 def solver_spawn(lam_reg):
     # Using the PDHG solver from Chambolle and Pock
-    return cct.solvers.CP(verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw)
+    return cct.solvers.PDHG(verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw)
 
 
 # Computes the reconstruction for a given solver and a given cross-validation data mask
 def solver_call(solver, b_test_mask=None):
     with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
         return solver(
-            A, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, precondition=prec, b_test_mask=b_test_mask
+            A, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, b_test_mask=b_test_mask
         )
 
 
@@ -107,8 +105,8 @@ solver = solver_spawn(lam_min)
 
 with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     # Unregularized weighted least-squares solver (PDHG), for reference
-    solver_wls = cct.solvers.CP(verbose=True, data_term=data_term_lsw)
-    rec_wls, _ = solver_wls(A, sino_substr, iterations, x_mask=vol_mask, lower_limit=0, precondition=prec)
+    solver_wls = cct.solvers.PDHG(verbose=True, data_term=data_term_lsw)
+    rec_wls, _ = solver_wls(A, sino_substr, iterations, x_mask=vol_mask, lower_limit=0)
 
 # Create the regularization weight finding helper object (using L-curve)
 reg_help_lc = cct.utils_reg.LCurve(iso_tv_seminorm, verbose=True, plot_result=True)

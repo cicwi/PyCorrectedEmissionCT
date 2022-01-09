@@ -41,7 +41,6 @@ ph_or = ph_or[:, :, 1]
 
 bckgnd_weight = np.sqrt(background_avg / (vol_shape[0] * np.sqrt(2)))
 
-prec = True
 num_iterations = 200
 reg_weight = 1 / 5
 lower_limit = None
@@ -49,10 +48,8 @@ vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
 
 sino_substract = sino - background_avg
 
-sino_variance = np.abs(sino)
-min_nonzero_variance = np.min(sino_variance[sino > 0])
-sino_tolerances = np.fmax(sino_variance, min_nonzero_variance)
-sino_weights = 1 / sino_tolerances
+sino_variance = cct.utils_proc.compute_variance_poisson(sino)
+sino_weights = cct.utils_proc.compute_variance_weigth(sino_variance)
 
 reg_tv = corrct.solvers.Regularizer_TV2D(reg_weight)
 reg_tv_hub = corrct.solvers.Regularizer_HubTV2D(reg_weight, huber_size=0.05)
@@ -82,17 +79,17 @@ data_term_lsb = corrct.solvers.DataFidelity_l2b(sino_variance)
 data_term_l1b = corrct.solvers.DataFidelity_l1b(sino_variance)
 data_term_hub = corrct.solvers.DataFidelity_Huber(sino_variance)
 
-solver_1 = corrct.solvers.CP(
+solver_1 = corrct.solvers.PDHG(
     verbose=True, data_term=data_term_ls, regularizer=reg_1, tolerance=0, data_term_test=data_term_lsw
 )
-solver_2 = corrct.solvers.CP(
+solver_2 = corrct.solvers.PDHG(
     verbose=True, data_term=data_term_lsb, regularizer=reg_2, tolerance=0, data_term_test=data_term_lsw
 )
 
-solver_3 = corrct.solvers.CP(
+solver_3 = corrct.solvers.PDHG(
     verbose=True, data_term=data_term_lsw, regularizer=reg_3, tolerance=0, data_term_test=data_term_lsw
 )
-solver_4 = corrct.solvers.CP(
+solver_4 = corrct.solvers.PDHG(
     verbose=True, data_term=data_term_kl_bck, regularizer=reg_4, tolerance=0, data_term_test=data_term_lsw
 )
 
@@ -105,20 +102,20 @@ b_test_mask[test_pixels] = 1
 with corrct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     print("Reconstructing:")
     (rec_1, res_1) = solver_1(
-        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, precondition=prec, b_test_mask=b_test_mask
+        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
     )
     print("- Phantom power: %g, noise power: %g" % cct.utils_test.compute_error_power(expected_ph, rec_1))
     (rec_2, res_2) = solver_2(
-        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, precondition=prec, b_test_mask=b_test_mask
+        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
     )
     print("- Phantom power: %g, noise power: %g" % cct.utils_test.compute_error_power(expected_ph, rec_2))
 
     (rec_3, res_3) = solver_3(
-        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, precondition=prec, b_test_mask=b_test_mask
+        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
     )
     print("- Phantom power: %g, noise power: %g" % cct.utils_test.compute_error_power(expected_ph, rec_3))
     (rec_4, res_4) = solver_4(
-        A, sino, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, precondition=prec, b_test_mask=b_test_mask
+        A, sino, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
     )
     print("- Phantom power: %g, noise power: %g" % cct.utils_test.compute_error_power(expected_ph, rec_4))
 
