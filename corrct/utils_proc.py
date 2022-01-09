@@ -144,6 +144,8 @@ def apply_flat_field(
     ArrayLike
         Falt-field corrected and linearized projections.
     """
+    projs = np.ascontiguousarray(projs, dtype=data_type)
+    flats = np.ascontiguousarray(flats, dtype=data_type)
     if crop is not None:
         projs = projs[..., crop[0] : crop[2], crop[1] : crop[3]]
         flats = flats[..., crop[0] : crop[2], crop[1] : crop[3]]
@@ -151,12 +153,13 @@ def apply_flat_field(
             darks = darks[..., crop[0] : crop[2], crop[1] : crop[3]]
 
     if darks is not None:
-        projs -= darks
-        flats -= darks
+        darks = np.ascontiguousarray(darks, dtype=data_type)
+        projs = projs - darks
+        flats = flats - darks
 
-    flats = np.mean(flats.astype(data_type), axis=0)
+    flats = np.mean(flats, axis=0)
 
-    return projs.astype(data_type) / flats
+    return projs / flats
 
 
 def apply_minus_log(projs: ArrayLike) -> ArrayLike:
