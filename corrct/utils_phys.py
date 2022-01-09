@@ -123,7 +123,7 @@ class FluoLinesSiegbahn:
             el_sym = xraylib.AtomicNumberToSymbol(element)
             el_num = element
 
-        if isinstance(lines, FluoLinesSiegbahn):
+        if isinstance(lines, FluoLine):
             lines = [lines]
         elif isinstance(lines, str):
             lines = FluoLinesSiegbahn.get_lines(lines)
@@ -365,7 +365,7 @@ class VolumeMaterial(object):
         self,
         element: Union[str, int],
         energy_in_keV: float,
-        fluo_lines: Union[str, FluoLinesSiegbahn, Sequence[FluoLinesSiegbahn]],
+        fluo_lines: Union[str, FluoLine, Sequence[FluoLine]],
         detector: Optional[DetectorXRF] = None,
     ) -> Tuple[float, ArrayLike]:
         """Compute the local fluorescence yield, for the given line of the given element.
@@ -376,7 +376,7 @@ class VolumeMaterial(object):
             The element to consider.
         energy_in_keV : float
             The incombing X-ray beam energy.
-        fluo_lines : str | FluoLinesSiegbahn | Sequence[FluoLinesSiegbahn]
+        fluo_lines : str | FluoLine | Sequence[FluoLine]
             The fluorescence line to consider.
         detector : DetectorXRF, optional
             The detector geometry. The default is None.
@@ -392,7 +392,7 @@ class VolumeMaterial(object):
             if not self._check_parallax_detector(detector):
                 print("WARNING - detector parallax is above 1e-2")
 
-        if isinstance(fluo_lines, FluoLinesSiegbahn):
+        if isinstance(fluo_lines, FluoLine):
             fluo_lines = [fluo_lines]
         elif isinstance(fluo_lines, str):
             fluo_lines = FluoLinesSiegbahn.get_lines(fluo_lines)
