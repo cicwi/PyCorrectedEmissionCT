@@ -28,6 +28,10 @@ except ImportError:
     print("WARNING - pywt was not found")
 
 
+from typing import Union, Sequence, Optional
+from numpy.typing import ArrayLike
+
+
 # ---- Data Fidelity terms ----
 
 
@@ -46,51 +50,128 @@ DataFidelity_KL = data_terms.DataFidelity_KL
 
 
 class BaseRegularizer(ABC):
+    """
+    Initilizie a base regularizer class, that defines the Regularizer object interface.
+
+    Parameters
+    ----------
+    weight : Union[float, ArrayLike]
+        The weight of the regularizer.
+    norm : DataFidelityBase
+        The norm of the regularizer minimization.
+    """
 
     __reg_name__ = ""
 
-    def __init__(self, weight, norm):
-        """
-        Base regularizer class that defines the Regularizer object interface.
-
-        Parameters
-        ----------
-        weight : Union[float, ArrayLike]
-            The weight of the regularizer.
-        norm : DataFidelityBase
-            The norm of the regularizer minimization.
-        """
+    def __init__(self, weight: Union[float, ArrayLike], norm: data_terms.DataFidelityBase):
         self.weight = np.array(weight)
         self.dtype = None
         self.op = None
         self.norm = norm
 
     def info(self) -> str:
+        """
+        Return the regularizer info.
+
+        Returns
+        -------
+        str
+            Regularizer info string.
+        """
         return self.__reg_name__ + "(w:%g" % self.weight.max() + ")"
 
     def upper(self) -> str:
+        """
+        Return the upper case name of the regularizer.
+
+        Returns
+        -------
+        str
+            Upper case string name of the regularizer.
+        """
         return self.__reg_name__.upper()
 
     def lower(self) -> str:
+        """
+        Return the lower case name of the regularizer.
+
+        Returns
+        -------
+        str
+            Lower case string name of the regularizer.
+        """
         return self.__reg_name__.lower()
 
     @abstractmethod
-    def initialize_sigma_tau(self, primal):
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+        """
+        Initialize the internal state, operator, and sigma. It then returns the tau.
+
+        Parameters
+        ----------
+        primal : ArrayLike
+            The primal vector.
+
+        Returns
+        -------
+        Union[float, ArrayLike]
+            The tau to be used in the SIRT or PDHG algorithm.
+        """
         raise NotImplementedError()
 
-    def initialize_dual(self):
+    def initialize_dual(self) -> ArrayLike:
+        """
+        Return the initialized dual.
+
+        Returns
+        -------
+        ArrayLike
+            Initialized (zero) dual.
+        """
         return np.zeros(self.op.adj_shape, dtype=self.dtype)
 
-    def update_dual(self, dual, primal):
+    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
+        """
+        Update the dual in-place.
+
+        Parameters
+        ----------
+        dual : ArrayLike
+            Current stat of the dual.
+        primal : ArrayLike
+            Primal or over-relaxation of the primal.
+        """
         dual += self.sigma * self.op(primal)
 
-    def apply_proximal(self, dual):
+    def apply_proximal(self, dual: ArrayLike) -> None:
+        """
+        Apply the proximal operator to the dual in-place.
+
+        Parameters
+        ----------
+        dual : ArrayLike
+            The dual to be applied the proximal on.
+        """
         if isinstance(self.norm, DataFidelity_l1):
             self.norm.apply_proximal(dual, self.weight)
         else:
             self.norm.apply_proximal(dual)
 
-    def compute_update_primal(self, dual):
+    def compute_update_primal(self, dual: ArrayLike) -> ArrayLike:
+        """
+        Compute the partial update of a primal term, from this regularizer.
+
+        Parameters
+        ----------
+        dual : ArrayLike
+            DESCRIPTION.
+
+        Returns
+        -------
+        upd : ArrayLike
+            DESCRIPTION.
+
+        """
         upd = self.op.T(dual)
         if not isinstance(self.norm, DataFidelity_l1):
             upd *= self.weight
@@ -98,26 +179,32 @@ class BaseRegularizer(ABC):
 
 
 class Regularizer_Grad(BaseRegularizer):
+    """Gradient regularizer.
+
+    When used with l1-norms, it promotes piece-wise constant reconstructions.
+    When used with l2-norm, it promotes smooth reconstructions.
+
+    Parameters
+    ----------
+    weight : Union[float, ArrayLike]
+        The weight of the regularizer.
+    ndims : int, optional
+        The number of dimensions. The default is 2.
+    axes : Sequence, optional
+        The axes over which it computes the gradient. If None, it uses the last 2. The default is None.
+    norm : DataFidelityBase, optional
+        The norm of the regularizer minimization. The default is DataFidelity_l12().
+    """
 
     __reg_name__ = "grad"
 
-    def __init__(self, weight, ndims: int = 2, axes=None, norm: DataFidelityBase = DataFidelity_l12()):
-        """Gradient regularizer.
-
-        When used with l1-norms, it promotes piece-wise constant reconstructions.
-        When used with l2-norm, it promotes smooth reconstructions.
-
-        Parameters
-        ----------
-        weight : Union[float, ArrayLike]
-            The weight of the regularizer.
-        ndims : int, optional
-            The number of dimensions. The default is 2.
-        axes : Sequence, optional
-            The axes over which it computes the gradient. If None, it uses the last 2. The default is None.
-        norm : DataFidelityBase, optional
-            The norm of the regularizer minimization. The default is DataFidelity_l12().
-        """
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        norm: DataFidelityBase = DataFidelity_l12(),
+    ):
         super().__init__(weight=weight, norm=norm)
 
         if axes is None:
@@ -128,7 +215,7 @@ class Regularizer_Grad(BaseRegularizer):
         self.ndims = ndims
         self.axes = axes
 
-    def initialize_sigma_tau(self, primal):
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
         self.op = operators.TransformGradient(primal.shape, axes=self.axes)
 
@@ -142,38 +229,48 @@ class Regularizer_Grad(BaseRegularizer):
 
 
 class Regularizer_TV2D(Regularizer_Grad):
+    """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = "TV2D"
 
-    def __init__(self, weight, axes=None, norm=DataFidelity_l12()):
-        """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        axes: Optional[Sequence[int]] = None,
+        norm: DataFidelityBase = DataFidelity_l12(),
+    ):
         super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
 
 
 class Regularizer_TV3D(Regularizer_Grad):
+    """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = "TV3D"
 
-    def __init__(self, weight, axes=None, norm=DataFidelity_l12()):
-        """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        axes: Optional[Sequence[int]] = None,
+        norm: DataFidelityBase = DataFidelity_l12(),
+    ):
         super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
 
 
 class Regularizer_HubTV2D(Regularizer_Grad):
+    """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = "HubTV2D"
 
-    def __init__(self, weight, huber_size, axes=None):
-        """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
+    def __init__(self, weight: Union[float, ArrayLike], huber_size: int, axes: Optional[Sequence[int]] = None):
         super().__init__(weight=weight, ndims=2, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
 
 
 class Regularizer_HubTV3D(Regularizer_Grad):
+    """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
 
     __reg_name__ = "HubTV3D"
 
-    def __init__(self, weight, huber_size, axes=None):
-        """Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions."""
+    def __init__(self, weight: Union[float, ArrayLike], huber_size: int, axes: Optional[Sequence[int]] = None):
         super().__init__(weight=weight, ndims=3, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
 
 
@@ -182,7 +279,9 @@ class Regularizer_smooth2D(Regularizer_Grad):
 
     __reg_name__ = "smooth2D"
 
-    def __init__(self, weight, axes=None, norm=DataFidelity_l2()):
+    def __init__(
+        self, weight: Union[float, ArrayLike], axes: Optional[Sequence[int]] = None, norm: DataFidelityBase = DataFidelity_l2()
+    ):
         super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
 
 
@@ -191,7 +290,9 @@ class Regularizer_smooth3D(Regularizer_Grad):
 
     __reg_name__ = "smooth3D"
 
-    def __init__(self, weight, axes=None, norm=DataFidelity_l2()):
+    def __init__(
+        self, weight: Union[float, ArrayLike], axes: Optional[Sequence[int]] = None, norm: DataFidelityBase = DataFidelity_l2()
+    ):
         super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
 
 
@@ -200,7 +301,7 @@ class Regularizer_lap(BaseRegularizer):
 
     __reg_name__ = "lap"
 
-    def __init__(self, weight, ndims=2, axes=None):
+    def __init__(self, weight: Union[float, ArrayLike], ndims: int = 2, axes: Optional[Sequence[int]] = None):
         super().__init__(weight=weight, norm=DataFidelity_l1())
 
         if axes is None:
@@ -211,7 +312,7 @@ class Regularizer_lap(BaseRegularizer):
         self.ndims = ndims
         self.axes = axes
 
-    def initialize_sigma_tau(self, primal):
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
         self.op = operators.TransformLaplacian(primal.shape, axes=self.axes)
 
@@ -244,10 +345,10 @@ class Regularizer_l1(BaseRegularizer):
 
     __reg_name__ = "l1"
 
-    def __init__(self, weight, norm=DataFidelity_l1()):
+    def __init__(self, weight: Union[float, ArrayLike], norm: DataFidelityBase = DataFidelity_l1()):
         super().__init__(weight=weight, norm=norm)
 
-    def initialize_sigma_tau(self, primal):
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
 
@@ -255,10 +356,10 @@ class Regularizer_l1(BaseRegularizer):
 
         return 1
 
-    def update_dual(self, dual, primal):
+    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
         dual += primal
 
-    def compute_update_primal(self, dual):
+    def compute_update_primal(self, dual: ArrayLike) -> ArrayLike:
         return dual
 
 
@@ -267,19 +368,27 @@ class Regularizer_swl(BaseRegularizer):
 
     __reg_name__ = "swl"
 
-    def info(self):
+    def info(self) -> str:
+        """
+        Return the regularizer info.
+
+        Returns
+        -------
+        str
+            Regularizer info string.
+        """
         return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight.max() + ")"
 
     def __init__(
         self,
-        weight,
-        wavelet,
-        level,
-        ndims=2,
-        axes=None,
-        pad_on_demand="constant",
-        normalized=False,
-        min_approx=True,
+        weight: Union[float, ArrayLike],
+        wavelet: str,
+        level: int,
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        pad_on_demand: str = "constant",
+        normalized: bool = False,
+        min_approx: bool = True,
         norm=DataFidelity_l1(),
     ):
         if not has_pywt:
@@ -302,7 +411,7 @@ class Regularizer_swl(BaseRegularizer):
 
         self.pad_on_demand = pad_on_demand
 
-    def initialize_sigma_tau(self, primal):
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
         self.op = operators.TransformStationaryWavelet(
             primal.shape,
@@ -317,10 +426,14 @@ class Regularizer_swl(BaseRegularizer):
         lo_dec_mult = filt_bank_l1norm[0] ** self.ndims
         lo_rec_mult = filt_bank_l1norm[2] ** self.ndims
 
-        self.dec_func_mult = self.op.wlet_dec_filter_mult[None, :] * (lo_dec_mult ** np.arange(self.level-1, -1, -1))[:, None]
+        self.dec_func_mult = (
+            self.op.wlet_dec_filter_mult[None, :] * (lo_dec_mult ** np.arange(self.level - 1, -1, -1))[:, None]
+        )
         self.dec_func_mult = np.concatenate(([lo_dec_mult ** self.level], self.dec_func_mult.flatten()))
 
-        self.rec_func_mult = self.op.wlet_rec_filter_mult[None, :] * (lo_rec_mult ** np.arange(self.level-1, -1, -1))[:, None]
+        self.rec_func_mult = (
+            self.op.wlet_rec_filter_mult[None, :] * (lo_rec_mult ** np.arange(self.level - 1, -1, -1))[:, None]
+        )
         self.rec_func_mult = np.concatenate(([lo_rec_mult ** self.level], self.rec_func_mult.flatten()))
 
         # self.dec_func_mult = 2 ** np.arange(self.level, 0, -1)
@@ -344,7 +457,7 @@ class Regularizer_swl(BaseRegularizer):
             tau *= self.weight
         return tau
 
-    def update_dual(self, dual, primal):
+    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
         upd = self.op(primal)
         if not self.normalized:
             upd *= self.sigma
@@ -359,7 +472,15 @@ class Regularizer_l1swl(Regularizer_swl):
     __reg_name__ = "l1swl"
 
     def __init__(
-        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", normalized=False, min_approx=True
+        self,
+        weight: Union[float, ArrayLike],
+        wavelet: str,
+        level: int,
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        pad_on_demand: str = "constant",
+        normalized: bool = False,
+        min_approx: bool = True,
     ):
         super().__init__(
             weight,
@@ -381,15 +502,15 @@ class Regularizer_Hub_swl(Regularizer_swl):
 
     def __init__(
         self,
-        weight,
-        wavelet,
-        level,
-        ndims=2,
-        axes=None,
-        pad_on_demand="constant",
-        normalized=False,
-        min_approx=True,
-        huber_size=None,
+        weight: Union[float, ArrayLike],
+        wavelet: str,
+        level: int,
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        pad_on_demand: str = "constant",
+        normalized: bool = False,
+        min_approx: bool = True,
+        huber_size: Optional[int] = None,
     ):
         super().__init__(
             weight,
@@ -409,11 +530,27 @@ class Regularizer_dwl(BaseRegularizer):
 
     __reg_name__ = "dwl"
 
-    def info(self):
+    def info(self) -> str:
+        """
+        Return the regularizer info.
+
+        Returns
+        -------
+        str
+            Regularizer info string.
+        """
         return self.__reg_name__ + "(t:" + self.wavelet + "-l:%d" % self.level + "-w:%g" % self.weight.max() + ")"
 
     def __init__(
-        self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", min_approx=True, norm=DataFidelity_l1()
+        self,
+        weight: Union[float, ArrayLike],
+        wavelet: str,
+        level: int,
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        pad_on_demand: str = "constant",
+        min_approx: bool = True,
+        norm: DataFidelityBase = DataFidelity_l1(),
     ):
         if not has_pywt:
             raise ValueError("Cannot use wavelet regularizer because pywavelets is not installed.")
@@ -432,7 +569,7 @@ class Regularizer_dwl(BaseRegularizer):
 
         self.pad_on_demand = pad_on_demand
 
-    def initialize_sigma_tau(self, primal):
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
         self.op = operators.TransformDecimatedWavelet(
             primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes, pad_on_demand=self.pad_on_demand
@@ -442,10 +579,14 @@ class Regularizer_dwl(BaseRegularizer):
         lo_dec_mult = filt_bank_l1norm[0] ** self.ndims
         lo_rec_mult = filt_bank_l1norm[2] ** self.ndims
 
-        self.dec_func_mult = self.op.wlet_dec_filter_mult[None, :] * (lo_dec_mult ** np.arange(self.level-1, -1, -1))[:, None]
+        self.dec_func_mult = (
+            self.op.wlet_dec_filter_mult[None, :] * (lo_dec_mult ** np.arange(self.level - 1, -1, -1))[:, None]
+        )
         self.dec_func_mult = np.concatenate(([lo_dec_mult ** self.level], self.dec_func_mult.flatten()))
 
-        self.rec_func_mult = self.op.wlet_rec_filter_mult[None, :] * (lo_rec_mult ** np.arange(self.level-1, -1, -1))[:, None]
+        self.rec_func_mult = (
+            self.op.wlet_rec_filter_mult[None, :] * (lo_rec_mult ** np.arange(self.level - 1, -1, -1))[:, None]
+        )
         self.rec_func_mult = np.concatenate(([lo_rec_mult ** self.level], self.rec_func_mult.flatten()))
 
         # self.dec_func_mult = 2 ** np.arange(self.level, 0, -1)
@@ -471,7 +612,7 @@ class Regularizer_dwl(BaseRegularizer):
             tau *= self.weight
         return tau
 
-    def update_dual(self, dual, primal):
+    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
         super().update_dual(dual, primal)
         if not self.min_approx:
             slices = [slice(0, x) for x in self.op.sub_band_shapes[0]]
@@ -483,7 +624,15 @@ class Regularizer_l1dwl(Regularizer_dwl):
 
     __reg_name__ = "l1dwl"
 
-    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant"):
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        wavelet: str,
+        level: int,
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        pad_on_demand: str = "constant",
+    ):
         super().__init__(weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, norm=DataFidelity_l1())
 
 
@@ -492,7 +641,16 @@ class Regularizer_Hub_dwl(Regularizer_dwl):
 
     __reg_name__ = "Hubdwl"
 
-    def __init__(self, weight, wavelet, level, ndims=2, axes=None, pad_on_demand="constant", huber_size=None):
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        wavelet: str,
+        level: int,
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        pad_on_demand: str = "constant",
+        huber_size: Optional[int] = None,
+    ):
         super().__init__(
             weight, wavelet, level, ndims=ndims, axes=axes, pad_on_demand=pad_on_demand, norm=DataFidelity_Huber(huber_size)
         )
@@ -503,14 +661,22 @@ class BaseRegularizer_med(BaseRegularizer):
 
     __reg_name__ = "med"
 
-    def info(self):
+    def info(self) -> str:
+        """
+        Return the regularizer info.
+
+        Returns
+        -------
+        str
+            Regularizer info string.
+        """
         return self.__reg_name__ + "(s:%s" % np.array(self.filt_size) + "-w:%g" % self.weight.max() + ")"
 
-    def __init__(self, weight, filt_size=3, norm=DataFidelity_l1()):
+    def __init__(self, weight: Union[float, ArrayLike], filt_size: int = 3, norm: DataFidelityBase = DataFidelity_l1()):
         super().__init__(weight=weight, norm=norm)
         self.filt_size = filt_size
 
-    def initialize_sigma_tau(self, primal):
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
         self.norm.assign_data(None, sigma=1)
@@ -520,10 +686,10 @@ class BaseRegularizer_med(BaseRegularizer):
         else:
             return 1
 
-    def update_dual(self, dual, primal):
+    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
         dual += primal - spimg.median_filter(primal, self.filt_size)
 
-    def compute_update_primal(self, dual):
+    def compute_update_primal(self, dual: ArrayLike) -> ArrayLike:
         return self.weight * dual
 
 
@@ -532,7 +698,7 @@ class Regularizer_l1med(BaseRegularizer_med):
 
     __reg_name__ = "l1med"
 
-    def __init__(self, weight, filt_size=3):
+    def __init__(self, weight: Union[float, ArrayLike], filt_size: int = 3):
         BaseRegularizer_med.__init__(self, weight, filt_size=filt_size, norm=DataFidelity_l1())
 
 
@@ -541,7 +707,7 @@ class Regularizer_l2med(BaseRegularizer_med):
 
     __reg_name__ = "l2med"
 
-    def __init__(self, weight, filt_size=3):
+    def __init__(self, weight: Union[float, ArrayLike], filt_size: int = 3):
         BaseRegularizer_med.__init__(self, weight, filt_size=filt_size, norm=DataFidelity_l2())
 
 
@@ -550,7 +716,14 @@ class Regularizer_fft(BaseRegularizer):
 
     __reg_name__ = "fft"
 
-    def __init__(self, weight, ndims=2, axes=None, mask="exp", norm=DataFidelity_l12()):
+    def __init__(
+        self,
+        weight: Union[float, ArrayLike],
+        ndims: int = 2,
+        axes: Optional[Sequence[int]] = None,
+        mask: str = "exp",
+        norm: DataFidelityBase = DataFidelity_l12(),
+    ):
         super().__init__(weight=weight, norm=norm)
 
         if axes is None:
@@ -563,7 +736,7 @@ class Regularizer_fft(BaseRegularizer):
 
         self.mask = mask
 
-    def initialize_sigma_tau(self, primal):
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
         self.op = operators.TransformFourier(primal.shape, axes=self.axes)
 
@@ -602,14 +775,22 @@ class Constraint_LowerLimit(BaseRegularizer):
 
     __reg_name__ = "lowlim"
 
-    def info(self):
+    def info(self) -> str:
+        """
+        Return the regularizer info.
+
+        Returns
+        -------
+        str
+            Regularizer info string.
+        """
         return self.__reg_name__ + "(l:%g" % self.limit + ")"
 
-    def __init__(self, limit, norm=DataFidelity_l2()):
+    def __init__(self, limit, norm: DataFidelityBase = DataFidelity_l2()):
         super().__init__(weight=1, norm=norm)
         self.limit = limit
 
-    def initialize_sigma_tau(self, primal):
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
 
@@ -620,14 +801,14 @@ class Constraint_LowerLimit(BaseRegularizer):
         else:
             return 1
 
-    def update_dual(self, dual, primal):
+    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
         dual += primal
 
-    def apply_proximal(self, dual):
+    def apply_proximal(self, dual: ArrayLike) -> None:
         dual[dual > self.limit] = self.limit
         self.norm.apply_proximal(dual)
 
-    def compute_update_primal(self, dual):
+    def compute_update_primal(self, dual: ArrayLike) -> ArrayLike:
         return dual
 
 
@@ -636,14 +817,22 @@ class Constraint_UpperLimit(BaseRegularizer):
 
     __reg_name__ = "uplim"
 
-    def info(self):
+    def info(self) -> str:
+        """
+        Return the regularizer info.
+
+        Returns
+        -------
+        str
+            Regularizer info string.
+        """
         return self.__reg_name__ + "(l:%g" % self.limit + ")"
 
-    def __init__(self, limit, norm=DataFidelity_l2()):
+    def __init__(self, limit, norm: DataFidelityBase = DataFidelity_l2()):
         super().__init__(weight=1, norm=norm)
         self.limit = limit
 
-    def initialize_sigma_tau(self, primal):
+    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
 
@@ -654,12 +843,12 @@ class Constraint_UpperLimit(BaseRegularizer):
         else:
             return 1
 
-    def update_dual(self, dual, primal):
+    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
         dual += primal
 
-    def apply_proximal(self, dual):
+    def apply_proximal(self, dual: ArrayLike) -> None:
         dual[dual < self.limit] = self.limit
         self.norm.apply_proximal(dual)
 
-    def compute_update_primal(self, dual):
+    def compute_update_primal(self, dual: ArrayLike) -> ArrayLike:
         return dual
