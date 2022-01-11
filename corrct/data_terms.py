@@ -250,15 +250,12 @@ class DataFidelity_l1(DataFidelityBase):
         pass
 
     def apply_proximal(self, dual, weight=1):
-        if weight > 0:
-            if self.data is not None:
-                dual -= self.sigma_data
-            self._apply_threshold(dual)
-            dual_inner_norm = self._get_inner_norm(dual)
-            dual /= np.fmax(dual_inner_norm, weight)
-            dual *= weight
-        else:
-            dual[:] = 0
+        if self.data is not None:
+            dual -= self.sigma_data
+        self._apply_threshold(dual)
+        dual_inner_norm = self._get_inner_norm(dual)
+        dual /= np.fmax(dual_inner_norm, weight)
+        dual *= weight
 
     def compute_residual_norm(self, dual):
         dual = dual.copy()
