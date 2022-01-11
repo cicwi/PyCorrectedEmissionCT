@@ -164,13 +164,12 @@ class BaseRegularizer(ABC):
         Parameters
         ----------
         dual : ArrayLike
-            DESCRIPTION.
+            The dual associated to this regularizer.
 
         Returns
         -------
         upd : ArrayLike
-            DESCRIPTION.
-
+            The update to the primal.
         """
         upd = self.op.T(dual)
         if not isinstance(self.norm, DataFidelity_l1):
