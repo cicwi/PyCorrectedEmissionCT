@@ -212,16 +212,35 @@ class BaseRegularizationEstimation(ABC):
         lams_reg : ArrayLike
             List of regularization weights.
 
-        Raises
-        ------
-        NotImplementedError
-            This is an interface method for derived classes.
+        Returns
+        -------
+        ArrayLike
+            Objective function cost for each regularization weight.
         """
         raise NotImplementedError()
 
 
 class LCurve(BaseRegularizationEstimation):
-    """L-curve based regularization parameter estimation class."""
+    """Create an L-curve regularization parameter estimation helper.
+
+    Parameters
+    ----------
+    loss_function : Callable
+        The loss function for the computation of the L-curve values.
+    data_dtype : DTypeLike, optional
+        Type of the input data. The default is np.float32.
+    parallel_eval : bool, optional
+        Compute loss and error values in parallel. The default is False.
+    verbose : bool, optional
+        Print verbose output. The default is False.
+    plot_result : bool, optional
+        Plot results. The default is False.
+
+    Raises
+    ------
+    ValueError
+        In case 'loss_function' is not callable or does not expose at least one argument.
+    """
 
     def __init__(
         self,
@@ -231,26 +250,6 @@ class LCurve(BaseRegularizationEstimation):
         verbose: bool = False,
         plot_result: bool = False,
     ):
-        """Create an L-curve regularization parameter estimation helper.
-
-        Parameters
-        ----------
-        loss_function : Callable
-            The loss function for the computation of the L-curve values.
-        data_dtype : DTypeLike, optional
-            Type of the input data. The default is np.float32.
-        parallel_eval : bool, optional
-            Compute loss and error values in parallel. The default is False.
-        verbose : bool, optional
-            Print verbose output. The default is False.
-        plot_result : bool, optional
-            Plot results. The default is False.
-
-        Raises
-        ------
-        ValueError
-            In case 'loss_function' is not callable or does not expose at least one argument.
-        """
         super().__init__(data_dtype=data_dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result)
 
         if not isinstance(loss_function, Callable):
@@ -310,7 +309,25 @@ class LCurve(BaseRegularizationEstimation):
 
 
 class CrossValidation(BaseRegularizationEstimation):
-    """Cross-validation based regularization parameter estimation class."""
+    """Create a cross-validation regularization parameter estimation helper.
+
+    Parameters
+    ----------
+    data_shape : ArrayLike
+        Shape of the projection data.
+    data_dtype : DTypeLike, optional
+        Type of the input data. The default is np.float32.
+    test_fraction : float, optional
+        Fraction of detector points to use for the leave-out set. The default is 0.1.
+    num_averages : int, optional
+        Number of averages random leave-out sets to use. The default is 7.
+    parallel_eval : bool, optional
+        Compute loss and error values in parallel. The default is False.
+    verbose : bool, optional
+        Print verbose output. The default is False.
+    plot_result : bool, optional
+        Plot results. The default is False.
+    """
 
     def __init__(
         self,
@@ -322,25 +339,6 @@ class CrossValidation(BaseRegularizationEstimation):
         verbose: bool = False,
         plot_result: bool = False,
     ):
-        """Create a cross-validation regularization parameter estimation helper.
-
-        Parameters
-        ----------
-        data_shape : ArrayLike
-            Shape of the projection data.
-        data_dtype : DTypeLike, optional
-            Type of the input data. The default is np.float32.
-        test_fraction : float, optional
-            Fraction of detector points to use for the leave-out set. The default is 0.1.
-        num_averages : int, optional
-            Number of averages random leave-out sets to use. The default is 7.
-        parallel_eval : bool, optional
-            Compute loss and error values in parallel. The default is False.
-        verbose : bool, optional
-            Print verbose output. The default is False.
-        plot_result : bool, optional
-            Plot results. The default is False.
-        """
         super().__init__(data_dtype=data_dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result)
         self.data_shape = data_shape
         self.test_fraction = test_fraction

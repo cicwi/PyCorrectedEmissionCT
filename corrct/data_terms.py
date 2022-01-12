@@ -16,25 +16,33 @@ eps = np.finfo(np.float32).eps
 
 
 class DataFidelityBase(ABC):
+    """
+    Initialize the base data-fidelity class.
+
+    This class that defines the object interface.
+
+    Parameters
+    ----------
+    background : Optional[Union[float, ArrayLike]], optional
+        The data background. The default is None.
+    """
 
     __data_fidelity_name__ = ""
 
     def __init__(self, background=None):
-        """
-        Initialize the base data-fidelity class.
-
-        This class that defines the object interface.
-
-        Parameters
-        ----------
-        background : Optional[Union[float, ArrayLike]], optional
-            The data background. The default is None.
-        """
         self.background = background
         self.data = None
         self.sigma = None
 
     def info(self) -> str:
+        """
+        Return the data-fidelity info.
+
+        Returns
+        -------
+        str
+            Data fidelity info string.
+        """
         if self.background is not None:
             if np.array(self.background).size > 1:
                 bckgrnd_str = "(B:<array>)"
@@ -45,9 +53,25 @@ class DataFidelityBase(ABC):
         return self.__data_fidelity_name__ + bckgrnd_str
 
     def upper(self) -> str:
+        """
+        Return the upper case name of the data-fidelity.
+
+        Returns
+        -------
+        str
+            Upper case string name of the data-fidelity.
+        """
         return self.info().upper()
 
     def lower(self) -> str:
+        """
+        Return the lower case name of the data-fidelity.
+
+        Returns
+        -------
+        str
+            Lower case string name of the data-fidelity.
+        """
         return self.info().lower()
 
     def assign_data(self, data=None, sigma=1):

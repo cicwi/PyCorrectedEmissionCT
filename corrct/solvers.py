@@ -11,7 +11,7 @@ from typing import Optional, Union, Tuple
 
 import numpy as np
 import numpy.random
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, DTypeLike
 
 import scipy.sparse as sps
 
@@ -75,6 +75,26 @@ Constraint_UpperLimit = regularizers.Constraint_UpperLimit
 
 
 class Solver(object):
+    """
+    Initialize the base solver class.
+
+    Parameters
+    ----------
+    verbose : bool, optional
+        Turn on verbose output. The default is False.
+    tolerance : Optional[float], optional
+        Tolerance on the data residual for computing when to stop iterations.
+        The default is None.
+    relaxation : float, optional
+        The relaxation length. The default is 1.0.
+    data_term : Union[str, DataFidelityBase], optional
+        Data fidelity term for computing the data residual. The default is "l2".
+    data_term_test : Optional[DataFidelityBase], optional
+        The data fidelity to be used for the test set.
+        If None, it will use the same as for the rest of the data.
+        The default is None.
+    """
+
     def __init__(
         self,
         verbose: bool = False,
@@ -83,25 +103,6 @@ class Solver(object):
         data_term: Union[str, DataFidelityBase] = "l2",
         data_term_test: Optional[DataFidelityBase] = None,
     ):
-        """
-        Initialize the base solver class.
-
-        Parameters
-        ----------
-        verbose : bool, optional
-            Turn on verbose output. The default is False.
-        tolerance : Optional[float], optional
-            Tolerance on the data residual for computing when to stop iterations.
-            The default is None.
-        relaxation : float, optional
-            The relaxation length. The default is 1.0.
-        data_term : Union[str, DataFidelityBase], optional
-            Data fidelity term for computing the data residual. The default is "l2".
-        data_term_test : Optional[DataFidelityBase], optional
-            The data fidelity to be used for the test set.
-            If None, it will use the same as for the rest of the data.
-            The default is None.
-        """
         self.verbose = verbose
         self.relaxation = relaxation
         self.tolerance = tolerance
@@ -112,12 +113,36 @@ class Solver(object):
         self.data_term_test = cp.deepcopy(self.data_term)
 
     def info(self) -> str:
+        """
+        Return the solver info.
+
+        Returns
+        -------
+        str
+            Solver info string.
+        """
         return type(self).__name__
 
     def upper(self) -> str:
+        """
+        Return the upper case name of the solver.
+
+        Returns
+        -------
+        str
+            Upper case string name of the solver.
+        """
         return type(self).__name__.upper()
 
     def lower(self) -> str:
+        """
+        Return the lower case name of the solver.
+
+        Returns
+        -------
+        str
+            Lower case string name of the solver.
+        """
         return type(self).__name__.lower()
 
     @staticmethod
@@ -292,6 +317,30 @@ class Sart(Solver):
 
 
 class Sirt(Solver):
+    """
+    Initialize the SIRT solver class.
+
+    This class implements the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm.
+
+    Parameters
+    ----------
+    verbose : bool, optional
+        Turn on verbose output. The default is False.
+    tolerance : Optional[float], optional
+        Tolerance on the data residual for computing when to stop iterations.
+        The default is None.
+    relaxation : float, optional
+        The relaxation length. The default is 1.95.
+    regularizer : Optional[BaseRegularizer], optional
+        Regularizer to be used. The default is None.
+    data_term : Union[str, DataFidelityBase], optional
+        Data fidelity term for computing the data residual. The default is "l2".
+    data_term_test : Optional[DataFidelityBase], optional
+        The data fidelity to be used for the test set.
+        If None, it will use the same as for the rest of the data.
+        The default is None.
+    """
+
     def __init__(
         self,
         verbose: bool = False,
@@ -301,35 +350,20 @@ class Sirt(Solver):
         data_term: Union[str, DataFidelityBase] = "l2",
         data_term_test: Optional[DataFidelityBase] = None,
     ):
-        """
-        Initialize the SIRT solver class.
-
-        This class implements the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm.
-
-        Parameters
-        ----------
-        verbose : bool, optional
-            Turn on verbose output. The default is False.
-        tolerance : Optional[float], optional
-            Tolerance on the data residual for computing when to stop iterations.
-            The default is None.
-        relaxation : float, optional
-            The relaxation length. The default is 1.95.
-        regularizer : Optional[BaseRegularizer], optional
-            Regularizer to be used. The default is None.
-        data_term : Union[str, DataFidelityBase], optional
-            Data fidelity term for computing the data residual. The default is "l2".
-        data_term_test : Optional[DataFidelityBase], optional
-            The data fidelity to be used for the test set.
-            If None, it will use the same as for the rest of the data.
-            The default is None.
-        """
         super().__init__(
             verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
         )
         self.regularizer = self._initialize_regularizer(regularizer)
 
-    def info(self):
+    def info(self) -> str:
+        """
+        Return the SIRT info.
+
+        Returns
+        -------
+        str
+            SIRT info string.
+        """
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         return Solver.info(self) + "-" + self.data_term.info() + reg_info
 
@@ -462,6 +496,30 @@ class Sirt(Solver):
 
 
 class PDHG(Solver):
+    """
+    Initialize the PDHG solver class.
+
+    PDHG stands for primal-dual hybridg gradient algorithm from Chambolle and Pock.
+
+    Parameters
+    ----------
+    verbose : bool, optional
+        Turn on verbose output. The default is False.
+    tolerance : Optional[float], optional
+        Tolerance on the data residual for computing when to stop iterations.
+        The default is None.
+    relaxation : float, optional
+        The relaxation length. The default is 0.95.
+    regularizer : Optional[BaseRegularizer], optional
+        Regularizer to be used. The default is None.
+    data_term : Union[str, DataFidelityBase], optional
+        Data fidelity term for computing the data residual. The default is "l2".
+    data_term_test : Optional[DataFidelityBase], optional
+        The data fidelity to be used for the test set.
+        If None, it will use the same as for the rest of the data.
+        The default is None.
+    """
+
     def __init__(
         self,
         verbose: bool = False,
@@ -471,35 +529,20 @@ class PDHG(Solver):
         data_term: Union[str, DataFidelityBase] = "l2",
         data_term_test: Optional[DataFidelityBase] = None,
     ):
-        """
-        Initialize the PDHG solver class.
-
-        PDHG stands for primal-dual hybridg gradient algorithm from Chambolle and Pock.
-
-        Parameters
-        ----------
-        verbose : bool, optional
-            Turn on verbose output. The default is False.
-        tolerance : Optional[float], optional
-            Tolerance on the data residual for computing when to stop iterations.
-            The default is None.
-        relaxation : float, optional
-            The relaxation length. The default is 0.95.
-        regularizer : Optional[BaseRegularizer], optional
-            Regularizer to be used. The default is None.
-        data_term : Union[str, DataFidelityBase], optional
-            Data fidelity term for computing the data residual. The default is "l2".
-        data_term_test : Optional[DataFidelityBase], optional
-            The data fidelity to be used for the test set.
-            If None, it will use the same as for the rest of the data.
-            The default is None.
-        """
         super().__init__(
             verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
         )
         self.regularizer = self._initialize_regularizer(regularizer)
 
-    def info(self):
+    def info(self) -> str:
+        """
+        Return the PDHG info.
+
+        Returns
+        -------
+        str
+            PDHG info string.
+        """
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         return Solver.info(self) + "-" + self.data_term.info() + reg_info
 
@@ -517,7 +560,26 @@ class PDHG(Solver):
         else:
             return cp.deepcopy(data_term)
 
-    def power_method(self, A, At, b: ArrayLike, iterations: int = 5):
+    def power_method(self, A, At, b: ArrayLike, iterations: int = 5) -> Tuple[float, Tuple[int], DTypeLike]:
+        """
+        Compute the l2-norm of the operator A, with the power method.
+
+        Parameters
+        ----------
+        A : Callable | BaseTransform
+            Operator whose l2-norm needs to be computed.
+        At : Callable | BaseTransform
+            Adjoint of the operator.
+        b : ArrayLike
+            The data vector.
+        iterations : int, optional
+            Number of power method iterations. The default is 5.
+
+        Returns
+        -------
+        Tuple[float, Tuple[int], DTypeLike]
+            The l2-norm of A, and the shape and type of the solution.
+        """
         x = np.random.rand(*b.shape).astype(b.dtype)
         x /= np.linalg.norm(x)
         x = At(x)
