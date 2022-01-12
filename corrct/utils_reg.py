@@ -16,6 +16,8 @@ from typing import Callable, Sequence, Optional, Tuple
 from numpy.typing import ArrayLike, DTypeLike
 import inspect
 
+from abc import ABC, abstractmethod
+
 import time as tm
 
 try:
@@ -54,7 +56,7 @@ def create_random_test_mask(
     return data_test_mask
 
 
-class BaseRegularizationEstimation(object):
+class BaseRegularizationEstimation(ABC):
     """Base class for regularization parameter estimation class."""
 
     def __init__(
@@ -201,6 +203,7 @@ class BaseRegularizationEstimation(object):
 
         return err_l1, err_l2
 
+    @abstractmethod
     def compute_loss_values(self, lams_reg: ArrayLike) -> ArrayLike:
         """Compute the objective function costs for a list of regularization weights.
 
