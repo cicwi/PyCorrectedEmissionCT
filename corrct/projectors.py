@@ -20,12 +20,14 @@ import multiprocessing as mp
 
 from tqdm import tqdm
 
+from typing import Union, Sequence, Optional, Callable
+from numpy.typing import ArrayLike, DTypeLike
+
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
 
 class ProjectorMatrix(operators.ProjectorOperator):
-    def __init__(self, A, vol_shape, proj_shape):
     """
     Projector that uses an explicit projection matrix.
 
@@ -39,6 +41,7 @@ class ProjectorMatrix(operators.ProjectorOperator):
         Projection shape.
     """
 
+    def __init__(self, A: ArrayLike, vol_shape: Union[Sequence[int], ArrayLike], proj_shape: Union[Sequence[int], ArrayLike]):
         self.vol_shape = vol_shape
         self.proj_shape = proj_shape
 
@@ -67,7 +70,7 @@ class ProjectorMatrix(operators.ProjectorOperator):
         """
         return ProjectorMatrix(np.abs(self.A), self.vol_shape, self.proj_shape)
 
-    def fp(self, x):
+    def fp(self, x: ArrayLike) -> ArrayLike:
         """
         Define the interface for the forward-projection.
 
@@ -83,7 +86,7 @@ class ProjectorMatrix(operators.ProjectorOperator):
         """
         return self.A.dot(x.flatten()).reshape(self.proj_shape)
 
-    def bp(self, x):
+    def bp(self, x: ArrayLike) -> ArrayLike:
         """
         Define the interface for the back-projection.
 
@@ -132,10 +135,10 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
     def __init__(
         self,
-        vol_shape,
-        angles_rot_rad,
+        vol_shape: Union[Sequence[int], ArrayLike],
+        angles_rot_rad: Union[Sequence[float], ArrayLike],
         rot_axis_shift_pix: float = 0.0,
-        proj_intensities: np.ndarray = None,
+        proj_intensities: Optional[ArrayLike] = None,
         use_astra: bool = prj_backends.has_cuda,
         create_single_projs: bool = True,
         super_sampling: int = 1,
@@ -179,7 +182,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         """De-initialize the with statement block."""
         self.projector_backend.dispose()
 
-    def fp_angle(self, vol, angle_ind: int):
+    def fp_angle(self, vol: ArrayLike, angle_ind: int) -> ArrayLike:
         """Forward-project a volume to a single sinogram line.
 
         Parameters
@@ -199,7 +202,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             x *= self.proj_intensities[angle_ind]
         return x
 
-    def bp_angle(self, sino_line, angle_ind: int):
+    def bp_angle(self, sino_line: ArrayLike, angle_ind: int) -> ArrayLike:
         """Back-project a single sinogram line to the volume.
 
         Parameters
@@ -218,7 +221,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             sino_line = sino_line * self.proj_intensities[angle_ind]  # It will make a copy
         return self.projector_backend.bp(sino_line, angle_ind)
 
-    def fp(self, vol):
+    def fp(self, vol: ArrayLike) -> ArrayLike:
         """
         Forward-projection of the volume to the projection data.
 
@@ -237,7 +240,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             x *= self.proj_intensities[:, np.newaxis]
         return x
 
-    def bp(self, data):
+    def bp(self, data: ArrayLike) -> ArrayLike:
         """
         Back-projection of the projection data to the volume.
 
@@ -255,7 +258,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             data = data * self.proj_intensities[:, np.newaxis]  # Needs copy
         return self.projector_backend.bp(data)
 
-    def fbp(self, projs, fbp_filter="shepp-logan"):
+    def fbp(self, projs: ArrayLike, fbp_filter: Union[str, Callable] = "shepp-logan") -> ArrayLike:
         """
         Compute the filtered back-projection of the projection data to the volume.
 
@@ -337,21 +340,21 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
     def __init__(
         self,
-        vol_shape,
-        angles_rot_rad,
-        rot_axis_shift_pix=0,
-        proj_intensities=None,
-        super_sampling=1,
-        att_in=None,
-        att_out=None,
-        angles_detectors_rad=(np.pi / 2),
-        weights_detectors=None,
-        psf=None,
+        vol_shape: Union[Sequence[int], ArrayLike],
+        angles_rot_rad: ArrayLike,
+        rot_axis_shift_pix: float = 0,
+        proj_intensities: Optional[ArrayLike] = None,
+        super_sampling: int = 1,
+        att_in: Optional[ArrayLike] = None,
+        att_out: Optional[ArrayLike] = None,
+        angles_detectors_rad: Union[float, ArrayLike] = (np.pi / 2),
+        weights_detectors: Optional[ArrayLike] = None,
+        psf: Optional[ArrayLike] = None,
         precompute_attenuation: bool = True,
         is_symmetric: bool = False,
-        weights_angles=None,
+        weights_angles: Optional[ArrayLike] = None,
         use_multithreading: bool = True,
-        data_type=np.float32,
+        data_type: DTypeLike = np.float32,
         verbose: bool = True,
     ):
         ProjectorUncorrected.__init__(
@@ -417,7 +420,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             self.executor.shutdown()
 
     @staticmethod
-    def _compute_attenuation(vol, angle_rad: float, invert: bool = False):
+    def _compute_attenuation(vol: ArrayLike, angle_rad: float, invert: bool = False) -> ArrayLike:
         def pad_vol(vol, edges):
             paddings = [(0,)] * len(vol.shape)
             paddings[-2], paddings[-1] = (edges[0],), (edges[1],)
@@ -457,7 +460,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return cum_arr
 
-    def compute_attenuation(self, vol, angle_rad: float, invert: bool = False):
+    def compute_attenuation(self, vol: ArrayLike, angle_rad: float, invert: bool = False) -> ArrayLike:
         """Compute the attenuation local attenuation for a given attenuation volume.
 
         This means the attenuation experienced by the photons emitted in each
@@ -497,17 +500,17 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return self._compute_attenuation(vol, angle_rad, invert=invert)
 
-    def _compute_attenuation_angle_in(self, angle_rad: float):
+    def _compute_attenuation_angle_in(self, angle_rad: float) -> ArrayLike:
         return self.compute_attenuation(self.att_in, angle_rad)[np.newaxis, ...]
 
-    def _compute_attenuation_angle_out(self, angle_rad: float):
+    def _compute_attenuation_angle_out(self, angle_rad: float) -> ArrayLike:
         angle_det = angle_rad - self.angles_det_rad
         atts = np.zeros(self.att_vol_angles.shape[1:], dtype=self.data_type)
         for ii, a in enumerate(angle_det):
             atts[ii, ...] = self.compute_attenuation(self.att_out, a, invert=True)
         return atts
 
-    def compute_attenuation_volumes(self):
+    def compute_attenuation_volumes(self) -> None:
         """Compute the corrections for each angle."""
         if self.att_in is None and self.att_out is None:
             raise ValueError("No attenuation volumes were given")
@@ -547,7 +550,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
                 for ii, a in enumerate(tqdm(self.angles_rot_rad, disable=(not self.verbose))):
                     self.att_vol_angles[ii, ...] *= self._compute_attenuation_angle_out(a)
 
-    def collapse_detectors(self):
+    def collapse_detectors(self) -> None:
         """Convert multi-detector configurations into single-detector."""
         weights = np.reshape(self.weights_det, [1, -1, 1, 1]) / np.sum(self.weights_det)
         self.att_vol_angles = np.sum(self.att_vol_angles * weights, axis=1)
@@ -557,7 +560,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         self.weights_angles = np.sum(self.weights_angles * weights, axis=1, keepdims=True)
         self.weights_det = np.sum(self.weights_det, keepdims=True)
 
-    def fp_angle(self, vol, angle_ind: int):
+    def fp_angle(self, vol: ArrayLike, angle_ind: int) -> ArrayLike:
         """Forward-project the volume to a single sinogram line.
 
         It applies the attenuation corrections.
@@ -600,7 +603,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return sino_line
 
-    def bp_angle(self, sino, angle_ind: int, single_line: bool = False):
+    def bp_angle(self, sino: ArrayLike, angle_ind: int, single_line: bool = False) -> ArrayLike:
         """Back-project a single sinogram line to the volume.
 
         It only applies the attenuation corrections if the projector is symmetric.
@@ -647,7 +650,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return np.sum(vol, axis=0)
 
-    def fp(self, vol):
+    def fp(self, vol: ArrayLike) -> ArrayLike:
         """Forward-project the volume to the sinogram.
 
         It applies the attenuation corrections.
@@ -670,7 +673,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return np.ascontiguousarray(np.stack(sino_lines, axis=-2))
 
-    def bp(self, sino):
+    def bp(self, sino: ArrayLike) -> ArrayLike:
         """Back-projection of the sinogram to the volume.
 
         Parameters
@@ -738,7 +741,7 @@ class FilterMR(object):
         if sinogram_pixels_num is not None and sinogram_angles_num is not None:
             self.initialize()
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Filter initialization function."""
         if self.sinogram_pixels_num is None:
             raise ValueError("No sinogram pixels number was given!")
@@ -774,7 +777,7 @@ class FilterMR(object):
 
         self.is_initialized = True
 
-    def compute_filter(self, sinogram, projector: operators.ProjectorOperator):
+    def compute_filter(self, sinogram: ArrayLike, projector: operators.ProjectorOperator) -> ArrayLike:
         """Compute the filter.
 
         Parameters
@@ -821,7 +824,7 @@ class FilterMR(object):
             computed_filter += fitted_components[0][ii] * bas
         return computed_filter
 
-    def apply_filter(self, sinogram, computed_filter):
+    def apply_filter(self, sinogram: ArrayLike, computed_filter: ArrayLike) -> ArrayLike:
         """Apply the filter to the sinogram.
 
         Parameters
@@ -838,7 +841,7 @@ class FilterMR(object):
         """
         return spsig.fftconvolve(sinogram, computed_filter[np.newaxis, ...], "same")
 
-    def __call__(self, sinogram, projector: operators.ProjectorOperator):
+    def __call__(self, sinogram: ArrayLike, projector: operators.ProjectorOperator) -> ArrayLike:
         """Filter the sinogram, by first computing the filter, and then applying it.
 
         Parameters
