@@ -358,9 +358,6 @@ class Regularizer_l1(BaseRegularizer):
     def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
         dual += primal
 
-    def compute_update_primal(self, dual: ArrayLike) -> ArrayLike:
-        return dual
-
 
 class Regularizer_swl(BaseRegularizer):
     """Base stationary wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
@@ -688,9 +685,6 @@ class BaseRegularizer_med(BaseRegularizer):
     def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
         dual += primal - spimg.median_filter(primal, self.filt_size)
 
-    def compute_update_primal(self, dual: ArrayLike) -> ArrayLike:
-        return self.weight * dual
-
 
 class Regularizer_l1med(BaseRegularizer_med):
     """l1-norm median filter regularizer. It can be used to promote filtered reconstructions."""
@@ -807,9 +801,6 @@ class Constraint_LowerLimit(BaseRegularizer):
         dual[dual > self.limit] = self.limit
         self.norm.apply_proximal(dual)
 
-    def compute_update_primal(self, dual: ArrayLike) -> ArrayLike:
-        return dual
-
 
 class Constraint_UpperLimit(BaseRegularizer):
     """Upper limit constraint. It can be used to promote reconstructions in certain regions of solution space."""
@@ -848,6 +839,3 @@ class Constraint_UpperLimit(BaseRegularizer):
     def apply_proximal(self, dual: ArrayLike) -> None:
         dual[dual < self.limit] = self.limit
         self.norm.apply_proximal(dual)
-
-    def compute_update_primal(self, dual: ArrayLike) -> ArrayLike:
-        return dual
