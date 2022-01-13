@@ -258,17 +258,17 @@ class Sart(Solver):
         b_ones = np.ones_like(b)
         if b_mask is not None:
             b_ones *= b_mask
-        tau = [At(b_ones[ii, :], ii) for ii in range(A_num_rows)]
-        tau = np.abs(np.stack(tau, axis=0))
+        tau = [At(b_ones[..., ii, :], ii) for ii in range(A_num_rows)]
+        tau = np.abs(np.stack(tau, axis=-2))
         tau[(tau / np.max(tau)) < 1e-5] = 1
         tau = self.relaxation / tau
 
         # Forward-projection diagonal re-scaling
-        x_ones = np.ones(tau.shape[1:], dtype=tau.dtype)
+        x_ones = np.ones([*tau.shape[:-2], tau.shape[-1]], dtype=tau.dtype)
         if x_mask is not None:
             x_ones *= x_mask
         sigma = [A(x_ones, ii) for ii in range(A_num_rows)]
-        sigma = np.abs(np.stack(sigma, axis=0))
+        sigma = np.abs(np.stack(sigma, axis=-2))
         sigma[(sigma / np.max(sigma)) < 1e-5] = 1
         sigma = 1 / sigma
 
@@ -289,11 +289,11 @@ class Sart(Solver):
         for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
 
             for ii_a in rows_sequence:
-                res = A(x, ii_a) - b[ii_a, ...]
+                res = A(x, ii_a) - b[..., ii_a, :]
                 if b_mask is not None:
-                    res *= b_mask[ii_a, ...]
+                    res *= b_mask[..., ii_a, :]
 
-                x -= At(res * sigma[ii_a, ...], ii_a) * tau[ii_a, ...]
+                x -= At(res * sigma[..., ii_a, :], ii_a) * tau[..., ii_a, :]
 
                 if lower_limit is not None:
                     x = np.fmax(x, lower_limit)
