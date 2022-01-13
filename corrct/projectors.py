@@ -26,7 +26,19 @@ num_threads = round(np.log2(mp.cpu_count() + 1))
 
 class ProjectorMatrix(operators.ProjectorOperator):
     def __init__(self, A, vol_shape, proj_shape):
-        """Initialize a projector that uses an explicit projection matrix."""
+    """
+    Projector that uses an explicit projection matrix.
+
+    Parameters
+    ----------
+    A : ArrayLike
+        The projection matrix.
+    vol_shape : Sequence[int]
+        Volume shape.
+    proj_shape : Sequence[int]
+        Projection shape.
+    """
+
         self.vol_shape = vol_shape
         self.proj_shape = proj_shape
 
@@ -34,40 +46,56 @@ class ProjectorMatrix(operators.ProjectorOperator):
         super().__init__()
 
     def _transpose(self) -> operators.ProjectorOperator:
-        """Create the transpose operator.
+        """
+        Create the transpose operator.
 
-        :returns: The transpose operator
-        :rtype: ProjectorMatrix
+        Returns
+        -------
+        operators.ProjectorOperator
+            The transpose operator.
         """
         return ProjectorMatrix(self.A.transpose(), self.proj_shape, self.vol_shape)
 
     def absolute(self) -> operators.ProjectorOperator:
-        """Return the projection operator using the absolute value of the projection coefficients.
+        """
+        Return the projection operator using the absolute value of the projection coefficients.
 
-        :returns: The absolute value operator
-        :rtype: ProjectorMatrix
+        Returns
+        -------
+        operators.ProjectorOperator
+            The absolute value operator.
         """
         return ProjectorMatrix(np.abs(self.A), self.vol_shape, self.proj_shape)
 
     def fp(self, x):
-        """Define the interface for the forward-projection.
+        """
+        Define the interface for the forward-projection.
 
-        :param x: Input volume.
-        :type x: `numpy.array_like`
+        Parameters
+        ----------
+        x : ArrayLike
+            Input volume.
 
-        :returns: The projection data.
-        :rtype: `numpy.array_like`
+        Returns
+        -------
+        ArrayLike
+            The projection data.
         """
         return self.A.dot(x.flatten()).reshape(self.proj_shape)
 
     def bp(self, x):
-        """Define the interface for the back-projection.
+        """
+        Define the interface for the back-projection.
 
-        :param x: Input projection data.
-        :type x: `numpy.array_like`
+        Parameters
+        ----------
+        x : ArrayLike
+            Input projection data.
 
-        :returns: The back-projected volume.
-        :rtype: `numpy.array_like`
+        Returns
+        -------
+        ArrayLike
+            The back-projected volume.
         """
         return self.A.transpose().dot(x.flatten()).reshape(self.vol_shape)
 
@@ -78,6 +106,28 @@ class ProjectorUncorrected(operators.ProjectorOperator):
     It implements the forward and back projection of the single lines of a sinogram.
     It takes care of initializing and disposing the ASTRA projectors when used in a *with* statement.
     It supports both 2D and 3D geometries.
+
+    Parameters
+    ----------
+    vol_shape : ArrayLike
+        The volume shape in Y X and optionally Z.
+    angles_rot_rad : ArrayLike
+        The rotation angles.
+    rot_axis_shift_pix : float or ArrayLike, optional
+        The rotation axis shift(s) in pixels. The default is 0.
+    proj_intensities : float or ArrayLike, optional
+        Projection scaling factor. The default is None.
+    use_astra : bool, optional
+        Whether to use ASTRA or fall back to scikit-image. The default is True if CUDA is available, otherwise False.
+    create_single_projs : bool, optional
+        Whether to create projectors for single projections. Used for corrections and SART. The default is True.
+    super_sampling : int, optional
+        pixel and voxel super-sampling. The default is 1.
+
+    Raises
+    ------
+    ValueError
+        When the geometry is not correct.
     """
 
     def __init__(
@@ -90,35 +140,6 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         create_single_projs: bool = True,
         super_sampling: int = 1,
     ):
-        """
-        Initialize ProjectorUncorrected class.
-
-        Parameters
-        ----------
-        vol_shape : numpy.array_like
-            The volume shape in Y X and optionally Z.
-        angles_rot_rad : numpy.array_like
-            The rotation angles.
-        rot_axis_shift_pix : float or numpy.array_like, optional
-            The rotation axis shift(s) in pixels. The default is 0.
-        proj_intensities : float or numpy.array_like, optional
-            Projection scaling factor. The default is None.
-        use_astra : bool, optional
-            Whether to use ASTRA or fall back to scikit-image. The default is True if CUDA is available, otherwise False.
-        create_single_projs : bool, optional
-            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
-        super_sampling : int, optional
-            pixel and voxel super-sampling. The default is 1.
-
-        Raises
-        ------
-        ValueError
-            When the geometry is not correct.
-
-        Returns
-        -------
-        None.
-        """
         if not prj_backends.has_astra and use_astra:
             use_astra = False
             print("WARNING: ASTRA requested but not available. Falling back to scikit-image.")
@@ -163,14 +184,14 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
         Parameters
         ----------
-        vol : numpy.array_like
+        vol : ArrayLike
             The volume to forward-project.
         angle_ind : int
             The angle index to foward project.
 
         Returns
         -------
-        x : numpy.array_like
+        x : ArrayLike
             The forward-projected sinogram line.
         """
         x = self.projector_backend.fp(vol, angle_ind)
@@ -183,14 +204,14 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
         Parameters
         ----------
-        sino_line : numpy.array_like
+        sino_line : ArrayLike
             The sinogram to back-project or a single line.
         angle_ind : int
             The angle index to foward project.
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The back-projected volume.
         """
         if self.proj_intensities is not None:
@@ -201,11 +222,15 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         """
         Forward-projection of the volume to the projection data.
 
-        :param vol: The volume to forward-project.
-        :type vol: numpy.array_like
+        Parameters
+        ----------
+        vol : ArrayLike
+            The volume to forward-project.
 
-        :returns: The forward-projected projection data
-        :rtype: numpy.array_like
+        Returns
+        -------
+        ArrayLike
+            The forward-projected projection data.
         """
         x = self.projector_backend.fp(vol)
         if self.proj_intensities is not None:
@@ -216,10 +241,15 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         """
         Back-projection of the projection data to the volume.
 
-        :param data: The projection data to back-project (numpy.array_like)
+        Parameters
+        ----------
+        data : ArrayLike
+            The projection data to back-project.
 
-        :returns: The back-projected volume
-        :rtype: numpy.array_like
+        Returns
+        -------
+        ArrayLike
+            The back-projected volume.
         """
         if self.proj_intensities is not None:
             data = data * self.proj_intensities[:, np.newaxis]  # Needs copy
@@ -231,13 +261,22 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
         The data could either be a sinogram, or a stack of sinograms.
 
-        :param projs: The projection data to back-project
-        :type projs: numpy.array_like
-        :param fbp_filter: The FBP filter to use
-        :type fbp_filter: str or function
+        Parameters
+        ----------
+        projs : ArrayLike
+            The projection data to back-project.
+        fbp_filter : str | Callable, optional
+            The FBP filter to use. The default is "shepp-logan".
 
-        :returns: The FBP reconstructed volume
-        :rtype: numpy.array_like
+        Raises
+        ------
+        ValueError
+            When trying to use fbp with a 3D projection geometry.
+
+        Returns
+        -------
+        ArrayLike
+            The FBP reconstructed volume.
         """
         if self.is_3d:
             raise ValueError("FBP not supported with 3D projector")
@@ -254,6 +293,46 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
     Attenuation corrected projection class for XRF, with multi-detector support.
 
     It includes the computation of the attenuation volumes.
+
+    Parameters
+    ----------
+    vol_shape : Union[Sequence[int], ArrayLike]
+        The volume shape in X Y and optionally Z.
+    angles_rot_rad : ArrayLike
+        The rotation angles.
+    rot_axis_shift_pix : float, optional
+        The rotation axis shift(s) in pixels. The default is 0.
+    proj_intensities : Optional[ArrayLike], optional
+        Projection scaling factor. The default is None.
+    super_sampling : int, optional
+        Pixel and voxel super-sampling. The default is 1.
+    att_in : Optional[ArrayLike], optional
+        Attenuation volume of the incoming beam. The default is None.
+    att_out : Optional[ArrayLike], optional
+        Attenuation volume of the outgoing beam. The default is None.
+    angles_detectors_rad : Union[float, ArrayLike], optional
+        Angles of the detector elements with respect to incident beam. The default is (np.pi / 2).
+    weights_detectors : Optional[ArrayLike], optional
+        Weights (e.g. solid angle, efficiency, etc) of the detector elements. The default is None.
+    psf : Optional[ArrayLike], optional
+        Optical system's point spread function (PSF). The default is None.
+    precompute_attenuation : bool, optional
+        Whether to precompute attenuation or not. The default is True.
+    is_symmetric : bool, optional
+        Whether the projector is symmetric or not. The default is False.
+    weights_angles : Optional[ArrayLike], optional
+        Projection weight for a given element at a given angle. The default is None.
+    use_multithreading : bool, optional
+        Whether to use multiple threads or not. The default is True.
+    data_type : DTypeLike, optional
+        Output data type. The default is np.float32.
+    verbose : bool, optional
+        Whether to produce verbose output. The default is True.
+
+    Raises
+    ------
+    ValueError
+        When given inconsistent numbers of detector weights and detector angles.
     """
 
     def __init__(
@@ -275,38 +354,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         data_type=np.float32,
         verbose: bool = True,
     ):
-        """
-        Attenuation corrected projection class for XRF.
-
-        :param vol_shape: The volume shape in X Y and optionally Z
-        :type vol_shape: numpy.array_like
-        :param angles_rot_rad: The rotation angles
-        :type angles_rot_rad: numpy.array_like
-        :param rot_axis_shift_pix: The rotation axis shift(s) in pixels, defaults to 0
-        :type rot_axis_shift_pix: float or numpy.array_like, optional
-        :param proj_intensities: Projection scaling factor, defaults to None
-        :type proj_intensities: float or numpy.array_like, optional
-        :param super_sampling: pixel and voxel super-sampling, defaults to 1
-        :type super_sampling: int, optional
-        :param att_in: Attenuation volume of the incoming beam, defaults to None
-        :type att_in: numpy.array_like, optional
-        :param att_out: Attenuation volume of the outgoing beam, defaults to None
-        :type att_out: numpy.array_like, optional
-        :param angles_detectors_rad: Angles of the detector elements with respect to incident beam, defaults to (np.pi/2)
-        :type angles_detectors_rad: numpy.array_like, optional
-        :param weights_detectors: Weights (e.g. solid angle, efficiency, etc) of the detector elements, defaults to None
-        :type weights_detectors: numpy.array_like, optional
-        :param psf: Optical system's point spread function (PSF), defaults to None
-        :type psf: numpy.array_like, optional
-        :param precompute_attenuation: Whether to precompute attenuation or not, defaults to True
-        :type precompute_attenuation: boolean, optional
-        :param is_symmetric: Whether the projector is symmetric or not, defaults to False
-        :type is_symmetric: boolean, optional
-        :param weights_angles: Projection weight for a given element at a given angle, defaults to None
-        :type weights_angles: numpy.array_like, optional
-        :param data_type: Data type, defaults to np.float32
-        :type data_type: numpy.dtype, optional
-        """
         ProjectorUncorrected.__init__(
             self,
             vol_shape,
@@ -418,7 +465,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         Parameters
         ----------
-        vol : numpy.array_like
+        vol : ArrayLike
             The attenuation volume.
         angle_rad : float
             The rotation angle in radians.
@@ -432,7 +479,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The stack of local attenuation volumes.
         """
         vol = np.array(vol)
@@ -517,14 +564,14 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         Parameters
         ----------
-        vol : numpy.array_like
+        vol : ArrayLike
             The volume to forward-project.
         angle_ind : int
             The angle index to foward project.
 
         Returns
         -------
-        sino_line : numpy.array_like
+        sino_line : ArrayLike
             The forward-projected sinogram line.
         """
         if self.precompute_attenuation:
@@ -560,7 +607,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         Parameters
         ----------
-        sino : numpy.array_like
+        sino : ArrayLike
             The sinogram to back-project or a single line.
         angle_ind : int
             The angle index to foward project.
@@ -569,7 +616,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The back-projected volume.
         """
         if single_line:
@@ -607,12 +654,12 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         Parameters
         ----------
-        vol : numpy.array_like
+        vol : ArrayLike
             The volume to forward-project.
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The forward-projected sinogram.
         """
         if self.use_multithreading and isinstance(self.projector_backend, prj_backends.ProjectorBackendSKimage):
@@ -628,12 +675,12 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         Parameters
         ----------
-        sino : numpy.array_like
+        sino : ArrayLike
             The sinogram to back-project.
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The back-projected volume.
         """
         if self.is_symmetric:
@@ -658,6 +705,19 @@ class FilterMR(object):
     Transactions on, 23(11), 4750-4762.
 
     Code inspired by: https://github.com/dmpelt/pymrfbp
+
+    Parameters
+    ----------
+    sinogram_pixels_num : int, optional
+        Number of sinogram pixels. The default is None.
+    sinogram_angles_num : int, optional
+        Number of sinogram angles. The default is None.
+    start_exp_binning : int, optional
+        From which distance to start exponentional binning. The default is 2.
+    lambda_smooth : float, optional
+        Smoothing parameter. The default is None.
+    data_type : DTypeLike, optional
+        Filter data type. The default is np.float32.
     """
 
     def __init__(
@@ -668,21 +728,6 @@ class FilterMR(object):
         lambda_smooth: float = None,
         data_type=np.float32,
     ):
-        """Initialize FilterMR class.
-
-        Parameters
-        ----------
-        sinogram_pixels_num : int, optional
-            Number of sinogram pixels. The default is None.
-        sinogram_angles_num : int, optional
-            Number of sinogram angles. The default is None.
-        start_exp_binning : int, optional
-            From which distance to start exponentional binning. The default is 2.
-        lambda_smooth : float, optional
-            Smoothing parameter. The default is None.
-        data_type : numpy.dtype, optional
-            Filter data type. The default is np.float32.
-        """
         self.data_type = data_type
         self.start_exp_binning = start_exp_binning
         self.lambda_smooth = lambda_smooth
@@ -734,14 +779,14 @@ class FilterMR(object):
 
         Parameters
         ----------
-        sinogram : numpy.array_like
+        sinogram : ArrayLike
             The sinogram.
         projector : operators.ProjectorOperator
             The projector used in the FBP.
 
         Returns
         -------
-        computed_filter : numpy.array_like
+        computed_filter : ArrayLike
             The computed filter.
         """
         sino_size = self.sinogram_angles_num * self.sinogram_pixels_num
@@ -781,14 +826,14 @@ class FilterMR(object):
 
         Parameters
         ----------
-        sinogram : numpy.array_like
+        sinogram : ArrayLike
             The sinogram.
-        computed_filter : numpy.array_like
+        computed_filter : ArrayLike
             The computed filter.
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The filtered sinogram.
         """
         return spsig.fftconvolve(sinogram, computed_filter[np.newaxis, ...], "same")
@@ -798,14 +843,14 @@ class FilterMR(object):
 
         Parameters
         ----------
-        sinogram : numpy.array_like
+        sinogram : ArrayLike
             The unfiltered sinogram.
         projector : operators.ProjectorOperator
             The projector used in the FBP.
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The filtered sinogram.
         """
         if not self.is_initialized:

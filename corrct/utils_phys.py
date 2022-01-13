@@ -29,11 +29,15 @@ except ImportError:
 
 @dataclass
 class FluoLine:
+    """Fluorescence line description class."""
+
     name: str
     indx: int
 
 
 class FluoLinesSiegbahn:
+    """Siegbahn fluorescence lines collection class."""
+
     lines = [
         FluoLine(name="KA1", indx=xraylib.KA1_LINE),
         FluoLine(name="KA2", indx=xraylib.KA2_LINE),
@@ -172,27 +176,27 @@ class DetectorXRF(object):
 
 
 class VolumeMaterial(object):
+    """
+    VolumeMaterial class, that can be used for predicting fluorescence and Compton yields, attenuation, etc.
+
+    Parameters
+    ----------
+    phase_fractions : Sequence
+        Concentration fractions of each phase for each voxel.
+    phase_compounds : Sequence
+        Compound description of each phase.
+    voxel_size_cm : float
+        Voxel size in cm.
+    dtype : DTypeLike, optional
+        Data type of the produced data. The default is None.
+
+    Raises
+    ------
+    ValueError
+        Raised in case of incorrect parameters.
+    """
 
     def __init__(self, phase_fractions: Sequence, phase_compounds: Sequence, voxel_size_cm: float, dtype: DTypeLike = None):
-        """
-        VolumeMaterial class, that can be used for predicting fluorescence and Compton yields, attenuation, etc.
-
-        Parameters
-        ----------
-        phase_fractions : Sequence
-            Concentration fractions of each phase for each voxel.
-        phase_compounds : Sequence
-            Compound description of each phase.
-        voxel_size_cm : float
-            Voxel size in cm.
-        dtype : DTypeLike, optional
-            Data type of the produced data. The default is None.
-
-        Raises
-        ------
-        ValueError
-            Raised in case of incorrect parameters.
-        """
         if len(phase_fractions) != len(phase_compounds):
             raise ValueError(
                 "Phase fractions (# %d) and phase compounds (# %d) should have the same length"
