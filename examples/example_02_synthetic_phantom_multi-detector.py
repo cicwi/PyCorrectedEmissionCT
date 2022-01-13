@@ -108,7 +108,7 @@ else:
 (f, axes) = plt.subplots(2, 3)
 axes[0, 0].imshow(expected_ph)
 axes[0, 0].set_title('Phantom')
-axes[1, 0].imshow(np.reshape(np.transpose(sino, [1, 0, 2]), [-1, ph.shape[0]]))
+axes[1, 0].imshow(np.reshape(sino, [-1, ph.shape[0]]))
 axes[1, 0].set_title('Sinogram')
 
 axes[0, 1].imshow(rec_sart)
