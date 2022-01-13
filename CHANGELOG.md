@@ -4,7 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.4.1...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.4.2...develop
+
+## 0.4.2 - 2022-01-14
+### Added
+- Support for XRF line handling (Siegbahn).
+- Support for log-scaling of data weigths.
+- More type hinting and docstrings.
+### Fixed
+- 3D volume support (especially in astra-toolbox backend).
+- Attenuation correction in 3D volumes.
+- Handling of multi-detector in attenuation corrected projector (non-symmetric).
+- Handling of multi-detector in SART.
+- Wavelet scaling in regularizers.
+- Installation instructions.
+- Flat-fielding function.
+- Updated examples to latest solvers changes.
 
 ## 0.4.1 - 2021-12-06
 ### Added
