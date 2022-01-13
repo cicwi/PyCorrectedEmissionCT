@@ -695,7 +695,9 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
             return np.sum(vols, axis=0)
         else:
-            return ProjectorUncorrected.bp(self, sino)
+            sino = np.reshape(sino, [len(self.weights_det), *self.proj_shape])
+            vol = [ProjectorUncorrected.bp(self, sino[ii, ...]) for ii in range(len(self.angles_det_rad))]
+            return np.sum(np.stack(vol, axis=0), axis=0)
 
 
 class FilterMR(object):
