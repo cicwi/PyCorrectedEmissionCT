@@ -627,7 +627,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         else:
             sino_line = sino[..., angle_ind, :]
 
-        if self.psf is not None:
+        if self.psf is not None and self.is_symmetric:
             sino_line = spsig.convolve(sino_line, self.psf, mode="same")
 
         sino_line = np.reshape(sino_line, [len(self.weights_det), *sino_line.shape[-(len(self.vol_shape) - 1) :]])
