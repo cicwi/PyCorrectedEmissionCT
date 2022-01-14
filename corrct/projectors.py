@@ -436,7 +436,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         size_lims = np.array(vol.shape[-2:])
         min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
-        edges = np.ceil((min_size - size_lims) / 2).astype(np.intp)
+        edges = np.ceil((min_size - size_lims) / 2).astype(int)
 
         if invert:
             angle_rad += np.pi
@@ -750,7 +750,7 @@ class FilterMR(object):
         if self.sinogram_angles_num is None:
             raise ValueError("No sinogram angles number was given!")
 
-        filter_center = np.floor(self.sinogram_pixels_num / 2).astype(np.intp)
+        filter_center = np.floor(self.sinogram_pixels_num / 2).astype(int)
         self.filter_size = filter_center * 2 + 1
 
         window_size = 1

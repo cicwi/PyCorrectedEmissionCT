@@ -38,7 +38,7 @@ def roundup_to_pow2(x: Union[int, float, ArrayLike], p: int, data_type: DTypeLik
     p : int
         Power of 2.
     data_type : DTypeLike, optional
-        data type of the output. The default is np.intp.
+        data type of the output. The default is int.
 
     Returns
     -------

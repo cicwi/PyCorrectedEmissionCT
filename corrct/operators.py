@@ -262,7 +262,7 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
         self.level = level
 
         if axes is None:
-            axes = np.arange(-len(x_shape), 0, dtype=np.intp)
+            axes = np.arange(-len(x_shape), 0, dtype=int)
         self.axes = axes
 
         self.pad_on_demand = pad_on_demand
@@ -355,7 +355,7 @@ class TransformStationaryWavelet(BaseWaveletTransform):
         self.normalized = normalized
 
         if axes is None:
-            axes = np.arange(-len(x_shape), 0, dtype=np.intp)
+            axes = np.arange(-len(x_shape), 0, dtype=int)
         self.axes = axes
 
         self.pad_on_demand = pad_on_demand
@@ -387,8 +387,8 @@ class TransformStationaryWavelet(BaseWaveletTransform):
         """
         if self.pad_on_demand is not None and np.any(self.pad_axes):
             for ax in np.nonzero(self.pad_axes)[0]:
-                pad_l = np.ceil(self.pad_axes[ax] / 2).astype(np.intp)
-                pad_h = np.floor(self.pad_axes[ax] / 2).astype(np.intp)
+                pad_l = np.ceil(self.pad_axes[ax] / 2).astype(int)
+                pad_h = np.floor(self.pad_axes[ax] / 2).astype(int)
                 pad_width = [(0, 0)] * len(x.shape)
                 pad_width[self.axes[ax]] = (pad_l, pad_h)
                 x = np.pad(x, pad_width, mode=self.pad_on_demand)
@@ -406,8 +406,8 @@ class TransformStationaryWavelet(BaseWaveletTransform):
         x = pywt.iswtn(y, wavelet=self.wavelet, axes=self.axes, norm=self.normalized)
         if self.pad_on_demand is not None and np.any(self.pad_axes):
             for ax in np.nonzero(self.pad_axes)[0]:
-                pad_l = np.ceil(self.pad_axes[ax] / 2).astype(np.intp)
-                pad_h = np.floor(self.pad_axes[ax] / 2).astype(np.intp)
+                pad_l = np.ceil(self.pad_axes[ax] / 2).astype(int)
+                pad_h = np.floor(self.pad_axes[ax] / 2).astype(int)
                 slices = [slice(None)] * len(x.shape)
                 slices[self.axes[ax]] = slice(pad_l, x.shape[self.axes[ax]] - pad_h, 1)
                 x = x[tuple(slices)]
@@ -441,7 +441,7 @@ class TransformGradient(BaseTransform):
         :type axes: int or tuple of int, optional
         """
         if axes is None:
-            axes = np.arange(-len(x_shape), 0, dtype=np.intp)
+            axes = np.arange(-len(x_shape), 0, dtype=int)
         self.axes = axes
         self.ndims = len(x_shape)
 
@@ -505,7 +505,7 @@ class TransformFourier(BaseTransform):
         :type axes: int or tuple of int, optional
         """
         if axes is None:
-            axes = np.arange(-len(x_shape), 0, dtype=np.intp)
+            axes = np.arange(-len(x_shape), 0, dtype=int)
         self.axes = axes
         self.ndims = len(x_shape)
 
@@ -560,7 +560,7 @@ class TransformLaplacian(BaseTransform):
         :type axes: int or tuple of int, optional
         """
         if axes is None:
-            axes = np.arange(-len(x_shape), 0, dtype=np.intp)
+            axes = np.arange(-len(x_shape), 0, dtype=int)
         self.axes = axes
         self.ndims = len(x_shape)
 
