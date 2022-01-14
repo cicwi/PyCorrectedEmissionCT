@@ -120,4 +120,4 @@ axes[1, 1].set_title('PDHG-KL')
 axes[1, 2].imshow(rec_cptvkl)
 axes[1, 2].set_title('PDHG-KL-TV')
 
-plt.show()
+plt.show(block=False)

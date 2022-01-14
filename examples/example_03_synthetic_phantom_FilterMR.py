@@ -64,7 +64,7 @@ axes[1, 0].imshow(vol_mr)
 axes[1, 0].set_title('FBP-MR')
 axes[1, 1].imshow(vol_mr_reg)
 axes[1, 1].set_title('FBP-MR-smooth')
-plt.show()
+plt.show(block=False)
 
 filt_f = np.abs(np.fft.fft(np.fft.ifftshift(filt)))[:(len(filt) // 2)]
 filt_reg_f = np.abs(np.fft.fft(np.fft.ifftshift(filt_reg)))[:(len(filt) // 2)]
