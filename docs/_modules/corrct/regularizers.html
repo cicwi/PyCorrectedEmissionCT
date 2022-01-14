@@ -95,6 +95,10 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING - pywt was not found&quot;</span><span class="p">)</span>
 
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+
+
 <span class="c1"># ---- Data Fidelity terms ----</span>
 
 
@@ -113,51 +117,127 @@
 
 
 <div class="viewcode-block" id="BaseRegularizer"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer">[docs]</a><span class="k">class</span> <span class="nc">BaseRegularizer</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initilizie a base regularizer class, that defines the Regularizer object interface.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    weight : Union[float, ArrayLike]</span>
+<span class="sd">        The weight of the regularizer.</span>
+<span class="sd">    norm : DataFidelityBase</span>
+<span class="sd">        The norm of the regularizer minimization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Base regularizer class that defines the Regularizer object interface.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        weight : Union[float, ArrayLike]</span>
-<span class="sd">            The weight of the regularizer.</span>
-<span class="sd">        norm : DataFidelityBase</span>
-<span class="sd">            The norm of the regularizer minimization.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">norm</span><span class="p">:</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span>
 
 <div class="viewcode-block" id="BaseRegularizer.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the regularizer info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Regularizer info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reg_name__</span> <span class="o">+</span> <span class="s2">&quot;(w:</span><span class="si">%g</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
 
 <div class="viewcode-block" id="BaseRegularizer.upper"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.upper">[docs]</a>    <span class="k">def</span> <span class="nf">upper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the upper case name of the regularizer.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Upper case string name of the regularizer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reg_name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseRegularizer.lower"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.lower">[docs]</a>    <span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the lower case name of the regularizer.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Lower case string name of the regularizer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reg_name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseRegularizer.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.initialize_sigma_tau">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the internal state, operator, and sigma. It then returns the tau.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        primal : ArrayLike</span>
+<span class="sd">            The primal vector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Union[float, ArrayLike]</span>
+<span class="sd">            The tau to be used in the SIRT or PDHG algorithm.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BaseRegularizer.initialize_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.initialize_dual">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRegularizer.initialize_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.initialize_dual">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the initialized dual.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArrayLike</span>
+<span class="sd">            Initialized (zero) dual.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">adj_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseRegularizer.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRegularizer.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the dual in-place.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dual : ArrayLike</span>
+<span class="sd">            Current stat of the dual.</span>
+<span class="sd">        primal : ArrayLike</span>
+<span class="sd">            Primal or over-relaxation of the primal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dual</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseRegularizer.apply_proximal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.apply_proximal">[docs]</a>    <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRegularizer.apply_proximal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.apply_proximal">[docs]</a>    <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply the proximal operator to the dual in-place.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dual : ArrayLike</span>
+<span class="sd">            The dual to be applied the proximal on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">DataFidelity_l1</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseRegularizer.compute_update_primal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.compute_update_primal">[docs]</a>    <span class="k">def</span> <span class="nf">compute_update_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRegularizer.compute_update_primal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer.compute_update_primal">[docs]</a>    <span class="k">def</span> <span class="nf">compute_update_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the partial update of a primal term, from this regularizer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dual : ArrayLike</span>
+<span class="sd">            The dual associated to this regularizer.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        upd : ArrayLike</span>
+<span class="sd">            The update to the primal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">upd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">DataFidelity_l1</span><span class="p">):</span>
             <span class="n">upd</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>
@@ -165,26 +245,32 @@
 
 
 <div class="viewcode-block" id="Regularizer_Grad"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_Grad">[docs]</a><span class="k">class</span> <span class="nc">Regularizer_Grad</span><span class="p">(</span><span class="n">BaseRegularizer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gradient regularizer.</span>
+
+<span class="sd">    When used with l1-norms, it promotes piece-wise constant reconstructions.</span>
+<span class="sd">    When used with l2-norm, it promotes smooth reconstructions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    weight : Union[float, ArrayLike]</span>
+<span class="sd">        The weight of the regularizer.</span>
+<span class="sd">    ndims : int, optional</span>
+<span class="sd">        The number of dimensions. The default is 2.</span>
+<span class="sd">    axes : Sequence, optional</span>
+<span class="sd">        The axes over which it computes the gradient. If None, it uses the last 2. The default is None.</span>
+<span class="sd">    norm : DataFidelityBase, optional</span>
+<span class="sd">        The norm of the regularizer minimization. The default is DataFidelity_l12().</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;grad&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l12</span><span class="p">()):</span>
-        <span class="sd">&quot;&quot;&quot;Gradient regularizer.</span>
-
-<span class="sd">        When used with l1-norms, it promotes piece-wise constant reconstructions.</span>
-<span class="sd">        When used with l2-norm, it promotes smooth reconstructions.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        weight : Union[float, ArrayLike]</span>
-<span class="sd">            The weight of the regularizer.</span>
-<span class="sd">        ndims : int, optional</span>
-<span class="sd">            The number of dimensions. The default is 2.</span>
-<span class="sd">        axes : Sequence, optional</span>
-<span class="sd">            The axes over which it computes the gradient. If None, it uses the last 2. The default is None.</span>
-<span class="sd">        norm : DataFidelityBase, optional</span>
-<span class="sd">            The norm of the regularizer minimization. The default is DataFidelity_l12().</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l12</span><span class="p">(),</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -195,12 +281,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span> <span class="o">=</span> <span class="n">ndims</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Pixel/voxel scale factor - it can accellerate convergence</span>
-
-<div class="viewcode-block" id="Regularizer_Grad.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_Grad.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
-        <span class="n">dual</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span></div>
-
-<div class="viewcode-block" id="Regularizer_Grad.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_Grad.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_Grad.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_Grad.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">primal</span><span class="o">.</span><span class="n">dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformGradient</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 
@@ -210,53 +291,53 @@
         <span class="n">tau</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">DataFidelity_l1</span><span class="p">):</span>
             <span class="n">tau</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>
-        <span class="k">return</span> <span class="n">tau</span></div>
-
-<div class="viewcode-block" id="Regularizer_Grad.compute_update_primal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_Grad.compute_update_primal">[docs]</a>    <span class="k">def</span> <span class="nf">compute_update_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
-        <span class="n">upd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">DataFidelity_l1</span><span class="p">):</span>
-            <span class="n">upd</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>
-        <span class="k">return</span> <span class="n">upd</span></div></div>
+        <span class="k">return</span> <span class="n">tau</span></div></div>
 
 
 <div class="viewcode-block" id="Regularizer_TV2D"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_TV2D">[docs]</a><span class="k">class</span> <span class="nc">Regularizer_TV2D</span><span class="p">(</span><span class="n">Regularizer_Grad</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions.&quot;&quot;&quot;</span>
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;TV2D&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l12</span><span class="p">()):</span>
-        <span class="sd">&quot;&quot;&quot;Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions.&quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="mi">10</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l12</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Regularizer_TV3D"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_TV3D">[docs]</a><span class="k">class</span> <span class="nc">Regularizer_TV3D</span><span class="p">(</span><span class="n">Regularizer_Grad</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions.&quot;&quot;&quot;</span>
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;TV3D&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l12</span><span class="p">()):</span>
-        <span class="sd">&quot;&quot;&quot;Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions.&quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="mi">10</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l12</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Regularizer_HubTV2D"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_HubTV2D">[docs]</a><span class="k">class</span> <span class="nc">Regularizer_HubTV2D</span><span class="p">(</span><span class="n">Regularizer_Grad</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions.&quot;&quot;&quot;</span>
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;HubTV2D&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">huber_size</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions.&quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_Huber</span><span class="p">(</span><span class="n">huber_size</span><span class="p">,</span> <span class="n">l2_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="mi">10</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">huber_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_Huber</span><span class="p">(</span><span class="n">huber_size</span><span class="p">,</span> <span class="n">l2_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="Regularizer_HubTV3D"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_HubTV3D">[docs]</a><span class="k">class</span> <span class="nc">Regularizer_HubTV3D</span><span class="p">(</span><span class="n">Regularizer_Grad</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions.&quot;&quot;&quot;</span>
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;HubTV3D&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">huber_size</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Total Variation (TV) regularizer in 3D. It can be used to promote piece-wise constant reconstructions.&quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_Huber</span><span class="p">(</span><span class="n">huber_size</span><span class="p">,</span> <span class="n">l2_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="mi">10</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">huber_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_Huber</span><span class="p">(</span><span class="n">huber_size</span><span class="p">,</span> <span class="n">l2_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="Regularizer_smooth2D"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_smooth2D">[docs]</a><span class="k">class</span> <span class="nc">Regularizer_smooth2D</span><span class="p">(</span><span class="n">Regularizer_Grad</span><span class="p">):</span>
@@ -264,7 +345,9 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;smooth2D&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l2</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l2</span><span class="p">()</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span></div>
 
 
@@ -273,7 +356,9 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;smooth3D&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l2</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l2</span><span class="p">()</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span></div>
 
 
@@ -282,7 +367,7 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;lap&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l1</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -293,7 +378,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span> <span class="o">=</span> <span class="n">ndims</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span>
 
-<div class="viewcode-block" id="Regularizer_lap.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_lap.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_lap.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_lap.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">primal</span><span class="o">.</span><span class="n">dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformLaplacian</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 
@@ -326,10 +411,10 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l1&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l1</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l1</span><span class="p">()):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Regularizer_l1.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_l1.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_l1.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_l1.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">primal</span><span class="o">.</span><span class="n">dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
@@ -337,11 +422,8 @@
 
         <span class="k">return</span> <span class="mi">1</span></div>
 
-<div class="viewcode-block" id="Regularizer_l1.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_l1.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
-        <span class="n">dual</span> <span class="o">+=</span> <span class="n">primal</span></div>
-
-<div class="viewcode-block" id="Regularizer_l1.compute_update_primal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_l1.compute_update_primal">[docs]</a>    <span class="k">def</span> <span class="nf">compute_update_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">dual</span></div></div>
+<div class="viewcode-block" id="Regularizer_l1.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_l1.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dual</span> <span class="o">+=</span> <span class="n">primal</span></div></div>
 
 
 <div class="viewcode-block" id="Regularizer_swl"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_swl">[docs]</a><span class="k">class</span> <span class="nc">Regularizer_swl</span><span class="p">(</span><span class="n">BaseRegularizer</span><span class="p">):</span>
@@ -349,19 +431,27 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;swl&quot;</span>
 
-<div class="viewcode-block" id="Regularizer_swl.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_swl.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_swl.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_swl.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the regularizer info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Regularizer info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reg_name__</span> <span class="o">+</span> <span class="s2">&quot;(t:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelet</span> <span class="o">+</span> <span class="s2">&quot;-l:</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">+</span> <span class="s2">&quot;-w:</span><span class="si">%g</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">,</span>
-        <span class="n">wavelet</span><span class="p">,</span>
-        <span class="n">level</span><span class="p">,</span>
-        <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">pad_on_demand</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">min_approx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l1</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_pywt</span><span class="p">:</span>
@@ -384,11 +474,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pad_on_demand</span> <span class="o">=</span> <span class="n">pad_on_demand</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span>
-
-<div class="viewcode-block" id="Regularizer_swl.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_swl.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_swl.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_swl.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">primal</span><span class="o">.</span><span class="n">dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformStationaryWavelet</span><span class="p">(</span>
             <span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
@@ -399,24 +485,42 @@
             <span class="n">normalized</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normalized</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="n">filt_bank_l1norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">filter_bank</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">lo_dec_mult</span> <span class="o">=</span> <span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span>
+        <span class="n">lo_rec_mult</span> <span class="o">=</span> <span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dec_func_mult</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">wlet_dec_filter_mult</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="n">lo_dec_mult</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dec_func_mult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="n">lo_dec_mult</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_func_mult</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rec_func_mult</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">wlet_rec_filter_mult</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="n">lo_rec_mult</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rec_func_mult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="n">lo_rec_mult</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">rec_func_mult</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span>
+
+        <span class="c1"># self.dec_func_mult = 2 ** np.arange(self.level, 0, -1)</span>
+        <span class="c1"># self.dec_func_mult = np.tile(self.dec_func_mult[:, None], [1, (2 ** self.ndims) - 1])</span>
+        <span class="c1"># self.dec_func_mult = np.concatenate(([self.dec_func_mult[0, 0]], self.dec_func_mult.flatten()))</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
 
-            <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="o">.</span><span class="n">size</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_func_mult</span><span class="o">.</span><span class="n">size</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">dir_shape</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_func_mult</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">dir_shape</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
 
-            <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rec_func_mult</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">tau</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">tau</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">tau</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rec_func_mult</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">DataFidelity_l1</span><span class="p">):</span>
             <span class="n">tau</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>
         <span class="k">return</span> <span class="n">tau</span></div>
 
-<div class="viewcode-block" id="Regularizer_swl.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_swl.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_swl.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_swl.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">upd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span><span class="p">:</span>
             <span class="n">upd</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span>
@@ -431,7 +535,15 @@
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l1swl&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_on_demand</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">min_approx</span><span class="o">=</span><span class="kc">True</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -453,15 +565,15 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">,</span>
-        <span class="n">wavelet</span><span class="p">,</span>
-        <span class="n">level</span><span class="p">,</span>
-        <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">pad_on_demand</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">min_approx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">huber_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">huber_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -481,11 +593,27 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;dwl&quot;</span>
 
-<div class="viewcode-block" id="Regularizer_dwl.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_dwl.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_dwl.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_dwl.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the regularizer info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Regularizer info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reg_name__</span> <span class="o">+</span> <span class="s2">&quot;(t:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelet</span> <span class="o">+</span> <span class="s2">&quot;-l:</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">+</span> <span class="s2">&quot;-w:</span><span class="si">%g</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_on_demand</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="n">min_approx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l1</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l1</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_pywt</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot use wavelet regularizer because pywavelets is not installed.&quot;</span><span class="p">)</span>
@@ -504,32 +632,50 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pad_on_demand</span> <span class="o">=</span> <span class="n">pad_on_demand</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-
-<div class="viewcode-block" id="Regularizer_dwl.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_dwl.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_dwl.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_dwl.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">primal</span><span class="o">.</span><span class="n">dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformDecimatedWavelet</span><span class="p">(</span>
             <span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelet</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_on_demand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_on_demand</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">sub_band_shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">filt_bank_l1norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">filter_bank</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">lo_dec_mult</span> <span class="o">=</span> <span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span>
+        <span class="n">lo_rec_mult</span> <span class="o">=</span> <span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dec_func_mult</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">wlet_dec_filter_mult</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="n">lo_dec_mult</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dec_func_mult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="n">lo_dec_mult</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_func_mult</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rec_func_mult</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">wlet_rec_filter_mult</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="n">lo_rec_mult</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rec_func_mult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="n">lo_rec_mult</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">rec_func_mult</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span>
+
+        <span class="c1"># self.dec_func_mult = 2 ** np.arange(self.level, 0, -1)</span>
+        <span class="c1"># self.rec_func_mult = self.dec_func_mult</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">sub_band_shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_func_mult</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">ii_l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">):</span>
             <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">sub_band_shapes</span><span class="p">[</span><span class="n">ii_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">d</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">sub_band_shapes</span><span class="p">[</span><span class="n">ii_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">label</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="p">[</span><span class="n">ii_l</span><span class="p">]</span>
+                <span class="c1"># d[label] = np.ones(self.op.sub_band_shapes[ii_l + 1][label], self.dtype) * self.dec_func_mult[ii_l]</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">sub_band_shapes</span><span class="p">[</span><span class="n">ii_l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">label</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_func_mult</span><span class="p">[</span><span class="n">count</span><span class="p">]</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">coeffs_to_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
 
-        <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rec_func_mult</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndims</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">tau</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">tau</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_func_mult</span><span class="p">)</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">tau</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rec_func_mult</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">DataFidelity_l1</span><span class="p">):</span>
             <span class="n">tau</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>
         <span class="k">return</span> <span class="n">tau</span></div>
 
-<div class="viewcode-block" id="Regularizer_dwl.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_dwl.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_dwl.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_dwl.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update_dual</span><span class="p">(</span><span class="n">dual</span><span class="p">,</span> <span class="n">primal</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_approx</span><span class="p">:</span>
             <span class="n">slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">sub_band_shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
@@ -541,7 +687,15 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l1dwl&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_on_demand</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="n">ndims</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_on_demand</span><span class="o">=</span><span class="n">pad_on_demand</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l1</span><span class="p">())</span></div>
 
 
@@ -550,7 +704,16 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;Hubdwl&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_on_demand</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="n">huber_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">huber_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="n">ndims</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_on_demand</span><span class="o">=</span><span class="n">pad_on_demand</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_Huber</span><span class="p">(</span><span class="n">huber_size</span><span class="p">)</span>
         <span class="p">)</span></div>
@@ -561,14 +724,22 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;med&quot;</span>
 
-<div class="viewcode-block" id="BaseRegularizer_med.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer_med.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRegularizer_med.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer_med.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the regularizer info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Regularizer info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reg_name__</span> <span class="o">+</span> <span class="s2">&quot;(s:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filt_size</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-w:</span><span class="si">%g</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">filt_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l1</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">filt_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l1</span><span class="p">()):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filt_size</span> <span class="o">=</span> <span class="n">filt_size</span>
 
-<div class="viewcode-block" id="BaseRegularizer_med.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer_med.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRegularizer_med.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer_med.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">primal</span><span class="o">.</span><span class="n">dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -578,11 +749,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">1</span></div>
 
-<div class="viewcode-block" id="BaseRegularizer_med.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer_med.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
-        <span class="n">dual</span> <span class="o">+=</span> <span class="n">primal</span> <span class="o">-</span> <span class="n">spimg</span><span class="o">.</span><span class="n">median_filter</span><span class="p">(</span><span class="n">primal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filt_size</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="BaseRegularizer_med.compute_update_primal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer_med.compute_update_primal">[docs]</a>    <span class="k">def</span> <span class="nf">compute_update_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">*</span> <span class="n">dual</span></div></div>
+<div class="viewcode-block" id="BaseRegularizer_med.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.BaseRegularizer_med.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dual</span> <span class="o">+=</span> <span class="n">primal</span> <span class="o">-</span> <span class="n">spimg</span><span class="o">.</span><span class="n">median_filter</span><span class="p">(</span><span class="n">primal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filt_size</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Regularizer_l1med"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_l1med">[docs]</a><span class="k">class</span> <span class="nc">Regularizer_l1med</span><span class="p">(</span><span class="n">BaseRegularizer_med</span><span class="p">):</span>
@@ -590,7 +758,7 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l1med&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">filt_size</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">filt_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
         <span class="n">BaseRegularizer_med</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">filt_size</span><span class="o">=</span><span class="n">filt_size</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l1</span><span class="p">())</span></div>
 
 
@@ -599,7 +767,7 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l2med&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">filt_size</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">filt_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
         <span class="n">BaseRegularizer_med</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">filt_size</span><span class="o">=</span><span class="n">filt_size</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l2</span><span class="p">())</span></div>
 
 
@@ -608,7 +776,14 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;fft&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="s2">&quot;exp&quot;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l12</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;exp&quot;</span><span class="p">,</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l12</span><span class="p">(),</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -621,7 +796,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span>
 
-<div class="viewcode-block" id="Regularizer_fft.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_fft.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_fft.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_fft.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">primal</span><span class="o">.</span><span class="n">dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformFourier</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 
@@ -660,14 +835,22 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;lowlim&quot;</span>
 
-<div class="viewcode-block" id="Constraint_LowerLimit.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_LowerLimit.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Constraint_LowerLimit.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_LowerLimit.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the regularizer info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Regularizer info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reg_name__</span> <span class="o">+</span> <span class="s2">&quot;(l:</span><span class="si">%g</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l2</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l2</span><span class="p">()):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">=</span> <span class="n">limit</span>
 
-<div class="viewcode-block" id="Constraint_LowerLimit.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_LowerLimit.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Constraint_LowerLimit.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_LowerLimit.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">primal</span><span class="o">.</span><span class="n">dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
@@ -678,15 +861,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">1</span></div>
 
-<div class="viewcode-block" id="Constraint_LowerLimit.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_LowerLimit.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Constraint_LowerLimit.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_LowerLimit.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dual</span> <span class="o">+=</span> <span class="n">primal</span></div>
 
-<div class="viewcode-block" id="Constraint_LowerLimit.apply_proximal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_LowerLimit.apply_proximal">[docs]</a>    <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
+<div class="viewcode-block" id="Constraint_LowerLimit.apply_proximal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_LowerLimit.apply_proximal">[docs]</a>    <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dual</span><span class="p">[</span><span class="n">dual</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Constraint_LowerLimit.compute_update_primal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_LowerLimit.compute_update_primal">[docs]</a>    <span class="k">def</span> <span class="nf">compute_update_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">dual</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Constraint_UpperLimit"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_UpperLimit">[docs]</a><span class="k">class</span> <span class="nc">Constraint_UpperLimit</span><span class="p">(</span><span class="n">BaseRegularizer</span><span class="p">):</span>
@@ -694,14 +874,22 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;uplim&quot;</span>
 
-<div class="viewcode-block" id="Constraint_UpperLimit.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_UpperLimit.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Constraint_UpperLimit.info"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_UpperLimit.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the regularizer info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Regularizer info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reg_name__</span> <span class="o">+</span> <span class="s2">&quot;(l:</span><span class="si">%g</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l2</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">norm</span><span class="p">:</span> <span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">DataFidelity_l2</span><span class="p">()):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">=</span> <span class="n">limit</span>
 
-<div class="viewcode-block" id="Constraint_UpperLimit.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_UpperLimit.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Constraint_UpperLimit.initialize_sigma_tau"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_UpperLimit.initialize_sigma_tau">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">primal</span><span class="o">.</span><span class="n">dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
@@ -712,15 +900,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">1</span></div>
 
-<div class="viewcode-block" id="Constraint_UpperLimit.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_UpperLimit.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">primal</span><span class="p">):</span>
+<div class="viewcode-block" id="Constraint_UpperLimit.update_dual"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_UpperLimit.update_dual">[docs]</a>    <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dual</span> <span class="o">+=</span> <span class="n">primal</span></div>
 
-<div class="viewcode-block" id="Constraint_UpperLimit.apply_proximal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_UpperLimit.apply_proximal">[docs]</a>    <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
+<div class="viewcode-block" id="Constraint_UpperLimit.apply_proximal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_UpperLimit.apply_proximal">[docs]</a>    <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dual</span><span class="p">[</span><span class="n">dual</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Constraint_UpperLimit.compute_update_primal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Constraint_UpperLimit.compute_update_primal">[docs]</a>    <span class="k">def</span> <span class="nf">compute_update_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">dual</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

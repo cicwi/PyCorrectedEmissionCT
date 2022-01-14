@@ -87,13 +87,28 @@
 
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span>
+
 
 <span class="n">num_threads</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="ProjectorMatrix"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorMatrix">[docs]</a><span class="k">class</span> <span class="nc">ProjectorMatrix</span><span class="p">(</span><span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">vol_shape</span><span class="p">,</span> <span class="n">proj_shape</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize a projector that uses an explicit projection matrix.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Projector that uses an explicit projection matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : ArrayLike</span>
+<span class="sd">        The projection matrix.</span>
+<span class="sd">    vol_shape : Sequence[int]</span>
+<span class="sd">        Volume shape.</span>
+<span class="sd">    proj_shape : Sequence[int]</span>
+<span class="sd">        Projection shape.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">vol_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">proj_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">ArrayLike</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span> <span class="o">=</span> <span class="n">vol_shape</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span> <span class="o">=</span> <span class="n">proj_shape</span>
 
@@ -101,40 +116,56 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Create the transpose operator.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the transpose operator.</span>
 
-<span class="sd">        :returns: The transpose operator</span>
-<span class="sd">        :rtype: ProjectorMatrix</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        operators.ProjectorOperator</span>
+<span class="sd">            The transpose operator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ProjectorMatrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ProjectorMatrix.absolute"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorMatrix.absolute">[docs]</a>    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return the projection operator using the absolute value of the projection coefficients.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the projection operator using the absolute value of the projection coefficients.</span>
 
-<span class="sd">        :returns: The absolute value operator</span>
-<span class="sd">        :rtype: ProjectorMatrix</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        operators.ProjectorOperator</span>
+<span class="sd">            The absolute value operator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ProjectorMatrix</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProjectorMatrix.fp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorMatrix.fp">[docs]</a>    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Define the interface for the forward-projection.</span>
+<div class="viewcode-block" id="ProjectorMatrix.fp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorMatrix.fp">[docs]</a>    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define the interface for the forward-projection.</span>
 
-<span class="sd">        :param x: Input volume.</span>
-<span class="sd">        :type x: `numpy.array_like`</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : ArrayLike</span>
+<span class="sd">            Input volume.</span>
 
-<span class="sd">        :returns: The projection data.</span>
-<span class="sd">        :rtype: `numpy.array_like`</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArrayLike</span>
+<span class="sd">            The projection data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProjectorMatrix.bp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorMatrix.bp">[docs]</a>    <span class="k">def</span> <span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Define the interface for the back-projection.</span>
+<div class="viewcode-block" id="ProjectorMatrix.bp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorMatrix.bp">[docs]</a>    <span class="k">def</span> <span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define the interface for the back-projection.</span>
 
-<span class="sd">        :param x: Input projection data.</span>
-<span class="sd">        :type x: `numpy.array_like`</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : ArrayLike</span>
+<span class="sd">            Input projection data.</span>
 
-<span class="sd">        :returns: The back-projected volume.</span>
-<span class="sd">        :rtype: `numpy.array_like`</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArrayLike</span>
+<span class="sd">            The back-projected volume.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">)</span></div></div>
 
@@ -145,47 +176,40 @@
 <span class="sd">    It implements the forward and back projection of the single lines of a sinogram.</span>
 <span class="sd">    It takes care of initializing and disposing the ASTRA projectors when used in a *with* statement.</span>
 <span class="sd">    It supports both 2D and 3D geometries.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vol_shape : ArrayLike</span>
+<span class="sd">        The volume shape in Y X and optionally Z.</span>
+<span class="sd">    angles_rot_rad : ArrayLike</span>
+<span class="sd">        The rotation angles.</span>
+<span class="sd">    rot_axis_shift_pix : float or ArrayLike, optional</span>
+<span class="sd">        The rotation axis shift(s) in pixels. The default is 0.</span>
+<span class="sd">    proj_intensities : float or ArrayLike, optional</span>
+<span class="sd">        Projection scaling factor. The default is None.</span>
+<span class="sd">    use_astra : bool, optional</span>
+<span class="sd">        Whether to use ASTRA or fall back to scikit-image. The default is True if CUDA is available, otherwise False.</span>
+<span class="sd">    create_single_projs : bool, optional</span>
+<span class="sd">        Whether to create projectors for single projections. Used for corrections and SART. The default is True.</span>
+<span class="sd">    super_sampling : int, optional</span>
+<span class="sd">        pixel and voxel super-sampling. The default is 1.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        When the geometry is not correct.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">vol_shape</span><span class="p">,</span>
-        <span class="n">angles_rot_rad</span><span class="p">,</span>
+        <span class="n">vol_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">ArrayLike</span><span class="p">],</span>
         <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">proj_intensities</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">proj_intensities</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_astra</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">has_cuda</span><span class="p">,</span>
         <span class="n">create_single_projs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize ProjectorUncorrected class.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        vol_shape : numpy.array_like</span>
-<span class="sd">            The volume shape in Y X and optionally Z.</span>
-<span class="sd">        angles_rot_rad : numpy.array_like</span>
-<span class="sd">            The rotation angles.</span>
-<span class="sd">        rot_axis_shift_pix : float or numpy.array_like, optional</span>
-<span class="sd">            The rotation axis shift(s) in pixels. The default is 0.</span>
-<span class="sd">        proj_intensities : float or numpy.array_like, optional</span>
-<span class="sd">            Projection scaling factor. The default is None.</span>
-<span class="sd">        use_astra : bool, optional</span>
-<span class="sd">            Whether to use ASTRA or fall back to scikit-image. The default is True if CUDA is available, otherwise False.</span>
-<span class="sd">        create_single_projs : bool, optional</span>
-<span class="sd">            Whether to create projectors for single projections. Used for corrections and SART. The default is True.</span>
-<span class="sd">        super_sampling : int, optional</span>
-<span class="sd">            pixel and voxel super-sampling. The default is 1.</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ValueError</span>
-<span class="sd">            When the geometry is not correct.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">has_astra</span> <span class="ow">and</span> <span class="n">use_astra</span><span class="p">:</span>
             <span class="n">use_astra</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: ASTRA requested but not available. Falling back to scikit-image.&quot;</span><span class="p">)</span>
@@ -225,19 +249,19 @@
         <span class="sd">&quot;&quot;&quot;De-initialize the with statement block.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ProjectorUncorrected.fp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorUncorrected.fp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Forward-project a volume to a single sinogram line.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        vol : numpy.array_like</span>
+<span class="sd">        vol : ArrayLike</span>
 <span class="sd">            The volume to forward-project.</span>
 <span class="sd">        angle_ind : int</span>
 <span class="sd">            The angle index to foward project.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        x : numpy.array_like</span>
+<span class="sd">        x : ArrayLike</span>
 <span class="sd">            The forward-projected sinogram line.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">)</span>
@@ -245,66 +269,84 @@
             <span class="n">x</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="ProjectorUncorrected.bp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.bp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino_line</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorUncorrected.bp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.bp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino_line</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Back-project a single sinogram line to the volume.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        sino_line : numpy.array_like</span>
+<span class="sd">        sino_line : ArrayLike</span>
 <span class="sd">            The sinogram to back-project or a single line.</span>
 <span class="sd">        angle_ind : int</span>
 <span class="sd">            The angle index to foward project.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.array_like</span>
+<span class="sd">        ArrayLike</span>
 <span class="sd">            The back-projected volume.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sino_line</span> <span class="o">=</span> <span class="n">sino_line</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">]</span>  <span class="c1"># It will make a copy</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProjectorUncorrected.fp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fp">[docs]</a>    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorUncorrected.fp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fp">[docs]</a>    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward-projection of the volume to the projection data.</span>
 
-<span class="sd">        :param vol: The volume to forward-project.</span>
-<span class="sd">        :type vol: numpy.array_like</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vol : ArrayLike</span>
+<span class="sd">            The volume to forward-project.</span>
 
-<span class="sd">        :returns: The forward-projected projection data</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArrayLike</span>
+<span class="sd">            The forward-projected projection data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">vol</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="ProjectorUncorrected.bp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.bp">[docs]</a>    <span class="k">def</span> <span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorUncorrected.bp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.bp">[docs]</a>    <span class="k">def</span> <span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Back-projection of the projection data to the volume.</span>
 
-<span class="sd">        :param data: The projection data to back-project (numpy.array_like)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : ArrayLike</span>
+<span class="sd">            The projection data to back-project.</span>
 
-<span class="sd">        :returns: The back-projected volume</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArrayLike</span>
+<span class="sd">            The back-projected volume.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_intensities</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>  <span class="c1"># Needs copy</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProjectorUncorrected.fbp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fbp">[docs]</a>    <span class="k">def</span> <span class="nf">fbp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projs</span><span class="p">,</span> <span class="n">fbp_filter</span><span class="o">=</span><span class="s2">&quot;shepp-logan&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorUncorrected.fbp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fbp">[docs]</a>    <span class="k">def</span> <span class="nf">fbp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projs</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">fbp_filter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;shepp-logan&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the filtered back-projection of the projection data to the volume.</span>
 
 <span class="sd">        The data could either be a sinogram, or a stack of sinograms.</span>
 
-<span class="sd">        :param projs: The projection data to back-project</span>
-<span class="sd">        :type projs: numpy.array_like</span>
-<span class="sd">        :param fbp_filter: The FBP filter to use</span>
-<span class="sd">        :type fbp_filter: str or function</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        projs : ArrayLike</span>
+<span class="sd">            The projection data to back-project.</span>
+<span class="sd">        fbp_filter : str | Callable, optional</span>
+<span class="sd">            The FBP filter to use. The default is &quot;shepp-logan&quot;.</span>
 
-<span class="sd">        :returns: The FBP reconstructed volume</span>
-<span class="sd">        :rtype: numpy.array_like</span>
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            When trying to use fbp with a 3D projection geometry.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArrayLike</span>
+<span class="sd">            The FBP reconstructed volume.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_3d</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;FBP not supported with 3D projector&quot;</span><span class="p">)</span>
@@ -321,59 +363,67 @@
 <span class="sd">    Attenuation corrected projection class for XRF, with multi-detector support.</span>
 
 <span class="sd">    It includes the computation of the attenuation volumes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vol_shape : Union[Sequence[int], ArrayLike]</span>
+<span class="sd">        The volume shape in X Y and optionally Z.</span>
+<span class="sd">    angles_rot_rad : ArrayLike</span>
+<span class="sd">        The rotation angles.</span>
+<span class="sd">    rot_axis_shift_pix : float, optional</span>
+<span class="sd">        The rotation axis shift(s) in pixels. The default is 0.</span>
+<span class="sd">    proj_intensities : Optional[ArrayLike], optional</span>
+<span class="sd">        Projection scaling factor. The default is None.</span>
+<span class="sd">    super_sampling : int, optional</span>
+<span class="sd">        Pixel and voxel super-sampling. The default is 1.</span>
+<span class="sd">    att_in : Optional[ArrayLike], optional</span>
+<span class="sd">        Attenuation volume of the incoming beam. The default is None.</span>
+<span class="sd">    att_out : Optional[ArrayLike], optional</span>
+<span class="sd">        Attenuation volume of the outgoing beam. The default is None.</span>
+<span class="sd">    angles_detectors_rad : Union[float, ArrayLike], optional</span>
+<span class="sd">        Angles of the detector elements with respect to incident beam. The default is (np.pi / 2).</span>
+<span class="sd">    weights_detectors : Optional[ArrayLike], optional</span>
+<span class="sd">        Weights (e.g. solid angle, efficiency, etc) of the detector elements. The default is None.</span>
+<span class="sd">    psf : Optional[ArrayLike], optional</span>
+<span class="sd">        Optical system&#39;s point spread function (PSF). The default is None.</span>
+<span class="sd">    precompute_attenuation : bool, optional</span>
+<span class="sd">        Whether to precompute attenuation or not. The default is True.</span>
+<span class="sd">    is_symmetric : bool, optional</span>
+<span class="sd">        Whether the projector is symmetric or not. The default is False.</span>
+<span class="sd">    weights_angles : Optional[ArrayLike], optional</span>
+<span class="sd">        Projection weight for a given element at a given angle. The default is None.</span>
+<span class="sd">    use_multithreading : bool, optional</span>
+<span class="sd">        Whether to use multiple threads or not. The default is True.</span>
+<span class="sd">    data_type : DTypeLike, optional</span>
+<span class="sd">        Output data type. The default is np.float32.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to produce verbose output. The default is True.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        When given inconsistent numbers of detector weights and detector angles.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">vol_shape</span><span class="p">,</span>
-        <span class="n">angles_rot_rad</span><span class="p">,</span>
-        <span class="n">rot_axis_shift_pix</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">proj_intensities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">super_sampling</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">att_in</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">att_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">angles_detectors_rad</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
-        <span class="n">weights_detectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vol_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">ArrayLike</span><span class="p">],</span>
+        <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+        <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">proj_intensities</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">att_in</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">att_out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">angles_detectors_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="n">weights_detectors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">precompute_attenuation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">is_symmetric</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">weights_angles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">weights_angles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_multithreading</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Attenuation corrected projection class for XRF.</span>
-
-<span class="sd">        :param vol_shape: The volume shape in X Y and optionally Z</span>
-<span class="sd">        :type vol_shape: numpy.array_like</span>
-<span class="sd">        :param angles_rot_rad: The rotation angles</span>
-<span class="sd">        :type angles_rot_rad: numpy.array_like</span>
-<span class="sd">        :param rot_axis_shift_pix: The rotation axis shift(s) in pixels, defaults to 0</span>
-<span class="sd">        :type rot_axis_shift_pix: float or numpy.array_like, optional</span>
-<span class="sd">        :param proj_intensities: Projection scaling factor, defaults to None</span>
-<span class="sd">        :type proj_intensities: float or numpy.array_like, optional</span>
-<span class="sd">        :param super_sampling: pixel and voxel super-sampling, defaults to 1</span>
-<span class="sd">        :type super_sampling: int, optional</span>
-<span class="sd">        :param att_in: Attenuation volume of the incoming beam, defaults to None</span>
-<span class="sd">        :type att_in: numpy.array_like, optional</span>
-<span class="sd">        :param att_out: Attenuation volume of the outgoing beam, defaults to None</span>
-<span class="sd">        :type att_out: numpy.array_like, optional</span>
-<span class="sd">        :param angles_detectors_rad: Angles of the detector elements with respect to incident beam, defaults to (np.pi/2)</span>
-<span class="sd">        :type angles_detectors_rad: numpy.array_like, optional</span>
-<span class="sd">        :param weights_detectors: Weights (e.g. solid angle, efficiency, etc) of the detector elements, defaults to None</span>
-<span class="sd">        :type weights_detectors: numpy.array_like, optional</span>
-<span class="sd">        :param psf: Optical system&#39;s point spread function (PSF), defaults to None</span>
-<span class="sd">        :type psf: numpy.array_like, optional</span>
-<span class="sd">        :param precompute_attenuation: Whether to precompute attenuation or not, defaults to True</span>
-<span class="sd">        :type precompute_attenuation: boolean, optional</span>
-<span class="sd">        :param is_symmetric: Whether the projector is symmetric or not, defaults to False</span>
-<span class="sd">        :type is_symmetric: boolean, optional</span>
-<span class="sd">        :param weights_angles: Projection weight for a given element at a given angle, defaults to None</span>
-<span class="sd">        :type weights_angles: numpy.array_like, optional</span>
-<span class="sd">        :param data_type: Data type, defaults to np.float32</span>
-<span class="sd">        :type data_type: numpy.dtype, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ProjectorUncorrected</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">vol_shape</span><span class="p">,</span>
@@ -437,15 +487,23 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_compute_attenuation</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_compute_attenuation</span><span class="p">(</span><span class="n">vol</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="k">def</span> <span class="nf">pad_vol</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">edges</span><span class="p">):</span>
             <span class="n">paddings</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             <span class="n">paddings</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">paddings</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">],)</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">paddings</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
 
+        <span class="k">def</span> <span class="nf">compute_cumsum</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">angle_deg</span><span class="p">):</span>
+            <span class="n">vol</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">rot_angle_deg</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">vol</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">vol</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">skt</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="o">-</span><span class="n">rot_angle_deg</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
         <span class="n">size_lims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])</span>
         <span class="n">min_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">size_lims</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
-        <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">min_size</span> <span class="o">-</span> <span class="n">size_lims</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">min_size</span> <span class="o">-</span> <span class="n">size_lims</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">invert</span><span class="p">:</span>
             <span class="n">angle_rad</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
@@ -454,18 +512,22 @@
 
         <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">pad_vol</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
 
-        <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">,</span> <span class="n">rot_angle_deg</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">cum_arr</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">cum_arr</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
-
-        <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">,</span> <span class="o">-</span><span class="n">rot_angle_deg</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cum_arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">prev_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cum_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">num_slices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">prev_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">cum_arr</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">num_slices</span><span class="p">,</span> <span class="o">*</span><span class="n">prev_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]])</span>
+            <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_slices</span><span class="p">):</span>
+                <span class="n">cum_arr</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">compute_cumsum</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">rot_angle_deg</span><span class="p">)</span>
+            <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">cum_arr</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">prev_shape</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">compute_cumsum</span><span class="p">(</span><span class="n">cum_arr</span><span class="p">,</span> <span class="n">rot_angle_deg</span><span class="p">)</span>
         <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">cum_arr</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
 
         <span class="n">cum_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">cum_arr</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">cum_arr</span>
 
-<div class="viewcode-block" id="ProjectorAttenuationXRF.compute_attenuation"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.compute_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorAttenuationXRF.compute_attenuation"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.compute_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute the attenuation local attenuation for a given attenuation volume.</span>
 
 <span class="sd">        This means the attenuation experienced by the photons emitted in each</span>
@@ -473,7 +535,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        vol : numpy.array_like</span>
+<span class="sd">        vol : ArrayLike</span>
 <span class="sd">            The attenuation volume.</span>
 <span class="sd">        angle_rad : float</span>
 <span class="sd">            The rotation angle in radians.</span>
@@ -487,35 +549,35 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.array_like</span>
+<span class="sd">        ArrayLike</span>
 <span class="sd">            The stack of local attenuation volumes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Maps can only be 2D or 3D Arrays. A </span><span class="si">%d</span><span class="s2">-dimensional was passed&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">])):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;Mismatching volume shape of input volume (</span><span class="si">%s</span><span class="s2">) with vol_shape (</span><span class="si">%s</span><span class="s2"> in 2D -&gt; </span><span class="si">%s</span><span class="s2">)&quot;</span>
                 <span class="o">%</span> <span class="p">(</span>
                     <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)),</span>
                     <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">)),</span>
-                    <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">])),</span>
+                    <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_in</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="n">angle_det</span> <span class="o">=</span> <span class="n">angle_rad</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span>
         <span class="n">atts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">angle_det</span><span class="p">):</span>
             <span class="n">atts</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_out</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">atts</span>
 
-<div class="viewcode-block" id="ProjectorAttenuationXRF.compute_attenuation_volumes"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.compute_attenuation_volumes">[docs]</a>    <span class="k">def</span> <span class="nf">compute_attenuation_volumes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorAttenuationXRF.compute_attenuation_volumes"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.compute_attenuation_volumes">[docs]</a>    <span class="k">def</span> <span class="nf">compute_attenuation_volumes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute the corrections for each angle.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_in</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No attenuation volumes were given&quot;</span><span class="p">)</span>
@@ -553,12 +615,9 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="n">r</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">))):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_out</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_out</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_3d</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span></div>
-
-<div class="viewcode-block" id="ProjectorAttenuationXRF.collapse_detectors"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.collapse_detectors">[docs]</a>    <span class="k">def</span> <span class="nf">collapse_detectors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorAttenuationXRF.collapse_detectors"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.collapse_detectors">[docs]</a>    <span class="k">def</span> <span class="nf">collapse_detectors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Convert multi-detector configurations into single-detector.&quot;&quot;&quot;</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att_vol_angles</span> <span class="o">*</span> <span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -568,21 +627,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">weights_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_angles</span> <span class="o">*</span> <span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProjectorAttenuationXRF.fp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.fp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorAttenuationXRF.fp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.fp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Forward-project the volume to a single sinogram line.</span>
 
 <span class="sd">        It applies the attenuation corrections.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        vol : numpy.array_like</span>
+<span class="sd">        vol : ArrayLike</span>
 <span class="sd">            The volume to forward-project.</span>
 <span class="sd">        angle_ind : int</span>
 <span class="sd">            The angle index to foward project.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        sino_line : numpy.array_like</span>
+<span class="sd">        sino_line : ArrayLike</span>
 <span class="sd">            The forward-projected sinogram line.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">precompute_attenuation</span><span class="p">:</span>
@@ -611,14 +670,14 @@
 
         <span class="k">return</span> <span class="n">sino_line</span></div>
 
-<div class="viewcode-block" id="ProjectorAttenuationXRF.bp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.bp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">single_line</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorAttenuationXRF.bp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.bp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">bp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">single_line</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Back-project a single sinogram line to the volume.</span>
 
 <span class="sd">        It only applies the attenuation corrections if the projector is symmetric.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        sino : numpy.array_like</span>
+<span class="sd">        sino : ArrayLike</span>
 <span class="sd">            The sinogram to back-project or a single line.</span>
 <span class="sd">        angle_ind : int</span>
 <span class="sd">            The angle index to foward project.</span>
@@ -627,15 +686,15 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.array_like</span>
+<span class="sd">        ArrayLike</span>
 <span class="sd">            The back-projected volume.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">single_line</span><span class="p">:</span>
             <span class="n">sino_line</span> <span class="o">=</span> <span class="n">sino</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">sino_line</span> <span class="o">=</span> <span class="n">sino</span><span class="p">[</span><span class="n">angle_ind</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+            <span class="n">sino_line</span> <span class="o">=</span> <span class="n">sino</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">,</span> <span class="p">:]</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">:</span>
             <span class="n">sino_line</span> <span class="o">=</span> <span class="n">spsig</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
 
         <span class="n">sino_line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sino_line</span><span class="p">,</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">),</span> <span class="o">*</span><span class="n">sino_line</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:]])</span>
@@ -658,19 +717,19 @@
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProjectorAttenuationXRF.fp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.fp">[docs]</a>    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorAttenuationXRF.fp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.fp">[docs]</a>    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Forward-project the volume to the sinogram.</span>
 
 <span class="sd">        It applies the attenuation corrections.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        vol : numpy.array_like</span>
+<span class="sd">        vol : ArrayLike</span>
 <span class="sd">            The volume to forward-project.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.array_like</span>
+<span class="sd">        ArrayLike</span>
 <span class="sd">            The forward-projected sinogram.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_multithreading</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="p">,</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackendSKimage</span><span class="p">):</span>
@@ -679,19 +738,19 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sino_lines</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fp_angle</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">))]</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sino_lines</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sino_lines</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="ProjectorAttenuationXRF.bp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.bp">[docs]</a>    <span class="k">def</span> <span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectorAttenuationXRF.bp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF.bp">[docs]</a>    <span class="k">def</span> <span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Back-projection of the sinogram to the volume.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        sino : numpy.array_like</span>
+<span class="sd">        sino : ArrayLike</span>
 <span class="sd">            The sinogram to back-project.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.array_like</span>
+<span class="sd">        ArrayLike</span>
 <span class="sd">            The back-projected volume.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">:</span>
@@ -703,7 +762,9 @@
 
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vols</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ProjectorUncorrected</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">)</span></div></div>
+            <span class="n">sino</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sino</span><span class="p">,</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_det</span><span class="p">),</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span><span class="p">])</span>
+            <span class="n">vol</span> <span class="o">=</span> <span class="p">[</span><span class="n">ProjectorUncorrected</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sino</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">))]</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="FilterMR"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR">[docs]</a><span class="k">class</span> <span class="nc">FilterMR</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -716,6 +777,19 @@
 <span class="sd">    Transactions on, 23(11), 4750-4762.</span>
 
 <span class="sd">    Code inspired by: https://github.com/dmpelt/pymrfbp</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sinogram_pixels_num : int, optional</span>
+<span class="sd">        Number of sinogram pixels. The default is None.</span>
+<span class="sd">    sinogram_angles_num : int, optional</span>
+<span class="sd">        Number of sinogram angles. The default is None.</span>
+<span class="sd">    start_exp_binning : int, optional</span>
+<span class="sd">        From which distance to start exponentional binning. The default is 2.</span>
+<span class="sd">    lambda_smooth : float, optional</span>
+<span class="sd">        Smoothing parameter. The default is None.</span>
+<span class="sd">    data_type : DTypeLike, optional</span>
+<span class="sd">        Filter data type. The default is np.float32.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -726,21 +800,6 @@
         <span class="n">lambda_smooth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize FilterMR class.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        sinogram_pixels_num : int, optional</span>
-<span class="sd">            Number of sinogram pixels. The default is None.</span>
-<span class="sd">        sinogram_angles_num : int, optional</span>
-<span class="sd">            Number of sinogram angles. The default is None.</span>
-<span class="sd">        start_exp_binning : int, optional</span>
-<span class="sd">            From which distance to start exponentional binning. The default is 2.</span>
-<span class="sd">        lambda_smooth : float, optional</span>
-<span class="sd">            Smoothing parameter. The default is None.</span>
-<span class="sd">        data_type : numpy.dtype, optional</span>
-<span class="sd">            Filter data type. The default is np.float32.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_exp_binning</span> <span class="o">=</span> <span class="n">start_exp_binning</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lambda_smooth</span> <span class="o">=</span> <span class="n">lambda_smooth</span>
@@ -751,14 +810,14 @@
         <span class="k">if</span> <span class="n">sinogram_pixels_num</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sinogram_angles_num</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
 
-<div class="viewcode-block" id="FilterMR.initialize"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="FilterMR.initialize"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Filter initialization function.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinogram_pixels_num</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No sinogram pixels number was given!&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinogram_angles_num</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No sinogram angles number was given!&quot;</span><span class="p">)</span>
 
-        <span class="n">filter_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sinogram_pixels_num</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
+        <span class="n">filter_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sinogram_pixels_num</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filter_size</span> <span class="o">=</span> <span class="n">filter_center</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
 
         <span class="n">window_size</span> <span class="o">=</span> <span class="mi">1</span>
@@ -787,19 +846,19 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="FilterMR.compute_filter"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR.compute_filter">[docs]</a>    <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">,</span> <span class="n">projector</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
+<div class="viewcode-block" id="FilterMR.compute_filter"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR.compute_filter">[docs]</a>    <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">projector</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute the filter.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        sinogram : numpy.array_like</span>
+<span class="sd">        sinogram : ArrayLike</span>
 <span class="sd">            The sinogram.</span>
 <span class="sd">        projector : operators.ProjectorOperator</span>
 <span class="sd">            The projector used in the FBP.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        computed_filter : numpy.array_like</span>
+<span class="sd">        computed_filter : ArrayLike</span>
 <span class="sd">            The computed filter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sino_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinogram_angles_num</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sinogram_pixels_num</span>
@@ -834,36 +893,36 @@
             <span class="n">computed_filter</span> <span class="o">+=</span> <span class="n">fitted_components</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="n">bas</span>
         <span class="k">return</span> <span class="n">computed_filter</span></div>
 
-<div class="viewcode-block" id="FilterMR.apply_filter"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR.apply_filter">[docs]</a>    <span class="k">def</span> <span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">,</span> <span class="n">computed_filter</span><span class="p">):</span>
+<div class="viewcode-block" id="FilterMR.apply_filter"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.FilterMR.apply_filter">[docs]</a>    <span class="k">def</span> <span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">computed_filter</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Apply the filter to the sinogram.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        sinogram : numpy.array_like</span>
+<span class="sd">        sinogram : ArrayLike</span>
 <span class="sd">            The sinogram.</span>
-<span class="sd">        computed_filter : numpy.array_like</span>
+<span class="sd">        computed_filter : ArrayLike</span>
 <span class="sd">            The computed filter.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.array_like</span>
+<span class="sd">        ArrayLike</span>
 <span class="sd">            The filtered sinogram.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">spsig</span><span class="o">.</span><span class="n">fftconvolve</span><span class="p">(</span><span class="n">sinogram</span><span class="p">,</span> <span class="n">computed_filter</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="s2">&quot;same&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">,</span> <span class="n">projector</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sinogram</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">projector</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Filter the sinogram, by first computing the filter, and then applying it.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        sinogram : numpy.array_like</span>
+<span class="sd">        sinogram : ArrayLike</span>
 <span class="sd">            The unfiltered sinogram.</span>
 <span class="sd">        projector : operators.ProjectorOperator</span>
 <span class="sd">            The projector used in the FBP.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.array_like</span>
+<span class="sd">        ArrayLike</span>
 <span class="sd">            The filtered sinogram.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">:</span>

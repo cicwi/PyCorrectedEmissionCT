@@ -78,7 +78,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">numpy.random</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span>
 
 <span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">sps</span>
 
@@ -142,6 +142,26 @@
 
 
 <div class="viewcode-block" id="Solver"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver">[docs]</a><span class="k">class</span> <span class="nc">Solver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the base solver class.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Turn on verbose output. The default is False.</span>
+<span class="sd">    tolerance : Optional[float], optional</span>
+<span class="sd">        Tolerance on the data residual for computing when to stop iterations.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    relaxation : float, optional</span>
+<span class="sd">        The relaxation length. The default is 1.0.</span>
+<span class="sd">    data_term : Union[str, DataFidelityBase], optional</span>
+<span class="sd">        Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
+<span class="sd">    data_term_test : Optional[DataFidelityBase], optional</span>
+<span class="sd">        The data fidelity to be used for the test set.</span>
+<span class="sd">        If None, it will use the same as for the rest of the data.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -150,25 +170,6 @@
         <span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
         <span class="n">data_term_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the base solver class.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        verbose : bool, optional</span>
-<span class="sd">            Turn on verbose output. The default is False.</span>
-<span class="sd">        tolerance : Optional[float], optional</span>
-<span class="sd">            Tolerance on the data residual for computing when to stop iterations.</span>
-<span class="sd">            The default is None.</span>
-<span class="sd">        relaxation : float, optional</span>
-<span class="sd">            The relaxation length. The default is 1.0.</span>
-<span class="sd">        data_term : Union[str, DataFidelityBase], optional</span>
-<span class="sd">            Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
-<span class="sd">        data_term_test : Optional[DataFidelityBase], optional</span>
-<span class="sd">            The data fidelity to be used for the test set.</span>
-<span class="sd">            If None, it will use the same as for the rest of the data.</span>
-<span class="sd">            The default is None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">=</span> <span class="n">relaxation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span> <span class="o">=</span> <span class="n">tolerance</span>
@@ -179,12 +180,36 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data_term_test</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Solver.info"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the solver info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Solver info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span></div>
 
 <div class="viewcode-block" id="Solver.upper"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver.upper">[docs]</a>    <span class="k">def</span> <span class="nf">upper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the upper case name of the solver.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Upper case string name of the solver.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Solver.lower"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver.lower">[docs]</a>    <span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the lower case name of the solver.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Lower case string name of the solver.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
 
     <span class="nd">@staticmethod</span>
@@ -300,17 +325,17 @@
         <span class="n">b_ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">b_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">b_ones</span> <span class="o">*=</span> <span class="n">b_mask</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="p">[</span><span class="n">At</span><span class="p">(</span><span class="n">b_ones</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">A_num_rows</span><span class="p">)]</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="p">[</span><span class="n">At</span><span class="p">(</span><span class="n">b_ones</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">A_num_rows</span><span class="p">)]</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">))</span>
         <span class="n">tau</span><span class="p">[(</span><span class="n">tau</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">tau</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">/</span> <span class="n">tau</span>
 
         <span class="c1"># Forward-projection diagonal re-scaling</span>
-        <span class="n">x_ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">tau</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tau</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">x_ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="o">*</span><span class="n">tau</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">tau</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tau</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">x_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">x_ones</span> <span class="o">*=</span> <span class="n">x_mask</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="p">[</span><span class="n">A</span><span class="p">(</span><span class="n">x_ones</span><span class="p">,</span> <span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">A_num_rows</span><span class="p">)]</span>
-        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">))</span>
         <span class="n">sigma</span><span class="p">[(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sigma</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sigma</span>
 
@@ -331,11 +356,11 @@
         <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="n">algo_info</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)):</span>
 
             <span class="k">for</span> <span class="n">ii_a</span> <span class="ow">in</span> <span class="n">rows_sequence</span><span class="p">:</span>
-                <span class="n">res</span> <span class="o">=</span> <span class="n">A</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ii_a</span><span class="p">)</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="n">ii_a</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">A</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ii_a</span><span class="p">)</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii_a</span><span class="p">,</span> <span class="p">:]</span>
                 <span class="k">if</span> <span class="n">b_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">res</span> <span class="o">*=</span> <span class="n">b_mask</span><span class="p">[</span><span class="n">ii_a</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+                    <span class="n">res</span> <span class="o">*=</span> <span class="n">b_mask</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii_a</span><span class="p">,</span> <span class="p">:]</span>
 
-                <span class="n">x</span> <span class="o">-=</span> <span class="n">At</span><span class="p">(</span><span class="n">res</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">[</span><span class="n">ii_a</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">ii_a</span><span class="p">)</span> <span class="o">*</span> <span class="n">tau</span><span class="p">[</span><span class="n">ii_a</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+                <span class="n">x</span> <span class="o">-=</span> <span class="n">At</span><span class="p">(</span><span class="n">res</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii_a</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ii_a</span><span class="p">)</span> <span class="o">*</span> <span class="n">tau</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii_a</span><span class="p">,</span> <span class="p">:]</span>
 
                 <span class="k">if</span> <span class="n">lower_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lower_limit</span><span class="p">)</span>
@@ -359,6 +384,30 @@
 
 
 <div class="viewcode-block" id="Sirt"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Sirt">[docs]</a><span class="k">class</span> <span class="nc">Sirt</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the SIRT solver class.</span>
+
+<span class="sd">    This class implements the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Turn on verbose output. The default is False.</span>
+<span class="sd">    tolerance : Optional[float], optional</span>
+<span class="sd">        Tolerance on the data residual for computing when to stop iterations.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    relaxation : float, optional</span>
+<span class="sd">        The relaxation length. The default is 1.95.</span>
+<span class="sd">    regularizer : Optional[BaseRegularizer], optional</span>
+<span class="sd">        Regularizer to be used. The default is None.</span>
+<span class="sd">    data_term : Union[str, DataFidelityBase], optional</span>
+<span class="sd">        Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
+<span class="sd">    data_term_test : Optional[DataFidelityBase], optional</span>
+<span class="sd">        The data fidelity to be used for the test set.</span>
+<span class="sd">        If None, it will use the same as for the rest of the data.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -368,35 +417,20 @@
         <span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
         <span class="n">data_term_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the SIRT solver class.</span>
-
-<span class="sd">        This class implements the Simultaneous Iterative Reconstruction Technique (SIRT) algorithm.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        verbose : bool, optional</span>
-<span class="sd">            Turn on verbose output. The default is False.</span>
-<span class="sd">        tolerance : Optional[float], optional</span>
-<span class="sd">            Tolerance on the data residual for computing when to stop iterations.</span>
-<span class="sd">            The default is None.</span>
-<span class="sd">        relaxation : float, optional</span>
-<span class="sd">            The relaxation length. The default is 1.95.</span>
-<span class="sd">        regularizer : Optional[BaseRegularizer], optional</span>
-<span class="sd">            Regularizer to be used. The default is None.</span>
-<span class="sd">        data_term : Union[str, DataFidelityBase], optional</span>
-<span class="sd">            Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
-<span class="sd">        data_term_test : Optional[DataFidelityBase], optional</span>
-<span class="sd">            The data fidelity to be used for the test set.</span>
-<span class="sd">            If None, it will use the same as for the rest of the data.</span>
-<span class="sd">            The default is None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">relaxation</span><span class="o">=</span><span class="n">relaxation</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term_test</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_regularizer</span><span class="p">(</span><span class="n">regularizer</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Sirt.info"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Sirt.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Sirt.info"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Sirt.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the SIRT info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            SIRT info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">reg_info</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">info</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">Solver</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="o">+</span> <span class="n">reg_info</span></div>
 
@@ -529,6 +563,30 @@
 
 
 <div class="viewcode-block" id="PDHG"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.PDHG">[docs]</a><span class="k">class</span> <span class="nc">PDHG</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the PDHG solver class.</span>
+
+<span class="sd">    PDHG stands for primal-dual hybridg gradient algorithm from Chambolle and Pock.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Turn on verbose output. The default is False.</span>
+<span class="sd">    tolerance : Optional[float], optional</span>
+<span class="sd">        Tolerance on the data residual for computing when to stop iterations.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    relaxation : float, optional</span>
+<span class="sd">        The relaxation length. The default is 0.95.</span>
+<span class="sd">    regularizer : Optional[BaseRegularizer], optional</span>
+<span class="sd">        Regularizer to be used. The default is None.</span>
+<span class="sd">    data_term : Union[str, DataFidelityBase], optional</span>
+<span class="sd">        Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
+<span class="sd">    data_term_test : Optional[DataFidelityBase], optional</span>
+<span class="sd">        The data fidelity to be used for the test set.</span>
+<span class="sd">        If None, it will use the same as for the rest of the data.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -538,35 +596,20 @@
         <span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
         <span class="n">data_term_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the PDHG solver class.</span>
-
-<span class="sd">        PDHG stands for primal-dual hybridg gradient algorithm from Chambolle and Pock.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        verbose : bool, optional</span>
-<span class="sd">            Turn on verbose output. The default is False.</span>
-<span class="sd">        tolerance : Optional[float], optional</span>
-<span class="sd">            Tolerance on the data residual for computing when to stop iterations.</span>
-<span class="sd">            The default is None.</span>
-<span class="sd">        relaxation : float, optional</span>
-<span class="sd">            The relaxation length. The default is 0.95.</span>
-<span class="sd">        regularizer : Optional[BaseRegularizer], optional</span>
-<span class="sd">            Regularizer to be used. The default is None.</span>
-<span class="sd">        data_term : Union[str, DataFidelityBase], optional</span>
-<span class="sd">            Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
-<span class="sd">        data_term_test : Optional[DataFidelityBase], optional</span>
-<span class="sd">            The data fidelity to be used for the test set.</span>
-<span class="sd">            If None, it will use the same as for the rest of the data.</span>
-<span class="sd">            The default is None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">relaxation</span><span class="o">=</span><span class="n">relaxation</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term_test</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_regularizer</span><span class="p">(</span><span class="n">regularizer</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PDHG.info"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.PDHG.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PDHG.info"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.PDHG.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the PDHG info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            PDHG info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">reg_info</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">info</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">Solver</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="o">+</span> <span class="n">reg_info</span></div>
 
@@ -584,7 +627,26 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_term</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PDHG.power_method"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.PDHG.power_method">[docs]</a>    <span class="k">def</span> <span class="nf">power_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
+<div class="viewcode-block" id="PDHG.power_method"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.PDHG.power_method">[docs]</a>    <span class="k">def</span> <span class="nf">power_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">DTypeLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the l2-norm of the operator A, with the power method.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        A : Callable | BaseTransform</span>
+<span class="sd">            Operator whose l2-norm needs to be computed.</span>
+<span class="sd">        At : Callable | BaseTransform</span>
+<span class="sd">            Adjoint of the operator.</span>
+<span class="sd">        b : ArrayLike</span>
+<span class="sd">            The data vector.</span>
+<span class="sd">        iterations : int, optional</span>
+<span class="sd">            Number of power method iterations. The default is 5.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[float, Tuple[int], DTypeLike]</span>
+<span class="sd">            The l2-norm of A, and the shape and type of the solution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">At</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>

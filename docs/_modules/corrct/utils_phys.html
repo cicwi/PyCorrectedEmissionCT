@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.utils_phys &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>corrct.utils_phys</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for corrct.utils_phys</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Provide X-ray physics related funtionality.</span>
+
+<span class="sd">Created on Fri Jan  7 16:07:21 2022</span>
+
+<span class="sd">@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,</span>
+<span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span>
+
+<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">xraylib</span>
+
+    <span class="n">xraylib</span><span class="o">.</span><span class="n">XRayInit</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Physics support is only available when xraylib is installed!&quot;</span><span class="p">)</span>
+    <span class="k">raise</span>
+
+
+<div class="viewcode-block" id="FluoLine"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.FluoLine">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">FluoLine</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Fluorescence line description class.&quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">indx</span><span class="p">:</span> <span class="nb">int</span></div>
+
+
+<div class="viewcode-block" id="FluoLinesSiegbahn"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.FluoLinesSiegbahn">[docs]</a><span class="k">class</span> <span class="nc">FluoLinesSiegbahn</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Siegbahn fluorescence lines collection class.&quot;&quot;&quot;</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;KA1&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">KA1_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;KA2&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">KA2_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;KA3&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">KA3_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;KB1&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">KB1_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;KB2&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">KB2_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;KB3&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">KB3_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;KB4&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">KB4_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;KB5&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">KB5_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LA1&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LA1_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LA2&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LA2_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB1&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB1_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB2&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB2_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB3&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB3_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB4&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB4_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB5&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB5_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB6&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB6_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB7&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB7_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB9&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB9_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB10&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB10_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB15&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB15_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LB17&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LB17_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LG1&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LG1_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LG2&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LG2_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LG3&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LG3_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LG4&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LG4_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LG5&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LG5_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LG6&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LG6_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LG8&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LG8_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LE&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LE_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LH&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LH_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LL&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LL_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LS&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LS_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LT&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LT_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LU&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LU_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;LV&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">LV_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MA1&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">MA1_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MA2&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">MA2_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MB&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">MB_LINE</span><span class="p">),</span>
+        <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MG&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">MG_LINE</span><span class="p">),</span>
+    <span class="p">]</span>
+
+<div class="viewcode-block" id="FluoLinesSiegbahn.get_lines"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.FluoLinesSiegbahn.get_lines">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_lines</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the list of xraylib line macro definitions for the requested family.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        line : str</span>
+<span class="sd">            The requested line. It can be a whole shell (transition to that shell),</span>
+<span class="sd">            or sub-shells.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Sequence</span>
+<span class="sd">            List of corresponding lines.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">FluoLinesSiegbahn</span><span class="o">.</span><span class="n">lines</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)]</span> <span class="o">==</span> <span class="n">line</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="FluoLinesSiegbahn.get_energy"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.FluoLinesSiegbahn.get_energy">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span>
+        <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span> <span class="n">compute_average</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the energy(ies) of the requested line for the given element.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        element : Union[str, int]</span>
+<span class="sd">            The requested element.</span>
+<span class="sd">        line : str</span>
+<span class="sd">            The requested line. It can be a whole shell (transition to that shell),</span>
+<span class="sd">            or sub-shells.</span>
+<span class="sd">        compute_average : bool, optional</span>
+<span class="sd">            Weighted averaging the lines, using the radiation rate. The default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        energy_keV : Union[float, Sequence[float]]</span>
+<span class="sd">            Either the average energy or the list of different energies.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">el_sym</span> <span class="o">=</span> <span class="n">element</span>
+            <span class="n">el_num</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">SymbolToAtomicNumber</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">el_sym</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">AtomicNumberToSymbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="n">el_num</span> <span class="o">=</span> <span class="n">element</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">):</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">lines</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">FluoLinesSiegbahn</span><span class="o">.</span><span class="n">get_lines</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No line was passed! lines=</span><span class="si">{</span><span class="n">lines</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">energy_keV</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">energy_keV</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">LineEnergy</span><span class="p">(</span><span class="n">el_num</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">indx</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Energy </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">: el_num=</span><span class="si">{</span><span class="n">el_num</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">el_sym</span><span class="si">}</span><span class="s2">) line=</span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">energy_keV</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">compute_average</span><span class="p">:</span>
+            <span class="n">rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">energy_keV</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rates</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">RadRate</span><span class="p">(</span><span class="n">el_num</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">indx</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RadRate </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">: el_num=</span><span class="si">{</span><span class="n">el_num</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">el_sym</span><span class="si">}</span><span class="s2">) line=</span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">rates</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">energy_keV</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">energy_keV</span> <span class="o">*</span> <span class="n">rates</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rates</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">energy_keV</span></div></div>
+
+
+<div class="viewcode-block" id="DetectorXRF"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.DetectorXRF">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">DetectorXRF</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simple XRF detector model.&quot;&quot;&quot;</span>
+
+    <span class="n">surface_mm2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">distance_mm</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">solid_angle_sr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the solid angle covered by the detector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float | ArrayLike</span>
+<span class="sd">            The computed solid angle of the detector geometry.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_mm2</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_mm</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VolumeMaterial"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial">[docs]</a><span class="k">class</span> <span class="nc">VolumeMaterial</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    VolumeMaterial class, that can be used for predicting fluorescence and Compton yields, attenuation, etc.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    phase_fractions : Sequence</span>
+<span class="sd">        Concentration fractions of each phase for each voxel.</span>
+<span class="sd">    phase_compounds : Sequence</span>
+<span class="sd">        Compound description of each phase.</span>
+<span class="sd">    voxel_size_cm : float</span>
+<span class="sd">        Voxel size in cm.</span>
+<span class="sd">    dtype : DTypeLike, optional</span>
+<span class="sd">        Data type of the produced data. The default is None.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Raised in case of incorrect parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phase_fractions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">phase_compounds</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">voxel_size_cm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase_compounds</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Phase fractions (# </span><span class="si">%d</span><span class="s2">) and phase compounds (# </span><span class="si">%d</span><span class="s2">) should have the same length&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase_compounds</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Phase list is empty&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All phase fraction volumes should have the same number of dimensions&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Phase fraction volumes should all have the same shape&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ph</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">ph</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">ph</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">ph</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_compounds</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">xraylib</span><span class="o">.</span><span class="n">GetCompoundDataNISTByName</span><span class="p">(</span><span class="n">cmp</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cmp</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">cmp</span> <span class="k">for</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="n">phase_compounds</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span> <span class="o">=</span> <span class="n">voxel_size_cm</span>
+
+<div class="viewcode-block" id="VolumeMaterial.get_element_number"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_element_number">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_element_number</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the element number from the symbol.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        element : str | int</span>
+<span class="sd">            The element symbol (or number, which won&#39;t be converted).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The corresponding element number.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">element</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">SymbolToAtomicNumber</span><span class="p">(</span><span class="n">element</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VolumeMaterial.get_attenuation"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">get_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the local attenuation for each voxel.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        energy_keV : float</span>
+<span class="sd">            The X-ray energy.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArrayLike</span>
+<span class="sd">            The computed local attenuation volume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ph_lin_att</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ph</span><span class="p">,</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_compounds</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cmp_cs</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">energy_keV</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">cmp_cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span> <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])],</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">ph_lin_att</span> <span class="o">+=</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cmp_cs</span>
+        <span class="k">return</span> <span class="n">ph_lin_att</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span></div>
+
+<div class="viewcode-block" id="VolumeMaterial.get_element_mass_fraction"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_element_mass_fraction">[docs]</a>    <span class="k">def</span> <span class="nf">get_element_mass_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the local element mass fraction through out all the phases.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        element : str | int</span>
+<span class="sd">            The element to look for.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mass_fraction : ArrayLike</span>
+<span class="sd">            The local mass fraction in each voxel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">el_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element_number</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+        <span class="n">mass_fraction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ph</span><span class="p">,</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_compounds</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">el_num</span> <span class="ow">in</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">]:</span>
+                <span class="n">el_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="n">el_num</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">mass_fraction</span> <span class="o">+=</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">el_ind</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">mass_fraction</span></div>
+
+    <span class="k">def</span> <span class="nf">_check_parallax_detector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detector</span><span class="p">:</span> <span class="n">DetectorXRF</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">half_sample_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">distance_mm</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">distance_mm</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">detector</span><span class="o">.</span><span class="n">distance_mm</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">):</span>
+            <span class="n">dets</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span>
+            <span class="n">dets</span><span class="o">.</span><span class="n">distance_mm</span> <span class="o">=</span> <span class="n">dets</span><span class="o">.</span><span class="n">distance_mm</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">half_sample_size</span><span class="p">,</span> <span class="n">half_sample_size</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dets</span> <span class="o">=</span> <span class="n">detector</span>
+
+        <span class="n">solid_angles</span> <span class="o">=</span> <span class="n">dets</span><span class="o">.</span><span class="n">solid_angle_sr</span>
+        <span class="n">max_parallax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">solid_angles</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">solid_angles</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">max_parallax</span> <span class="o">&lt;</span> <span class="n">tolerance</span>
+
+<div class="viewcode-block" id="VolumeMaterial.get_compton_scattering"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_compton_scattering">[docs]</a>    <span class="k">def</span> <span class="nf">get_compton_scattering</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">energy_in_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">detector</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DetectorXRF</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the local Compton scattering.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        energy_in_keV : float</span>
+<span class="sd">            Incoming beam energy.</span>
+<span class="sd">        angle_rad : float, optional</span>
+<span class="sd">            The detector angle, with respect to incoming beam direction. The default is None.</span>
+<span class="sd">        detector : DetectorXRF, optional</span>
+<span class="sd">            The detector object. The default is None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            In case neither of `angle_rad` nor `detector` have been passed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        energy_out_keV : float</span>
+<span class="sd">            The energy of the Compton radiation received by the detector.</span>
+<span class="sd">        cmptn_yield : ArrayLike</span>
+<span class="sd">            Local yield of Compton radiation.</span>
+
+<span class="sd">        Either `angle_rad` or `detector` need to be supplied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">angle_rad</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">detector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either &#39;angle_rad&#39; or &#39;detector&#39; should be passed.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">detector</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_parallax_detector</span><span class="p">(</span><span class="n">detector</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING - detector parallax is above 1e-2&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">angle_rad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">angle_rad</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">angle_rad</span>
+
+        <span class="n">cmptn_yield</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ph</span><span class="p">,</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_compounds</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cmptn_cmp_cs</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">DCS_Compt_CP</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">energy_in_keV</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">cmptn_cmp_cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">xraylib</span><span class="o">.</span><span class="n">DCS_Compt</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">energy_in_keV</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])</span>
+                    <span class="p">],</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">cmptn_yield</span> <span class="o">+=</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cmptn_cmp_cs</span>
+        <span class="n">cmptn_yield</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span>
+
+        <span class="k">if</span> <span class="n">detector</span><span class="p">:</span>
+            <span class="n">cmptn_yield</span> <span class="o">*=</span> <span class="n">detector</span><span class="o">.</span><span class="n">solid_angle_sr</span>
+
+        <span class="n">energy_out_keV</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">ComptonEnergy</span><span class="p">(</span><span class="n">energy_in_keV</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">energy_out_keV</span><span class="p">,</span> <span class="n">cmptn_yield</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VolumeMaterial.get_fluo_yield"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_fluo_yield">[docs]</a>    <span class="k">def</span> <span class="nf">get_fluo_yield</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">energy_in_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">fluo_lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
+        <span class="n">detector</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DetectorXRF</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the local fluorescence yield, for the given line of the given element.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        element : str | int</span>
+<span class="sd">            The element to consider.</span>
+<span class="sd">        energy_in_keV : float</span>
+<span class="sd">            The incombing X-ray beam energy.</span>
+<span class="sd">        fluo_lines : str | FluoLine | Sequence[FluoLine]</span>
+<span class="sd">            The fluorescence line to consider.</span>
+<span class="sd">        detector : DetectorXRF, optional</span>
+<span class="sd">            The detector geometry. The default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        energy_out_keV : float</span>
+<span class="sd">            The emitted fluorescence energy.</span>
+<span class="sd">        el_yield : ArrayLike</span>
+<span class="sd">            The local fluorescence yield in each voxel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">detector</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_parallax_detector</span><span class="p">(</span><span class="n">detector</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING - detector parallax is above 1e-2&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fluo_lines</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">):</span>
+            <span class="n">fluo_lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">fluo_lines</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fluo_lines</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">fluo_lines</span> <span class="o">=</span> <span class="n">FluoLinesSiegbahn</span><span class="o">.</span><span class="n">get_lines</span><span class="p">(</span><span class="n">fluo_lines</span><span class="p">)</span>
+
+        <span class="n">el_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element_number</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+        <span class="n">el_cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">fluo_lines</span><span class="p">),</span> <span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fluo_lines</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">el_cs</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_FluorLine_Kissel</span><span class="p">(</span><span class="n">el_num</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">indx</span><span class="p">,</span> <span class="n">energy_in_keV</span><span class="p">)</span>  <span class="c1"># fluo production for cm2/g</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">el_sym</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">AtomicNumberToSymbol</span><span class="p">(</span><span class="n">el_num</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Energy </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">: el_num=</span><span class="si">{</span><span class="n">el_num</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">el_sym</span><span class="si">}</span><span class="s2">) line=</span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">el_cs</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">el_yield</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element_mass_fraction</span><span class="p">(</span><span class="n">el_num</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">el_cs</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span>
+
+        <span class="k">if</span> <span class="n">detector</span><span class="p">:</span>
+            <span class="n">el_yield</span> <span class="o">*=</span> <span class="n">detector</span><span class="o">.</span><span class="n">solid_angle_sr</span>
+
+        <span class="n">energy_out_keV</span> <span class="o">=</span> <span class="n">FluoLinesSiegbahn</span><span class="o">.</span><span class="n">get_energy</span><span class="p">(</span><span class="n">el_num</span><span class="p">,</span> <span class="n">fluo_lines</span><span class="p">,</span> <span class="n">compute_average</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">energy_out_keV</span><span class="p">,</span> <span class="n">el_yield</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

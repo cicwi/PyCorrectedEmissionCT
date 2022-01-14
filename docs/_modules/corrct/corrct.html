@@ -68,6 +68,8 @@
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Expose a minimalistic interface for sinogram generation and reconstruction.</span>
+
 <span class="sd">Created on Thu May  4 15:37:13 2017</span>
 
 <span class="sd">@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,</span>
@@ -77,6 +79,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">projectors</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">regularizers</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">solvers</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils_proc</span>
 
@@ -91,7 +94,8 @@
     <span class="n">weights_detectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Creates a synthetic sinogram, from the given volume, attenuations and PSF.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a synthetic sinogram, from the given volume, attenuations and PSF.</span>
 
 <span class="sd">    :param vol: Volume containing the elemental concentrations or other quantities.</span>
 <span class="sd">    :type vol: numpy.array_like</span>
@@ -138,16 +142,17 @@
     <span class="n">lower_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">upper_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">apply_circ_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">symm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">symm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">lambda_reg</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
     <span class="n">data_term</span><span class="o">=</span><span class="s2">&quot;l2&quot;</span><span class="p">,</span>
     <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Reconstructs the given sinogram, with the requested algorithm.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reconstruct the given sinogram, with the requested algorithm.</span>
 
 <span class="sd">    :param algo: Reconstruction algorithms to use.</span>
-<span class="sd">    :type algo: string. Options: &#39;SART&#39; | &#39;SIRT&#39; | &#39;CP&#39; | &#39;CPTV&#39; | &#39;CPL1&#39; | &#39;CPWL&#39;</span>
+<span class="sd">    :type algo: string. Options: &#39;SART&#39; | &#39;SIRT&#39; | &#39;PDHG&#39; | &#39;PDHG-TV&#39;</span>
 <span class="sd">    :param sino: The sinogram to recosntruct</span>
 <span class="sd">    :type sino: numpy.array_like</span>
 <span class="sd">    :param angles_rad: Angles in radians of each sinogram line</span>
@@ -206,17 +211,14 @@
             <span class="n">At</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">y</span><span class="p">,</span> <span class="n">ii</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">bp_angle</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="n">single_line</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># noqa: E731</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">A</span> <span class="o">=</span> <span class="n">p</span>
-            <span class="n">At</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">T</span>
 
         <span class="k">if</span> <span class="n">iterations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;SIRT&quot;</span><span class="p">,</span> <span class="s2">&quot;CPTV&quot;</span><span class="p">,</span> <span class="s2">&quot;CPL1&quot;</span><span class="p">,</span> <span class="s2">&quot;CPWL&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;SIRT&quot;</span><span class="p">,</span> <span class="s2">&quot;PDHG-TV&quot;</span><span class="p">):</span>
                 <span class="n">iterations</span> <span class="o">=</span> <span class="mi">50</span>
-            <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;CP&quot;</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;PDHG&quot;</span><span class="p">:</span>
                 <span class="n">iterations</span> <span class="o">=</span> <span class="mi">25</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">iterations</span> <span class="o">=</span> <span class="mi">5</span>
-
-        <span class="n">precondition</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Algorithms</span>
         <span class="k">if</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;SART&quot;</span><span class="p">:</span>
@@ -224,22 +226,14 @@
             <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">angles_rad</span><span class="p">),</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;SIRT&quot;</span><span class="p">:</span>
             <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Sirt</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;CP&quot;</span><span class="p">:</span>
-            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
-            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">,</span> <span class="n">precondition</span><span class="o">=</span><span class="n">precondition</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;CPTV&quot;</span><span class="p">:</span>
-            <span class="n">regularizer</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_TV2D</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">lambda_reg</span><span class="p">)</span>
-            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">regularizer</span><span class="p">)</span>
-            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">,</span> <span class="n">precondition</span><span class="o">=</span><span class="n">precondition</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;CPL1&quot;</span><span class="p">:</span>
-            <span class="n">regularizer</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">lambda_reg</span><span class="p">)</span>
-            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">regularizer</span><span class="p">)</span>
-            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">,</span> <span class="n">precondition</span><span class="o">=</span><span class="n">precondition</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;CPWL&quot;</span><span class="p">:</span>
-            <span class="n">regularizer</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1swl</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">lambda_reg</span><span class="p">,</span> <span class="n">pad_on_demand</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">regularizer</span><span class="p">)</span>
-            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">At</span><span class="o">=</span><span class="n">At</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">,</span> <span class="n">precondition</span><span class="o">=</span><span class="n">precondition</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;PDHG&quot;</span><span class="p">:</span>
+            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;PDHG-TV&quot;</span><span class="p">:</span>
+            <span class="n">regularizer</span> <span class="o">=</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">Regularizer_TV2D</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">lambda_reg</span><span class="p">)</span>
+            <span class="n">algo</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">regularizer</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">algo</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown algorithm: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">algo</span><span class="p">)</span>
 

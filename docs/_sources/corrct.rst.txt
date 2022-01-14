@@ -52,6 +52,14 @@ corrct.solvers module
    :undoc-members:
    :show-inheritance:
 
+corrct.utils\_phys module
+-------------------------
+
+.. automodule:: corrct.utils_phys
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.utils\_proc module
 -------------------------
 

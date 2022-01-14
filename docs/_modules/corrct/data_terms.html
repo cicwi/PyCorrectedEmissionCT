@@ -83,25 +83,33 @@
 
 
 <div class="viewcode-block" id="DataFidelityBase"><a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase">[docs]</a><span class="k">class</span> <span class="nc">DataFidelityBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the base data-fidelity class.</span>
+
+<span class="sd">    This class that defines the object interface.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    background : Optional[Union[float, ArrayLike]], optional</span>
+<span class="sd">        The data background. The default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">__data_fidelity_name__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the base data-fidelity class.</span>
-
-<span class="sd">        This class that defines the object interface.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        background : Optional[Union[float, ArrayLike]], optional</span>
-<span class="sd">            The data background. The default is None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="o">=</span> <span class="n">background</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="DataFidelityBase.info"><a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the data-fidelity info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Data fidelity info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">background</span><span class="p">)</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">bckgrnd_str</span> <span class="o">=</span> <span class="s2">&quot;(B:&lt;array&gt;)&quot;</span>
@@ -112,9 +120,25 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_fidelity_name__</span> <span class="o">+</span> <span class="n">bckgrnd_str</span></div>
 
 <div class="viewcode-block" id="DataFidelityBase.upper"><a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.upper">[docs]</a>    <span class="k">def</span> <span class="nf">upper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the upper case name of the data-fidelity.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Upper case string name of the data-fidelity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="DataFidelityBase.lower"><a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.lower">[docs]</a>    <span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the lower case name of the data-fidelity.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Lower case string name of the data-fidelity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="DataFidelityBase.assign_data"><a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.assign_data">[docs]</a>    <span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
@@ -317,15 +341,12 @@
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="DataFidelity_l1.apply_proximal"><a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l1.apply_proximal">[docs]</a>    <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">weight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">dual</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_threshold</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span>
-            <span class="n">dual_inner_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_inner_norm</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span>
-            <span class="n">dual</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">dual_inner_norm</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span>
-            <span class="n">dual</span> <span class="o">*=</span> <span class="n">weight</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dual</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dual</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_threshold</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span>
+        <span class="n">dual_inner_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_inner_norm</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span>
+        <span class="n">dual</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">dual_inner_norm</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span>
+        <span class="n">dual</span> <span class="o">*=</span> <span class="n">weight</span></div>
 
 <div class="viewcode-block" id="DataFidelity_l1.compute_residual_norm"><a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l1.compute_residual_norm">[docs]</a>    <span class="k">def</span> <span class="nf">compute_residual_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
         <span class="n">dual</span> <span class="o">=</span> <span class="n">dual</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
