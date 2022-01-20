@@ -261,7 +261,9 @@ def compute_variance_transmission(
     return variance
 
 
-def compute_variance_weigth(variance: ArrayLike, normalized: bool = False, semilog: bool = False) -> ArrayLike:
+def compute_variance_weigth(
+    variance: ArrayLike, percentile: float = 0.001, normalized: bool = False, semilog: bool = False
+) -> ArrayLike:
     """
     Compute the weight associated to the given variance, in a weighted least-squares context.
 
@@ -269,6 +271,8 @@ def compute_variance_weigth(variance: ArrayLike, normalized: bool = False, semil
     ----------
     variance : ArrayLike
         The variance of the signal.
+    percentile : float
+        Minimum percentile to discard. The default is 0.001 (0.1%)
     normalized : bool, optional
         Scale the largest weight to 1. The default is False.
     semilog : bool, optional
@@ -281,14 +285,20 @@ def compute_variance_weigth(variance: ArrayLike, normalized: bool = False, semil
         The computed weights.
     """
     variance = np.abs(variance)
-    if semilog:
-        variance = np.log(variance + 1) - 1
-    min_nonzero_variance = np.fmax(np.min(variance[variance > 0]), eps)
+
+    sorted_variances = np.sort(variance.flatten())
+    percentiles_variances = np.cumsum(sorted_variances) / np.sum(sorted_variances)
+    ind_threshold = np.fmin(np.fmax(0, np.sum(percentiles_variances < percentile)), percentiles_variances.size)
+    min_val = np.fmax(sorted_variances[ind_threshold], eps)
+
+    min_nonzero_variance = np.fmax(np.min(variance[variance > 0]), min_val)
     weight = np.fmax(variance, min_nonzero_variance)
+
     if normalized:
-        return min_nonzero_variance / weight
-    else:
-        return 1 / weight
+        weight /= min_nonzero_variance
+    if semilog:
+        weight = np.log(weight + float(normalized is False)) + 1
+    return 1 / weight
 
 
 def denoise_image(
