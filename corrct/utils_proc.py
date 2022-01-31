@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+Pre-processing and post-processing routines.
+
 Created on Tue Mar 24 15:25:14 2020
 
 @author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
@@ -26,8 +28,9 @@ def get_circular_mask(
     vol_shape: ArrayLike,
     radius_offset: float = 0,
     coords_ball: Optional[Sequence[int]] = None,
+    vol_origin: Optional[Sequence[float]] = None,
     mask_drop_off: str = "const",
-    data_type: DTypeLike = np.float32,
+    dtype: DTypeLike = np.float32,
 ) -> ArrayLike:
     """
     Compute a circular mask for the reconstruction volume.
@@ -40,15 +43,17 @@ def get_circular_mask(
         The offset with respect to the volume edge. The default is 0.
     coords_ball : Optional[Sequence[int]], optional
         The coordinates to consider for the non-masked region. The default is None.
+    vol_origin : Optional[Sequence[float]], optional
+        The origin of the coordinates in voxels. The default is None.
     mask_drop_off : str, optional
         The mask data type. Allowed types: "const" | "sinc". The default is "const".
-    data_type : DTypeLike, optional
+    dtype : DTypeLike, optional
         The type of mask. The default is np.float32.
 
     Raises
     ------
     ValueError
-        In case of unknown mask_drop_off value.
+        In case of unknown mask_drop_off value, or mismatching volume origin and shape.
 
     Returns
     -------
@@ -57,7 +62,11 @@ def get_circular_mask(
     """
     vol_shape = np.array(vol_shape, dtype=int)
 
-    coords = [np.linspace(-(s - 1) / 2, (s - 1) / 2, s, dtype=data_type) for s in vol_shape]
+    coords = [np.linspace(-(s - 1) / 2, (s - 1) / 2, s, dtype=dtype) for s in vol_shape]
+    if vol_origin:
+        if len(coords) != len(vol_origin):
+            raise ValueError(f"The volume shape ({len(coords)}), and the origin shape ({len(vol_origin)}) should match")
+        coords = [c + vol_origin[ii] for ii, c in enumerate(coords)]
     coords = np.meshgrid(*coords, indexing="ij")
 
     if coords_ball is None:
@@ -74,12 +83,12 @@ def get_circular_mask(
         dists = np.sqrt(np.sum(coords[coords_ball, ...] ** 2, axis=0))
 
     if mask_drop_off.lower() == "const":
-        return dists <= radius
+        return (dists <= radius).astype(dtype)
     elif mask_drop_off.lower() == "sinc":
         cut_off = np.min(vol_shape[coords_ball]) / np.sqrt(2) - radius
-        outter_region = 1 - (dists <= radius)
-        outter_vals = 1 - np.sinc((dists - radius) / cut_off)
-        return np.fmax(1 - outter_region * outter_vals, 0)
+        outter_region = 1.0 - (dists <= radius)
+        outter_vals = 1.0 - np.sinc((dists - radius) / cut_off)
+        return np.fmax(1 - outter_region * outter_vals, 0.0).astype(dtype)
     else:
         raise ValueError("Unknown drop-off function: %s" % mask_drop_off)
 
@@ -121,7 +130,7 @@ def apply_flat_field(
     flats: ArrayLike,
     darks: Optional[ArrayLike] = None,
     crop: Optional[Sequence[int]] = None,
-    data_type: DTypeLike = np.float32,
+    dtype: DTypeLike = np.float32,
 ) -> ArrayLike:
     """
     Apply flat field.
@@ -136,7 +145,7 @@ def apply_flat_field(
         Dark noise. The default is None.
     crop : Optional[Sequence[int]], optional
         Crop region. The default is None.
-    data_type : DTypeLike, optional
+    dtype : DTypeLike, optional
         Data type of the processed data. The default is np.float32.
 
     Returns
@@ -144,8 +153,8 @@ def apply_flat_field(
     ArrayLike
         Falt-field corrected and linearized projections.
     """
-    projs = np.ascontiguousarray(projs, dtype=data_type)
-    flats = np.ascontiguousarray(flats, dtype=data_type)
+    projs = np.ascontiguousarray(projs, dtype=dtype)
+    flats = np.ascontiguousarray(flats, dtype=dtype)
     if crop is not None:
         projs = projs[..., crop[0] : crop[2], crop[1] : crop[3]]
         flats = flats[..., crop[0] : crop[2], crop[1] : crop[3]]
@@ -153,7 +162,7 @@ def apply_flat_field(
             darks = darks[..., crop[0] : crop[2], crop[1] : crop[3]]
 
     if darks is not None:
-        darks = np.ascontiguousarray(darks, dtype=data_type)
+        darks = np.ascontiguousarray(darks, dtype=dtype)
         projs = projs - darks
         flats = flats - darks
 
