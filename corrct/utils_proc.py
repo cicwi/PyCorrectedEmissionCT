@@ -12,6 +12,8 @@ import numpy as np
 import scipy as sp
 import scipy.signal
 
+import skimage.transform as skt
+
 from . import operators
 from . import solvers
 from . import utils_reg
@@ -244,6 +246,28 @@ def apply_minus_log(projs: ArrayLike) -> ArrayLike:
         Linearized projections.
     """
     return np.fmax(-np.log(projs), 0.0)
+
+
+def rotate_proj_stack(data_vwu: ArrayLike, rot_angle_deg: float) -> ArrayLike:
+    """
+    Rotate the projection stack.
+
+    Parameters
+    ----------
+    data_vwu : ArrayLike
+        The projection stack, with dimensions [v, w, u] (vertical, omega / sample rotation, horizontal).
+    rot_angle_deg : float
+        The rotation angle in degrees.
+
+    Returns
+    -------
+    ArrayLike
+        The rotated projection stack.
+    """
+    data_vwu_r = np.empty_like(data_vwu)
+    for ii in range(data_vwu.shape[-2]):
+        data_vwu_r[:, ii, :] = skt.rotate(data_vwu[:, ii, :], -rot_angle_deg, clip=False)
+    return data_vwu_r
 
 
 def compute_variance_poisson(
