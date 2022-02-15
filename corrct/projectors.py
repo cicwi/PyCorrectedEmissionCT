@@ -14,6 +14,7 @@ import skimage.transform as skt
 from . import operators
 from . import _projector_backends as prj_backends
 from . import utils_proc
+from . import models
 
 import concurrent.futures as cf
 import multiprocessing as mp
@@ -118,12 +119,17 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         The rotation angles.
     rot_axis_shift_pix : float or ArrayLike, optional
         The rotation axis shift(s) in pixels. The default is 0.
+    geom : ProjectionGeometry, optional
+        The fully specified projection geometry.
+        When active, the rotation axis shift is ignored. The default is None.
     proj_intensities : float or ArrayLike, optional
         Projection scaling factor. The default is None.
     use_astra : bool, optional
-        Whether to use ASTRA or fall back to scikit-image. The default is True if CUDA is available, otherwise False.
+        Whether to use ASTRA or fall back to scikit-image.
+        The default is True if CUDA is available, otherwise False.
     create_single_projs : bool, optional
-        Whether to create projectors for single projections. Used for corrections and SART. The default is True.
+        Whether to create projectors for single projections.
+        Used for corrections and SART. The default is True.
     super_sampling : int, optional
         pixel and voxel super-sampling. The default is 1.
 
@@ -138,6 +144,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         vol_shape: Union[Sequence[int], ArrayLike],
         angles_rot_rad: Union[Sequence[float], ArrayLike],
         rot_axis_shift_pix: float = 0.0,
+        geom: Optional[models.ProjectionGeometry] = None,
         proj_intensities: Optional[ArrayLike] = None,
         use_astra: bool = prj_backends.has_cuda,
         create_single_projs: bool = True,
@@ -152,11 +159,17 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         if not vol_shape[0] == vol_shape[1]:
             raise ValueError("Only square volumes")
 
+        self.is_3d = len(vol_shape) == 3
+
+        if geom is not None and (not use_astra or not self.is_3d):
+            raise ValueError("Using class `ProjectionGeometry` requires astra-toolbox and 3D volumes.")
+
         if use_astra:
             self.projector_backend = prj_backends.ProjectorBackendASTRA(
                 vol_shape,
                 angles_rot_rad,
                 rot_axis_shift_pix=rot_axis_shift_pix,
+                geom=geom,
                 create_single_projs=create_single_projs,
                 super_sampling=super_sampling,
             )
@@ -166,7 +179,6 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             )
 
         self.angles_rot_rad = angles_rot_rad
-        self.is_3d = len(vol_shape) == 3
         self.proj_intensities = proj_intensities
 
         self.vol_shape = self.projector_backend.get_vol_shape()
@@ -305,6 +317,9 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         The rotation angles.
     rot_axis_shift_pix : float, optional
         The rotation axis shift(s) in pixels. The default is 0.
+    geom : ProjectionGeometry, optional
+        The fully specified projection geometry.
+        When active, the rotation axis shift is ignored. The default is None.
     proj_intensities : Optional[ArrayLike], optional
         Projection scaling factor. The default is None.
     super_sampling : int, optional
@@ -343,6 +358,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         vol_shape: Union[Sequence[int], ArrayLike],
         angles_rot_rad: ArrayLike,
         rot_axis_shift_pix: float = 0,
+        geom: Optional[models.ProjectionGeometry] = None,
         proj_intensities: Optional[ArrayLike] = None,
         super_sampling: int = 1,
         att_in: Optional[ArrayLike] = None,
@@ -362,6 +378,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             vol_shape,
             angles_rot_rad,
             rot_axis_shift_pix,
+            geom=geom,
             proj_intensities=proj_intensities,
             super_sampling=super_sampling,
         )

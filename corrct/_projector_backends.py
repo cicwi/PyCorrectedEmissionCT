@@ -10,6 +10,11 @@ import numpy as np
 import skimage
 import skimage.transform as skt
 
+from .models import ProjectionGeometry
+
+import scipy.spatial.transform as spt
+
+from typing import Optional
 from numpy.typing import ArrayLike
 
 from abc import ABC, abstractmethod
@@ -255,6 +260,9 @@ class ProjectorBackendASTRA(ProjectorBackend):
         The projection angles.
     rot_axis_shift_pix : float, optional
         Relative position of the rotation center with respect to the volume center. The default is 0.0.
+    geom : ProjectionGeometry, optional
+        The fully specified projection geometry.
+        When active, the rotation axis shift is ignored. The default is None.
     create_single_projs : bool, optional
         Whether to create projectors for single projections. Used for corrections and SART. The default is True.
     super_sampling : int, optional
@@ -271,13 +279,18 @@ class ProjectorBackendASTRA(ProjectorBackend):
         vol_shape: ArrayLike,
         angles_rot_rad: ArrayLike,
         rot_axis_shift_pix: float = 0.0,
+        geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
         super_sampling: int = 1,
     ):
         if len(vol_shape) == 3 and not has_cuda:
             raise ValueError("CUDA is not available: only 2D volumes are allowed!")
-
-        angles_rot_rad = -angles_rot_rad
+        if len(vol_shape) == 2 and geom is not None:
+            raise ValueError("Support for `ProjectionGeometry` is not implemented for 2D volumes.")
+        if not isinstance(rot_axis_shift_pix, (int, float, np.ndarray)):
+            raise ValueError(
+                "Rotation axis shift should either be an int, a float or a sequence of floats"
+                + f" ({type(rot_axis_shift_pix)} given instead).")
 
         super().__init__(vol_shape, np.array(angles_rot_rad))
 
@@ -291,40 +304,42 @@ class ProjectorBackendASTRA(ProjectorBackend):
         self.is_3d = len(vol_shape) == 3
         if self.is_3d:
             self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0], vol_shape[2]))
+            if geom is None:
+                det_pos_xyz = np.stack([rot_axis_shift_pix, np.zeros((len(rot_axis_shift_pix), 2))], axis=1)
+                geom = ProjectionGeometry(
+                    geom_type="parallel3d",
+                    src_pos_xyz=np.array([0, -1, 0]),
+                    det_pos_xyz=det_pos_xyz,
+                    det_u_xyz=np.array([1, 0, 0]),
+                    det_v_xyz=np.array([0, 0, 1]),
+                    rot_dir_xyz=np.array([0, 0, 1])
+                )
+
+            rotations = spt.Rotation.from_rotvec(self.angles_rot_rad[:, None] * geom.rot_dir_xyz)
 
             vectors = np.empty([num_angles, 12])
-            # source
-            vectors[:, 0] = -np.sin(self.angles_rot_rad)
-            vectors[:, 1] = -np.cos(self.angles_rot_rad)
-            vectors[:, 2] = 0
-            # vector from detector pixel (0,0) to (0,1)
-            vectors[:, 6] = np.cos(self.angles_rot_rad)
-            vectors[:, 7] = -np.sin(self.angles_rot_rad)
-            vectors[:, 8] = 0
-            # center of detector
-            vectors[:, 3:6] = rot_axis_shift_pix * vectors[:, 6:9]
-            # vector from detector pixel (0,0) to (1,0)
-            vectors[:, 9] = 0
-            vectors[:, 10] = 0
-            vectors[:, 11] = 1
+            vectors[:, 0:3] = rotations.apply(geom.src_pos_xyz / geom.pix2vox_ratio)
+            vectors[:, 3:6] = rotations.apply(geom.det_pos_xyz / geom.pix2vox_ratio)
+            vectors[:, 6:9] = rotations.apply(geom.det_u_xyz / geom.pix2vox_ratio)
+            vectors[:, 9:12] = rotations.apply(geom.det_v_xyz / geom.pix2vox_ratio)
 
             if self.has_individual_projs:
                 self.proj_geom_ind = [
-                    astra.create_proj_geom("parallel3d_vec", vol_shape[2], vol_shape[0], vectors[ii : ii + 1 :, :])
+                    astra.create_proj_geom(geom.geom_type + "_vec", vol_shape[2], vol_shape[0], vectors[ii : ii + 1 :, :])
                     for ii in range(num_angles)
                 ]
 
-            self.proj_geom_all = astra.create_proj_geom("parallel3d_vec", vol_shape[2], vol_shape[0], vectors)
+            self.proj_geom_all = astra.create_proj_geom(geom.geom_type + "_vec", vol_shape[2], vol_shape[0], vectors)
         else:
             self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0]))
 
             vectors = np.empty([num_angles, 6])
             # source
-            vectors[:, 0] = np.sin(self.angles_rot_rad)
+            vectors[:, 0] = -np.sin(self.angles_rot_rad)
             vectors[:, 1] = -np.cos(self.angles_rot_rad)
             # vector from detector pixel 0 to 1
             vectors[:, 4] = np.cos(self.angles_rot_rad)
-            vectors[:, 5] = np.sin(self.angles_rot_rad)
+            vectors[:, 5] = -np.sin(self.angles_rot_rad)
             # center of detector
             vectors[:, 2:4] = rot_axis_shift_pix * vectors[:, 4:6]
 

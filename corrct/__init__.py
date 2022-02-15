@@ -20,6 +20,8 @@ __version__ = __get_version()
 # Import all definitions from main module.
 from .corrct import *  # noqa: F401, F402, F403
 
+from . import models  # noqa: F401, F402
+
 from . import operators  # noqa: F401, F402
 from . import projectors  # noqa: F401, F402
 
