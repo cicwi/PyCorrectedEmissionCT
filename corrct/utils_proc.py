@@ -30,6 +30,7 @@ def get_circular_mask(
     coords_ball: Optional[Sequence[int]] = None,
     vol_origin: Optional[Sequence[float]] = None,
     mask_drop_off: str = "const",
+    super_sampling: int = 1,
     dtype: DTypeLike = np.float32,
 ) -> ArrayLike:
     """
@@ -47,6 +48,8 @@ def get_circular_mask(
         The origin of the coordinates in voxels. The default is None.
     mask_drop_off : str, optional
         The mask data type. Allowed types: "const" | "sinc". The default is "const".
+    super_sampling : int, optional
+        The pixel super sampling to be used for the mask. The default is 1.
     dtype : DTypeLike, optional
         The type of mask. The default is np.float32.
 
@@ -60,9 +63,9 @@ def get_circular_mask(
     ArrayLike
         The circular mask.
     """
-    vol_shape = np.array(vol_shape, dtype=int)
+    vol_shape = np.array(vol_shape, dtype=int) * super_sampling
 
-    coords = [np.linspace(-(s - 1) / 2, (s - 1) / 2, s, dtype=dtype) for s in vol_shape]
+    coords = [np.linspace(-(s - 1) / (2 * super_sampling), (s - 1) / (2 * super_sampling), s, dtype=dtype) for s in vol_shape]
     if vol_origin:
         if len(coords) != len(vol_origin):
             raise ValueError(f"The volume shape ({len(coords)}), and the origin shape ({len(vol_origin)}) should match")
@@ -74,7 +77,7 @@ def get_circular_mask(
     else:
         coords_ball = np.array(coords_ball, dtype=int)
 
-    radius = np.min(vol_shape[coords_ball]) / 2 + radius_offset
+    radius = np.min(vol_shape[coords_ball]) / (2 * super_sampling) + radius_offset
 
     coords = np.stack(coords, axis=0)
     if coords_ball.size == 1:
@@ -83,14 +86,21 @@ def get_circular_mask(
         dists = np.sqrt(np.sum(coords[coords_ball, ...] ** 2, axis=0))
 
     if mask_drop_off.lower() == "const":
-        return (dists <= radius).astype(dtype)
+        mask = (dists <= radius).astype(dtype)
     elif mask_drop_off.lower() == "sinc":
         cut_off = np.min(vol_shape[coords_ball]) / np.sqrt(2) - radius
         outter_region = 1.0 - (dists <= radius)
         outter_vals = 1.0 - np.sinc((dists - radius) / cut_off)
-        return np.fmax(1 - outter_region * outter_vals, 0.0).astype(dtype)
+        mask = np.fmax(1 - outter_region * outter_vals, 0.0).astype(dtype)
     else:
         raise ValueError("Unknown drop-off function: %s" % mask_drop_off)
+
+    if super_sampling > 1:
+        new_shape = np.stack([vol_shape // super_sampling, np.ones_like(vol_shape) * super_sampling], axis=1).flatten()
+        mask = mask.reshape(new_shape)
+        mask = np.mean(mask, axis=tuple(np.arange(1, len(vol_shape) * 2, 2, dtype=int)))
+
+    return mask
 
 
 def pad_sinogram(
