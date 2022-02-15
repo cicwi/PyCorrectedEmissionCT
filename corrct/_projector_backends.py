@@ -10,6 +10,10 @@ import numpy as np
 import skimage
 import skimage.transform as skt
 
+from numpy.typing import ArrayLike
+
+from abc import ABC, abstractmethod
+
 
 def _set_filter_name(filt):
     if skimage.__version__ >= "0.18":
@@ -33,19 +37,18 @@ except ImportError:
     print("WARNING: ASTRA is not available. Only 2D operations on CPU are available (scikit-image will be used).")
 
 
-class ProjectorBackend(object):
-    """Base projector backend class."""
+class ProjectorBackend(ABC):
+    """Initialize base abstract projector backend class. All backends should inherit from this class.
 
-    def __init__(self, vol_shape_yxz, angles_rot_rad):
-        """Initialize base projector backend class. All backends should inherit from this class.
+    Parameters
+    ----------
+    vol_shape_yxz : tuple, list or ArrayLike
+        The volume shape.
+    angles_rot_rad : tuple, list or ArrayLike
+        The projection angles.
+    """
 
-        Parameters
-        ----------
-        vol_shape_yxz : tuple, list or np.ndarray
-            The volume shape.
-        angles_rot_rad : tuple, list or np.ndarray
-            The projection angles.
-        """
+    def __init__(self, vol_shape_yxz: ArrayLike, angles_rot_rad: ArrayLike):
         self.vol_shape = [*vol_shape_yxz[2:], vol_shape_yxz[0], vol_shape_yxz[1]]
         self.angles_rot_rad = angles_rot_rad
         self.prj_shape = [*vol_shape_yxz[2:], len(self.angles_rot_rad), vol_shape_yxz[1]]
@@ -53,7 +56,7 @@ class ProjectorBackend(object):
 
         self.is_initialized = False
 
-    def get_vol_shape(self):
+    def get_vol_shape(self) -> ArrayLike:
         """Return the expected and produced volume shape (in ZYX coordinates).
 
         Returns
@@ -63,7 +66,7 @@ class ProjectorBackend(object):
         """
         return self.vol_shape
 
-    def get_prj_shape(self):
+    def get_prj_shape(self) -> ArrayLike:
         """Return the expected and produced projection shape (in VWU coordinates).
 
         Returns
@@ -73,14 +76,14 @@ class ProjectorBackend(object):
         """
         return self.prj_shape
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the projector.
 
         It should make sure that all the resources have been allocated.
         """
         self.is_initialized = True
 
-    def dispose(self):
+    def dispose(self) -> None:
         """De-initialize the projector.
 
         It should make sure that all the resources have been de-allocated.
@@ -92,42 +95,45 @@ class ProjectorBackend(object):
         if self.is_initialized:
             self.dispose()
 
-    def fp(self, vol, angle_ind: int = None):
+    @abstractmethod
+    def fp(self, vol: ArrayLike, angle_ind: int = None) -> ArrayLike:
         """Forward-project volume.
 
         Forward-projection interface. Derived backends need to implement this method.
 
         Parameters
         ----------
-        vol : numpy.array_like
+        vol : ArrayLike
             The volume to forward-project.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
         """
         raise NotImplementedError("Method FP not implemented.")
 
-    def bp(self, prj, angle_ind: int = None):
+    @abstractmethod
+    def bp(self, prj: ArrayLike, angle_ind: int = None) -> ArrayLike:
         """Back-project data.
 
         Back-projection interface. Derived backends need to implement this method.
 
         Parameters
         ----------
-        prj : numpy.array_like
+        prj : ArrayLike
             The sinogram to back-project or a single line.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
         """
         raise NotImplementedError("Method BP not implemented.")
 
-    def fbp(self, prj, fbp_filter):
+    @abstractmethod
+    def fbp(self, prj: ArrayLike, fbp_filter) -> ArrayLike:
         """Apply FBP.
 
         Filtered back-projection interface. Derived backends need to implement this method.
 
         Parameters
         ----------
-        prj : numpy.array_like
+        prj : ArrayLike
             The sinogram or stack of sinograms.
         fbp_filter : str
             The filter to use in the filtered back-projection.
@@ -136,25 +142,24 @@ class ProjectorBackend(object):
 
 
 class ProjectorBackendSKimage(ProjectorBackend):
-    """Projector backend based on scikit-image."""
+    """Initialize projector backend based on scikit-image.
 
-    def __init__(self, vol_shape, angles_rot_rad, rot_axis_shift_pix: float = 0.0):
-        """Initialize projector backend based on scikit-image.
+    Parameters
+    ----------
+    vol_shape : tuple, list or ArrayLike
+        The volume shape.
+    angles_rot_rad : tuple, list or ArrayLike
+        The projection angles.
+    rot_axis_shift_pix : float, optional
+        Relative position of the rotation center with respect to the volume center. The default is 0.0.
 
-        Parameters
-        ----------
-        vol_shape : tuple, list or np.ndarray
-            The volume shape.
-        angles_rot_rad : tuple, list or np.ndarray
-            The projection angles.
-        rot_axis_shift_pix : float, optional
-            Relative position of the rotation center with respect to the volume center. The default is 0.0.
+    Raises
+    ------
+    ValueError
+        In case the volume dimensionality is larger than 2D, and if a rotation axis shift is passed.
+    """
 
-        Raises
-        ------
-        ValueError
-            In case the volume dimensionality is larger than 2D, and if a rotation axis shift is passed.
-        """
+    def __init__(self, vol_shape: ArrayLike, angles_rot_rad: ArrayLike, rot_axis_shift_pix: float = 0.0):
         if len(vol_shape) == 3:
             raise ValueError("With the scikit-image backend only 2D volumes are allowed!")
         if not float(rot_axis_shift_pix) == 0.0:
@@ -165,19 +170,19 @@ class ProjectorBackendSKimage(ProjectorBackend):
         self.angles_rot_deg = np.rad2deg(angles_rot_rad)
         self.is_initialized = True
 
-    def fp(self, vol: np.ndarray, angle_ind: int = None):
+    def fp(self, vol: ArrayLike, angle_ind: int = None) -> ArrayLike:
         """Forward-projection of the volume to the sinogram or a single sinogram line.
 
         Parameters
         ----------
-        vol : numpy.array_like
+        vol : ArrayLike
             The volume to forward-project.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The forward-projected sinogram or sinogram line.
         """
         if angle_ind is None:
@@ -188,19 +193,19 @@ class ProjectorBackendSKimage(ProjectorBackend):
         else:
             return np.squeeze(skt.radon(vol, self.angles_rot_deg[angle_ind : angle_ind + 1 :]))
 
-    def bp(self, prj: np.ndarray, angle_ind: int = None):
+    def bp(self, prj: ArrayLike, angle_ind: int = None) -> ArrayLike:
         """Back-projection of a single sinogram line to the volume.
 
         Parameters
         ----------
-        prj : numpy.array_like
+        prj : ArrayLike
             The sinogram to back-project or a single line.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The back-projected volume.
         """
         filter_name = _set_filter_name(None)
@@ -212,19 +217,19 @@ class ProjectorBackendSKimage(ProjectorBackend):
         else:
             return skt.iradon(prj[:, np.newaxis], self.angles_rot_deg[angle_ind : angle_ind + 1 :], **filter_name)
 
-    def fbp(self, prj: np.ndarray, fbp_filter: str):
+    def fbp(self, prj: ArrayLike, fbp_filter: str) -> ArrayLike:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
         ----------
-        prj : numpy.array_like
+        prj : ArrayLike
             The sinogram or stack of sinograms.
         fbp_filter : str
             The filter to use in the filtered back-projection.
 
         Returns
         -------
-        vol : numpy.array_like
+        vol : ArrayLike
             The reconstructed volume.
         """
         filter_name = _set_filter_name(fbp_filter.lower())
@@ -240,36 +245,35 @@ class ProjectorBackendSKimage(ProjectorBackend):
 
 
 class ProjectorBackendASTRA(ProjectorBackend):
-    """Projector backend based on astra-toolbox."""
+    """Initialize projector backend based on astra-toolbox.
+
+    Parameters
+    ----------
+    vol_shape : tuple, list or ArrayLike
+        The volume shape.
+    angles_rot_rad : tuple, list or ArrayLike
+        The projection angles.
+    rot_axis_shift_pix : float, optional
+        Relative position of the rotation center with respect to the volume center. The default is 0.0.
+    create_single_projs : bool, optional
+        Whether to create projectors for single projections. Used for corrections and SART. The default is True.
+    super_sampling : int, optional
+        pixel and voxel super-sampling. The default is 1.
+
+    Raises
+    ------
+    ValueError
+        In case the volume dimensionality is larger than 2D and CUDA is not available.
+    """
 
     def __init__(
         self,
-        vol_shape,
-        angles_rot_rad,
+        vol_shape: ArrayLike,
+        angles_rot_rad: ArrayLike,
         rot_axis_shift_pix: float = 0.0,
         create_single_projs: bool = True,
         super_sampling: int = 1,
     ):
-        """Initialize projector backend based on astra-toolbox.
-
-        Parameters
-        ----------
-        vol_shape : tuple, list or np.ndarray
-            The volume shape.
-        angles_rot_rad : tuple, list or np.ndarray
-            The projection angles.
-        rot_axis_shift_pix : float, optional
-            Relative position of the rotation center with respect to the volume center. The default is 0.0.
-        create_single_projs : bool, optional
-            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
-        super_sampling : int, optional
-            pixel and voxel super-sampling. The default is 1.
-
-        Raises
-        ------
-        ValueError
-            In case the volume dimensionality is larger than 2D and CUDA is not available.
-        """
         if len(vol_shape) == 3 and not has_cuda:
             raise ValueError("CUDA is not available: only 2D volumes are allowed!")
 
@@ -331,7 +335,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
             self.proj_geom_all = astra.create_proj_geom("parallel_vec", vol_shape[0], vectors)
 
-    def get_vol_shape(self):
+    def get_vol_shape(self) -> ArrayLike:
         """Return the expected and produced volume shape (in ZYX coordinates).
 
         Returns
@@ -341,7 +345,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         """
         return astra.functions.geom_size(self.vol_geom)
 
-    def get_prj_shape(self):
+    def get_prj_shape(self) -> ArrayLike:
         """Return the expected and produced projection shape (in VWU coordinates).
 
         Returns
@@ -351,7 +355,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         """
         return astra.functions.geom_size(self.proj_geom_all)
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the ASTRA projectors."""
         if not self.is_initialized:
             if self.is_3d:
@@ -376,7 +380,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         super().initialize()
 
-    def _check_data(self, x, expected_shape):
+    def _check_data(self, x: ArrayLike, expected_shape: ArrayLike) -> ArrayLike:
         if x.dtype != np.float32:
             x = x.astype(np.float32)
         if not x.flags["C_CONTIGUOUS"]:
@@ -387,7 +391,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
             print(f"Could not reshape input data of shape={x.shape} into expected shape={expected_shape}")
             raise
 
-    def dispose(self):
+    def dispose(self) -> None:
         """De-initialize the ASTRA projectors."""
         for p in self.proj_id:
             astra.projector.delete(p)
@@ -395,19 +399,19 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         super().dispose()
 
-    def fp(self, vol, angle_ind: int = None):
+    def fp(self, vol: ArrayLike, angle_ind: int = None) -> ArrayLike:
         """Apply forward-projection of the volume to the sinogram or a single sinogram line.
 
         Parameters
         ----------
-        vol : numpy.array_like
+        vol : ArrayLike
             The volume to forward-project.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The forward-projected sinogram or sinogram line.
         """
         self.initialize()
@@ -444,19 +448,19 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         return np.squeeze(prj)
 
-    def bp(self, prj, angle_ind: int = None):
+    def bp(self, prj: ArrayLike, angle_ind: int = None) -> ArrayLike:
         """Apply back-projection of a single sinogram line to the volume.
 
         Parameters
         ----------
-        prj : numpy.array_like
+        prj : ArrayLike
             The sinogram to back-project or a single line.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
 
         Returns
         -------
-        numpy.array_like
+        ArrayLike
             The back-projected volume.
         """
         self.initialize()
@@ -492,19 +496,19 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         return vol
 
-    def fbp(self, prj, fbp_filter: str):
+    def fbp(self, prj: ArrayLike, fbp_filter: str) -> ArrayLike:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
         ----------
-        prj : numpy.array_like
+        prj : ArrayLike
             The sinogram or stack of sinograms.
         fbp_filter : str
             The filter to use in the filtered back-projection.
 
         Returns
         -------
-        vol : numpy.array_like
+        vol : ArrayLike
             The reconstructed volume.
         """
         self.initialize()
