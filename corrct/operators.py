@@ -12,6 +12,8 @@ import scipy.sparse.linalg as spsla
 
 import copy as cp
 
+from numpy.typing import ArrayLike
+
 try:
     import pywt
 
@@ -42,7 +44,7 @@ class BaseTransform(spsla.LinearOperator):
         super().__init__(np.float32, [num_rows, num_cols])
         self.is_dir_operator = True
 
-    def _matvec(self, x):
+    def _matvec(self, x: ArrayLike) -> ArrayLike:
         """Implement the direct operator for column vectors from the right.
 
         :param x: Either row from the left or column from the right.
@@ -55,7 +57,7 @@ class BaseTransform(spsla.LinearOperator):
             x = x.reshape(self.adj_shape)
             return self._op_adjoint(x).flatten()
 
-    def rmatvec(self, x):
+    def rmatvec(self, x: ArrayLike) -> ArrayLike:
         """Implement the direct operator for row vectors from the left.
 
         :param x: Either row from the left or column from the right on transpose.
@@ -107,7 +109,7 @@ class BaseTransform(spsla.LinearOperator):
             He[:, ii] = self * xii
         return He
 
-    def __call__(self, x):
+    def __call__(self, x: ArrayLike) -> ArrayLike:
         """Apply the operator to the input vector.
 
         :param x: Input vector.
@@ -121,10 +123,10 @@ class BaseTransform(spsla.LinearOperator):
         else:
             return self._op_adjoint(x)
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: ArrayLike) -> ArrayLike:
         raise NotImplementedError()
 
-    def _op_adjoint(self, x):
+    def _op_adjoint(self, x: ArrayLike) -> ArrayLike:
         raise NotImplementedError()
 
 
