@@ -9,6 +9,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 import scipy.sparse.linalg as spsla
+import scipy.signal as spsig
 
 import copy as cp
 
@@ -223,7 +224,51 @@ class TransformDiagonalScaling(BaseTransform):
         return self.scale * x
 
 
+class TransformConvolution(BaseTransform):
+    """
+    Convolution operator.
+
+    Parameters
+    ----------
+    x_shape : ArrayLike
+        Shape of the direct space.
+    kernel : ArrayLike
+        The convolution kernel.
+    is_symm : bool, optional
+        Whether the operator is symmetric or not. The default is True.
+    """
+
+    def __init__(self, x_shape: ArrayLike, kernel: ArrayLike, is_symm: bool = True):
+        self.kernel = kernel
+        self.is_symm = is_symm
+        self.dir_shape = np.array(x_shape)
+        self.adj_shape = np.array(x_shape)
+        super().__init__()
+
+    def absolute(self) -> "TransformConvolution":
+        """
+        Return the convolution operator using the absolute value of the kernel coefficients.
+
+        Returns
+        -------
+        TransformConvolution
+            The absolute value of the convolution operator.
+        """
+        return TransformConvolution(self.dir_shape, np.abs(self.kernel))
+
+    def _op_direct(self, x):
+        return spsig.convolve(x, self.kernel, mode="same")
+
+    def _op_adjoint(self, x):
+        if self.is_symm:
+            return spsig.convolve(x, self.kernel, mode="same")
+        else:
+            return x
+
+
 class BaseWaveletTransform(BaseTransform):
+    """Base Wavelet transform."""
+
     def _initialize_filter_bank(self):
         num_axes = len(self.axes)
         self.labels = [bin(x)[2:].zfill(num_axes).replace("0", "a").replace("1", "d") for x in range(1, 2 ** num_axes)]
