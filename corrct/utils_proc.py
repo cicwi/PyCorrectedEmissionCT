@@ -322,7 +322,8 @@ def compute_variance_weigth(
 
 def denoise_image(
     img: ArrayLike,
-    reg_weight: Union[float, Sequence[float], ArrayLike] = 1e-2,
+    reg_weight: Union[float, ArrayLike] = 1e-2,
+    psf: Optional[ArrayLike] = None,
     variances: Optional[ArrayLike] = None,
     iterations: int = 250,
     axes: Sequence[int] = (-2, -1),
@@ -362,13 +363,28 @@ def denoise_image(
     ArrayLike
         Denoised image or sinogram.
     """
-    OpI = operators.TransformIdentity(img.shape)
+    if psf is None:
+        op = operators.TransformIdentity(img.shape)
+        padding = None
+    else:
+        padding = [(0, )] * len(img.shape)
+        for ii, p in enumerate(psf.shape):
+            padding[axes[ii]] = (p, )
+        new_shape = np.ones_like(img.shape)
+        new_shape[list(axes)] = psf.shape
+
+        img = np.pad(img, padding, mode="edge")
+        if variances is not None:
+            variances = np.pad(variances, padding, mode="edge")
+        op = operators.TransformConvolution(img.shape, psf.reshape(new_shape))
 
     if variances is not None:
         variances = np.abs(variances)
-        min_nonzero_vars = np.min(variances[variances > 0])
-        img_weights = 1 / np.fmax(variances, min_nonzero_vars)
-
+        img_weights = compute_variance_weigth(variances, normalized=True, semilog=True)
+        # import matplotlib.pyplot as plt
+        # plt.figure()
+        # plt.imshow(img_weights[:, 0, :])
+        # plt.show()
         data_term = solvers.DataFidelity_wl2(img_weights)
     else:
         data_term = solvers.DataFidelity_l2()
@@ -379,8 +395,8 @@ def denoise_image(
     def solver_spawn(lam_reg):
         # Using the PDHG solver from Chambolle and Pock
         # reg = solvers.Regularizer_Grad(lam_reg, axes=axes)
-        reg = solvers.Regularizer_l1swl(lam_reg, "bior4.4", 3, axes=axes, normalized=False)
-        return solvers.CP(verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term)
+        reg = solvers.Regularizer_l1dwl(lam_reg, "bior4.4", 3, axes=axes)
+        return solvers.PDHG(verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term)
 
     def solver_call(solver, b_test_mask=None):
         if b_test_mask is not None:
@@ -391,7 +407,7 @@ def denoise_image(
         else:
             x0 = img.copy()
 
-        return solver(OpI, img, iterations, x0=x0, lower_limit=lower_limit, b_test_mask=b_test_mask)
+        return solver(op, img, iterations, x0=x0, lower_limit=lower_limit, b_test_mask=b_test_mask)
 
     reg_weight = np.array(reg_weight)
     if reg_weight.size > 1:
@@ -405,6 +421,10 @@ def denoise_image(
 
     solver = solver_spawn(reg_weight)
     (denoised_img, _) = solver_call(solver, None)
+
+    if padding is not None:
+        slicing = [slice(p[0], -p[0]) if p[0] else slice(None) for p in padding]
+        denoised_img = denoised_img[tuple(slicing)]
     return denoised_img
 
 
