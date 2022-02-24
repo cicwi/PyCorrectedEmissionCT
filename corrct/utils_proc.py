@@ -16,12 +16,60 @@ from . import operators
 from . import solvers
 from . import utils_reg
 
-from typing import Sequence, Optional, Union, Tuple
+from typing import Sequence, Optional, Union, Tuple, Callable
 
 from numpy.typing import ArrayLike, DTypeLike
 
 
 eps = np.finfo(np.float32).eps
+
+
+def get_ball(
+    data_shape_vu: ArrayLike,
+    radius: Union[int, float],
+    super_sampling: int = 5,
+    dtype: DTypeLike = np.float32,
+    func: Optional[Callable] = None
+) -> ArrayLike:
+    """
+    Compute a ball with specified radius.
+
+    Parameters
+    ----------
+    data_shape_vu : ArrayLike
+        Shape of the output array.
+    radius : int | float
+        Radius of the ball.
+    super_sampling : int, optional
+        Super-sampling for having smoother ball edges. The default is 5.
+    dtype : DTypeLike, optional
+        Type of the output. The default is np.float32.
+    func : Optional[Callable], optional
+        Point-wise function for the local values. The default is None.
+
+    Returns
+    -------
+    ArrayLike
+        The ball.
+    """
+    data_shape_vu = np.array(data_shape_vu, dtype=int) * super_sampling
+
+    # coords = [np.linspace(-(s - 1) / 2, (s - 1) / 2, s, dtype=np.float32) for s in data_shape_vu]
+    coords = [np.fft.fftfreq(d, 1 / d) for d in data_shape_vu]
+    coords = np.stack(np.meshgrid(*coords, indexing="ij"), axis=0)
+
+    r = np.sqrt(np.sum(coords ** 2, axis=0)) / super_sampling
+
+    probe = (r < radius).astype(dtype)
+    if func is not None:
+        probe *= func(r)
+
+    probe = np.roll(probe, super_sampling // 2, axis=tuple(np.arange(len(data_shape_vu))))
+    new_shape = np.stack([data_shape_vu // super_sampling, np.ones_like(data_shape_vu) * super_sampling], axis=1).flatten()
+    probe = probe.reshape(new_shape)
+    probe = np.mean(probe, axis=tuple(np.arange(1, len(data_shape_vu) * 2, 2, dtype=int)))
+
+    return np.fft.fftshift(probe)
 
 
 def get_circular_mask(
