@@ -146,6 +146,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         rot_axis_shift_pix: float = 0.0,
         geom: Optional[models.ProjectionGeometry] = None,
         proj_intensities: Optional[ArrayLike] = None,
+        psf: Optional[ArrayLike] = None,
         use_astra: bool = prj_backends.has_cuda,
         create_single_projs: bool = True,
         super_sampling: int = 1,
@@ -181,6 +182,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         self.angles_rot_rad = angles_rot_rad
         self.proj_intensities = proj_intensities
 
+        self.psf = psf
+
         self.vol_shape = self.projector_backend.get_vol_shape()
         self.proj_shape = self.projector_backend.get_prj_shape()
         super().__init__()
@@ -212,6 +215,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         x = self.projector_backend.fp(vol, angle_ind)
         if self.proj_intensities is not None:
             x *= self.proj_intensities[angle_ind]
+        if self.psf is not None:
+            x = spsig.convolve(x, self.psf, mode="same")
         return x
 
     def bp_angle(self, sino_line: ArrayLike, angle_ind: int) -> ArrayLike:
@@ -250,6 +255,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         x = self.projector_backend.fp(vol)
         if self.proj_intensities is not None:
             x *= self.proj_intensities[:, np.newaxis]
+        if self.psf is not None:
+            x = spsig.convolve(x, self.psf[..., None, :], mode="same")
         return x
 
     def bp(self, data: ArrayLike) -> ArrayLike:
@@ -379,6 +386,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             angles_rot_rad,
             rot_axis_shift_pix,
             geom=geom,
+            psf=psf,
             proj_intensities=proj_intensities,
             super_sampling=super_sampling,
         )
@@ -416,8 +424,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         self.precompute_attenuation = precompute_attenuation
         self.is_symmetric = is_symmetric
-
-        self.psf = psf
 
         if self.precompute_attenuation:
             self.compute_attenuation_volumes()
@@ -611,9 +617,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             for ii in range(len(self.angles_det_rad))
         ]
         sino_line = np.ascontiguousarray(np.stack(sino_line, axis=0))
-
-        if self.psf is not None:
-            sino_line = spsig.convolve(sino_line, self.psf, mode="same")
 
         if sino_line.shape[0] == 1:
             sino_line = np.squeeze(sino_line, axis=0)
