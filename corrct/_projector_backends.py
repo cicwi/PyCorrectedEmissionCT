@@ -10,7 +10,7 @@ import numpy as np
 import skimage
 import skimage.transform as skt
 
-from .models import ProjectionGeometry
+from .models import ProjectionGeometry, VolumeGeometry
 
 import scipy.spatial.transform as spt
 
@@ -47,29 +47,33 @@ class ProjectorBackend(ABC):
 
     Parameters
     ----------
-    vol_shape_yxz : tuple, list or ArrayLike
-        The volume shape.
+    vol_geom : VolumeGeometry
+        The volume geometry.
     angles_rot_rad : tuple, list or ArrayLike
         The projection angles.
     """
 
-    def __init__(self, vol_shape_yxz: ArrayLike, angles_rot_rad: ArrayLike):
-        self.vol_shape = [*vol_shape_yxz[2:], vol_shape_yxz[0], vol_shape_yxz[1]]
-        self.angles_rot_rad = angles_rot_rad
-        self.prj_shape = [*vol_shape_yxz[2:], len(self.angles_rot_rad), vol_shape_yxz[1]]
-        self.prj_1a_shape = [*vol_shape_yxz[2:], 1, vol_shape_yxz[1]]
+    def __init__(self, vol_geom: VolumeGeometry, angles_rot_rad: ArrayLike):
+        self.vol_geom = vol_geom
+
+        self.vol_shape_zxy = [*self.vol_geom.shape[2:], self.vol_geom.shape[0], self.vol_geom.shape[1]]
+        self.angles_w_rad = angles_rot_rad
+
+        # Basic sizes, unless overridden
+        self.prj_shape_vwu = [*self.vol_geom.shape[2:], len(self.angles_w_rad), self.vol_geom.shape[1]]
+        self.prj_shape_vu = [*self.vol_geom.shape[2:], 1, self.vol_geom.shape[1]]
 
         self.is_initialized = False
 
     def get_vol_shape(self) -> ArrayLike:
-        """Return the expected and produced volume shape (in ZYX coordinates).
+        """Return the expected and produced volume shape (in ZXY coordinates).
 
         Returns
         -------
         tuple
             The volume shape.
         """
-        return self.vol_shape
+        return self.vol_shape_zxy
 
     def get_prj_shape(self) -> ArrayLike:
         """Return the expected and produced projection shape (in VWU coordinates).
@@ -79,7 +83,7 @@ class ProjectorBackend(ABC):
         tuple
             The projection shape.
         """
-        return self.prj_shape
+        return self.prj_shape_vwu
 
     def initialize(self) -> None:
         """Initialize the projector.
@@ -151,7 +155,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
 
     Parameters
     ----------
-    vol_shape : tuple, list or ArrayLike
+    vol_geom : VolumeGeometry
         The volume shape.
     angles_rot_rad : tuple, list or ArrayLike
         The projection angles.
@@ -164,13 +168,13 @@ class ProjectorBackendSKimage(ProjectorBackend):
         In case the volume dimensionality is larger than 2D, and if a rotation axis shift is passed.
     """
 
-    def __init__(self, vol_shape: ArrayLike, angles_rot_rad: ArrayLike, rot_axis_shift_pix: float = 0.0):
-        if len(vol_shape) == 3:
+    def __init__(self, vol_geom: VolumeGeometry, angles_rot_rad: ArrayLike, rot_axis_shift_pix: float = 0.0):
+        if vol_geom.is_3D():
             raise ValueError("With the scikit-image backend only 2D volumes are allowed!")
         if not float(rot_axis_shift_pix) == 0.0:
             raise ValueError("With the scikit-image rotation axis shift is not supported!")
 
-        super().__init__(vol_shape, np.array(angles_rot_rad))
+        super().__init__(vol_geom, np.array(angles_rot_rad))
 
         self.angles_rot_deg = np.rad2deg(angles_rot_rad)
         self.is_initialized = True
@@ -191,7 +195,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
             The forward-projected sinogram or sinogram line.
         """
         if angle_ind is None:
-            prj = np.empty(self.prj_shape, dtype=vol.dtype)
+            prj = np.empty(self.prj_shape_vwu, dtype=vol.dtype)
             for ii_a, a in enumerate(self.angles_rot_deg):
                 prj[ii_a, :] = np.squeeze(skt.radon(vol, [a]))
             return prj
@@ -215,7 +219,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
         """
         filter_name = _set_filter_name(None)
         if angle_ind is None:
-            vol = np.empty([self.prj_shape[-1], *self.vol_shape], dtype=prj.dtype)
+            vol = np.empty([self.prj_shape_vwu[-1], *self.vol_shape_zxy], dtype=prj.dtype)
             for ii_a, a in enumerate(self.angles_rot_deg):
                 vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], **filter_name)
             return vol.sum(axis=0)
@@ -240,7 +244,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
         filter_name = _set_filter_name(fbp_filter.lower())
         if len(prj.shape) > 2:
             num_lines = prj.shape[1]
-            vol = np.empty([num_lines, *self.vol_shape], dtype=prj.dtype)
+            vol = np.empty([num_lines, *self.vol_shape_zxy], dtype=prj.dtype)
 
             for ii_v in range(num_lines):
                 vol[ii_v, ...] = skt.iradon(prj[ii_v, ...].transpose(), self.angles_rot_deg, **filter_name)
@@ -254,7 +258,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
     Parameters
     ----------
-    vol_shape : tuple, list or ArrayLike
+    vol_geom : VolumeGeometry
         The volume shape.
     angles_rot_rad : tuple, list or ArrayLike
         The projection angles.
@@ -276,34 +280,33 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
     def __init__(
         self,
-        vol_shape: ArrayLike,
+        vol_geom: VolumeGeometry,
         angles_rot_rad: ArrayLike,
         rot_axis_shift_pix: float = 0.0,
         geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
         super_sampling: int = 1,
     ):
-        if len(vol_shape) == 3 and not has_cuda:
+        if vol_geom.is_3D() and not has_cuda:
             raise ValueError("CUDA is not available: only 2D volumes are allowed!")
-        if len(vol_shape) == 2 and geom is not None:
+        if not vol_geom.is_3D() and geom is not None:
             raise ValueError("Support for `ProjectionGeometry` is not implemented for 2D volumes.")
         if not isinstance(rot_axis_shift_pix, (int, float, np.ndarray)):
             raise ValueError(
                 "Rotation axis shift should either be an int, a float or a sequence of floats"
                 + f" ({type(rot_axis_shift_pix)} given instead).")
 
-        super().__init__(vol_shape, np.array(angles_rot_rad))
+        super().__init__(vol_geom, np.array(angles_rot_rad))
 
         self.proj_id = []
         self.has_individual_projs = create_single_projs
         self.super_sampling = super_sampling
         self.dispose()
 
-        num_angles = self.angles_rot_rad.size
+        num_angles = self.angles_w_rad.size
 
-        self.is_3d = len(vol_shape) == 3
-        if self.is_3d:
-            self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0], vol_shape[2]))
+        if self.vol_geom.is_3D():
+            self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape[list([1, 0, 2])], *self.vol_geom.extent)
             if geom is None:
                 det_pos_xyz = np.stack([rot_axis_shift_pix, np.zeros((len(rot_axis_shift_pix), 2))], axis=1)
                 geom = ProjectionGeometry(
@@ -315,7 +318,13 @@ class ProjectorBackendASTRA(ProjectorBackend):
                     rot_dir_xyz=np.array([0, 0, 1])
                 )
 
-            rotations = spt.Rotation.from_rotvec(self.angles_rot_rad[:, None] * geom.rot_dir_xyz)
+            if geom.det_shape_vu is None:
+                geom.det_shape_vu = np.array(self.vol_geom.shape[list([2, 1])], dtype=int)
+            else:
+                self.prj_shape_vwu = [geom.det_shape_vu[0], num_angles, geom.det_shape_vu[1]]
+                self.prj_shape_vu = [geom.det_shape_vu[0], 1, geom.det_shape_vu[1]]
+
+            rotations = spt.Rotation.from_rotvec(self.angles_w_rad[:, None] * geom.rot_dir_xyz)
 
             vectors = np.empty([num_angles, 12])
             vectors[:, 0:3] = rotations.apply(geom.src_pos_xyz / geom.pix2vox_ratio)
@@ -325,30 +334,31 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
             if self.has_individual_projs:
                 self.proj_geom_ind = [
-                    astra.create_proj_geom(geom.geom_type + "_vec", vol_shape[2], vol_shape[0], vectors[ii : ii + 1 :, :])
+                    astra.create_proj_geom(geom.geom_type + "_vec", *geom.det_shape_vu, vectors[ii : ii + 1 :, :])
                     for ii in range(num_angles)
                 ]
 
-            self.proj_geom_all = astra.create_proj_geom(geom.geom_type + "_vec", vol_shape[2], vol_shape[0], vectors)
+            self.proj_geom_all = astra.create_proj_geom(geom.geom_type + "_vec", *geom.det_shape_vu, vectors)
         else:
-            self.vol_geom = astra.create_vol_geom((vol_shape[1], vol_shape[0]))
+            self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape[list([1, 0])], *self.vol_geom.extent)
 
             vectors = np.empty([num_angles, 6])
             # source
-            vectors[:, 0] = -np.sin(self.angles_rot_rad)
-            vectors[:, 1] = -np.cos(self.angles_rot_rad)
+            vectors[:, 0] = -np.sin(self.angles_w_rad)
+            vectors[:, 1] = -np.cos(self.angles_w_rad)
             # vector from detector pixel 0 to 1
-            vectors[:, 4] = np.cos(self.angles_rot_rad)
-            vectors[:, 5] = -np.sin(self.angles_rot_rad)
+            vectors[:, 4] = np.cos(self.angles_w_rad)
+            vectors[:, 5] = -np.sin(self.angles_w_rad)
             # center of detector
             vectors[:, 2:4] = rot_axis_shift_pix * vectors[:, 4:6]
 
             if self.has_individual_projs:
                 self.proj_geom_ind = [
-                    astra.create_proj_geom("parallel_vec", vol_shape[0], vectors[ii : ii + 1 :, :]) for ii in range(num_angles)
+                    astra.create_proj_geom("parallel_vec", vol_geom.shape[0], vectors[ii : ii + 1 :, :])
+                    for ii in range(num_angles)
                 ]
 
-            self.proj_geom_all = astra.create_proj_geom("parallel_vec", vol_shape[0], vectors)
+            self.proj_geom_all = astra.create_proj_geom("parallel_vec", vol_geom.shape[0], vectors)
 
     def get_vol_shape(self) -> ArrayLike:
         """Return the expected and produced volume shape (in ZYX coordinates).
@@ -358,7 +368,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         tuple
             The volume shape.
         """
-        return astra.functions.geom_size(self.vol_geom)
+        return astra.functions.geom_size(self.astra_vol_geom)
 
     def get_prj_shape(self) -> ArrayLike:
         """Return the expected and produced projection shape (in VWU coordinates).
@@ -373,7 +383,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
     def initialize(self) -> None:
         """Initialize the ASTRA projectors."""
         if not self.is_initialized:
-            if self.is_3d:
+            if self.vol_geom.is_3D():
                 projector_type = "cuda3d"
                 self.algo_type = "3D_CUDA"
                 self.data_mod = astra.data3d
@@ -386,12 +396,16 @@ class ProjectorBackendASTRA(ProjectorBackend):
                     self.algo_type = ""
                 self.data_mod = astra.data2d
 
-            opts = {"VoxelSuperSampling": self.super_sampling, "DetectorSuperSampling": self.super_sampling}
+            voxel_sampling = int(self.super_sampling * np.fmax(1, self.vol_geom.vox_size))
+            pixel_sampling = int(self.super_sampling / np.fmin(1, self.vol_geom.vox_size))
+            opts = {"VoxelSuperSampling": voxel_sampling, "DetectorSuperSampling": pixel_sampling}
 
             if self.has_individual_projs:
-                self.proj_id = [astra.create_projector(projector_type, pg, self.vol_geom, opts) for pg in self.proj_geom_ind]
+                self.proj_id = [
+                    astra.create_projector(projector_type, pg, self.astra_vol_geom, opts) for pg in self.proj_geom_ind
+                ]
 
-            self.proj_id.append(astra.create_projector(projector_type, self.proj_geom_all, self.vol_geom, opts))
+            self.proj_id.append(astra.create_projector(projector_type, self.proj_geom_all, self.astra_vol_geom, opts))
 
         super().initialize()
 
@@ -431,22 +445,22 @@ class ProjectorBackendASTRA(ProjectorBackend):
         """
         self.initialize()
 
-        vol = self._check_data(vol, self.vol_shape)
+        vol = self._check_data(vol, self.vol_shape_zxy)
 
         if angle_ind is None:
-            prj = np.empty(self.prj_shape, dtype=np.float32)
+            prj = np.empty(self.prj_shape_vwu, dtype=np.float32)
             prj_geom = self.proj_geom_all
             proj_id = self.proj_id[-1]
         else:
             if not self.has_individual_projs:
                 raise ValueError("Individual projectors not available!")
 
-            prj = np.empty(self.prj_1a_shape, dtype=np.float32)
+            prj = np.empty(self.prj_shape_vu, dtype=np.float32)
             prj_geom = self.proj_geom_ind[angle_ind]
             proj_id = self.proj_id[angle_ind]
 
         try:
-            vid = self.data_mod.link("-vol", self.vol_geom, vol)
+            vid = self.data_mod.link("-vol", self.astra_vol_geom, vol)
             sid = self.data_mod.link("-sino", prj_geom, prj)
 
             cfg = astra.creators.astra_dict("FP" + self.algo_type)
@@ -480,21 +494,21 @@ class ProjectorBackendASTRA(ProjectorBackend):
         """
         self.initialize()
 
-        vol = np.empty(self.vol_shape, dtype=np.float32)
+        vol = np.empty(self.vol_shape_zxy, dtype=np.float32)
         if angle_ind is None:
-            prj = self._check_data(prj, self.prj_shape)
+            prj = self._check_data(prj, self.prj_shape_vwu)
             prj_geom = self.proj_geom_all
             proj_id = self.proj_id[-1]
         else:
             if not self.has_individual_projs:
                 raise ValueError("Individual projectors not available!")
 
-            prj = self._check_data(prj, self.prj_1a_shape)
+            prj = self._check_data(prj, self.prj_shape_vu)
             prj_geom = self.proj_geom_ind[angle_ind]
             proj_id = self.proj_id[angle_ind]
 
         try:
-            vid = self.data_mod.link("-vol", self.vol_geom, vol)
+            vid = self.data_mod.link("-vol", self.astra_vol_geom, vol)
             sid = self.data_mod.link("-sino", prj_geom, prj)
 
             cfg = astra.creators.astra_dict("BP" + self.algo_type)

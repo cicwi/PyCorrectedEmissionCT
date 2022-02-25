@@ -45,6 +45,7 @@ class ProjectionGeometry(Geometry):
     det_v_xyz: ArrayLike
     rot_dir_xyz: ArrayLike
     pix2vox_ratio: float = 1
+    det_shape_vu: Optional[ArrayLike] = None
 
 
 @dataclass

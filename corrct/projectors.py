@@ -141,7 +141,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
     def __init__(
         self,
-        vol_shape: Union[Sequence[int], ArrayLike],
+        vol_geom: Union[Sequence[int], ArrayLike, models.VolumeGeometry],
         angles_rot_rad: Union[Sequence[float], ArrayLike],
         rot_axis_shift_pix: float = 0.0,
         geom: Optional[models.ProjectionGeometry] = None,
@@ -155,19 +155,23 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             use_astra = False
             print("WARNING: ASTRA requested but not available. Falling back to scikit-image.")
 
+        if not isinstance(vol_geom, models.VolumeGeometry):
+            vol_geom = models.VolumeGeometry(vol_shape_xyz=np.array(vol_geom))
+        self.vol_geom = vol_geom
+
+        vol_shape = self.vol_geom.shape
+
         if len(vol_shape) < 2 or len(vol_shape) > 3:
             raise ValueError("Only 2D or 3D volumes")
         if not vol_shape[0] == vol_shape[1]:
             raise ValueError("Only square volumes")
 
-        self.is_3d = len(vol_shape) == 3
-
-        if geom is not None and (not use_astra or not self.is_3d):
+        if geom is not None and (not use_astra or not self.vol_geom.is_3D()):
             raise ValueError("Using class `ProjectionGeometry` requires astra-toolbox and 3D volumes.")
 
         if use_astra:
             self.projector_backend = prj_backends.ProjectorBackendASTRA(
-                vol_shape,
+                vol_geom,
                 angles_rot_rad,
                 rot_axis_shift_pix=rot_axis_shift_pix,
                 geom=geom,
@@ -176,7 +180,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             )
         else:
             self.projector_backend = prj_backends.ProjectorBackendSKimage(
-                vol_shape, angles_rot_rad, rot_axis_shift_pix=rot_axis_shift_pix
+                vol_geom, angles_rot_rad, rot_axis_shift_pix=rot_axis_shift_pix
             )
 
         self.angles_rot_rad = angles_rot_rad
@@ -300,7 +304,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         ArrayLike
             The FBP reconstructed volume.
         """
-        if self.is_3d:
+        if self.vol_geom.is_3D():
             raise ValueError("FBP not supported with 3D projector")
 
         if isinstance(fbp_filter, str):
