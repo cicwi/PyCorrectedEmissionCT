@@ -38,13 +38,13 @@ class ProjectorMatrix(operators.ProjectorOperator):
         The projection matrix.
     vol_shape : Sequence[int]
         Volume shape.
-    proj_shape : Sequence[int]
+    prj_shape : Sequence[int]
         Projection shape.
     """
 
-    def __init__(self, A: ArrayLike, vol_shape: Union[Sequence[int], ArrayLike], proj_shape: Union[Sequence[int], ArrayLike]):
+    def __init__(self, A: ArrayLike, vol_shape: Union[Sequence[int], ArrayLike], prj_shape: Union[Sequence[int], ArrayLike]):
         self.vol_shape = vol_shape
-        self.proj_shape = proj_shape
+        self.prj_shape = prj_shape
 
         self.A = A
         super().__init__()
@@ -58,7 +58,7 @@ class ProjectorMatrix(operators.ProjectorOperator):
         operators.ProjectorOperator
             The transpose operator.
         """
-        return ProjectorMatrix(self.A.transpose(), self.proj_shape, self.vol_shape)
+        return ProjectorMatrix(self.A.transpose(), self.prj_shape, self.vol_shape)
 
     def absolute(self) -> operators.ProjectorOperator:
         """
@@ -69,7 +69,7 @@ class ProjectorMatrix(operators.ProjectorOperator):
         operators.ProjectorOperator
             The absolute value operator.
         """
-        return ProjectorMatrix(np.abs(self.A), self.vol_shape, self.proj_shape)
+        return ProjectorMatrix(np.abs(self.A), self.vol_shape, self.prj_shape)
 
     def fp(self, x: ArrayLike) -> ArrayLike:
         """
@@ -85,7 +85,7 @@ class ProjectorMatrix(operators.ProjectorOperator):
         ArrayLike
             The projection data.
         """
-        return self.A.dot(x.flatten()).reshape(self.proj_shape)
+        return self.A.dot(x.flatten()).reshape(self.prj_shape)
 
     def bp(self, x: ArrayLike) -> ArrayLike:
         """
@@ -185,7 +185,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         self.psf = psf
 
         self.vol_shape = self.projector_backend.get_vol_shape()
-        self.proj_shape = self.projector_backend.get_prj_shape()
+        self.prj_shape = self.projector_backend.get_prj_shape()
         super().__init__()
 
     def __enter__(self):
@@ -715,7 +715,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
             return np.sum(vols, axis=0)
         else:
-            sino = np.reshape(sino, [len(self.weights_det), *self.proj_shape])
+            sino = np.reshape(sino, [len(self.weights_det), *self.prj_shape])
             vol = [ProjectorUncorrected.bp(self, sino[ii, ...]) for ii in range(len(self.angles_det_rad))]
             return np.sum(np.stack(vol, axis=0), axis=0)
 

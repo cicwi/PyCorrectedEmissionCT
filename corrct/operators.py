@@ -137,11 +137,11 @@ class ProjectorOperator(BaseTransform):
     def __init__(self):
         """Initialize the projector operator class.
 
-        It sets the fields `dir_shape` and `adj_shape`, from the fields `vol_shape` and `proj_shape` respectively.
+        It sets the fields `dir_shape` and `adj_shape`, from the fields `vol_shape` and `prj_shape` respectively.
         These two other fields need to have been defined in a derived class.
         """
         self.dir_shape = self.vol_shape
-        self.adj_shape = self.proj_shape
+        self.adj_shape = self.prj_shape
         super().__init__()
 
     def fp(self, x):
