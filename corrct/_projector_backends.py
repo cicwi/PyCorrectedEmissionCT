@@ -308,7 +308,8 @@ class ProjectorBackendASTRA(ProjectorBackend):
         if self.vol_geom.is_3D():
             self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape[list([1, 0, 2])], *self.vol_geom.extent)
             if geom is None:
-                det_pos_xyz = np.stack([rot_axis_shift_pix, np.zeros((len(rot_axis_shift_pix), 2))], axis=1)
+                rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
+                det_pos_xyz = np.concatenate([rot_axis_shift_pix[:, None], np.zeros((len(rot_axis_shift_pix), 2))], axis=-1)
                 geom = ProjectionGeometry(
                     geom_type="parallel3d",
                     src_pos_xyz=np.array([0, -1, 0]),
