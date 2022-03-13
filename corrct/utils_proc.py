@@ -545,10 +545,10 @@ def azimuthal_integration(img: ArrayLike, axes: Sequence[int] = (-2, -1), domain
     r = np.sqrt(np.sum(coords ** 2, axis=0))
 
     # Reshape the volume to have the axes to be integrates as right-most axes
-    img_tr_op = [*range(len(img.shape))]
-    for a in axes:
-        img_tr_op.append(img_tr_op.pop(a))
+    img_tr_op = np.array([*range(len(img.shape))])
+    img_tr_op = np.concatenate((np.delete(img_tr_op, obj=axes), img_tr_op[list(axes)]))
     img = np.transpose(img, img_tr_op)
+
     if num_dims_img > num_dims_int:
         img_old_shape = img.shape[:-num_dims_int]
         img = np.reshape(img, [-1, *img_axes_dims])
