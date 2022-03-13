@@ -692,3 +692,35 @@ def compute_frc(
         frc = sp.ndimage.convolve(frc, win, mode="nearest")
 
     return frc[:cut_off], Thb[:cut_off]
+
+
+def norm_cross_corr(img1: ArrayLike, img2: Optional[ArrayLike] = None, axes: ArrayLike = (-2, -1)) -> ArrayLike:
+    """
+    Compute the normalized cross-correlation between two images.
+
+    Parameters
+    ----------
+    img1 : ArrayLike
+        The first image.
+    img2 : ArrayLike, optional
+        The second images. If None, it computes the auto-correlation. The default is None.
+    axes : ArrayLike, optional
+        Axes along which to compute the cross-correlation. The default is (-2, -1).
+
+    Returns
+    -------
+    ArrayLike
+        The one-dimensional cross-correlation curve.
+    """
+    img1_f = np.fft.fft2(img1, axes=axes)
+    if img2 is None:
+        img2 = img1
+    img2_f = np.fft.fft2(img2, axes=axes)
+    cc_f = img1_f * np.conjugate(img2_f)
+    cc = np.fft.ifft2(cc_f, axes=axes).real
+
+    cc_n = (cc - cc.min()) / (cc.max() - cc.min())
+    cc_l = azimuthal_integration(cc_n, axes=axes, domain="fourier")
+    cc_o = azimuthal_integration(np.ones_like(cc_n), axes=axes, domain="fourier")
+
+    return cc_l / cc_o
