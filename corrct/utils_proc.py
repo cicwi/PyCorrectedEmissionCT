@@ -22,6 +22,8 @@ from typing import Sequence, Optional, Union, Tuple, Callable
 
 from numpy.typing import ArrayLike, DTypeLike
 
+import matplotlib.pyplot as plt
+
 
 eps = np.finfo(np.float32).eps
 
@@ -694,7 +696,9 @@ def compute_frc(
     return frc[:cut_off], Thb[:cut_off]
 
 
-def norm_cross_corr(img1: ArrayLike, img2: Optional[ArrayLike] = None, axes: ArrayLike = (-2, -1)) -> ArrayLike:
+def norm_cross_corr(
+    img1: ArrayLike, img2: Optional[ArrayLike] = None, axes: ArrayLike = (-2, -1), t_match: bool = False, plot: bool = True
+) -> ArrayLike:
     """
     Compute the normalized cross-correlation between two images.
 
@@ -706,21 +710,63 @@ def norm_cross_corr(img1: ArrayLike, img2: Optional[ArrayLike] = None, axes: Arr
         The second images. If None, it computes the auto-correlation. The default is None.
     axes : ArrayLike, optional
         Axes along which to compute the cross-correlation. The default is (-2, -1).
+    t_match: bool, optional
+        Whether to perform the cross-correlation for template matching. The default is False.
+    plot: bool, optional
+        Whether to plot the profile of the cross-correlation curve. The default is True.
 
     Returns
     -------
     ArrayLike
         The one-dimensional cross-correlation curve.
     """
-    img1_f = np.fft.fft2(img1, axes=axes)
+    def local_sum(x: ArrayLike, axes: ArrayLike) -> ArrayLike:
+        padding = [(0, )] * len(x.shape)
+        for a in axes:
+            padding[a] = (x.shape[a], )
+        y = np.pad(x, padding)
+        for a in axes:
+            y = np.cumsum(y, axis=a)
+            slicing1 = [slice(None)] * len(x.shape)
+            slicing1[a] = slice(x.shape[a], -1)
+            slicing2 = [slice(None)] * len(x.shape)
+            slicing2[a] = slice(0, -x.shape[a] - 1)
+            y = y[tuple(slicing1)] - y[tuple(slicing2)]
+        return y
+
     if img2 is None:
         img2 = img1
-    img2_f = np.fft.fft2(img2, axes=axes)
-    cc_f = img1_f * np.conjugate(img2_f)
-    cc = np.fft.ifft2(cc_f, axes=axes).real
 
-    cc_n = (cc - cc.min()) / (cc.max() - cc.min())
+    img1 = img1.astype(np.float32)
+    img2 = img2.astype(np.float32)
+
+    cc = sp.signal.correlate(img1, img2, mode="full", method="fft")
+
+    if t_match:
+        local_sums_img2 = local_sum(img2, axes=axes)
+        local_sums_img2_2 = local_sum(img2 ** 2, axes=axes)
+
+        cc_n = cc - local_sums_img2 * np.mean(img1)
+
+        cc_n /= (np.std(img1) * np.sqrt(np.prod(np.array(img1.shape)[list(axes)])))
+
+        diff_local_sums = local_sums_img2_2 - (local_sums_img2 ** 2) / np.prod(np.array(img2.shape)[list(axes)])
+        cc_n /= np.sqrt(diff_local_sums.clip(0, None))
+    else:
+        cc_n = cc / (np.linalg.norm(img1) * np.linalg.norm(img2))
+
+    cc_n = np.fft.ifftshift(cc_n)
     cc_l = azimuthal_integration(cc_n, axes=axes, domain="fourier")
     cc_o = azimuthal_integration(np.ones_like(cc_n), axes=axes, domain="fourier")
 
-    return cc_l / cc_o
+    cc_l /= cc_o
+    cc_l = cc_l[:np.min(np.array(img1.shape)[list(axes)])]
+
+    if plot:
+        f, ax = plt.subplots()
+        ax.plot(cc_l)
+        ax.plot(np.ones_like(cc_l) * 0.5)
+        ax.grid()
+        f.tight_layout()
+
+    return cc_l
