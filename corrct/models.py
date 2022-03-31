@@ -7,8 +7,8 @@ Define all the models used through-out the code.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+import numpy as np
 from numpy.typing import ArrayLike
-
 from typing import Optional, Sequence
 
 from dataclasses import dataclass
@@ -46,6 +46,32 @@ class ProjectionGeometry(Geometry):
     rot_dir_xyz: ArrayLike
     pix2vox_ratio: float = 1
     det_shape_vu: Optional[ArrayLike] = None
+
+    @staticmethod
+    def get_default_parallel3d(rot_axis_shift_pix: Optional[ArrayLike] = None) -> "ProjectionGeometry":
+        """
+        Generate the default geometry for 3D parallel beam.
+
+        Parameters
+        ----------
+        rot_axis_shift_pix : Optional[ArrayLike], optional
+            Rotation axis shift in pixels. The default is None.
+
+        Returns
+        -------
+        ProjectionGeometry
+            The default paralle-beam geometry.
+        """
+        rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
+        det_pos_xyz = np.concatenate([rot_axis_shift_pix[:, None], np.zeros((len(rot_axis_shift_pix), 2))], axis=-1)
+        return ProjectionGeometry(
+            geom_type="parallel3d",
+            src_pos_xyz=np.array([0, -1, 0]),
+            det_pos_xyz=det_pos_xyz,
+            det_u_xyz=np.array([1, 0, 0]),
+            det_v_xyz=np.array([0, 0, 1]),
+            rot_dir_xyz=np.array([0, 0, -1])
+        )
 
 
 @dataclass

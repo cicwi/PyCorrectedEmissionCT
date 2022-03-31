@@ -57,7 +57,7 @@ class ProjectorBackend(ABC):
         self.vol_geom = vol_geom
 
         self.vol_shape_zxy = [*self.vol_geom.shape[2:], self.vol_geom.shape[0], self.vol_geom.shape[1]]
-        self.angles_w_rad = angles_rot_rad
+        self.angles_w_rad = np.array(angles_rot_rad, ndmin=1)
 
         # Basic sizes, unless overridden
         self.prj_shape_vwu = [*self.vol_geom.shape[2:], len(self.angles_w_rad), self.vol_geom.shape[1]]
@@ -174,9 +174,9 @@ class ProjectorBackendSKimage(ProjectorBackend):
         if not float(rot_axis_shift_pix) == 0.0:
             raise ValueError("With the scikit-image rotation axis shift is not supported!")
 
-        super().__init__(vol_geom, np.array(angles_rot_rad))
+        super().__init__(vol_geom, angles_rot_rad)
 
-        self.angles_rot_deg = np.rad2deg(angles_rot_rad)
+        self.angles_w_deg = np.rad2deg(self.angles_w_rad)
         self.is_initialized = True
 
     def fp(self, vol: ArrayLike, angle_ind: int = None) -> ArrayLike:
@@ -196,11 +196,11 @@ class ProjectorBackendSKimage(ProjectorBackend):
         """
         if angle_ind is None:
             prj = np.empty(self.prj_shape_vwu, dtype=vol.dtype)
-            for ii_a, a in enumerate(self.angles_rot_deg):
+            for ii_a, a in enumerate(self.angles_w_deg):
                 prj[ii_a, :] = np.squeeze(skt.radon(vol, [a]))
             return prj
         else:
-            return np.squeeze(skt.radon(vol, self.angles_rot_deg[angle_ind : angle_ind + 1 :]))
+            return np.squeeze(skt.radon(vol, self.angles_w_deg[angle_ind : angle_ind + 1 :]))
 
     def bp(self, prj: ArrayLike, angle_ind: int = None) -> ArrayLike:
         """Back-projection of a single sinogram line to the volume.
@@ -220,11 +220,11 @@ class ProjectorBackendSKimage(ProjectorBackend):
         filter_name = _set_filter_name(None)
         if angle_ind is None:
             vol = np.empty([self.prj_shape_vwu[-1], *self.vol_shape_zxy], dtype=prj.dtype)
-            for ii_a, a in enumerate(self.angles_rot_deg):
+            for ii_a, a in enumerate(self.angles_w_deg):
                 vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], **filter_name)
             return vol.sum(axis=0)
         else:
-            return skt.iradon(prj[:, np.newaxis], self.angles_rot_deg[angle_ind : angle_ind + 1 :], **filter_name)
+            return skt.iradon(prj[:, np.newaxis], self.angles_w_deg[angle_ind : angle_ind + 1 :], **filter_name)
 
     def fbp(self, prj: ArrayLike, fbp_filter: str) -> ArrayLike:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
@@ -247,10 +247,10 @@ class ProjectorBackendSKimage(ProjectorBackend):
             vol = np.empty([num_lines, *self.vol_shape_zxy], dtype=prj.dtype)
 
             for ii_v in range(num_lines):
-                vol[ii_v, ...] = skt.iradon(prj[ii_v, ...].transpose(), self.angles_rot_deg, **filter_name)
+                vol[ii_v, ...] = skt.iradon(prj[ii_v, ...].transpose(), self.angles_w_deg, **filter_name)
             return vol
         else:
-            return skt.iradon(prj.transpose(), self.angles_rot_deg, **filter_name)
+            return skt.iradon(prj.transpose(), self.angles_w_deg, **filter_name)
 
 
 class ProjectorBackendASTRA(ProjectorBackend):
@@ -296,7 +296,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
                 "Rotation axis shift should either be an int, a float or a sequence of floats"
                 + f" ({type(rot_axis_shift_pix)} given instead).")
 
-        super().__init__(vol_geom, np.array(angles_rot_rad))
+        super().__init__(vol_geom, angles_rot_rad)
 
         self.proj_id = []
         self.has_individual_projs = create_single_projs
@@ -308,16 +308,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         if self.vol_geom.is_3D():
             self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape[list([1, 0, 2])], *self.vol_geom.extent)
             if geom is None:
-                rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
-                det_pos_xyz = np.concatenate([rot_axis_shift_pix[:, None], np.zeros((len(rot_axis_shift_pix), 2))], axis=-1)
-                geom = ProjectionGeometry(
-                    geom_type="parallel3d",
-                    src_pos_xyz=np.array([0, -1, 0]),
-                    det_pos_xyz=det_pos_xyz,
-                    det_u_xyz=np.array([1, 0, 0]),
-                    det_v_xyz=np.array([0, 0, 1]),
-                    rot_dir_xyz=np.array([0, 0, 1])
-                )
+                geom = ProjectionGeometry.get_default_parallel3d(rot_axis_shift_pix)
 
             if geom.det_shape_vu is None:
                 geom.det_shape_vu = np.array(self.vol_geom.shape[list([2, 1])], dtype=int)
@@ -341,17 +332,18 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
             self.proj_geom_all = astra.create_proj_geom(geom.geom_type + "_vec", *geom.det_shape_vu, vectors)
         else:
+            rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
             self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape[list([1, 0])], *self.vol_geom.extent)
 
             vectors = np.empty([num_angles, 6])
             # source
-            vectors[:, 0] = -np.sin(self.angles_w_rad)
+            vectors[:, 0] = np.sin(self.angles_w_rad)
             vectors[:, 1] = -np.cos(self.angles_w_rad)
             # vector from detector pixel 0 to 1
             vectors[:, 4] = np.cos(self.angles_w_rad)
-            vectors[:, 5] = -np.sin(self.angles_w_rad)
+            vectors[:, 5] = np.sin(self.angles_w_rad)
             # center of detector
-            vectors[:, 2:4] = rot_axis_shift_pix * vectors[:, 4:6]
+            vectors[:, 2:4] = rot_axis_shift_pix[:, None] * vectors[:, 4:6]
 
             if self.has_individual_projs:
                 self.proj_geom_ind = [
