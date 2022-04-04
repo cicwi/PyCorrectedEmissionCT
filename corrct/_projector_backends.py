@@ -12,8 +12,6 @@ import skimage.transform as skt
 
 from .models import ProjectionGeometry, VolumeGeometry
 
-import scipy.spatial.transform as spt
-
 from typing import Optional
 from numpy.typing import ArrayLike
 
@@ -264,7 +262,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         The projection angles.
     rot_axis_shift_pix : float, optional
         Relative position of the rotation center with respect to the volume center. The default is 0.0.
-    geom : ProjectionGeometry, optional
+    prj_geom : ProjectionGeometry, optional
         The fully specified projection geometry.
         When active, the rotation axis shift is ignored. The default is None.
     create_single_projs : bool, optional
@@ -283,14 +281,12 @@ class ProjectorBackendASTRA(ProjectorBackend):
         vol_geom: VolumeGeometry,
         angles_rot_rad: ArrayLike,
         rot_axis_shift_pix: float = 0.0,
-        geom: Optional[ProjectionGeometry] = None,
+        prj_geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
         super_sampling: int = 1,
     ):
         if vol_geom.is_3D() and not has_cuda:
             raise ValueError("CUDA is not available: only 2D volumes are allowed!")
-        if not vol_geom.is_3D() and geom is not None:
-            raise ValueError("Support for `ProjectionGeometry` is not implemented for 2D volumes.")
         if not isinstance(rot_axis_shift_pix, (int, float, np.ndarray)):
             raise ValueError(
                 "Rotation axis shift should either be an int, a float or a sequence of floats"
@@ -307,51 +303,55 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         if self.vol_geom.is_3D():
             self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape[list([1, 0, 2])], *self.vol_geom.extent)
-            if geom is None:
-                geom = ProjectionGeometry.get_default_parallel3d(rot_axis_shift_pix)
+            if prj_geom is None:
+                prj_geom = ProjectionGeometry.get_default_parallel(geom_type="3d", rot_axis_shift_pix=rot_axis_shift_pix)
 
-            if geom.det_shape_vu is None:
-                geom.det_shape_vu = np.array(self.vol_geom.shape[list([2, 1])], dtype=int)
+            if prj_geom.det_shape_vu is None:
+                prj_geom.det_shape_vu = np.array(self.vol_geom.shape[list([2, 1])], dtype=int)
             else:
-                self.prj_shape_vwu = [geom.det_shape_vu[0], num_angles, geom.det_shape_vu[1]]
-                self.prj_shape_vu = [geom.det_shape_vu[0], 1, geom.det_shape_vu[1]]
+                self.prj_shape_vwu = [prj_geom.det_shape_vu[0], num_angles, prj_geom.det_shape_vu[1]]
+                self.prj_shape_vu = [prj_geom.det_shape_vu[0], 1, prj_geom.det_shape_vu[1]]
 
-            rotations = spt.Rotation.from_rotvec(self.angles_w_rad[:, None] * geom.rot_dir_xyz)
+            rot_geom = prj_geom.rotate(self.angles_w_rad)
 
             vectors = np.empty([num_angles, 12])
-            vectors[:, 0:3] = rotations.apply(geom.src_pos_xyz / geom.pix2vox_ratio)
-            vectors[:, 3:6] = rotations.apply(geom.det_pos_xyz / geom.pix2vox_ratio)
-            vectors[:, 6:9] = rotations.apply(geom.det_u_xyz / geom.pix2vox_ratio)
-            vectors[:, 9:12] = rotations.apply(geom.det_v_xyz / geom.pix2vox_ratio)
+            # source / beam direction
+            vectors[:, 0:3] = rot_geom.get_scaled("src_pos_xyz")
+            # center of detector
+            vectors[:, 3:6] = rot_geom.get_scaled("det_pos_xyz")
+            # vector from detector pixel (0, 0) to (0, 1)
+            vectors[:, 6:9] = rot_geom.get_scaled("det_u_xyz")
+            # vector from detector pixel (0, 0) to (1, 0)
+            vectors[:, 9:12] = rot_geom.get_scaled("det_v_xyz")
 
-            if self.has_individual_projs:
-                self.proj_geom_ind = [
-                    astra.create_proj_geom(geom.geom_type + "_vec", *geom.det_shape_vu, vectors[ii : ii + 1 :, :])
-                    for ii in range(num_angles)
-                ]
-
-            self.proj_geom_all = astra.create_proj_geom(geom.geom_type + "_vec", *geom.det_shape_vu, vectors)
+            geom_type_str = prj_geom.geom_type
         else:
-            rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
             self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape[list([1, 0])], *self.vol_geom.extent)
+            if prj_geom is None:
+                prj_geom = ProjectionGeometry.get_default_parallel(geom_type="2d", rot_axis_shift_pix=rot_axis_shift_pix)
+
+            if prj_geom.det_shape_vu is None:
+                prj_geom.det_shape_vu = np.array(self.vol_geom.shape[list([1])], dtype=int)
+
+            rot_geom = prj_geom.rotate(self.angles_w_rad)
 
             vectors = np.empty([num_angles, 6])
-            # source
-            vectors[:, 0] = np.sin(self.angles_w_rad)
-            vectors[:, 1] = -np.cos(self.angles_w_rad)
-            # vector from detector pixel 0 to 1
-            vectors[:, 4] = np.cos(self.angles_w_rad)
-            vectors[:, 5] = np.sin(self.angles_w_rad)
+            # source / beam direction
+            vectors[:, 0:2] = rot_geom.get_scaled("src_pos_xyz")
             # center of detector
-            vectors[:, 2:4] = rot_axis_shift_pix[:, None] * vectors[:, 4:6]
+            vectors[:, 2:4] = rot_geom.get_scaled("det_pos_xyz")
+            # vector from detector pixel 0 to 1
+            vectors[:, 4:6] = rot_geom.get_scaled("det_u_xyz")
 
-            if self.has_individual_projs:
-                self.proj_geom_ind = [
-                    astra.create_proj_geom("parallel_vec", vol_geom.shape[0], vectors[ii : ii + 1 :, :])
-                    for ii in range(num_angles)
-                ]
+            geom_type_str = prj_geom.geom_type[:-2]
 
-            self.proj_geom_all = astra.create_proj_geom("parallel_vec", vol_geom.shape[0], vectors)
+        if self.has_individual_projs:
+            self.proj_geom_ind = [
+                astra.create_proj_geom(geom_type_str + "_vec", *prj_geom.det_shape_vu, vectors[ii : ii + 1 :, :])
+                for ii in range(num_angles)
+            ]
+
+        self.proj_geom_all = astra.create_proj_geom(geom_type_str + "_vec", *prj_geom.det_shape_vu, vectors)
 
     def get_vol_shape(self) -> ArrayLike:
         """Return the expected and produced volume shape (in ZYX coordinates).

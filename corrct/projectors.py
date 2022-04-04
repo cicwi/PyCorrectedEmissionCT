@@ -119,7 +119,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         The rotation angles.
     rot_axis_shift_pix : float or ArrayLike, optional
         The rotation axis shift(s) in pixels. The default is 0.
-    geom : ProjectionGeometry, optional
+    prj_geom : ProjectionGeometry, optional
         The fully specified projection geometry.
         When active, the rotation axis shift is ignored. The default is None.
     proj_intensities : float or ArrayLike, optional
@@ -144,7 +144,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         vol_geom: Union[Sequence[int], ArrayLike, models.VolumeGeometry],
         angles_rot_rad: Union[Sequence[float], ArrayLike],
         rot_axis_shift_pix: float = 0.0,
-        geom: Optional[models.ProjectionGeometry] = None,
+        *,
+        prj_geom: Optional[models.ProjectionGeometry] = None,
         proj_intensities: Optional[ArrayLike] = None,
         psf: Optional[ArrayLike] = None,
         use_astra: bool = prj_backends.has_cuda,
@@ -166,15 +167,15 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         if not vol_shape[0] == vol_shape[1]:
             raise ValueError("Only square volumes")
 
-        if geom is not None and (not use_astra or not self.vol_geom.is_3D()):
-            raise ValueError("Using class `ProjectionGeometry` requires astra-toolbox and 3D volumes.")
+        if prj_geom is not None and not use_astra:
+            raise ValueError("Using class `ProjectionGeometry` requires astra-toolbox.")
 
         if use_astra:
             self.projector_backend = prj_backends.ProjectorBackendASTRA(
                 vol_geom,
                 angles_rot_rad,
                 rot_axis_shift_pix=rot_axis_shift_pix,
-                geom=geom,
+                prj_geom=prj_geom,
                 create_single_projs=create_single_projs,
                 super_sampling=super_sampling,
             )
@@ -328,7 +329,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         The rotation angles.
     rot_axis_shift_pix : float, optional
         The rotation axis shift(s) in pixels. The default is 0.
-    geom : ProjectionGeometry, optional
+    prj_geom : ProjectionGeometry, optional
         The fully specified projection geometry.
         When active, the rotation axis shift is ignored. The default is None.
     proj_intensities : Optional[ArrayLike], optional
@@ -367,7 +368,8 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         vol_shape: Union[Sequence[int], ArrayLike],
         angles_rot_rad: ArrayLike,
         rot_axis_shift_pix: float = 0,
-        geom: Optional[models.ProjectionGeometry] = None,
+        *,
+        prj_geom: Optional[models.ProjectionGeometry] = None,
         proj_intensities: Optional[ArrayLike] = None,
         super_sampling: int = 1,
         att_in: Optional[ArrayLike] = None,
@@ -386,7 +388,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             vol_shape,
             angles_rot_rad,
             rot_axis_shift_pix,
-            geom=geom,
+            prj_geom=prj_geom,
             psf=psf,
             proj_intensities=proj_intensities,
             super_sampling=super_sampling,
