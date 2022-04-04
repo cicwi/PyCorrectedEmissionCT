@@ -345,8 +345,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         Weights (e.g. solid angle, efficiency, etc) of the detector elements. The default is None.
     psf : Optional[ArrayLike], optional
         Optical system's point spread function (PSF). The default is None.
-    precompute_attenuation : bool, optional
-        Whether to precompute attenuation or not. The default is True.
     is_symmetric : bool, optional
         Whether the projector is symmetric or not. The default is False.
     weights_angles : Optional[ArrayLike], optional
@@ -377,7 +375,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         angles_detectors_rad: Union[float, ArrayLike] = (np.pi / 2),
         weights_detectors: Optional[ArrayLike] = None,
         psf: Optional[ArrayLike] = None,
-        precompute_attenuation: bool = True,
         is_symmetric: bool = False,
         weights_angles: Optional[ArrayLike] = None,
         use_multithreading: bool = True,
@@ -398,14 +395,8 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         self.data_type = data_type
         self.use_multithreading = use_multithreading
         self.verbose = verbose
+        self.is_symmetric = is_symmetric
 
-        if precompute_attenuation:
-            if att_in is None and att_out is None:
-                print("Turning off precomputation of attenuation.")
-                precompute_attenuation = False
-
-        self.att_in = att_in
-        self.att_out = att_out
         self.angles_det_rad = np.array(angles_detectors_rad, ndmin=1)
         num_det_angles = len(self.angles_det_rad)
         if weights_detectors is None:
@@ -426,13 +417,9 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             weights_angles = np.ones((len(angles_rot_rad), num_det_angles))
         self.weights_angles = weights_angles
 
-        self.precompute_attenuation = precompute_attenuation
-        self.is_symmetric = is_symmetric
-
-        if self.precompute_attenuation:
-            self.compute_attenuation_volumes()
-        else:
-            self.att_vol_angles = None
+        self.att_in = att_in
+        self.att_out = att_out
+        self.compute_attenuation_volumes()
 
     def __enter__(self):
         """Initialize the with statement block."""
@@ -604,16 +591,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         sino_line : ArrayLike
             The forward-projected sinogram line.
         """
-        if self.precompute_attenuation:
-            temp_vol = vol * self.att_vol_angles[angle_ind, ...]
-        else:
-            temp_vol = np.tile(vol[np.newaxis, ...], (len(self.angles_det_rad), *((1,) * len(self.vol_shape))))
-
-            a = self.angles_rot_rad[angle_ind]
-            if self.att_in is not None:
-                temp_vol *= self._compute_attenuation_angle_in(a)
-            if self.att_out is not None:
-                temp_vol *= self._compute_attenuation_angle_out(a)
+        temp_vol = vol * self.att_vol_angles[angle_ind, ...]
 
         weights = self.weights_det * self.weights_angles[angle_ind, :]
         sino_line = [
@@ -663,14 +641,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         vol = np.stack(vol, axis=0)
 
         if self.is_symmetric:
-            if self.precompute_attenuation:
-                vol *= self.att_vol_angles[angle_ind, ...]
-            else:
-                a = self.angles_rot_rad[angle_ind]
-                if self.att_in is not None:
-                    vol *= self._compute_attenuation_angle_in(a)
-                if self.att_out is not None:
-                    vol *= self._compute_attenuation_angle_out(a)
+            vol *= self.att_vol_angles[angle_ind, ...]
 
         return np.sum(vol, axis=0)
 
