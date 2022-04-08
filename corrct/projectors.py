@@ -9,7 +9,6 @@ and ESRF - The European Synchrotron, Grenoble, France
 import numpy as np
 
 import scipy.signal as spsig
-import skimage.transform as skt
 
 from . import operators
 from . import _projector_backends as prj_backends
@@ -437,44 +436,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
     @staticmethod
     def _compute_attenuation(vol: ArrayLike, angle_rad: float, invert: bool = False) -> ArrayLike:
-        def pad_vol(vol, edges):
-            paddings = [(0,)] * len(vol.shape)
-            paddings[-2], paddings[-1] = (edges[0],), (edges[1],)
-            return np.pad(vol, paddings, mode="constant")
-
-        def compute_cumsum(vol, angle_deg):
-            vol = skt.rotate(vol, rot_angle_deg, order=1, clip=False)
-
-            vol += np.roll(vol, 1, axis=-2)
-            vol = np.cumsum(vol / 2, axis=-2)
-
-            return skt.rotate(vol, -rot_angle_deg, order=1, clip=False)
-
-        size_lims = np.array(vol.shape[-2:])
-        min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
-        edges = np.ceil((min_size - size_lims) / 2).astype(int)
-
-        if invert:
-            angle_rad += np.pi
-
-        rot_angle_deg = np.rad2deg(angle_rad)
-
-        cum_arr = pad_vol(vol, edges)
-
-        if cum_arr.ndim > 2:
-            prev_shape = np.array(cum_arr.shape, ndmin=1)
-            num_slices = np.prod(prev_shape[:-2])
-            cum_arr = cum_arr.reshape([num_slices, *prev_shape[-2:]])
-            for ii in range(num_slices):
-                cum_arr[ii] = compute_cumsum(cum_arr[ii], rot_angle_deg)
-            cum_arr = cum_arr.reshape(prev_shape)
-        else:
-            cum_arr = compute_cumsum(cum_arr, rot_angle_deg)
-        cum_arr = cum_arr[..., edges[0] : -edges[0], edges[1] : -edges[1]]
-
-        cum_arr = np.exp(-cum_arr)
-
-        return cum_arr
+        return prj_backends.ProjectorBackend.compute_attenuation(vol, angle_rad, invert)
 
     def compute_attenuation(self, vol: ArrayLike, angle_rad: float, invert: bool = False) -> ArrayLike:
         """Compute the attenuation local attenuation for a given attenuation volume.
@@ -520,7 +482,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         return self.compute_attenuation(self.att_in, angle_rad)[np.newaxis, ...]
 
     def _compute_attenuation_angle_out(self, angle_rad: float) -> ArrayLike:
-        angle_det = angle_rad - self.angles_det_rad
+        angle_det = angle_rad + self.angles_det_rad
         atts = np.zeros(self.att_vol_angles.shape[1:], dtype=self.data_type)
         for ii, a in enumerate(angle_det):
             atts[ii, ...] = self.compute_attenuation(self.att_out, a, invert=True)
