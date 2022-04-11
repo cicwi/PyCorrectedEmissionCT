@@ -121,7 +121,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
     prj_geom : ProjectionGeometry, optional
         The fully specified projection geometry.
         When active, the rotation axis shift is ignored. The default is None.
-    proj_intensities : float or ArrayLike, optional
+    prj_intensities : float or ArrayLike, optional
         Projection scaling factor. The default is None.
     use_astra : bool, optional
         Whether to use ASTRA or fall back to scikit-image.
@@ -145,7 +145,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         rot_axis_shift_pix: float = 0.0,
         *,
         prj_geom: Optional[models.ProjectionGeometry] = None,
-        proj_intensities: Optional[ArrayLike] = None,
+        prj_intensities: Optional[ArrayLike] = None,
         psf: Optional[ArrayLike] = None,
         use_astra: bool = prj_backends.has_cuda,
         create_single_projs: bool = True,
@@ -184,7 +184,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             )
 
         self.angles_rot_rad = angles_rot_rad
-        self.proj_intensities = proj_intensities
+        self.prj_intensities = prj_intensities
 
         self.psf = psf
 
@@ -217,8 +217,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             The forward-projected sinogram line.
         """
         x = self.projector_backend.fp(vol, angle_ind)
-        if self.proj_intensities is not None:
-            x *= self.proj_intensities[angle_ind]
+        if self.prj_intensities is not None:
+            x *= self.prj_intensities[angle_ind]
         if self.psf is not None:
             x = spsig.convolve(x, self.psf, mode="same")
         return x
@@ -238,8 +238,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         ArrayLike
             The back-projected volume.
         """
-        if self.proj_intensities is not None:
-            sino_line = sino_line * self.proj_intensities[angle_ind]  # It will make a copy
+        if self.prj_intensities is not None:
+            sino_line = sino_line * self.prj_intensities[angle_ind]  # It will make a copy
         return self.projector_backend.bp(sino_line, angle_ind)
 
     def fp(self, vol: ArrayLike) -> ArrayLike:
@@ -257,8 +257,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             The forward-projected projection data.
         """
         x = self.projector_backend.fp(vol)
-        if self.proj_intensities is not None:
-            x *= self.proj_intensities[:, np.newaxis]
+        if self.prj_intensities is not None:
+            x *= self.prj_intensities[:, np.newaxis]
         if self.psf is not None:
             x = spsig.convolve(x, self.psf[..., None, :], mode="same")
         return x
@@ -277,8 +277,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         ArrayLike
             The back-projected volume.
         """
-        if self.proj_intensities is not None:
-            data = data * self.proj_intensities[:, np.newaxis]  # Needs copy
+        if self.prj_intensities is not None:
+            data = data * self.prj_intensities[:, np.newaxis]  # Needs copy
         return self.projector_backend.bp(data)
 
     def fbp(self, projs: ArrayLike, fbp_filter: Union[str, Callable] = "shepp-logan") -> ArrayLike:
@@ -331,7 +331,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
     prj_geom : ProjectionGeometry, optional
         The fully specified projection geometry.
         When active, the rotation axis shift is ignored. The default is None.
-    proj_intensities : Optional[ArrayLike], optional
+    prj_intensities : Optional[ArrayLike], optional
         Projection scaling factor. The default is None.
     super_sampling : int, optional
         Pixel and voxel super-sampling. The default is 1.
@@ -369,7 +369,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         rot_axis_shift_pix: float = 0,
         *,
         prj_geom: Optional[models.ProjectionGeometry] = None,
-        proj_intensities: Optional[ArrayLike] = None,
+        prj_intensities: Optional[ArrayLike] = None,
         super_sampling: int = 1,
         att_in: Optional[ArrayLike] = None,
         att_out: Optional[ArrayLike] = None,
@@ -389,7 +389,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             rot_axis_shift_pix,
             prj_geom=prj_geom,
             psf=psf,
-            proj_intensities=proj_intensities,
+            prj_intensities=prj_intensities,
             super_sampling=super_sampling,
         )
 
