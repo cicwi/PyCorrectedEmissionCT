@@ -23,6 +23,8 @@ from tqdm import tqdm
 from typing import Union, Sequence, Optional, Callable
 from numpy.typing import ArrayLike, DTypeLike
 
+from dataclasses import dataclass, field
+
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
@@ -314,6 +316,193 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             return self.bp(projs) / self.angles_rot_rad.size
 
 
+@dataclass
+class AttenuationVolume:
+    """Attenuation volume computation class."""
+
+    incident_local: ArrayLike
+    emitted_local: ArrayLike
+    angles_rot_rad: ArrayLike
+    angles_det_rad: ArrayLike = np.pi / 2
+
+    dtype: DTypeLike = np.float32
+
+    vol_shape_zyx: ArrayLike = field(init=False)
+    maps: ArrayLike = field(init=False, default=None)
+
+    def __post_init__(self):
+        """
+        Initialize the AttenuationVolume class.
+
+        Raises
+        ------
+        ValueError
+            In case no volumes were passed, or if they differed in shape.
+        """
+        self.angles_det_rad = np.array(self.angles_det_rad, ndmin=1)
+
+        if self.incident_local is not None:
+            self.vol_shape_zyx = self.incident_local.shape
+
+            if self.emitted_local is not None and np.any(self.vol_shape_zyx != self.emitted_local.shape):
+                raise ValueError(
+                    f"Incident volume shape ({self.incident_local.shape}) does not"
+                    + f" match the emitted volume shape ({self.emitted_local.shape})"
+                )
+        elif self.emitted_local is not None:
+            self.vol_shape_zyx = self.emitted_local.shape
+        else:
+            raise ValueError("No attenuation volumes were given.")
+
+        self.vol_shape_zyx = np.array(self.vol_shape_zyx, ndmin=1)
+
+        num_dims = len(self.vol_shape_zyx)
+        if num_dims not in [2, 3]:
+            raise ValueError(f"Maps can only be 2D or 3D Arrays. A {num_dims}-dimensional was passed ({self.vol_shape_zyx}).")
+
+    @staticmethod
+    def _compute_attenuation(vol: ArrayLike, angle_rad: float, invert: bool = False) -> ArrayLike:
+        return prj_backends.ProjectorBackend.compute_attenuation(vol, angle_rad, invert)
+
+    def _compute_attenuation_angle_in(self, angle_rad: float) -> ArrayLike:
+        return self._compute_attenuation(self.incident_local, angle_rad)[None, ...]
+
+    def _compute_attenuation_angle_out(self, angle_rad: float) -> ArrayLike:
+        angle_det = angle_rad + self.angles_det_rad
+        atts = np.empty(self.maps.shape[1:], dtype=self.dtype)
+        for ii, a in enumerate(angle_det):
+            atts[ii, ...] = self._compute_attenuation(self.emitted_local, a, invert=True)
+        return atts
+
+    def compute_maps(self, use_multithreading: bool = True, verbose: bool = True) -> None:
+        """
+        Compute the correction maps for each angle.
+
+        Parameters
+        ----------
+        use_multithreading : bool, optional
+            Use multi-threading for computing the attenuation maps. The default is True.
+        verbose : bool, optional
+            Show verbose output. The default is True.
+        """
+        num_rot_angles = len(self.angles_rot_rad)
+        self.maps = np.ones(
+            [num_rot_angles, len(self.angles_det_rad), *self.vol_shape_zyx], dtype=self.dtype
+        )
+
+        if self.incident_local is not None:
+            description = "Computing attenuation maps of incident beam: "
+            if use_multithreading:
+                r = [None] * num_rot_angles
+                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
+                    # angle_atts = executor.map(self._compute_attenuation_angle_in, self.angles_rot_rad)
+                    for ii, a in enumerate(self.angles_rot_rad):
+                        r[ii] = executor.submit(self._compute_attenuation_angle_in, a)
+                    for ii in tqdm(range(num_rot_angles), desc=description, disable=(not verbose)):
+                        self.maps[ii, ...] *= r[ii].result()
+            else:
+                for ii, a in enumerate(tqdm(self.angles_rot_rad, desc=description, disable=(not verbose))):
+                    self.maps[ii, ...] *= self._compute_attenuation_angle_in(a)
+
+        if self.emitted_local is not None:
+            description = "Computing attenuation maps of emitted photons: "
+            if use_multithreading:
+                r = [None] * num_rot_angles
+                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
+                    for ii, a in enumerate(self.angles_rot_rad):
+                        r[ii] = executor.submit(self._compute_attenuation_angle_out, a)
+                    for ii in tqdm(range(num_rot_angles), desc=description, disable=(not verbose)):
+                        self.maps[ii, ...] *= r[ii].result()
+            else:
+                for ii, a in enumerate(tqdm(self.angles_rot_rad, desc=description, disable=(not verbose))):
+                    self.maps[ii, ...] *= self._compute_attenuation_angle_out(a)
+
+    def plot_map(
+        self, ax, rot_ind: int, det_ind: int = 0, slice_ind: Optional[int] = None, axes: ArrayLike = (-2, -1)
+    ) -> None:
+        """
+        Plot the requested attenuation map.
+
+        Parameters
+        ----------
+        ax : matplotlib axes
+            The axes where to plot.
+        rot_ind : int
+            Rotation angle index.
+        det_ind : int, optional
+            Detector angle index. The default is 0.
+        slice_ind : Optional[int], optional
+            Volume slice index (for 3D volumes). The default is None.
+        axes : ArrayLike, optional
+            Axes of the slice. The default is (-2, -1).
+
+        Raises
+        ------
+        ValueError
+            In case a slice index is not passed for a 3D volume.
+        """
+        slice_shape = self.vol_shape_zyx[list(axes)]
+        coords = [(- (s - 1) / 2, (s - 1) / 2) for s in slice_shape]
+
+        att_map = np.squeeze(self.get_maps(rot_ind=rot_ind, det_ind=det_ind))
+        other_dim = np.squeeze(np.delete(np.arange(-3, 0), axes))
+        if len(att_map.shape) == 3:
+            if slice_ind is None:
+                raise ValueError("Slice index is needed for 3D volumes. None was passed.")
+
+            att_map = np.take(att_map, slice_ind, axis=other_dim)
+
+        ax.imshow(att_map, extent=np.concatenate(coords))
+
+        if other_dim == -3:
+            arrow_length = np.linalg.norm(slice_shape) / np.pi
+            arrow_args = dict(
+                width=arrow_length / 25,
+                head_width=arrow_length / 8,
+                head_length=arrow_length / 6,
+                length_includes_head=True,
+            )
+
+            prj_geom = models.ProjectionGeometry.get_default_parallel()
+            beam_i_geom = prj_geom.rotate(- self.angles_rot_rad[rot_ind])
+            beam_e_geom = prj_geom.rotate(- (self.angles_rot_rad[rot_ind] + self.angles_det_rad[det_ind]))
+
+            beam_i_dir = beam_i_geom.src_pos_xyz[0, :2] * arrow_length
+            beam_i_orig = - beam_i_dir
+            beam_e_dir = beam_e_geom.src_pos_xyz[0, :2] * arrow_length
+            beam_e_orig = np.array([0, 0])
+
+            ax.arrow(*beam_i_orig, *beam_i_dir, **arrow_args, fc='r', ec='r')
+            ax.arrow(*beam_e_orig, *beam_e_dir, **arrow_args, fc='k', ec='k')
+
+    def get_maps(
+        self, roi: Optional[ArrayLike] = None, rot_ind: Optional[int] = None, det_ind: Optional[int] = None
+    ) -> ArrayLike:
+        """
+        Return the attenuation maps.
+
+        Parameters
+        ----------
+        roi : Optional[ArrayLike], optional
+            The region-of-interest to select. The default is None.
+
+        Returns
+        -------
+        ArrayLike
+            The attenuation maps.
+        """
+        maps = self.maps
+
+        if roi is not None:
+            raise NotImplementedError("Extracting a region of interest it not supported, yet.")
+        if rot_ind is not None:
+            maps = maps[rot_ind:rot_ind+1:, ...]
+        if det_ind is not None:
+            maps = maps[:, det_ind:det_ind+1:, ...]
+
+        return maps
+
+
 class ProjectorAttenuationXRF(ProjectorUncorrected):
     """
     Attenuation corrected projection class for XRF, with multi-detector support.
@@ -371,6 +560,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         prj_geom: Optional[models.ProjectionGeometry] = None,
         prj_intensities: Optional[ArrayLike] = None,
         super_sampling: int = 1,
+        att_maps: Optional[ArrayLike] = None,
         att_in: Optional[ArrayLike] = None,
         att_out: Optional[ArrayLike] = None,
         angles_detectors_rad: Union[float, ArrayLike] = (np.pi / 2),
@@ -418,9 +608,19 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             weights_angles = np.ones((len(angles_rot_rad), num_det_angles))
         self.weights_angles = weights_angles
 
-        self.att_in = att_in
-        self.att_out = att_out
-        self.compute_attenuation_volumes()
+        if att_maps is None:
+            m = AttenuationVolume(att_in, att_out, self.angles_rot_rad, self.angles_det_rad)
+            m.compute_maps(use_multithreading=self.use_multithreading, verbose=self.verbose)
+            self.att_vol_angles = m.get_maps()
+        else:
+            if att_maps.shape[1] != num_det_angles:
+                raise ValueError(f"Number of maps ({att_maps.shape[1]}) differs from number of detectors ({num_det_angles})")
+            if not np.all(np.equal(att_maps.shape[-2:], self.vol_shape[-2:])):
+                raise ValueError(
+                    f"Mismatching volume shape of input volume ({att_maps.shape[-2:]})"
+                    + f" with vol_shape ({self.vol_shape} in 2D -> {self.vol_shape[-2:]})"
+                )
+            self.att_vol_angles = att_maps
 
     def __enter__(self):
         """Initialize the with statement block."""
@@ -433,100 +633,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         super().__exit__()
         if self.use_multithreading and isinstance(self.projector_backend, prj_backends.ProjectorBackendSKimage):
             self.executor.shutdown()
-
-    @staticmethod
-    def _compute_attenuation(vol: ArrayLike, angle_rad: float, invert: bool = False) -> ArrayLike:
-        return prj_backends.ProjectorBackend.compute_attenuation(vol, angle_rad, invert)
-
-    def compute_attenuation(self, vol: ArrayLike, angle_rad: float, invert: bool = False) -> ArrayLike:
-        """Compute the attenuation local attenuation for a given attenuation volume.
-
-        This means the attenuation experienced by the photons emitted in each
-        point of the volume, along a given direction.
-
-        Parameters
-        ----------
-        vol : ArrayLike
-            The attenuation volume.
-        angle_rad : float
-            The rotation angle in radians.
-        invert : bool, optional
-            Whether to reverse the direction of propagation. The default is False.
-
-        Raises
-        ------
-        ValueError
-            In case of non matching volume shape between the projector volumes and input attenuation volumes.
-
-        Returns
-        -------
-        ArrayLike
-            The stack of local attenuation volumes.
-        """
-        vol = np.array(vol)
-        if not len(vol.shape) in [2, 3]:
-            raise ValueError("Maps can only be 2D or 3D Arrays. A %d-dimensional was passed" % (len(vol.shape)))
-        if not np.all(np.equal(vol.shape[-2:], self.vol_shape[-2:])):
-            raise ValueError(
-                "Mismatching volume shape of input volume (%s) with vol_shape (%s in 2D -> %s)"
-                % (
-                    " ".join(("%d" % x for x in vol.shape)),
-                    " ".join(("%d" % x for x in self.vol_shape)),
-                    " ".join(("%d" % x for x in self.vol_shape[-2:])),
-                )
-            )
-
-        return self._compute_attenuation(vol, angle_rad, invert=invert)
-
-    def _compute_attenuation_angle_in(self, angle_rad: float) -> ArrayLike:
-        return self.compute_attenuation(self.att_in, angle_rad)[np.newaxis, ...]
-
-    def _compute_attenuation_angle_out(self, angle_rad: float) -> ArrayLike:
-        angle_det = angle_rad + self.angles_det_rad
-        atts = np.zeros(self.att_vol_angles.shape[1:], dtype=self.data_type)
-        for ii, a in enumerate(angle_det):
-            atts[ii, ...] = self.compute_attenuation(self.att_out, a, invert=True)
-        return atts
-
-    def compute_attenuation_volumes(self) -> None:
-        """Compute the corrections for each angle."""
-        if self.att_in is None and self.att_out is None:
-            raise ValueError("No attenuation volumes were given")
-
-        self.att_vol_angles = np.ones(
-            [len(self.angles_rot_rad), len(self.angles_det_rad), *self.vol_shape[:3]], dtype=self.data_type
-        )
-
-        if self.att_in is not None:
-            if self.use_multithreading:
-                num_angles = len(self.angles_rot_rad)
-                r = [None] * num_angles
-                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    # angle_atts = executor.map(self._compute_attenuation_angle_in, self.angles_rot_rad)
-                    for ii, a in enumerate(self.angles_rot_rad):
-                        r[ii] = executor.submit(self._compute_attenuation_angle_in, a)
-                    for ii in tqdm(
-                        range(num_angles), desc="Computing attenuation maps of incident beam: ", disable=(not self.verbose)
-                    ):
-                        self.att_vol_angles[ii, ...] *= r[ii].result()
-            else:
-                for ii, a in enumerate(tqdm(self.angles_rot_rad, disable=(not self.verbose))):
-                    self.att_vol_angles[ii, ...] *= self._compute_attenuation_angle_in(a)
-
-        if self.att_out is not None:
-            if self.use_multithreading:
-                num_angles = len(self.angles_rot_rad)
-                r = [None] * num_angles
-                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    for ii, a in enumerate(self.angles_rot_rad):
-                        r[ii] = executor.submit(self._compute_attenuation_angle_out, a)
-                    for ii in tqdm(
-                        range(num_angles), desc="Computing attenuation maps of emitted photons: ", disable=(not self.verbose)
-                    ):
-                        self.att_vol_angles[ii, ...] *= r[ii].result()
-            else:
-                for ii, a in enumerate(tqdm(self.angles_rot_rad, disable=(not self.verbose))):
-                    self.att_vol_angles[ii, ...] *= self._compute_attenuation_angle_out(a)
 
     def collapse_detectors(self) -> None:
         """Convert multi-detector configurations into single-detector."""
