@@ -110,7 +110,7 @@ class ProjectionGeometry(Geometry):
         ProjectionGeometry
             The rotated geometry.
         """
-        angles = angles_w_rad[:, None]
+        angles = np.array(angles_w_rad, ndmin=1)[:, None]
 
         # Deadling with ASTRA's incoherent 2D and 3D coordinate systems.
         if int(self.geom_type[-2]) == 2:
