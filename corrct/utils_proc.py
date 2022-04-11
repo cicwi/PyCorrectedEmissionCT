@@ -398,6 +398,67 @@ def compute_variance_weigth(
     return 1 / weight
 
 
+def get_beam_profile(voxel_size_um: float, beam_fwhm_um: float, profile_size: float = 1, verbose: bool = False) -> ArrayLike:
+    """
+    Compute the pencil beam integration point spread function.
+
+    Parameters
+    ----------
+    voxel_size_um : float
+        The integration length.
+    beam_fwhm_um : float
+        The beam FWHM.
+    profile_size : float, optional
+        The number of pixels of the PSF. The default is 1.
+    verbose : bool, optional
+        Whether to print verbose information. The default is False.
+
+    Returns
+    -------
+    ArrayLike
+        The beam PSF.
+    """
+    y_points = profile_size * 2 + 1
+    extent_um = y_points * voxel_size_um
+    num_points = (np.ceil(extent_um * 10) // 2).astype(int) * 2 + 1
+    half_voxel_size_um = voxel_size_um / 2
+
+    eps = np.finfo(np.float32).eps
+
+    xc = np.linspace(- extent_um / 2, extent_um / 2, num_points)
+
+    # Box beam shape
+    yb = np.abs(xc) < half_voxel_size_um
+    yb[np.abs(np.abs(xc) - half_voxel_size_um) <= eps] = 0.5
+
+    # Gaussian beam shape
+    yg = np.exp(-4 * np.log(2) * (xc ** 2) / (beam_fwhm_um ** 2))
+
+    yc = np.convolve(yb, yg, mode='same')
+    yc = yc / np.max(yc)
+
+    if verbose:
+        f, ax = plt.subplots()
+        ax.plot(xc, yb, label="Integration length")
+        ax.plot(xc, yg, label="Gaussian beam shape")
+        ax.plot(xc, yc, label="Resulting beam shape")
+        ax.legend()
+        ax.grid()
+        plt.tight_layout()
+
+    y = np.zeros((y_points, ))
+    for ii_p in range(y_points):
+        # Finding the region that overlaps with the given adjacent voxel
+        voxel_center_um = (ii_p - profile_size) * voxel_size_um
+        yp = np.abs(xc - voxel_center_um) < half_voxel_size_um
+        yp[(np.abs(xc - voxel_center_um) - half_voxel_size_um) < eps] = 0.5
+
+        y[ii_p] = np.sum(yc * yp)
+
+    # Renormalization
+    return y / y.sum()
+
+
 def denoise_image(
     img: ArrayLike,
     reg_weight: Union[float, ArrayLike] = 1e-2,
