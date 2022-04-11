@@ -275,7 +275,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
         """
         filter_name = _set_filter_name(None)
         if angle_ind is None:
-            vol = np.empty([self.prj_shape_vwu[-1], *self.vol_shape_zxy], dtype=prj.dtype)
+            vol = np.empty([self.prj_shape_vwu[-2], *self.vol_shape_zxy], dtype=prj.dtype)
             for ii_a, a in enumerate(self.angles_w_deg):
                 vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], **filter_name)
             return vol.sum(axis=0)
