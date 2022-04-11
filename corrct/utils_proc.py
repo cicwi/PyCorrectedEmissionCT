@@ -355,7 +355,7 @@ def compute_variance_transmission(
 
 
 def compute_variance_weigth(
-    variance: ArrayLike, percentile: float = 0.001, normalized: bool = False, semilog: bool = False
+    variance: ArrayLike, *, percentile: float = 0.001, normalized: bool = False, use_std: bool = False, semilog: bool = False
 ) -> ArrayLike:
     """
     Compute the weight associated to the given variance, in a weighted least-squares context.
@@ -368,6 +368,8 @@ def compute_variance_weigth(
         Minimum percentile to discard. The default is 0.001 (0.1%)
     normalized : bool, optional
         Scale the largest weight to 1. The default is False.
+    use_std : bool, optional
+        Use the standard deviation instead of the variance.
     semilog : bool, optional
         Scale the variance over a logarithmic curve. It can be beneficial with
         high dynamic range data. The default is False.
@@ -389,6 +391,8 @@ def compute_variance_weigth(
 
     if normalized:
         weight /= min_nonzero_variance
+    if use_std:
+        weight = np.sqrt(weight)
     if semilog:
         weight = np.log(weight + float(normalized is False)) + 1
     return 1 / weight
