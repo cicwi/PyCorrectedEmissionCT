@@ -403,7 +403,7 @@ class VolumeMaterial(object):
 
         el_num = self.get_element_number(element)
 
-        el_cs = np.empty((len(fluo_lines), ), self.dtype)
+        el_cs = np.empty((len(fluo_lines),), self.dtype)
         for ii, line in enumerate(fluo_lines):
             try:
                 el_cs[ii] = xraylib.CS_FluorLine_Kissel(el_num, line.indx, energy_in_keV)  # fluo production for cm2/g

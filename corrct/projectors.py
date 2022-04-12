@@ -386,9 +386,7 @@ class AttenuationVolume:
             Show verbose output. The default is True.
         """
         num_rot_angles = len(self.angles_rot_rad)
-        self.maps = np.ones(
-            [num_rot_angles, len(self.angles_det_rad), *self.vol_shape_zyx], dtype=self.dtype
-        )
+        self.maps = np.ones([num_rot_angles, len(self.angles_det_rad), *self.vol_shape_zyx], dtype=self.dtype)
 
         if self.incident_local is not None:
             description = "Computing attenuation maps for incident beam: "
@@ -442,7 +440,7 @@ class AttenuationVolume:
             In case a slice index is not passed for a 3D volume.
         """
         slice_shape = self.vol_shape_zyx[list(axes)]
-        coords = [(- (s - 1) / 2, (s - 1) / 2) for s in slice_shape]
+        coords = [(-(s - 1) / 2, (s - 1) / 2) for s in slice_shape]
 
         att_map = np.squeeze(self.get_maps(rot_ind=rot_ind, det_ind=det_ind))
         other_dim = np.squeeze(np.delete(np.arange(-3, 0), axes))
@@ -457,23 +455,20 @@ class AttenuationVolume:
         if other_dim == -3:
             arrow_length = np.linalg.norm(slice_shape) / np.pi
             arrow_args = dict(
-                width=arrow_length / 25,
-                head_width=arrow_length / 8,
-                head_length=arrow_length / 6,
-                length_includes_head=True,
+                width=arrow_length / 25, head_width=arrow_length / 8, head_length=arrow_length / 6, length_includes_head=True,
             )
 
             prj_geom = models.ProjectionGeometry.get_default_parallel()
-            beam_i_geom = prj_geom.rotate(- self.angles_rot_rad[rot_ind])
-            beam_e_geom = prj_geom.rotate(- (self.angles_rot_rad[rot_ind] + self.angles_det_rad[det_ind]))
+            beam_i_geom = prj_geom.rotate(-self.angles_rot_rad[rot_ind])
+            beam_e_geom = prj_geom.rotate(-(self.angles_rot_rad[rot_ind] + self.angles_det_rad[det_ind]))
 
             beam_i_dir = beam_i_geom.src_pos_xyz[0, :2] * arrow_length
-            beam_i_orig = - beam_i_dir
+            beam_i_orig = -beam_i_dir
             beam_e_dir = beam_e_geom.src_pos_xyz[0, :2] * arrow_length
             beam_e_orig = np.array([0, 0])
 
-            ax.arrow(*beam_i_orig, *beam_i_dir, **arrow_args, fc='r', ec='r')
-            ax.arrow(*beam_e_orig, *beam_e_dir, **arrow_args, fc='k', ec='k')
+            ax.arrow(*beam_i_orig, *beam_i_dir, **arrow_args, fc="r", ec="r")
+            ax.arrow(*beam_e_orig, *beam_e_dir, **arrow_args, fc="k", ec="k")
 
     def get_maps(
         self, roi: Optional[ArrayLike] = None, rot_ind: Optional[int] = None, det_ind: Optional[int] = None
@@ -494,9 +489,9 @@ class AttenuationVolume:
         maps = self.maps
 
         if rot_ind is not None:
-            maps = maps[rot_ind:rot_ind+1:, ...]
+            maps = maps[rot_ind : rot_ind + 1 :, ...]
         if det_ind is not None:
-            maps = maps[:, det_ind:det_ind+1:, ...]
+            maps = maps[:, det_ind : det_ind + 1 :, ...]
         if roi is not None:
             raise NotImplementedError("Extracting a region of interest is not supported, yet.")
 

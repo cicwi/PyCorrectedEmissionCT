@@ -78,7 +78,7 @@ class ProjectionGeometry(Geometry):
             det_pos_xyz=det_pos_xyz,
             det_u_xyz=np.array([1, 0, 0]),
             det_v_xyz=np.array([0, 0, 1]),
-            rot_dir_xyz=np.array([0, 0, -1])
+            rot_dir_xyz=np.array([0, 0, -1]),
         )
 
     def set_detector_shifts_vu(self, det_pos_vu: ArrayLike) -> None:
@@ -114,7 +114,7 @@ class ProjectionGeometry(Geometry):
 
         # Deadling with ASTRA's incoherent 2D and 3D coordinate systems.
         if int(self.geom_type[-2]) == 2:
-            angles = - angles
+            angles = -angles
 
         rotations = spt.Rotation.from_rotvec(angles * self.rot_dir_xyz)
 

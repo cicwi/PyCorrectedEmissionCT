@@ -33,7 +33,7 @@ def get_ball(
     radius: Union[int, float],
     super_sampling: int = 5,
     dtype: DTypeLike = np.float32,
-    func: Optional[Callable] = None
+    func: Optional[Callable] = None,
 ) -> ArrayLike:
     """
     Compute a ball with specified radius.
@@ -425,7 +425,7 @@ def get_beam_profile(voxel_size_um: float, beam_fwhm_um: float, profile_size: fl
 
     eps = np.finfo(np.float32).eps
 
-    xc = np.linspace(- extent_um / 2, extent_um / 2, num_points)
+    xc = np.linspace(-extent_um / 2, extent_um / 2, num_points)
 
     # Box beam shape
     yb = np.abs(xc) < half_voxel_size_um
@@ -434,7 +434,7 @@ def get_beam_profile(voxel_size_um: float, beam_fwhm_um: float, profile_size: fl
     # Gaussian beam shape
     yg = np.exp(-4 * np.log(2) * (xc ** 2) / (beam_fwhm_um ** 2))
 
-    yc = np.convolve(yb, yg, mode='same')
+    yc = np.convolve(yb, yg, mode="same")
     yc = yc / np.max(yc)
 
     if verbose:
@@ -446,7 +446,7 @@ def get_beam_profile(voxel_size_um: float, beam_fwhm_um: float, profile_size: fl
         ax.grid()
         plt.tight_layout()
 
-    y = np.zeros((y_points, ))
+    y = np.zeros((y_points,))
     for ii_p in range(y_points):
         # Finding the region that overlaps with the given adjacent voxel
         voxel_center_um = (ii_p - profile_size) * voxel_size_um
@@ -506,9 +506,9 @@ def denoise_image(
         op = operators.TransformIdentity(img.shape)
         padding = None
     else:
-        padding = [(0, )] * len(img.shape)
+        padding = [(0,)] * len(img.shape)
         for ii, p in enumerate(psf.shape):
-            padding[axes[ii]] = (p, )
+            padding[axes[ii]] = (p,)
         new_shape = np.ones_like(img.shape)
         new_shape[list(axes)] = psf.shape
 
@@ -785,10 +785,11 @@ def norm_cross_corr(
     ArrayLike
         The one-dimensional cross-correlation curve.
     """
+
     def local_sum(x: ArrayLike, axes: ArrayLike) -> ArrayLike:
-        padding = [(0, )] * len(x.shape)
+        padding = [(0,)] * len(x.shape)
         for a in axes:
-            padding[a] = (x.shape[a], )
+            padding[a] = (x.shape[a],)
         y = np.pad(x, padding)
         for a in axes:
             y = np.cumsum(y, axis=a)
@@ -813,7 +814,7 @@ def norm_cross_corr(
 
         cc_n = cc - local_sums_img2 * np.mean(img1)
 
-        cc_n /= (np.std(img1) * np.sqrt(np.prod(np.array(img1.shape)[list(axes)])))
+        cc_n /= np.std(img1) * np.sqrt(np.prod(np.array(img1.shape)[list(axes)]))
 
         diff_local_sums = local_sums_img2_2 - (local_sums_img2 ** 2) / np.prod(np.array(img2.shape)[list(axes)])
         cc_n /= np.sqrt(diff_local_sums.clip(0, None))
@@ -825,7 +826,7 @@ def norm_cross_corr(
     cc_o = azimuthal_integration(np.ones_like(cc_n), axes=axes, domain="fourier")
 
     cc_l /= cc_o
-    cc_l = cc_l[:np.min(np.array(img1.shape)[list(axes)])]
+    cc_l = cc_l[: np.min(np.array(img1.shape)[list(axes)])]
 
     if plot:
         f, ax = plt.subplots()

@@ -275,12 +275,12 @@ class BaseWaveletTransform(BaseTransform):
 
         self.w = pywt.Wavelet(self.wavelet)
         filt_bank_l1norm = np.linalg.norm(self.w.filter_bank, ord=1, axis=-1)
-        self.wlet_dec_filter_mult = np.array([
-            (filt_bank_l1norm[0] ** lab.count("a")) * (filt_bank_l1norm[1] ** lab.count("d")) for lab in self.labels
-        ])
-        self.wlet_rec_filter_mult = np.array([
-            (filt_bank_l1norm[2] ** lab.count("a")) * (filt_bank_l1norm[3] ** lab.count("d")) for lab in self.labels
-        ])
+        self.wlet_dec_filter_mult = np.array(
+            [(filt_bank_l1norm[0] ** lab.count("a")) * (filt_bank_l1norm[1] ** lab.count("d")) for lab in self.labels]
+        )
+        self.wlet_rec_filter_mult = np.array(
+            [(filt_bank_l1norm[2] ** lab.count("a")) * (filt_bank_l1norm[3] ** lab.count("d")) for lab in self.labels]
+        )
 
 
 class TransformDecimatedWavelet(BaseWaveletTransform):
