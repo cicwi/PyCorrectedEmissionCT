@@ -391,7 +391,7 @@ class AttenuationVolume:
         )
 
         if self.incident_local is not None:
-            description = "Computing attenuation maps of incident beam: "
+            description = "Computing attenuation maps for incident beam: "
             if use_multithreading:
                 r = [None] * num_rot_angles
                 with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
@@ -405,7 +405,7 @@ class AttenuationVolume:
                     self.maps[ii, ...] *= self._compute_attenuation_angle_in(a)
 
         if self.emitted_local is not None:
-            description = "Computing attenuation maps of emitted photons: "
+            description = "Computing attenuation maps for emitted photons: "
             if use_multithreading:
                 r = [None] * num_rot_angles
                 with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
@@ -493,12 +493,12 @@ class AttenuationVolume:
         """
         maps = self.maps
 
-        if roi is not None:
-            raise NotImplementedError("Extracting a region of interest it not supported, yet.")
         if rot_ind is not None:
             maps = maps[rot_ind:rot_ind+1:, ...]
         if det_ind is not None:
             maps = maps[:, det_ind:det_ind+1:, ...]
+        if roi is not None:
+            raise NotImplementedError("Extracting a region of interest is not supported, yet.")
 
         return maps
 

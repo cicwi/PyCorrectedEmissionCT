@@ -18,12 +18,6 @@ from numpy.typing import ArrayLike
 from abc import ABC, abstractmethod
 
 
-def _set_filter_name(filt):
-    if skimage.__version__ >= "0.18":
-        return dict(filter_name=filt)
-    else:
-        return dict(filter=filt)
-
 
 try:
     import astra
@@ -235,6 +229,17 @@ class ProjectorBackendSKimage(ProjectorBackend):
         self.angles_w_deg = np.rad2deg(self.angles_w_rad)
         self.is_initialized = True
 
+    @staticmethod
+    def _set_filter_name(filt):
+        if skimage.__version__ >= "0.18":
+            return dict(filter_name=filt)
+        else:
+            return dict(filter=filt)
+
+    @staticmethod
+    def _set_bpj_size(output_size):
+        return dict(circle=False, output_size=output_size)
+
     def fp(self, vol: ArrayLike, angle_ind: int = None) -> ArrayLike:
         """Forward-projection of the volume to the sinogram or a single sinogram line.
 
@@ -273,14 +278,15 @@ class ProjectorBackendSKimage(ProjectorBackend):
         ArrayLike
             The back-projected volume.
         """
-        filter_name = _set_filter_name(None)
+        filter_name = self._set_filter_name(None)
+        bpj_size = self._set_bpj_size(self.vol_shape_zxy[-1])
         if angle_ind is None:
             vol = np.empty([self.prj_shape_vwu[-2], *self.vol_shape_zxy], dtype=prj.dtype)
             for ii_a, a in enumerate(self.angles_w_deg):
-                vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], **filter_name)
+                vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], **bpj_size, **filter_name)
             return vol.sum(axis=0)
         else:
-            return skt.iradon(prj[:, np.newaxis], self.angles_w_deg[angle_ind : angle_ind + 1 :], **filter_name)
+            return skt.iradon(prj[:, np.newaxis], self.angles_w_deg[angle_ind : angle_ind + 1 :], **bpj_size, **filter_name)
 
     def fbp(self, prj: ArrayLike, fbp_filter: str) -> ArrayLike:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
@@ -297,16 +303,17 @@ class ProjectorBackendSKimage(ProjectorBackend):
         vol : ArrayLike
             The reconstructed volume.
         """
-        filter_name = _set_filter_name(fbp_filter.lower())
+        filter_name = self._set_filter_name(fbp_filter.lower())
+        bpj_size = self._set_bpj_size(self.vol_shape_zxy[-1])
         if len(prj.shape) > 2:
             num_lines = prj.shape[1]
             vol = np.empty([num_lines, *self.vol_shape_zxy], dtype=prj.dtype)
 
             for ii_v in range(num_lines):
-                vol[ii_v, ...] = skt.iradon(prj[ii_v, ...].transpose(), self.angles_w_deg, **filter_name)
+                vol[ii_v, ...] = skt.iradon(prj[ii_v, ...].transpose(), self.angles_w_deg, **bpj_size, **filter_name)
             return vol
         else:
-            return skt.iradon(prj.transpose(), self.angles_w_deg, **filter_name)
+            return skt.iradon(prj.transpose(), self.angles_w_deg, **bpj_size, **filter_name)
 
 
 class ProjectorBackendASTRA(ProjectorBackend):
@@ -348,7 +355,8 @@ class ProjectorBackendASTRA(ProjectorBackend):
         if not isinstance(rot_axis_shift_pix, (int, float, np.ndarray)):
             raise ValueError(
                 "Rotation axis shift should either be an int, a float or a sequence of floats"
-                + f" ({type(rot_axis_shift_pix)} given instead).")
+                + f" ({type(rot_axis_shift_pix)} given instead)."
+            )
 
         super().__init__(vol_geom, angles_rot_rad)
 
