@@ -4,7 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.4.2...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.5.0...develop
+
+## 0.5.0 - 2022-04-14
+### Added
+- New module called `models`:
+  - VolumeGeometry: description of the volume.
+  - ProjectionGeometry: description / manipulation of the projection geometry.
+  - Support for unmatched pixel-voxel size, cone beam geometry, uneven volume shape.
+  - Arbitrary geometry, including tilted detector.
+- Convolution operator and deconvolution support.
+- Support for rotating projection stack.
+- Support for computing cross-correlation curves.
+- Computation of PSF for pencil beam scanning with gaussian beam.
+- Support for computing attenuation maps outside the corrected projector.
+### Fixed
+- Pixel weights, when having small outliers.
+- Volume mask generation
+- Dimension bug in azimuthal integration.
+- Inconsistency between astra-toolbox and scikit-image backends.
 
 ## 0.4.2 - 2022-01-14
 ### Added
