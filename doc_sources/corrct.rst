@@ -20,6 +20,14 @@ corrct.data\_terms module
    :undoc-members:
    :show-inheritance:
 
+corrct.models module
+--------------------
+
+.. automodule:: corrct.models
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.operators module
 -----------------------
 

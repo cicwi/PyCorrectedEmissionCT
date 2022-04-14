@@ -67,6 +67,8 @@
   <h1>Source code for corrct.utils_proc</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Pre-processing and post-processing routines.</span>
+
 <span class="sd">Created on Tue Mar 24 15:25:14 2020</span>
 
 <span class="sd">@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,</span>
@@ -77,24 +79,78 @@
 <span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
 <span class="kn">import</span> <span class="nn">scipy.signal</span>
 
+<span class="kn">import</span> <span class="nn">skimage.transform</span> <span class="k">as</span> <span class="nn">skt</span>
+
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">operators</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">solvers</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils_reg</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Callable</span>
 
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span>
 
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
 
 <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+
+
+<div class="viewcode-block" id="get_ball"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_ball">[docs]</a><span class="k">def</span> <span class="nf">get_ball</span><span class="p">(</span>
+    <span class="n">data_shape_vu</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a ball with specified radius.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_shape_vu : ArrayLike</span>
+<span class="sd">        Shape of the output array.</span>
+<span class="sd">    radius : int | float</span>
+<span class="sd">        Radius of the ball.</span>
+<span class="sd">    super_sampling : int, optional</span>
+<span class="sd">        Super-sampling for having smoother ball edges. The default is 5.</span>
+<span class="sd">    dtype : DTypeLike, optional</span>
+<span class="sd">        Type of the output. The default is np.float32.</span>
+<span class="sd">    func : Optional[Callable], optional</span>
+<span class="sd">        Point-wise function for the local values. The default is None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        The ball.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data_shape_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_shape_vu</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">super_sampling</span>
+
+    <span class="c1"># coords = [np.linspace(-(s - 1) / 2, (s - 1) / 2, s, dtype=np.float32) for s in data_shape_vu]</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data_shape_vu</span><span class="p">]</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coords</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">super_sampling</span>
+
+    <span class="n">probe</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span> <span class="o">&lt;</span> <span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">probe</span> <span class="o">*=</span> <span class="n">func</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+    <span class="n">probe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">probe</span><span class="p">,</span> <span class="n">super_sampling</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_shape_vu</span><span class="p">))))</span>
+    <span class="n">new_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">data_shape_vu</span> <span class="o">//</span> <span class="n">super_sampling</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">data_shape_vu</span><span class="p">)</span> <span class="o">*</span> <span class="n">super_sampling</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">probe</span> <span class="o">=</span> <span class="n">probe</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">new_shape</span><span class="p">)</span>
+    <span class="n">probe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">probe</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape_vu</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">probe</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_circular_mask"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_circular_mask">[docs]</a><span class="k">def</span> <span class="nf">get_circular_mask</span><span class="p">(</span>
     <span class="n">vol_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">radius_offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">coords_ball</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vol_origin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">mask_drop_off</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;const&quot;</span><span class="p">,</span>
-    <span class="n">data_type</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute a circular mask for the reconstruction volume.</span>
@@ -107,24 +163,32 @@
 <span class="sd">        The offset with respect to the volume edge. The default is 0.</span>
 <span class="sd">    coords_ball : Optional[Sequence[int]], optional</span>
 <span class="sd">        The coordinates to consider for the non-masked region. The default is None.</span>
+<span class="sd">    vol_origin : Optional[Sequence[float]], optional</span>
+<span class="sd">        The origin of the coordinates in voxels. The default is None.</span>
 <span class="sd">    mask_drop_off : str, optional</span>
 <span class="sd">        The mask data type. Allowed types: &quot;const&quot; | &quot;sinc&quot;. The default is &quot;const&quot;.</span>
-<span class="sd">    data_type : DTypeLike, optional</span>
+<span class="sd">    super_sampling : int, optional</span>
+<span class="sd">        The pixel super sampling to be used for the mask. The default is 1.</span>
+<span class="sd">    dtype : DTypeLike, optional</span>
 <span class="sd">        The type of mask. The default is np.float32.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        In case of unknown mask_drop_off value.</span>
+<span class="sd">        In case of unknown mask_drop_off value, or mismatching volume origin and shape.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    ArrayLike</span>
 <span class="sd">        The circular mask.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">vol_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">vol_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">super_sampling</span>
 
-    <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">vol_shape</span><span class="p">]</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">super_sampling</span><span class="p">),</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">super_sampling</span><span class="p">),</span> <span class="n">s</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">vol_shape</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">vol_origin</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol_origin</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The volume shape (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span><span class="si">}</span><span class="s2">), and the origin shape (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vol_origin</span><span class="p">)</span><span class="si">}</span><span class="s2">) should match&quot;</span><span class="p">)</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="n">vol_origin</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coords</span><span class="p">)]</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">coords_ball</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -132,7 +196,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">coords_ball</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coords_ball</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
-    <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">[</span><span class="n">coords_ball</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">radius_offset</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">[</span><span class="n">coords_ball</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">super_sampling</span><span class="p">)</span> <span class="o">+</span> <span class="n">radius_offset</span>
 
     <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">coords_ball</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -141,14 +205,21 @@
         <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">coords_ball</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">mask_drop_off</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;const&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">dists</span> <span class="o">&lt;=</span> <span class="n">radius</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">dists</span> <span class="o">&lt;=</span> <span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">mask_drop_off</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;sinc&quot;</span><span class="p">:</span>
         <span class="n">cut_off</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">[</span><span class="n">coords_ball</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">radius</span>
-        <span class="n">outter_region</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">dists</span> <span class="o">&lt;=</span> <span class="n">radius</span><span class="p">)</span>
-        <span class="n">outter_vals</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sinc</span><span class="p">((</span><span class="n">dists</span> <span class="o">-</span> <span class="n">radius</span><span class="p">)</span> <span class="o">/</span> <span class="n">cut_off</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">outter_region</span> <span class="o">*</span> <span class="n">outter_vals</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">outter_region</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">dists</span> <span class="o">&lt;=</span> <span class="n">radius</span><span class="p">)</span>
+        <span class="n">outter_vals</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sinc</span><span class="p">((</span><span class="n">dists</span> <span class="o">-</span> <span class="n">radius</span><span class="p">)</span> <span class="o">/</span> <span class="n">cut_off</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">outter_region</span> <span class="o">*</span> <span class="n">outter_vals</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown drop-off function: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">mask_drop_off</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown drop-off function: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">mask_drop_off</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">super_sampling</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">new_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">vol_shape</span> <span class="o">//</span> <span class="n">super_sampling</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">super_sampling</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">new_shape</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">mask</span></div>
 
 
 <div class="viewcode-block" id="pad_sinogram"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.pad_sinogram">[docs]</a><span class="k">def</span> <span class="nf">pad_sinogram</span><span class="p">(</span>
@@ -188,7 +259,7 @@
     <span class="n">flats</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">darks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">crop</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">data_type</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply flat field.</span>
@@ -203,7 +274,7 @@
 <span class="sd">        Dark noise. The default is None.</span>
 <span class="sd">    crop : Optional[Sequence[int]], optional</span>
 <span class="sd">        Crop region. The default is None.</span>
-<span class="sd">    data_type : DTypeLike, optional</span>
+<span class="sd">    dtype : DTypeLike, optional</span>
 <span class="sd">        Data type of the processed data. The default is np.float32.</span>
 
 <span class="sd">    Returns</span>
@@ -211,8 +282,8 @@
 <span class="sd">    ArrayLike</span>
 <span class="sd">        Falt-field corrected and linearized projections.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">projs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">projs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
-    <span class="n">flats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">flats</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+    <span class="n">projs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">projs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">flats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">flats</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">crop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">projs</span> <span class="o">=</span> <span class="n">projs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
         <span class="n">flats</span> <span class="o">=</span> <span class="n">flats</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
@@ -220,7 +291,7 @@
             <span class="n">darks</span> <span class="o">=</span> <span class="n">darks</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">crop</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
 
     <span class="k">if</span> <span class="n">darks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">darks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">darks</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="n">darks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">darks</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">projs</span> <span class="o">=</span> <span class="n">projs</span> <span class="o">-</span> <span class="n">darks</span>
         <span class="n">flats</span> <span class="o">=</span> <span class="n">flats</span> <span class="o">-</span> <span class="n">darks</span>
 
@@ -244,6 +315,28 @@
 <span class="sd">        Linearized projections.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">projs</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="rotate_proj_stack"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.rotate_proj_stack">[docs]</a><span class="k">def</span> <span class="nf">rotate_proj_stack</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">rot_angle_deg</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotate the projection stack.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_vwu : ArrayLike</span>
+<span class="sd">        The projection stack, with dimensions [v, w, u] (vertical, omega / sample rotation, horizontal).</span>
+<span class="sd">    rot_angle_deg : float</span>
+<span class="sd">        The rotation angle in degrees.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        The rotated projection stack.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data_vwu_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_vwu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]):</span>
+        <span class="n">data_vwu_r</span><span class="p">[:,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">[:,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:],</span> <span class="o">-</span><span class="n">rot_angle_deg</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data_vwu_r</span></div>
 
 
 <div class="viewcode-block" id="compute_variance_poisson"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.compute_variance_poisson">[docs]</a><span class="k">def</span> <span class="nf">compute_variance_poisson</span><span class="p">(</span>
@@ -328,7 +421,9 @@
     <span class="k">return</span> <span class="n">variance</span></div>
 
 
-<div class="viewcode-block" id="compute_variance_weigth"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.compute_variance_weigth">[docs]</a><span class="k">def</span> <span class="nf">compute_variance_weigth</span><span class="p">(</span><span class="n">variance</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">semilog</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+<div class="viewcode-block" id="compute_variance_weigth"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.compute_variance_weigth">[docs]</a><span class="k">def</span> <span class="nf">compute_variance_weigth</span><span class="p">(</span>
+    <span class="n">variance</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">percentile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">,</span> <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">use_std</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">semilog</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the weight associated to the given variance, in a weighted least-squares context.</span>
 
@@ -336,8 +431,12 @@
 <span class="sd">    ----------</span>
 <span class="sd">    variance : ArrayLike</span>
 <span class="sd">        The variance of the signal.</span>
+<span class="sd">    percentile : float</span>
+<span class="sd">        Minimum percentile to discard. The default is 0.001 (0.1%)</span>
 <span class="sd">    normalized : bool, optional</span>
 <span class="sd">        Scale the largest weight to 1. The default is False.</span>
+<span class="sd">    use_std : bool, optional</span>
+<span class="sd">        Use the standard deviation instead of the variance.</span>
 <span class="sd">    semilog : bool, optional</span>
 <span class="sd">        Scale the variance over a logarithmic curve. It can be beneficial with</span>
 <span class="sd">        high dynamic range data. The default is False.</span>
@@ -348,19 +447,89 @@
 <span class="sd">        The computed weights.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">semilog</span><span class="p">:</span>
-        <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">variance</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">min_nonzero_variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">variance</span><span class="p">[</span><span class="n">variance</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">eps</span><span class="p">)</span>
+
+    <span class="n">sorted_variances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">variance</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+    <span class="n">percentiles_variances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">sorted_variances</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sorted_variances</span><span class="p">)</span>
+    <span class="n">ind_threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">percentiles_variances</span> <span class="o">&lt;</span> <span class="n">percentile</span><span class="p">)),</span> <span class="n">percentiles_variances</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">min_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">sorted_variances</span><span class="p">[</span><span class="n">ind_threshold</span><span class="p">],</span> <span class="n">eps</span><span class="p">)</span>
+
+    <span class="n">min_nonzero_variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">variance</span><span class="p">[</span><span class="n">variance</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">min_val</span><span class="p">)</span>
     <span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">variance</span><span class="p">,</span> <span class="n">min_nonzero_variance</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">normalized</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">min_nonzero_variance</span> <span class="o">/</span> <span class="n">weight</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">weight</span></div>
+        <span class="n">weight</span> <span class="o">/=</span> <span class="n">min_nonzero_variance</span>
+    <span class="k">if</span> <span class="n">use_std</span><span class="p">:</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">semilog</span><span class="p">:</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">weight</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">normalized</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">weight</span></div>
+
+
+<div class="viewcode-block" id="get_beam_profile"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_beam_profile">[docs]</a><span class="k">def</span> <span class="nf">get_beam_profile</span><span class="p">(</span><span class="n">voxel_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beam_fwhm_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">profile_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the pencil beam integration point spread function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    voxel_size_um : float</span>
+<span class="sd">        The integration length.</span>
+<span class="sd">    beam_fwhm_um : float</span>
+<span class="sd">        The beam FWHM.</span>
+<span class="sd">    profile_size : float, optional</span>
+<span class="sd">        The number of pixels of the PSF. The default is 1.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to print verbose information. The default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        The beam PSF.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y_points</span> <span class="o">=</span> <span class="n">profile_size</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">extent_um</span> <span class="o">=</span> <span class="n">y_points</span> <span class="o">*</span> <span class="n">voxel_size_um</span>
+    <span class="n">num_points</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">extent_um</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">half_voxel_size_um</span> <span class="o">=</span> <span class="n">voxel_size_um</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+
+    <span class="n">xc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">extent_um</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">extent_um</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">num_points</span><span class="p">)</span>
+
+    <span class="c1"># Box beam shape</span>
+    <span class="n">yb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xc</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">half_voxel_size_um</span>
+    <span class="n">yb</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xc</span><span class="p">)</span> <span class="o">-</span> <span class="n">half_voxel_size_um</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="c1"># Gaussian beam shape</span>
+    <span class="n">yg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">xc</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">beam_fwhm_um</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">yc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">yb</span><span class="p">,</span> <span class="n">yg</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+    <span class="n">yc</span> <span class="o">=</span> <span class="n">yc</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">yc</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Integration length&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yg</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Gaussian beam shape&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Resulting beam shape&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y_points</span><span class="p">,))</span>
+    <span class="k">for</span> <span class="n">ii_p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_points</span><span class="p">):</span>
+        <span class="c1"># Finding the region that overlaps with the given adjacent voxel</span>
+        <span class="n">voxel_center_um</span> <span class="o">=</span> <span class="p">(</span><span class="n">ii_p</span> <span class="o">-</span> <span class="n">profile_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">voxel_size_um</span>
+        <span class="n">yp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xc</span> <span class="o">-</span> <span class="n">voxel_center_um</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">half_voxel_size_um</span>
+        <span class="n">yp</span><span class="p">[(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xc</span> <span class="o">-</span> <span class="n">voxel_center_um</span><span class="p">)</span> <span class="o">-</span> <span class="n">half_voxel_size_um</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+        <span class="n">y</span><span class="p">[</span><span class="n">ii_p</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">yc</span> <span class="o">*</span> <span class="n">yp</span><span class="p">)</span>
+
+    <span class="c1"># Renormalization</span>
+    <span class="k">return</span> <span class="n">y</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="denoise_image"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.denoise_image">[docs]</a><span class="k">def</span> <span class="nf">denoise_image</span><span class="p">(</span>
     <span class="n">img</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-    <span class="n">reg_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
+    <span class="n">reg_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
+    <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">variances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
     <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
@@ -400,13 +569,28 @@
 <span class="sd">    ArrayLike</span>
 <span class="sd">        Denoised image or sinogram.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">OpI</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">psf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">psf</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+            <span class="n">padding</span><span class="p">[</span><span class="n">axes</span><span class="p">[</span><span class="n">ii</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">,)</span>
+        <span class="n">new_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">new_shape</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]</span> <span class="o">=</span> <span class="n">psf</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">variances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">variances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">variances</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">)</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformConvolution</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">psf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">new_shape</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">variances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">variances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">variances</span><span class="p">)</span>
-        <span class="n">min_nonzero_vars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">variances</span><span class="p">[</span><span class="n">variances</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="n">img_weights</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">variances</span><span class="p">,</span> <span class="n">min_nonzero_vars</span><span class="p">)</span>
-
+        <span class="n">img_weights</span> <span class="o">=</span> <span class="n">compute_variance_weigth</span><span class="p">(</span><span class="n">variances</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">semilog</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># import matplotlib.pyplot as plt</span>
+        <span class="c1"># plt.figure()</span>
+        <span class="c1"># plt.imshow(img_weights[:, 0, :])</span>
+        <span class="c1"># plt.show()</span>
         <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_wl2</span><span class="p">(</span><span class="n">img_weights</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">()</span>
@@ -417,8 +601,8 @@
     <span class="k">def</span> <span class="nf">solver_spawn</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">):</span>
         <span class="c1"># Using the PDHG solver from Chambolle and Pock</span>
         <span class="c1"># reg = solvers.Regularizer_Grad(lam_reg, axes=axes)</span>
-        <span class="n">reg</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1swl</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">,</span> <span class="s2">&quot;bior4.4&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">solvers</span><span class="o">.</span><span class="n">CP</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg</span><span class="p">,</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1dwl</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">,</span> <span class="s2">&quot;bior4.4&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg</span><span class="p">,</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">b_test_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -429,7 +613,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">x0</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">solver</span><span class="p">(</span><span class="n">OpI</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="o">=</span><span class="n">b_test_mask</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">solver</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="o">=</span><span class="n">b_test_mask</span><span class="p">)</span>
 
     <span class="n">reg_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">reg_weight</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -443,6 +627,10 @@
 
     <span class="n">solver</span> <span class="o">=</span> <span class="n">solver_spawn</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
     <span class="p">(</span><span class="n">denoised_img</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">padding</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">slicing</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">padding</span><span class="p">]</span>
+        <span class="n">denoised_img</span> <span class="o">=</span> <span class="n">denoised_img</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slicing</span><span class="p">)]</span>
     <span class="k">return</span> <span class="n">denoised_img</span></div>
 
 
@@ -491,10 +679,10 @@
     <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coords</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 
     <span class="c1"># Reshape the volume to have the axes to be integrates as right-most axes</span>
-    <span class="n">img_tr_op</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
-    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
-        <span class="n">img_tr_op</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img_tr_op</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+    <span class="n">img_tr_op</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">))])</span>
+    <span class="n">img_tr_op</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">img_tr_op</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">axes</span><span class="p">),</span> <span class="n">img_tr_op</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]))</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">img_tr_op</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">num_dims_img</span> <span class="o">&gt;</span> <span class="n">num_dims_int</span><span class="p">:</span>
         <span class="n">img_old_shape</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="n">num_dims_int</span><span class="p">]</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">img_axes_dims</span><span class="p">])</span>
@@ -638,6 +826,83 @@
         <span class="n">frc</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">frc</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">frc</span><span class="p">[:</span><span class="n">cut_off</span><span class="p">],</span> <span class="n">Thb</span><span class="p">[:</span><span class="n">cut_off</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="norm_cross_corr"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.norm_cross_corr">[docs]</a><span class="k">def</span> <span class="nf">norm_cross_corr</span><span class="p">(</span>
+    <span class="n">img1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">img2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">t_match</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the normalized cross-correlation between two images.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img1 : ArrayLike</span>
+<span class="sd">        The first image.</span>
+<span class="sd">    img2 : ArrayLike, optional</span>
+<span class="sd">        The second images. If None, it computes the auto-correlation. The default is None.</span>
+<span class="sd">    axes : ArrayLike, optional</span>
+<span class="sd">        Axes along which to compute the cross-correlation. The default is (-2, -1).</span>
+<span class="sd">    t_match: bool, optional</span>
+<span class="sd">        Whether to perform the cross-correlation for template matching. The default is False.</span>
+<span class="sd">    plot: bool, optional</span>
+<span class="sd">        Whether to plot the profile of the cross-correlation curve. The default is True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        The one-dimensional cross-correlation curve.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">local_sum</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+            <span class="n">padding</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">a</span><span class="p">],)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+            <span class="n">slicing1</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">slicing1</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">slicing2</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">slicing2</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slicing1</span><span class="p">)]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slicing2</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">y</span>
+
+    <span class="k">if</span> <span class="n">img2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">img2</span> <span class="o">=</span> <span class="n">img1</span>
+
+    <span class="n">img1</span> <span class="o">=</span> <span class="n">img1</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">img2</span> <span class="o">=</span> <span class="n">img2</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;fft&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">t_match</span><span class="p">:</span>
+        <span class="n">local_sums_img2</span> <span class="o">=</span> <span class="n">local_sum</span><span class="p">(</span><span class="n">img2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+        <span class="n">local_sums_img2_2</span> <span class="o">=</span> <span class="n">local_sum</span><span class="p">(</span><span class="n">img2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+
+        <span class="n">cc_n</span> <span class="o">=</span> <span class="n">cc</span> <span class="o">-</span> <span class="n">local_sums_img2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">img1</span><span class="p">)</span>
+
+        <span class="n">cc_n</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">img1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img1</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]))</span>
+
+        <span class="n">diff_local_sums</span> <span class="o">=</span> <span class="n">local_sums_img2_2</span> <span class="o">-</span> <span class="p">(</span><span class="n">local_sums_img2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img2</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)])</span>
+        <span class="n">cc_n</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">diff_local_sums</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cc_n</span> <span class="o">=</span> <span class="n">cc</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">img1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">img2</span><span class="p">))</span>
+
+    <span class="n">cc_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">cc_n</span><span class="p">)</span>
+    <span class="n">cc_l</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">cc_n</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
+    <span class="n">cc_o</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">cc_n</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
+
+    <span class="n">cc_l</span> <span class="o">/=</span> <span class="n">cc_o</span>
+    <span class="n">cc_l</span> <span class="o">=</span> <span class="n">cc_l</span><span class="p">[:</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img1</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)])]</span>
+
+    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cc_l</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">cc_l</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">cc_l</span></div>
 </pre></div>
 
            </div>

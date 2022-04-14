@@ -76,8 +76,11 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.sparse.linalg</span> <span class="k">as</span> <span class="nn">spsla</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">spsig</span>
 
 <span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
+
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">pywt</span>
@@ -109,7 +112,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="p">[</span><span class="n">num_rows</span><span class="p">,</span> <span class="n">num_cols</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_dir_operator</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">_matvec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_matvec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Implement the direct operator for column vectors from the right.</span>
 
 <span class="sd">        :param x: Either row from the left or column from the right.</span>
@@ -122,7 +125,7 @@
             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adj_shape</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op_adjoint</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
 
-<div class="viewcode-block" id="BaseTransform.rmatvec"><a class="viewcode-back" href="../../corrct.html#corrct.operators.BaseTransform.rmatvec">[docs]</a>    <span class="k">def</span> <span class="nf">rmatvec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseTransform.rmatvec"><a class="viewcode-back" href="../../corrct.html#corrct.operators.BaseTransform.rmatvec">[docs]</a>    <span class="k">def</span> <span class="nf">rmatvec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Implement the direct operator for row vectors from the left.</span>
 
 <span class="sd">        :param x: Either row from the left or column from the right on transpose.</span>
@@ -174,7 +177,7 @@
             <span class="n">He</span><span class="p">[:,</span> <span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">*</span> <span class="n">xii</span>
         <span class="k">return</span> <span class="n">He</span></div>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Apply the operator to the input vector.</span>
 
 <span class="sd">        :param x: Input vector.</span>
@@ -188,10 +191,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op_adjoint</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 
@@ -201,11 +204,11 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize the projector operator class.</span>
 
-<span class="sd">        It sets the fields `dir_shape` and `adj_shape`, from the fields `vol_shape` and `proj_shape` respectively.</span>
+<span class="sd">        It sets the fields `dir_shape` and `adj_shape`, from the fields `vol_shape` and `prj_shape` respectively.</span>
 <span class="sd">        These two other fields need to have been defined in a derived class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dir_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">adj_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adj_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj_shape</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ProjectorOperator.fp"><a class="viewcode-back" href="../../corrct.html#corrct.operators.ProjectorOperator.fp">[docs]</a>    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
@@ -288,19 +291,63 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span></div>
 
 
+<div class="viewcode-block" id="TransformConvolution"><a class="viewcode-back" href="../../corrct.html#corrct.operators.TransformConvolution">[docs]</a><span class="k">class</span> <span class="nc">TransformConvolution</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convolution operator.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x_shape : ArrayLike</span>
+<span class="sd">        Shape of the direct space.</span>
+<span class="sd">    kernel : ArrayLike</span>
+<span class="sd">        The convolution kernel.</span>
+<span class="sd">    is_symm : bool, optional</span>
+<span class="sd">        Whether the operator is symmetric or not. The default is True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">is_symm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_symm</span> <span class="o">=</span> <span class="n">is_symm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adj_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_shape</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="TransformConvolution.absolute"><a class="viewcode-back" href="../../corrct.html#corrct.operators.TransformConvolution.absolute">[docs]</a>    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TransformConvolution&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the convolution operator using the absolute value of the kernel coefficients.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        TransformConvolution</span>
+<span class="sd">            The absolute value of the convolution operator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TransformConvolution</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir_shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">spsig</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_symm</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">spsig</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">x</span></div>
+
+
 <div class="viewcode-block" id="BaseWaveletTransform"><a class="viewcode-back" href="../../corrct.html#corrct.operators.BaseWaveletTransform">[docs]</a><span class="k">class</span> <span class="nc">BaseWaveletTransform</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base Wavelet transform.&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">_initialize_filter_bank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">num_axes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">bin</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">num_axes</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">num_axes</span><span class="p">)]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">Wavelet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelet</span><span class="p">)</span>
         <span class="n">filt_bank_l1norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">filter_bank</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wlet_dec_filter_mult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-            <span class="p">(</span><span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="n">lab</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="n">lab</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span>
-        <span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wlet_rec_filter_mult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-            <span class="p">(</span><span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">**</span> <span class="n">lab</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">**</span> <span class="n">lab</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span>
-        <span class="p">])</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wlet_dec_filter_mult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[(</span><span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="n">lab</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="n">lab</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wlet_rec_filter_mult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[(</span><span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">**</span> <span class="n">lab</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">filt_bank_l1norm</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">**</span> <span class="n">lab</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">]</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TransformDecimatedWavelet"><a class="viewcode-back" href="../../corrct.html#corrct.operators.TransformDecimatedWavelet">[docs]</a><span class="k">class</span> <span class="nc">TransformDecimatedWavelet</span><span class="p">(</span><span class="n">BaseWaveletTransform</span><span class="p">):</span>
