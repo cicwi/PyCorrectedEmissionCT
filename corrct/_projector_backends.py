@@ -382,13 +382,13 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
             vectors = np.empty([num_angles, 12])
             # source / beam direction
-            vectors[:, 0:3] = rot_geom.get_scaled("src_pos_xyz")
+            vectors[:, 0:3] = rot_geom.get_field_scaled("src_pos_xyz")
             # center of detector
-            vectors[:, 3:6] = rot_geom.get_scaled("det_pos_xyz")
+            vectors[:, 3:6] = rot_geom.get_field_scaled("det_pos_xyz")
             # vector from detector pixel (0, 0) to (0, 1)
-            vectors[:, 6:9] = rot_geom.get_scaled("det_u_xyz")
+            vectors[:, 6:9] = rot_geom.get_field_scaled("det_u_xyz")
             # vector from detector pixel (0, 0) to (1, 0)
-            vectors[:, 9:12] = rot_geom.get_scaled("det_v_xyz")
+            vectors[:, 9:12] = rot_geom.get_field_scaled("det_v_xyz")
 
             geom_type_str = prj_geom.geom_type
         else:
@@ -403,11 +403,11 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
             vectors = np.empty([num_angles, 6])
             # source / beam direction
-            vectors[:, 0:2] = rot_geom.get_scaled("src_pos_xyz")
+            vectors[:, 0:2] = rot_geom.get_field_scaled("src_pos_xyz")
             # center of detector
-            vectors[:, 2:4] = rot_geom.get_scaled("det_pos_xyz")
+            vectors[:, 2:4] = rot_geom.get_field_scaled("det_pos_xyz")
             # vector from detector pixel 0 to 1
-            vectors[:, 4:6] = rot_geom.get_scaled("det_u_xyz")
+            vectors[:, 4:6] = rot_geom.get_field_scaled("det_u_xyz")
 
             geom_type_str = prj_geom.geom_type[:-2]
 

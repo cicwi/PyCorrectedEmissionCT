@@ -126,7 +126,20 @@ class ProjectionGeometry(Geometry):
             det_v_xyz=rotations.apply(self.det_v_xyz),
         )
 
-    def get_scaled(self, field_name: str) -> ArrayLike:
+    def get_field_scaled(self, field_name: str) -> ArrayLike:
+        """
+        Return the a field content, scaled by the pix2vox ratio.
+
+        Parameters
+        ----------
+        field_name : str
+            Name of the field to access.
+
+        Returns
+        -------
+        ArrayLike
+            The scaled field.
+        """
         field_value = getattr(self, field_name) / self.pix2vox_ratio
         if int(self.geom_type[-2]) == 2:
             return field_value[:, :-1]
