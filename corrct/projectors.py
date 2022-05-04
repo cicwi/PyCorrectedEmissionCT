@@ -20,7 +20,7 @@ import multiprocessing as mp
 
 from tqdm import tqdm
 
-from typing import Union, Sequence, Optional, Callable
+from typing import Union, Sequence, Optional, Callable, Dict
 from numpy.typing import ArrayLike, DTypeLike
 
 from dataclasses import dataclass, field
@@ -478,8 +478,12 @@ class AttenuationVolume:
 
         Parameters
         ----------
-        roi : Optional[ArrayLike], optional
+        roi : ArrayLike, optional
             The region-of-interest to select. The default is None.
+        rot_ind : int, optional
+            A specific rotation index, if only one is to be desired. The default is None.
+        det_ind : int, optional
+            A specific detector index, if only one is to be desired. The default is None.
 
         Returns
         -------
@@ -496,6 +500,32 @@ class AttenuationVolume:
             raise NotImplementedError("Extracting a region of interest is not supported, yet.")
 
         return maps
+
+    def get_projector_args(
+        self, roi: Optional[ArrayLike] = None, rot_ind: Optional[int] = None, det_ind: Optional[int] = None
+    ) -> Dict[str, ArrayLike]:
+        """
+        Return the projector arguments.
+
+        Parameters
+        ----------
+        roi : ArrayLike, optional
+            The region-of-interest to select. The default is None.
+        rot_ind : int, optional
+            A specific rotation index, if only one is to be desired. The default is None.
+        det_ind : int, optional
+            A specific detector index, if only one is to be desired. The default is None.
+
+        Returns
+        -------
+        Dict[str, ArrayLike]
+            A dictionary containing the attenuation maps and the detector angle.
+        """
+        if det_ind is None:
+            det_angles = self.angles_det_rad
+        else:
+            det_angles = self.angles_det_rad[det_ind]
+        return dict(att_maps=self.get_maps(roi=roi, rot_ind=rot_ind, det_ind=det_ind), angles_detectors_rad=det_angles)
 
 
 class ProjectorAttenuationXRF(ProjectorUncorrected):
