@@ -9,7 +9,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Union
 
 import scipy.spatial.transform as spt
 
@@ -50,7 +50,12 @@ class ProjectionGeometry(Geometry):
     det_shape_vu: Optional[ArrayLike] = None
 
     @staticmethod
-    def get_default_parallel(*, geom_type: str = "3d", rot_axis_shift_pix: Optional[ArrayLike] = None) -> "ProjectionGeometry":
+    def get_default_parallel(
+        *,
+        geom_type: str = "3d",
+        rot_axis_shift_pix: Optional[ArrayLike] = None,
+        rot_axis_dir: Union[str, ArrayLike] = "clockwise",
+    ) -> "ProjectionGeometry":
         """
         Generate the default geometry for parallel beam.
 
@@ -60,6 +65,8 @@ class ProjectionGeometry(Geometry):
             The geometry type. The default is "parallel3d".
         rot_axis_shift_pix : Optional[ArrayLike], optional
             Rotation axis shift in pixels. The default is None.
+        rot_axis_dir : Union[str, ArrayLike], optional
+            Rotation axis direction. It can be either a string or a direction. The default is "clockwise".
 
         Returns
         -------
@@ -72,13 +79,19 @@ class ProjectionGeometry(Geometry):
             rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
             det_pos_xyz = np.concatenate([rot_axis_shift_pix[:, None], np.zeros((len(rot_axis_shift_pix), 2))], axis=-1)
 
+        if isinstance(rot_axis_dir, str):
+            if rot_axis_dir.lower() == "clockwise":
+                rot_axis_dir = np.array([0, 0, -1])
+            else:
+                rot_axis_dir = np.array([0, 0, 1])
+
         return ProjectionGeometry(
             geom_type="parallel" + geom_type,
             src_pos_xyz=np.array([0, -1, 0]),
             det_pos_xyz=det_pos_xyz,
             det_u_xyz=np.array([1, 0, 0]),
             det_v_xyz=np.array([0, 0, 1]),
-            rot_dir_xyz=np.array([0, 0, -1]),
+            rot_dir_xyz=rot_axis_dir,
         )
 
     def set_detector_shifts_vu(self, det_pos_vu: ArrayLike) -> None:
