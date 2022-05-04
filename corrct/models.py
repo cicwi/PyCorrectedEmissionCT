@@ -167,6 +167,9 @@ class VolumeGeometry(Geometry):
     vol_shape_xyz: ArrayLike
     vox_size: float = 1
 
+    def __post_init__(self):
+        self.vol_shape_xyz = np.array(self.vol_shape_xyz, ndmin=1)
+
     @property
     def shape(self) -> ArrayLike:
         """
@@ -218,4 +221,4 @@ class VolumeGeometry(Geometry):
         VolumeGeometry
             The default volume geometry.
         """
-        return VolumeGeometry([data_vwu.shape[-1], data_vwu.shape[-1], *np.flip(data_vwu.shape[:-2])])
+        return VolumeGeometry([data_vwu.shape[-1], data_vwu.shape[-1], *np.flip(data_vwu.shape[-3:-2])])
