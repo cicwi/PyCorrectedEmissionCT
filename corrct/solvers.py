@@ -13,7 +13,8 @@ import numpy as np
 import numpy.random
 from numpy.typing import ArrayLike, DTypeLike
 
-import scipy.sparse as sps
+import scipy as sp
+import scipy.sparse
 
 import copy as cp
 
@@ -74,7 +75,7 @@ Constraint_UpperLimit = regularizers.Constraint_UpperLimit
 # ---- Solvers ----
 
 
-class Solver(object):
+class Solver:
     """
     Initialize the base solver class.
 
@@ -159,19 +160,19 @@ class Solver(object):
 
     @staticmethod
     def _initialize_data_operators(
-        A: Union[ArrayLike, sps.linalg.LinearOperator, sps.dia_matrix],
-        At: Optional[Union[ArrayLike, sps.linalg.LinearOperator, sps.dia_matrix]],
+        A: Union[ArrayLike, sp.sparse.linalg.LinearOperator, sp.sparse.dia_matrix],
+        At: Optional[Union[ArrayLike, sp.sparse.linalg.LinearOperator, sp.sparse.dia_matrix]],
     ):
         if At is None:
             if isinstance(A, np.ndarray):
                 At = A.transpose((1, 0))
-            elif isinstance(A, sps.dia_matrix) or isinstance(A, sps.linalg.LinearOperator):
+            elif isinstance(A, sp.sparse.dia_matrix) or isinstance(A, sp.sparse.linalg.LinearOperator):
                 At = A.transpose()
 
-        if isinstance(At, np.ndarray) or isinstance(At, sps.dia_matrix):
+        if isinstance(At, np.ndarray) or isinstance(At, sp.sparse.dia_matrix):
             At_m = At
             At = At_m.dot
-        if isinstance(A, np.ndarray) or isinstance(A, sps.dia_matrix):
+        if isinstance(A, np.ndarray) or isinstance(A, sp.sparse.dia_matrix):
             A_m = A
             A = A_m.dot
         return (A, At)
