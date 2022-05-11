@@ -12,7 +12,7 @@ import skimage.transform as skt
 
 from .models import ProjectionGeometry, VolumeGeometry
 
-from typing import Optional
+from typing import Optional, Union
 from numpy.typing import ArrayLike
 
 from abc import ABC, abstractmethod
@@ -127,7 +127,7 @@ class ProjectorBackend(ABC):
         raise NotImplementedError("Method BP not implemented.")
 
     @abstractmethod
-    def fbp(self, prj: ArrayLike, fbp_filter) -> ArrayLike:
+    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike] = "ram-lak") -> ArrayLike:
         """Apply FBP.
 
         Filtered back-projection interface. Derived backends need to implement this method.
@@ -136,8 +136,8 @@ class ProjectorBackend(ABC):
         ----------
         prj : ArrayLike
             The sinogram or stack of sinograms.
-        fbp_filter : str
-            The filter to use in the filtered back-projection.
+        fbp_filter : str | ArrayLike, optional
+            The filter to use in the filtered back-projection. The default is "Ram-Lak".
         """
         raise NotImplementedError("Method FBP not implemented.")
 
@@ -160,6 +160,7 @@ class ProjectorBackend(ABC):
         ArrayLike
             The attenuation volume.
         """
+
         def pad_vol(vol, edges):
             paddings = [(0,)] * len(vol.shape)
             paddings[-2], paddings[-1] = (edges[0],), (edges[1],)
@@ -288,15 +289,15 @@ class ProjectorBackendSKimage(ProjectorBackend):
         else:
             return skt.iradon(prj[:, np.newaxis], self.angles_w_deg[angle_ind : angle_ind + 1 :], **bpj_size, **filter_name)
 
-    def fbp(self, prj: ArrayLike, fbp_filter: str) -> ArrayLike:
+    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike] = "ram-lak") -> ArrayLike:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
         ----------
         prj : ArrayLike
             The sinogram or stack of sinograms.
-        fbp_filter : str
-            The filter to use in the filtered back-projection.
+        fbp_filter : str | ArrayLike, optional
+            The filter to use in the filtered back-projection. The default is "Ram-Lak".
 
         Returns
         -------
@@ -584,65 +585,43 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         return vol
 
-    def fbp(self, prj: ArrayLike, fbp_filter: str) -> ArrayLike:
+    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike] = "ram-lak") -> ArrayLike:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
         ----------
         prj : ArrayLike
             The sinogram or stack of sinograms.
-        fbp_filter : str
-            The filter to use in the filtered back-projection.
+        fbp_filter : str | ArrayLike, optional
+            The filter to use in the filtered back-projection. The default is "Ram-Lak".
 
         Returns
         -------
         vol : ArrayLike
             The reconstructed volume.
         """
-        self.initialize()
+        prj_size_pad = max(64, int(2 ** np.ceil(np.log2(self.prj_shape_vu[-1]))))
 
-        if has_cuda:
-            fbp_type = "FBP_CUDA"
+        if isinstance(fbp_filter, str):
+            fbp_filter = skt.radon_transform._get_fourier_filter(prj_size_pad, fbp_filter.lower())
+            fbp_filter = np.squeeze(fbp_filter) * np.pi / 2
+            fbp_filter = fbp_filter[:(fbp_filter.shape[-1]) // 2 + 1]
+
+        fbp_filter = fbp_filter / self.angles_w_rad.size
+        fbp_filter = np.array(fbp_filter, ndmin=len(prj.shape))
+
+        prj_f = np.fft.rfft(prj, n=prj_size_pad, axis=-1)
+        prj_f *= fbp_filter
+        prj_f = np.fft.irfft(prj_f, axis=-1)[..., :self.prj_shape_vu[-1]]
+
+        if self.vol_geom.is_3D() or len(prj.shape) == 2:
+            return self.bp(prj_f)
         else:
-            fbp_type = "FBP"
-        cfg = astra.astra_dict(fbp_type)
-        cfg["ProjectorId"] = self.proj_id[-1]
-        cfg["FilterType"] = fbp_filter
-
-        proj_geom = astra.projector.projection_geometry(self.proj_id[-1])
-        vol_geom = astra.projector.volume_geometry(self.proj_id[-1])
-
-        if len(prj.shape) > 2:
-            num_lines = prj.shape[1]
+            num_lines = prj.shape[-3]
             vols = [None] * num_lines
 
             for ii_v in range(num_lines):
-                sino_id = astra.data2d.link("-sino", proj_geom, prj[:, ii_v, :])
-                vol_id = astra.data2d.create("-vol", vol_geom, 0)
+                prj_v = np.ascontiguousarray(prj_f[ii_v, :, :])
+                vols[ii_v] = self.bp(prj_v)
 
-                cfg["ProjectionDataId"] = sino_id
-                cfg["ReconstructionDataId"] = vol_id
-                alg_id = astra.algorithm.create(cfg)
-                astra.algorithm.run(alg_id)
-                astra.algorithm.delete(alg_id)
-
-                vols[ii_v] = astra.data2d.get(vol_id)
-                astra.data2d.delete(vol_id)
-                astra.data2d.delete(sino_id)
-
-            return np.stack(vols, axis=0)
-        else:
-            sino_id = astra.data2d.link("-sino", proj_geom, prj)
-            vol_id = astra.data2d.create("-vol", vol_geom, 0)
-
-            cfg["ProjectionDataId"] = sino_id
-            cfg["ReconstructionDataId"] = vol_id
-            alg_id = astra.algorithm.create(cfg)
-            astra.algorithm.run(alg_id)
-            astra.algorithm.delete(alg_id)
-
-            vol = astra.data2d.get(vol_id)
-            astra.data2d.delete(vol_id)
-            astra.data2d.delete(sino_id)
-
-            return vol
+            return np.ascontiguousarray(np.stack(vols, axis=0))

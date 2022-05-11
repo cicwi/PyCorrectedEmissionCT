@@ -306,9 +306,6 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         ArrayLike
             The FBP reconstructed volume.
         """
-        if self.vol_geom.is_3D():
-            raise ValueError("FBP not supported with 3D projector")
-
         if isinstance(fbp_filter, str):
             return self.projector_backend.fbp(projs, fbp_filter)
         else:
