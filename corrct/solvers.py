@@ -207,6 +207,93 @@ class Solver:
         return (b_mask, b_test_mask)
 
 
+class FBP(Solver):
+    """
+    Implement the Filtered Back-Projection (FBP) algorithm.
+
+    Parameters
+    ----------
+    verbose : bool, optional
+        Turn on verbose output. The default is False.
+    regularizer : Optional[BaseRegularizer], optional
+        NOT USED, only exposed for compatibility reasons.
+    data_term : Union[str, DataFidelityBase], optional
+        NOT USED, only exposed for compatibility reasons.
+    fbp_filter : Union[str, ArrayLike], optional
+        FBP filter to use. Either a string from scikit-image's list of `iradon` filters, or an array. The default is "ram-lak".
+    """
+
+    def __init__(
+        self,
+        verbose: bool = False,
+        regularizer: Optional[BaseRegularizer] = None,
+        data_term: Union[str, DataFidelityBase] = "l2",
+        fbp_filter: Union[str, ArrayLike] = "ram-lak",
+    ):
+        super().__init__(verbose=verbose)
+        self.fbp_filter = fbp_filter
+
+    def __call__(  # noqa: C901
+        self,
+        A,
+        b: ArrayLike,
+        iterations: int,
+        x0: Optional[ArrayLike] = None,
+        At=None,
+        lower_limit: Union[float, ArrayLike] = None,
+        upper_limit: Union[float, ArrayLike] = None,
+        x_mask: Optional[ArrayLike] = None,
+        b_mask: Optional[ArrayLike] = None,
+    ) -> Tuple[ArrayLike, Optional[ArrayLike]]:
+        """
+        Reconstruct the data, using the FBP algorithm.
+
+        Parameters
+        ----------
+        A : Union[Callable, BaseTransform]
+            Projection operator.
+        b : ArrayLike
+            Data to reconstruct.
+        iterations : int
+            Number of iterations.
+        x0 : Optional[ArrayLike], optional
+            Initial solution. The default is None.
+        At : Callable, optional
+            The back-projection operator. Not needed, because the operator should provilde the necessary `fbp` function.
+        lower_limit : Union[float, ArrayLike], optional
+            Lower clipping value. The default is None.
+        upper_limit : Union[float, ArrayLike], optional
+            Upper clipping value. The default is None.
+        x_mask : Optional[ArrayLike], optional
+            Solution mask. The default is None.
+        b_mask : Optional[ArrayLike], optional
+            Data mask. The default is None.
+
+        Raises
+        ------
+        ValueError
+            In case the data is 1D.
+
+        Returns
+        -------
+        Tuple[ArrayLike, None]
+            The reconstruction, and None.
+        """
+        if len(b.shape) < 2:
+            raise ValueError(f"Data should be at least 2-dimensional (b.shape = {b.shape})")
+
+        (A, At) = self._initialize_data_operators(A, At)
+
+        x = A.fbp(b, self.fbp_filter)
+
+        if lower_limit is not None or upper_limit is not None:
+            x = x.clip(lower_limit, upper_limit)
+        if x_mask is not None:
+            x *= x_mask
+
+        return x, None
+
+
 class Sart(Solver):
     """Solver class implementing the Simultaneous Algebraic Reconstruction Technique (SART) algorithm."""
 
