@@ -15,6 +15,8 @@ import copy as cp
 
 from numpy.typing import ArrayLike
 
+from typing import Optional, Union
+
 try:
     import pywt
 
@@ -97,7 +99,7 @@ class BaseTransform(spsla.LinearOperator):
         """Return the explicit transformation matrix associated to the operator.
 
         :returns: The explicit transformation matrix
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         He = np.empty(self.shape, dtype=self.dtype)
         if self.is_dir_operator:
@@ -114,10 +116,10 @@ class BaseTransform(spsla.LinearOperator):
         """Apply the operator to the input vector.
 
         :param x: Input vector.
-        :type x: `numpy.array_like`
+        :type x: ArrayLike
 
         :returns: The result of the application of the operator on the input vector.
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         if self.is_dir_operator:
             return self._op_direct(x)
@@ -144,65 +146,65 @@ class ProjectorOperator(BaseTransform):
         self.adj_shape = self.prj_shape
         super().__init__()
 
-    def fp(self, x):
+    def fp(self, x: ArrayLike) -> ArrayLike:
         """Define the interface for the forward-projection.
 
         :param x: Input volume.
-        :type x: `numpy.array_like`
+        :type x: ArrayLike
 
         :returns: The projection data.
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         raise NotImplementedError()
 
-    def bp(self, x):
+    def bp(self, x: ArrayLike) -> ArrayLike:
         """Define the interface for the back-projection.
 
         :param x: Input projection data.
-        :type x: `numpy.array_like`
+        :type x: ArrayLike
 
         :returns: The back-projected volume.
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         raise NotImplementedError()
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: ArrayLike) -> ArrayLike:
         return self.fp(x)
 
-    def _op_adjoint(self, x):
+    def _op_adjoint(self, x: ArrayLike) -> ArrayLike:
         return self.bp(x)
 
 
 class TransformIdentity(BaseTransform):
     """Identity operator."""
 
-    def __init__(self, x_shape):
+    def __init__(self, x_shape: ArrayLike):
         """Identity operator.
 
         :param x_shape: Shape of the data.
-        :type x_shape: `numpy.array_like`
+        :type x_shape: ArrayLike
         """
         self.dir_shape = np.array(x_shape)
         self.adj_shape = np.array(x_shape)
         super().__init__()
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: ArrayLike) -> ArrayLike:
         return x
 
-    def _op_adjoint(self, x):
+    def _op_adjoint(self, x: ArrayLike) -> ArrayLike:
         return x
 
 
 class TransformDiagonalScaling(BaseTransform):
     """Diagonal scaling operator."""
 
-    def __init__(self, x_shape, scale):
+    def __init__(self, x_shape: ArrayLike, scale: Union[float, ArrayLike]):
         """Diagonal scaling operator.
 
         :param x_shape: Shape of the data.
-        :type x_shape: `numpy.array_like`
+        :type x_shape: ArrayLike
         :param scale: Operator diagonal.
-        :type scale: float or `numpy.array_like`
+        :type scale: float or ArrayLike
         """
         self.scale = scale
         self.dir_shape = np.array(x_shape)
@@ -217,10 +219,10 @@ class TransformDiagonalScaling(BaseTransform):
         """
         return TransformDiagonalScaling(self.dir_shape, np.abs(self.scale))
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: ArrayLike) -> ArrayLike:
         return self.scale * x
 
-    def _op_adjoint(self, x):
+    def _op_adjoint(self, x: ArrayLike) -> ArrayLike:
         return self.scale * x
 
 
@@ -256,10 +258,10 @@ class TransformConvolution(BaseTransform):
         """
         return TransformConvolution(self.dir_shape, np.abs(self.kernel))
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: ArrayLike) -> ArrayLike:
         return spsig.convolve(x, self.kernel, mode="same")
 
-    def _op_adjoint(self, x):
+    def _op_adjoint(self, x: ArrayLike) -> ArrayLike:
         if self.is_symm:
             return spsig.convolve(x, self.kernel, mode="same")
         else:
@@ -269,9 +271,9 @@ class TransformConvolution(BaseTransform):
 class BaseWaveletTransform(BaseTransform):
     """Base Wavelet transform."""
 
-    def _initialize_filter_bank(self):
+    def _initialize_filter_bank(self) -> None:
         num_axes = len(self.axes)
-        self.labels = [bin(x)[2:].zfill(num_axes).replace("0", "a").replace("1", "d") for x in range(1, 2 ** num_axes)]
+        self.labels = [bin(x)[2:].zfill(num_axes).replace("0", "a").replace("1", "d") for x in range(1, 2**num_axes)]
 
         self.w = pywt.Wavelet(self.wavelet)
         filt_bank_l1norm = np.linalg.norm(self.w.filter_bank, ord=1, axis=-1)
@@ -286,18 +288,20 @@ class BaseWaveletTransform(BaseTransform):
 class TransformDecimatedWavelet(BaseWaveletTransform):
     """Decimated wavelet Transform operator."""
 
-    def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand="constant"):
+    def __init__(
+        self, x_shape: ArrayLike, wavelet: str, level: int, axes: Optional[ArrayLike] = None, pad_on_demand: str = "edge"
+    ):
         """Decimated wavelet Transform operator.
 
         :param x_shape: Shape of the data to be wavelet transformed.
-        :type x_shape: `numpy.array_like`
+        :type x_shape: ArrayLike
         :param wavelet: Wavelet type
         :type wavelet: string
         :param level: Numer of wavelet decomposition levels
         :type level: int
         :param axes: Axes along which to do the transform, defaults to None
         :type axes: int or tuple of int, optional
-        :param pad_on_demand: Padding type to fit the `2 ** level` shape requirements, defaults to 'constant'
+        :param pad_on_demand: Padding type to fit the `2 ** level` shape requirements, defaults to 'edge'
         :type pad_on_demand: string, optional. Options are all the `numpy.pad` padding modes.
 
         :raises ValueError: In case the pywavelets package is not available or its version is not adequate.
@@ -310,7 +314,7 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
 
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=int)
-        self.axes = axes
+        self.axes = np.array(axes, ndmin=1)
 
         self.pad_on_demand = pad_on_demand
 
@@ -332,25 +336,25 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
 
         super().__init__()
 
-    def direct_dwt(self, x):
+    def direct_dwt(self, x: ArrayLike) -> ArrayLike:
         """Perform the direct wavelet transform.
 
         :param x: Data to transform.
-        :type x: `numpy.array_like`
+        :type x: ArrayLike
 
         :return: Transformed data.
         :rtype: list
         """
         return pywt.wavedecn(x, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand, level=self.level)
 
-    def inverse_dwt(self, y):
+    def inverse_dwt(self, y: ArrayLike) -> ArrayLike:
         """Perform the inverse wavelet transform.
 
         :param x: Data to anti-transform.
         :type x: list
 
         :return: Anti-transformed data.
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         rec = pywt.waverecn(y, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand)
         if not np.all(rec.shape == self.dir_shape):
@@ -358,12 +362,12 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
             rec = rec[tuple(slices)]
         return rec
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: ArrayLike) -> ArrayLike:
         c = self.direct_dwt(x)
         y, self.slicing_info = pywt.coeffs_to_array(c, axes=self.axes)
         return y
 
-    def _op_adjoint(self, y):
+    def _op_adjoint(self, y: ArrayLike) -> ArrayLike:
         if self.slicing_info is None:
             _ = self._op_direct(np.zeros(self.dir_shape))
 
@@ -374,11 +378,19 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
 class TransformStationaryWavelet(BaseWaveletTransform):
     """Stationary avelet Transform operator."""
 
-    def __init__(self, x_shape, wavelet, level, axes=None, pad_on_demand="constant", normalized=True):
+    def __init__(
+        self,
+        x_shape: ArrayLike,
+        wavelet: str,
+        level: int,
+        axes: Optional[ArrayLike] = None,
+        pad_on_demand: str = "edge",
+        normalized: bool = True,
+    ):
         """Stationary wavelet Transform operator.
 
         :param x_shape: Shape of the data to be wavelet transformed.
-        :type x_shape: `numpy.array_like`
+        :type x_shape: ArrayLike
         :param wavelet: Wavelet type
         :type wavelet: string
         :param level: Numer of wavelet decomposition levels
@@ -403,7 +415,7 @@ class TransformStationaryWavelet(BaseWaveletTransform):
 
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=int)
-        self.axes = axes
+        self.axes = np.array(axes, ndmin=1)
 
         self.pad_on_demand = pad_on_demand
 
@@ -411,7 +423,7 @@ class TransformStationaryWavelet(BaseWaveletTransform):
 
         self.dir_shape = np.array(x_shape)
         if self.pad_on_demand is not None:
-            alignment = 2 ** self.level
+            alignment = 2**self.level
             x_axes = np.array(self.dir_shape)[np.array(self.axes)]
             self.pad_axes = (alignment - x_axes % alignment) % alignment
 
@@ -423,11 +435,11 @@ class TransformStationaryWavelet(BaseWaveletTransform):
 
         super().__init__()
 
-    def direct_swt(self, x):
+    def direct_swt(self, x: ArrayLike) -> ArrayLike:
         """Perform the direct wavelet transform.
 
         :param x: Data to transform.
-        :type x: `numpy.array_like`
+        :type x: ArrayLike
 
         :return: Transformed data.
         :rtype: list
@@ -441,14 +453,14 @@ class TransformStationaryWavelet(BaseWaveletTransform):
                 x = np.pad(x, pad_width, mode=self.pad_on_demand)
         return pywt.swtn(x, wavelet=self.wavelet, axes=self.axes, norm=self.normalized, level=self.level, trim_approx=True)
 
-    def inverse_swt(self, y):
+    def inverse_swt(self, y: ArrayLike) -> ArrayLike:
         """Perform the inverse wavelet transform.
 
         :param x: Data to anti-transform.
         :type x: list
 
         :return: Anti-transformed data.
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         x = pywt.iswtn(y, wavelet=self.wavelet, axes=self.axes, norm=self.normalized)
         if self.pad_on_demand is not None and np.any(self.pad_axes):
@@ -460,12 +472,12 @@ class TransformStationaryWavelet(BaseWaveletTransform):
                 x = x[tuple(slices)]
         return x
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: ArrayLike) -> ArrayLike:
         y = self.direct_swt(x)
         y = [y[0]] + [y[lvl][x] for lvl in range(1, self.level + 1) for x in self.labels]
         return np.array(y)
 
-    def _op_adjoint(self, y):
+    def _op_adjoint(self, y: ArrayLike) -> ArrayLike:
         def get_lvl_pos(lvl):
             return (lvl - 1) * (2 ** len(self.axes) - 1) + 1
 
@@ -477,83 +489,89 @@ class TransformStationaryWavelet(BaseWaveletTransform):
 
 
 class TransformGradient(BaseTransform):
-    """Gradient operator."""
+    """
+    Gradient operator.
 
-    def __init__(self, x_shape, axes=None):
-        """Gradient transform.
+    Parameters
+    ----------
+    x_shape : ArrayLike
+        Shape of the data to be transformed.
+    axes : Optional[ArrayLike], optional
+        Axes along which to do the gradient. The default is None.
+    pad_mode : str, optional
+        Padding mode of the gradient. The default is "edge".
+    """
 
-        :param x_shape: Shape of the data to be wavelet transformed.
-        :type x_shape: `numpy.array_like`
-        :param axes: Axes along which to do the gradient, defaults to None
-        :type axes: int or tuple of int, optional
-        """
+    def __init__(self, x_shape: ArrayLike, axes: Optional[ArrayLike] = None, pad_mode: str = "edge"):
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=int)
-        self.axes = axes
+        self.axes = np.array(axes, ndmin=1)
         self.ndims = len(x_shape)
+
+        self.pad_mode = pad_mode
 
         self.dir_shape = np.array(x_shape)
         self.adj_shape = np.array((len(self.axes), *self.dir_shape))
 
         super().__init__()
 
-    def gradient(self, x):
+    def gradient(self, x: ArrayLike) -> ArrayLike:
         """Compute the gradient.
 
         :param x: Input data.
-        :type x: `numpy.array_like`
+        :type x: ArrayLike
 
         :return: Gradient of data.
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         d = [None] * len(self.axes)
         for ii in range(len(self.axes)):
             ind = -(ii + 1)
             padding = [(0, 0)] * self.ndims
             padding[ind] = (0, 1)
-            temp_x = np.pad(x, padding, mode="constant")
+            temp_x = np.pad(x, padding, mode=self.pad_mode)
             d[ind] = np.diff(temp_x, n=1, axis=ind)
         return np.stack(d, axis=0)
 
-    def divergence(self, x):
+    def divergence(self, x: ArrayLike) -> ArrayLike:
         """Compute the divergence - transpose of gradient.
 
         :param x: Input data.
-        :type x: `numpy.array_like`
+        :type x: ArrayLike
 
         :return: Divergence of data.
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         d = [None] * len(self.axes)
         for ii in range(len(self.axes)):
             ind = -(ii + 1)
             padding = [(0, 0)] * self.ndims
             padding[ind] = (1, 0)
-            temp_x = np.pad(x[ind, ...], padding, mode="constant")
+            temp_x = np.pad(x[ind, ...], padding, mode=self.pad_mode)
             d[ind] = np.diff(temp_x, n=1, axis=ind)
         return np.sum(np.stack(d, axis=0), axis=0)
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: ArrayLike) -> ArrayLike:
         return self.gradient(x)
 
-    def _op_adjoint(self, y):
+    def _op_adjoint(self, y: ArrayLike) -> ArrayLike:
         return -self.divergence(y)
 
 
 class TransformFourier(BaseTransform):
     """Fourier transform operator."""
 
-    def __init__(self, x_shape, axes=None):
+    def __init__(self, x_shape: ArrayLike, axes: Optional[ArrayLike] = None):
         """Fourier transform.
 
         :param x_shape: Shape of the data to be wavelet transformed.
-        :type x_shape: `numpy.array_like`
+        :type x_shape: ArrayLike
         :param axes: Axes along which to do the gradient, defaults to None
         :type axes: int or tuple of int, optional
         """
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=int)
-        self.axes = axes
+        self.axes = np.array(axes, ndmin=1)
         self.ndims = len(x_shape)
 
         self.dir_shape = np.array(x_shape)
@@ -561,14 +579,14 @@ class TransformFourier(BaseTransform):
 
         super().__init__()
 
-    def fft(self, x):
+    def fft(self, x: ArrayLike) -> ArrayLike:
         """Compute the fft.
 
         :param x: Input data.
-        :type x: `numpy.array_like`
+        :type x: ArrayLike
 
         :return: FFT of data.
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         d = np.empty(self.adj_shape, dtype=x.dtype)
         x_f = np.fft.fftn(x, axes=self.axes, norm="ortho")
@@ -576,68 +594,74 @@ class TransformFourier(BaseTransform):
         d[1, ...] = x_f.imag
         return d
 
-    def ifft(self, x):
+    def ifft(self, x: ArrayLike) -> ArrayLike:
         """Compute the inverse of the fft.
 
         :param x: Input data.
-        :type x: `numpy.array_like`
+        :type x: ArrayLike
 
         :return: iFFT of data.
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         d = x[0, ...] + 1j * x[1, ...]
         return np.fft.ifftn(d, axes=self.axes, norm="ortho").real
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: ArrayLike) -> ArrayLike:
         return self.fft(x)
 
-    def _op_adjoint(self, y):
+    def _op_adjoint(self, y: ArrayLike) -> ArrayLike:
         return self.ifft(y)
 
 
 class TransformLaplacian(BaseTransform):
-    """Laplacian transform operator."""
+    """
+    Laplacian transform operator.
 
-    def __init__(self, x_shape, axes=None):
-        """Laplacian transform.
+    Parameters
+    ----------
+    x_shape : ArrayLike
+        Shape of the data to be transformed.
+    axes : ArrayLike, optional
+        Axes along which to do the Laplacian. The default is None.
+    pad_mode : str, optional
+        Padding mode of the Laplacian. The default is "edge".
+    """
 
-        :param x_shape: Shape of the data to be wavelet transformed.
-        :type x_shape: `numpy.array_like`
-        :param axes: Axes along which to do the gradient, defaults to None
-        :type axes: int or tuple of int, optional
-        """
+    def __init__(self, x_shape: ArrayLike, axes: Optional[ArrayLike] = None, pad_mode: str = "edge"):
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=int)
-        self.axes = axes
+        self.axes = np.array(axes, ndmin=1)
         self.ndims = len(x_shape)
+
+        self.pad_mode = pad_mode
 
         self.dir_shape = np.array(x_shape)
         self.adj_shape = np.array(x_shape)
 
         super().__init__()
 
-    def laplacian(self, x):
+    def laplacian(self, x: ArrayLike) -> ArrayLike:
         """Compute the laplacian.
 
         :param x: Input data.
-        :type x: `numpy.array_like`
+        :type x: ArrayLike
 
         :return: Gradient of data.
-        :rtype: `numpy.array_like`
+        :rtype: ArrayLike
         """
         d = [None] * len(self.axes)
         for ii in range(len(self.axes)):
             ind = -(ii + 1)
             padding = [(0, 0)] * self.ndims
             padding[ind] = (1, 1)
-            temp_x = np.pad(x, padding, mode="edge")
+            temp_x = np.pad(x, padding, mode=self.pad_mode)
             d[ind] = np.diff(temp_x, n=2, axis=ind)
         return np.sum(d, axis=0)
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: ArrayLike) -> ArrayLike:
         return self.laplacian(x)
 
-    def _op_adjoint(self, y):
+    def _op_adjoint(self, y: ArrayLike) -> ArrayLike:
         return self.laplacian(y)
 
 
