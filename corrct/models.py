@@ -9,7 +9,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence, Union, Any
 
 import scipy.spatial.transform as spt
 
@@ -48,6 +48,21 @@ class ProjectionGeometry(Geometry):
     rot_dir_xyz: ArrayLike
     pix2vox_ratio: float = 1
     det_shape_vu: Optional[ArrayLike] = None
+
+    def __getitem__(self, indx: Any):
+        def slice_array(arr: ArrayLike, indx: Any):
+            if len(arr.shape) > 1:
+                return arr[indx, :]
+            else:
+                return arr
+
+        return dc_replace(
+            self,
+            src_pos_xyz=slice_array(self.src_pos_xyz, indx),
+            det_pos_xyz=slice_array(self.det_pos_xyz, indx),
+            det_u_xyz=slice_array(self.det_u_xyz, indx),
+            det_v_xyz=slice_array(self.det_v_xyz, indx),
+        )
 
     @staticmethod
     def get_default_parallel(
