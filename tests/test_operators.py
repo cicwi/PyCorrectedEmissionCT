@@ -31,7 +31,7 @@ class TestTransformGradient(TestOperators):
 
     def test_000_gradient(self):
         """Test gradient operator 2D."""
-        D = operators.TransformGradient(self.vol_ones_2d.shape)
+        D = operators.TransformGradient(self.vol_ones_2d.shape, pad_mode="constant")
 
         g = D(self.vol_ones_2d)
         assert np.all(g.shape[1:] == self.vol_ones_2d.shape)
@@ -42,7 +42,7 @@ class TestTransformGradient(TestOperators):
 
     def test_001_minus_divergence(self):
         """Test divergence operator 2D."""
-        D = operators.TransformGradient(self.vol_ones_2d.shape)
+        D = operators.TransformGradient(self.vol_ones_2d.shape, pad_mode="constant")
 
         g = np.ones(D.adj_shape)
         d = D.T(g)
@@ -53,7 +53,7 @@ class TestTransformGradient(TestOperators):
 
     def test_002_explicit_gradient(self):
         """Test explicit gradient operator 2D."""
-        D = operators.TransformGradient(self.vol_ones_2d.shape)
+        D = operators.TransformGradient(self.vol_ones_2d.shape, pad_mode="constant")
         g0 = D(self.vol_ones_2d)
 
         De = D.explicit()
@@ -65,7 +65,7 @@ class TestTransformGradient(TestOperators):
 
     def test_003_explicit_minus_divergence(self):
         """Test explicit transposed gradient operator 2D."""
-        D = operators.TransformGradient(self.vol_ones_2d.shape)
+        D = operators.TransformGradient(self.vol_ones_2d.shape, pad_mode="constant")
         g = np.ones(D.adj_shape)
         d0 = D.T(g)
 
