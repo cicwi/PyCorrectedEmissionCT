@@ -188,7 +188,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         self.angles_rot_rad = angles_rot_rad
         self.prj_intensities = prj_intensities
 
-        self.psf = psf
+        self._set_psf(psf)
 
         self.vol_shape = self.projector_backend.get_vol_shape()
         self.prj_shape = self.projector_backend.get_prj_shape()
@@ -202,6 +202,16 @@ class ProjectorUncorrected(operators.ProjectorOperator):
     def __exit__(self, *args):
         """De-initialize the with statement block."""
         self.projector_backend.dispose()
+
+    def _set_psf(self, psf: ArrayLike) -> None:
+        if psf is not None:
+            psf = np.squeeze(psf)
+            if len(psf.shape) >= len(self.vol_geom.shape):
+                raise ValueError(
+                    "PSF should either be 1D (for 2D and 3D reconstructions) or 2D (for 3D reconstructions)."
+                    + f" Passed PSF has shape: {psf.shape}, and the reconstruction is {len(self.vol_geom.shape)}D."
+                )
+        self.psf = psf
 
     def fp_angle(self, vol: ArrayLike, angle_ind: int) -> ArrayLike:
         """Forward-project a volume to a single sinogram line.
@@ -222,7 +232,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         if self.prj_intensities is not None:
             x *= self.prj_intensities[angle_ind]
         if self.psf is not None:
-            x = spsig.convolve(x, self.psf, mode="same")
+            psf = np.array(self.psf, ndmin=len(x.shape))
+            x = spsig.convolve(x, psf, mode="same")
         return x
 
     def bp_angle(self, sino_line: ArrayLike, angle_ind: int) -> ArrayLike:
@@ -262,7 +273,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         if self.prj_intensities is not None:
             x *= self.prj_intensities[:, np.newaxis]
         if self.psf is not None:
-            x = spsig.convolve(x, self.psf[..., None, :], mode="same")
+            psf = np.array(self.psf[..., None, :], ndmin=len(x.shape))
+            x = spsig.convolve(x, psf, mode="same")
         return x
 
     def bp(self, data: ArrayLike) -> ArrayLike:
