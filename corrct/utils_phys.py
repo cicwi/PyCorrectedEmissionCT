@@ -13,7 +13,7 @@ import numpy as np
 
 from dataclasses import dataclass
 
-from typing import Union, Sequence, Optional, Tuple
+from typing import Union, Sequence, Optional, Tuple, Dict
 from numpy.typing import ArrayLike, DTypeLike
 
 import copy as cp
@@ -100,7 +100,7 @@ class FluoLinesSiegbahn:
 
     @staticmethod
     def get_energy(
-        element: Union[str, int], lines: Union[str, FluoLine, Sequence[FluoLine]], compute_average: bool = False
+        element: Union[str, int], lines: Union[str, FluoLine, Sequence[FluoLine]], compute_average: bool = False, verbose: bool = False
     ) -> Union[float, Sequence[float]]:
         """
         Return the energy(ies) of the requested line for the given element.
@@ -127,6 +127,9 @@ class FluoLinesSiegbahn:
             el_sym = xraylib.AtomicNumberToSymbol(element)
             el_num = element
 
+        if verbose:
+            requested_lines = lines
+
         if isinstance(lines, FluoLine):
             lines = [lines]
         elif isinstance(lines, str):
@@ -139,7 +142,8 @@ class FluoLinesSiegbahn:
             try:
                 energy_keV[ii] = xraylib.LineEnergy(el_num, line.indx)
             except ValueError as exc:
-                print(f"Energy {exc}: el_num={el_num} ({el_sym}) line={line}")
+                if verbose:
+                    print(f"INFO - Energy - {exc}: el_num={el_num} ({el_sym}) line={line}")
                 energy_keV[ii] = 0
 
         if compute_average:
@@ -148,9 +152,13 @@ class FluoLinesSiegbahn:
                 try:
                     rates[ii] = xraylib.RadRate(el_num, line.indx)
                 except ValueError as exc:
-                    print(f"RadRate {exc}: el_num={el_num} ({el_sym}) line={line}")
+                    if verbose:
+                        print(f"INFO - RadRate - {exc}: el_num={el_num} ({el_sym}) line={line}")
                     rates[ii] = 0
             energy_keV = np.sum(energy_keV * rates / np.sum(rates))
+
+        if verbose:
+            print(f"{el_sym}-{requested_lines} emission energy (keV):", energy_keV, "\n")
 
         return energy_keV
 
@@ -196,7 +204,7 @@ class VolumeMaterial(object):
         Raised in case of incorrect parameters.
     """
 
-    def __init__(self, phase_fractions: Sequence, phase_compounds: Sequence, voxel_size_cm: float, dtype: DTypeLike = None):
+    def __init__(self, phase_fractions: Sequence, phase_compounds: Sequence, voxel_size_cm: float, dtype: DTypeLike = None, verbose: bool = False):
         if len(phase_fractions) != len(phase_compounds):
             raise ValueError(
                 "Phase fractions (# %d) and phase compounds (# %d) should have the same length"
@@ -226,6 +234,7 @@ class VolumeMaterial(object):
         ]
 
         self.voxel_size_cm = voxel_size_cm
+        self.verbose = verbose
 
     @staticmethod
     def get_element_number(element: Union[str, int]) -> int:
@@ -246,8 +255,36 @@ class VolumeMaterial(object):
         else:
             return xraylib.SymbolToAtomicNumber(element)
 
+    @staticmethod
+    def get_compound(cmp_name: str, density: Optional[float] = None) -> Dict:
+        """
+        Builds a compound from the compound composition string.
+
+        Parameters
+        ----------
+        cmp_name : str
+            Compund name / composition.
+        density : float, optional
+            The density of the compound. If not provided it will be approximated from the composing elements.
+            The default is None.
+
+        Returns
+        -------
+        cmp : Dict
+            The compound structure.
+        """
+        cmp = xraylib.CompoundParser(cmp_name)
+        cmp["name"] = cmp_name
+        if density is None:
+            density = 0
+            for ii, el in enumerate(cmp["Elements"]):
+                density += xraylib.ElementDensity(el) * cmp["massFractions"][ii]
+        cmp["density"] = density
+        return cmp
+
     def get_attenuation(self, energy_keV: float) -> ArrayLike:
-        """Compute the local attenuation for each voxel.
+        """
+        Compute the local attenuation for each voxel.
 
         Parameters
         ----------
@@ -268,6 +305,12 @@ class VolumeMaterial(object):
                     [xraylib.CS_Total(el, energy_keV) * cmp["massFractions"][ii] for ii, el in enumerate(cmp["Elements"])],
                     axis=0,
                 )
+            if self.verbose:
+                print(f"Attenuation ({cmp['name']} at {energy_keV}):")
+                print(
+                    f" - cross-section * mass fraction = {cmp_cs}, density = {cmp['density']}, pixel-size {self.voxel_size_cm}"
+                )
+                print(f" - total {cmp['density'] * cmp_cs * self.voxel_size_cm} (assuming phase mass fraction = 1)")
             ph_lin_att += ph * cmp["density"] * cmp_cs
         return ph_lin_att * self.voxel_size_cm
 
@@ -347,16 +390,24 @@ class VolumeMaterial(object):
         cmptn_yield = np.zeros(self.shape, self.dtype)
         for ph, cmp in zip(self.phase_fractions, self.phase_compounds):
             try:
-                cmptn_cmp_cs = xraylib.DCS_Compt_CP(cmp["name"], energy_in_keV, angle_rad)
+                cmp_cs = xraylib.DCS_Compt_CP(cmp["name"], energy_in_keV, angle_rad)
             except ValueError:
-                cmptn_cmp_cs = np.sum(
+                cmp_cs = np.sum(
                     [
                         xraylib.DCS_Compt(el, energy_in_keV, angle_rad) * cmp["massFractions"][ii]
                         for ii, el in enumerate(cmp["Elements"])
                     ],
                     axis=0,
                 )
-            cmptn_yield += ph * cmp["density"] * cmptn_cmp_cs
+            if self.verbose:
+                print(
+                    f"Compton - {cmp['name']} at incoming energy {energy_in_keV} (keV),"
+                    + f" outgoing angle {np.rad2deg(angle_rad)} (deg):\n"
+                    + f" - cross-section * mass fraction = {cmp_cs}, density = {cmp['density']}"
+                    + ", pixel-size {self.voxel_size_cm}"
+                    + f" - total {cmp['density'] * cmp_cs * self.voxel_size_cm} (assuming phase mass fraction = 1)"
+                )
+            cmptn_yield += ph * cmp["density"] * cmp_cs
         cmptn_yield *= self.voxel_size_cm
 
         if detector:
@@ -409,7 +460,8 @@ class VolumeMaterial(object):
                 el_cs[ii] = xraylib.CS_FluorLine_Kissel(el_num, line.indx, energy_in_keV)  # fluo production for cm2/g
             except ValueError as exc:
                 el_sym = xraylib.AtomicNumberToSymbol(el_num)
-                print(f"Energy {exc}: el_num={el_num} ({el_sym}) line={line}")
+                if self.verbose:
+                    print(f"Energy {exc}: el_num={el_num} ({el_sym}) line={line}")
                 el_cs[ii] = 0
         el_yield = self.get_element_mass_fraction(el_num) * np.sum(el_cs) * self.voxel_size_cm
 
