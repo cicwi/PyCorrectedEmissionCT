@@ -782,7 +782,13 @@ def compute_frc(
 
 
 def norm_cross_corr(
-    img1: ArrayLike, img2: Optional[ArrayLike] = None, axes: ArrayLike = (-2, -1), t_match: bool = False, plot: bool = True
+    img1: ArrayLike,
+    img2: Optional[ArrayLike] = None,
+    axes: ArrayLike = (-2, -1),
+    t_match: bool = False,
+    mode_full: bool = True,
+    compute_profile: bool = True,
+    plot: bool = True,
 ) -> ArrayLike:
     """
     Compute the normalized cross-correlation between two images.
@@ -795,9 +801,13 @@ def norm_cross_corr(
         The second images. If None, it computes the auto-correlation. The default is None.
     axes : ArrayLike, optional
         Axes along which to compute the cross-correlation. The default is (-2, -1).
-    t_match: bool, optional
+    t_match : bool, optional
         Whether to perform the cross-correlation for template matching. The default is False.
-    plot: bool, optional
+    mode_full : bool, optional
+        Whether to return the "full" or "same" convolution size. The default is True.
+    compute_profile : bool, optional
+        Whether to compute the azimuthal integration of the cross-correlation or not. The default is True.
+    plot : bool, optional
         Whether to plot the profile of the cross-correlation curve. The default is True.
 
     Returns
@@ -826,11 +836,25 @@ def norm_cross_corr(
     img1 = img1.astype(np.float32)
     img2 = img2.astype(np.float32)
 
-    cc = sp.signal.correlate(img1, img2, mode="full", method="fft")
+    for a in axes:
+        img2 = np.flip(img2, axis=a)
+    cc = sp.signal.fftconvolve(img1, img2, mode="full", axes=axes)
+
+    if not mode_full:
+        slices = [slice(None)] * len(cc.shape)
+        for a in axes:
+            start_ind = (cc.shape[a] - img1.shape[a]) // 2
+            end_ind = start_ind + img1.shape[a]
+            slices[a] = slice(start_ind, end_ind)
+        slices = tuple(slices)
+        cc = cc[slices]
 
     if t_match:
-        local_sums_img2 = local_sum(img2, axes=axes)[slices]
-        local_sums_img2_2 = local_sum(img2**2, axes=axes)[slices]
+        local_sums_img2 = local_sum(img2, axes=axes)
+        local_sums_img2_2 = local_sum(img2**2, axes=axes)
+        if not mode_full:
+            local_sums_img2 = local_sums_img2[slices]
+            local_sums_img2_2 = local_sums_img2_2[slices]
 
         cc_n = cc - local_sums_img2 * np.mean(img1)
 
@@ -842,17 +866,21 @@ def norm_cross_corr(
         cc_n = cc / (np.linalg.norm(img1) * np.linalg.norm(img2))
 
     cc_n = np.fft.ifftshift(cc_n)
-    cc_l = azimuthal_integration(cc_n, axes=axes, domain="fourier")
-    cc_o = azimuthal_integration(np.ones_like(cc_n), axes=axes, domain="fourier")
 
-    cc_l /= cc_o
-    cc_l = cc_l[: np.min(np.array(img1.shape)[list(axes)])]
+    if compute_profile:
+        cc_l = azimuthal_integration(cc_n, axes=axes, domain="fourier")
+        cc_o = azimuthal_integration(np.ones_like(cc_n), axes=axes, domain="fourier")
 
-    if plot:
-        f, ax = plt.subplots()
-        ax.plot(cc_l)
-        ax.plot(np.ones_like(cc_l) * 0.5)
-        ax.grid()
-        f.tight_layout()
+        cc_l /= cc_o
+        cc_l = cc_l[: np.min(np.array(img1.shape)[list(axes)])]
 
-    return cc_l
+        if plot:
+            f, ax = plt.subplots()
+            ax.plot(cc_l)
+            ax.plot(np.ones_like(cc_l) * 0.5)
+            ax.grid()
+            f.tight_layout()
+
+        return cc_n, cc_l
+    else:
+        return cc_n
