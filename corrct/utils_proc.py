@@ -62,7 +62,7 @@ def get_ball(
     coords = [np.fft.fftfreq(d, 1 / d) for d in data_shape_vu]
     coords = np.stack(np.meshgrid(*coords, indexing="ij"), axis=0)
 
-    r = np.sqrt(np.sum(coords ** 2, axis=0)) / super_sampling
+    r = np.sqrt(np.sum(coords**2, axis=0)) / super_sampling
 
     probe = (r < radius).astype(dtype)
     if func is not None:
@@ -306,8 +306,8 @@ def compute_variance_poisson(
             var_I0 = np.abs(I0)
         I0 = np.fmax(I0, eps)
 
-        Is2 = Is ** 2
-        I02 = I0 ** 2
+        Is2 = Is**2
+        I02 = I0**2
         variance = (Is2 / I02) * (var_Is / Is2 + var_I0 / I02)
         if normalized:
             variance *= np.mean(I0)
@@ -346,8 +346,8 @@ def compute_variance_transmission(
         var_I0 = np.abs(I0)
     I0 = np.fmax(I0, eps)
 
-    Is2 = Is ** 2
-    I02 = I0 ** 2
+    Is2 = Is**2
+    I02 = I0**2
     variance = (Is / I0) * (var_Is / Is2 + var_I0 / I02)
     if normalized:
         variance *= np.mean(I0)
@@ -609,7 +609,7 @@ def azimuthal_integration(img: ArrayLike, axes: Sequence[int] = (-2, -1), domain
     else:
         coords = [np.fft.fftfreq(d, 1 / d) for d in img_axes_dims]
     coords = np.stack(np.meshgrid(*coords, indexing="ij"))
-    r = np.sqrt(np.sum(coords ** 2, axis=0))
+    r = np.sqrt(np.sum(coords**2, axis=0))
 
     # Reshape the volume to have the axes to be integrates as right-most axes
     img_tr_op = np.array([*range(len(img.shape))])
@@ -732,7 +732,7 @@ def compute_frc(
 
     fc_r_int = azimuthal_integration(fc.real, axes=axes, domain="fourier")
     fc_i_int = azimuthal_integration(fc.imag, axes=axes, domain="fourier")
-    fc_int = np.sqrt((fc_r_int ** 2) + (fc_i_int ** 2))
+    fc_int = np.sqrt((fc_r_int**2) + (fc_i_int**2))
     f1_int = azimuthal_integration(f1, axes=axes, domain="fourier")
     f2_int = azimuthal_integration(f2, axes=axes, domain="fourier")
 
@@ -809,14 +809,14 @@ def norm_cross_corr(
     cc = sp.signal.correlate(img1, img2, mode="full", method="fft")
 
     if t_match:
-        local_sums_img2 = local_sum(img2, axes=axes)
-        local_sums_img2_2 = local_sum(img2 ** 2, axes=axes)
+        local_sums_img2 = local_sum(img2, axes=axes)[slices]
+        local_sums_img2_2 = local_sum(img2**2, axes=axes)[slices]
 
         cc_n = cc - local_sums_img2 * np.mean(img1)
 
         cc_n /= np.std(img1) * np.sqrt(np.prod(np.array(img1.shape)[list(axes)]))
 
-        diff_local_sums = local_sums_img2_2 - (local_sums_img2 ** 2) / np.prod(np.array(img2.shape)[list(axes)])
+        diff_local_sums = local_sums_img2_2 - (local_sums_img2**2) / np.prod(np.array(img2.shape)[list(axes)])
         cc_n /= np.sqrt(diff_local_sums.clip(0, None))
     else:
         cc_n = cc / (np.linalg.norm(img1) * np.linalg.norm(img2))
