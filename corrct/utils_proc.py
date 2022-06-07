@@ -398,7 +398,9 @@ def compute_variance_weigth(
     return 1 / weight
 
 
-def get_beam_profile(voxel_size_um: float, beam_fwhm_um: float, profile_size: float = 1, verbose: bool = False) -> ArrayLike:
+def get_beam_profile(
+    voxel_size_um: float, beam_fwhm_um: float, profile_size: float = 1, beam_shape: str = "gaussian", verbose: bool = False
+) -> ArrayLike:
     """
     Compute the pencil beam integration point spread function.
 
@@ -432,19 +434,20 @@ def get_beam_profile(voxel_size_um: float, beam_fwhm_um: float, profile_size: fl
     yb[np.abs(np.abs(xc) - half_voxel_size_um) <= eps] = 0.5
 
     # Gaussian beam shape
-    yg = np.exp(-4 * np.log(2) * (xc ** 2) / (beam_fwhm_um ** 2))
+    if beam_shape.lower() == "gaussian":
+        yg = np.exp(-4 * np.log(2) * (xc**2) / (beam_fwhm_um**2))
+    elif beam_shape.lower() == "lorentzian":
+        beam_hwhm_um = beam_fwhm_um / 2
+        yg = (beam_hwhm_um**2) / (xc**2 + beam_hwhm_um**2)
+    elif beam_shape.lower() == "sech**2":
+        # doi: 10.1364/ol.20.001160
+        tau = beam_fwhm_um / (2 * np.arccosh(np.sqrt(2)))
+        yg = 1 / np.cosh(xc / tau) ** 2
+    else:
+        raise ValueError(f"Unknown beam shape: {beam_shape.lower()}")
 
     yc = np.convolve(yb, yg, mode="same")
     yc = yc / np.max(yc)
-
-    if verbose:
-        f, ax = plt.subplots()
-        ax.plot(xc, yb, label="Integration length")
-        ax.plot(xc, yg, label="Gaussian beam shape")
-        ax.plot(xc, yc, label="Resulting beam shape")
-        ax.legend()
-        ax.grid()
-        plt.tight_layout()
 
     y = np.zeros((y_points,))
     for ii_p in range(y_points):
@@ -456,7 +459,24 @@ def get_beam_profile(voxel_size_um: float, beam_fwhm_um: float, profile_size: fl
         y[ii_p] = np.sum(yc * yp)
 
     # Renormalization
-    return y / y.sum()
+    y /= y.sum()
+
+    if verbose:
+        f, ax = plt.subplots(1, 2, figsize=[10, 5])
+        ax[0].plot(xc, yb, label="Integration length")
+        ax[0].plot(xc, yg, label=f"{beam_shape.capitalize()} beam shape")
+        ax[0].plot(xc, yc, label="Resulting beam shape")
+        ax[0].legend()
+        ax[0].grid()
+
+        pixels_pos = np.linspace(-(y_points - 1) / 2, (y_points - 1) / 2, y_points)
+        ax[1].bar(pixels_pos, y, label="PSF values", color="C1", width=1, linewidth=1.5, edgecolor="k", alpha=0.75)
+        ax[1].plot(xc / extent_um * profile_size * 2, yc, label="Resulting beam shape")
+        ax[1].legend()
+        ax[1].grid()
+        plt.tight_layout()
+
+    return y
 
 
 def denoise_image(
