@@ -124,7 +124,7 @@ class ProjectionGeometry(Geometry):
         if int(self.geom_type[-2]) == 3 and det_pos_vu.shape[0] == 2:
             self.det_pos_xyz[:, 2] = det_pos_vu[-2, :]
 
-    def rotate(self, angles_w_rad: ArrayLike) -> "ProjectionGeometry":
+    def rotate(self, angles_w_rad: ArrayLike, patch_astra_2d: bool = False) -> "ProjectionGeometry":
         """
         Rotate the geometry by the given angle(s).
 
@@ -141,7 +141,7 @@ class ProjectionGeometry(Geometry):
         angles = np.array(angles_w_rad, ndmin=1)[:, None]
 
         # Deadling with ASTRA's incoherent 2D and 3D coordinate systems.
-        if int(self.geom_type[-2]) == 2:
+        if patch_astra_2d and int(self.geom_type[-2]) == 2:
             angles = -angles
 
         rotations = spt.Rotation.from_rotvec(angles * self.rot_dir_xyz)

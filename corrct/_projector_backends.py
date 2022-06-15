@@ -403,7 +403,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
             if prj_geom.det_shape_vu is None:
                 prj_geom.det_shape_vu = np.array(self.vol_geom.shape[list([1])], dtype=int)
 
-            rot_geom = prj_geom.rotate(self.angles_w_rad)
+            rot_geom = prj_geom.rotate(self.angles_w_rad, patch_astra_2d=True)
 
             vectors = np.empty([num_angles, 6])
             # source / beam direction
