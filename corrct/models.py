@@ -50,11 +50,19 @@ class ProjectionGeometry(Geometry):
     det_shape_vu: Optional[ArrayLike] = None
 
     def __getitem__(self, indx: Any):
-        def slice_array(arr: ArrayLike, indx: Any):
-            if len(arr.shape) > 1:
-                return arr[indx, :]
+        """
+        Slice projection geometry along the angular direction.
+
+        Parameters
+        ----------
+        indx : Any
+            Indices of the slicing.
+        """
+        def slice_array(vecs_arr: ArrayLike, indx: Any):
+            if len(vecs_arr.shape) > 1:
+                return vecs_arr[indx, :]
             else:
-                return arr
+                return vecs_arr
 
         return dc_replace(
             self,
@@ -174,6 +182,38 @@ class ProjectionGeometry(Geometry):
         else:
             return field_value
 
+    def project_displacement_to_detector(self, disp_zyx: ArrayLike) -> ArrayLike:
+        """Project a given displacement vector in the volume coordinates, over the detector.
+
+        Parameters
+        ----------
+        disp_zyx : ArrayLike
+            The displacement vector in volume coordinates.
+
+        Returns
+        -------
+        ArrayLike
+            The projection on u (and if applicable v) coordinates.
+
+        Raises
+        ------
+        ValueError
+            When projection geometry and vector dimensions don match.
+        """
+        geom_dims = int(self.geom_type[-2])
+        disp_dims = len(disp_zyx)
+        if geom_dims != disp_dims:
+            raise ValueError(f"Geometry is {geom_dims}d, while passed displacement is {disp_dims}d.")
+
+        disp_xyz = np.flip(disp_zyx)
+
+        if geom_dims == 2:
+            return self.det_u_xyz[..., :geom_dims].dot(disp_xyz)
+        else:
+            return np.stack(
+                [self.det_v_xyz[..., :geom_dims].dot(disp_xyz), self.det_u_xyz[..., :geom_dims].dot(disp_xyz)], axis=0
+            )
+
 
 @dataclass
 class VolumeGeometry(Geometry):
@@ -183,6 +223,7 @@ class VolumeGeometry(Geometry):
     vox_size: float = 1
 
     def __post_init__(self):
+        """Initialize the input parameters."""
         self.vol_shape_xyz = np.array(self.vol_shape_xyz, ndmin=1)
 
     @property
