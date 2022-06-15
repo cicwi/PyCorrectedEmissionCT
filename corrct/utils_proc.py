@@ -480,6 +480,39 @@ def get_beam_profile(
     return y
 
 
+def compute_com(vol: ArrayLike, axes: Optional[ArrayLike] = None) -> ArrayLike:
+    """
+    Compute center-of-mass for given volume.
+
+    Parameters
+    ----------
+    vol : ArrayLike
+        The input volume.
+    axes : ArrayLike, optional
+        Axes on which to compute center-of-mass. The default is None.
+
+    Returns
+    -------
+    ArrayLike
+        The center-of-mass position.
+    """
+    if axes is None:
+        axes = np.arange(len(vol.shape))
+    else:
+        axes = np.array(axes, ndmin=1)
+
+    coords = [np.linspace(- (s - 1) / 2, (s - 1) / 2, s) for s in np.array(vol.shape)[list(axes)]]
+
+    num_dims = len(vol.shape)
+    com = np.empty((len(axes),))
+    for ii, a in enumerate(axes):
+        sum_axes = np.array(np.delete(np.arange(num_dims), a), ndmin=1, dtype=int)
+        line = np.abs(vol).sum(axis=tuple(sum_axes))
+        com[ii] = line.dot(coords[ii]) / line.sum()
+
+    return com
+
+
 def denoise_image(
     img: ArrayLike,
     reg_weight: Union[float, ArrayLike] = 1e-2,
