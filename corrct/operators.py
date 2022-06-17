@@ -238,11 +238,15 @@ class TransformConvolution(BaseTransform):
         The convolution kernel.
     is_symm : bool, optional
         Whether the operator is symmetric or not. The default is True.
+    flip_adjoint : bool, optional
+        Whether the adjoint kernel should be flipped. The default is False.
+        This is useful when the kernel is not symmetric.
     """
 
-    def __init__(self, x_shape: ArrayLike, kernel: ArrayLike, is_symm: bool = True):
+    def __init__(self, x_shape: ArrayLike, kernel: ArrayLike, is_symm: bool = True, flip_adjoint: bool = False):
         self.kernel = kernel
         self.is_symm = is_symm
+        self.flip_adjoint = flip_adjoint
         self.dir_shape = np.array(x_shape)
         self.adj_shape = np.array(x_shape)
         super().__init__()
@@ -258,12 +262,28 @@ class TransformConvolution(BaseTransform):
         """
         return TransformConvolution(self.dir_shape, np.abs(self.kernel))
 
+    def _pad_valid(self, x: ArrayLike) -> ArrayLike:
+        pad_width = (np.array(self.kernel.shape) - 1) // 2
+        return np.pad(x, pad_width=pad_width[:, None], mode="edge"), pad_width
+
+    def _crop_valid(self, x: ArrayLike, pad_width: ArrayLike) -> ArrayLike:
+        slices = [slice(pw if pw else None, -pw if pw else None) for pw in pad_width]
+        return x[tuple(slices)]
+
     def _op_direct(self, x: ArrayLike) -> ArrayLike:
-        return spsig.convolve(x, self.kernel, mode="same")
+        x, pw = self._pad_valid(x)
+        x = spsig.convolve(x, self.kernel, mode="same")
+        return self._crop_valid(x, pw)
 
     def _op_adjoint(self, x: ArrayLike) -> ArrayLike:
         if self.is_symm:
-            return spsig.convolve(x, self.kernel, mode="same")
+            x, pw = self._pad_valid(x)
+            if self.flip_adjoint:
+                adj_kernel = np.flip(self.kernel)
+            else:
+                adj_kernel = self.kernel
+            x = spsig.convolve(x, adj_kernel, mode="same")
+            return self._crop_valid(x, pw)
         else:
             return x
 
