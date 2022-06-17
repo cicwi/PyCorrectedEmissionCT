@@ -171,6 +171,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         if prj_geom is not None and not use_astra:
             raise ValueError("Using class `ProjectionGeometry` requires astra-toolbox.")
 
+        angles_rot_rad = np.array(np.squeeze(angles_rot_rad), ndmin=1)
+
         if use_astra:
             self.projector_backend = prj_backends.ProjectorBackendASTRA(
                 vol_geom,
