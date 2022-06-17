@@ -16,6 +16,7 @@ import skimage.transform as skt
 
 from . import operators
 from . import solvers
+from . import regularizers
 from . import utils_reg
 
 from typing import Sequence, Optional, Union, Tuple, Callable
@@ -483,9 +484,9 @@ def denoise_image(
     img: ArrayLike,
     reg_weight: Union[float, ArrayLike] = 1e-2,
     psf: Optional[ArrayLike] = None,
-    variances: Optional[ArrayLike] = None,
+    pix_weights: Optional[ArrayLike] = None,
     iterations: int = 250,
-    axes: Sequence[int] = (-2, -1),
+    regularizer: Callable = lambda rw: regularizers.Regularizer_l1dwl(rw, "bior4.4", 3),
     lower_limit: Optional[float] = None,
     verbose: bool = False,
 ) -> ArrayLike:
@@ -493,7 +494,7 @@ def denoise_image(
     Denoise an image.
 
     Image denoiser based on (flat or weighted) least-squares, with wavelet minimization regularization.
-    The weighted least-squares requires the local pixel-wise variances.
+    The weighted least-squares requires the local pixel-wise weights.
     It can be used to denoise sinograms and projections.
 
     Parameters
@@ -504,14 +505,13 @@ def denoise_image(
         Weight of the regularization term. The default is 1e-2.
         If a sequence / array is passed, all the different values will be tested.
         The one minimizing the error over the cross-validation set will be chosen and returned.
-    variances : Optional[ArrayLike], optional
-        The local variance of the pixels, for a weighted least-squares minimization.
-        If None, a standard least-squares minimization is performed.
-        The default is None.
+    pix_weights : Optional[ArrayLike], optional
+        The local weights of the pixels, for a weighted least-squares minimization.
+        If None, a standard least-squares minimization is performed. The default is None.
     iterations : int, optional
         Number of iterations. The default is 250.
-    axes : Sequence[int], optional
-        Axes along which the regularization should be done. The default is (-2, -1).
+    regularizer : Callable, optional
+        The one-argument constructor of a regularizer. The default is the DWL regularizer.
     lower_limit : Optional[float], optional
         Lower clipping limit of the image. The default is None.
     verbose : bool, optional
@@ -524,66 +524,43 @@ def denoise_image(
     """
     if psf is None:
         op = operators.TransformIdentity(img.shape)
-        padding = None
     else:
-        padding = [(0,)] * len(img.shape)
-        for ii, p in enumerate(psf.shape):
-            padding[axes[ii]] = (p,)
-        new_shape = np.ones_like(img.shape)
-        new_shape[list(axes)] = psf.shape
+        op = operators.TransformConvolution(img.shape, psf)
 
-        img = np.pad(img, padding, mode="edge")
-        if variances is not None:
-            variances = np.pad(variances, padding, mode="edge")
-        op = operators.TransformConvolution(img.shape, psf.reshape(new_shape))
-
-    if variances is not None:
-        variances = np.abs(variances)
-        img_weights = compute_variance_weigth(variances, normalized=True, semilog=True)
-        # import matplotlib.pyplot as plt
-        # plt.figure()
-        # plt.imshow(img_weights[:, 0, :])
-        # plt.show()
-        data_term = solvers.DataFidelity_wl2(img_weights)
-    else:
+    if pix_weights is None:
         data_term = solvers.DataFidelity_l2()
-
-    if isinstance(axes, int):
-        axes = (axes,)
+    else:
+        data_term = solvers.DataFidelity_wl2(pix_weights)
 
     def solver_spawn(lam_reg):
         # Using the PDHG solver from Chambolle and Pock
-        # reg = solvers.Regularizer_Grad(lam_reg, axes=axes)
-        reg = solvers.Regularizer_l1dwl(lam_reg, "bior4.4", 3, axes=axes)
+        reg = regularizer(lam_reg)
         return solvers.PDHG(verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term)
 
-    def solver_call(solver, b_test_mask=None):
+    def solver_call(solver: solvers.Solver, b_test_mask: Optional[ArrayLike] = None) -> Tuple[ArrayLike, Tuple[ArrayLike]]:
+        x0 = img.copy()
         if b_test_mask is not None:
             med_img = sp.signal.medfilt2d(img, kernel_size=11)
             masked_pixels = b_test_mask > 0.5
-            x0 = img.copy()
+
             x0[masked_pixels] = med_img[masked_pixels]
-        else:
-            x0 = img.copy()
 
         return solver(op, img, iterations, x0=x0, lower_limit=lower_limit, b_test_mask=b_test_mask)
 
     reg_weight = np.array(reg_weight)
     if reg_weight.size > 1:
-        reg_help_cv = utils_reg.CrossValidation(img.shape, verbose=True, num_averages=5, plot_result=True)
+        reg_help_cv = utils_reg.CrossValidation(img.shape, verbose=True, num_averages=5, plot_result=False)
         reg_help_cv.solver_spawning_function = solver_spawn
         reg_help_cv.solver_calling_function = solver_call
 
         f_avgs, f_stds, _ = reg_help_cv.compute_loss_values(reg_weight)
 
-        reg_weight, _ = reg_help_cv.fit_loss_min(reg_weight, f_avgs)
+        reg_help_cv.plot_result = True
+        reg_weight, _ = reg_help_cv.fit_loss_min(reg_weight, f_avgs, f_stds=f_stds)
 
     solver = solver_spawn(reg_weight)
     (denoised_img, _) = solver_call(solver, None)
 
-    if padding is not None:
-        slicing = [slice(p[0], -p[0]) if p[0] else slice(None) for p in padding]
-        denoised_img = denoised_img[tuple(slicing)]
     return denoised_img
 
 
