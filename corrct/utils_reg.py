@@ -397,7 +397,9 @@ class CrossValidation(BaseRegularizationEstimation):
 
         return f_avgs, f_stds, f_vals
 
-    def fit_loss_min(self, lams_reg: ArrayLike, f_vals: ArrayLike, scale: str = "log") -> Tuple[float, float]:
+    def fit_loss_min(
+        self, lams_reg: ArrayLike, f_vals: ArrayLike, f_stds: Optional[ArrayLike] = None, scale: str = "log"
+    ) -> Tuple[float, float]:
         """Parabolic fit of objective function costs for the different regularization weights.
 
         Parameters
@@ -406,6 +408,9 @@ class CrossValidation(BaseRegularizationEstimation):
             Regularization weights.
         f_vals : ArrayLike
             Objective function costs of each regularization weight.
+        f_stds : ArrayLike, optional
+            Objective function cost standard deviations of each regularization weight.
+            It is only used for plotting purpouses. The default is None.
         scale : str, optional
             Scale of the fit. Options are: "log" | "linear". The default is "log".
 
@@ -479,7 +484,9 @@ class CrossValidation(BaseRegularizationEstimation):
                 % (min_lam, lams_reg[0], lams_reg[-1])
                 + " Returning minimum measured point."
             )
-            return lams_reg[min_pos], f_vals[min_pos]
+            res_lam, res_val = lams_reg[min_pos], f_vals[min_pos]
+        else:
+            res_lam, res_val = min_lam, min_val
 
         if self.verbose:
             print("Found at %g, in %g seconds.\n" % (min_lam, tm.time() - c))
@@ -487,7 +494,10 @@ class CrossValidation(BaseRegularizationEstimation):
         if self.plot_result:
             f, ax = plt.subplots()
             ax.set_xscale(scale, nonpositive="clip")
-            ax.plot(lams_reg, f_vals)
+            if f_stds is None:
+                ax.plot(lams_reg, f_vals)
+            else:
+                ax.errorbar(lams_reg, f_vals, yerr=f_stds, ecolor=[0.5, 0.5, 0.5], elinewidth=1, capsize=2)
             x = np.linspace(lams_reg_fit[0], lams_reg_fit[2])
             y = coeffs[0] + x * (coeffs[1] + x * coeffs[2])
             ax.plot(from_fit(x), y)
@@ -496,4 +506,4 @@ class CrossValidation(BaseRegularizationEstimation):
             f.tight_layout()
             plt.show(block=False)
 
-        return min_lam, min_val
+        return res_lam, res_val
