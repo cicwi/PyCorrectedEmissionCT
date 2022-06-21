@@ -125,7 +125,7 @@ class ProjectorBackend(ABC):
         """
 
     @abstractmethod
-    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike] = "ram-lak") -> ArrayLike:
+    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> ArrayLike:
         """Apply FBP.
 
         Filtered back-projection interface. Derived backends need to implement this method.
@@ -135,7 +135,9 @@ class ProjectorBackend(ABC):
         prj : ArrayLike
             The sinogram or stack of sinograms.
         fbp_filter : str | ArrayLike, optional
-            The filter to use in the filtered back-projection. The default is "Ram-Lak".
+            The filter to use in the filtered back-projection.
+        pad_mode: str, optional
+            The padding mode to use for the linear convolution.
         """
 
     @staticmethod
@@ -286,7 +288,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
         else:
             return skt.iradon(prj[:, np.newaxis], self.angles_w_deg[angle_ind : angle_ind + 1 :], **bpj_size, **filter_name)
 
-    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike] = "ram-lak") -> ArrayLike:
+    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> ArrayLike:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
@@ -294,13 +296,17 @@ class ProjectorBackendSKimage(ProjectorBackend):
         prj : ArrayLike
             The sinogram or stack of sinograms.
         fbp_filter : str | ArrayLike, optional
-            The filter to use in the filtered back-projection. The default is "Ram-Lak".
+            The filter to use in the filtered back-projection.
+        pad_mode: str, optional
+            The padding mode to use for the linear convolution.
 
         Returns
         -------
         vol : ArrayLike
             The reconstructed volume.
         """
+        if pad_mode.lower() != "constant":
+            raise ValueError(f"Argument 'pad_mode' only supports 'constant', while {pad_mode.lower()} was given.")
         filter_name = self._set_filter_name(fbp_filter.lower())
         bpj_size = self._set_bpj_size(self.vol_shape_zxy[-1])
         if len(prj.shape) > 2:
@@ -582,7 +588,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         return vol
 
-    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike] = "ram-lak") -> ArrayLike:
+    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> ArrayLike:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
@@ -590,14 +596,22 @@ class ProjectorBackendASTRA(ProjectorBackend):
         prj : ArrayLike
             The sinogram or stack of sinograms.
         fbp_filter : str | ArrayLike, optional
-            The filter to use in the filtered back-projection. The default is "Ram-Lak".
+            The filter to use in the filtered back-projection.
+        pad_mode: str, optional
+            The padding mode to use for the linear convolution.
 
         Returns
         -------
         vol : ArrayLike
             The reconstructed volume.
         """
-        prj_size_pad = max(64, int(2 ** np.ceil(np.log2(self.prj_shape_vu[-1]))))
+        prj_size_pad = max(64, int(2 ** np.ceil(np.log2(2 * self.prj_shape_vu[-1]))))
+
+        pad_width = [(0, 0)] * len(prj.shape)
+        pad_edge_u = (prj_size_pad - prj.shape[-1]) / 2
+        pad_width[-1] = (int(np.ceil(pad_edge_u)), int(np.floor(pad_edge_u)))
+        prj_pad = np.pad(prj, pad_width=tuple(pad_width), mode=pad_mode)
+        prj_pad = np.roll(prj_pad, shift=-pad_width[-1][0], axis=-1)
 
         if isinstance(fbp_filter, str):
             fbp_filter = skt.radon_transform._get_fourier_filter(prj_size_pad, fbp_filter.lower())
@@ -607,7 +621,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         fbp_filter = fbp_filter / self.angles_w_rad.size
         fbp_filter = np.array(fbp_filter, ndmin=len(prj.shape))
 
-        prj_f = np.fft.rfft(prj, n=prj_size_pad, axis=-1)
+        prj_f = np.fft.rfft(prj_pad, axis=-1)
         prj_f *= fbp_filter
         prj_f = np.fft.irfft(prj_f, axis=-1)[..., :self.prj_shape_vu[-1]]
 

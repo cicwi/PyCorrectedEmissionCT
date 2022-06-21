@@ -297,7 +297,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             data = data * self.prj_intensities[:, np.newaxis]  # Needs copy
         return self.projector_backend.bp(data)
 
-    def fbp(self, projs: ArrayLike, fbp_filter: Union[str, Callable] = "shepp-logan") -> ArrayLike:
+    def fbp(self, projs: ArrayLike, fbp_filter: Union[str, Callable] = "ramp", pad_mode: str = "constant") -> ArrayLike:
         """
         Compute the filtered back-projection of the projection data to the volume.
 
@@ -308,7 +308,9 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         projs : ArrayLike
             The projection data to back-project.
         fbp_filter : str | Callable, optional
-            The FBP filter to use. The default is "shepp-logan".
+            The FBP filter to use. The default is "ramp".
+        pad_mode: str, optional
+            The padding mode to use for the linear convolution. The default is "constant".
 
         Raises
         ------
@@ -321,7 +323,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             The FBP reconstructed volume.
         """
         if isinstance(fbp_filter, str):
-            return self.projector_backend.fbp(projs, fbp_filter)
+            return self.projector_backend.fbp(projs, fbp_filter=fbp_filter, pad_mode=pad_mode)
         else:
             projs = fbp_filter(projs, self)
             return self.bp(projs) / self.angles_rot_rad.size

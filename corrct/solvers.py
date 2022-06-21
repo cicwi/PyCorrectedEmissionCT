@@ -220,7 +220,9 @@ class FBP(Solver):
     data_term : Union[str, DataFidelityBase], optional
         NOT USED, only exposed for compatibility reasons.
     fbp_filter : Union[str, ArrayLike], optional
-        FBP filter to use. Either a string from scikit-image's list of `iradon` filters, or an array. The default is "ram-lak".
+        FBP filter to use. Either a string from scikit-image's list of `iradon` filters, or an array. The default is "ramp".
+    pad_mode: str, optional
+        The padding mode to use for the linear convolution. The default is "constant".
     """
 
     def __init__(
@@ -228,10 +230,12 @@ class FBP(Solver):
         verbose: bool = False,
         regularizer: Optional[BaseRegularizer] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
-        fbp_filter: Union[str, ArrayLike] = "ram-lak",
+        fbp_filter: Union[str, ArrayLike] = "ramp",
+        pad_mode: str = "constant",
     ):
         super().__init__(verbose=verbose)
         self.fbp_filter = fbp_filter
+        self.pad_mode = pad_mode
 
     def __call__(  # noqa: C901
         self,
@@ -284,7 +288,7 @@ class FBP(Solver):
 
         (A, At) = self._initialize_data_operators(A, At)
 
-        x = A.fbp(b, self.fbp_filter)
+        x = A.fbp(b, fbp_filter=self.fbp_filter, pad_mode=self.pad_mode)
 
         if lower_limit is not None or upper_limit is not None:
             x = x.clip(lower_limit, upper_limit)
