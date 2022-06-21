@@ -118,13 +118,15 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         The volume shape in Y X and optionally Z.
     angles_rot_rad : ArrayLike
         The rotation angles.
-    rot_axis_shift_pix : float or ArrayLike, optional
+    rot_axis_shift_pix : float | ArrayLike, optional
         The rotation axis shift(s) in pixels. The default is 0.
     prj_geom : ProjectionGeometry, optional
         The fully specified projection geometry.
         When active, the rotation axis shift is ignored. The default is None.
-    prj_intensities : float or ArrayLike, optional
+    prj_intensities : float | ArrayLike, optional
         Projection scaling factor. The default is None.
+    psf: ArrayLike | None, optional
+        The "point spread function" of the detector. The default is None.
     use_astra : bool, optional
         Whether to use ASTRA or fall back to scikit-image.
         The default is True if CUDA is available, otherwise False.
@@ -205,7 +207,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         """De-initialize the with statement block."""
         self.projector_backend.dispose()
 
-    def _set_psf(self, psf: ArrayLike) -> None:
+    def _set_psf(self, psf: ArrayLike, is_conv_symm: bool = False) -> None:
         if psf is not None:
             psf = np.squeeze(psf)
             if len(psf.shape) >= len(self.vol_geom.shape):
@@ -213,7 +215,14 @@ class ProjectorUncorrected(operators.ProjectorOperator):
                     "PSF should either be 1D (for 2D and 3D reconstructions) or 2D (for 3D reconstructions)."
                     + f" Passed PSF has shape: {psf.shape}, and the reconstruction is {len(self.vol_geom.shape)}D."
                 )
-        self.psf = psf
+            # This redundancy is required, due to the different results between the single-angle and multi-angle projections
+            prj_shape_vu = [*self.projector_backend.prj_shape_vu[:-2], self.projector_backend.prj_shape_vu[-1]]
+            prj_shape_vu = np.array(prj_shape_vu, ndmin=1)
+            self.psf_vu = operators.TransformConvolution(prj_shape_vu, kernel=psf, is_symm=is_conv_symm)
+            prj_shape_vwu = np.array(self.projector_backend.prj_shape_vwu, ndmin=1)
+            self.psf_vwu = operators.TransformConvolution(prj_shape_vwu, kernel=psf[..., None, :], is_symm=is_conv_symm)
+        else:
+            self.psf_vu = self.psf_vwu = None
 
     def fp_angle(self, vol: ArrayLike, angle_ind: int) -> ArrayLike:
         """Forward-project a volume to a single sinogram line.
@@ -230,20 +239,19 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         x : ArrayLike
             The forward-projected sinogram line.
         """
-        x = self.projector_backend.fp(vol, angle_ind)
+        prj_vu = self.projector_backend.fp(vol, angle_ind)
         if self.prj_intensities is not None:
-            x *= self.prj_intensities[angle_ind]
-        if self.psf is not None:
-            psf = np.array(self.psf, ndmin=len(x.shape))
-            x = spsig.convolve(x, psf, mode="same")
-        return x
+            prj_vu *= self.prj_intensities[angle_ind]
+        if self.psf_vu is not None:
+            prj_vu = self.psf_vu(prj_vu)
+        return prj_vu
 
-    def bp_angle(self, sino_line: ArrayLike, angle_ind: int) -> ArrayLike:
+    def bp_angle(self, prj_vu: ArrayLike, angle_ind: int) -> ArrayLike:
         """Back-project a single sinogram line to the volume.
 
         Parameters
         ----------
-        sino_line : ArrayLike
+        prj_vu : ArrayLike
             The sinogram to back-project or a single line.
         angle_ind : int
             The angle index to foward project.
@@ -254,8 +262,10 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             The back-projected volume.
         """
         if self.prj_intensities is not None:
-            sino_line = sino_line * self.prj_intensities[angle_ind]  # It will make a copy
-        return self.projector_backend.bp(sino_line, angle_ind)
+            prj_vu = prj_vu * self.prj_intensities[angle_ind]  # It will make a copy
+        if self.psf_vu is not None:
+            prj_vu = self.psf_vu.T(prj_vu)
+        return self.projector_backend.bp(prj_vu, angle_ind)
 
     def fp(self, vol: ArrayLike) -> ArrayLike:
         """
@@ -271,21 +281,20 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         ArrayLike
             The forward-projected projection data.
         """
-        x = self.projector_backend.fp(vol)
+        prj_vwu = self.projector_backend.fp(vol)
         if self.prj_intensities is not None:
-            x *= self.prj_intensities[:, np.newaxis]
-        if self.psf is not None:
-            psf = np.array(self.psf[..., None, :], ndmin=len(x.shape))
-            x = spsig.convolve(x, psf, mode="same")
-        return x
+            prj_vwu *= self.prj_intensities[:, np.newaxis]
+        if self.psf_vwu is not None:
+            prj_vwu = self.psf_vwu(prj_vwu)
+        return prj_vwu
 
-    def bp(self, data: ArrayLike) -> ArrayLike:
+    def bp(self, prj_vwu: ArrayLike) -> ArrayLike:
         """
         Back-projection of the projection data to the volume.
 
         Parameters
         ----------
-        data : ArrayLike
+        prj_vwu : ArrayLike
             The projection data to back-project.
 
         Returns
@@ -294,8 +303,10 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             The back-projected volume.
         """
         if self.prj_intensities is not None:
-            data = data * self.prj_intensities[:, np.newaxis]  # Needs copy
-        return self.projector_backend.bp(data)
+            prj_vwu = prj_vwu * self.prj_intensities[:, np.newaxis]  # Needs copy
+        if self.psf_vwu is not None:
+            prj_vwu = self.psf_vwu.T(prj_vwu)
+        return self.projector_backend.bp(prj_vwu)
 
     def fbp(self, projs: ArrayLike, fbp_filter: Union[str, Callable] = "ramp", pad_mode: str = "constant") -> ArrayLike:
         """
@@ -739,9 +750,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             sino_line = sino
         else:
             sino_line = sino[..., angle_ind, :]
-
-        if self.psf is not None and self.is_symmetric:
-            sino_line = spsig.convolve(sino_line, self.psf, mode="same")
 
         sino_line = np.reshape(sino_line, [len(self.weights_det), *sino_line.shape[-(len(self.vol_shape) - 1) :]])
         weights = self.weights_det * self.weights_angles[angle_ind, :]
