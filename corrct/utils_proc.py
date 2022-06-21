@@ -501,7 +501,7 @@ def compute_com(vol: ArrayLike, axes: Optional[ArrayLike] = None) -> ArrayLike:
     else:
         axes = np.array(axes, ndmin=1)
 
-    coords = [np.linspace(- (s - 1) / 2, (s - 1) / 2, s) for s in np.array(vol.shape)[list(axes)]]
+    coords = [np.linspace(-(s - 1) / 2, (s - 1) / 2, s) for s in np.array(vol.shape)[list(axes)]]
 
     num_dims = len(vol.shape)
     com = np.empty((len(axes),))

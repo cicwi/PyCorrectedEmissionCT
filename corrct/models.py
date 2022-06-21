@@ -58,6 +58,7 @@ class ProjectionGeometry(Geometry):
         indx : Any
             Indices of the slicing.
         """
+
         def slice_array(vecs_arr: ArrayLike, indx: Any):
             if len(vecs_arr.shape) > 1:
                 return vecs_arr[indx, :]

@@ -18,7 +18,6 @@ from numpy.typing import ArrayLike
 from abc import ABC, abstractmethod
 
 
-
 try:
     import astra
 
@@ -174,7 +173,7 @@ class ProjectorBackend(ABC):
             return skt.rotate(vol, rot_angle_deg, order=1, clip=False)
 
         size_lims = np.array(vol.shape[-2:])
-        min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
+        min_size = np.ceil(np.sqrt(np.sum(size_lims**2)))
         edges = np.ceil((min_size - size_lims) / 2).astype(int)
 
         if invert:
@@ -616,14 +615,14 @@ class ProjectorBackendASTRA(ProjectorBackend):
         if isinstance(fbp_filter, str):
             fbp_filter = skt.radon_transform._get_fourier_filter(prj_size_pad, fbp_filter.lower())
             fbp_filter = np.squeeze(fbp_filter) * np.pi / 2
-            fbp_filter = fbp_filter[:(fbp_filter.shape[-1]) // 2 + 1]
+            fbp_filter = fbp_filter[: (fbp_filter.shape[-1]) // 2 + 1]
 
         fbp_filter = fbp_filter / self.angles_w_rad.size
         fbp_filter = np.array(fbp_filter, ndmin=len(prj.shape))
 
         prj_f = np.fft.rfft(prj_pad, axis=-1)
         prj_f *= fbp_filter
-        prj_f = np.fft.irfft(prj_f, axis=-1)[..., :self.prj_shape_vu[-1]]
+        prj_f = np.fft.irfft(prj_f, axis=-1)[..., : self.prj_shape_vu[-1]]
 
         if self.vol_geom.is_3D() or len(prj.shape) == 2:
             return self.bp(prj_f)

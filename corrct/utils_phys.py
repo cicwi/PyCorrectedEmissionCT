@@ -100,7 +100,10 @@ class FluoLinesSiegbahn:
 
     @staticmethod
     def get_energy(
-        element: Union[str, int], lines: Union[str, FluoLine, Sequence[FluoLine]], compute_average: bool = False, verbose: bool = False
+        element: Union[str, int],
+        lines: Union[str, FluoLine, Sequence[FluoLine]],
+        compute_average: bool = False,
+        verbose: bool = False,
     ) -> Union[float, Sequence[float]]:
         """
         Return the energy(ies) of the requested line for the given element.
@@ -169,7 +172,7 @@ class DetectorXRF(object):
 
     surface_mm2: float
     distance_mm: float
-    angle_rad: float = (np.pi / 2)
+    angle_rad: float = np.pi / 2
 
     @property
     def solid_angle_sr(self) -> Union[float, ArrayLike]:
@@ -180,7 +183,7 @@ class DetectorXRF(object):
         float | ArrayLike
             The computed solid angle of the detector geometry.
         """
-        return self.surface_mm2 / (np.pi * self.distance_mm ** 2)
+        return self.surface_mm2 / (np.pi * self.distance_mm**2)
 
 
 class VolumeMaterial(object):
@@ -204,7 +207,14 @@ class VolumeMaterial(object):
         Raised in case of incorrect parameters.
     """
 
-    def __init__(self, phase_fractions: Sequence, phase_compounds: Sequence, voxel_size_cm: float, dtype: DTypeLike = None, verbose: bool = False):
+    def __init__(
+        self,
+        phase_fractions: Sequence,
+        phase_compounds: Sequence,
+        voxel_size_cm: float,
+        dtype: DTypeLike = None,
+        verbose: bool = False,
+    ):
         if len(phase_fractions) != len(phase_compounds):
             raise ValueError(
                 "Phase fractions (# %d) and phase compounds (# %d) should have the same length"

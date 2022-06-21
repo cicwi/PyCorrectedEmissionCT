@@ -468,7 +468,10 @@ class AttenuationVolume:
         if other_dim == -3:
             arrow_length = np.linalg.norm(slice_shape) / np.pi
             arrow_args = dict(
-                width=arrow_length / 25, head_width=arrow_length / 8, head_length=arrow_length / 6, length_includes_head=True,
+                width=arrow_length / 25,
+                head_width=arrow_length / 8,
+                head_length=arrow_length / 6,
+                length_includes_head=True,
             )
 
             prj_geom = models.ProjectionGeometry.get_default_parallel()

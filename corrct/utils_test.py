@@ -45,7 +45,7 @@ def roundup_to_pow2(x: Union[int, float, ArrayLike], p: int, data_type: DTypeLik
     int | float | ArrayLike
         Rounding up of input.
     """
-    return np.ceil(np.array(x) / (2 ** p)).astype(data_type) * (2 ** p)
+    return np.ceil(np.array(x) / (2**p)).astype(data_type) * (2**p)
 
 
 def download_phantom():

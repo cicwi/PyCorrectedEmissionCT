@@ -425,12 +425,12 @@ class Regularizer_swl(BaseRegularizer):
         self.dec_func_mult = (
             self.op.wlet_dec_filter_mult[None, :] * (lo_dec_mult ** np.arange(self.level - 1, -1, -1))[:, None]
         )
-        self.dec_func_mult = np.concatenate(([lo_dec_mult ** self.level], self.dec_func_mult.flatten()))
+        self.dec_func_mult = np.concatenate(([lo_dec_mult**self.level], self.dec_func_mult.flatten()))
 
         self.rec_func_mult = (
             self.op.wlet_rec_filter_mult[None, :] * (lo_rec_mult ** np.arange(self.level - 1, -1, -1))[:, None]
         )
-        self.rec_func_mult = np.concatenate(([lo_rec_mult ** self.level], self.rec_func_mult.flatten()))
+        self.rec_func_mult = np.concatenate(([lo_rec_mult**self.level], self.rec_func_mult.flatten()))
 
         # self.dec_func_mult = 2 ** np.arange(self.level, 0, -1)
         # self.dec_func_mult = np.tile(self.dec_func_mult[:, None], [1, (2 ** self.ndims) - 1])
@@ -445,7 +445,7 @@ class Regularizer_swl(BaseRegularizer):
             self.sigma = np.reshape(1 / self.dec_func_mult, [-1] + [1] * len(self.op.dir_shape))
             self.norm.assign_data(None, sigma=self.sigma)
 
-            tau = np.ones_like(self.rec_func_mult) * ((2 ** self.ndims) - 1)
+            tau = np.ones_like(self.rec_func_mult) * ((2**self.ndims) - 1)
             tau[0] += 1
             tau = np.sum(tau / self.rec_func_mult)
 
@@ -578,12 +578,12 @@ class Regularizer_dwl(BaseRegularizer):
         self.dec_func_mult = (
             self.op.wlet_dec_filter_mult[None, :] * (lo_dec_mult ** np.arange(self.level - 1, -1, -1))[:, None]
         )
-        self.dec_func_mult = np.concatenate(([lo_dec_mult ** self.level], self.dec_func_mult.flatten()))
+        self.dec_func_mult = np.concatenate(([lo_dec_mult**self.level], self.dec_func_mult.flatten()))
 
         self.rec_func_mult = (
             self.op.wlet_rec_filter_mult[None, :] * (lo_rec_mult ** np.arange(self.level - 1, -1, -1))[:, None]
         )
-        self.rec_func_mult = np.concatenate(([lo_rec_mult ** self.level], self.rec_func_mult.flatten()))
+        self.rec_func_mult = np.concatenate(([lo_rec_mult**self.level], self.rec_func_mult.flatten()))
 
         # self.dec_func_mult = 2 ** np.arange(self.level, 0, -1)
         # self.rec_func_mult = self.dec_func_mult
@@ -600,7 +600,7 @@ class Regularizer_dwl(BaseRegularizer):
         self.sigma, _ = pywt.coeffs_to_array(self.sigma, axes=self.axes)
         self.norm.assign_data(None, sigma=self.sigma)
 
-        tau = np.ones_like(self.rec_func_mult) * ((2 ** self.ndims) - 1)
+        tau = np.ones_like(self.rec_func_mult) * ((2**self.ndims) - 1)
         tau[0] += 1
         tau = np.sum(tau / self.rec_func_mult)
 
@@ -740,9 +740,9 @@ class Regularizer_fft(BaseRegularizer):
             if self.mask.lower() == "delta":
                 self.sigma = 1 - np.all(coords == 0, axis=0)
             elif self.mask.lower() == "exp":
-                self.sigma = 1 - np.exp(-np.sqrt(np.sum(coords ** 2, axis=0)) * 12)
+                self.sigma = 1 - np.exp(-np.sqrt(np.sum(coords**2, axis=0)) * 12)
             elif self.mask.lower() == "exp2":
-                self.sigma = 1 - np.exp(-np.sum(coords ** 2, axis=0) * 36)
+                self.sigma = 1 - np.exp(-np.sum(coords**2, axis=0) * 36)
             else:
                 raise ValueError('Unknown FFT mask: %s. Options are: "delta", "exp". and "exp2".' % self.mask)
 

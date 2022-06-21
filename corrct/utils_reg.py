@@ -431,7 +431,7 @@ class CrossValidation(BaseRegularizationEstimation):
             to_fit = np.log10
 
             def from_fit(x):
-                return 10 ** x
+                return 10**x
 
         elif scale.lower() == "linear":
 
