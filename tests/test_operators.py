@@ -5,7 +5,7 @@
 
 import numpy as np
 
-import unittest
+import pytest
 
 from corrct import operators
 from corrct import utils_test
@@ -14,19 +14,15 @@ from corrct import utils_test
 eps = np.finfo(np.float32).eps
 
 
-class TestOperators(unittest.TestCase):
-    """Base test class for operators in `corrct.operators` package."""
-
-    def setUp(self):
-        """Set up test fixtures, if any."""
-        test_vols_shape = (29, 29)
-        self.vol_ones_2d = np.ones(test_vols_shape)
-
-    def tearDown(self):
-        """Tear down test fixtures, if any."""
+@pytest.fixture(scope="class")
+def bootstrap_base(request):
+    cls = request.cls
+    test_vols_shape = (29, 29)
+    cls.vol_ones_2d = np.ones(test_vols_shape)
 
 
-class TestTransformGradient(TestOperators):
+@pytest.mark.usefixtures("bootstrap_base")
+class TestTransformGradient:
     """Test for TransformGradient class in `corrct.operators` package."""
 
     def test_000_gradient(self):
@@ -77,7 +73,8 @@ class TestTransformGradient(TestOperators):
         assert np.all(np.isclose(d0, de, atol=eps))
 
 
-class TestTransformLaplacian(TestOperators):
+@pytest.mark.usefixtures("bootstrap_base")
+class TestTransformLaplacian:
     """Test for TransformLaplacian class in `corrct.operators` package."""
 
     def test_000_laplcian(self):
@@ -107,7 +104,8 @@ class TestTransformLaplacian(TestOperators):
         assert np.all(np.isclose(g0, ge, atol=eps))
 
 
-class TestTransformStationaryWavelet(TestOperators):
+@pytest.mark.usefixtures("bootstrap_base")
+class TestTransformStationaryWavelet:
     """Tests for the TransformStationaryWavelet class in `corrct.operators` package."""
 
     def test_000_transform(self):
