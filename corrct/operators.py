@@ -236,6 +236,8 @@ class TransformConvolution(BaseTransform):
         Shape of the direct space.
     kernel : ArrayLike
         The convolution kernel.
+    pad_mode: str, optional
+        The padding mode to use for the linear convolution. The default is "edge".
     is_symm : bool, optional
         Whether the operator is symmetric or not. The default is True.
     flip_adjoint : bool, optional
@@ -243,12 +245,18 @@ class TransformConvolution(BaseTransform):
         This is useful when the kernel is not symmetric.
     """
 
-    def __init__(self, x_shape: ArrayLike, kernel: ArrayLike, is_symm: bool = True, flip_adjoint: bool = False):
-        self.kernel = kernel
-        self.is_symm = is_symm
-        self.flip_adjoint = flip_adjoint
+    def __init__(
+        self, x_shape: ArrayLike, kernel: ArrayLike, pad_mode: str = "edge", is_symm: bool = True, flip_adjoint: bool = False
+    ):
         self.dir_shape = np.array(x_shape)
         self.adj_shape = np.array(x_shape)
+
+        self.kernel = np.array(kernel, ndmin=len(self.dir_shape))
+
+        self.pad_mode = pad_mode.lower()
+        self.is_symm = is_symm
+        self.flip_adjoint = flip_adjoint
+
         super().__init__()
 
     def absolute(self) -> "TransformConvolution":
@@ -264,7 +272,7 @@ class TransformConvolution(BaseTransform):
 
     def _pad_valid(self, x: ArrayLike) -> ArrayLike:
         pad_width = (np.array(self.kernel.shape) - 1) // 2
-        return np.pad(x, pad_width=pad_width[:, None], mode="edge"), pad_width
+        return np.pad(x, pad_width=pad_width[:, None], mode=self.pad_mode), pad_width
 
     def _crop_valid(self, x: ArrayLike, pad_width: ArrayLike) -> ArrayLike:
         slices = [slice(pw if pw else None, -pw if pw else None) for pw in pad_width]
