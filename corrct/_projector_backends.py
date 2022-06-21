@@ -41,7 +41,7 @@ class ProjectorBackend(ABC):
     ----------
     vol_geom : VolumeGeometry
         The volume geometry.
-    angles_rot_rad : tuple, list or ArrayLike
+    angles_rot_rad : ArrayLike
         The projection angles.
     """
 
@@ -109,7 +109,6 @@ class ProjectorBackend(ABC):
         angle_ind : int, optional
             The angle index to foward project. The default is None.
         """
-        raise NotImplementedError("Method FP not implemented.")
 
     @abstractmethod
     def bp(self, prj: ArrayLike, angle_ind: int = None) -> ArrayLike:
@@ -124,7 +123,6 @@ class ProjectorBackend(ABC):
         angle_ind : int, optional
             The angle index to foward project. The default is None.
         """
-        raise NotImplementedError("Method BP not implemented.")
 
     @abstractmethod
     def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike] = "ram-lak") -> ArrayLike:
@@ -139,7 +137,6 @@ class ProjectorBackend(ABC):
         fbp_filter : str | ArrayLike, optional
             The filter to use in the filtered back-projection. The default is "Ram-Lak".
         """
-        raise NotImplementedError("Method FBP not implemented.")
 
     @staticmethod
     def compute_attenuation(vol: ArrayLike, angle_rad: float, invert: bool = False) -> ArrayLike:
