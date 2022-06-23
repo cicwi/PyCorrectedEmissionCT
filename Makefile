@@ -70,6 +70,10 @@ docs/.nojekyll:
 	mkdir -p docs
 	touch docs/.nojekyll
 
+docs_env:
+	conda install configparser dataclasses -y
+	conda install sphinx_rtd_theme commonmark coverage pycodestyle pyflakes recommonmark -y
+
 docs: docs/.nojekyll install_dev ## generate Sphinx HTML documentation, including API docs
 	rm -f doc_sources/corrct.rst
 	rm -f doc_sources/modules.rst
