@@ -19,12 +19,8 @@ from .attenuation import AttenuationVolume
 import concurrent.futures as cf
 import multiprocessing as mp
 
-from tqdm import tqdm
-
-from typing import Union, Sequence, Optional, Callable, Dict
+from typing import Union, Sequence, Optional, Callable
 from numpy.typing import ArrayLike, DTypeLike
-
-from dataclasses import dataclass, field
 
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
