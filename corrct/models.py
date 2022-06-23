@@ -264,18 +264,23 @@ class VolumeGeometry(Geometry):
         return len(self.vol_shape_xyz) == 3 and self.vol_shape_xyz[-1] > 1
 
     @staticmethod
-    def get_default_from_data(data_vwu: ArrayLike) -> "VolumeGeometry":
+    def get_default_from_data(data: ArrayLike, data_format: str = "dvwu") -> "VolumeGeometry":
         """
         Generate a default volume geometry from the data shape.
 
         Parameters
         ----------
-        data_vwu : ArrayLike
+        data : ArrayLike
             The data.
+        data_format : str, optional
+            The ordering and meaning of the dimensions in the data. The deault is "dvwu".
 
         Returns
         -------
         VolumeGeometry
             The default volume geometry.
         """
-        return VolumeGeometry([data_vwu.shape[-1], data_vwu.shape[-1], *np.flip(data_vwu.shape[-3:-2])])
+        dims = dict(u=[], v=[], w=[], d=[])
+        for ii in range(-len(data.shape), 0):
+            dims[data_format[ii]] = [data.shape[ii]]
+        return VolumeGeometry([*(dims["u"] * 2), *dims["v"]])
