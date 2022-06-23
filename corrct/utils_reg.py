@@ -20,12 +20,11 @@ from abc import ABC, abstractmethod
 
 import time as tm
 
-try:
-    import dask.distributed as dd
+import concurrent.futures as cf
+import multiprocessing as mp
 
-    has_distributed = True
-except ImportError:
-    has_distributed = False
+
+num_threads = round(np.log2(mp.cpu_count() + 1))
 
 
 def create_random_test_mask(
@@ -60,13 +59,10 @@ class BaseRegularizationEstimation(ABC):
     """Base class for regularization parameter estimation class."""
 
     def __init__(
-        self, data_dtype: DTypeLike = np.float32, parallel_eval: bool = False, verbose: bool = False, plot_result: bool = False
+        self, data_dtype: DTypeLike = np.float32, parallel_eval: bool = True, verbose: bool = False, plot_result: bool = False
     ):
         self.data_dtype = data_dtype
 
-        if parallel_eval and not has_distributed:
-            print("WARNING: module dask.distributed is not available. Parallelization of computation will not be available.")
-            parallel_eval = False
         self.parallel_eval = parallel_eval
         self.verbose = verbose
         self.plot_result = plot_result
@@ -170,14 +166,17 @@ class BaseRegularizationEstimation(ABC):
         if self.verbose:
             print("Computing reconstruction error:")
             print("- Regularization weights range: [%g, %g] in %d steps" % (lams_reg[0], lams_reg[-1], len(lams_reg)))
+            print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
             c = tm.time()
 
         err_l1 = np.empty((len(lams_reg),))
         err_l2 = np.empty((len(lams_reg),))
 
         if self.parallel_eval:
-            client = dd.Client()
-            r = client.map(self.compute_reconstruction_and_loss, lams_reg)
+            with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
+                r = [None] * len(lams_reg)
+                for ii_l, l in enumerate(lams_reg):
+                    r[ii_l] = executor.submit(self.compute_reconstruction_and_loss, l)
 
         for ii_l, l in enumerate(lams_reg):
             if self.parallel_eval:
@@ -246,7 +245,7 @@ class LCurve(BaseRegularizationEstimation):
         self,
         loss_function: Callable,
         data_dtype: DTypeLike = np.float32,
-        parallel_eval: bool = False,
+        parallel_eval: bool = True,
         verbose: bool = False,
         plot_result: bool = False,
     ):
@@ -277,11 +276,14 @@ class LCurve(BaseRegularizationEstimation):
         if self.verbose:
             print("Computing L-curve loss values:")
             print("- Regularization weights range: [%g, %g] in %d steps" % (lams_reg[0], lams_reg[-1], len(lams_reg)))
+            print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
             c = tm.time()
 
         if self.parallel_eval:
-            client = dd.Client()
-            r = client.map(self.compute_reconstruction_and_loss, lams_reg)
+            with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
+                r = [None] * len(lams_reg)
+                for ii_l, l in enumerate(lams_reg):
+                    r[ii_l] = executor.submit(self.compute_reconstruction_and_loss, l)
 
         f_vals = np.empty(len(lams_reg))
 
@@ -299,7 +301,7 @@ class LCurve(BaseRegularizationEstimation):
             f, ax = plt.subplots()
             ax.set_title("L-Curve loss values")
             ax.set_xscale("log", nonpositive="clip")
-            # ax.set_yscale("log", nonpositive="clip")
+            ax.set_yscale("log", nonpositive="clip")
             ax.plot(lams_reg, f_vals)
             ax.grid()
             f.tight_layout()
@@ -335,7 +337,7 @@ class CrossValidation(BaseRegularizationEstimation):
         data_dtype: DTypeLike = np.float32,
         test_fraction: float = 0.1,
         num_averages: int = 7,
-        parallel_eval: bool = False,
+        parallel_eval: bool = True,
         verbose: bool = False,
         plot_result: bool = False,
     ):
@@ -371,14 +373,27 @@ class CrossValidation(BaseRegularizationEstimation):
             print("- Regularization weights range: [%g, %g] in %d steps" % (lams_reg[0], lams_reg[-1], len(lams_reg)))
             print("- Number of averages: %d" % self.num_averages)
             print("- Leave-out pixel fraction: %g%%" % (self.test_fraction * 100))
+            print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
             c = tm.time()
 
         f_vals = np.empty((len(lams_reg), self.num_averages))
         for ii_avg in range(self.num_averages):
             if self.verbose:
                 print("\nRound: %d/%d" % (ii_avg + 1, self.num_averages))
+                c_round = tm.time()
+
+            if self.parallel_eval:
+                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
+                    r = [None] * len(lams_reg)
+                    for ii_l, l in enumerate(lams_reg):
+                        r[ii_l] = executor.submit(self.compute_reconstruction_and_loss, l, self.data_test_masks[ii_avg])
+
             for ii_l, l in enumerate(lams_reg):
-                f_vals[ii_l, ii_avg], _ = self.compute_reconstruction_and_loss(l, self.data_test_masks[ii_avg])
+                if self.parallel_eval:
+                    f_vals[ii_l, ii_avg], _ = r[ii_l].result()
+                else:
+                    f_vals[ii_l, ii_avg], _ = self.compute_reconstruction_and_loss(l, self.data_test_masks[ii_avg])
+            print(" - Done in %g seconds.\n" % (tm.time() - c_round))
 
         f_avgs = np.mean(f_vals, axis=1)
         f_stds = np.std(f_vals, axis=1)
