@@ -13,6 +13,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -83,6 +84,7 @@
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">operators</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">solvers</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">regularizers</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils_reg</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Callable</span>
@@ -129,7 +131,7 @@
     <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data_shape_vu</span><span class="p">]</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coords</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">super_sampling</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coords</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">super_sampling</span>
 
     <span class="n">probe</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span> <span class="o">&lt;</span> <span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -373,8 +375,8 @@
             <span class="n">var_I0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">I0</span><span class="p">)</span>
         <span class="n">I0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">I0</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span>
 
-        <span class="n">Is2</span> <span class="o">=</span> <span class="n">Is</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="n">I02</span> <span class="o">=</span> <span class="n">I0</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">Is2</span> <span class="o">=</span> <span class="n">Is</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">I02</span> <span class="o">=</span> <span class="n">I0</span><span class="o">**</span><span class="mi">2</span>
         <span class="n">variance</span> <span class="o">=</span> <span class="p">(</span><span class="n">Is2</span> <span class="o">/</span> <span class="n">I02</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">var_Is</span> <span class="o">/</span> <span class="n">Is2</span> <span class="o">+</span> <span class="n">var_I0</span> <span class="o">/</span> <span class="n">I02</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">normalized</span><span class="p">:</span>
             <span class="n">variance</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">I0</span><span class="p">)</span>
@@ -413,8 +415,8 @@
         <span class="n">var_I0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">I0</span><span class="p">)</span>
     <span class="n">I0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">I0</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span>
 
-    <span class="n">Is2</span> <span class="o">=</span> <span class="n">Is</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="n">I02</span> <span class="o">=</span> <span class="n">I0</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">Is2</span> <span class="o">=</span> <span class="n">Is</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">I02</span> <span class="o">=</span> <span class="n">I0</span><span class="o">**</span><span class="mi">2</span>
     <span class="n">variance</span> <span class="o">=</span> <span class="p">(</span><span class="n">Is</span> <span class="o">/</span> <span class="n">I0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">var_Is</span> <span class="o">/</span> <span class="n">Is2</span> <span class="o">+</span> <span class="n">var_I0</span> <span class="o">/</span> <span class="n">I02</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">normalized</span><span class="p">:</span>
         <span class="n">variance</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">I0</span><span class="p">)</span>
@@ -465,7 +467,9 @@
     <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">weight</span></div>
 
 
-<div class="viewcode-block" id="get_beam_profile"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_beam_profile">[docs]</a><span class="k">def</span> <span class="nf">get_beam_profile</span><span class="p">(</span><span class="n">voxel_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beam_fwhm_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">profile_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+<div class="viewcode-block" id="get_beam_profile"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.get_beam_profile">[docs]</a><span class="k">def</span> <span class="nf">get_beam_profile</span><span class="p">(</span>
+    <span class="n">voxel_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beam_fwhm_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">profile_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">beam_shape</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the pencil beam integration point spread function.</span>
 
@@ -499,19 +503,20 @@
     <span class="n">yb</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xc</span><span class="p">)</span> <span class="o">-</span> <span class="n">half_voxel_size_um</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
 
     <span class="c1"># Gaussian beam shape</span>
-    <span class="n">yg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">xc</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">beam_fwhm_um</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">beam_shape</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">:</span>
+        <span class="n">yg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">xc</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">beam_fwhm_um</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">beam_shape</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;lorentzian&quot;</span><span class="p">:</span>
+        <span class="n">beam_hwhm_um</span> <span class="o">=</span> <span class="n">beam_fwhm_um</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">yg</span> <span class="o">=</span> <span class="p">(</span><span class="n">beam_hwhm_um</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">xc</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">beam_hwhm_um</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">beam_shape</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;sech**2&quot;</span><span class="p">:</span>
+        <span class="c1"># doi: 10.1364/ol.20.001160</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">beam_fwhm_um</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arccosh</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="n">yg</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">xc</span> <span class="o">/</span> <span class="n">tau</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown beam shape: </span><span class="si">{</span><span class="n">beam_shape</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">yc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">yb</span><span class="p">,</span> <span class="n">yg</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
     <span class="n">yc</span> <span class="o">=</span> <span class="n">yc</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">yc</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Integration length&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yg</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Gaussian beam shape&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Resulting beam shape&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y_points</span><span class="p">,))</span>
     <span class="k">for</span> <span class="n">ii_p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_points</span><span class="p">):</span>
@@ -523,16 +528,66 @@
         <span class="n">y</span><span class="p">[</span><span class="n">ii_p</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">yc</span> <span class="o">*</span> <span class="n">yp</span><span class="p">)</span>
 
     <span class="c1"># Renormalization</span>
-    <span class="k">return</span> <span class="n">y</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+    <span class="n">y</span> <span class="o">/=</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Integration length&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yg</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">beam_shape</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2"> beam shape&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Resulting beam shape&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+        <span class="n">pixels_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">y_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">y_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y_points</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">pixels_pos</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;PSF values&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span> <span class="o">/</span> <span class="n">extent_um</span> <span class="o">*</span> <span class="n">profile_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Resulting beam shape&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="compute_com"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.compute_com">[docs]</a><span class="k">def</span> <span class="nf">compute_com</span><span class="p">(</span><span class="n">vol</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute center-of-mass for given volume.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    vol : ArrayLike</span>
+<span class="sd">        The input volume.</span>
+<span class="sd">    axes : ArrayLike, optional</span>
+<span class="sd">        Axes on which to compute center-of-mass. The default is None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ArrayLike</span>
+<span class="sd">        The center-of-mass position.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]]</span>
+
+    <span class="n">num_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">com</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">),))</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axes</span><span class="p">):</span>
+        <span class="n">sum_axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_dims</span><span class="p">),</span> <span class="n">a</span><span class="p">),</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">vol</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">sum_axes</span><span class="p">))</span>
+        <span class="n">com</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span> <span class="o">/</span> <span class="n">line</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">com</span></div>
 
 
 <div class="viewcode-block" id="denoise_image"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.denoise_image">[docs]</a><span class="k">def</span> <span class="nf">denoise_image</span><span class="p">(</span>
     <span class="n">img</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">reg_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
     <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">variances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pix_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
-    <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">regularizer</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">rw</span><span class="p">:</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">Regularizer_l1dwl</span><span class="p">(</span><span class="n">rw</span><span class="p">,</span> <span class="s2">&quot;bior4.4&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
     <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
@@ -540,7 +595,7 @@
 <span class="sd">    Denoise an image.</span>
 
 <span class="sd">    Image denoiser based on (flat or weighted) least-squares, with wavelet minimization regularization.</span>
-<span class="sd">    The weighted least-squares requires the local pixel-wise variances.</span>
+<span class="sd">    The weighted least-squares requires the local pixel-wise weights.</span>
 <span class="sd">    It can be used to denoise sinograms and projections.</span>
 
 <span class="sd">    Parameters</span>
@@ -551,14 +606,13 @@
 <span class="sd">        Weight of the regularization term. The default is 1e-2.</span>
 <span class="sd">        If a sequence / array is passed, all the different values will be tested.</span>
 <span class="sd">        The one minimizing the error over the cross-validation set will be chosen and returned.</span>
-<span class="sd">    variances : Optional[ArrayLike], optional</span>
-<span class="sd">        The local variance of the pixels, for a weighted least-squares minimization.</span>
-<span class="sd">        If None, a standard least-squares minimization is performed.</span>
-<span class="sd">        The default is None.</span>
+<span class="sd">    pix_weights : Optional[ArrayLike], optional</span>
+<span class="sd">        The local weights of the pixels, for a weighted least-squares minimization.</span>
+<span class="sd">        If None, a standard least-squares minimization is performed. The default is None.</span>
 <span class="sd">    iterations : int, optional</span>
 <span class="sd">        Number of iterations. The default is 250.</span>
-<span class="sd">    axes : Sequence[int], optional</span>
-<span class="sd">        Axes along which the regularization should be done. The default is (-2, -1).</span>
+<span class="sd">    regularizer : Callable, optional</span>
+<span class="sd">        The one-argument constructor of a regularizer. The default is the DWL regularizer.</span>
 <span class="sd">    lower_limit : Optional[float], optional</span>
 <span class="sd">        Lower clipping limit of the image. The default is None.</span>
 <span class="sd">    verbose : bool, optional</span>
@@ -571,66 +625,43 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">psf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-        <span class="n">padding</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">padding</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">psf</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
-            <span class="n">padding</span><span class="p">[</span><span class="n">axes</span><span class="p">[</span><span class="n">ii</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">,)</span>
-        <span class="n">new_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-        <span class="n">new_shape</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]</span> <span class="o">=</span> <span class="n">psf</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformConvolution</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">psf</span><span class="p">)</span>
 
-        <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">variances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">variances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">variances</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">)</span>
-        <span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformConvolution</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">psf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">new_shape</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="n">variances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">variances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">variances</span><span class="p">)</span>
-        <span class="n">img_weights</span> <span class="o">=</span> <span class="n">compute_variance_weigth</span><span class="p">(</span><span class="n">variances</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">semilog</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="c1"># import matplotlib.pyplot as plt</span>
-        <span class="c1"># plt.figure()</span>
-        <span class="c1"># plt.imshow(img_weights[:, 0, :])</span>
-        <span class="c1"># plt.show()</span>
-        <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_wl2</span><span class="p">(</span><span class="n">img_weights</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">pix_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="n">axes</span> <span class="o">=</span> <span class="p">(</span><span class="n">axes</span><span class="p">,)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_term</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">DataFidelity_wl2</span><span class="p">(</span><span class="n">pix_weights</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">solver_spawn</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">):</span>
         <span class="c1"># Using the PDHG solver from Chambolle and Pock</span>
-        <span class="c1"># reg = solvers.Regularizer_Grad(lam_reg, axes=axes)</span>
-        <span class="n">reg</span> <span class="o">=</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Regularizer_l1dwl</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">,</span> <span class="s2">&quot;bior4.4&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">regularizer</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg</span><span class="p">,</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">:</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Solver</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]]:</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">b_test_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">med_img</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">medfilt2d</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
             <span class="n">masked_pixels</span> <span class="o">=</span> <span class="n">b_test_mask</span> <span class="o">&gt;</span> <span class="mf">0.5</span>
-            <span class="n">x0</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
             <span class="n">x0</span><span class="p">[</span><span class="n">masked_pixels</span><span class="p">]</span> <span class="o">=</span> <span class="n">med_img</span><span class="p">[</span><span class="n">masked_pixels</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x0</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">solver</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="o">=</span><span class="n">b_test_mask</span><span class="p">)</span>
 
     <span class="n">reg_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">reg_weight</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">reg_help_cv</span> <span class="o">=</span> <span class="n">utils_reg</span><span class="o">.</span><span class="n">CrossValidation</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_averages</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">reg_help_cv</span> <span class="o">=</span> <span class="n">utils_reg</span><span class="o">.</span><span class="n">CrossValidation</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_averages</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">solver_spawning_function</span> <span class="o">=</span> <span class="n">solver_spawn</span>
         <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">solver_calling_function</span> <span class="o">=</span> <span class="n">solver_call</span>
 
         <span class="n">f_avgs</span><span class="p">,</span> <span class="n">f_stds</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">compute_loss_values</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
 
-        <span class="n">reg_weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">fit_loss_min</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">,</span> <span class="n">f_avgs</span><span class="p">)</span>
+        <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">plot_result</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">reg_weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">fit_loss_min</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">,</span> <span class="n">f_avgs</span><span class="p">,</span> <span class="n">f_stds</span><span class="o">=</span><span class="n">f_stds</span><span class="p">)</span>
 
     <span class="n">solver</span> <span class="o">=</span> <span class="n">solver_spawn</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
     <span class="p">(</span><span class="n">denoised_img</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">padding</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">slicing</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">padding</span><span class="p">]</span>
-        <span class="n">denoised_img</span> <span class="o">=</span> <span class="n">denoised_img</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slicing</span><span class="p">)]</span>
     <span class="k">return</span> <span class="n">denoised_img</span></div>
 
 
@@ -676,7 +707,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">img_axes_dims</span><span class="p">]</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">))</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coords</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coords</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 
     <span class="c1"># Reshape the volume to have the axes to be integrates as right-most axes</span>
     <span class="n">img_tr_op</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">))])</span>
@@ -799,7 +830,7 @@
 
     <span class="n">fc_r_int</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">fc</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
     <span class="n">fc_i_int</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">fc</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
-    <span class="n">fc_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">fc_r_int</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">fc_i_int</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">fc_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">fc_r_int</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">fc_i_int</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
     <span class="n">f1_int</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
     <span class="n">f2_int</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
 
@@ -829,7 +860,13 @@
 
 
 <div class="viewcode-block" id="norm_cross_corr"><a class="viewcode-back" href="../../corrct.html#corrct.utils_proc.norm_cross_corr">[docs]</a><span class="k">def</span> <span class="nf">norm_cross_corr</span><span class="p">(</span>
-    <span class="n">img1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">img2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">t_match</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">img1</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">img2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">t_match</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">mode_full</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">compute_profile</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the normalized cross-correlation between two images.</span>
@@ -842,9 +879,13 @@
 <span class="sd">        The second images. If None, it computes the auto-correlation. The default is None.</span>
 <span class="sd">    axes : ArrayLike, optional</span>
 <span class="sd">        Axes along which to compute the cross-correlation. The default is (-2, -1).</span>
-<span class="sd">    t_match: bool, optional</span>
+<span class="sd">    t_match : bool, optional</span>
 <span class="sd">        Whether to perform the cross-correlation for template matching. The default is False.</span>
-<span class="sd">    plot: bool, optional</span>
+<span class="sd">    mode_full : bool, optional</span>
+<span class="sd">        Whether to return the &quot;full&quot; or &quot;same&quot; convolution size. The default is True.</span>
+<span class="sd">    compute_profile : bool, optional</span>
+<span class="sd">        Whether to compute the azimuthal integration of the cross-correlation or not. The default is True.</span>
+<span class="sd">    plot : bool, optional</span>
 <span class="sd">        Whether to plot the profile of the cross-correlation curve. The default is True.</span>
 
 <span class="sd">    Returns</span>
@@ -873,36 +914,54 @@
     <span class="n">img1</span> <span class="o">=</span> <span class="n">img1</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="n">img2</span> <span class="o">=</span> <span class="n">img2</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
-    <span class="n">cc</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;fft&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+        <span class="n">img2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">img2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">fftconvolve</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">mode_full</span><span class="p">:</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+            <span class="n">start_ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-</span> <span class="n">img1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">a</span><span class="p">])</span> <span class="o">//</span> <span class="mi">2</span>
+            <span class="n">end_ind</span> <span class="o">=</span> <span class="n">start_ind</span> <span class="o">+</span> <span class="n">img1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+            <span class="n">slices</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">start_ind</span><span class="p">,</span> <span class="n">end_ind</span><span class="p">)</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span><span class="p">)</span>
+        <span class="n">cc</span> <span class="o">=</span> <span class="n">cc</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">t_match</span><span class="p">:</span>
         <span class="n">local_sums_img2</span> <span class="o">=</span> <span class="n">local_sum</span><span class="p">(</span><span class="n">img2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
-        <span class="n">local_sums_img2_2</span> <span class="o">=</span> <span class="n">local_sum</span><span class="p">(</span><span class="n">img2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+        <span class="n">local_sums_img2_2</span> <span class="o">=</span> <span class="n">local_sum</span><span class="p">(</span><span class="n">img2</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mode_full</span><span class="p">:</span>
+            <span class="n">local_sums_img2</span> <span class="o">=</span> <span class="n">local_sums_img2</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span>
+            <span class="n">local_sums_img2_2</span> <span class="o">=</span> <span class="n">local_sums_img2_2</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span>
 
         <span class="n">cc_n</span> <span class="o">=</span> <span class="n">cc</span> <span class="o">-</span> <span class="n">local_sums_img2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">img1</span><span class="p">)</span>
 
         <span class="n">cc_n</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">img1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img1</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]))</span>
 
-        <span class="n">diff_local_sums</span> <span class="o">=</span> <span class="n">local_sums_img2_2</span> <span class="o">-</span> <span class="p">(</span><span class="n">local_sums_img2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img2</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)])</span>
+        <span class="n">diff_local_sums</span> <span class="o">=</span> <span class="n">local_sums_img2_2</span> <span class="o">-</span> <span class="p">(</span><span class="n">local_sums_img2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img2</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)])</span>
         <span class="n">cc_n</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">diff_local_sums</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">cc_n</span> <span class="o">=</span> <span class="n">cc</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">img1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">img2</span><span class="p">))</span>
 
     <span class="n">cc_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">cc_n</span><span class="p">)</span>
-    <span class="n">cc_l</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">cc_n</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
-    <span class="n">cc_o</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">cc_n</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
 
-    <span class="n">cc_l</span> <span class="o">/=</span> <span class="n">cc_o</span>
-    <span class="n">cc_l</span> <span class="o">=</span> <span class="n">cc_l</span><span class="p">[:</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img1</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)])]</span>
+    <span class="k">if</span> <span class="n">compute_profile</span><span class="p">:</span>
+        <span class="n">cc_l</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">cc_n</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
+        <span class="n">cc_o</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">cc_n</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
-        <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cc_l</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">cc_l</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">cc_l</span> <span class="o">/=</span> <span class="n">cc_o</span>
+        <span class="n">cc_l</span> <span class="o">=</span> <span class="n">cc_l</span><span class="p">[:</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img1</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)])]</span>
 
-    <span class="k">return</span> <span class="n">cc_l</span></div>
+        <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cc_l</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">cc_l</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">cc_n</span><span class="p">,</span> <span class="n">cc_l</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cc_n</span></div>
 </pre></div>
 
            </div>

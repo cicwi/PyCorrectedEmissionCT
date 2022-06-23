@@ -13,6 +13,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -80,7 +81,8 @@
 <span class="kn">import</span> <span class="nn">numpy.random</span>
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span>
 
-<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">sps</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span>
 
 <span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
 
@@ -141,7 +143,7 @@
 <span class="c1"># ---- Solvers ----</span>
 
 
-<div class="viewcode-block" id="Solver"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver">[docs]</a><span class="k">class</span> <span class="nc">Solver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Solver"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver">[docs]</a><span class="k">class</span> <span class="nc">Solver</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize the base solver class.</span>
 
@@ -226,19 +228,19 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_initialize_data_operators</span><span class="p">(</span>
-        <span class="n">A</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinearOperator</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">],</span>
-        <span class="n">At</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinearOperator</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">]],</span>
+        <span class="n">A</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinearOperator</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">],</span>
+        <span class="n">At</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinearOperator</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">]],</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">At</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
                 <span class="n">At</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinearOperator</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinearOperator</span><span class="p">):</span>
                 <span class="n">At</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">At</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">At</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">At</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">At</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">):</span>
             <span class="n">At_m</span> <span class="o">=</span> <span class="n">At</span>
             <span class="n">At</span> <span class="o">=</span> <span class="n">At_m</span><span class="o">.</span><span class="n">dot</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sps</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">):</span>
             <span class="n">A_m</span> <span class="o">=</span> <span class="n">A</span>
             <span class="n">A</span> <span class="o">=</span> <span class="n">A_m</span><span class="o">.</span><span class="n">dot</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span>
@@ -271,6 +273,97 @@
             <span class="c1"># At the same time, we need to remove any masked pixel from the test count.</span>
             <span class="n">b_mask</span><span class="p">,</span> <span class="n">b_test_mask</span> <span class="o">=</span> <span class="n">b_mask</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">b_test_mask</span><span class="p">),</span> <span class="n">b_test_mask</span> <span class="o">*</span> <span class="n">b_mask</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">b_mask</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FBP"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.FBP">[docs]</a><span class="k">class</span> <span class="nc">FBP</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implement the Filtered Back-Projection (FBP) algorithm.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Turn on verbose output. The default is False.</span>
+<span class="sd">    regularizer : Optional[BaseRegularizer], optional</span>
+<span class="sd">        NOT USED, only exposed for compatibility reasons.</span>
+<span class="sd">    data_term : Union[str, DataFidelityBase], optional</span>
+<span class="sd">        NOT USED, only exposed for compatibility reasons.</span>
+<span class="sd">    fbp_filter : Union[str, ArrayLike], optional</span>
+<span class="sd">        FBP filter to use. Either a string from scikit-image&#39;s list of `iradon` filters, or an array. The default is &quot;ramp&quot;.</span>
+<span class="sd">    pad_mode: str, optional</span>
+<span class="sd">        The padding mode to use for the linear convolution. The default is &quot;constant&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BaseRegularizer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
+        <span class="n">fbp_filter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ramp&quot;</span><span class="p">,</span>
+        <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">fbp_filter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pad_mode</span> <span class="o">=</span> <span class="n">pad_mode</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">A</span><span class="p">,</span>
+        <span class="n">b</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+        <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">x0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">At</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reconstruct the data, using the FBP algorithm.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        A : Union[Callable, BaseTransform]</span>
+<span class="sd">            Projection operator.</span>
+<span class="sd">        b : ArrayLike</span>
+<span class="sd">            Data to reconstruct.</span>
+<span class="sd">        iterations : int</span>
+<span class="sd">            Number of iterations.</span>
+<span class="sd">        x0 : Optional[ArrayLike], optional</span>
+<span class="sd">            Initial solution. The default is None.</span>
+<span class="sd">        At : Callable, optional</span>
+<span class="sd">            The back-projection operator. Not needed, because the operator should provilde the necessary `fbp` function.</span>
+<span class="sd">        lower_limit : Union[float, ArrayLike], optional</span>
+<span class="sd">            Lower clipping value. The default is None.</span>
+<span class="sd">        upper_limit : Union[float, ArrayLike], optional</span>
+<span class="sd">            Upper clipping value. The default is None.</span>
+<span class="sd">        x_mask : Optional[ArrayLike], optional</span>
+<span class="sd">            Solution mask. The default is None.</span>
+<span class="sd">        b_mask : Optional[ArrayLike], optional</span>
+<span class="sd">            Data mask. The default is None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            In case the data is 1D.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[ArrayLike, None]</span>
+<span class="sd">            The reconstruction, and None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data should be at least 2-dimensional (b.shape = </span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_data_operators</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">At</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">fbp</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">fbp_filter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_mode</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">lower_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">upper_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">upper_limit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">*=</span> <span class="n">x_mask</span>
+
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="Sart"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.Sart">[docs]</a><span class="k">class</span> <span class="nc">Sart</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>

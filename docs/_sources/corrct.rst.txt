@@ -4,6 +4,14 @@ corrct package
 Submodules
 ----------
 
+corrct.attenuation module
+-------------------------
+
+.. automodule:: corrct.attenuation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.corrct module
 --------------------
 

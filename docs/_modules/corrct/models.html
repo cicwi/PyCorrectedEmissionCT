@@ -13,6 +13,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -76,7 +77,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">import</span> <span class="nn">scipy.spatial.transform</span> <span class="k">as</span> <span class="nn">spt</span>
 
@@ -116,8 +117,37 @@
     <span class="n">pix2vox_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">det_shape_vu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indx</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Slice projection geometry along the angular direction.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        indx : Any</span>
+<span class="sd">            Indices of the slicing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">slice_array</span><span class="p">(</span><span class="n">vecs_arr</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">indx</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vecs_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">vecs_arr</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">vecs_arr</span>
+
+        <span class="k">return</span> <span class="n">dc_replace</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">src_pos_xyz</span><span class="o">=</span><span class="n">slice_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="p">,</span> <span class="n">indx</span><span class="p">),</span>
+            <span class="n">det_pos_xyz</span><span class="o">=</span><span class="n">slice_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="p">,</span> <span class="n">indx</span><span class="p">),</span>
+            <span class="n">det_u_xyz</span><span class="o">=</span><span class="n">slice_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span><span class="p">,</span> <span class="n">indx</span><span class="p">),</span>
+            <span class="n">det_v_xyz</span><span class="o">=</span><span class="n">slice_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span><span class="p">,</span> <span class="n">indx</span><span class="p">),</span>
+        <span class="p">)</span>
+
 <div class="viewcode-block" id="ProjectionGeometry.get_default_parallel"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.get_default_parallel">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_default_parallel</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">geom_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;3d&quot;</span><span class="p">,</span> <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_default_parallel</span><span class="p">(</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">geom_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;3d&quot;</span><span class="p">,</span>
+        <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the default geometry for parallel beam.</span>
 
@@ -127,6 +157,8 @@
 <span class="sd">            The geometry type. The default is &quot;parallel3d&quot;.</span>
 <span class="sd">        rot_axis_shift_pix : Optional[ArrayLike], optional</span>
 <span class="sd">            Rotation axis shift in pixels. The default is None.</span>
+<span class="sd">        rot_axis_dir : Union[str, ArrayLike], optional</span>
+<span class="sd">            Rotation axis direction. It can be either a string or a direction. The default is &quot;clockwise&quot;.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -139,13 +171,19 @@
             <span class="n">rot_axis_shift_pix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rot_axis_shift_pix</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">rot_axis_shift_pix</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">rot_axis_shift_pix</span><span class="p">),</span> <span class="mi">2</span><span class="p">))],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">rot_axis_dir</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">:</span>
+                <span class="n">rot_axis_dir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rot_axis_dir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
         <span class="k">return</span> <span class="n">ProjectionGeometry</span><span class="p">(</span>
             <span class="n">geom_type</span><span class="o">=</span><span class="s2">&quot;parallel&quot;</span> <span class="o">+</span> <span class="n">geom_type</span><span class="p">,</span>
             <span class="n">src_pos_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
             <span class="n">det_pos_xyz</span><span class="o">=</span><span class="n">det_pos_xyz</span><span class="p">,</span>
             <span class="n">det_u_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
             <span class="n">det_v_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
-            <span class="n">rot_dir_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="n">rot_dir_xyz</span><span class="o">=</span><span class="n">rot_axis_dir</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ProjectionGeometry.set_detector_shifts_vu"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.set_detector_shifts_vu">[docs]</a>    <span class="k">def</span> <span class="nf">set_detector_shifts_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_pos_vu</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -163,7 +201,7 @@
         <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">det_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">det_pos_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span></div>
 
-<div class="viewcode-block" id="ProjectionGeometry.rotate"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.rotate">[docs]</a>    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angles_w_rad</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="ProjectionGeometry.rotate"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.rotate">[docs]</a>    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angles_w_rad</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">patch_astra_2d</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Rotate the geometry by the given angle(s).</span>
 
@@ -180,7 +218,7 @@
         <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angles_w_rad</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
 
         <span class="c1"># Deadling with ASTRA&#39;s incoherent 2D and 3D coordinate systems.</span>
-        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">patch_astra_2d</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">angles</span> <span class="o">=</span> <span class="o">-</span><span class="n">angles</span>
 
         <span class="n">rotations</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">Rotation</span><span class="o">.</span><span class="n">from_rotvec</span><span class="p">(</span><span class="n">angles</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_dir_xyz</span><span class="p">)</span>
@@ -211,7 +249,39 @@
         <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">field_value</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">field_value</span></div></div>
+            <span class="k">return</span> <span class="n">field_value</span></div>
+
+<div class="viewcode-block" id="ProjectionGeometry.project_displacement_to_detector"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.project_displacement_to_detector">[docs]</a>    <span class="k">def</span> <span class="nf">project_displacement_to_detector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disp_zyx</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Project a given displacement vector in the volume coordinates, over the detector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        disp_zyx : ArrayLike</span>
+<span class="sd">            The displacement vector in volume coordinates.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArrayLike</span>
+<span class="sd">            The projection on u (and if applicable v) coordinates.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            When projection geometry and vector dimensions don match.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">geom_dims</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">disp_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disp_zyx</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">geom_dims</span> <span class="o">!=</span> <span class="n">disp_dims</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Geometry is </span><span class="si">{</span><span class="n">geom_dims</span><span class="si">}</span><span class="s2">d, while passed displacement is </span><span class="si">{</span><span class="n">disp_dims</span><span class="si">}</span><span class="s2">d.&quot;</span><span class="p">)</span>
+
+        <span class="n">disp_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">disp_zyx</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">geom_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">geom_dims</span><span class="p">]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">disp_xyz</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">geom_dims</span><span class="p">]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">disp_xyz</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="n">geom_dims</span><span class="p">]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">disp_xyz</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="VolumeGeometry"><a class="viewcode-back" href="../../corrct.html#corrct.models.VolumeGeometry">[docs]</a><span class="nd">@dataclass</span>
@@ -220,6 +290,10 @@
 
     <span class="n">vol_shape_xyz</span><span class="p">:</span> <span class="n">ArrayLike</span>
     <span class="n">vox_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the input parameters.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
@@ -258,21 +332,26 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_xyz</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_xyz</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="VolumeGeometry.get_default_from_data"><a class="viewcode-back" href="../../corrct.html#corrct.models.VolumeGeometry.get_default_from_data">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_default_from_data</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VolumeGeometry&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_default_from_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VolumeGeometry&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate a default volume geometry from the data shape.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        data_vwu : ArrayLike</span>
+<span class="sd">        data : ArrayLike</span>
 <span class="sd">            The data.</span>
+<span class="sd">        data_format : str, optional</span>
+<span class="sd">            The ordering and meaning of the dimensions in the data. The deault is &quot;dvwu&quot;.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        VolumeGeometry</span>
 <span class="sd">            The default volume geometry.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">VolumeGeometry</span><span class="p">([</span><span class="n">data_vwu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">data_vwu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">data_vwu</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])])</span></div></div>
+        <span class="n">dims</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="p">[],</span> <span class="n">v</span><span class="o">=</span><span class="p">[],</span> <span class="n">w</span><span class="o">=</span><span class="p">[],</span> <span class="n">d</span><span class="o">=</span><span class="p">[])</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">dims</span><span class="p">[</span><span class="n">data_format</span><span class="p">[</span><span class="n">ii</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">ii</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="n">VolumeGeometry</span><span class="p">([</span><span class="o">*</span><span class="p">(</span><span class="n">dims</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="o">*</span><span class="n">dims</span><span class="p">[</span><span class="s2">&quot;v&quot;</span><span class="p">]])</span></div></div>
 </pre></div>
 
            </div>
