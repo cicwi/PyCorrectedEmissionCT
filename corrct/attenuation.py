@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Attenuation support.
+Incident beam and emidded radiation attenuation support.
 
 @author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+from matplotlib.axes._axes import Axes
 import numpy as np
 
 from . import _projector_backends as prj_backends
@@ -125,7 +126,7 @@ class AttenuationVolume:
                     self.maps[ii, ...] *= self._compute_attenuation_angle_out(a)
 
     def plot_map(
-        self, ax, rot_ind: int, det_ind: int = 0, slice_ind: Optional[int] = None, axes: ArrayLike = (-2, -1)
+        self, ax: Axes, rot_ind: int, det_ind: int = 0, slice_ind: Optional[int] = None, axes: ArrayLike = (-2, -1)
     ) -> None:
         """
         Plot the requested attenuation map.
