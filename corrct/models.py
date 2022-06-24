@@ -178,7 +178,7 @@ class ProjectionGeometry(Geometry):
             The scaled field.
         """
         field_value = getattr(self, field_name) / self.pix2vox_ratio
-        if int(self.geom_type[-2]) == 2:
+        if self.geom_type.lower() != "cone" and int(self.geom_type[-2]) == 2:
             return field_value[:, :-1]
         else:
             return field_value
