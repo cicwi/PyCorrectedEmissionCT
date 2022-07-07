@@ -8,7 +8,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 from typing import Optional, Sequence, Union, Any
 
 import scipy.spatial.transform as spt
@@ -41,13 +41,20 @@ class ProjectionGeometry(Geometry):
     """Store the projection geometry."""
 
     geom_type: str
-    src_pos_xyz: ArrayLike
-    det_pos_xyz: ArrayLike
-    det_u_xyz: ArrayLike
-    det_v_xyz: ArrayLike
-    rot_dir_xyz: ArrayLike
+    src_pos_xyz: NDArray
+    det_pos_xyz: NDArray
+    det_u_xyz: NDArray
+    det_v_xyz: NDArray
+    rot_dir_xyz: NDArray
     pix2vox_ratio: float = 1
-    det_shape_vu: Optional[ArrayLike] = None
+    det_shape_vu: Optional[NDArray] = None
+
+    def __post_init__(self) -> None:
+        self.src_pos_xyz = np.array(self.src_pos_xyz)
+        self.det_pos_xyz = np.array(self.det_pos_xyz)
+        self.det_u_xyz = np.array(self.det_u_xyz)
+        self.det_v_xyz = np.array(self.det_v_xyz)
+        self.rot_dir_xyz = np.array(self.rot_dir_xyz)
 
     def __getitem__(self, indx: Any):
         """
@@ -59,7 +66,7 @@ class ProjectionGeometry(Geometry):
             Indices of the slicing.
         """
 
-        def slice_array(vecs_arr: ArrayLike, indx: Any):
+        def slice_array(vecs_arr: NDArray, indx: Any):
             if len(vecs_arr.shape) > 1:
                 return vecs_arr[indx, :]
             else:
@@ -108,6 +115,8 @@ class ProjectionGeometry(Geometry):
                 rot_axis_dir = np.array([0, 0, -1])
             else:
                 rot_axis_dir = np.array([0, 0, 1])
+        else:
+            rot_axis_dir = np.array(rot_axis_dir, ndmin=1)
 
         return ProjectionGeometry(
             geom_type="parallel" + geom_type,
@@ -128,6 +137,7 @@ class ProjectionGeometry(Geometry):
             Detector vertical and horizontal positions. Vertical is optional.
         """
         det_pos_vu = np.array(det_pos_vu, ndmin=2)
+
         self.det_pos_xyz = np.zeros((det_pos_vu.shape[-1], 3))
         self.det_pos_xyz[:, 0] = det_pos_vu[-1, :]
         if int(self.geom_type[-2]) == 3 and det_pos_vu.shape[0] == 2:
@@ -163,7 +173,7 @@ class ProjectionGeometry(Geometry):
             det_v_xyz=rotations.apply(self.det_v_xyz),
         )
 
-    def get_field_scaled(self, field_name: str) -> ArrayLike:
+    def get_field_scaled(self, field_name: str) -> NDArray:
         """
         Return the a field content, scaled by the pix2vox ratio.
 
@@ -174,7 +184,7 @@ class ProjectionGeometry(Geometry):
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The scaled field.
         """
         field_value = getattr(self, field_name) / self.pix2vox_ratio
@@ -183,7 +193,7 @@ class ProjectionGeometry(Geometry):
         else:
             return field_value
 
-    def project_displacement_to_detector(self, disp_zyx: ArrayLike) -> ArrayLike:
+    def project_displacement_to_detector(self, disp_zyx: ArrayLike) -> NDArray:
         """Project a given displacement vector in the volume coordinates, over the detector.
 
         Parameters
@@ -193,7 +203,7 @@ class ProjectionGeometry(Geometry):
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The projection on u (and if applicable v) coordinates.
 
         Raises
@@ -202,6 +212,8 @@ class ProjectionGeometry(Geometry):
             When projection geometry and vector dimensions don match.
         """
         geom_dims = int(self.geom_type[-2])
+        disp_zyx = np.array(disp_zyx, ndmin=1)
+
         disp_dims = len(disp_zyx)
         if geom_dims != disp_dims:
             raise ValueError(f"Geometry is {geom_dims}d, while passed displacement is {disp_dims}d.")
@@ -216,25 +228,25 @@ class ProjectionGeometry(Geometry):
             )
 
 
-@dataclass
 class VolumeGeometry(Geometry):
     """Store the volume geometry."""
 
-    vol_shape_xyz: ArrayLike
-    vox_size: float = 1
+    vol_shape_xyz: NDArray
+    vox_size: float
 
-    def __post_init__(self):
+    def __init__(self, vol_shape_xyz: ArrayLike, vox_size: float = 1.0):
         """Initialize the input parameters."""
-        self.vol_shape_xyz = np.array(self.vol_shape_xyz, ndmin=1)
+        self.vol_shape_xyz = np.array(vol_shape_xyz, ndmin=1)
+        self.vox_size = vox_size
 
     @property
-    def shape(self) -> ArrayLike:
+    def shape(self) -> NDArray:
         """
         Return the volume shape.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             Shape of the volume.
         """
         return self.vol_shape_xyz
@@ -264,13 +276,13 @@ class VolumeGeometry(Geometry):
         return len(self.vol_shape_xyz) == 3 and self.vol_shape_xyz[-1] > 1
 
     @staticmethod
-    def get_default_from_data(data: ArrayLike, data_format: str = "dvwu") -> "VolumeGeometry":
+    def get_default_from_data(data: NDArray, data_format: str = "dvwu") -> "VolumeGeometry":
         """
         Generate a default volume geometry from the data shape.
 
         Parameters
         ----------
-        data : ArrayLike
+        data : NDArray
             The data.
         data_format : str, optional
             The ordering and meaning of the dimensions in the data. The deault is "dvwu".
