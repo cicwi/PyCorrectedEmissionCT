@@ -162,6 +162,76 @@ class BaseTransform(LinearOperator):
         """
 
 
+class TransformFunctions(BaseTransform):
+    """Transform class that uses callables."""
+
+    def __init__(
+        self, dir_shape: ArrayLike, adj_shape: ArrayLike, A: Callable[[NDArray], NDArray], At: Optional[Callable[[NDArray], NDArray]] = None
+    ) -> None:
+        """Initialize the callable transform.
+
+        If the adjoint of the function is not given, the function is considered symmetric.
+
+        Parameters
+        ----------
+        dir_shape : ArrayLike
+            Shape of the direct space.
+        adj_shape : ArrayLike
+            Shape of the adjoint space.
+        A : Callable[[NDArray], NDArray]
+            The transform function.
+        At : Optional[Callable[[NDArray], NDArray]], optional
+            The adjoint transform function, by default None
+        """
+        self.dir_shape = np.array(dir_shape, ndmin=1)
+        self.adj_shape = np.array(adj_shape, ndmin=1)
+        self.A = A
+        self.At = At
+        super().__init__()
+
+    def _op_direct(self, x: NDArray) -> NDArray:
+        """Apply the operator to the data.
+
+        Parameters
+        ----------
+        x : NDArray
+            Data to process.
+
+        Returns
+        -------
+        NDArray
+            The processed data.
+        """
+        return self.A(x)
+
+    def _op_adjoint(self, x: NDArray) -> NDArray:
+        """Apply the adjoint operator to the data.
+
+        Parameters
+        ----------
+        x : NDArray
+            Data to process.
+
+        Returns
+        -------
+        NDArray
+            The processed data.
+        """
+        if self.At is not None:
+            return self.At(x)
+        else:
+            return self.A(x)
+
+    def absolute(self):
+        """Compute the absolute value of the operator. Raise an error, because not supported.
+
+        Raises
+        ------
+        AttributeError
+            Not supported operation.
+        """
+        raise AttributeError("Callable transform class does not support computing its absolute value.")
+
 
 class ProjectorOperator(BaseTransform):
     """Base projector class that fixes the projection interface."""
