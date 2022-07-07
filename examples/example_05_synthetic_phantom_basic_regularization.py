@@ -17,6 +17,8 @@ import matplotlib.pyplot as plt
 import corrct as cct
 import corrct.utils_test
 
+from numpy.typing import ArrayLike
+
 try:
     import phantom
 except ImportError:
@@ -24,8 +26,20 @@ except ImportError:
     import phantom
 
 
-def cm2inch(x):
-    return np.array(x) / 2.54
+def cm2inch(x: ArrayLike) -> tuple[float, float]:
+    """Convert cm to inch.
+
+    Parameters
+    ----------
+    x : ArrayLike
+        Sizes in cm.
+
+    Returns
+    -------
+    tuple[float, float]
+        Sizes in inch.
+    """
+    return tuple(np.array(x) / 2.54)
 
 
 vol_shape = [256, 256, 3]
@@ -51,45 +65,45 @@ sino_substract = sino - background_avg
 sino_variance = cct.utils_proc.compute_variance_poisson(sino)
 sino_weights = cct.utils_proc.compute_variance_weigth(sino_variance)
 
-reg_tv = corrct.solvers.Regularizer_TV2D(reg_weight)
-reg_tv_hub = corrct.solvers.Regularizer_HubTV2D(reg_weight, huber_size=0.05)
-reg_lap = corrct.solvers.Regularizer_lap2D(reg_weight)
-reg_smooth = corrct.solvers.Regularizer_smooth2D(reg_weight)
-reg_l1med = corrct.solvers.Regularizer_l1med(reg_weight)
-reg_l2med = corrct.solvers.Regularizer_l2med(reg_weight, filt_size=5)
-reg_dwl = corrct.solvers.Regularizer_l1dwl(reg_weight, "haar", 4)
-reg_swl = corrct.solvers.Regularizer_l1swl(reg_weight, "bior4.4", 3)
+reg_tv = cct.regularizers.Regularizer_TV2D(reg_weight)
+reg_tv_hub = cct.regularizers.Regularizer_HubTV2D(reg_weight, huber_size=0.05)
+reg_lap = cct.regularizers.Regularizer_lap2D(reg_weight)
+reg_smooth = cct.regularizers.Regularizer_smooth2D(reg_weight)
+reg_l1med = cct.regularizers.Regularizer_l1med(reg_weight)
+reg_l2med = cct.regularizers.Regularizer_l2med(reg_weight, filt_size=5)
+reg_dwl = cct.regularizers.Regularizer_l1dwl(reg_weight, "haar", 4)
+reg_swl = cct.regularizers.Regularizer_l1swl(reg_weight, "bior4.4", 3)
 
-lowlim_l2 = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_l2())
-lowlim_l2w = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_wl2(1 / bckgnd_weight))
-lowlim_l2b = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_l2b(bckgnd_weight))
-lowlim_l1 = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_l1())
-lowlim_l1b = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_l1b(bckgnd_weight))
-lowlim_hub = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_Huber(bckgnd_weight))
+lowlim_l2 = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_l2())
+lowlim_l2w = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_wl2(1 / bckgnd_weight))
+lowlim_l2b = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_l2b(bckgnd_weight))
+lowlim_l1 = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_l1())
+lowlim_l1b = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_l1b(bckgnd_weight))
+lowlim_hub = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_Huber(bckgnd_weight))
 
 reg_1 = reg_2 = reg_3 = reg_4 = [lowlim_l2w, reg_tv]
 
-data_term_ls = corrct.solvers.DataFidelity_l2()
-data_term_l1 = corrct.solvers.DataFidelity_l1()
-data_term_kl = corrct.solvers.DataFidelity_KL()
-data_term_kl_bck = corrct.solvers.DataFidelity_KL(background=background_avg)
+data_term_ls = cct.data_terms.DataFidelity_l2()
+data_term_l1 = cct.data_terms.DataFidelity_l1()
+data_term_kl = cct.data_terms.DataFidelity_KL()
+data_term_kl_bck = cct.data_terms.DataFidelity_KL(background=background_avg)
 
-data_term_lsw = corrct.solvers.DataFidelity_wl2(sino_weights)
-data_term_lsb = corrct.solvers.DataFidelity_l2b(sino_variance)
-data_term_l1b = corrct.solvers.DataFidelity_l1b(sino_variance)
-data_term_hub = corrct.solvers.DataFidelity_Huber(sino_variance)
+data_term_lsw = cct.data_terms.DataFidelity_wl2(sino_weights)
+data_term_lsb = cct.data_terms.DataFidelity_l2b(sino_variance)
+data_term_l1b = cct.data_terms.DataFidelity_l1b(sino_variance)
+data_term_hub = cct.data_terms.DataFidelity_Huber(sino_variance)
 
-solver_1 = corrct.solvers.PDHG(
+solver_1 = cct.solvers.PDHG(
     verbose=True, data_term=data_term_ls, regularizer=reg_1, tolerance=0, data_term_test=data_term_lsw
 )
-solver_2 = corrct.solvers.PDHG(
+solver_2 = cct.solvers.PDHG(
     verbose=True, data_term=data_term_lsb, regularizer=reg_2, tolerance=0, data_term_test=data_term_lsw
 )
 
-solver_3 = corrct.solvers.PDHG(
+solver_3 = cct.solvers.PDHG(
     verbose=True, data_term=data_term_lsw, regularizer=reg_3, tolerance=0, data_term_test=data_term_lsw
 )
-solver_4 = corrct.solvers.PDHG(
+solver_4 = cct.solvers.PDHG(
     verbose=True, data_term=data_term_kl_bck, regularizer=reg_4, tolerance=0, data_term_test=data_term_lsw
 )
 
@@ -99,7 +113,7 @@ test_pixels = np.random.permutation(sino.size)
 test_pixels = np.unravel_index(test_pixels[:num_test_pixels], sino.shape)
 b_test_mask[test_pixels] = 1
 
-with corrct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
+with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     print("Reconstructing:")
     (rec_1, res_1) = solver_1(
         A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
@@ -133,7 +147,7 @@ ax_ph.set_title("Phantom")
 f.colorbar(im_ph, ax=ax_ph)
 
 ax_sino_clean = f.add_subplot(gs[4, 0])
-with corrct.projectors.ProjectorUncorrected(ph_or.shape, angles) as p:
+with cct.projectors.ProjectorUncorrected(ph_or.shape, angles) as p:
     sino_clean = p.fp(expected_ph)
 im_sino_clean = ax_sino_clean.imshow(sino_clean)
 ax_sino_clean.set_title("Clean sinogram")

@@ -11,6 +11,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 import matplotlib.pyplot as plt
 
@@ -24,8 +25,20 @@ except ImportError:
     import phantom
 
 
-def cm2inch(x):
-    return np.array(x) / 2.54
+def cm2inch(x: ArrayLike) -> tuple[float, float]:
+    """Convert cm to inch.
+
+    Parameters
+    ----------
+    x : ArrayLike
+        Sizes in cm.
+
+    Returns
+    -------
+    tuple[float, float]
+        Sizes in inch.
+    """
+    return tuple(np.array(x) / 2.54)
 
 
 vol_shape = [256, 256, 3]
@@ -42,37 +55,37 @@ bckgnd_weight = np.sqrt(background_avg / (vol_shape[0] * np.sqrt(2)))
 
 num_iterations = 200
 lower_limit = 0
-vol_mask = corrct.utils_proc.get_circular_mask(ph_or.shape)
+vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
 
 sino_substract = sino - background_avg
 
 sino_variance = cct.utils_proc.compute_variance_poisson(sino)
 sino_weights = cct.utils_proc.compute_variance_weigth(sino_variance)
 
-lowlim_l2 = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_l2())
-lowlim_l2w = corrct.solvers.Constraint_LowerLimit(0, norm=corrct.solvers.DataFidelity_wl2(1 / bckgnd_weight))
+lowlim_l2 = cct.solvers.Constraint_LowerLimit(0, norm=cct.solvers.DataFidelity_l2())
+lowlim_l2w = cct.solvers.Constraint_LowerLimit(0, norm=cct.solvers.DataFidelity_wl2(1 / bckgnd_weight))
 
-data_term_ls = corrct.solvers.DataFidelity_l2()
-data_term_lsw = corrct.solvers.DataFidelity_wl2(sino_weights)
-data_term_lsb = corrct.solvers.DataFidelity_l2b(sino_variance)
+data_term_ls = cct.solvers.DataFidelity_l2()
+data_term_lsw = cct.solvers.DataFidelity_wl2(sino_weights)
+data_term_lsb = cct.solvers.DataFidelity_l2b(sino_variance)
 
-with corrct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
-    solver_ls = corrct.solvers.PDHG(verbose=True, data_term=data_term_ls)
+with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
+    solver_ls = cct.solvers.PDHG(verbose=True, data_term=data_term_ls)
     rec_ls, _ = solver_ls(A, sino_substract, num_iterations, x_mask=vol_mask, lower_limit=lower_limit)
 
-    solver_wls = corrct.solvers.PDHG(verbose=True, data_term=data_term_lsw)
+    solver_wls = cct.solvers.PDHG(verbose=True, data_term=data_term_lsw)
     rec_wls, _ = solver_wls(A, sino_substract, num_iterations, x_mask=vol_mask, lower_limit=lower_limit)
 
-    solver_lsb = corrct.solvers.PDHG(verbose=True, data_term=data_term_lsb)
+    solver_lsb = cct.solvers.PDHG(verbose=True, data_term=data_term_lsb)
     rec_lsb, _ = solver_lsb(A, sino_substract, num_iterations, x_mask=vol_mask, lower_limit=lower_limit)
 
-    solver_ls_l = corrct.solvers.PDHG(verbose=True, data_term=data_term_ls, regularizer=[lowlim_l2w])
+    solver_ls_l = cct.solvers.PDHG(verbose=True, data_term=data_term_ls, regularizer=[lowlim_l2w])
     rec_ls_l, _ = solver_ls_l(A, sino_substract, num_iterations, x_mask=vol_mask)
 
-    solver_wls_l = corrct.solvers.PDHG(verbose=True, data_term=data_term_lsw, regularizer=[lowlim_l2w])
+    solver_wls_l = cct.solvers.PDHG(verbose=True, data_term=data_term_lsw, regularizer=[lowlim_l2w])
     rec_wls_l, _ = solver_wls_l(A, sino_substract, num_iterations, x_mask=vol_mask)
 
-    solver_lsb_l = corrct.solvers.PDHG(verbose=True, data_term=data_term_lsb, regularizer=[lowlim_l2w])
+    solver_lsb_l = cct.solvers.PDHG(verbose=True, data_term=data_term_lsb, regularizer=[lowlim_l2w])
     rec_lsb_l, _ = solver_lsb_l(A, sino_substract, num_iterations, x_mask=vol_mask)
 
 # Reconstructions
@@ -84,7 +97,7 @@ ax_ph.set_title('Phantom')
 f.colorbar(im_ph, ax=ax_ph)
 
 ax_sino_clean = f.add_subplot(gs[4, 0])
-with corrct.projectors.ProjectorUncorrected(ph_or.shape, angles) as p:
+with cct.projectors.ProjectorUncorrected(ph_or.shape, angles) as p:
     sino_clean = p.fp(expected_ph)
 im_sino_clean = ax_sino_clean.imshow(sino_clean)
 ax_sino_clean.set_title('Clean sinogram')

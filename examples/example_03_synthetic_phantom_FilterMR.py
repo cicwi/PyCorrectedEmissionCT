@@ -11,6 +11,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 import matplotlib.pyplot as plt
 
@@ -31,9 +32,26 @@ except ImportError:
     __have_skimage__ = False
 
 
+def cm2inch(x: ArrayLike) -> tuple[float, float]:
+    """Convert cm to inch.
+
+    Parameters
+    ----------
+    x : ArrayLike
+        Sizes in cm.
+
+    Returns
+    -------
+    tuple[float, float]
+        Sizes in inch.
+    """
+    return tuple(np.array(x) / 2.54)
+
+
 vol_shape_xy = [256, 256]
 ph = np.squeeze(phantom.modified_shepp_logan([*vol_shape_xy, 3]).astype(np.float32))
 ph = ph[:, :, 1]
+
 fbp_filter = 'Shepp-Logan'
 
 (sino, angles_rad, expected_ph, _) = cct.utils_test.create_sino(ph, 30, add_poisson=True, photon_flux=1e4)
@@ -55,7 +73,7 @@ with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:
     filt = filter_mr.compute_filter(sino, p)
     filt_reg = filter_mr_reg.compute_filter(sino, p)
 
-(f, axes) = plt.subplots(2, 2, sharex=True, sharey=True)
+f, axes = plt.subplots(2, 2, sharex=True, sharey=True, figsize=cm2inch([24, 24]))
 axes[0, 0].imshow(expected_ph)
 axes[0, 0].set_title('Phantom')
 axes[0, 1].imshow(vol_sl)
@@ -64,12 +82,12 @@ axes[1, 0].imshow(vol_mr)
 axes[1, 0].set_title('FBP-MR')
 axes[1, 1].imshow(vol_mr_reg)
 axes[1, 1].set_title('FBP-MR-smooth')
-plt.show(block=False)
+f.tight_layout()
 
 filt_f = np.abs(np.fft.fft(np.fft.ifftshift(filt)))[:(len(filt) // 2)]
 filt_reg_f = np.abs(np.fft.fft(np.fft.ifftshift(filt_reg)))[:(len(filt) // 2)]
 
-(f, axes) = plt.subplots(1, 2)
+f, axes = plt.subplots(1, 2, figsize=cm2inch([24, 10]))
 axes[0].plot(filt, label='FBP-MR')
 axes[0].plot(filt_reg, label='FBP-MR-smooth')
 axes[0].set_title('Real-space')
@@ -90,13 +108,15 @@ if __have_skimage__:
 axes[0].grid()
 axes[1].grid()
 axes[1].legend()
+f.tight_layout()
 
-(f_prof, ax) = plt.subplots()
-ax.plot(np.squeeze(expected_ph[..., 172]), label='Phantom')
+f, ax = plt.subplots(figsize=cm2inch([24, 10]))
 ax.plot(np.squeeze(vol_sl[..., 172]), label='FBP (%s)' % fbp_filter)
 ax.plot(np.squeeze(vol_mr[..., 172]), label='FBP-MR')
 ax.plot(np.squeeze(vol_mr_reg[..., 172]), label='FBP-MR-smooth')
+ax.plot(np.squeeze(expected_ph[..., 172]), label='Phantom')
 ax.legend()
 ax.grid()
+f.tight_layout()
 
 plt.show(block=False)

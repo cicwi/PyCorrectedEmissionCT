@@ -17,6 +17,8 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import corrct as cct
 import corrct.utils_test
 
+from numpy.typing import ArrayLike
+
 try:
     import phantom
 except ImportError:
@@ -24,8 +26,20 @@ except ImportError:
     import phantom
 
 
-def cm2inch(x):
-    return np.array(x) / 2.54
+def cm2inch(x: ArrayLike) -> tuple[float, float]:
+    """Convert cm to inch.
+
+    Parameters
+    ----------
+    x : ArrayLike
+        Sizes in cm.
+
+    Returns
+    -------
+    tuple[float, float]
+        Sizes in inch.
+    """
+    return tuple(np.array(x) / 2.54)
 
 
 data_type = np.float32
