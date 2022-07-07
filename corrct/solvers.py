@@ -7,14 +7,15 @@ Solvers for the tomographic reconstruction problem.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from typing import Optional, Union, Tuple, Any
+from typing import Optional, Sequence, Union, Tuple, Any
 
 import numpy as np
 import numpy.random
 from numpy.typing import ArrayLike, DTypeLike, NDArray
 
 import scipy as sp
-import scipy.sparse
+from scipy.sparse import spmatrix
+from scipy.sparse.linalg import LinearOperator
 
 import copy as cp
 
@@ -182,26 +183,7 @@ class Solver(ABC):
             raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
 
     @staticmethod
-    def _initialize_data_operators(
-        A: Union[ArrayLike, sp.sparse.linalg.LinearOperator, sp.sparse.dia_matrix],
-        At: Optional[Union[ArrayLike, sp.sparse.linalg.LinearOperator, sp.sparse.dia_matrix]],
-    ):
-        if At is None:
-            if isinstance(A, np.ndarray):
-                At = A.transpose((1, 0))
-            elif isinstance(A, sp.sparse.dia_matrix) or isinstance(A, sp.sparse.linalg.LinearOperator):
-                At = A.transpose()
-
-        if isinstance(At, np.ndarray) or isinstance(At, sp.sparse.dia_matrix):
-            At_m = At
-            At = At_m.dot
-        if isinstance(A, np.ndarray) or isinstance(A, sp.sparse.dia_matrix):
-            A_m = A
-            A = A_m.dot
-        return (A, At)
-
-    @staticmethod
-    def _initialize_regularizer(regularizer: Optional[BaseRegularizer]) -> BaseRegularizer:
+    def _initialize_regularizer(regularizer: Union[BaseRegularizer, None, Sequence[BaseRegularizer]]) -> list[BaseRegularizer]:
         if regularizer is None:
             return []
         elif isinstance(regularizer, regularizers.BaseRegularizer):
@@ -211,7 +193,7 @@ class Solver(ABC):
             if not np.all(check_regs_ok):
                 raise ValueError(
                     "The following regularizers are not derived from the BaseRegularizer class: %s"
-                    % np.array(np.arange(len(check_regs_ok))[np.array(check_regs_ok, dtype=np.bool)])
+                    % np.array(np.arange(len(check_regs_ok))[np.array(check_regs_ok, dtype=bool)])
                 )
             else:
                 return list(regularizer)
@@ -219,7 +201,7 @@ class Solver(ABC):
             raise ValueError("Unknown regularizer type.")
 
     @staticmethod
-    def _initialize_b_masks(b: ArrayLike, b_mask: Optional[ArrayLike], b_test_mask: Optional[ArrayLike]):
+    def _initialize_b_masks(b: NDArray, b_mask: Optional[NDArray], b_test_mask: Optional[NDArray]):
         if b_test_mask is not None:
             if b_mask is None:
                 b_mask = np.ones_like(b)
@@ -342,8 +324,8 @@ class Sart(Solver):
         A_num_rows: int,
         x0: Optional[ArrayLike] = None,
         At=None,
-        lower_limit: Union[float, ArrayLike] = None,
-        upper_limit: Union[float, ArrayLike] = None,
+        lower_limit: Union[float, ArrayLike, None] = None,
+        upper_limit: Union[float, ArrayLike, None] = None,
         x_mask: Optional[ArrayLike] = None,
         b_mask: Optional[ArrayLike] = None,
     ) -> Tuple[ArrayLike, Optional[ArrayLike]]:
@@ -494,50 +476,46 @@ class Sirt(Solver):
 
     def __call__(  # noqa: C901
         self,
-        A,
-        b: ArrayLike,
+        A: operators.BaseTransform,
+        b: NDArray,
         iterations: int,
-        x0: Optional[ArrayLike] = None,
-        At=None,
-        lower_limit: Union[float, ArrayLike] = None,
-        upper_limit: Union[float, ArrayLike] = None,
-        x_mask: Optional[ArrayLike] = None,
-        b_mask: Optional[ArrayLike] = None,
-        b_test_mask: Optional[ArrayLike] = None,
-    ) -> Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]:
+        x0: Optional[NDArray] = None,
+        lower_limit: Union[float, NDArray, None] = None,
+        upper_limit: Union[float, NDArray, None] = None,
+        x_mask: Optional[NDArray] = None,
+        b_mask: Optional[NDArray] = None,
+        b_test_mask: Optional[NDArray] = None,
+    ) -> Tuple[NDArray, Tuple[ArrayLike]]:
         """
         Reconstruct the data, using the SIRT algorithm.
 
         Parameters
         ----------
-        A : Union[Callable, BaseTransform]
+        A : BaseTransform
             Projection operator.
-        b : ArrayLike
+        b : NDArray
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        x0 : Optional[ArrayLike], optional
+        x0 : Optional[NDArray], optional
             Initial solution. The default is None.
-        At : Callable, optional
-            The back-projection operator. This is only needed if the projection operator does not have an adjoint.
-            The default is None.
-        lower_limit : Union[float, ArrayLike], optional
+        lower_limit : Union[float, NDArray], optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, ArrayLike], optional
+        upper_limit : Union[float, NDArray], optional
             Upper clipping value. The default is None.
-        x_mask : Optional[ArrayLike], optional
+        x_mask : Optional[NDArray], optional
             Solution mask. The default is None.
-        b_mask : Optional[ArrayLike], optional
+        b_mask : Optional[NDArray], optional
             Data mask. The default is None.
-        b_test_mask : Optional[ArrayLike], optional
+        b_test_mask : Optional[NDArray], optional
             Test data mask. The default is None.
 
         Returns
         -------
-        Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]
+        Tuple[NDArray, Tuple[ArrayLike]]
             The reconstruction, and the residuals.
         """
-        (A, At) = self._initialize_data_operators(A, At)
+        b = np.array(b)
 
         (b_mask, b_test_mask) = self._initialize_b_masks(b, b_mask, b_test_mask)
 
@@ -545,7 +523,7 @@ class Sirt(Solver):
         tau = np.ones_like(b)
         if b_mask is not None:
             tau *= b_mask
-        tau = np.abs(At(tau))
+        tau = np.abs(A.T(tau))
         for reg in self.regularizer:
             tau += reg.initialize_sigma_tau(tau)
         tau[(tau / np.max(tau)) < 1e-5] = 1
@@ -560,9 +538,9 @@ class Sirt(Solver):
         sigma = 1 / sigma
 
         if x0 is None:
-            x0 = At(b * sigma) * tau
+            x0 = A.T(b * sigma) * tau
         else:
-            x0 = x0.copy()
+            x0 = np.array(x0).copy()
         x = x0
 
         self.data_term.assign_data(b, sigma)
@@ -607,7 +585,7 @@ class Sirt(Solver):
                 reg.update_dual(q_r, x)
                 reg.apply_proximal(q_r)
 
-            upd = At(res * sigma)
+            upd = A.T(res * sigma)
             for q_r, reg in zip(q, self.regularizer):
                 upd -= reg.compute_update_primal(q_r)
             x += upd * tau
@@ -685,17 +663,17 @@ class PDHG(Solver):
         else:
             return cp.deepcopy(data_term)
 
-    def power_method(self, A, At, b: ArrayLike, iterations: int = 5) -> Tuple[float, Tuple[int], DTypeLike]:
+    def power_method(
+        self, A: operators.BaseTransform, b: NDArray, iterations: int = 5
+    ) -> Tuple[np.floating, Sequence[int], DTypeLike]:
         """
         Compute the l2-norm of the operator A, with the power method.
 
         Parameters
         ----------
-        A : Callable | BaseTransform
+        A : BaseTransform
             Operator whose l2-norm needs to be computed.
-        At : Callable | BaseTransform
-            Adjoint of the operator.
-        b : ArrayLike
+        b : NDArray
             The data vector.
         iterations : int, optional
             Number of power method iterations. The default is 5.
@@ -705,24 +683,25 @@ class PDHG(Solver):
         Tuple[float, Tuple[int], DTypeLike]
             The l2-norm of A, and the shape and type of the solution.
         """
-        x = np.random.rand(*b.shape).astype(b.dtype)
+        x: NDArray = np.array(np.random.rand(*b.shape))
+        x = x.astype(b.dtype)
         x /= np.linalg.norm(x)
-        x = At(x)
+        x = A.T(x)
 
         x_norm = np.linalg.norm(x)
         L = x_norm
 
         for ii in range(iterations):
             x /= x_norm
-            x = At(A(x))
+            x = A.T(A(x))
 
             x_norm = np.linalg.norm(x)
             L = np.sqrt(x_norm)
 
         return (L, x.shape, x.dtype)
 
-    def _get_data_sigma_tau_unpreconditioned(self, A, At, b: ArrayLike):
-        (L, x_shape, x_dtype) = self.power_method(A, At, b)
+    def _get_data_sigma_tau_unpreconditioned(self, A: operators.BaseTransform, b: NDArray):
+        (L, x_shape, x_dtype) = self.power_method(A, b)
         tau = L
 
         dummy_x = np.empty(x_shape, dtype=x_dtype)
@@ -735,59 +714,56 @@ class PDHG(Solver):
 
     def __call__(  # noqa: C901
         self,
-        A,
-        b: ArrayLike,
+        A: operators.BaseTransform,
+        b: NDArray,
         iterations: int,
-        x0: Optional[ArrayLike] = None,
-        At=None,
-        lower_limit: Union[float, ArrayLike] = None,
-        upper_limit: Union[float, ArrayLike] = None,
-        x_mask: Optional[ArrayLike] = None,
-        b_mask: Optional[ArrayLike] = None,
-        b_test_mask: Optional[ArrayLike] = None,
+        x0: Optional[NDArray] = None,
+        lower_limit: Union[float, NDArray, None] = None,
+        upper_limit: Union[float, NDArray, None] = None,
+        x_mask: Optional[NDArray] = None,
+        b_mask: Optional[NDArray] = None,
+        b_test_mask: Optional[NDArray] = None,
         precondition: bool = True,
-    ) -> Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]:
+    ) -> Tuple[NDArray, Tuple[ArrayLike]]:
         """
         Reconstruct the data, using the PDHG algorithm.
 
         Parameters
         ----------
-        A : Union[Callable, BaseTransform]
+        A : BaseTransform
             Projection operator.
-        b : ArrayLike
+        b : NDArray
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        x0 : Optional[ArrayLike], optional
+        x0 : Optional[NDArray], optional
             Initial solution. The default is None.
-        At : Callable, optional
-            The back-projection operator. This is only needed if the projection operator does not have an adjoint.
-            The default is None.
-        lower_limit : Union[float, ArrayLike], optional
+        lower_limit : Union[float, NDArray], optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, ArrayLike], optional
+        upper_limit : Union[float, NDArray], optional
             Upper clipping value. The default is None.
-        x_mask : Optional[ArrayLike], optional
+        x_mask : Optional[NDArray], optional
             Solution mask. The default is None.
-        b_mask : Optional[ArrayLike], optional
+        b_mask : Optional[NDArray], optional
             Data mask. The default is None.
-        b_test_mask : Optional[ArrayLike], optional
+        b_test_mask : Optional[NDArray], optional
             Test data mask. The default is None.
         precondition : bool, optional
             Whether to use the preconditioned version of the algorithm. The default is True.
 
         Returns
         -------
-        Tuple[ArrayLike, Tuple[Optional[ArrayLike], Optional[ArrayLike], int]]
+        Tuple[NDArray, Tuple[ArrayLike]]
             The reconstruction, and the residuals.
         """
-        (A, At) = self._initialize_data_operators(A, At)
+        b = np.array(b)
+
         if precondition:
             try:
-                At_abs = At.absolute()
+                At_abs = A.T.absolute()
                 A_abs = A.absolute()
             except AttributeError:
-                print(A, At)
+                print(A)
                 print("WARNING: Turning off preconditioning because system matrix does not support absolute")
                 precondition = False
 
@@ -813,12 +789,12 @@ class PDHG(Solver):
             sigma[(sigma / np.max(sigma)) < 1e-5] = 1
             sigma = self.relaxation / sigma
         else:
-            (x_shape, x_dtype, sigma, tau) = self._get_data_sigma_tau_unpreconditioned(A, At, b)
+            (x_shape, x_dtype, sigma, tau) = self._get_data_sigma_tau_unpreconditioned(A, b)
 
         if x0 is None:
             x0 = np.zeros(x_shape, dtype=x_dtype)
         else:
-            x0 = x0.copy()
+            x0 = np.array(x0).copy()
         x = x0
         x_relax = x.copy()
 
@@ -861,7 +837,7 @@ class PDHG(Solver):
                 reg.update_dual(q_r, x_relax)
                 reg.apply_proximal(q_r)
 
-            upd = At(p)
+            upd = A.T(p)
             for q_r, reg in zip(q, self.regularizer):
                 upd += reg.compute_update_primal(q_r)
             x_new = x - upd * tau

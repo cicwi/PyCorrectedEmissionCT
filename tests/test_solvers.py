@@ -42,6 +42,8 @@ class TestSolvers(unittest.TestCase):
         self.data_flat_2d = self.fwd_op(self.proj_matrix_2d, self.vol_flat_2d, self.test_prjs_shape)
         self.data_flat_2d += np.random.randn(*self.data_flat_2d.shape) * 1e-3
 
+        self.tolerance = 1e-2
+
     def tearDown(self):
         """Tear down test fixtures, if any."""
 
@@ -67,84 +69,74 @@ class TestSolvers(unittest.TestCase):
     def test_000_SIRT(self):
         """Test SIRT algorithm in 2D."""
 
-        (A, At) = self.get_A_At("2d")
+        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
         algo = solvers.Sirt()
-        (sol, residual) = algo(A, self.data_rand_2d, 2500, At=At)
+        sol, _ = algo(A, self.data_rand_2d, 500)
 
         print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_rand_2d - sol))), end="", flush=True)
-        assert np.all(np.isclose(sol, self.vol_rand_2d, atol=1e-3))
+        assert np.all(np.isclose(sol, self.vol_rand_2d, atol=self.tolerance))
 
-    def test_001_CPLS(self):
+    def test_001_PDHG_LS(self):
         """Test Chambolle-Pock least-squares algorithm in 2D."""
 
-        (A, At) = self.get_A_At("2d")
-        algo = solvers.CP()
-        (sol, residual) = algo(A, self.data_rand_2d, 2000, At=At)
+        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
+        algo = solvers.PDHG()
+        sol, _ = algo(A, self.data_rand_2d, 500)
 
         print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_rand_2d - sol))), end="", flush=True)
-        assert np.all(np.isclose(sol, self.vol_rand_2d, atol=1e-3))
+        assert np.all(np.isclose(sol, self.vol_rand_2d, atol=self.tolerance))
 
-    def test_002_SIRTTV(self):
+    def test_002_SIRT_TV(self):
         """Test SIRT TV-min algorithm in 2D."""
 
-        (A, At) = self.get_A_At("2d")
+        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.Sirt(regularizer=reg)
-        (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At)
+        sol, _ = algo(A, self.data_flat_2d, 2500)
 
         print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
+        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
-    def test_003_CPLSTV(self):
+    def test_003_PDHG_LS_TV(self):
         """Test Chambolle-Pock unconstrained least-squares TV-min algorithm in 2D."""
 
-        (A, At) = self.get_A_At("2d")
+        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
         reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.CP(regularizer=reg)
-        (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At)
+        algo = solvers.PDHG(regularizer=reg)
+        sol, _ = algo(A, self.data_flat_2d, 500)
 
         print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
+        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
-    def test_004_CPLSTV_unconstrained(self):
+    def test_004_PDHG_LS_TV_unconstrained(self):
         """Test Chambolle-Pock unconstrained least-squares TV-min algorithm in 2D."""
 
-        (A, At) = self.get_A_At("2d")
+        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
         reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.CP(regularizer=reg)
-        (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At)
+        algo = solvers.PDHG(regularizer=reg)
+        sol, _ = algo(A, self.data_flat_2d, 500)
 
         print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
+        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
-    def test_005_CPLSTV_constrained01(self):
+    def test_005_PDHG_LS_TV_constrained01(self):
         """Test Chambolle-Pock constrained [0, 1] least-squares TV-min algorithm in 2D."""
 
-        (A, At) = self.get_A_At("2d")
+        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
         reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.CP(regularizer=reg)
-        (sol, residual) = algo(A, self.data_flat_2d, 2500, At=At, lower_limit=0, upper_limit=1)
+        algo = solvers.PDHG(regularizer=reg)
+        sol, _ = algo(A, self.data_flat_2d, 500, lower_limit=0, upper_limit=1)
 
         print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
+        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
-    def test_006_CPLSTV_unconstrained_precond(self):
-        """Test Chambolle-Pock preconditioned, unconstrained least-squares TV-min algorithm in 2D."""
+    def test_006_PDHG_LS_TV_unconstrained_no_precond(self):
+        """Test Chambolle-Pock not preconditioned, unconstrained least-squares TV-min algorithm in 2D."""
 
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
         reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.CP(regularizer=reg)
-        (sol, residual) = algo(A, self.data_flat_2d, 2500, precondition=True)
+        algo = solvers.PDHG(regularizer=reg)
+        sol, _ = algo(A, self.data_flat_2d, 1000, precondition=False)
 
         print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=1e-3))
-
-    def test_007_OperatorMatrix_SIRT(self):
-        """Test SIRT algorithm in 2D."""
-
-        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
-        algo = solvers.Sirt()
-        (sol, residual) = algo(A, self.data_rand_2d, 2500)
-
-        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_rand_2d - sol))), end="", flush=True)
-        assert np.all(np.isclose(sol, self.vol_rand_2d, atol=1e-3))
+        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
