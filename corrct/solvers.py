@@ -7,21 +7,24 @@ Solvers for the tomographic reconstruction problem.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, Any
 
 import numpy as np
 import numpy.random
-from numpy.typing import ArrayLike, DTypeLike
+from numpy.typing import ArrayLike, DTypeLike, NDArray
 
 import scipy as sp
 import scipy.sparse
 
 import copy as cp
 
+from . import operators
 from . import data_terms
 from . import regularizers
 
 from tqdm import tqdm
+
+from abc import ABC, abstractmethod
 
 
 eps = np.finfo(np.float32).eps
@@ -75,7 +78,7 @@ Constraint_UpperLimit = regularizers.Constraint_UpperLimit
 # ---- Solvers ----
 
 
-class Solver:
+class Solver(ABC):
     """
     Initialize the base solver class.
 
@@ -100,7 +103,7 @@ class Solver:
         self,
         verbose: bool = False,
         relaxation: float = 1.0,
-        tolerance: float = None,
+        tolerance: Optional[float] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
         data_term_test: Optional[DataFidelityBase] = None,
     ):
@@ -145,6 +148,25 @@ class Solver:
             Lower case string name of the solver.
         """
         return type(self).__name__.lower()
+
+    @abstractmethod
+    def __call__(
+        self, A: operators.BaseTransform, b: NDArray, *args: Any, **kwds: Any
+    ) -> tuple[NDArray, Optional[ArrayLike]]:
+        """Execute the reconstruction of the data.
+
+        Parameters
+        ----------
+        A : operators.BaseTransform
+            The projection operator.
+        b : NDArray
+            The data to be reconstructed.
+
+        Returns
+        -------
+        tuple[NDArray, Optional[ArrayLike]]
+            The reconstruction and related information.
+        """
 
     @staticmethod
     def _initialize_data_fidelity_function(data_term: Union[str, DataFidelityBase]) -> DataFidelityBase:
