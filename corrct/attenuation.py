@@ -17,7 +17,7 @@ import multiprocessing as mp
 
 from tqdm import tqdm
 
-from typing import Optional, Sequence, Union
+from typing import Dict, Optional, Sequence, Union
 from numpy.typing import ArrayLike, DTypeLike, NDArray
 
 from dataclasses import dataclass, field
@@ -229,7 +229,7 @@ class AttenuationVolume:
 
     def get_projector_args(
         self, roi: Optional[ArrayLike] = None, rot_ind: Optional[int] = None, det_ind: Optional[int] = None
-    ) -> dict[str, NDArray]:
+    ) -> Dict[str, NDArray]:
         """
         Return the projector arguments.
 
@@ -244,7 +244,7 @@ class AttenuationVolume:
 
         Returns
         -------
-        dict[str, NDArray]
+        Dict[str, NDArray]
             A dictionary containing the attenuation maps and the detector angle.
         """
         if det_ind is None:
