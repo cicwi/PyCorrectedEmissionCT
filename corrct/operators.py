@@ -552,13 +552,12 @@ class TransformGradient(BaseTransform):
         :return: Gradient of data.
         :rtype: ArrayLike
         """
-        d = [None] * len(self.axes)
-        for ii in range(len(self.axes)):
-            ind = -(ii + 1)
-            padding = [(0, 0)] * self.ndims
-            padding[ind] = (0, 1)
-            temp_x = np.pad(x, padding, mode=self.pad_mode)
-            d[ind] = np.diff(temp_x, n=1, axis=ind)
+        d = [np.array([])] * len(self.axes)
+        for ii, ax in enumerate(self.axes):
+            padding = np.zeros((self.ndims, 2), dtype=int)
+            padding[ax, 1] = 1
+            temp_x = np.pad(x, padding, mode=self.pad_mode)  # type: ignore
+            d[ii] = np.diff(temp_x, n=1, axis=ax)
         return np.stack(d, axis=0)
 
     def divergence(self, x: ArrayLike) -> ArrayLike:
@@ -570,13 +569,12 @@ class TransformGradient(BaseTransform):
         :return: Divergence of data.
         :rtype: ArrayLike
         """
-        d = [None] * len(self.axes)
-        for ii in range(len(self.axes)):
-            ind = -(ii + 1)
-            padding = [(0, 0)] * self.ndims
-            padding[ind] = (1, 0)
-            temp_x = np.pad(x[ind, ...], padding, mode=self.pad_mode)
-            d[ind] = np.diff(temp_x, n=1, axis=ind)
+        d = [np.array([])] * len(self.axes)
+        for ii, ax in enumerate(self.axes):
+            padding = np.zeros((self.ndims, 2), dtype=int)
+            padding[ax, 0] = 1
+            temp_x = np.pad(x[ii, ...], padding, mode=self.pad_mode)  # type: ignore
+            d[ii] = np.diff(temp_x, n=1, axis=ax)
         return np.sum(np.stack(d, axis=0), axis=0)
 
     def _op_direct(self, x: ArrayLike) -> ArrayLike:
@@ -677,13 +675,12 @@ class TransformLaplacian(BaseTransform):
         :return: Gradient of data.
         :rtype: ArrayLike
         """
-        d = [None] * len(self.axes)
-        for ii in range(len(self.axes)):
-            ind = -(ii + 1)
-            padding = [(0, 0)] * self.ndims
-            padding[ind] = (1, 1)
-            temp_x = np.pad(x, padding, mode=self.pad_mode)
-            d[ind] = np.diff(temp_x, n=2, axis=ind)
+        d = [np.array([])] * len(self.axes)
+        for ii, ax in enumerate(self.axes):
+            padding = np.zeros((self.ndims, 2), dtype=int)
+            padding[ax, :] = 1
+            temp_x = np.pad(x, padding, mode=self.pad_mode)  # type: ignore
+            d[ii] = np.diff(temp_x, n=2, axis=ax)
         return np.sum(d, axis=0)
 
     def _op_direct(self, x: ArrayLike) -> ArrayLike:
