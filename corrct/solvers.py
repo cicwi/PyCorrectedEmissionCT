@@ -21,6 +21,7 @@ import copy as cp
 from . import operators
 from . import data_terms
 from . import regularizers
+from . import filters
 
 from tqdm import tqdm
 
@@ -241,7 +242,7 @@ class FBP(Solver):
         NOT USED, only exposed for compatibility reasons.
     data_term : Union[str, DataFidelityBase], optional
         NOT USED, only exposed for compatibility reasons.
-    fbp_filter : Union[str, ArrayLike], optional
+    fbp_filter : Union[str, NDArray], optional
         FBP filter to use. Either a string from scikit-image's list of `iradon` filters, or an array. The default is "ramp".
     pad_mode: str, optional
         The padding mode to use for the linear convolution. The default is "constant".
@@ -252,47 +253,46 @@ class FBP(Solver):
         verbose: bool = False,
         regularizer: Optional[BaseRegularizer] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
-        fbp_filter: Union[str, ArrayLike] = "ramp",
+        fbp_filter: Union[str, NDArray, filters.Filter] = "ramp",
         pad_mode: str = "constant",
     ):
         super().__init__(verbose=verbose)
+        if isinstance(fbp_filter, str):
+            fbp_filter = fbp_filter.lower()
         self.fbp_filter = fbp_filter
         self.pad_mode = pad_mode
 
     def __call__(  # noqa: C901
         self,
-        A,
-        b: ArrayLike,
-        iterations: int,
-        x0: Optional[ArrayLike] = None,
-        At=None,
-        lower_limit: Union[float, ArrayLike] = None,
-        upper_limit: Union[float, ArrayLike] = None,
-        x_mask: Optional[ArrayLike] = None,
-        b_mask: Optional[ArrayLike] = None,
-    ) -> Tuple[ArrayLike, Optional[ArrayLike]]:
+        A: operators.BaseTransform,
+        b: NDArray,
+        iterations: int = 0,
+        x0: Optional[NDArray] = None,
+        lower_limit: Union[float, NDArray, None] = None,
+        upper_limit: Union[float, NDArray, None] = None,
+        x_mask: Optional[NDArray] = None,
+        b_mask: Optional[NDArray] = None,
+    ) -> tuple[NDArray, Optional[ArrayLike]]:
         """
         Reconstruct the data, using the FBP algorithm.
 
         Parameters
         ----------
-        A : Union[Callable, BaseTransform]
+        A : BaseTransform
             Projection operator.
-        b : ArrayLike
+        b : NDArray
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        x0 : Optional[ArrayLike], optional
+        x0 : Optional[NDArray], optional
             Initial solution. The default is None.
-        At : Callable, optional
-            The back-projection operator. Not needed, because the operator should provilde the necessary `fbp` function.
-        lower_limit : Union[float, ArrayLike], optional
+        lower_limit : Union[float, NDArray], optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, ArrayLike], optional
+        upper_limit : Union[float, NDArray], optional
             Upper clipping value. The default is None.
-        x_mask : Optional[ArrayLike], optional
+        x_mask : Optional[NDArray], optional
             Solution mask. The default is None.
-        b_mask : Optional[ArrayLike], optional
+        b_mask : Optional[NDArray], optional
             Data mask. The default is None.
 
         Raises
@@ -302,15 +302,26 @@ class FBP(Solver):
 
         Returns
         -------
-        Tuple[ArrayLike, None]
+        Tuple[NDArray, None]
             The reconstruction, and None.
         """
         if len(b.shape) < 2:
             raise ValueError(f"Data should be at least 2-dimensional (b.shape = {b.shape})")
 
-        (A, At) = self._initialize_data_operators(A, At)
+        if isinstance(self.fbp_filter, str):
+            if self.fbp_filter in ('mr', 'data'):
+                local_filter = filters.FilterMR(projector=A)
+            else:
+                local_filter = filters.FilterFBP(filter_name=self.fbp_filter)
+        elif isinstance(self.fbp_filter, np.ndarray):
+            local_filter = filters.FilterCustom(self.fbp_filter)
+        else:
+            local_filter = self.fbp_filter
+        local_filter.pad_mode = self.pad_mode
 
-        x = A.fbp(b, fbp_filter=self.fbp_filter, pad_mode=self.pad_mode)
+        b_f = local_filter(b)
+
+        x = A.T(b_f)
 
         if lower_limit is not None or upper_limit is not None:
             x = x.clip(lower_limit, upper_limit)

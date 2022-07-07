@@ -10,6 +10,7 @@ import numpy as np
 import skimage
 import skimage.transform as skt
 
+from . import filters
 from .models import ProjectionGeometry, VolumeGeometry
 
 from typing import Optional, Union
@@ -34,7 +35,7 @@ except ImportError:
 
 
 class ProjectorBackend(ABC):
-    """Initialize base abstract projector backend class. All backends should inherit from this class."""
+    """Base abstract projector backend class. All backends should inherit from this class."""
 
     vol_geom: VolumeGeometry
     vol_shape_zxy: NDArray
@@ -43,7 +44,8 @@ class ProjectorBackend(ABC):
     prj_shape_vu: NDArray
 
     def __init__(self, vol_geom: VolumeGeometry, angles_rot_rad: ArrayLike):
-        """
+        """Initialize base abstract projector backend class.
+
         Parameters
         ----------
         vol_geom : VolumeGeometry
@@ -206,24 +208,25 @@ class ProjectorBackend(ABC):
 
 
 class ProjectorBackendSKimage(ProjectorBackend):
-    """Initialize projector backend based on scikit-image.
-
-    Parameters
-    ----------
-    vol_geom : VolumeGeometry
-        The volume shape.
-    angles_rot_rad : ArrayLike
-        The projection angles.
-    rot_axis_shift_pix : float, optional
-        Relative position of the rotation center with respect to the volume center. The default is 0.0.
-
-    Raises
-    ------
-    ValueError
-        In case the volume dimensionality is larger than 2D, and if a rotation axis shift is passed.
-    """
+    """Projector backend based on scikit-image."""
 
     def __init__(self, vol_geom: VolumeGeometry, angles_rot_rad: ArrayLike, rot_axis_shift_pix: Union[float, NDArray] = 0.0):
+        """Initialize projector backend based on scikit-image.
+
+        Parameters
+        ----------
+        vol_geom : VolumeGeometry
+            The volume shape.
+        angles_rot_rad : ArrayLike
+            The projection angles.
+        rot_axis_shift_pix : float, optional
+            Relative position of the rotation center with respect to the volume center. The default is 0.0.
+
+        Raises
+        ------
+        ValueError
+            In case the volume dimensionality is larger than 2D, and if a rotation axis shift is passed.
+        """
         if vol_geom.is_3D():
             raise ValueError("With the scikit-image backend only 2D volumes are allowed!")
         if not float(rot_axis_shift_pix) == 0.0:
@@ -329,29 +332,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
 
 
 class ProjectorBackendASTRA(ProjectorBackend):
-    """Initialize projector backend based on astra-toolbox.
-
-    Parameters
-    ----------
-    vol_geom : VolumeGeometry
-        The volume shape.
-    angles_rot_rad : ArrayLike
-        The projection angles.
-    rot_axis_shift_pix : float | NDArray, optional
-        Relative position of the rotation center with respect to the volume center. The default is 0.0.
-    prj_geom : ProjectionGeometry, optional
-        The fully specified projection geometry.
-        When active, the rotation axis shift is ignored. The default is None.
-    create_single_projs : bool, optional
-        Whether to create projectors for single projections. Used for corrections and SART. The default is True.
-    super_sampling : int, optional
-        pixel and voxel super-sampling. The default is 1.
-
-    Raises
-    ------
-    ValueError
-        In case the volume dimensionality is larger than 2D and CUDA is not available.
-    """
+    """Projector backend based on astra-toolbox."""
 
     def __init__(
         self,
@@ -362,6 +343,29 @@ class ProjectorBackendASTRA(ProjectorBackend):
         create_single_projs: bool = True,
         super_sampling: int = 1,
     ):
+        """Initialize projector backend based on astra-toolbox.
+
+        Parameters
+        ----------
+        vol_geom : VolumeGeometry
+            The volume shape.
+        angles_rot_rad : ArrayLike
+            The projection angles.
+        rot_axis_shift_pix : float | NDArray, optional
+            Relative position of the rotation center with respect to the volume center. The default is 0.0.
+        prj_geom : ProjectionGeometry, optional
+            The fully specified projection geometry.
+            When active, the rotation axis shift is ignored. The default is None.
+        create_single_projs : bool, optional
+            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
+        super_sampling : int, optional
+            pixel and voxel super-sampling. The default is 1.
+
+        Raises
+        ------
+        ValueError
+            In case the volume dimensionality is larger than 2D and CUDA is not available.
+        """
         if vol_geom.is_3D() and not has_cuda:
             raise ValueError("CUDA is not available: only 2D volumes are allowed!")
         if not isinstance(rot_axis_shift_pix, (int, float, list, tuple, np.ndarray)):
@@ -602,14 +606,14 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         return vol
 
-    def fbp(self, prj: NDArray, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> NDArray:
+    def fbp(self, prj: NDArray, fbp_filter: Union[str, NDArray, filters.Filter], pad_mode: str) -> NDArray:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
         ----------
         prj : NDArray
             The sinogram or stack of sinograms.
-        fbp_filter : str | ArrayLike, optional
+        fbp_filter : str | NDArray | filtering.Filter, optional
             The filter to use in the filtered back-projection.
         pad_mode: str, optional
             The padding mode to use for the linear convolution.
@@ -619,28 +623,15 @@ class ProjectorBackendASTRA(ProjectorBackend):
         vol : NDArray
             The reconstructed volume.
         """
-        prj_size_pad = max(64, int(2 ** np.ceil(np.log2(2 * self.prj_shape_vu[-1]))))
-
-        pad_edge_u = (prj_size_pad - prj.shape[-1]) / 2
-        pad_width = np.zeros((len(prj.shape), 2), dtype=int)
-        pad_width[-1, :] = (int(np.ceil(pad_edge_u)), int(np.floor(pad_edge_u)))
-
-        prj_pad = np.pad(prj, pad_width=tuple(pad_width), mode=pad_mode.lower())  # type: ignore
-        prj_pad = np.roll(prj_pad, shift=-pad_width[-1][0], axis=-1)
-
         if isinstance(fbp_filter, str):
-            fbp_filter = skt.radon_transform._get_fourier_filter(prj_size_pad, fbp_filter.lower())
-            fbp_filter = np.squeeze(fbp_filter) * np.pi / 2
-            fbp_filter = fbp_filter[: (fbp_filter.shape[-1]) // 2 + 1]
+            local_filter = filters.FilterFBP(filter_name=fbp_filter)
+        elif isinstance(fbp_filter, np.ndarray):
+            local_filter = filters.FilterCustom(fbp_filter)
         else:
-            fbp_filter = np.array(fbp_filter, ndmin=1)
+            local_filter = fbp_filter
+        local_filter.pad_mode = pad_mode
 
-        fbp_filter = fbp_filter / self.angles_w_rad.size
-        fbp_filter = np.array(fbp_filter, ndmin=len(prj.shape))
-
-        prj_f = np.fft.rfft(prj_pad, axis=-1)
-        prj_f *= fbp_filter
-        prj_f = np.fft.irfft(prj_f, axis=-1)[..., : self.prj_shape_vu[-1]]
+        prj_f = local_filter(prj)
 
         if self.vol_geom.is_3D() or len(prj.shape) == 2:
             return self.bp(prj_f)
