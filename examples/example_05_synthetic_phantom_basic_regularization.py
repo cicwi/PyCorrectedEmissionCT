@@ -11,13 +11,13 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
+from numpy.typing import ArrayLike
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 
 import corrct as cct
 import corrct.utils_test
-
-from numpy.typing import ArrayLike
 
 try:
     import phantom
@@ -26,7 +26,7 @@ except ImportError:
     import phantom
 
 
-def cm2inch(x: ArrayLike) -> tuple[float, float]:
+def cm2inch(x: ArrayLike) -> Tuple[float, float]:
     """Convert cm to inch.
 
     Parameters
@@ -36,7 +36,7 @@ def cm2inch(x: ArrayLike) -> tuple[float, float]:
 
     Returns
     -------
-    tuple[float, float]
+    Tuple[float, float]
         Sizes in inch.
     """
     return tuple(np.array(x) / 2.54)
