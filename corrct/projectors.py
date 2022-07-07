@@ -9,6 +9,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 import numpy as np
 
 import scipy.signal as spsig
+from scipy.sparse import spmatrix
 
 from . import operators
 from . import _projector_backends as prj_backends
@@ -20,7 +21,7 @@ import concurrent.futures as cf
 import multiprocessing as mp
 
 from typing import Union, Sequence, Optional, Callable
-from numpy.typing import ArrayLike, DTypeLike
+from numpy.typing import ArrayLike, DTypeLike, NDArray
 
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
@@ -29,20 +30,23 @@ num_threads = round(np.log2(mp.cpu_count() + 1))
 class ProjectorMatrix(operators.ProjectorOperator):
     """
     Projector that uses an explicit projection matrix.
-
-    Parameters
-    ----------
-    A : ArrayLike
-        The projection matrix.
-    vol_shape : Sequence[int]
-        Volume shape.
-    prj_shape : Sequence[int]
-        Projection shape.
     """
 
-    def __init__(self, A: ArrayLike, vol_shape: Union[Sequence[int], ArrayLike], prj_shape: Union[Sequence[int], ArrayLike]):
-        self.vol_shape = vol_shape
-        self.prj_shape = prj_shape
+    A: Union[NDArray, spmatrix]
+
+    def __init__(self, A: Union[NDArray, spmatrix], vol_shape: ArrayLike, prj_shape: ArrayLike):
+        """
+        Parameters
+        ----------
+        A : NDArray | spmatrix
+            The projection matrix.
+        vol_shape : ArrayLike
+            Volume shape.
+        prj_shape : ArrayLike
+            Projection shape.
+        """
+        self.vol_shape = np.array(vol_shape, ndmin=1, dtype=int)
+        self.prj_shape = np.array(prj_shape, ndmin=1, dtype=int)
 
         self.A = A
         super().__init__()
@@ -67,36 +71,36 @@ class ProjectorMatrix(operators.ProjectorOperator):
         operators.ProjectorOperator
             The absolute value operator.
         """
-        return ProjectorMatrix(np.abs(self.A), self.vol_shape, self.prj_shape)
+        return ProjectorMatrix(np.abs(self.A), self.vol_shape, self.prj_shape)  # type: ignore
 
-    def fp(self, x: ArrayLike) -> ArrayLike:
+    def fp(self, x: NDArray) -> NDArray:
         """
         Define the interface for the forward-projection.
 
         Parameters
         ----------
-        x : ArrayLike
+        x : NDArray
             Input volume.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The projection data.
         """
         return self.A.dot(x.flatten()).reshape(self.prj_shape)
 
-    def bp(self, x: ArrayLike) -> ArrayLike:
+    def bp(self, x: NDArray) -> NDArray:
         """
         Define the interface for the back-projection.
 
         Parameters
         ----------
-        x : ArrayLike
+        x : NDArray
             Input projection data.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The back-projected volume.
         """
         return self.A.transpose().dot(x.flatten()).reshape(self.vol_shape)
@@ -139,11 +143,16 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         When the geometry is not correct.
     """
 
+    vol_geom: models.VolumeGeometry
+    angles_rot_rad: NDArray[np.floating]
+    prj_intensities: Union[NDArray[np.floating], None]
+    psf: Union[NDArray[np.floating], float, None]
+
     def __init__(
         self,
-        vol_geom: Union[Sequence[int], ArrayLike, models.VolumeGeometry],
-        angles_rot_rad: Union[Sequence[float], ArrayLike],
-        rot_axis_shift_pix: float = 0.0,
+        vol_geom: Union[Sequence[int], models.VolumeGeometry],
+        angles_rot_rad: ArrayLike,
+        rot_axis_shift_pix: Union[float, ArrayLike] = 0.0,
         *,
         prj_geom: Optional[models.ProjectionGeometry] = None,
         prj_intensities: Optional[ArrayLike] = None,
@@ -171,6 +180,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             raise ValueError("Using class `ProjectionGeometry` requires astra-toolbox.")
 
         angles_rot_rad = np.array(np.squeeze(angles_rot_rad), ndmin=1)
+        rot_axis_shift_pix = np.array(rot_axis_shift_pix)
 
         if use_astra:
             self.projector_backend = prj_backends.ProjectorBackendASTRA(
@@ -187,12 +197,14 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             )
 
         self.angles_rot_rad = angles_rot_rad
+        if prj_intensities is not None:
+            prj_intensities = np.array(prj_intensities)
         self.prj_intensities = prj_intensities
 
         self._set_psf(psf)
 
-        self.vol_shape = self.projector_backend.get_vol_shape()
-        self.prj_shape = self.projector_backend.get_prj_shape()
+        self.vol_shape = np.array(self.projector_backend.get_vol_shape(), ndmin=1)
+        self.prj_shape = np.array(self.projector_backend.get_prj_shape(), ndmin=1)
         super().__init__()
 
     def __enter__(self):
@@ -204,9 +216,9 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         """De-initialize the with statement block."""
         self.projector_backend.dispose()
 
-    def _set_psf(self, psf: ArrayLike, is_conv_symm: bool = False) -> None:
+    def _set_psf(self, psf: Optional[ArrayLike], is_conv_symm: bool = False) -> None:
         if psf is not None:
-            psf = np.squeeze(psf)
+            psf = np.squeeze(np.array(psf))
             if len(psf.shape) >= len(self.vol_geom.shape):
                 raise ValueError(
                     "PSF should either be 1D (for 2D and 3D reconstructions) or 2D (for 3D reconstructions)."
@@ -221,19 +233,19 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         else:
             self.psf_vu = self.psf_vwu = None
 
-    def fp_angle(self, vol: ArrayLike, angle_ind: int) -> ArrayLike:
+    def fp_angle(self, vol: NDArray, angle_ind: int) -> NDArray:
         """Forward-project a volume to a single sinogram line.
 
         Parameters
         ----------
-        vol : ArrayLike
+        vol : NDArray
             The volume to forward-project.
         angle_ind : int
             The angle index to foward project.
 
         Returns
         -------
-        x : ArrayLike
+        x : NDArray
             The forward-projected sinogram line.
         """
         prj_vu = self.projector_backend.fp(vol, angle_ind)
@@ -243,19 +255,19 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             prj_vu = self.psf_vu(prj_vu)
         return prj_vu
 
-    def bp_angle(self, prj_vu: ArrayLike, angle_ind: int) -> ArrayLike:
+    def bp_angle(self, prj_vu: NDArray, angle_ind: int) -> NDArray:
         """Back-project a single sinogram line to the volume.
 
         Parameters
         ----------
-        prj_vu : ArrayLike
+        prj_vu : NDArray
             The sinogram to back-project or a single line.
         angle_ind : int
             The angle index to foward project.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The back-projected volume.
         """
         if self.prj_intensities is not None:
@@ -264,18 +276,18 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             prj_vu = self.psf_vu.T(prj_vu)
         return self.projector_backend.bp(prj_vu, angle_ind)
 
-    def fp(self, vol: ArrayLike) -> ArrayLike:
+    def fp(self, vol: NDArray) -> NDArray:
         """
         Forward-projection of the volume to the projection data.
 
         Parameters
         ----------
-        vol : ArrayLike
+        vol : NDArray
             The volume to forward-project.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The forward-projected projection data.
         """
         prj_vwu = self.projector_backend.fp(vol)
@@ -285,18 +297,18 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             prj_vwu = self.psf_vwu(prj_vwu)
         return prj_vwu
 
-    def bp(self, prj_vwu: ArrayLike) -> ArrayLike:
+    def bp(self, prj_vwu: NDArray) -> NDArray:
         """
         Back-projection of the projection data to the volume.
 
         Parameters
         ----------
-        prj_vwu : ArrayLike
+        prj_vwu : NDArray
             The projection data to back-project.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The back-projected volume.
         """
         if self.prj_intensities is not None:
@@ -305,7 +317,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             prj_vwu = self.psf_vwu.T(prj_vwu)
         return self.projector_backend.bp(prj_vwu)
 
-    def fbp(self, projs: ArrayLike, fbp_filter: Union[str, Callable] = "ramp", pad_mode: str = "constant") -> ArrayLike:
+    def fbp(self, projs: NDArray, fbp_filter: Union[str, Callable] = "ramp", pad_mode: str = "constant") -> NDArray:
         """
         Compute the filtered back-projection of the projection data to the volume.
 
@@ -313,7 +325,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
         Parameters
         ----------
-        projs : ArrayLike
+        projs : NDArray
             The projection data to back-project.
         fbp_filter : str | Callable, optional
             The FBP filter to use. The default is "ramp".
@@ -327,7 +339,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The FBP reconstructed volume.
         """
         if isinstance(fbp_filter, str):
@@ -345,7 +357,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
     Parameters
     ----------
-    vol_shape : Union[Sequence[int], ArrayLike]
+    vol_shape : Sequence[int] | models.VolumeGeometry
         The volume shape in X Y and optionally Z.
     angles_rot_rad : ArrayLike
         The rotation angles.
@@ -385,18 +397,20 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         When given inconsistent numbers of detector weights and detector angles.
     """
 
+    att_vol_angles: NDArray[np.floating]
+
     def __init__(
         self,
-        vol_shape: Union[Sequence[int], ArrayLike],
+        vol_shape: Union[Sequence[int], models.VolumeGeometry],
         angles_rot_rad: ArrayLike,
         rot_axis_shift_pix: float = 0,
         *,
         prj_geom: Optional[models.ProjectionGeometry] = None,
         prj_intensities: Optional[ArrayLike] = None,
         super_sampling: int = 1,
-        att_maps: Optional[ArrayLike] = None,
-        att_in: Optional[ArrayLike] = None,
-        att_out: Optional[ArrayLike] = None,
+        att_maps: Optional[NDArray[np.floating]] = None,
+        att_in: Optional[NDArray[np.floating]] = None,
+        att_out: Optional[NDArray[np.floating]] = None,
         angles_detectors_rad: Union[float, ArrayLike] = (np.pi / 2),
         weights_detectors: Optional[ArrayLike] = None,
         psf: Optional[ArrayLike] = None,
@@ -439,7 +453,9 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
                 )
 
         if weights_angles is None:
-            weights_angles = np.ones((len(angles_rot_rad), num_det_angles))
+            weights_angles = np.ones((len(self.angles_rot_rad), num_det_angles))
+        else:
+            weights_angles = np.array(weights_angles)
         self.weights_angles = weights_angles
 
         if att_maps is None:
@@ -478,21 +494,21 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         self.weights_angles = np.sum(self.weights_angles * weights, axis=1, keepdims=True)
         self.weights_det = np.sum(self.weights_det, keepdims=True)
 
-    def fp_angle(self, vol: ArrayLike, angle_ind: int) -> ArrayLike:
+    def fp_angle(self, vol: NDArray, angle_ind: int) -> NDArray:
         """Forward-project the volume to a single sinogram line.
 
         It applies the attenuation corrections.
 
         Parameters
         ----------
-        vol : ArrayLike
+        vol : NDArray
             The volume to forward-project.
         angle_ind : int
             The angle index to foward project.
 
         Returns
         -------
-        sino_line : ArrayLike
+        sino_line : NDArray
             The forward-projected sinogram line.
         """
         temp_vol = vol * self.att_vol_angles[angle_ind, ...]
@@ -509,14 +525,14 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return sino_line
 
-    def bp_angle(self, sino: ArrayLike, angle_ind: int, single_line: bool = False) -> ArrayLike:
+    def bp_angle(self, sino: NDArray, angle_ind: int, single_line: bool = False) -> NDArray:
         """Back-project a single sinogram line to the volume.
 
         It only applies the attenuation corrections if the projector is symmetric.
 
         Parameters
         ----------
-        sino : ArrayLike
+        sino : NDArray
             The sinogram to back-project or a single line.
         angle_ind : int
             The angle index to foward project.
@@ -525,7 +541,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The back-projected volume.
         """
         if single_line:
@@ -546,19 +562,19 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return np.sum(vol, axis=0)
 
-    def fp(self, vol: ArrayLike) -> ArrayLike:
+    def fp(self, vol: NDArray) -> NDArray:
         """Forward-project the volume to the sinogram.
 
         It applies the attenuation corrections.
 
         Parameters
         ----------
-        vol : ArrayLike
+        vol : NDArray
             The volume to forward-project.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The forward-projected sinogram.
         """
         if self.use_multithreading and isinstance(self.projector_backend, prj_backends.ProjectorBackendSKimage):
@@ -569,17 +585,17 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         return np.ascontiguousarray(np.stack(sino_lines, axis=-2))
 
-    def bp(self, sino: ArrayLike) -> ArrayLike:
+    def bp(self, sino: NDArray) -> NDArray:
         """Back-projection of the sinogram to the volume.
 
         Parameters
         ----------
-        sino : ArrayLike
+        sino : NDArray
             The sinogram to back-project.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The back-projected volume.
         """
         if self.is_symmetric:
