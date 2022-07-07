@@ -191,6 +191,8 @@ class Regularizer_Grad(BaseRegularizer):
         The number of dimensions. The default is 2.
     axes : Sequence, optional
         The axes over which it computes the gradient. If None, it uses the last 2. The default is None.
+    pad_mode: str, optional
+        The padding mode to use for the linear convolution. The default is "edge".
     norm : DataFidelityBase, optional
         The norm of the regularizer minimization. The default is DataFidelity_l12().
     """
@@ -202,6 +204,7 @@ class Regularizer_Grad(BaseRegularizer):
         weight: Union[float, ArrayLike],
         ndims: int = 2,
         axes: Optional[Sequence[int]] = None,
+        pad_mode: str = "edge",
         norm: DataFidelityBase = DataFidelity_l12(),
     ):
         super().__init__(weight=weight, norm=norm)
@@ -213,10 +216,11 @@ class Regularizer_Grad(BaseRegularizer):
             ndims = len(axes)
         self.ndims = ndims
         self.axes = axes
+        self.pad_mode = pad_mode.lower()
 
     def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
-        self.op = operators.TransformGradient(primal.shape, axes=self.axes)
+        self.op = operators.TransformGradient(primal.shape, axes=self.axes, pad_mode=self.pad_mode)
 
         self.sigma = 0.5
         self.norm.assign_data(None, sigma=self.sigma)
@@ -236,9 +240,10 @@ class Regularizer_TV2D(Regularizer_Grad):
         self,
         weight: Union[float, ArrayLike],
         axes: Optional[Sequence[int]] = None,
+        pad_mode: str = "edge",
         norm: DataFidelityBase = DataFidelity_l12(),
     ):
-        super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
+        super().__init__(weight=weight, ndims=2, axes=axes, pad_mode=pad_mode, norm=norm)
 
 
 class Regularizer_TV3D(Regularizer_Grad):
@@ -250,9 +255,10 @@ class Regularizer_TV3D(Regularizer_Grad):
         self,
         weight: Union[float, ArrayLike],
         axes: Optional[Sequence[int]] = None,
+        pad_mode: str = "edge",
         norm: DataFidelityBase = DataFidelity_l12(),
     ):
-        super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
+        super().__init__(weight=weight, ndims=3, axes=axes, pad_mode=pad_mode, norm=norm)
 
 
 class Regularizer_HubTV2D(Regularizer_Grad):
@@ -260,8 +266,10 @@ class Regularizer_HubTV2D(Regularizer_Grad):
 
     __reg_name__ = "HubTV2D"
 
-    def __init__(self, weight: Union[float, ArrayLike], huber_size: int, axes: Optional[Sequence[int]] = None):
-        super().__init__(weight=weight, ndims=2, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
+    def __init__(
+        self, weight: Union[float, ArrayLike], huber_size: int, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"
+    ):
+        super().__init__(weight=weight, ndims=2, axes=axes, pad_mode=pad_mode, norm=DataFidelity_Huber(huber_size, l2_axis=0))
 
 
 class Regularizer_HubTV3D(Regularizer_Grad):
@@ -269,8 +277,10 @@ class Regularizer_HubTV3D(Regularizer_Grad):
 
     __reg_name__ = "HubTV3D"
 
-    def __init__(self, weight: Union[float, ArrayLike], huber_size: int, axes: Optional[Sequence[int]] = None):
-        super().__init__(weight=weight, ndims=3, axes=axes, norm=DataFidelity_Huber(huber_size, l2_axis=0))
+    def __init__(
+        self, weight: Union[float, ArrayLike], huber_size: int, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"
+    ):
+        super().__init__(weight=weight, ndims=3, axes=axes, pad_mode=pad_mode, norm=DataFidelity_Huber(huber_size, l2_axis=0))
 
 
 class Regularizer_smooth2D(Regularizer_Grad):
@@ -279,9 +289,13 @@ class Regularizer_smooth2D(Regularizer_Grad):
     __reg_name__ = "smooth2D"
 
     def __init__(
-        self, weight: Union[float, ArrayLike], axes: Optional[Sequence[int]] = None, norm: DataFidelityBase = DataFidelity_l2()
+        self,
+        weight: Union[float, ArrayLike],
+        axes: Optional[Sequence[int]] = None,
+        pad_mode: str = "edge",
+        norm: DataFidelityBase = DataFidelity_l2(),
     ):
-        super().__init__(weight=weight, ndims=2, axes=axes, norm=norm)
+        super().__init__(weight=weight, ndims=2, axes=axes, pad_mode=pad_mode, norm=norm)
 
 
 class Regularizer_smooth3D(Regularizer_Grad):
@@ -290,9 +304,13 @@ class Regularizer_smooth3D(Regularizer_Grad):
     __reg_name__ = "smooth3D"
 
     def __init__(
-        self, weight: Union[float, ArrayLike], axes: Optional[Sequence[int]] = None, norm: DataFidelityBase = DataFidelity_l2()
+        self,
+        weight: Union[float, ArrayLike],
+        axes: Optional[Sequence[int]] = None,
+        pad_mode: str = "edge",
+        norm: DataFidelityBase = DataFidelity_l2(),
     ):
-        super().__init__(weight=weight, ndims=3, axes=axes, norm=norm)
+        super().__init__(weight=weight, ndims=3, axes=axes, pad_mode=pad_mode, norm=norm)
 
 
 class Regularizer_lap(BaseRegularizer):
@@ -300,7 +318,9 @@ class Regularizer_lap(BaseRegularizer):
 
     __reg_name__ = "lap"
 
-    def __init__(self, weight: Union[float, ArrayLike], ndims: int = 2, axes: Optional[Sequence[int]] = None):
+    def __init__(
+        self, weight: Union[float, ArrayLike], ndims: int = 2, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"
+    ):
         super().__init__(weight=weight, norm=DataFidelity_l1())
 
         if axes is None:
@@ -310,10 +330,11 @@ class Regularizer_lap(BaseRegularizer):
             ndims = len(axes)
         self.ndims = ndims
         self.axes = axes
+        self.pad_mode = pad_mode.lower()
 
     def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
-        self.op = operators.TransformLaplacian(primal.shape, axes=self.axes)
+        self.op = operators.TransformLaplacian(primal.shape, axes=self.axes, pad_mode=self.pad_mode)
 
         self.sigma = 0.25
         self.norm.assign_data(None, sigma=self.sigma)
@@ -326,8 +347,8 @@ class Regularizer_lap2D(Regularizer_lap):
 
     __reg_name__ = "lap2D"
 
-    def __init__(self, weight):
-        Regularizer_lap.__init__(self, weight=weight, ndims=2)
+    def __init__(self, weight, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"):
+        Regularizer_lap.__init__(self, weight=weight, ndims=2, axes=axes, pad_mode=pad_mode)
 
 
 class Regularizer_lap3D(Regularizer_lap):
@@ -335,8 +356,8 @@ class Regularizer_lap3D(Regularizer_lap):
 
     __reg_name__ = "lap3D"
 
-    def __init__(self, weight):
-        Regularizer_lap.__init__(self, weight=weight, ndims=3)
+    def __init__(self, weight, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"):
+        Regularizer_lap.__init__(self, weight=weight, ndims=3, axes=axes, pad_mode=pad_mode)
 
 
 class Regularizer_l1(BaseRegularizer):
