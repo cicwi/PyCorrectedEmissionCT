@@ -17,7 +17,7 @@ from . import regularizers
 from . import solvers
 from . import utils_reg
 
-from typing import Optional, Union, Callable
+from typing import Optional, Tuple, Union, Callable
 
 from numpy.typing import ArrayLike, NDArray
 
@@ -82,7 +82,7 @@ def denoise_image(
         reg = regularizer(lam_reg)
         return solvers.PDHG(verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term)
 
-    def solver_call(solver: solvers.Solver, b_test_mask: Optional[NDArray] = None) -> tuple[NDArray, Optional[ArrayLike]]:
+    def solver_call(solver: solvers.Solver, b_test_mask: Optional[NDArray] = None) -> Tuple[NDArray, Optional[ArrayLike]]:
         x0 = img.copy()
         if b_test_mask is not None:
             med_img = spsig.medfilt2d(img, kernel_size=11)

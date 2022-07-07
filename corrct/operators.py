@@ -15,7 +15,7 @@ import copy as cp
 
 from numpy.typing import ArrayLike, NDArray
 
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Tuple, Union
 
 from abc import abstractmethod
 
@@ -380,7 +380,7 @@ class TransformConvolution(BaseTransform):
         """
         return TransformConvolution(self.dir_shape, np.abs(self.kernel))
 
-    def _pad_valid(self, x: NDArray) -> tuple[NDArray, NDArray]:
+    def _pad_valid(self, x: NDArray) -> Tuple[NDArray, NDArray]:
         pad_width = (np.array(self.kernel.shape) - 1) // 2
         return np.pad(x, pad_width=pad_width[:, None], mode=self.pad_mode), pad_width  # type: ignore
 

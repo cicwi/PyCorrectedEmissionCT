@@ -154,7 +154,7 @@ class Solver(ABC):
     @abstractmethod
     def __call__(
         self, A: operators.BaseTransform, b: NDArray, *args: Any, **kwds: Any
-    ) -> tuple[NDArray, Optional[ArrayLike]]:
+    ) -> Tuple[NDArray, Optional[ArrayLike]]:
         """Execute the reconstruction of the data.
 
         Parameters
@@ -166,7 +166,7 @@ class Solver(ABC):
 
         Returns
         -------
-        tuple[NDArray, Optional[ArrayLike]]
+        Tuple[NDArray, Optional[ArrayLike]]
             The reconstruction and related information.
         """
 
@@ -254,7 +254,7 @@ class FBP(Solver):
         upper_limit: Union[float, NDArray, None] = None,
         x_mask: Optional[NDArray] = None,
         b_mask: Optional[NDArray] = None,
-    ) -> tuple[NDArray, Optional[ArrayLike]]:
+    ) -> Tuple[NDArray, Optional[ArrayLike]]:
         """
         Reconstruct the data, using the FBP algorithm.
 

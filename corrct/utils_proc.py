@@ -13,7 +13,7 @@ import scipy as sp
 
 import skimage.transform as skt
 
-from typing import Sequence, Optional, Union, Callable
+from typing import Sequence, Optional, Tuple, Union, Callable
 
 from numpy.typing import ArrayLike, DTypeLike, NDArray
 
@@ -589,7 +589,7 @@ def compute_frc(
     axes: Optional[Sequence[int]] = None,
     smooth: Optional[int] = 5,
     supersampling: int = 1,
-) -> tuple[NDArray, NDArray]:
+) -> Tuple[NDArray, NDArray]:
     """
     Compute the FRC/FSC (Fourier ring/shell correlation) between two images / volumes.
 
@@ -710,7 +710,7 @@ def norm_cross_corr(
     mode_full: bool = True,
     compute_profile: bool = True,
     plot: bool = True,
-) -> Union[NDArray, tuple[NDArray, NDArray]]:
+) -> Union[NDArray, Tuple[NDArray, NDArray]]:
     """
     Compute the normalized cross-correlation between two images.
 
