@@ -183,7 +183,7 @@ class Solver(ABC):
             raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
 
     @staticmethod
-    def _initialize_regularizer(regularizer: Union[BaseRegularizer, None, Sequence[BaseRegularizer]]) -> list[BaseRegularizer]:
+    def _initialize_regularizer(regularizer: Union[BaseRegularizer, None, Sequence[BaseRegularizer]]) -> Sequence[BaseRegularizer]:
         if regularizer is None:
             return []
         elif isinstance(regularizer, regularizers.BaseRegularizer):
