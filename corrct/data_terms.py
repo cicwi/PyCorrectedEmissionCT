@@ -74,7 +74,7 @@ class DataFidelityBase(ABC):
         """
         return self.info().lower()
 
-    def assign_data(self, data=None, sigma=1):
+    def assign_data(self, data=None, sigma=1.0):
         self.data = data
         self.sigma = sigma
         if self.data is not None:
@@ -142,7 +142,7 @@ class DataFidelity_l2(DataFidelityBase):
     def __init__(self, background=None):
         super().__init__(background=background)
 
-    def assign_data(self, data, sigma=1):
+    def assign_data(self, data, sigma=1.0):
         super().assign_data(data=data, sigma=sigma)
         self.sigma1 = 1 / (1 + sigma)
 
@@ -169,7 +169,7 @@ class DataFidelity_wl2(DataFidelity_l2):
         super().__init__(background=background)
         self.weights = weights
 
-    def assign_data(self, data, sigma=1):
+    def assign_data(self, data, sigma=1.0):
         super().assign_data(data=data, sigma=sigma)
         self.sigma1 = 1 / (1 + sigma / self.weights)
 
@@ -194,7 +194,7 @@ class DataFidelity_l2b(DataFidelity_l2):
         super().__init__(background=background)
         self.local_error = local_error
 
-    def assign_data(self, data, sigma=1):
+    def assign_data(self, data, sigma=1.0):
         self.sigma_error = sigma * self.local_error
         self.sigma_sqrt_error = sigma * np.sqrt(self.local_error)
         super().assign_data(data=data, sigma=sigma)
@@ -228,7 +228,7 @@ class DataFidelity_Huber(DataFidelityBase):
         self.local_error = local_error
         self.l2_axis = l2_axis
 
-    def assign_data(self, data, sigma=1):
+    def assign_data(self, data, sigma=1.0):
         self.one_sigma_error = 1 / (1 + sigma * self.local_error)
         super().assign_data(data=data, sigma=sigma)
 
@@ -319,7 +319,7 @@ class DataFidelity_l1b(DataFidelity_l1):
         super().__init__(background=background)
         self.local_error = local_error
 
-    def assign_data(self, data, sigma=1):
+    def assign_data(self, data, sigma=1.0):
         self.sigma_error = sigma * self.local_error
         super().assign_data(data=data, sigma=sigma)
 
