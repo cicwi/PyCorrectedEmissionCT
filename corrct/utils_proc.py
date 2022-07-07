@@ -21,7 +21,7 @@ from . import utils_reg
 
 from typing import Sequence, Optional, Union, Tuple, Callable
 
-from numpy.typing import ArrayLike, DTypeLike
+from numpy.typing import ArrayLike, DTypeLike, NDArray
 
 import matplotlib.pyplot as plt
 
@@ -78,20 +78,20 @@ def get_ball(
 
 
 def get_circular_mask(
-    vol_shape: ArrayLike,
+    vol_shape: Sequence[int],
     radius_offset: float = 0,
-    coords_ball: Optional[Sequence[int]] = None,
+    coords_ball: Optional[NDArray[np.signedinteger]] = None,
     vol_origin: Optional[Sequence[float]] = None,
     mask_drop_off: str = "const",
     super_sampling: int = 1,
     dtype: DTypeLike = np.float32,
-) -> ArrayLike:
+) -> NDArray:
     """
     Compute a circular mask for the reconstruction volume.
 
     Parameters
     ----------
-    vol_shape : ArrayLike
+    vol_shape : Sequence[int]
         The size of the volume.
     radius_offset : float, optional
         The offset with respect to the volume edge. The default is 0.
@@ -113,12 +113,12 @@ def get_circular_mask(
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The circular mask.
     """
-    vol_shape = np.array(vol_shape, dtype=int) * super_sampling
+    vol_shape_s = np.array(vol_shape, dtype=int) * super_sampling
 
-    coords = [np.linspace(-(s - 1) / (2 * super_sampling), (s - 1) / (2 * super_sampling), s, dtype=dtype) for s in vol_shape]
+    coords = [np.linspace(-(s - 1) / (2 * super_sampling), (s - 1) / (2 * super_sampling), s, dtype=dtype) for s in vol_shape_s]
     if vol_origin:
         if len(coords) != len(vol_origin):
             raise ValueError(f"The volume shape ({len(coords)}), and the origin shape ({len(vol_origin)}) should match")
@@ -126,11 +126,11 @@ def get_circular_mask(
     coords = np.meshgrid(*coords, indexing="ij")
 
     if coords_ball is None:
-        coords_ball = np.arange(-np.fmin(2, len(vol_shape)), 0, dtype=int)
+        coords_ball = np.arange(-np.fmin(2, len(vol_shape_s)), 0, dtype=int)
     else:
         coords_ball = np.array(coords_ball, dtype=int)
 
-    radius = np.min(vol_shape[coords_ball]) / (2 * super_sampling) + radius_offset
+    radius = np.min(vol_shape_s[coords_ball]) / (2 * super_sampling) + radius_offset
 
     coords = np.stack(coords, axis=0)
     if coords_ball.size == 1:
@@ -141,7 +141,7 @@ def get_circular_mask(
     if mask_drop_off.lower() == "const":
         mask = (dists <= radius).astype(dtype)
     elif mask_drop_off.lower() == "sinc":
-        cut_off = np.min(vol_shape[coords_ball]) / np.sqrt(2) - radius
+        cut_off = np.min(vol_shape_s[coords_ball]) / np.sqrt(2) - radius
         outter_region = 1.0 - (dists <= radius)
         outter_vals = 1.0 - np.sinc((dists - radius) / cut_off)
         mask = np.fmax(1 - outter_region * outter_vals, 0.0).astype(dtype)
@@ -149,7 +149,7 @@ def get_circular_mask(
         raise ValueError("Unknown drop-off function: %s" % mask_drop_off)
 
     if super_sampling > 1:
-        new_shape = np.stack([vol_shape // super_sampling, np.ones_like(vol_shape) * super_sampling], axis=1).flatten()
+        new_shape = np.stack([np.array(vol_shape), np.ones_like(vol_shape) * super_sampling], axis=1).flatten()
         mask = mask.reshape(new_shape)
         mask = np.mean(mask, axis=tuple(np.arange(1, len(vol_shape) * 2, 2, dtype=int)))
 
@@ -157,14 +157,14 @@ def get_circular_mask(
 
 
 def pad_sinogram(
-    sinogram: ArrayLike, width: Union[int, Sequence[int]], pad_axis: int = -1, mode: str = "edge", **kwds
-) -> ArrayLike:
+    sinogram: NDArray, width: Union[int, Sequence[int]], pad_axis: int = -1, mode: str = "edge", **kwds
+) -> NDArray:
     """
     Pad the sinogram.
 
     Parameters
     ----------
-    sinogram : ArrayLike
+    sinogram : NDArray
         The sinogram to pad.
     width : Union[int, Sequence[int]]
         The width of the padding. Normally, it should either be an int or a tuple(int, int).
@@ -177,7 +177,7 @@ def pad_sinogram(
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The padded sinogram.
     """
     pad_size = [(0, 0)] * len(sinogram.shape)
@@ -189,22 +189,22 @@ def pad_sinogram(
 
 
 def apply_flat_field(
-    projs: ArrayLike,
-    flats: ArrayLike,
-    darks: Optional[ArrayLike] = None,
+    projs: NDArray,
+    flats: NDArray,
+    darks: Optional[NDArray] = None,
     crop: Optional[Sequence[int]] = None,
     dtype: DTypeLike = np.float32,
-) -> ArrayLike:
+) -> NDArray:
     """
     Apply flat field.
 
     Parameters
     ----------
-    projs : ArrayLike
+    projs : NDArray
         Projections.
-    flats : ArrayLike
+    flats : NDArray
         Flat fields.
-    darks : Optional[ArrayLike], optional
+    darks : Optional[NDArray], optional
         Dark noise. The default is None.
     crop : Optional[Sequence[int]], optional
         Crop region. The default is None.
@@ -213,11 +213,12 @@ def apply_flat_field(
 
     Returns
     -------
-    ArrayLike
+    NDArray
         Falt-field corrected and linearized projections.
     """
     projs = np.ascontiguousarray(projs, dtype=dtype)
     flats = np.ascontiguousarray(flats, dtype=dtype)
+
     if crop is not None:
         projs = projs[..., crop[0] : crop[2], crop[1] : crop[3]]
         flats = flats[..., crop[0] : crop[2], crop[1] : crop[3]]
@@ -234,37 +235,37 @@ def apply_flat_field(
     return projs / flats
 
 
-def apply_minus_log(projs: ArrayLike) -> ArrayLike:
+def apply_minus_log(projs: NDArray) -> NDArray:
     """
     Apply -log.
 
     Parameters
     ----------
-    projs : ArrayLike
+    projs : NDArray
         Projections.
 
     Returns
     -------
-    ArrayLike
+    NDArray
         Linearized projections.
     """
     return np.fmax(-np.log(projs), 0.0)
 
 
-def rotate_proj_stack(data_vwu: ArrayLike, rot_angle_deg: float) -> ArrayLike:
+def rotate_proj_stack(data_vwu: NDArray, rot_angle_deg: float) -> NDArray:
     """
     Rotate the projection stack.
 
     Parameters
     ----------
-    data_vwu : ArrayLike
+    data_vwu : NDArray
         The projection stack, with dimensions [v, w, u] (vertical, omega / sample rotation, horizontal).
     rot_angle_deg : float
         The rotation angle in degrees.
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The rotated projection stack.
     """
     data_vwu_r = np.empty_like(data_vwu)
@@ -274,8 +275,8 @@ def rotate_proj_stack(data_vwu: ArrayLike, rot_angle_deg: float) -> ArrayLike:
 
 
 def compute_variance_poisson(
-    Is: ArrayLike, I0: Optional[ArrayLike] = None, var_I0: Optional[ArrayLike] = None, normalized: bool = True
-) -> ArrayLike:
+    Is: NDArray, I0: Optional[NDArray] = None, var_I0: Optional[NDArray] = None, normalized: bool = True
+) -> NDArray:
     """
     Compute the variance of a signal subject to Poisson noise, against a reference intensity.
 
@@ -284,11 +285,11 @@ def compute_variance_poisson(
 
     Parameters
     ----------
-    Is : ArrayLike
+    Is : NDArray
         The signal intensity.
-    I0 : Optional[ArrayLike], optional
+    I0 : Optional[NDArray], optional
         The reference intensity. The default is None.
-    var_I0 : Optional[ArrayLike], optional
+    var_I0 : Optional[NDArray], optional
         The variance of the reference intensity. The default is None.
         If not given, it will be assumed to be equal to I0.
     normalized : bool, optional
@@ -296,7 +297,7 @@ def compute_variance_poisson(
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The computed variance.
     """
     var_Is = np.abs(Is)
@@ -318,18 +319,18 @@ def compute_variance_poisson(
 
 
 def compute_variance_transmission(
-    Is: ArrayLike, I0: ArrayLike, var_I0: Optional[ArrayLike] = None, normalized: bool = True
-) -> ArrayLike:
+    Is: NDArray, I0: NDArray, var_I0: Optional[NDArray] = None, normalized: bool = True
+) -> NDArray:
     """
     Compute the variance of a linearized attenuation (transmission) signal, against a reference intensity.
 
     Parameters
     ----------
-    Is : ArrayLike
+    Is : NDArray
         The transmitted signal.
-    I0 : ArrayLike
+    I0 : NDArray
         The reference intensity.
-    var_I0 : Optional[ArrayLike], optional
+    var_I0 : Optional[NDArray], optional
         The variance of the reference intensity. The default is None.
         If not given, it will be assumed to be equal to I0.
     normalized : bool, optional
@@ -337,7 +338,7 @@ def compute_variance_transmission(
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The computed variance.
     """
     var_Is = np.abs(Is)
@@ -356,14 +357,14 @@ def compute_variance_transmission(
 
 
 def compute_variance_weigth(
-    variance: ArrayLike, *, percentile: float = 0.001, normalized: bool = False, use_std: bool = False, semilog: bool = False
-) -> ArrayLike:
+    variance: NDArray, *, percentile: float = 0.001, normalized: bool = False, use_std: bool = False, semilog: bool = False
+) -> NDArray:
     """
     Compute the weight associated to the given variance, in a weighted least-squares context.
 
     Parameters
     ----------
-    variance : ArrayLike
+    variance : NDArray
         The variance of the signal.
     percentile : float
         Minimum percentile to discard. The default is 0.001 (0.1%)
@@ -377,7 +378,7 @@ def compute_variance_weigth(
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The computed weights.
     """
     variance = np.abs(variance)
@@ -400,8 +401,8 @@ def compute_variance_weigth(
 
 
 def get_beam_profile(
-    voxel_size_um: float, beam_fwhm_um: float, profile_size: float = 1, beam_shape: str = "gaussian", verbose: bool = False
-) -> ArrayLike:
+    voxel_size_um: float, beam_fwhm_um: float, profile_size: int = 1, beam_shape: str = "gaussian", verbose: bool = False
+) -> NDArray:
     """
     Compute the pencil beam integration point spread function.
 
@@ -411,14 +412,14 @@ def get_beam_profile(
         The integration length.
     beam_fwhm_um : float
         The beam FWHM.
-    profile_size : float, optional
+    profile_size : int, optional
         The number of pixels of the PSF. The default is 1.
     verbose : bool, optional
         Whether to print verbose information. The default is False.
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The beam PSF.
     """
     y_points = profile_size * 2 + 1
@@ -464,36 +465,36 @@ def get_beam_profile(
 
     if verbose:
         f, ax = plt.subplots(1, 2, figsize=[10, 5])
-        ax[0].plot(xc, yb, label="Integration length")
-        ax[0].plot(xc, yg, label=f"{beam_shape.capitalize()} beam shape")
-        ax[0].plot(xc, yc, label="Resulting beam shape")
-        ax[0].legend()
-        ax[0].grid()
+        ax[0].plot(xc, yb, label="Integration length")  # type: ignore
+        ax[0].plot(xc, yg, label=f"{beam_shape.capitalize()} beam shape")  # type: ignore
+        ax[0].plot(xc, yc, label="Resulting beam shape")  # type: ignore
+        ax[0].legend()  # type: ignore
+        ax[0].grid()  # type: ignore
 
         pixels_pos = np.linspace(-(y_points - 1) / 2, (y_points - 1) / 2, y_points)
-        ax[1].bar(pixels_pos, y, label="PSF values", color="C1", width=1, linewidth=1.5, edgecolor="k", alpha=0.75)
-        ax[1].plot(xc / extent_um * profile_size * 2, yc, label="Resulting beam shape")
-        ax[1].legend()
-        ax[1].grid()
+        ax[1].bar(pixels_pos, y, label="PSF values", color="C1", width=1, linewidth=1.5, edgecolor="k", alpha=0.75)  # type: ignore
+        ax[1].plot(xc / extent_um * profile_size * 2, yc, label="Resulting beam shape")  # type: ignore
+        ax[1].legend()  # type: ignore
+        ax[1].grid()  # type: ignore
         plt.tight_layout()
 
     return y
 
 
-def compute_com(vol: ArrayLike, axes: Optional[ArrayLike] = None) -> ArrayLike:
+def compute_com(vol: NDArray, axes: Optional[ArrayLike] = None) -> NDArray:
     """
     Compute center-of-mass for given volume.
 
     Parameters
     ----------
-    vol : ArrayLike
+    vol : NDArray
         The input volume.
     axes : ArrayLike, optional
         Axes on which to compute center-of-mass. The default is None.
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The center-of-mass position.
     """
     if axes is None:
@@ -514,15 +515,15 @@ def compute_com(vol: ArrayLike, axes: Optional[ArrayLike] = None) -> ArrayLike:
 
 
 def denoise_image(
-    img: ArrayLike,
+    img: NDArray,
     reg_weight: Union[float, ArrayLike] = 1e-2,
     psf: Optional[ArrayLike] = None,
-    pix_weights: Optional[ArrayLike] = None,
+    pix_weights: Optional[NDArray] = None,
     iterations: int = 250,
     regularizer: Callable = lambda rw: regularizers.Regularizer_l1dwl(rw, "bior4.4", 3),
     lower_limit: Optional[float] = None,
     verbose: bool = False,
-) -> ArrayLike:
+) -> NDArray:
     """
     Denoise an image.
 
@@ -532,13 +533,13 @@ def denoise_image(
 
     Parameters
     ----------
-    img : ArrayLike
+    img : NDArray
         The image or sinogram to denoise.
     reg_weight : Union[float, Sequence[float], ArrayLike], optional
         Weight of the regularization term. The default is 1e-2.
         If a sequence / array is passed, all the different values will be tested.
         The one minimizing the error over the cross-validation set will be chosen and returned.
-    pix_weights : Optional[ArrayLike], optional
+    pix_weights : Optional[NDArray], optional
         The local weights of the pixels, for a weighted least-squares minimization.
         If None, a standard least-squares minimization is performed. The default is None.
     iterations : int, optional
@@ -552,7 +553,7 @@ def denoise_image(
 
     Returns
     -------
-    ArrayLike
+    NDArray
         Denoised image or sinogram.
     """
     if psf is None:
@@ -570,7 +571,7 @@ def denoise_image(
         reg = regularizer(lam_reg)
         return solvers.PDHG(verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term)
 
-    def solver_call(solver: solvers.Solver, b_test_mask: Optional[ArrayLike] = None) -> Tuple[ArrayLike, Tuple[ArrayLike]]:
+    def solver_call(solver: solvers.Solver, b_test_mask: Optional[NDArray] = None) -> Tuple[NDArray, Optional[ArrayLike]]:
         x0 = img.copy()
         if b_test_mask is not None:
             med_img = sp.signal.medfilt2d(img, kernel_size=11)
@@ -597,13 +598,13 @@ def denoise_image(
     return denoised_img
 
 
-def azimuthal_integration(img: ArrayLike, axes: Sequence[int] = (-2, -1), domain: str = "direct") -> ArrayLike:
+def azimuthal_integration(img: NDArray, axes: Sequence[int] = (-2, -1), domain: str = "direct") -> NDArray:
     """
     Compute the azimuthal integration of a n-dimensional image or a stack of them.
 
     Parameters
     ----------
-    img : ArrayLike
+    img : NDArray
         The image or stack of images.
     axes : tuple(int, int), optional
         Axes of that need to be azimuthally integrated. The default is (-2, -1).
@@ -617,7 +618,7 @@ def azimuthal_integration(img: ArrayLike, axes: Sequence[int] = (-2, -1), domain
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The azimuthally integrated profile.
     """
     num_dims_int = len(axes)
@@ -660,25 +661,25 @@ def azimuthal_integration(img: ArrayLike, axes: Sequence[int] = (-2, -1), domain
     r_all = np.concatenate((r_l.flatten(), r_u.flatten())).astype(int)
     if num_dims_img > num_dims_int:
         num_imgs = img.shape[0]
-        az_img = [None] * num_imgs
+        az_img = []
         for ii in range(num_imgs):
             w_all = np.concatenate((w_l[ii, ...].flatten(), w_u[ii, ...].flatten()))
-            az_img[ii] = np.bincount(r_all, weights=w_all)
+            az_img.append(np.bincount(r_all, weights=w_all))
         az_img = np.array(az_img)
-        return np.reshape(az_img, (*img_old_shape, az_img.shape[-1]))
+        return np.reshape(az_img, (*img_old_shape, az_img.shape[-1]))  # type: ignore
     else:
         w_all = np.concatenate((w_l.flatten(), w_u.flatten()))
         return np.bincount(r_all, weights=w_all)
 
 
 def compute_frc(
-    img1: ArrayLike,
-    img2: ArrayLike,
+    img1: NDArray,
+    img2: NDArray,
     snrt: float = 0.2071,
     axes: Optional[Sequence[int]] = None,
     smooth: Optional[int] = 5,
     supersampling: int = 1,
-) -> Tuple[ArrayLike, ArrayLike]:
+) -> Tuple[NDArray, NDArray]:
     """
     Compute the FRC/FSC (Fourier ring/shell correlation) between two images / volumes.
 
@@ -688,9 +689,9 @@ def compute_frc(
 
     Parameters
     ----------
-    img1 : ArrayLike
+    img1 : NDArray
         First image / volume.
-    img2 : ArrayLike
+    img2 : NDArray
         Second image / volume.
     snrt : float, optional
         SNR to be used for generating the threshold curve for resolution definition.
@@ -714,18 +715,18 @@ def compute_frc(
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The computed FRC/FSC.
-    ArrayLike
+    NDArray
         The threshold curve corresponding to the given threshod SNR.
     """
     img1_shape = np.array(img1.shape)
 
     if axes is None:
-        axes = np.arange(-len(img1_shape), 0)
+        axes = list(np.arange(-len(img1_shape), 0))
 
     if img2 is None:
-        if np.any(img1_shape[list(axes)] % 2 == 1):
+        if np.any(img1_shape[axes] % 2 == 1):
             raise ValueError(f"Image shape {img1_shape} along the chosen axes {axes} needs to be even.")
         raise NotImplementedError("Self FRC not implemented, yet.")
     else:
@@ -792,24 +793,24 @@ def compute_frc(
 
 
 def norm_cross_corr(
-    img1: ArrayLike,
-    img2: Optional[ArrayLike] = None,
-    axes: ArrayLike = (-2, -1),
+    img1: NDArray,
+    img2: Optional[NDArray] = None,
+    axes: Sequence[int] = (-2, -1),
     t_match: bool = False,
     mode_full: bool = True,
     compute_profile: bool = True,
     plot: bool = True,
-) -> ArrayLike:
+) -> Union[NDArray, tuple[NDArray, NDArray]]:
     """
     Compute the normalized cross-correlation between two images.
 
     Parameters
     ----------
-    img1 : ArrayLike
+    img1 : NDArray
         The first image.
-    img2 : ArrayLike, optional
+    img2 : NDArray, optional
         The second images. If None, it computes the auto-correlation. The default is None.
-    axes : ArrayLike, optional
+    axes : Sequence[int], optional
         Axes along which to compute the cross-correlation. The default is (-2, -1).
     t_match : bool, optional
         Whether to perform the cross-correlation for template matching. The default is False.
@@ -822,15 +823,15 @@ def norm_cross_corr(
 
     Returns
     -------
-    ArrayLike
+    NDArray
         The one-dimensional cross-correlation curve.
     """
 
-    def local_sum(x: ArrayLike, axes: ArrayLike) -> ArrayLike:
-        padding = [(0,)] * len(x.shape)
+    def local_sum(x: NDArray, axes: Sequence[int]) -> NDArray:
+        padding = np.zeros((len(x.shape, )), dtype=int)
         for a in axes:
-            padding[a] = (x.shape[a],)
-        y = np.pad(x, padding)
+            padding[a] = x.shape[a]
+        y: NDArray[np.floating] = np.pad(x, padding)
         for a in axes:
             y = np.cumsum(y, axis=a)
             slicing1 = [slice(None)] * len(x.shape)
