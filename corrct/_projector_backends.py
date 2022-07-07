@@ -13,7 +13,7 @@ import skimage.transform as skt
 from .models import ProjectionGeometry, VolumeGeometry
 
 from typing import Optional, Union
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 
 from abc import ABC, abstractmethod
 
@@ -34,25 +34,31 @@ except ImportError:
 
 
 class ProjectorBackend(ABC):
-    """Initialize base abstract projector backend class. All backends should inherit from this class.
+    """Initialize base abstract projector backend class. All backends should inherit from this class."""
 
-    Parameters
-    ----------
-    vol_geom : VolumeGeometry
-        The volume geometry.
-    angles_rot_rad : ArrayLike
-        The projection angles.
-    """
+    vol_geom: VolumeGeometry
+    vol_shape_zxy: NDArray
+    angles_w_rad: NDArray[np.floating]
+    prj_shape_vwu: NDArray
+    prj_shape_vu: NDArray
 
     def __init__(self, vol_geom: VolumeGeometry, angles_rot_rad: ArrayLike):
+        """
+        Parameters
+        ----------
+        vol_geom : VolumeGeometry
+            The volume geometry.
+        angles_rot_rad : ArrayLike
+            The projection angles.
+        """
         self.vol_geom = vol_geom
 
-        self.vol_shape_zxy = [*self.vol_geom.shape[2:], self.vol_geom.shape[0], self.vol_geom.shape[1]]
+        self.vol_shape_zxy = np.array([*self.vol_geom.shape[2:], self.vol_geom.shape[0], self.vol_geom.shape[1]])
         self.angles_w_rad = np.array(angles_rot_rad, ndmin=1)
 
         # Basic sizes, unless overridden
-        self.prj_shape_vwu = [*self.vol_geom.shape[2:], len(self.angles_w_rad), self.vol_geom.shape[1]]
-        self.prj_shape_vu = [*self.vol_geom.shape[2:], 1, self.vol_geom.shape[1]]
+        self.prj_shape_vwu = np.array([*self.vol_geom.shape[2:], len(self.angles_w_rad), self.vol_geom.shape[1]])
+        self.prj_shape_vu = np.array([*self.vol_geom.shape[2:], 1, self.vol_geom.shape[1]])
 
         self.is_initialized = False
 
@@ -96,7 +102,7 @@ class ProjectorBackend(ABC):
             self.dispose()
 
     @abstractmethod
-    def fp(self, vol: ArrayLike, angle_ind: int = None) -> ArrayLike:
+    def fp(self, vol: ArrayLike, angle_ind: Optional[int] = None) -> ArrayLike:
         """Forward-project volume.
 
         Forward-projection interface. Derived backends need to implement this method.
@@ -110,7 +116,7 @@ class ProjectorBackend(ABC):
         """
 
     @abstractmethod
-    def bp(self, prj: ArrayLike, angle_ind: int = None) -> ArrayLike:
+    def bp(self, prj: ArrayLike, angle_ind: Optional[int] = None) -> ArrayLike:
         """Back-project data.
 
         Back-projection interface. Derived backends need to implement this method.
@@ -140,13 +146,13 @@ class ProjectorBackend(ABC):
         """
 
     @staticmethod
-    def compute_attenuation(vol: ArrayLike, angle_rad: float, invert: bool = False) -> ArrayLike:
+    def compute_attenuation(vol: NDArray, angle_rad: float, invert: bool = False) -> NDArray:
         """
         Compute the attenuation volume for the given local attenuation, and angle.
 
         Parameters
         ----------
-        vol : ArrayLike
+        vol : NDArray
             The local attenuation volume.
         angle_rad : float
             The angle along which to compute the attenuation.
@@ -155,13 +161,13 @@ class ProjectorBackend(ABC):
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The attenuation volume.
         """
 
         def pad_vol(vol, edges):
-            paddings = [(0,)] * len(vol.shape)
-            paddings[-2], paddings[-1] = (edges[0],), (edges[1],)
+            paddings = np.zeros((len(vol.shape), 1), dtype=int)
+            paddings[-2], paddings[-1] = edges[0], edges[1]
             return np.pad(vol, paddings, mode="constant")
 
         def compute_cumsum(vol, angle_deg):
@@ -206,7 +212,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
     ----------
     vol_geom : VolumeGeometry
         The volume shape.
-    angles_rot_rad : tuple, list or ArrayLike
+    angles_rot_rad : ArrayLike
         The projection angles.
     rot_axis_shift_pix : float, optional
         Relative position of the rotation center with respect to the volume center. The default is 0.0.
@@ -217,7 +223,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
         In case the volume dimensionality is larger than 2D, and if a rotation axis shift is passed.
     """
 
-    def __init__(self, vol_geom: VolumeGeometry, angles_rot_rad: ArrayLike, rot_axis_shift_pix: float = 0.0):
+    def __init__(self, vol_geom: VolumeGeometry, angles_rot_rad: ArrayLike, rot_axis_shift_pix: Union[float, NDArray] = 0.0):
         if vol_geom.is_3D():
             raise ValueError("With the scikit-image backend only 2D volumes are allowed!")
         if not float(rot_axis_shift_pix) == 0.0:
@@ -239,19 +245,19 @@ class ProjectorBackendSKimage(ProjectorBackend):
     def _set_bpj_size(output_size):
         return dict(circle=False, output_size=output_size)
 
-    def fp(self, vol: ArrayLike, angle_ind: int = None) -> ArrayLike:
+    def fp(self, vol: NDArray, angle_ind: Optional[int] = None) -> NDArray:
         """Forward-projection of the volume to the sinogram or a single sinogram line.
 
         Parameters
         ----------
-        vol : ArrayLike
+        vol : NDArray
             The volume to forward-project.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The forward-projected sinogram or sinogram line.
         """
         if angle_ind is None:
@@ -262,19 +268,19 @@ class ProjectorBackendSKimage(ProjectorBackend):
         else:
             return np.squeeze(skt.radon(vol, self.angles_w_deg[angle_ind : angle_ind + 1 :]))
 
-    def bp(self, prj: ArrayLike, angle_ind: int = None) -> ArrayLike:
+    def bp(self, prj: NDArray, angle_ind: Optional[int] = None) -> NDArray:
         """Back-projection of a single sinogram line to the volume.
 
         Parameters
         ----------
-        prj : ArrayLike
+        prj : NDArray
             The sinogram to back-project or a single line.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The back-projected volume.
         """
         filter_name = self._set_filter_name(None)
@@ -287,12 +293,12 @@ class ProjectorBackendSKimage(ProjectorBackend):
         else:
             return skt.iradon(prj[:, np.newaxis], self.angles_w_deg[angle_ind : angle_ind + 1 :], **bpj_size, **filter_name)
 
-    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> ArrayLike:
+    def fbp(self, prj: NDArray, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> NDArray:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
         ----------
-        prj : ArrayLike
+        prj : NDArray
             The sinogram or stack of sinograms.
         fbp_filter : str | ArrayLike, optional
             The filter to use in the filtered back-projection.
@@ -301,11 +307,14 @@ class ProjectorBackendSKimage(ProjectorBackend):
 
         Returns
         -------
-        vol : ArrayLike
+        vol : NDArray
             The reconstructed volume.
         """
         if pad_mode.lower() != "constant":
             raise ValueError(f"Argument 'pad_mode' only supports 'constant', while {pad_mode.lower()} was given.")
+        if not isinstance(fbp_filter, str):
+            raise ValueError(f"Custom filters not supported in the scikit-image backend.")
+
         filter_name = self._set_filter_name(fbp_filter.lower())
         bpj_size = self._set_bpj_size(self.vol_shape_zxy[-1])
         if len(prj.shape) > 2:
@@ -326,9 +335,9 @@ class ProjectorBackendASTRA(ProjectorBackend):
     ----------
     vol_geom : VolumeGeometry
         The volume shape.
-    angles_rot_rad : tuple, list or ArrayLike
+    angles_rot_rad : ArrayLike
         The projection angles.
-    rot_axis_shift_pix : float, optional
+    rot_axis_shift_pix : float | NDArray, optional
         Relative position of the rotation center with respect to the volume center. The default is 0.0.
     prj_geom : ProjectionGeometry, optional
         The fully specified projection geometry.
@@ -348,14 +357,14 @@ class ProjectorBackendASTRA(ProjectorBackend):
         self,
         vol_geom: VolumeGeometry,
         angles_rot_rad: ArrayLike,
-        rot_axis_shift_pix: float = 0.0,
+        rot_axis_shift_pix: Union[ArrayLike, NDArray] = 0.0,
         prj_geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
         super_sampling: int = 1,
     ):
         if vol_geom.is_3D() and not has_cuda:
             raise ValueError("CUDA is not available: only 2D volumes are allowed!")
-        if not isinstance(rot_axis_shift_pix, (int, float, np.ndarray)):
+        if not isinstance(rot_axis_shift_pix, (int, float, list, tuple, np.ndarray)):
             raise ValueError(
                 "Rotation axis shift should either be an int, a float or a sequence of floats"
                 + f" ({type(rot_axis_shift_pix)} given instead)."
@@ -378,8 +387,8 @@ class ProjectorBackendASTRA(ProjectorBackend):
             if prj_geom.det_shape_vu is None:
                 prj_geom.det_shape_vu = np.array(self.vol_geom.shape[list([2, 1])], dtype=int)
             else:
-                self.prj_shape_vwu = [prj_geom.det_shape_vu[0], num_angles, prj_geom.det_shape_vu[1]]
-                self.prj_shape_vu = [prj_geom.det_shape_vu[0], 1, prj_geom.det_shape_vu[1]]
+                self.prj_shape_vwu = np.array([prj_geom.det_shape_vu[0], num_angles, prj_geom.det_shape_vu[1]])
+                self.prj_shape_vu = np.array([prj_geom.det_shape_vu[0], 1, prj_geom.det_shape_vu[1]])
 
             rot_geom = prj_geom.rotate(self.angles_w_rad)
 
@@ -471,13 +480,13 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         super().initialize()
 
-    def _check_data(self, x: ArrayLike, expected_shape: ArrayLike) -> ArrayLike:
+    def _check_data(self, x: NDArray, expected_shape: ArrayLike) -> NDArray:
         if x.dtype != np.float32:
             x = x.astype(np.float32)
         if not x.flags["C_CONTIGUOUS"]:
             x = np.ascontiguousarray(x)
         try:
-            return x.reshape(expected_shape)
+            return x.reshape(np.array(expected_shape, ndmin=1))
         except ValueError:
             print(f"Could not reshape input data of shape={x.shape} into expected shape={expected_shape}")
             raise
@@ -490,19 +499,19 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         super().dispose()
 
-    def fp(self, vol: ArrayLike, angle_ind: int = None) -> ArrayLike:
+    def fp(self, vol: NDArray, angle_ind: Optional[int] = None) -> NDArray:
         """Apply forward-projection of the volume to the sinogram or a single sinogram line.
 
         Parameters
         ----------
-        vol : ArrayLike
+        vol : NDArray
             The volume to forward-project.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The forward-projected sinogram or sinogram line.
         """
         self.initialize()
@@ -542,19 +551,19 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         return np.squeeze(prj)
 
-    def bp(self, prj: ArrayLike, angle_ind: int = None) -> ArrayLike:
+    def bp(self, prj: NDArray, angle_ind: Optional[int] = None) -> NDArray:
         """Apply back-projection of a single sinogram line to the volume.
 
         Parameters
         ----------
-        prj : ArrayLike
+        prj : NDArray
             The sinogram to back-project or a single line.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The back-projected volume.
         """
         self.initialize()
@@ -593,12 +602,12 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         return vol
 
-    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> ArrayLike:
+    def fbp(self, prj: NDArray, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> NDArray:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
 
         Parameters
         ----------
-        prj : ArrayLike
+        prj : NDArray
             The sinogram or stack of sinograms.
         fbp_filter : str | ArrayLike, optional
             The filter to use in the filtered back-projection.
@@ -607,21 +616,24 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         Returns
         -------
-        vol : ArrayLike
+        vol : NDArray
             The reconstructed volume.
         """
         prj_size_pad = max(64, int(2 ** np.ceil(np.log2(2 * self.prj_shape_vu[-1]))))
 
-        pad_width = [(0, 0)] * len(prj.shape)
         pad_edge_u = (prj_size_pad - prj.shape[-1]) / 2
-        pad_width[-1] = (int(np.ceil(pad_edge_u)), int(np.floor(pad_edge_u)))
-        prj_pad = np.pad(prj, pad_width=tuple(pad_width), mode=pad_mode)
+        pad_width = np.zeros((len(prj.shape), 2), dtype=int)
+        pad_width[-1, :] = (int(np.ceil(pad_edge_u)), int(np.floor(pad_edge_u)))
+
+        prj_pad = np.pad(prj, pad_width=tuple(pad_width), mode=pad_mode.lower())  # type: ignore
         prj_pad = np.roll(prj_pad, shift=-pad_width[-1][0], axis=-1)
 
         if isinstance(fbp_filter, str):
             fbp_filter = skt.radon_transform._get_fourier_filter(prj_size_pad, fbp_filter.lower())
             fbp_filter = np.squeeze(fbp_filter) * np.pi / 2
             fbp_filter = fbp_filter[: (fbp_filter.shape[-1]) // 2 + 1]
+        else:
+            fbp_filter = np.array(fbp_filter, ndmin=1)
 
         fbp_filter = fbp_filter / self.angles_w_rad.size
         fbp_filter = np.array(fbp_filter, ndmin=len(prj.shape))
@@ -634,10 +646,10 @@ class ProjectorBackendASTRA(ProjectorBackend):
             return self.bp(prj_f)
         else:
             num_lines = prj.shape[-3]
-            vols = [None] * num_lines
+            vols = []
 
             for ii_v in range(num_lines):
                 prj_v = np.ascontiguousarray(prj_f[ii_v, :, :])
-                vols[ii_v] = self.bp(prj_v)
+                vols.append(self.bp(prj_v))
 
             return np.ascontiguousarray(np.stack(vols, axis=0))
