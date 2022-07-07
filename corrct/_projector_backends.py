@@ -521,21 +521,24 @@ class ProjectorBackendASTRA(ProjectorBackend):
             prj_geom = self.proj_geom_ind[angle_ind]
             proj_id = self.proj_id[angle_ind]
 
+        vid = self.data_mod.link("-vol", self.astra_vol_geom, vol)
         try:
-            vid = self.data_mod.link("-vol", self.astra_vol_geom, vol)
             sid = self.data_mod.link("-sino", prj_geom, prj)
-
-            cfg = astra.creators.astra_dict("FP" + self.algo_type)
-            cfg["ProjectionDataId"] = sid
-            cfg["VolumeDataId"] = vid
-            cfg["ProjectorId"] = proj_id
-            fp_id = astra.algorithm.create(cfg)
             try:
-                astra.algorithm.run(fp_id)
+                cfg = astra.creators.astra_dict("FP" + self.algo_type)
+                cfg["ProjectionDataId"] = sid
+                cfg["VolumeDataId"] = vid
+                cfg["ProjectorId"] = proj_id
+
+                fp_id = astra.algorithm.create(cfg)
+                try:
+                    astra.algorithm.run(fp_id)
+                finally:
+                    astra.algorithm.delete(fp_id)
             finally:
-                astra.algorithm.delete(fp_id)
+                self.data_mod.delete([sid])
         finally:
-            self.data_mod.delete([vid, sid])
+            self.data_mod.delete([vid])
 
         return np.squeeze(prj)
 
@@ -569,21 +572,24 @@ class ProjectorBackendASTRA(ProjectorBackend):
             prj_geom = self.proj_geom_ind[angle_ind]
             proj_id = self.proj_id[angle_ind]
 
+        vid = self.data_mod.link("-vol", self.astra_vol_geom, vol)
         try:
-            vid = self.data_mod.link("-vol", self.astra_vol_geom, vol)
             sid = self.data_mod.link("-sino", prj_geom, prj)
 
-            cfg = astra.creators.astra_dict("BP" + self.algo_type)
-            cfg["ProjectionDataId"] = sid
-            cfg["ReconstructionDataId"] = vid
-            cfg["ProjectorId"] = proj_id
-            bp_id = astra.algorithm.create(cfg)
             try:
-                astra.algorithm.run(bp_id)
+                cfg = astra.creators.astra_dict("BP" + self.algo_type)
+                cfg["ProjectionDataId"] = sid
+                cfg["ReconstructionDataId"] = vid
+                cfg["ProjectorId"] = proj_id
+                bp_id = astra.algorithm.create(cfg)
+                try:
+                    astra.algorithm.run(bp_id)
+                finally:
+                    astra.algorithm.delete(bp_id)
             finally:
-                astra.algorithm.delete(bp_id)
+                self.data_mod.delete([sid])
         finally:
-            self.data_mod.delete([vid, sid])
+            self.data_mod.delete([vid])
 
         return vol
 
