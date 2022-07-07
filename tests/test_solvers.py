@@ -8,7 +8,9 @@ Test `corrct.solvers` package.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+import sys
 import numpy as np
+from numpy.typing import NDArray
 
 import unittest
 
@@ -18,6 +20,14 @@ from corrct import utils_proc
 
 
 eps = np.finfo(np.float32).eps
+
+
+def get_test_ind(func_name: str) -> str:
+    return func_name.split("_")[1]
+
+
+def print_max_deviation(test_ind: str, sol_diff: NDArray[np.floating]) -> None:
+    print(f"\n{test_ind} - Max absolute deviation is: {np.max(np.abs(sol_diff)):.6} -> ", end="", flush=True)
 
 
 class TestSolvers(unittest.TestCase):
@@ -68,75 +78,96 @@ class TestSolvers(unittest.TestCase):
 
     def test_000_SIRT(self):
         """Test SIRT algorithm in 2D."""
-
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
-        algo = solvers.Sirt()
-        sol, _ = algo(A, self.data_rand_2d, 500)
 
-        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_rand_2d - sol))), end="", flush=True)
+        algo = solvers.Sirt()
+        sol, _ = algo(A, self.data_rand_2d, 1000)
+
+        sol_diff = self.vol_rand_2d - sol
+        test_ind = get_test_ind(sys._getframe().f_code.co_name)
+        print_max_deviation(test_ind, sol_diff)
+
         assert np.all(np.isclose(sol, self.vol_rand_2d, atol=self.tolerance))
 
     def test_001_PDHG_LS(self):
         """Test Chambolle-Pock least-squares algorithm in 2D."""
-
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
+
         algo = solvers.PDHG()
         sol, _ = algo(A, self.data_rand_2d, 500)
 
-        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_rand_2d - sol))), end="", flush=True)
+        sol_diff = self.vol_rand_2d - sol
+        test_ind = get_test_ind(sys._getframe().f_code.co_name)
+        print_max_deviation(test_ind, sol_diff)
+
         assert np.all(np.isclose(sol, self.vol_rand_2d, atol=self.tolerance))
 
     def test_002_SIRT_TV(self):
         """Test SIRT TV-min algorithm in 2D."""
-
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
+
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.Sirt(regularizer=reg)
         sol, _ = algo(A, self.data_flat_2d, 2500)
 
-        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
+        sol_diff = self.vol_flat_2d - sol
+        test_ind = get_test_ind(sys._getframe().f_code.co_name)
+        print_max_deviation(test_ind, sol_diff)
+
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
     def test_003_PDHG_LS_TV(self):
         """Test Chambolle-Pock unconstrained least-squares TV-min algorithm in 2D."""
-
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
+
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.PDHG(regularizer=reg)
         sol, _ = algo(A, self.data_flat_2d, 500)
 
-        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
+        sol_diff = self.vol_flat_2d - sol
+        test_ind = get_test_ind(sys._getframe().f_code.co_name)
+        print_max_deviation(test_ind, sol_diff)
+
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
     def test_004_PDHG_LS_TV_unconstrained(self):
         """Test Chambolle-Pock unconstrained least-squares TV-min algorithm in 2D."""
-
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
+
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.PDHG(regularizer=reg)
         sol, _ = algo(A, self.data_flat_2d, 500)
 
-        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
+        sol_diff = self.vol_flat_2d - sol
+        test_ind = get_test_ind(sys._getframe().f_code.co_name)
+        print_max_deviation(test_ind, sol_diff)
+
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
     def test_005_PDHG_LS_TV_constrained01(self):
         """Test Chambolle-Pock constrained [0, 1] least-squares TV-min algorithm in 2D."""
-
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
+
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.PDHG(regularizer=reg)
         sol, _ = algo(A, self.data_flat_2d, 500, lower_limit=0, upper_limit=1)
 
-        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
+        sol_diff = self.vol_flat_2d - sol
+        test_ind = get_test_ind(sys._getframe().f_code.co_name)
+        print_max_deviation(test_ind, sol_diff)
+
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
     def test_006_PDHG_LS_TV_unconstrained_no_precond(self):
         """Test Chambolle-Pock not preconditioned, unconstrained least-squares TV-min algorithm in 2D."""
-
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
+
         reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.PDHG(regularizer=reg)
         sol, _ = algo(A, self.data_flat_2d, 1000, precondition=False)
 
-        print("Max absolute deviation is: {}. ".format(np.max(np.abs(self.vol_flat_2d - sol))), end="", flush=True)
+        sol_diff = self.vol_flat_2d - sol
+        test_ind = get_test_ind(sys._getframe().f_code.co_name)
+        print_max_deviation(test_ind, sol_diff)
+
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
