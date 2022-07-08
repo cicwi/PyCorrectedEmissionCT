@@ -7,7 +7,7 @@ Solvers for the tomographic reconstruction problem.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from typing import Optional, Sequence, Union, Tuple, Any
+from typing import Callable, Optional, Sequence, Union, Tuple, Any
 
 import numpy as np
 import numpy.random
@@ -318,17 +318,17 @@ class Sart(Solver):
 
     def __call__(  # noqa: C901
         self,
-        A,
-        b: ArrayLike,
+        A: Callable,
+        b: NDArray,
         iterations: int,
         A_num_rows: int,
-        x0: Optional[ArrayLike] = None,
-        At=None,
-        lower_limit: Union[float, ArrayLike, None] = None,
-        upper_limit: Union[float, ArrayLike, None] = None,
-        x_mask: Optional[ArrayLike] = None,
-        b_mask: Optional[ArrayLike] = None,
-    ) -> Tuple[ArrayLike, Optional[ArrayLike]]:
+        At: Callable,
+        x0: Optional[NDArray] = None,
+        lower_limit: Union[float, NDArray, None] = None,
+        upper_limit: Union[float, NDArray, None] = None,
+        x_mask: Optional[NDArray] = None,
+        b_mask: Optional[NDArray] = None,
+    ) -> Tuple[NDArray, Optional[ArrayLike]]:
         """
         Reconstruct the data, using the SART algorithm.
 
@@ -336,29 +336,29 @@ class Sart(Solver):
         ----------
         A : Union[Callable, BaseTransform]
             Projection operator.
-        b : ArrayLike
+        b : NDArray
             Data to reconstruct.
         iterations : int
             Number of iterations.
         A_num_rows : int
             Number of projections.
-        x0 : Optional[ArrayLike], optional
+        x0 : Optional[NDArray], optional
             Initial solution. The default is None.
         At : Callable, optional
             The back-projection operator. This is only needed if the projection operator does not have an adjoint.
             The default is None.
-        lower_limit : Union[float, ArrayLike], optional
+        lower_limit : Union[float, NDArray], optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, ArrayLike], optional
+        upper_limit : Union[float, NDArray], optional
             Upper clipping value. The default is None.
-        x_mask : Optional[ArrayLike], optional
+        x_mask : Optional[NDArray], optional
             Solution mask. The default is None.
-        b_mask : Optional[ArrayLike], optional
+        b_mask : Optional[NDArray], optional
             Data mask. The default is None.
 
         Returns
         -------
-        Tuple[ArrayLike, Tuple[Optional[ArrayLike]]]
+        Tuple[NDArray, Tuple[Optional[ArrayLike]]]
             The reconstruction, and the residuals.
         """
         # Back-projection diagonal re-scaling
