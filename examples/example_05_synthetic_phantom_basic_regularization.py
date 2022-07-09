@@ -93,9 +93,7 @@ data_term_lsb = cct.data_terms.DataFidelity_l2b(sino_variance)
 data_term_l1b = cct.data_terms.DataFidelity_l1b(sino_variance)
 data_term_hub = cct.data_terms.DataFidelity_Huber(sino_variance)
 
-solver_1 = cct.solvers.PDHG(
-    verbose=True, data_term=data_term_ls, regularizer=reg_1, tolerance=0, data_term_test=data_term_lsw
-)
+solver_1 = cct.solvers.PDHG(verbose=True, data_term=data_term_ls, regularizer=reg_1, tolerance=0, data_term_test=data_term_lsw)
 solver_2 = cct.solvers.PDHG(
     verbose=True, data_term=data_term_lsb, regularizer=reg_2, tolerance=0, data_term_test=data_term_lsw
 )
@@ -184,7 +182,7 @@ f.colorbar(im_reg, ax=ax_reg)
 
 f.tight_layout()
 
-(f_prof, ax) = plt.subplots()
+f, ax = plt.subplots()
 ax.plot(np.squeeze(expected_ph[..., 172]), label="Phantom")
 ax.plot(np.squeeze(rec_1[..., 172]), label=label_1)
 ax.plot(np.squeeze(rec_2[..., 172]), label=label_2)
@@ -192,8 +190,8 @@ ax.plot(np.squeeze(rec_3[..., 172]), label=label_3)
 ax.plot(np.squeeze(rec_4[..., 172]), label=label_4)
 ax.legend()
 ax.grid()
+f.tight_layout()
 
-plt.tight_layout()
 
 (f_prof, ax) = plt.subplots()
 ax.semilogy(np.squeeze(res_1[0]), "C0", label=label_1)
@@ -221,14 +219,14 @@ frcs = [None] * 4
 for ii, rec in enumerate([rec_1, rec_2, rec_3, rec_4]):
     frcs[ii], T = cct.utils_proc.compute_frc(expected_ph, rec, snrt=0.4142)
 
-(f_prof, axs) = plt.subplots(1, 1, sharex=True, sharey=True)
-axs.plot(np.squeeze(frcs[0]), label=solver_1.info().upper())
-axs.plot(np.squeeze(frcs[1]), label=solver_2.info().upper())
-axs.plot(np.squeeze(frcs[2]), label=solver_3.info().upper())
-axs.plot(np.squeeze(frcs[3]), label=solver_4.info().upper())
-axs.plot(np.squeeze(T), label="T 1/2 bit")
-axs.legend()
-axs.grid()
+f, ax = plt.subplots(1, 1, sharex=True, sharey=True)
+ax.plot(np.squeeze(frcs[0]), label=solver_1.info().upper())
+ax.plot(np.squeeze(frcs[1]), label=solver_2.info().upper())
+ax.plot(np.squeeze(frcs[2]), label=solver_3.info().upper())
+ax.plot(np.squeeze(frcs[3]), label=solver_4.info().upper())
+ax.plot(np.squeeze(T), label="T 1/2 bit")
+ax.legend()
+ax.grid()
+f.tight_layout()
 
-plt.tight_layout()
 plt.show(block=False)
