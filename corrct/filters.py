@@ -371,8 +371,8 @@ class FilterMR(Filter):
             A[:sino_size, ii] = self.projector(img).flatten()
 
             if self.lambda_smooth:
-                dx = np.diff(img, axis=0)
-                dy = np.diff(img, axis=1)
+                dx = np.diff(img, axis=-2)
+                dy = np.diff(img, axis=-1)
                 d = np.concatenate((dx.flatten(), dy.flatten()))
                 A[sino_size:, ii] = self.lambda_smooth * d
 
