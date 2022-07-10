@@ -112,7 +112,9 @@ def get_circular_mask(
     """
     vol_shape_s = np.array(vol_shape, dtype=int) * super_sampling
 
-    coords = [np.linspace(-(s - 1) / (2 * super_sampling), (s - 1) / (2 * super_sampling), s, dtype=dtype) for s in vol_shape_s]
+    coords = [
+        np.linspace(-(s - 1) / (2 * super_sampling), (s - 1) / (2 * super_sampling), s, dtype=dtype) for s in vol_shape_s
+    ]
     if vol_origin:
         if len(coords) != len(vol_origin):
             raise ValueError(f"The volume shape ({len(coords)}), and the origin shape ({len(vol_origin)}) should match")
@@ -738,7 +740,7 @@ def norm_cross_corr(
     """
 
     def local_sum(x: NDArray, axes: Sequence[int]) -> NDArray:
-        padding = np.zeros((len(x.shape, )), dtype=int)
+        padding = np.zeros(len(x.shape), dtype=int)
         for a in axes:
             padding[a] = x.shape[a]
         y: NDArray[np.floating] = np.pad(x, padding)
