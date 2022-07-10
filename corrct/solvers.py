@@ -80,6 +80,52 @@ Constraint_UpperLimit = regularizers.Constraint_UpperLimit
 # ---- Solvers ----
 
 
+NDArrayFloat = NDArray[np.floating]
+
+
+class SolutionInfo:
+    """Reconstruction info."""
+
+    method: str
+    iterations: int
+    max_iterations: int
+
+    residual0: Union[float, np.floating]
+    residual0_cv: Union[float, np.floating]
+
+    residuals: NDArrayFloat
+    residuals_cv: NDArrayFloat
+    tolerance: Union[float, np.floating, None]
+
+    def __init__(
+        self,
+        method: str,
+        max_iterations: int,
+        tolerance: Union[float, np.floating, None],
+        residual0: float = np.inf,
+        residual0_cv: float = np.inf,
+    ) -> None:
+        self.method = method
+        self.max_iterations = max_iterations
+        self.tolerance = tolerance
+
+        self.residual0 = residual0
+        self.residual0_cv = residual0_cv
+
+        self.residuals = np.zeros(max_iterations)
+        self.residuals_cv = np.zeros(max_iterations)
+
+        self.iterations = 0
+
+    @property
+    def residuals_rel(self) -> NDArrayFloat:
+        return self.residuals / self.residual0
+
+    @property
+    def residuals_cv_rel(self) -> NDArrayFloat:
+        return self.residuals_cv / self.residual0_cv
+
+
 class Solver(ABC):
     """
     Initialize the base solver class.
@@ -153,20 +199,20 @@ class Solver(ABC):
 
     @abstractmethod
     def __call__(
-        self, A: operators.BaseTransform, b: NDArray, *args: Any, **kwds: Any
-    ) -> Tuple[NDArray, Optional[ArrayLike]]:
+        self, A: operators.BaseTransform, b: NDArrayFloat, *args: Any, **kwds: Any
+    ) -> Tuple[NDArrayFloat, SolutionInfo]:
         """Execute the reconstruction of the data.
 
         Parameters
         ----------
         A : operators.BaseTransform
             The projection operator.
-        b : NDArray
+        b : NDArrayFloat
             The data to be reconstructed.
 
         Returns
         -------
-        Tuple[NDArray, Optional[ArrayLike]]
+        Tuple[NDArrayFloat, SolutionInfo]
             The reconstruction and related information.
         """
 
@@ -183,7 +229,9 @@ class Solver(ABC):
             raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
 
     @staticmethod
-    def _initialize_regularizer(regularizer: Union[BaseRegularizer, None, Sequence[BaseRegularizer]]) -> Sequence[BaseRegularizer]:
+    def _initialize_regularizer(
+        regularizer: Union[BaseRegularizer, None, Sequence[BaseRegularizer]]
+    ) -> Sequence[BaseRegularizer]:
         if regularizer is None:
             return []
         elif isinstance(regularizer, regularizers.BaseRegularizer):
@@ -201,7 +249,9 @@ class Solver(ABC):
             raise ValueError("Unknown regularizer type.")
 
     @staticmethod
-    def _initialize_b_masks(b: NDArray, b_mask: Optional[NDArray], b_test_mask: Optional[NDArray]):
+    def _initialize_b_masks(
+        b: NDArrayFloat, b_mask: Optional[NDArrayFloat], b_test_mask: Optional[NDArrayFloat]
+    ) -> Tuple[Optional[NDArrayFloat], Optional[NDArrayFloat]]:
         if b_test_mask is not None:
             if b_mask is None:
                 b_mask = np.ones_like(b)
@@ -213,48 +263,64 @@ class Solver(ABC):
 
 
 class FBP(Solver):
-    """
-    Implement the Filtered Back-Projection (FBP) algorithm.
-
-    Parameters
-    ----------
-    verbose : bool, optional
-        Turn on verbose output. The default is False.
-    regularizer : Optional[BaseRegularizer], optional
-        NOT USED, only exposed for compatibility reasons.
-    data_term : Union[str, DataFidelityBase], optional
-        NOT USED, only exposed for compatibility reasons.
-    fbp_filter : Union[str, NDArray], optional
-        FBP filter to use. Either a string from scikit-image's list of `iradon` filters, or an array. The default is "ramp".
-    pad_mode: str, optional
-        The padding mode to use for the linear convolution. The default is "constant".
-    """
+    """Implementation of the Filtered Back-Projection (FBP) algorithm."""
 
     def __init__(
         self,
         verbose: bool = False,
         regularizer: Optional[BaseRegularizer] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
-        fbp_filter: Union[str, NDArray, filters.Filter] = "ramp",
+        fbp_filter: Union[str, NDArrayFloat, filters.Filter] = "ramp",
         pad_mode: str = "constant",
     ):
+        """Initialize the Filtered Back-Projection (FBP) algorithm.
+
+        Parameters
+        ----------
+        verbose : bool, optional
+            Turn on verbose output. The default is False.
+        regularizer : Optional[BaseRegularizer], optional
+            NOT USED, only exposed for compatibility reasons.
+        data_term : Union[str, DataFidelityBase], optional
+            NOT USED, only exposed for compatibility reasons.
+        fbp_filter : Union[str, NDArrayFloat], optional
+            FBP filter to use. Either a string from scikit-image's list of `iradon` filters, or an array. The default is "ramp".
+        pad_mode: str, optional
+            The padding mode to use for the linear convolution. The default is "constant".
+        """
         super().__init__(verbose=verbose)
         if isinstance(fbp_filter, str):
             fbp_filter = fbp_filter.lower()
         self.fbp_filter = fbp_filter
         self.pad_mode = pad_mode
 
+    def info(self) -> str:
+        """
+        Return the solver info.
+
+        Returns
+        -------
+        str
+            Solver info string.
+        """
+        if isinstance(self.fbp_filter, str):
+            return super().info() + "-" + self.fbp_filter.upper()
+        elif isinstance(self.fbp_filter, np.ndarray):
+            return super().info() + "-" + filters.FilterCustom.__name__.upper()
+        else:
+            return super().info() + "-" + type(self.fbp_filter).__name__.upper()
+
     def __call__(  # noqa: C901
         self,
         A: operators.BaseTransform,
-        b: NDArray,
+        b: NDArrayFloat,
         iterations: int = 0,
-        x0: Optional[NDArray] = None,
-        lower_limit: Union[float, NDArray, None] = None,
-        upper_limit: Union[float, NDArray, None] = None,
-        x_mask: Optional[NDArray] = None,
-        b_mask: Optional[NDArray] = None,
-    ) -> Tuple[NDArray, Optional[ArrayLike]]:
+        x0: Optional[NDArrayFloat] = None,
+        lower_limit: Union[float, NDArrayFloat, None] = None,
+        upper_limit: Union[float, NDArrayFloat, None] = None,
+        x_mask: Optional[NDArrayFloat] = None,
+        b_mask: Optional[NDArrayFloat] = None,
+    ) -> Tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the FBP algorithm.
 
@@ -262,19 +328,19 @@ class FBP(Solver):
         ----------
         A : BaseTransform
             Projection operator.
-        b : NDArray
+        b : NDArrayFloat
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        x0 : Optional[NDArray], optional
+        x0 : Optional[NDArrayFloat], optional
             Initial solution. The default is None.
-        lower_limit : Union[float, NDArray], optional
+        lower_limit : Union[float, NDArrayFloat], optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, NDArray], optional
+        upper_limit : Union[float, NDArrayFloat], optional
             Upper clipping value. The default is None.
-        x_mask : Optional[NDArray], optional
+        x_mask : Optional[NDArrayFloat], optional
             Solution mask. The default is None.
-        b_mask : Optional[NDArray], optional
+        b_mask : Optional[NDArrayFloat], optional
             Data mask. The default is None.
 
         Raises
@@ -284,14 +350,16 @@ class FBP(Solver):
 
         Returns
         -------
-        Tuple[NDArray, None]
+        Tuple[NDArrayFloat, SolutionInfo]
             The reconstruction, and None.
         """
         if len(b.shape) < 2:
             raise ValueError(f"Data should be at least 2-dimensional (b.shape = {b.shape})")
 
+        info = SolutionInfo(self.info(), max_iterations=0, tolerance=0.0)
+
         if isinstance(self.fbp_filter, str):
-            if self.fbp_filter in ('mr', 'data'):
+            if self.fbp_filter in ("mr", "data"):
                 local_filter = filters.FilterMR(projector=A)
             else:
                 local_filter = filters.FilterFBP(filter_name=self.fbp_filter)
@@ -310,25 +378,60 @@ class FBP(Solver):
         if x_mask is not None:
             x *= x_mask
 
-        return x, None
+        return x, info
 
 
 class Sart(Solver):
     """Solver class implementing the Simultaneous Algebraic Reconstruction Technique (SART) algorithm."""
 
+    def compute_residual(
+        self,
+        A: Callable,
+        b: NDArrayFloat,
+        x: NDArrayFloat,
+        A_num_rows: int,
+        b_mask: Optional[NDArrayFloat],
+    ) -> NDArrayFloat:
+        """Compute the solution residual.
+
+        Parameters
+        ----------
+        A : Callable
+            The forward projector.
+        b : NDArrayFloat
+            The detector data.
+        x : NDArrayFloat
+            The current solution
+        A_num_rows : int
+            The number of projections.
+        b_mask : Optional[NDArrayFloat]
+            The mask to apply
+
+        Returns
+        -------
+        NDArrayFloat
+            The residual.
+        """
+        fp = np.stack([A(x, ii) for ii in range(A_num_rows)], axis=-1)
+        fp = np.ascontiguousarray(fp, dtype=b.dtype)
+        res = fp - b
+        if b_mask is not None:
+            res *= b_mask
+        return res
+
     def __call__(  # noqa: C901
         self,
         A: Callable,
-        b: NDArray,
+        b: NDArrayFloat,
         iterations: int,
         A_num_rows: int,
         At: Callable,
-        x0: Optional[NDArray] = None,
-        lower_limit: Union[float, NDArray, None] = None,
-        upper_limit: Union[float, NDArray, None] = None,
-        x_mask: Optional[NDArray] = None,
-        b_mask: Optional[NDArray] = None,
-    ) -> Tuple[NDArray, Optional[ArrayLike]]:
+        x0: Optional[NDArrayFloat] = None,
+        lower_limit: Union[float, NDArrayFloat, None] = None,
+        upper_limit: Union[float, NDArrayFloat, None] = None,
+        x_mask: Optional[NDArrayFloat] = None,
+        b_mask: Optional[NDArrayFloat] = None,
+    ) -> Tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the SART algorithm.
 
@@ -336,29 +439,29 @@ class Sart(Solver):
         ----------
         A : Union[Callable, BaseTransform]
             Projection operator.
-        b : NDArray
+        b : NDArrayFloat
             Data to reconstruct.
         iterations : int
             Number of iterations.
         A_num_rows : int
             Number of projections.
-        x0 : Optional[NDArray], optional
+        x0 : Optional[NDArrayFloat], optional
             Initial solution. The default is None.
         At : Callable, optional
             The back-projection operator. This is only needed if the projection operator does not have an adjoint.
             The default is None.
-        lower_limit : Union[float, NDArray], optional
+        lower_limit : Union[float, NDArrayFloat], optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, NDArray], optional
+        upper_limit : Union[float, NDArrayFloat], optional
             Upper clipping value. The default is None.
-        x_mask : Optional[NDArray], optional
+        x_mask : Optional[NDArrayFloat], optional
             Solution mask. The default is None.
-        b_mask : Optional[NDArray], optional
+        b_mask : Optional[NDArrayFloat], optional
             Data mask. The default is None.
 
         Returns
         -------
-        Tuple[NDArray, Tuple[Optional[ArrayLike]]]
+        Tuple[NDArrayFloat, SolutionInfo]
             The reconstruction, and the residuals.
         """
         # Back-projection diagonal re-scaling
@@ -381,19 +484,22 @@ class Sart(Solver):
 
         if x0 is None:
             x0 = np.zeros_like(x_ones)
+        else:
+            x0 = np.array(x0).copy()
         x = x0
 
+        info = SolutionInfo(self.info(), max_iterations=iterations, tolerance=self.tolerance)
+
         if self.tolerance is not None:
-            res_norm_0 = np.linalg.norm((b * b_mask).flatten())
-            res_norm_rel = np.ones((iterations,)) * self.tolerance
-        else:
-            res_norm_rel = None
+            res = self.compute_residual(A, b, x, A_num_rows=A_num_rows, b_mask=b_mask)
+            info.residual0 = np.linalg.norm(res.flatten())
 
         rows_sequence = np.random.permutation(A_num_rows)
 
         algo_info = "- Performing %s iterations: " % self.upper()
 
         for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
+            info.iterations += 1
 
             for ii_a in rows_sequence:
                 res = A(x, ii_a) - b[..., ii_a, :]
@@ -410,17 +516,13 @@ class Sart(Solver):
                     x *= x_mask
 
             if self.tolerance is not None:
-                res = np.empty_like(b)
-                for ii_a in rows_sequence:
-                    res[..., ii_a, :] = A(x, ii_a) - b[..., ii_a, :]
-                if b_mask is not None:
-                    res *= b_mask
-                res_norm_rel[ii] = np.linalg.norm(res) / res_norm_0
+                res = self.compute_residual(A, b, x, A_num_rows=A_num_rows, b_mask=b_mask)
+                info.residuals[ii] = np.linalg.norm(res)
 
-                if self.tolerance > res_norm_rel[ii]:
+                if self.tolerance > info.residuals[ii]:
                     break
 
-        return (x, res_norm_rel)
+        return x, info
 
 
 class Sirt(Solver):
@@ -477,15 +579,15 @@ class Sirt(Solver):
     def __call__(  # noqa: C901
         self,
         A: operators.BaseTransform,
-        b: NDArray,
+        b: NDArrayFloat,
         iterations: int,
-        x0: Optional[NDArray] = None,
-        lower_limit: Union[float, NDArray, None] = None,
-        upper_limit: Union[float, NDArray, None] = None,
-        x_mask: Optional[NDArray] = None,
-        b_mask: Optional[NDArray] = None,
-        b_test_mask: Optional[NDArray] = None,
-    ) -> Tuple[NDArray, Tuple[ArrayLike]]:
+        x0: Optional[NDArrayFloat] = None,
+        lower_limit: Union[float, NDArrayFloat, None] = None,
+        upper_limit: Union[float, NDArrayFloat, None] = None,
+        x_mask: Optional[NDArrayFloat] = None,
+        b_mask: Optional[NDArrayFloat] = None,
+        b_test_mask: Optional[NDArrayFloat] = None,
+    ) -> Tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the SIRT algorithm.
 
@@ -493,26 +595,26 @@ class Sirt(Solver):
         ----------
         A : BaseTransform
             Projection operator.
-        b : NDArray
+        b : NDArrayFloat
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        x0 : Optional[NDArray], optional
+        x0 : Optional[NDArrayFloat], optional
             Initial solution. The default is None.
-        lower_limit : Union[float, NDArray], optional
+        lower_limit : Union[float, NDArrayFloat], optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, NDArray], optional
+        upper_limit : Union[float, NDArrayFloat], optional
             Upper clipping value. The default is None.
-        x_mask : Optional[NDArray], optional
+        x_mask : Optional[NDArrayFloat], optional
             Solution mask. The default is None.
-        b_mask : Optional[NDArray], optional
+        b_mask : Optional[NDArrayFloat], optional
             Data mask. The default is None.
-        b_test_mask : Optional[NDArray], optional
+        b_test_mask : Optional[NDArrayFloat], optional
             Test data mask. The default is None.
 
         Returns
         -------
-        Tuple[NDArray, Tuple[ArrayLike]]
+        Tuple[NDArrayFloat, SolutionInfo]
             The reconstruction, and the residuals.
         """
         b = np.array(b)
@@ -520,30 +622,34 @@ class Sirt(Solver):
         (b_mask, b_test_mask) = self._initialize_b_masks(b, b_mask, b_test_mask)
 
         # Back-projection diagonal re-scaling
-        tau = np.ones_like(b)
+        b_ones = np.ones_like(b)
         if b_mask is not None:
-            tau *= b_mask
-        tau = np.abs(A.T(tau))
+            b_ones *= b_mask
+        tau = np.abs(A.T(b_ones))
         for reg in self.regularizer:
             tau += reg.initialize_sigma_tau(tau)
         tau[(tau / np.max(tau)) < 1e-5] = 1
         tau = self.relaxation / tau
 
         # Forward-projection diagonal re-scaling
-        sigma = np.ones_like(tau)
+        x_ones = np.ones_like(tau)
         if x_mask is not None:
-            sigma *= x_mask
-        sigma = np.abs(A(sigma))
+            x_ones *= x_mask
+        sigma = np.abs(A(x_ones))
         sigma[(sigma / np.max(sigma)) < 1e-5] = 1
         sigma = 1 / sigma
 
         if x0 is None:
-            x0 = A.T(b * sigma) * tau
+            x = np.zeros_like(x_ones)
         else:
-            x0 = np.array(x0).copy()
-        x = x0
+            x = np.array(x0).copy()
 
         self.data_term.assign_data(b, sigma)
+
+        info = SolutionInfo(self.info(), max_iterations=iterations, tolerance=self.tolerance)
+
+        if b_test_mask is not None or self.tolerance is not None:
+            Ax = A(x)
 
         if b_test_mask is not None:
             if self.data_term_test.background != self.data_term.background:
@@ -551,33 +657,29 @@ class Sirt(Solver):
                 self.data_term_test.background = self.data_term.background
             self.data_term_test.assign_data(b, sigma)
 
-            res_test_0 = self.data_term_test.compute_residual(0, mask=b_test_mask)
-            res_test_norm_0 = self.data_term_test.compute_residual_norm(res_test_0)
-            res_test_norm_rel = np.ones((iterations,))
-        else:
-            res_test_norm_rel = None
+            res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
+            info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
 
         if self.tolerance is not None:
-            res_0 = self.data_term.compute_residual(0, mask=b_mask)
-            res_norm_0 = self.data_term.compute_residual_norm(res_0)
-            res_norm_rel = np.ones((iterations,)) * self.tolerance
-        else:
-            res_norm_rel = None
+            res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
+            info.residual0 = self.data_term.compute_residual_norm(res_0)
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
 
         for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
+            info.iterations += 1
+
             Ax = A(x)
             res = self.data_term.compute_residual(Ax, mask=b_mask)
 
             if b_test_mask is not None:
                 res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                res_test_norm_rel[ii] = self.data_term_test.compute_residual_norm(res_test.flatten()) / res_test_norm_0
+                info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test.flatten())
 
             if self.tolerance is not None:
-                res_norm_rel[ii] = self.data_term.compute_residual_norm(res.flatten()) / res_norm_0
-                if self.tolerance > res_norm_rel[ii]:
+                info.residuals[ii] = self.data_term.compute_residual_norm(res.flatten())
+                if self.tolerance > info.residuals[ii]:
                     break
 
             q = [reg.initialize_dual() for reg in self.regularizer]
@@ -595,7 +697,7 @@ class Sirt(Solver):
             if x_mask is not None:
                 x *= x_mask
 
-        return (x, (res_norm_rel, res_test_norm_rel, ii))
+        return x, info
 
 
 class PDHG(Solver):
@@ -664,7 +766,7 @@ class PDHG(Solver):
             return cp.deepcopy(data_term)
 
     def power_method(
-        self, A: operators.BaseTransform, b: NDArray, iterations: int = 5
+        self, A: operators.BaseTransform, b: NDArrayFloat, iterations: int = 5
     ) -> Tuple[np.floating, Sequence[int], DTypeLike]:
         """
         Compute the l2-norm of the operator A, with the power method.
@@ -673,7 +775,7 @@ class PDHG(Solver):
         ----------
         A : BaseTransform
             Operator whose l2-norm needs to be computed.
-        b : NDArray
+        b : NDArrayFloat
             The data vector.
         iterations : int, optional
             Number of power method iterations. The default is 5.
@@ -683,7 +785,7 @@ class PDHG(Solver):
         Tuple[float, Tuple[int], DTypeLike]
             The l2-norm of A, and the shape and type of the solution.
         """
-        x: NDArray = np.array(np.random.rand(*b.shape))
+        x: NDArrayFloat = np.array(np.random.rand(*b.shape))
         x = x.astype(b.dtype)
         x /= np.linalg.norm(x)
         x = A.T(x)
@@ -700,7 +802,7 @@ class PDHG(Solver):
 
         return (L, x.shape, x.dtype)
 
-    def _get_data_sigma_tau_unpreconditioned(self, A: operators.BaseTransform, b: NDArray):
+    def _get_data_sigma_tau_unpreconditioned(self, A: operators.BaseTransform, b: NDArrayFloat):
         (L, x_shape, x_dtype) = self.power_method(A, b)
         tau = L
 
@@ -715,16 +817,16 @@ class PDHG(Solver):
     def __call__(  # noqa: C901
         self,
         A: operators.BaseTransform,
-        b: NDArray,
+        b: NDArrayFloat,
         iterations: int,
-        x0: Optional[NDArray] = None,
-        lower_limit: Union[float, NDArray, None] = None,
-        upper_limit: Union[float, NDArray, None] = None,
-        x_mask: Optional[NDArray] = None,
-        b_mask: Optional[NDArray] = None,
-        b_test_mask: Optional[NDArray] = None,
+        x0: Optional[NDArrayFloat] = None,
+        lower_limit: Union[float, NDArrayFloat, None] = None,
+        upper_limit: Union[float, NDArrayFloat, None] = None,
+        x_mask: Optional[NDArrayFloat] = None,
+        b_mask: Optional[NDArrayFloat] = None,
+        b_test_mask: Optional[NDArrayFloat] = None,
         precondition: bool = True,
-    ) -> Tuple[NDArray, Tuple[ArrayLike]]:
+    ) -> Tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the PDHG algorithm.
 
@@ -732,28 +834,28 @@ class PDHG(Solver):
         ----------
         A : BaseTransform
             Projection operator.
-        b : NDArray
+        b : NDArrayFloat
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        x0 : Optional[NDArray], optional
+        x0 : Optional[NDArrayFloat], optional
             Initial solution. The default is None.
-        lower_limit : Union[float, NDArray], optional
+        lower_limit : Union[float, NDArrayFloat], optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, NDArray], optional
+        upper_limit : Union[float, NDArrayFloat], optional
             Upper clipping value. The default is None.
-        x_mask : Optional[NDArray], optional
+        x_mask : Optional[NDArrayFloat], optional
             Solution mask. The default is None.
-        b_mask : Optional[NDArray], optional
+        b_mask : Optional[NDArrayFloat], optional
             Data mask. The default is None.
-        b_test_mask : Optional[NDArray], optional
+        b_test_mask : Optional[NDArrayFloat], optional
             Test data mask. The default is None.
         precondition : bool, optional
             Whether to use the preconditioned version of the algorithm. The default is True.
 
         Returns
         -------
-        Tuple[NDArray, Tuple[ArrayLike]]
+        Tuple[NDArrayFloat, SolutionInfo]
             The reconstruction, and the residuals.
         """
         b = np.array(b)
@@ -803,29 +905,30 @@ class PDHG(Solver):
 
         q = [reg.initialize_dual() for reg in self.regularizer]
 
-        if b_test_mask is not None:
-            if self.data_term_test.background != self.data_term.background:
-                print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
-                self.data_term_test.background = self.data_term.background
-            self.data_term_test.assign_data(b, sigma)
+        info = SolutionInfo(self.info(), max_iterations=iterations, tolerance=self.tolerance)
 
-            res_test_0 = self.data_term_test.compute_residual(0, mask=b_test_mask)
-            res_test_norm_0 = self.data_term_test.compute_residual_norm(res_test_0)
-            res_test_norm_rel = np.ones((iterations,))
-        else:
-            res_test_norm_rel = None
+        if b_test_mask is not None or self.tolerance is not None:
+            Ax = A(x)
 
-        if self.tolerance is not None:
-            res_0 = self.data_term.compute_residual(0, mask=b_mask)
-            res_norm_0 = self.data_term.compute_residual_norm(res_0)
-            res_norm_rel = np.ones((iterations,)) * self.tolerance
-        else:
-            res_norm_rel = None
+            if b_test_mask is not None:
+                if self.data_term_test.background != self.data_term.background:
+                    print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
+                    self.data_term_test.background = self.data_term.background
+                self.data_term_test.assign_data(b, sigma)
+
+                res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
+                info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
+
+            if self.tolerance is not None:
+                res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
+                info.residual0 = self.data_term.compute_residual_norm(res_0)
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
 
         for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
+            info.iterations += 1
+
             Ax_rlx = A(x_relax)
             self.data_term.update_dual(p, Ax_rlx)
             self.data_term.apply_proximal(p)
@@ -853,17 +956,17 @@ class PDHG(Solver):
             if b_test_mask is not None or self.tolerance is not None:
                 Ax = A(x)
 
-            if b_test_mask is not None:
-                res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                res_test_norm_rel[ii] = self.data_term_test.compute_residual_norm(res_test.flatten()) / res_test_norm_0
+                if b_test_mask is not None:
+                    res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
+                    info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test.flatten())
 
-            if self.tolerance is not None:
-                res = self.data_term.compute_residual(Ax, mask=b_mask)
-                res_norm_rel[ii] = self.data_term.compute_residual_norm(res.flatten()) / res_norm_0
-                if self.tolerance > res_norm_rel[ii]:
-                    break
+                if self.tolerance is not None:
+                    res = self.data_term.compute_residual(Ax, mask=b_mask)
+                    info.residuals[ii] = self.data_term.compute_residual_norm(res.flatten())
+                    if self.tolerance > info.residuals[ii]:
+                        break
 
-        return (x, (res_norm_rel, res_test_norm_rel, ii))
+        return x, info
 
 
 CP = PDHG

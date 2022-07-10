@@ -113,22 +113,20 @@ b_test_mask[test_pixels] = 1
 
 with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     print("Reconstructing:")
-    (rec_1, res_1) = solver_1(
+    (rec_1, info_1) = solver_1(
         A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
     )
     print("- Phantom power: %g, noise power: %g" % cct.utils_test.compute_error_power(expected_ph, rec_1))
-    (rec_2, res_2) = solver_2(
+    (rec_2, info_2) = solver_2(
         A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
     )
     print("- Phantom power: %g, noise power: %g" % cct.utils_test.compute_error_power(expected_ph, rec_2))
 
-    (rec_3, res_3) = solver_3(
+    (rec_3, info_3) = solver_3(
         A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
     )
     print("- Phantom power: %g, noise power: %g" % cct.utils_test.compute_error_power(expected_ph, rec_3))
-    (rec_4, res_4) = solver_4(
-        A, sino, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
-    )
+    (rec_4, info_4) = solver_4(A, sino, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask)
     print("- Phantom power: %g, noise power: %g" % cct.utils_test.compute_error_power(expected_ph, rec_4))
 
 label_1 = solver_1.info().upper()
@@ -192,22 +190,20 @@ ax.legend()
 ax.grid()
 f.tight_layout()
 
+f, ax = plt.subplots()
+ax.semilogy(np.squeeze(info_1.residuals_rel), "C0", label=label_1)
+ax.semilogy(np.squeeze(info_2.residuals_rel), "C1", label=label_2)
+ax.semilogy(np.squeeze(info_3.residuals_rel), "C2", label=label_3)
+ax.semilogy(np.squeeze(info_4.residuals_rel), "C3", label=label_4)
 
-(f_prof, ax) = plt.subplots()
-ax.semilogy(np.squeeze(res_1[0]), "C0", label=label_1)
-ax.semilogy(np.squeeze(res_2[0]), "C1", label=label_2)
-ax.semilogy(np.squeeze(res_3[0]), "C2", label=label_3)
-ax.semilogy(np.squeeze(res_4[0]), "C3", label=label_4)
+ax.semilogy(np.squeeze(info_1.residuals_cv_rel), "C0-.", label=(label_1 + " - Cross-Validation"))
+ax.semilogy(np.squeeze(info_2.residuals_cv_rel), "C1-.", label=(label_2 + " - Cross-Validation"))
+ax.semilogy(np.squeeze(info_3.residuals_cv_rel), "C2-.", label=(label_3 + " - Cross-Validation"))
+ax.semilogy(np.squeeze(info_4.residuals_cv_rel), "C3-.", label=(label_4 + " - Cross-Validation"))
 
-ax.semilogy(np.squeeze(res_1[1]), "C0-.", label=(label_1 + "-test"))
-ax.semilogy(np.squeeze(res_2[1]), "C1-.", label=(label_2 + "-test"))
-ax.semilogy(np.squeeze(res_3[1]), "C2-.", label=(label_3 + "-test"))
-ax.semilogy(np.squeeze(res_4[1]), "C3-.", label=(label_4 + "-test"))
 ax.legend()
 ax.grid()
-
 f.tight_layout()
-plt.show(block=False)
 
 print(np.std((expected_ph - rec_1) / (expected_ph + (expected_ph == 0))))
 print(np.std((expected_ph - rec_2) / (expected_ph + (expected_ph == 0))))

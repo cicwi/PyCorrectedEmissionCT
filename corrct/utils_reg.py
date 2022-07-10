@@ -12,8 +12,8 @@ from numpy.polynomial.polynomial import Polynomial
 
 import matplotlib.pyplot as plt
 
-from typing import Callable, Sequence, Optional, Tuple
-from numpy.typing import ArrayLike, DTypeLike
+from typing import Callable, Sequence, Optional, Tuple, Any, Union
+from numpy.typing import ArrayLike, DTypeLike, NDArray
 import inspect
 
 from abc import ABC, abstractmethod
@@ -23,8 +23,13 @@ import time as tm
 import concurrent.futures as cf
 import multiprocessing as mp
 
+from . import solvers
+
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
+
+
+NDArrayFloat = NDArray[np.floating]
 
 
 def create_random_test_mask(
@@ -58,6 +63,8 @@ def create_random_test_mask(
 class BaseRegularizationEstimation(ABC):
     """Base class for regularization parameter estimation class."""
 
+    _solver_calling_function: Optional[Callable[[Any], Tuple[NDArrayFloat, solvers.SolutionInfo]]]
+
     def __init__(
         self, data_dtype: DTypeLike = np.float32, parallel_eval: bool = True, verbose: bool = False, plot_result: bool = False
     ):
@@ -71,11 +78,17 @@ class BaseRegularizationEstimation(ABC):
         self._solver_calling_function = None
 
     @property
-    def solver_spawning_function(self):
+    def solver_spawning_function(self) -> Callable:
+        """Return the locally stored solver spawning function."""
+        if self._solver_spawning_function is None:
+            raise ValueError("Solver spawning function not initialized!")
         return self._solver_spawning_function
 
     @property
-    def solver_calling_function(self):
+    def solver_calling_function(self) -> Callable[[Any], Tuple[NDArrayFloat, solvers.SolutionInfo]]:
+        """Return the locally stored solver calling function."""
+        if self._solver_calling_function is None:
+            raise ValueError("Solver spawning function not initialized!")
         return self._solver_calling_function
 
     @solver_spawning_function.setter
@@ -137,14 +150,11 @@ class BaseRegularizationEstimation(ABC):
         rec : ArrayLike
             Reconstruction at the given weight.
         """
-        solver = self._solver_spawning_function(lam_reg)
-        (rec, rec_info) = self._solver_calling_function(solver, *args, **kwds)
-        test_residuals = rec_info[1]
+        solver = self.solver_spawning_function(lam_reg)
+        rec, rec_info = self.solver_calling_function(solver, *args, **kwds)
+
         # Output will be: test objective function cost, and reconstruction
-        if test_residuals is not None:
-            return test_residuals[-1], rec
-        else:
-            return None, rec
+        return rec_info.residuals_cv_rel[-1], rec
 
     def compute_reconstruction_error(self, lams_reg: ArrayLike, gnd_truth: ArrayLike) -> Tuple[ArrayLike, ArrayLike]:
         """Compute the reconstructions for each regularization weight error against the ground truth.
