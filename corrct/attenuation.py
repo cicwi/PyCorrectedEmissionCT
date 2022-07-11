@@ -45,7 +45,7 @@ class AttenuationVolume:
         emitted_local: Union[NDArray[np.floating], None],
         angles_rot_rad: ArrayLike,
         angles_det_rad: Union[NDArray[np.floating], ArrayLike, float] = np.pi / 2,
-        dtype: DTypeLike = np.float32
+        dtype: DTypeLike = np.float32,
     ):
         """
         Initialize the AttenuationVolume class.
@@ -133,7 +133,12 @@ class AttenuationVolume:
                     self.maps[ii, ...] *= self._compute_attenuation_angle_out(self.emitted_local, a)
 
     def plot_map(
-        self, ax: Axes, rot_ind: int, det_ind: int = 0, slice_ind: Optional[int] = None, axes: Union[Sequence[int], NDArray] = (-2, -1)
+        self,
+        ax: Axes,
+        rot_ind: int,
+        det_ind: int = 0,
+        slice_ind: Optional[int] = None,
+        axes: Union[Sequence[int], NDArray] = (-2, -1),
     ) -> None:
         """
         Plot the requested attenuation map.
@@ -191,7 +196,10 @@ class AttenuationVolume:
             ax.arrow(*beam_e_orig, *beam_e_dir, **arrow_args, fc="k", ec="k")
 
     def get_maps(
-        self, roi: Optional[ArrayLike] = None, rot_ind: Union[int, slice, None] = None, det_ind: Union[int, slice, None] = None
+        self,
+        roi: Optional[ArrayLike] = None,
+        rot_ind: Union[int, slice, Sequence[int], None] = None,
+        det_ind: Union[int, slice, Sequence[int], None] = None,
     ) -> NDArray:
         """
         Return the attenuation maps.
@@ -228,7 +236,10 @@ class AttenuationVolume:
         return maps
 
     def get_projector_args(
-        self, roi: Optional[ArrayLike] = None, rot_ind: Optional[int] = None, det_ind: Optional[int] = None
+        self,
+        roi: Optional[ArrayLike] = None,
+        rot_ind: Union[int, slice, Sequence[int], None] = None,
+        det_ind: Union[int, slice, Sequence[int], None] = None,
     ) -> Dict[str, NDArray]:
         """
         Return the projector arguments.
@@ -252,4 +263,3 @@ class AttenuationVolume:
         else:
             det_angles = self.angles_det_rad[det_ind]
         return dict(att_maps=self.get_maps(roi=roi, rot_ind=rot_ind, det_ind=det_ind), angles_detectors_rad=det_angles)
-
