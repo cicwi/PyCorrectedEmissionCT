@@ -19,6 +19,64 @@ from numpy.typing import ArrayLike, DTypeLike, NDArray
 from abc import ABC, abstractmethod
 
 
+def create_basis(
+    num_pixels: int,
+    binning_start: Optional[int] = None,
+    binning_type: str = "exponential",
+    normalized: bool = False,
+    dtype: DTypeLike = np.float32,
+) -> NDArray:
+    """Compute filter basis matrix.
+
+    Parameters
+    ----------
+    num_pixels : int
+        Number of filter fixels.
+    binning_start : Optional[int], optional
+        Starting displacement of the binning, by default None.
+    binning_type : str, optional
+        Type of pixel binning, by default "exponential".
+    normalized : bool, optional
+        Whether to normalize the bins by the window size.
+    dtype : DTypeLike, optional
+        Data type, by default np.float32.
+
+    Returns
+    -------
+    NDArray
+        The filter basis.
+    """
+    filter_positions = np.abs(np.fft.fftfreq(num_pixels, 1 / num_pixels))
+
+    window_size = 1
+    window_position = 0
+
+    basis_r = []
+    while window_position < filter_positions.max():
+        basis_tmp = np.zeros(filter_positions.shape, dtype=dtype)
+
+        binning_positions = np.logical_and(
+            window_position <= filter_positions, filter_positions < (window_position + window_size)
+        )
+
+        basis_val = 1.0
+        if normalized:
+            basis_val /= window_size
+
+        basis_tmp[binning_positions] = basis_val
+
+        basis_r.append(basis_tmp)
+        window_position += window_size
+
+        if binning_start is not None and window_position > binning_start:
+            if binning_type == "exponential":
+                window_size = 2 * window_size
+            else:
+                window_size += 1
+
+    return np.array(basis_r, dtype=dtype)
+
+
 class Filter(ABC):
     """Base FBP filter."""
 
@@ -71,6 +129,18 @@ class Filter(ABC):
         """
         return max(64, int(2 ** np.ceil(np.log2(2 * data_wu_shape[-1]))))
 
+    def to_fourier(self, data_wu: NDArray) -> NDArray:
+        if self.use_rfft:
+            return np.fft.rfft(data_wu, axis=-1)
+        else:
+            return np.fft.fft(data_wu, axis=-1)
+
+    def to_real(self, data_wu: NDArray) -> NDArray:
+        if self.use_rfft:
+            return np.fft.irfft(data_wu, axis=-1)
+        else:
+            return np.fft.ifft(data_wu, axis=-1).real
+
     @property
     def filter_fourier(self) -> NDArray[np.floating]:
         """Fourier representation of the filter.
@@ -91,11 +161,12 @@ class Filter(ABC):
         NDArray[np.floating]
             The filter in real-space.
         """
-        if self.use_rfft:
-            fbp_filter_r = np.fft.irfft(self.fbp_filter, axis=-1)
-        else:
-            fbp_filter_r = np.fft.ifft(self.fbp_filter, axis=-1).real
+        fbp_filter_r = self.to_real(self.fbp_filter)
         return np.fft.fftshift(fbp_filter_r)
+
+    @property
+    def num_filters(self) -> int:
+        return np.array(self.fbp_filter, ndmin=2).shape[-2]
 
     def apply_filter(self, data_wu: NDArray, fbp_filter: Optional[NDArray] = None) -> NDArray:
         """Apply the filter to the data_wu.
@@ -127,21 +198,24 @@ class Filter(ABC):
         prj_pad = np.pad(data_wu, pad_width=tuple(pad_width), mode=self.pad_mode)  # type: ignore
         prj_pad = np.roll(prj_pad, shift=-pad_width[-1][0], axis=-1)
 
-        local_filter = np.array(local_filter, ndmin=len(data_wu_shape))
+        prj_f = self.to_fourier(prj_pad)
 
-        if self.use_rfft:
-            prj_f = np.fft.rfft(prj_pad, axis=-1)
+        local_filter = np.array(local_filter, ndmin=2)
+
+        num_filters = local_filter.shape[-2]
+
+        if num_filters > 1:
+            prjs_f = [np.array([])] * num_filters
+
+            for ii, f in enumerate(local_filter):
+                prj_f_ii = prj_f * np.array(f, ndmin=len(data_wu_shape))
+                prj_f_ii = self.to_real(prj_f_ii)
+                prjs_f[ii] = prj_f_ii[..., : data_wu_shape[-1]]
+
+            return np.array(prjs_f)
         else:
-            prj_f = np.fft.fft(prj_pad, axis=-1)
-
-        prj_f *= local_filter
-
-        if self.use_rfft:
-            prj_f = np.fft.irfft(prj_f, axis=-1)[..., : data_wu_shape[-1]]
-        else:
-            prj_f = np.fft.ifft(prj_f, axis=-1)[..., : data_wu_shape[-1]].real
-
-        return prj_f
+            prj_f *= np.array(local_filter, ndmin=len(data_wu_shape))
+            return self.to_real(prj_f)[..., : data_wu_shape[-1]]
 
     @abstractmethod
     def compute_filter(self, data_wu: NDArray) -> None:
@@ -305,34 +379,11 @@ class FilterMR(Filter):
         """
         num_pad_pixels = self.get_padding_size(data_wu_shape)
 
-        filter_positions = np.abs(np.fft.fftfreq(num_pad_pixels, 1 / num_pad_pixels))
+        self.basis_r = create_basis(
+            num_pad_pixels, binning_type=self.binning_type, binning_start=self.binning_start, dtype=self.dtype
+        )
 
-        window_size = 1
-        window_position = 0
-
-        basis_r = []
-        while window_position < filter_positions.max():
-            basis_tmp = np.zeros(filter_positions.shape, dtype=self.dtype)
-
-            binning_positions = np.logical_and(
-                window_position <= filter_positions, filter_positions < (window_position + window_size)
-            )
-            basis_tmp[binning_positions] = 1.0
-
-            basis_r.append(basis_tmp)
-            window_position += window_size
-
-            if self.binning_start is not None and window_position > self.binning_start:
-                if self.binning_type == "exponential":
-                    window_size = 2 * window_size
-                else:
-                    window_size += 1
-
-        self.basis_r = np.array(basis_r, dtype=self.dtype)
-        if self.use_rfft:
-            self.basis_f = np.fft.rfft(self.basis_r, axis=-1).real
-        else:
-            self.basis_f = np.fft.fft(self.basis_f, axis=-1).real
+        self.basis_f = self.to_fourier(self.basis_r).real
 
         self.is_initialized = True
 
