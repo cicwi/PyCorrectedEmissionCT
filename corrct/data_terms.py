@@ -184,6 +184,9 @@ class DataFidelity_wl2(DataFidelity_l2):
             residual *= mask
         return residual
 
+    def compute_residual_norm(self, dual):
+        return np.linalg.norm((dual / np.sqrt(self.weights)).flatten(), ord=2) ** 2
+
 
 class DataFidelity_l2b(DataFidelity_l2):
     """l2-norm ball data-fidelity class."""
