@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Pre-processing and post-processing routines.
-
-Created on Tue Mar 24 15:25:14 2020
+Advanced denoising methods.
 
 @author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
 and ESRF - The European Synchrotron, Grenoble, France
@@ -82,7 +80,7 @@ def denoise_image(
         reg = regularizer(lam_reg)
         return solvers.PDHG(verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term)
 
-    def solver_call(solver: solvers.Solver, b_test_mask: Optional[NDArray] = None) -> Tuple[NDArray, Optional[ArrayLike]]:
+    def solver_call(solver: solvers.Solver, b_test_mask: Optional[NDArray] = None) -> Tuple[NDArray, solvers.SolutionInfo]:
         x0 = img.copy()
         if b_test_mask is not None:
             med_img = spsig.medfilt2d(img, kernel_size=11)
