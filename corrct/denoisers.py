@@ -14,9 +14,20 @@ from . import data_terms
 from . import regularizers
 from . import solvers
 from . import utils_reg
+from . import filters
+from . import utils_proc
 
-from typing import Optional, Tuple, Union, Callable
+try:
+    from . import utils_nn
 
+    has_nn = True
+
+except ImportError as ex:
+    print(ex)
+
+    has_nn = False
+
+from typing import List, Optional, Tuple, Union, Callable
 from numpy.typing import ArrayLike, NDArray
 
 
@@ -105,3 +116,105 @@ def denoise_image(
     (denoised_img, _) = solver_call(solver, None)
 
     return denoised_img
+
+
+class Denoiser_NNFBP:
+    """Denoise FBP using Neural Networks."""
+
+    projector: operators.BaseTransform
+    num_fbps: int
+    hidden_layers: List[int]
+
+    def __init__(
+        self,
+        projector: operators.BaseTransform,
+        num_fbps: int = 4,
+        num_pixels_train: int = 256,
+        num_pixels_test: int = 64,
+        hidden_layers: List[int] = list(),
+    ) -> None:
+        if not has_nn:
+            raise RuntimeError("Neural network module not available!")
+        self.projector = projector
+        self.num_fbps = num_fbps
+        self.num_pixels_train = num_pixels_train
+        self.num_pixels_test = num_pixels_test
+        self.hidden_layers = hidden_layers
+
+        self.filters = filters.FilterCustom([1.0])
+
+    def _get_normalization(self, vol: NDArray, percentile: Optional[float] = None) -> Tuple[float, float]:
+        if percentile is not None:
+            vol_sort = np.sort(vol.flatten())
+            ind_min = np.fmax(int(vol_sort.size * percentile), 0)
+            ind_max = np.fmin(int(vol_sort.size * (1 - percentile)), vol_sort.size - 1)
+            return vol_sort[ind_min], vol_sort[ind_max]
+        else:
+            return vol.min(), vol.max()
+
+    def _sub_sample_pixels(
+        self, num_pixels: int, lq_recs: List[NDArray], hq_recs: NDArray, hq_weights: Optional[NDArray] = None
+    ) -> utils_nn.DatasetPixel:
+        vol_mask = utils_proc.get_circular_mask(hq_recs.shape)
+        vol_linear_pos = np.arange(vol_mask.size)[vol_mask.flatten() == 1.0]
+
+        pixels_pos = np.random.permutation(int(np.sum(vol_mask)))[:num_pixels]
+        pixels_pos = vol_linear_pos[pixels_pos]
+
+        X = np.stack([lq_rec.flatten()[pixels_pos] for lq_rec in lq_recs], axis=-1)
+        y = hq_recs.flatten()[pixels_pos]
+
+        if hq_weights is None:
+            return utils_nn.DatasetPixel(X, y)
+        else:
+            w = hq_weights.flatten()[pixels_pos]
+            return utils_nn.DatasetPixel(X, y, w)
+
+    def compute_filter(self, lq_sinos: NDArray, hq_recs: NDArray, hq_weights: Optional[NDArray] = None) -> None:
+        num_pixels = self.filters.get_padding_size(lq_sinos.shape)
+        self.basis_r = filters.create_basis(num_pixels, binning_start=3, binning_type="exponential", normalized=True)
+        self.basis_f = self.filters.to_fourier(self.basis_r)
+        self.filters = filters.FilterCustom(self.basis_f)
+
+        num_filters = self.filters.num_filters
+
+        lq_sinos_filt = self.filters.apply_filter(lq_sinos)
+        lq_recs = [np.array([])] * num_filters
+        for ii in range(num_filters):
+            lq_recs[ii] = self.projector.T(lq_sinos_filt[ii])
+
+        # Compute scaling
+        min_max_features = [self._get_normalization(lq_rec) for lq_rec in lq_recs]
+        self.min_max_target = self._get_normalization(hq_recs)
+
+        lq_recs = [lq_rec / (max - min) for lq_rec, (min, max) in zip(lq_recs, min_max_features)]
+        hq_recs = hq_recs / (self.min_max_target[1] - self.min_max_target[0])
+
+        dset_train = self._sub_sample_pixels(self.num_pixels_train, lq_recs, hq_recs, hq_weights)
+        dset_test = self._sub_sample_pixels(self.num_pixels_test, lq_recs, hq_recs, hq_weights)
+
+        self.nn_fit = utils_nn.NeuralNetwork(layers_size=[num_filters, self.num_fbps, *self.hidden_layers, 1])
+        self.nn_fit.train(dset_train, dataset_test=dset_test)
+
+        w, b = self.nn_fit.model.get_weights()
+        new_filters = [filt / (max - min) for filt, (min, max) in zip(self.filters.filter_fourier, min_max_features)]
+        filters_learned = w[0].dot(new_filters)
+
+        self.filters = filters.FilterCustom(filters_learned)
+        w[0] = np.eye(self.num_fbps)
+
+        self.nn_predict = utils_nn.NeuralNetwork(layers_size=[self.num_fbps, self.num_fbps, *self.hidden_layers, 1])
+        self.nn_predict.model.set_weights(w, b)
+
+    def apply_filter(self, lq_sinos: NDArray) -> NDArray:
+        lq_sinos_filt = self.filters.apply_filter(lq_sinos)
+        lq_recs = [np.array([])] * self.filters.num_filters
+        for ii in range(self.filters.num_filters):
+            lq_recs[ii] = self.projector.T(lq_sinos_filt[ii])
+
+        lq_recs_stack = np.stack([lq_rec.flatten() for lq_rec in lq_recs], axis=-1)
+        dset_predict = utils_nn.DatasetPixel(lq_recs_stack)
+
+        hq_rec = self.nn_predict.predict(dset_predict)
+        hq_rec *= self.min_max_target[1] - self.min_max_target[0]
+        return hq_rec.reshape(lq_recs[0].shape)
