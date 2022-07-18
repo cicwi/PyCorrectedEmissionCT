@@ -25,15 +25,18 @@ except ImportError as exc:
 
 
 from typing import Union, Sequence, Optional, Tuple
-from numpy.typing import ArrayLike, DTypeLike
+from numpy.typing import DTypeLike, NDArray
 
 
-def roundup_to_pow2(x: Union[int, float, ArrayLike], p: int, data_type: DTypeLike = int) -> Union[int, float, ArrayLike]:
+NDArrayFloat = NDArray[np.floating]
+
+
+def roundup_to_pow2(x: Union[int, float, NDArrayFloat], p: int, data_type: DTypeLike = int) -> Union[int, float, NDArrayFloat]:
     """Round first argument to the power of 2 indicated by second argument.
 
     Parameters
     ----------
-    x : int | float | ArrayLike
+    x : int | float | NDArrayFloat
         Number to round up.
     p : int
         Power of 2.
@@ -42,7 +45,7 @@ def roundup_to_pow2(x: Union[int, float, ArrayLike], p: int, data_type: DTypeLik
 
     Returns
     -------
-    int | float | ArrayLike
+    int | float | NDArrayFloat
         Rounding up of input.
     """
     return np.ceil(np.array(x) / (2**p)).astype(data_type) * (2**p)
@@ -59,9 +62,9 @@ def download_phantom():
         % phantom_url
     )
 
-    import urllib
+    import urllib.request as urlreq
 
-    urllib.request.urlretrieve(phantom_url, phantom_path)
+    urlreq.urlretrieve(phantom_url, phantom_path)
 
     with open(phantom_path, "r") as f:
         file_content = f.read()
@@ -70,8 +73,8 @@ def download_phantom():
 
 
 def phantom_assign_concentration(
-    ph_or: ArrayLike, element: str = "Ca", em_line: str = "KA", in_energy_keV: float = 20.0
-) -> Tuple[ArrayLike, ArrayLike, ArrayLike]:
+    ph_or: NDArrayFloat, element: str = "Ca", em_line: str = "KA", in_energy_keV: float = 20.0
+) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
     """Build an XRF phantom.
 
     The created phantom has been used in:
@@ -81,7 +84,7 @@ def phantom_assign_concentration(
 
     Parameters
     ----------
-    ph_or : ArrayLike
+    ph_or : NDArrayFloat
         The phases phantom map.
     element : str, optional
         Element symbol. The default is "Ca".
@@ -92,11 +95,11 @@ def phantom_assign_concentration(
 
     Returns
     -------
-    vol_fluo_yield : ArrayLike
+    vol_fluo_yield : NDArrayFloat
         Voxel-wise fluorescence yields.
-    vol_att_in : ArrayLike
+    vol_att_in : NDArrayFloat
         Voxel-wise attenuation at the incoming beam energy.
-    vol_att_out : ArrayLike
+    vol_att_out : NDArrayFloat
         Voxel-wise attenuation at the emitted energy.
     """
     if not __has_physics__:
@@ -125,28 +128,82 @@ def phantom_assign_concentration(
     return (vol_fluo_yield, vol_lin_att_in, vol_lin_att_out)
 
 
+def add_noise(
+    img_clean: NDArray,
+    num_photons: Union[int, float],
+    add_poisson: bool = False,
+    readout_noise_std: Optional[float] = None,
+    background_avg: Optional[float] = None,
+    background_std: Optional[float] = None,
+    detection_efficiency: float = 1.0,
+) -> Tuple[NDArray, NDArray, float]:
+    """Add noise to an image (sinogram).
+
+    Parameters
+    ----------
+    img_clean : NDArray
+        The clean input image.
+    num_photons : Union[int, float]
+        Number of photons corresponding to the value 1.0 in the image.
+    add_poisson : bool, optional
+        Whether to add Poisson noise, by default False.
+    readout_noise_std : Optional[float], optional
+        Standard deviation of the readout noise, by default None.
+    background_avg : Optional[float], optional
+        Average value of the background, by default None.
+    background_std : Optional[float], optional
+        Standard deviation of the background, by default None.
+    detection_efficiency : float, optional
+        Efficiency of the detection (e.g. detector solid angle, inclination, etc), by default 1.0.
+
+    Returns
+    -------
+    Tuple[NDArray, NDArray, float]
+        The noised and clean images (scaled by the photons and efficiency), and the background.
+    """
+    img_clean = num_photons * detection_efficiency * img_clean.copy()
+
+    img_noise = img_clean.copy()
+
+    if background_avg is not None:
+        if background_std is None:
+            background_std = background_avg * 5e-2
+        img_noise += (
+            num_photons * detection_efficiency * np.abs(np.random.normal(background_avg, background_std, img_clean.shape))
+        )
+
+    background = float(np.mean((img_noise - img_clean).flatten()))
+
+    if add_poisson:
+        img_noise = np.random.poisson(img_noise).astype(np.float32)
+    if readout_noise_std is not None:
+        img_noise += np.random.normal(0, readout_noise_std, img_clean.shape)
+
+    return img_noise, img_clean, background
+
+
 def create_sino(
-    ph: ArrayLike,
+    ph: NDArrayFloat,
     num_angles: int,
-    start_angle_deg: float = 0,
-    end_angle_deg: float = 180,
-    dwell_time_s: float = 1,
+    start_angle_deg: float = 0.0,
+    end_angle_deg: float = 180.0,
+    dwell_time_s: float = 1.0,
     photon_flux: float = 1e9,
-    detectors_pos_rad: Union[float, Sequence] = (np.pi / 2),
-    vol_att_in: Optional[ArrayLike] = None,
-    vol_att_out: Optional[ArrayLike] = None,
-    psf: Optional[ArrayLike] = None,
+    detectors_pos_rad: Union[float, Sequence[float], NDArrayFloat] = (np.pi / 2),
+    vol_att_in: Optional[NDArrayFloat] = None,
+    vol_att_out: Optional[NDArrayFloat] = None,
+    psf: Optional[NDArrayFloat] = None,
     background_avg: Optional[float] = None,
     background_std: Optional[float] = None,
     add_poisson: bool = False,
     readout_noise_std: Optional[float] = None,
     data_type: DTypeLike = np.float32,
-) -> Tuple[ArrayLike, ArrayLike, ArrayLike]:
+) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, float]:
     """Compute the sinogram from a given phantom.
 
     Parameters
     ----------
-    ph : ArrayLike
+    ph : NDArrayFloat
         The phantom volume, with the expected average photon production per voxel per impinging photon.
     num_angles : int
         The number of angles.
@@ -158,13 +215,13 @@ def create_sino(
         The acquisition time per sinogram point. The default is 1.
     photon_flux : float, optional
         The impinging photon flux per unit time (second). The default is 1e9.
-    detectors_pos_rad : float | tuple | list | ArrayLike, optional
+    detectors_pos_rad : float | Sequence[float] | NDArrayFloat, optional
         Detector(s) positions in radians, with respect to incoming beam. The default is (np.pi / 2).
-    vol_att_in : ArrayLike, optional
+    vol_att_in : NDArrayFloat, optional
         Attenuation volume for the incoming beam. The default is None.
-    vol_att_out : ArrayLike, optional
+    vol_att_out : NDArrayFloat, optional
         Attenuation volume for the outgoing beam. The default is None.
-    psf : ArrayLike, optional
+    psf : NDArrayFloat, optional
         Point spread function or probing beam profile. The default is None.
     background_avg : float, optional
         Background average value. The default is None.
@@ -179,7 +236,7 @@ def create_sino(
 
     Returns
     -------
-    Tuple[ArrayLike, ArrayLike, ArrayLike]
+    Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, float]
         The sinogram (detector readings), the angular positions, and the expected average phton production per voxel.
     """
     print("Creating Sino with %d angles" % num_angles)
@@ -192,40 +249,35 @@ def create_sino(
 
     if vol_att_in is None and vol_att_out is None:
         with projectors.ProjectorUncorrected(ph.shape, angles_rad) as p:
-            sino = num_photons * detector_solidangle_sr * p.fp(ph)
+            sino = p.fp(ph)
     else:
         with projectors.ProjectorAttenuationXRF(
             ph.shape, angles_rad, att_in=vol_att_in, att_out=vol_att_out, angles_detectors_rad=detectors_pos_rad, psf=psf
         ) as p:
-            sino = num_photons * detector_solidangle_sr * p.fp(ph)
+            sino = p.fp(ph)
 
     # Adding noise
-    sino_noise = sino.copy()
-    if background_avg is not None:
-        if background_std is None:
-            background_std = background_avg * 5e-2
-        sino_noise += (
-            num_photons * detector_solidangle_sr * np.abs(np.random.normal(background_avg, background_std, sino.shape))
-        )
-
-    background = np.mean((sino_noise - sino).flatten())
-
-    if add_poisson:
-        sino_noise = np.random.poisson(sino_noise).astype(np.float32)
-    if readout_noise_std is not None:
-        sino_noise += np.random.normal(0, readout_noise_std, sino.shape)
+    sino_noise, sino, background = add_noise(
+        sino,
+        num_photons=num_photons,
+        add_poisson=add_poisson,
+        readout_noise_std=readout_noise_std,
+        background_avg=background_avg,
+        background_std=background_std,
+        detection_efficiency=detector_solidangle_sr,
+    )
 
     return (sino_noise, angles_rad, ph * num_photons * detector_solidangle_sr, background)
 
 
-def compute_error_power(expected_vol: ArrayLike, computed_vol: ArrayLike) -> Tuple[float, float]:
+def compute_error_power(expected_vol: NDArrayFloat, computed_vol: NDArrayFloat) -> Tuple[float, float]:
     """Compute the expected volume signal power, and computed volume error power.
 
     Parameters
     ----------
-    expected_vol : ArrayLike
+    expected_vol : NDArrayFloat
         The expected volume.
-    computed_vol : ArrayLike
+    computed_vol : NDArrayFloat
         The computed volume.
 
     Returns
