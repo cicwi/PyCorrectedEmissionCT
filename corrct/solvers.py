@@ -651,18 +651,18 @@ class Sirt(Solver):
         if b_test_mask is not None or self.tolerance is not None:
             Ax = A(x)
 
-        if b_test_mask is not None:
-            if self.data_term_test.background != self.data_term.background:
-                print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
-                self.data_term_test.background = self.data_term.background
-            self.data_term_test.assign_data(b, sigma)
+            if b_test_mask is not None:
+                if self.data_term_test.background != self.data_term.background:
+                    print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
+                    self.data_term_test.background = self.data_term.background
+                self.data_term_test.assign_data(b, sigma)
 
-            res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-            info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
+                res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
+                info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
 
-        if self.tolerance is not None:
-            res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
-            info.residual0 = self.data_term.compute_residual_norm(res_0)
+            if self.tolerance is not None:
+                res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
+                info.residual0 = self.data_term.compute_residual_norm(res_0)
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
@@ -675,10 +675,10 @@ class Sirt(Solver):
 
             if b_test_mask is not None:
                 res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test.flatten())
+                info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test)
 
             if self.tolerance is not None:
-                info.residuals[ii] = self.data_term.compute_residual_norm(res.flatten())
+                info.residuals[ii] = self.data_term.compute_residual_norm(res)
                 if self.tolerance > info.residuals[ii]:
                     break
 
@@ -958,11 +958,11 @@ class PDHG(Solver):
 
                 if b_test_mask is not None:
                     res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                    info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test.flatten())
+                    info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test)
 
                 if self.tolerance is not None:
                     res = self.data_term.compute_residual(Ax, mask=b_mask)
-                    info.residuals[ii] = self.data_term.compute_residual_norm(res.flatten())
+                    info.residuals[ii] = self.data_term.compute_residual_norm(res)
                     if self.tolerance > info.residuals[ii]:
                         break
 
