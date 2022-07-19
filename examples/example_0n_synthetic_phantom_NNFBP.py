@@ -46,14 +46,27 @@ vol_shape_xy = [256, 256]
 ph = np.squeeze(phantom.modified_shepp_logan([*vol_shape_xy, 3]).astype(np.float32))
 ph = ph[:, :, 1]
 
-sino_clean, angles_rad_clean, expected_ph, _ = cct.utils_test.create_sino(ph, 180, add_poisson=True, photon_flux=1e6)
-sino_noise, angles_rad_noise, _, _ = cct.utils_test.create_sino(ph, 60, add_poisson=True, photon_flux=1e4)
-sino_noise2, angles_rad_noise, _, _ = cct.utils_test.create_sino(ph, 60, add_poisson=True, photon_flux=1e4)
+photon_flux_clean = 1e6
+photon_flux_delta = 1e2
+photon_flux_noise = photon_flux_clean / photon_flux_delta
+
+num_angles_clean = int(180 * np.pi / 2)
+num_angles_noise = 60
+
+sino_clean, angles_rad_clean, expected_ph, _ = cct.utils_test.create_sino(
+    ph, num_angles_clean, add_poisson=True, photon_flux=photon_flux_clean
+)
+sino_noise, angles_rad_noise, _, _ = cct.utils_test.create_sino(
+    ph, num_angles_noise, add_poisson=True, photon_flux=photon_flux_noise
+)
+sino_noise2, angles_rad_noise, _, _ = cct.utils_test.create_sino(
+    ph, num_angles_noise, add_poisson=True, photon_flux=photon_flux_noise
+)
 
 expected_ph /= 1e4
 sino_clean /= 1e4
-sino_noise /= 1e2
-sino_noise2 /= 1e2
+sino_noise /= 1e4 / photon_flux_delta
+sino_noise2 /= 1e4 / photon_flux_delta
 
 print("High quality:")
 with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad_clean) as p:
@@ -67,7 +80,7 @@ with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad_noise) as p:
     solver_fbp_sl = cct.solvers.FBP()
     vol_lq, _ = solver_fbp_sl(p, sino_noise)
     print("Training:")
-    den = cct.denoisers.Denoiser_NNFBP(projector=p, num_pixels_train=256, num_fbps=7, hidden_layers=[3])
+    den = cct.denoisers.Denoiser_NNFBP(projector=p, num_pixels_train=512, num_fbps=7, hidden_layers=[5, 3])
     den.compute_filter(sino_noise, vol_hq)
 
     # vol_den_hq = den.apply_filter(sino_noise)
@@ -114,6 +127,20 @@ ax.plot(np.squeeze((vol_den_hq2 * vol_mask)[..., 172]), label=learned_rec_label)
 ax.plot(np.squeeze(expected_ph[..., 172]), label="Phantom")
 ax.legend()
 ax.grid()
+f.tight_layout()
+
+vols = [vol_hq * vol_mask, vol_lq * vol_mask, vol_den_hq2 * vol_mask]
+frcs = [None] * len(vols)
+for ii, rec in enumerate(vols):
+    frcs[ii], T = cct.utils_proc.compute_frc(expected_ph, rec, snrt=0.4142, supersampling=2)
+
+f, axs = plt.subplots(1, 1, sharex=True, sharey=True)
+axs.plot(np.squeeze(frcs[0]), label="High quality")
+axs.plot(np.squeeze(frcs[1]), label="Low quality")
+axs.plot(np.squeeze(frcs[2]), label=learned_rec_label)
+axs.plot(np.squeeze(T), label="T 1/2 bit")
+axs.legend()
+axs.grid()
 f.tight_layout()
 
 plt.show(block=False)

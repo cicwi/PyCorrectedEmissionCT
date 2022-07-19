@@ -111,7 +111,7 @@ class NeuralNetwork:
         self,
         layers_size: Sequence[int],
         device: str = "cuda" if tcd.is_available() else "cpu",
-        batch_size: int = 128,
+        batch_size: int = 512,
     ) -> None:
         self.layers_size = layers_size
 
@@ -119,14 +119,14 @@ class NeuralNetwork:
         self.batch_size = batch_size
         self.model = ModelNetwork(self.layers_size).to(self.device)
 
-    def train(self, dataset_train: tdt.Dataset, iterations: int = 10000, dataset_test: Optional[tdt.Dataset] = None):
+    def train(self, dataset_train: tdt.Dataset, iterations: int = 10_000, dataset_test: Optional[tdt.Dataset] = None):
         dataloader_train = tdt.DataLoader(dataset_train, batch_size=self.batch_size)
         datasize_train = len(dataloader_train.dataset)
         if dataset_test is not None:
             dataloader_test = tdt.DataLoader(dataset_test, batch_size=self.batch_size)
             datasize_test = len(dataloader_test.dataset)
         loss_fn = tnn.MSELoss(reduction="sum")
-        optimizer = top.Adam(self.model.parameters(), lr=1e-3)
+        optimizer = top.AdamW(self.model.parameters(), lr=1e-3)
 
         self.model.train()
         for ii in range(iterations):
