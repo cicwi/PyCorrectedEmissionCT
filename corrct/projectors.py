@@ -581,7 +581,12 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         else:
             sino_lines = [self.fp_angle(vol, ii) for ii in range(len(self.angles_rot_rad))]
 
-        return np.ascontiguousarray(np.stack(sino_lines, axis=-2))
+        sino_lines = np.ascontiguousarray(np.stack(sino_lines, axis=-2))
+
+        if sino_lines.shape[0] == 1:
+            sino_lines = np.squeeze(sino_lines, axis=0)
+
+        return sino_lines
 
     def bp(self, sino: NDArray) -> NDArray:
         """Back-projection of the sinogram to the volume.
