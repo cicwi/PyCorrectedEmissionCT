@@ -73,7 +73,7 @@ def download_phantom():
 
 
 def phantom_assign_concentration(
-    ph_or: NDArrayFloat, element: str = "Ca", em_line: str = "KA", in_energy_keV: float = 20.0
+    ph_or: NDArrayFloat, element: str = "Ca", em_line: str = "KA", in_energy_keV: float = 20.0, voxel_size_um: float = 0.5
 ) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
     """Build an XRF phantom.
 
@@ -111,7 +111,6 @@ def phantom_assign_concentration(
 
     conv_mm_to_cm = 1e-1
     conv_um_to_mm = 1e-3
-    voxel_size_um = 0.5
     voxel_size_cm = voxel_size_um * conv_um_to_mm * conv_mm_to_cm  # cm to micron
     print("Sample size: [%g %g] um" % (ph_or.shape[0] * voxel_size_um, ph_or.shape[1] * voxel_size_um))
 
