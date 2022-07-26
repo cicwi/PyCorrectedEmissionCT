@@ -21,9 +21,10 @@ from abc import ABC, abstractmethod
 
 def create_basis(
     num_pixels: int,
-    binning_start: Optional[int] = None,
+    binning_start: Optional[int] = 2,
     binning_type: str = "exponential",
     normalized: bool = False,
+    order: int = 1,
     dtype: DTypeLike = np.float32,
 ) -> NDArray:
     """Compute filter basis matrix.
@@ -33,11 +34,13 @@ def create_basis(
     num_pixels : int
         Number of filter fixels.
     binning_start : Optional[int], optional
-        Starting displacement of the binning, by default None.
+        Starting displacement of the binning, by default 2.
     binning_type : str, optional
         Type of pixel binning, by default "exponential".
     normalized : bool, optional
         Whether to normalize the bins by the window size.
+    order : int, optional
+        Order of the basis functions. Only 0 and 1 supported, by default 1.
     dtype : DTypeLike, optional
         Data type, by default np.float32.
 
@@ -55,15 +58,18 @@ def create_basis(
     while window_position < filter_positions.max():
         basis_tmp = np.zeros(filter_positions.shape, dtype=dtype)
 
-        binning_positions = np.logical_and(
-            window_position <= filter_positions, filter_positions < (window_position + window_size)
-        )
+        if order == 0:
+            binning_positions = np.logical_and(
+                window_position <= filter_positions, filter_positions < (window_position + window_size)
+            )
 
-        basis_val = 1.0
-        if normalized:
-            basis_val /= window_size
+            basis_val = 1.0
+            if normalized:
+                basis_val /= window_size
 
-        basis_tmp[binning_positions] = basis_val
+            basis_tmp[binning_positions] = basis_val
+        else:
+            basis_tmp = np.fmax(1.0 - filter_positions / (window_position + window_size), 0.0)
 
         basis_r.append(basis_tmp)
         window_position += window_size
@@ -71,10 +77,26 @@ def create_basis(
         if binning_start is not None and window_position > binning_start:
             if binning_type == "exponential":
                 window_size = 2 * window_size
-            else:
+            elif binning_type == "incremental":
                 window_size += 1
+            elif binning_type == "custom":
+                window_size += int(np.sqrt(window_position - binning_start))
+            else:
+                raise ValueError(f"Invalid 'binning_type' = {binning_type}.")
 
-    return np.array(basis_r, dtype=dtype)
+    basis_r = np.array(basis_r, dtype=dtype)
+
+    if order > 1:
+        for ii in range(1, basis_r.shape[0]):
+            for jj in range(0, ii):
+                other_vec = basis_r[jj, ...]
+                other_vec_norm_2 = other_vec.dot(other_vec)
+                basis_r[ii, ...] -= other_vec * other_vec.dot(basis_r[ii, ...]) / other_vec_norm_2
+        if normalized:
+            basis_r /= np.linalg.norm(basis_r, ord=1, axis=-1)
+
+    return basis_r
+
 
 
 class Filter(ABC):
