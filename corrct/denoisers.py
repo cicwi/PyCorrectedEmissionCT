@@ -27,7 +27,7 @@ except ImportError as ex:
 
     has_nn = False
 
-from typing import List, Optional, Tuple, Union, Callable
+from typing import List, Optional, Sequence, Tuple, Union, Callable
 from numpy.typing import ArrayLike, NDArray
 
 
@@ -170,37 +170,43 @@ if has_nn:
                 w = hq_weights.flatten()[pixels_pos]
                 return utils_nn.DatasetPixel(X, y, w)
 
-        def compute_filter(
-            self, lq_sinos: NDArray, hq_recs: NDArray, hq_weights: Optional[NDArray] = None, train_epochs: int = 10_000
+        def fit(
+            self,
+            inp_sinos: NDArray,
+            tgt_recs: NDArray,
+            train_epochs: int = 10_000,
+            init_fit_weights: Optional[Tuple[Sequence[NDArray], Sequence[NDArray]]] = None,
         ) -> None:
-            num_pixels = self.filters.get_padding_size(lq_sinos.shape)
+            num_pixels = self.filters.get_padding_size(inp_sinos.shape)
             self.basis_r = filters.create_basis(num_pixels, binning_start=3, binning_type="exponential", normalized=True)
             self.basis_f = self.filters.to_fourier(self.basis_r)
             self.filters = filters.FilterCustom(self.basis_f)
 
             num_filters = self.filters.num_filters
 
-            lq_sinos_filt = self.filters.apply_filter(lq_sinos)
-            lq_recs = [np.array([])] * num_filters
+            inp_sinos_filt = self.filters.apply_filter(inp_sinos)
+            inp_recs = [np.array([])] * num_filters
             for ii in range(num_filters):
-                lq_recs[ii] = self.projector.T(lq_sinos_filt[ii])
+                inp_recs[ii] = self.projector.T(inp_sinos_filt[ii])
 
             # Compute scaling
-            min_max_features = [self._get_normalization(lq_rec) for lq_rec in lq_recs]
-            self.min_max_target = self._get_normalization(hq_recs)
+            min_max_features = [self._get_normalization(lq_rec, percentile=0.001) for lq_rec in inp_recs]
+            self.min_max_target = self._get_normalization(tgt_recs)
 
-            lq_recs = [lq_rec / (max - min) for lq_rec, (min, max) in zip(lq_recs, min_max_features)]
-            hq_recs = hq_recs / (self.min_max_target[1] - self.min_max_target[0])
+            inp_recs = [inp_rec / (max - min) for inp_rec, (min, max) in zip(inp_recs, min_max_features)]
+            tgt_recs = tgt_recs / (self.min_max_target[1] - self.min_max_target[0])
 
-            dset_train = self._sub_sample_pixels(self.num_pixels_train, lq_recs, hq_recs, hq_weights)
-            dset_test = self._sub_sample_pixels(self.num_pixels_test, lq_recs, hq_recs, hq_weights)
+            dset_train = self._sub_sample_pixels(self.num_pixels_train, inp_recs, tgt_recs)
+            dset_test = self._sub_sample_pixels(self.num_pixels_test, inp_recs, tgt_recs)
 
             self.nn_fit = utils_nn.NeuralNetwork(layers_size=[num_filters, self.num_fbps, *self.hidden_layers, 1])
+            if init_fit_weights is not None:
+                self.nn_fit.model.set_weights(weights=init_fit_weights[0], biases=init_fit_weights[1])
             self.nn_fit.train(dset_train, dataset_test=dset_test, iterations=train_epochs)
 
             w, b = self.nn_fit.model.get_weights()
-            new_filters = [filt / (max - min) for filt, (min, max) in zip(self.filters.filter_fourier, min_max_features)]
-            filters_learned = w[0].dot(new_filters)
+            filters_scaled = [filt / (max - min) for filt, (min, max) in zip(self.filters.filter_fourier, min_max_features)]
+            filters_learned = w[0].dot(filters_scaled)
 
             self.filters = filters.FilterCustom(filters_learned)
             w[0] = np.eye(self.num_fbps)
@@ -208,15 +214,15 @@ if has_nn:
             self.nn_predict = utils_nn.NeuralNetwork(layers_size=[self.num_fbps, self.num_fbps, *self.hidden_layers, 1])
             self.nn_predict.model.set_weights(w, b)
 
-        def apply_filter(self, lq_sinos: NDArray) -> NDArray:
-            lq_sinos_filt = self.filters.apply_filter(lq_sinos)
-            lq_recs = [np.array([])] * self.filters.num_filters
+        def predict(self, inp_sinos: NDArray) -> NDArray:
+            filt_sinos = self.filters.apply_filter(inp_sinos)
+            filt_recs = [np.array([])] * self.filters.num_filters
             for ii in range(self.filters.num_filters):
-                lq_recs[ii] = self.projector.T(lq_sinos_filt[ii])
+                filt_recs[ii] = self.projector.T(filt_sinos[ii])
 
-            lq_recs_stack = np.stack([lq_rec.flatten() for lq_rec in lq_recs], axis=-1)
-            dset_predict = utils_nn.DatasetPixel(lq_recs_stack)
+            filt_recs_stack = np.stack([filt_rec.flatten() for filt_rec in filt_recs], axis=-1)
+            dset_predict = utils_nn.DatasetPixel(filt_recs_stack)
 
-            hq_rec = self.nn_predict.predict(dset_predict)
-            hq_rec *= self.min_max_target[1] - self.min_max_target[0]
-            return hq_rec.reshape(lq_recs[0].shape)
+            pred_rec = self.nn_predict.predict(dset_predict)
+            pred_rec *= self.min_max_target[1] - self.min_max_target[0]
+            return pred_rec.reshape(filt_recs[0].shape)

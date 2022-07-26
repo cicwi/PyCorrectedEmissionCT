@@ -48,7 +48,7 @@ class DatasetPixel(tdt.Dataset):
 class ModelNetwork(tnn.Module):
     """Neural network model class."""
 
-    def __init__(self, layers_size: Sequence[int], linears_labels: Optional[List[str]] = None):
+    def __init__(self, layers_size: Sequence[int], linears_labels: Optional[Sequence[str]] = None):
         super(ModelNetwork, self).__init__()
 
         self.linears_dims = [(layers_size[ii], layers_size[ii + 1]) for ii in range(len(layers_size) - 1)]
@@ -62,20 +62,22 @@ class ModelNetwork(tnn.Module):
             tmp_op_stack[lab] = tnn.Linear(i, o)
             tmp_op_stack.move_to_end(lab)
 
-            if ii < (len(self.linears_dims) - 1):
-                lab = f"relu_{ii}"
-                tmp_op_stack[lab] = tnn.ReLU()
-            else:
-                lab = f"flatten_{ii}"
-                tmp_op_stack[lab] = tnn.Flatten(0, 1)
+            lab = f"activation_{ii}"
+            # tmp_op_stack[lab] = tnn.Sigmoid()
+            tmp_op_stack[lab] = tnn.GELU()
+            # tmp_op_stack[lab] = tnn.ReLU()
             tmp_op_stack.move_to_end(lab)
+
+        lab = f"flatten"
+        tmp_op_stack[lab] = tnn.Flatten(0, 1)
+        tmp_op_stack.move_to_end(lab)
 
         self.op_stack = tnn.Sequential(tmp_op_stack)
 
     def forward(self, x):
         return self.op_stack(x)
 
-    def set_weights(self, weights: List[NDArray], biases: List[NDArray]) -> None:
+    def set_weights(self, weights: Sequence[NDArray], biases: Sequence[NDArray]) -> None:
         tmp_op_stack = self.op_stack.state_dict()
         for ii, (iw, ib) in enumerate(zip(weights, biases)):
             tw = tmp_op_stack[f"linear_{ii}.weight"]
@@ -125,39 +127,47 @@ class NeuralNetwork:
         if dataset_test is not None:
             dataloader_test = tdt.DataLoader(dataset_test, batch_size=self.batch_size)
             datasize_test = len(dataloader_test.dataset)
-        loss_fn = tnn.MSELoss(reduction="sum")
-        optimizer = top.AdamW(self.model.parameters(), lr=1e-3)
+        loss_fn = tnn.MSELoss(reduction="none")
+        learning_rate = 1e-3
+        optimizer = top.AdamW(self.model.parameters(), lr=learning_rate, weight_decay=1e-2)
 
         self.model.train()
         for ii in range(iterations):
-            loss_train = 0
+            loss_train = 0.0
             for bunch_train in dataloader_train:
                 has_weights = len(bunch_train) == 3
                 if has_weights:
                     X, y, w = bunch_train
+                    w = w.to(self.device)
                 else:
                     X, y = bunch_train
                 X, y = X.to(self.device), y.to(self.device)
 
-                # Compute prediction error
-                pred_y = self.model(X)
-                if has_weights:
-                    w = w.to(self.device)
-                    y *= w
-                    pred_y *= w
-                loss = loss_fn(pred_y, y)
+                def closure():
+                    if pt.is_grad_enabled():
+                        optimizer.zero_grad()
 
-                # Backpropagation
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
+                    # Compute prediction error
+                    pred_y = self.model(X)
+                    loss = loss_fn(pred_y, y)
+
+                    if has_weights:
+                        loss *= w / w.mean()
+                    loss = loss.sum()
+
+                    # Backpropagation
+                    if loss.requires_grad:
+                        loss.backward()
+                    return loss
+
+                loss = optimizer.step(closure=closure)
 
                 loss_train += loss.item()
             loss_train /= datasize_train
 
             if ii % 100 == 0:
                 if dataset_test is not None:
-                    loss_test = 0
+                    loss_test = 0.0
                     for bunch_test in dataloader_test:
                         has_weights = len(bunch_test) == 3
                         if has_weights:
@@ -167,11 +177,11 @@ class NeuralNetwork:
                         X, y = X.to(self.device), y.to(self.device)
 
                         pred_y = self.model(X)
+                        loss = loss_fn(pred_y, y)
                         if has_weights:
                             w = w.to(self.device)
-                            y *= w
-                            pred_y *= w
-                        loss_test += loss_fn(pred_y, y).item()
+                            loss *= w / w.mean()
+                        loss_test += loss.sum().item()
                     loss_test /= datasize_test
                 else:
                     loss_test = np.NaN
@@ -188,7 +198,8 @@ class NeuralNetwork:
             for X, y in dataloader:
                 X, y = X.to(self.device), y.to(self.device)
                 pred = self.model(X)
-                test_loss += loss_fn(pred, y).item()
+                loss = loss_fn(pred, y)
+                test_loss += loss.item()
         test_loss /= datasize
         print(f"Test Error: \n Avg loss: {test_loss:>8f} \n")
 
