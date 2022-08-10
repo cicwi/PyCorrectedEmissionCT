@@ -10,6 +10,8 @@ import numpy as np
 
 import skimage.transform as skt
 
+import matplotlib.pyplot as plt
+
 from .operators import BaseTransform
 from .utils_proc import get_circular_mask
 
@@ -272,6 +274,27 @@ class Filter(ABC):
         """
         self.compute_filter(data_wu)
         return self.apply_filter(data_wu, self.fbp_filter)
+
+    def plot_filters(self):
+        filters_r = np.array(self.filter_real, ndmin=2)
+        filters_f = np.array(self.filter_fourier, ndmin=2)
+
+        f, axes = plt.subplots(1, 2, figsize=(10, 4))
+        for ii in range(self.num_filters):
+            axes[0].plot(filters_r[ii, ...], label=f"Filter-{ii}")
+        axes[0].set_title("Real-space")
+        axes[0].set_xlabel("Pixel")
+
+        for ii in range(self.num_filters):
+            axes[1].plot(filters_f[ii, ...], label=f"Filter-{ii}")
+        axes[1].set_title("Fourier-space")
+        axes[1].set_xlabel("Frequency")
+
+        axes[0].grid()
+        axes[1].grid()
+        if self.num_filters > 1:
+            axes[1].legend()
+        f.tight_layout()
 
 
 class FilterCustom(Filter):
