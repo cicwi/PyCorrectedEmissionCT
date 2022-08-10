@@ -86,14 +86,14 @@ def create_basis(
 
     basis_r = np.array(basis_r, dtype=dtype)
 
-    if order > 1:
+    if order > 0:
         for ii in range(1, basis_r.shape[0]):
             for jj in range(0, ii):
                 other_vec = basis_r[jj, ...]
                 other_vec_norm_2 = other_vec.dot(other_vec)
                 basis_r[ii, ...] -= other_vec * other_vec.dot(basis_r[ii, ...]) / other_vec_norm_2
         if normalized:
-            basis_r /= np.linalg.norm(basis_r, ord=1, axis=-1)
+            basis_r /= np.linalg.norm(basis_r, ord=1, axis=-1, keepdims=True)
 
     return basis_r
 
@@ -184,7 +184,15 @@ class Filter(ABC):
             The filter in real-space.
         """
         fbp_filter_r = self.to_real(self.fbp_filter)
-        return np.fft.fftshift(fbp_filter_r)
+        return np.fft.fftshift(fbp_filter_r, axes=(-1,))
+
+    @filter_real.setter
+    def filter_real(self, fbp_filter_r: NDArray[np.floating]) -> None:
+        self.fbp_filter = self.to_fourier(fbp_filter_r)
+
+    @filter_fourier.setter
+    def filter_fourier(self, fbp_filter_f: NDArray[np.floating]) -> None:
+        self.fbp_filter = fbp_filter_f.copy()
 
     @property
     def num_filters(self) -> int:
