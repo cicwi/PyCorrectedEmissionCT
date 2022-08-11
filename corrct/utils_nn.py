@@ -98,8 +98,8 @@ class ModelNetwork(tnn.Module):
         weights = [np.array([])] * len(self.linears_dims)
         biases = [np.array([])] * len(self.linears_dims)
         for ii in range(len(self.linears_dims)):
-            weights[ii] = tmp_op_stack[f"linear_{ii}.weight"].numpy()
-            biases[ii] = tmp_op_stack[f"linear_{ii}.bias"].numpy()
+            weights[ii] = tmp_op_stack[f"linear_{ii}.weight"].numpy().copy()
+            biases[ii] = tmp_op_stack[f"linear_{ii}.bias"].numpy().copy()
 
         return weights, biases
 
