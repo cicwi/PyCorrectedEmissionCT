@@ -114,9 +114,14 @@ class Model(tnn.Module):
 
         for l in layer:
             for ii in range(1, w[l].shape[0]):
+                curr_vec = w[l][ii, ...]
                 for jj in range(0, ii):
                     other_vec = w[l][jj, ...]
-                    w[l][ii, ...] -= weight * other_vec * other_vec.dot(w[l][ii, ...]) / other_vec.dot(other_vec)
+                    other_vec_norm2 = np.linalg.norm(other_vec, ord=2) ** 2
+
+                    scalar_prod_norm = other_vec.dot(curr_vec) / other_vec_norm2
+
+                    curr_vec -= weight * other_vec * scalar_prod_norm
 
             if normalized:
                 w[l] /= np.linalg.norm(w[l], ord=1, axis=-1, keepdims=True)
@@ -175,7 +180,7 @@ class NeuralNetwork:
         data_test: Sequence[NDArray],
         batch_size: int = 2**8,
         iterations: int = 10_000,
-        encourage_orthogonal: bool = True,
+        weight_orthogonal: Optional[float] = 1e0,
     ) -> TrainingInfo:
         return self.train(
             data_train,
@@ -183,7 +188,7 @@ class NeuralNetwork:
             iterations=iterations,
             batch_size=batch_size,
             optim_class=top.AdamW,
-            encourage_orthogonal=encourage_orthogonal,
+            weight_orthogonal=weight_orthogonal,
         )
 
     def train_lbfgs(
@@ -192,15 +197,15 @@ class NeuralNetwork:
         data_test: Sequence[NDArray],
         batch_size: int = 2**20,
         iterations: int = 10_000,
-        encourage_orthogonal: bool = False,
+        weight_orthogonal: Optional[float] = None,
     ) -> TrainingInfo:
         return self.train(
             data_train,
             data_test,
             iterations=iterations,
             batch_size=batch_size,
-            optim_class=lambda *x, **y: top.LBFGS(*x, **y, max_iter=1000, history_size=200),
-            encourage_orthogonal=encourage_orthogonal,
+            optim_class=lambda *x, **y: top.LBFGS(*x, **y, max_iter=1000),
+            weight_orthogonal=weight_orthogonal,
         )
 
     def train(
@@ -210,7 +215,7 @@ class NeuralNetwork:
         optim_class: Callable = top.AdamW,
         batch_size: Optional[int] = None,
         iterations: int = 10_000,
-        encourage_orthogonal: bool = True,
+        weight_orthogonal: Optional[float] = None,
         verbose: bool = True,
     ) -> TrainingInfo:
         dataset_train = DatasetPixel(*data_train)
@@ -271,8 +276,8 @@ class NeuralNetwork:
                         loss.backward()
                     return loss
 
-                if encourage_orthogonal:
-                    self.model.orthogonalize_layer(layer=0, weight=learning_rate * 1e-2)
+                if weight_orthogonal:
+                    self.model.orthogonalize_layer(layer=0, weight=weight_orthogonal)
 
                 loss = optimizer.step(closure=closure)
 
