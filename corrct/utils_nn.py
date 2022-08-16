@@ -27,22 +27,22 @@ eps = np.finfo(np.float32).eps
 class DatasetPixel(tdt.Dataset):
     """Dataset class for various learned methods."""
 
-    def __init__(self, filter_vals: NDArray, pixel_vals: Optional[NDArray] = None, pixel_weights: Optional[NDArray] = None):
-        self.filter_values = pt.tensor(filter_vals, dtype=pt.float)
-        self.pixel_values = pt.tensor(pixel_vals, dtype=pt.float) if pixel_vals is not None else None
-        self.pixel_weights = pt.tensor(pixel_weights, dtype=pt.float) if pixel_weights is not None else None
+    def __init__(self, inp_vals: NDArray, tgt_vals: Optional[NDArray] = None, tgt_wgts: Optional[NDArray] = None):
+        self.inp_vals = pt.tensor(inp_vals, dtype=pt.float)
+        self.tgt_vals = pt.tensor(tgt_vals, dtype=pt.float) if tgt_vals is not None else None
+        self.tgt_wgts = pt.tensor(tgt_wgts, dtype=pt.float) if tgt_wgts is not None else None
 
     def __len__(self):
-        return self.filter_values.shape[0]
+        return self.inp_vals.shape[0]
 
     def __getitem__(self, idx):
-        if self.pixel_values is not None:
-            if self.pixel_weights is not None:
-                return self.filter_values[idx, :], self.pixel_values[idx], self.pixel_weights[idx]
+        if self.tgt_vals is not None:
+            if self.tgt_wgts is not None:
+                return self.inp_vals[idx, :], self.tgt_vals[idx], self.tgt_wgts[idx]
             else:
-                return self.filter_values[idx, :], self.pixel_values[idx]
+                return self.inp_vals[idx, :], self.tgt_vals[idx]
         else:
-            return self.filter_values[idx, :]
+            return self.inp_vals[idx, :]
 
 
 class ModelNetwork(tnn.Module):
