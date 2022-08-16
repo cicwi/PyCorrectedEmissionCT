@@ -125,13 +125,13 @@ if has_nn:
     class Denoiser_NNFBP:
         """Denoise FBP using Neural Networks."""
 
-        projector: operators.BaseTransform
+        projector: operators.ProjectorOperator
         num_fbps: int
         hidden_layers: List[int]
 
         def __init__(
             self,
-            projector: operators.BaseTransform,
+            projector: operators.ProjectorOperator,
             num_fbps: int = 4,
             num_pixels_trn: int = 256,
             num_pixels_tst: int = 128,
@@ -308,9 +308,17 @@ if has_nn:
             tgt_wgts: Optional[NDArray] = None,
             train_epochs: int = 10_000,
             init_fit_weights: Optional[Tuple[Sequence[NDArray], Sequence[NDArray]]] = None,
+            projectors: Optional[Sequence[operators.ProjectorOperator]] = None,
             plot_loss_curves: bool = True,
         ) -> None:
-            num_pixels = self.filters.get_padding_size(inp_sinos[0].shape)
+            num_sinos = inp_sinos.shape[0]
+            if projectors is not None and num_sinos != len(projectors):
+                raise ValueError(
+                    f"Number of sinograms ({num_sinos}) and number of projectors ({len(projectors)}) should be equal."
+                )
+            num_angles = inp_sinos.shape[-2]
+            num_pixels = self.filters.get_padding_size(inp_sinos.shape[1:])
+
             self.basis_r = filters.create_basis(num_pixels, binning_start=3, binning_type="exponential", normalized=True)
             self.basis_f = self.filters.to_fourier(self.basis_r)
             self.filters = filters.FilterCustom(self.basis_f)
@@ -320,15 +328,23 @@ if has_nn:
             inp_sinos_filt = self.filters.apply_filter(inp_sinos)
             inp_recs = [np.array([])] * num_filters
             for ii in range(num_filters):
-                inp_recs[ii] = np.ascontiguousarray([self.projector.T(s) for s in inp_sinos_filt[ii]])
+                if projectors is None:
+                    inp_recs[ii] = np.ascontiguousarray([self.projector.T(s) for s in inp_sinos_filt[ii]])
+                else:
+                    inp_recs[ii] = np.ascontiguousarray([projectors[ii_s].T(s) for ii_s, s in enumerate(inp_sinos_filt[ii])])
 
             # Compute scaling
             min_max_features = [self._get_normalization(np.mean(inp_rec, axis=0), percentile=0.001) for inp_rec in inp_recs]
             self.min_max_target = self._get_normalization(np.mean(tgt_recs, axis=0), percentile=0.001)
 
-            self.basis_f_scaled = [
-                filt / (max - min) for filt, (min, max) in zip(self.filters.filter_fourier, min_max_features)
-            ]
+            self.basis_f_scaled = np.ascontiguousarray(
+                [filt / (max - min) for filt, (min, max) in zip(self.filters.filter_fourier, min_max_features)]
+            )
+            if projectors is not None:
+                # We need to normalize the learned filters by the number of angles of the projector to be used.
+                # We assume that the projectors are partitions of the main projector.
+                self.basis_f_scaled /= self.projector.prj_shape[-2] / num_angles
+
             inp_recs = [inp_rec / (max - min) for inp_rec, (min, max) in zip(inp_recs, min_max_features)]
             tgt_recs = tgt_recs / (self.min_max_target[1] - self.min_max_target[0])
 
@@ -342,7 +358,7 @@ if has_nn:
             if init_fit_weights is not None:
                 self.nn_fit.model.set_weights(weights=init_fit_weights[0], biases=init_fit_weights[1])
 
-            info_a = self.nn_fit.train_adam(data_trn, data_tst, iterations=2 * train_epochs)
+            info_a = self.nn_fit.train_adam(data_trn, data_tst, iterations=5 * train_epochs)
             info_n = self.nn_fit.train_lbfgs(data_trn, data_tst, iterations=train_epochs)
 
             if plot_loss_curves:

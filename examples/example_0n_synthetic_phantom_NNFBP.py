@@ -50,16 +50,16 @@ photon_flux_clean = 1e6
 photon_flux_delta = 1e2
 photon_flux_noise = photon_flux_clean / photon_flux_delta
 
-num_angles_clean = int(180 * np.pi / 2)
-num_angles_noise = 180
+num_angles_clean = int(256 * np.pi / 2)
+num_angles_noise = 256
 
 sino_clean, angles_rad_clean, expected_ph, _ = cct.utils_test.create_sino(
     ph, num_angles_clean, add_poisson=True, photon_flux=photon_flux_clean
 )
-sino_noise_1, angles_rad_noise, _, _ = cct.utils_test.create_sino(
+sino_noise_1, angles_rad_noise_1, _, _ = cct.utils_test.create_sino(
     ph, num_angles_noise, add_poisson=True, photon_flux=photon_flux_noise
 )
-sino_noise_2, angles_rad_noise2, _, _ = cct.utils_test.create_sino(
+sino_noise_2, angles_rad_noise_2, _, _ = cct.utils_test.create_sino(
     ph, num_angles_noise, add_poisson=True, photon_flux=photon_flux_noise
 )
 
@@ -74,7 +74,7 @@ with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad_clean) as p:
     print("High quality:")
     print("- Phantom power: %g, noise power: %g" % cct.utils_test.compute_error_power(expected_ph, vol_hq))
 
-with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad_noise2) as p:
+with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad_noise_2) as p:
     solver_fbp_sl = cct.solvers.FBP()
     vol_lq_1, _ = solver_fbp_sl(p, sino_noise_1)
     vol_lq_2, _ = solver_fbp_sl(p, sino_noise_2)
@@ -83,14 +83,37 @@ with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad_noise2) as p:
 
     num_pix_trn = 2**13
     num_pix_tst = 2**11
-    denoiser = cct.denoisers.Denoiser_NNFBP(
-        projector=p, num_pixels_trn=num_pix_trn, num_pixels_tst=num_pix_tst, num_fbps=4, hidden_layers=[4]
-    )
-    denoiser.fit(sino_noise_1, vol_hq, train_epochs=30)
+
+    # denoiser = cct.denoisers.Denoiser_NNFBP(
+    #     projector=p, num_pixels_trn=num_pix_trn, num_pixels_tst=num_pix_tst, num_fbps=4, hidden_layers=[4]
+    # )
+    # denoiser.fit(sino_noise_1, vol_hq, train_epochs=30)
+
     # denoiser = cct.denoisers.Denoiser_N2F(
     #     projector=p, num_pixels_trn=num_pix_trn, num_pixels_tst=num_pix_tst, num_fbps=4, hidden_layers=[4]
     # )
     # denoiser.fit(np.array([sino_noise_1, sino_noise_2]), np.array([vol_lq_2, vol_lq_1]), train_epochs=30)
+
+    angles_partial_0 = angles_rad_noise_1[0::2]
+    angles_partial_1 = angles_rad_noise_1[1::2]
+
+    sino_partial_0 = sino_noise_1[..., 0::2, :]
+    sino_partial_1 = sino_noise_1[..., 1::2, :]
+
+    with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_partial_0) as p0:
+        with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_partial_1) as p1:
+            vol_partial_0, _ = solver_fbp_sl(p0, sino_partial_0)
+            vol_partial_1, _ = solver_fbp_sl(p1, sino_partial_1)
+
+            denoiser = cct.denoisers.Denoiser_N2F(
+                projector=p, num_pixels_trn=num_pix_trn, num_pixels_tst=num_pix_tst, num_fbps=4, hidden_layers=[4]
+            )
+            denoiser.fit(
+                np.array([sino_partial_0, sino_partial_1]),
+                np.array([vol_partial_1, vol_partial_0]),
+                train_epochs=30,
+                projectors=[p0, p1],
+            )
 
     # vol_den_1 = denoiser.predict(sino_noise_1)
     vol_den_2 = denoiser.predict(sino_noise_2)
