@@ -17,6 +17,8 @@ from . import utils_reg
 from . import filters
 from . import utils_proc
 
+import matplotlib.pyplot as plt
+
 try:
     from . import utils_nn
 
@@ -131,15 +133,17 @@ if has_nn:
             self,
             projector: operators.BaseTransform,
             num_fbps: int = 4,
-            num_pixels_train: int = 256,
-            num_pixels_test: int = 128,
+            num_pixels_trn: int = 256,
+            num_pixels_tst: int = 128,
             hidden_layers: List[int] = list(),
+            verbose: bool = False,
         ) -> None:
             self.projector = projector
             self.num_fbps = num_fbps
-            self.num_pixels_train = num_pixels_train
-            self.num_pixels_test = num_pixels_test
+            self.num_pixels_trn = num_pixels_trn
+            self.num_pixels_tst = num_pixels_tst
             self.hidden_layers = hidden_layers
+            self.verbose = verbose
 
             self.filters = filters.FilterCustom([1.0])
 
@@ -152,30 +156,49 @@ if has_nn:
             else:
                 return vol.min(), vol.max()
 
-        def _sub_sample_pixels(
-            self, num_pixels: int, lq_recs: List[NDArray], hq_recs: NDArray, hq_weights: Optional[NDArray] = None
-        ) -> utils_nn.DatasetPixel:
-            vol_mask = utils_proc.get_circular_mask(hq_recs.shape)
+        def _get_pixel_subsampling(
+            self, data_shape: Sequence[int], *, num_trn: int, num_tst: int, num_vld: int = 0
+        ) -> Sequence[NDArray]:
+            vol_mask = utils_proc.get_circular_mask(data_shape)
             vol_linear_pos = np.arange(vol_mask.size)[vol_mask.flatten() == 1.0]
 
+            num_pixels = num_trn + num_tst + num_vld
+
             pixels_pos = np.random.permutation(int(np.sum(vol_mask)))[:num_pixels]
-            pixels_pos = vol_linear_pos[pixels_pos]
+            pixels_pos_trn = pixels_pos[:num_trn]
+            pixels_pos_tst = pixels_pos[num_trn : num_trn + num_tst]
 
-            X = np.stack([lq_rec.flatten()[pixels_pos] for lq_rec in lq_recs], axis=-1)
-            y = hq_recs.flatten()[pixels_pos]
+            pixels_pos_trn = vol_linear_pos[pixels_pos_trn]
+            pixels_pos_tst = vol_linear_pos[pixels_pos_tst]
 
-            if hq_weights is None:
-                return utils_nn.DatasetPixel(X, y)
+            if num_vld == 0:
+                return pixels_pos_trn, pixels_pos_tst
             else:
-                w = hq_weights.flatten()[pixels_pos]
-                return utils_nn.DatasetPixel(X, y, w)
+                pixels_pos_vld = pixels_pos[:-num_vld]
+                pixels_pos_vld = vol_linear_pos[pixels_pos_vld]
+
+                return pixels_pos_trn, pixels_pos_tst, pixels_pos_vld
+
+        def _sub_sample_pixels(
+            self, pixels_pos: NDArray, inp_recs: List[NDArray], tgt_recs: NDArray, tgt_wgts: Optional[NDArray] = None
+        ) -> Sequence[NDArray]:
+            X = np.stack([inp_rec.flatten()[pixels_pos] for inp_rec in inp_recs], axis=-1)
+            y = tgt_recs.flatten()[pixels_pos]
+
+            if tgt_wgts is None:
+                return X, y
+            else:
+                w = tgt_wgts.flatten()[pixels_pos]
+                return X, y, w
 
         def fit(
             self,
             inp_sinos: NDArray,
             tgt_recs: NDArray,
+            tgt_wgts: Optional[NDArray] = None,
             train_epochs: int = 10_000,
             init_fit_weights: Optional[Tuple[Sequence[NDArray], Sequence[NDArray]]] = None,
+            plot_loss_curves: bool = True,
         ) -> None:
             num_pixels = self.filters.get_padding_size(inp_sinos.shape)
             self.basis_r = filters.create_basis(num_pixels, binning_start=3, binning_type="exponential", normalized=True)
@@ -193,20 +216,42 @@ if has_nn:
             min_max_features = [self._get_normalization(lq_rec, percentile=0.001) for lq_rec in inp_recs]
             self.min_max_target = self._get_normalization(tgt_recs)
 
+            self.basis_f_scaled = [
+                filt / (max - min) for filt, (min, max) in zip(self.filters.filter_fourier, min_max_features)
+            ]
             inp_recs = [inp_rec / (max - min) for inp_rec, (min, max) in zip(inp_recs, min_max_features)]
             tgt_recs = tgt_recs / (self.min_max_target[1] - self.min_max_target[0])
 
-            dset_train = self._sub_sample_pixels(self.num_pixels_train, inp_recs, tgt_recs)
-            dset_test = self._sub_sample_pixels(self.num_pixels_test, inp_recs, tgt_recs)
+            pix_trn, pix_tst = self._get_pixel_subsampling(
+                tgt_recs.shape, num_trn=self.num_pixels_trn, num_tst=self.num_pixels_tst
+            )
+            data_trn = self._sub_sample_pixels(pix_trn, inp_recs, tgt_recs, tgt_wgts=tgt_wgts)
+            data_tst = self._sub_sample_pixels(pix_tst, inp_recs, tgt_recs, tgt_wgts=tgt_wgts)
 
             self.nn_fit = utils_nn.NeuralNetwork(layers_size=[num_filters, self.num_fbps, *self.hidden_layers, 1])
             if init_fit_weights is not None:
                 self.nn_fit.model.set_weights(weights=init_fit_weights[0], biases=init_fit_weights[1])
-            self.nn_fit.train(dset_train, dataset_test=dset_test, iterations=train_epochs)
 
+            info_a = self.nn_fit.train_adam(data_trn, data_tst, iterations=2 * train_epochs)
+            info_n = self.nn_fit.train_lbfgs(data_trn, data_tst, iterations=train_epochs)
+
+            if plot_loss_curves:
+                f, axs = plt.subplots(1, 2, figsize=[10, 4])
+                axs[0].semilogy(info_a.loss_values_trn, label="Train loss")
+                axs[0].semilogy(np.array([info_a.loss_init_tst, *info_a.loss_values_tst]), label="Test loss")
+                axs[1].semilogy(info_n.loss_values_trn, label="Train loss")
+                axs[1].semilogy(np.array([info_n.loss_init_tst, *info_n.loss_values_tst]), label="Test loss")
+                axs[0].grid()
+                axs[1].grid()
+                axs[1].legend()
+                f.tight_layout()
+                plt.show(block=False)
+
+            self._create_prediction_nn()
+
+        def _create_prediction_nn(self):
             w, b = self.nn_fit.model.get_weights()
-            filters_scaled = [filt / (max - min) for filt, (min, max) in zip(self.filters.filter_fourier, min_max_features)]
-            filters_learned = w[0].dot(filters_scaled)
+            filters_learned = w[0].dot(self.basis_f_scaled)
 
             self.filters = filters.FilterCustom(filters_learned)
             w[0] = np.eye(self.num_fbps)
@@ -221,8 +266,95 @@ if has_nn:
                 filt_recs[ii] = self.projector.T(filt_sinos[ii])
 
             filt_recs_stack = np.stack([filt_rec.flatten() for filt_rec in filt_recs], axis=-1)
-            dset_predict = utils_nn.DatasetPixel(filt_recs_stack)
 
-            pred_rec = self.nn_predict.predict(dset_predict)
+            pred_rec = self.nn_predict.predict([filt_recs_stack])
             pred_rec *= self.min_max_target[1] - self.min_max_target[0]
             return pred_rec.reshape(filt_recs[0].shape)
+
+    class Denoiser_N2F(Denoiser_NNFBP):
+        """Denoise FBP using Neural Networks, with a Noise2Inverse strategy."""
+
+        def _get_pixel_subsampling(
+            self, data_shape: Sequence[int], *, num_trn: int, num_tst: int, num_vld: int = 0
+        ) -> Sequence[NDArray]:
+            def expand_multiple_vols(inds: NDArray, num_vols: int, size_vol: int) -> NDArray:
+                return np.concatenate([inds + ii * size_vol for ii in range(num_vols)])
+
+            num_tgts = data_shape[0]
+            vol_mask = utils_proc.get_circular_mask(data_shape[1:])
+            vol_linear_pos = np.arange(vol_mask.size)[vol_mask.flatten() == 1.0]
+
+            num_pixels = num_trn + num_tst + num_vld
+
+            pixels_pos = np.random.permutation(int(np.sum(vol_mask)))[:num_pixels]
+            pixels_pos_trn = pixels_pos[:num_trn]
+            pixels_pos_tst = pixels_pos[num_trn : num_trn + num_tst]
+
+            pixels_pos_trn = expand_multiple_vols(vol_linear_pos[pixels_pos_trn], num_tgts, vol_mask.size)
+            pixels_pos_tst = expand_multiple_vols(vol_linear_pos[pixels_pos_tst], num_tgts, vol_mask.size)
+
+            if num_vld == 0:
+                return pixels_pos_trn, pixels_pos_tst
+            else:
+                pixels_pos_vld = pixels_pos[:-num_vld]
+                pixels_pos_vld = expand_multiple_vols(vol_linear_pos[pixels_pos_vld], num_tgts, vol_mask.size)
+
+                return pixels_pos_trn, pixels_pos_tst, pixels_pos_vld
+
+        def fit(
+            self,
+            inp_sinos: NDArray,
+            tgt_recs: NDArray,
+            tgt_wgts: Optional[NDArray] = None,
+            train_epochs: int = 10_000,
+            init_fit_weights: Optional[Tuple[Sequence[NDArray], Sequence[NDArray]]] = None,
+            plot_loss_curves: bool = True,
+        ) -> None:
+            num_pixels = self.filters.get_padding_size(inp_sinos[0].shape)
+            self.basis_r = filters.create_basis(num_pixels, binning_start=3, binning_type="exponential", normalized=True)
+            self.basis_f = self.filters.to_fourier(self.basis_r)
+            self.filters = filters.FilterCustom(self.basis_f)
+
+            num_filters = self.filters.num_filters
+
+            inp_sinos_filt = self.filters.apply_filter(inp_sinos)
+            inp_recs = [np.array([])] * num_filters
+            for ii in range(num_filters):
+                inp_recs[ii] = np.ascontiguousarray([self.projector.T(s) for s in inp_sinos_filt[ii]])
+
+            # Compute scaling
+            min_max_features = [self._get_normalization(np.mean(inp_rec, axis=0), percentile=0.001) for inp_rec in inp_recs]
+            self.min_max_target = self._get_normalization(np.mean(tgt_recs, axis=0), percentile=0.001)
+
+            self.basis_f_scaled = [
+                filt / (max - min) for filt, (min, max) in zip(self.filters.filter_fourier, min_max_features)
+            ]
+            inp_recs = [inp_rec / (max - min) for inp_rec, (min, max) in zip(inp_recs, min_max_features)]
+            tgt_recs = tgt_recs / (self.min_max_target[1] - self.min_max_target[0])
+
+            pix_trn, pix_tst = self._get_pixel_subsampling(
+                tgt_recs.shape, num_trn=self.num_pixels_trn, num_tst=self.num_pixels_tst
+            )
+            data_trn = self._sub_sample_pixels(pix_trn, inp_recs, tgt_recs, tgt_wgts=tgt_wgts)
+            data_tst = self._sub_sample_pixels(pix_tst, inp_recs, tgt_recs, tgt_wgts=tgt_wgts)
+
+            self.nn_fit = utils_nn.NeuralNetwork(layers_size=[num_filters, self.num_fbps, *self.hidden_layers, 1])
+            if init_fit_weights is not None:
+                self.nn_fit.model.set_weights(weights=init_fit_weights[0], biases=init_fit_weights[1])
+
+            info_a = self.nn_fit.train_adam(data_trn, data_tst, iterations=2 * train_epochs)
+            info_n = self.nn_fit.train_lbfgs(data_trn, data_tst, iterations=train_epochs)
+
+            if plot_loss_curves:
+                f, axs = plt.subplots(1, 2, figsize=[10, 4])
+                axs[0].semilogy(info_a.loss_values_trn, label="Train loss")
+                axs[0].semilogy(np.array([info_a.loss_init_tst, *info_a.loss_values_tst]), label="Test loss")
+                axs[1].semilogy(info_n.loss_values_trn, label="Train loss")
+                axs[1].semilogy(np.array([info_n.loss_init_tst, *info_n.loss_values_tst]), label="Test loss")
+                axs[0].grid()
+                axs[1].grid()
+                axs[1].legend()
+                f.tight_layout()
+                plt.show(block=False)
+
+            self._create_prediction_nn()
