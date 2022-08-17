@@ -127,6 +127,80 @@ def phantom_assign_concentration(
     return (vol_fluo_yield, vol_lin_att_in, vol_lin_att_out)
 
 
+def phantom_assign_concentration_multi(
+    ph_or: NDArrayFloat,
+    elements: Sequence[str] = ["Ca", "Fe"],
+    em_lines: Union[str, Sequence[str]] = "KA",
+    in_energy_keV: float = 20.0,
+    detectors_pos_rad: Optional[Union[float, Sequence[float]]] = None,
+) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
+    """Build an XRF phantom.
+
+    The created phantom has been used in:
+    - N. Viganò and V. A. Solé, “Physically corrected forward operators for
+    induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
+    Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.
+
+    Parameters
+    ----------
+    ph_or : NDArrayFloat
+        The phases phantom map.
+    elements : Sequence[str], optional
+        Element symbols. The default is ["Ca", "Fe"].
+    em_lines : str | Sequence[str], optional
+        Emission lines. The default is "KA" (corresponding to K-alpha).
+    in_energy_keV : float, optional
+        Incoming beam energy in keV. The default is 20.0.
+    detectors_pos_rad : float | tuple | list | NDArrayFloat, optional
+        Detector(s) positions in radians, with respect to incoming beam.
+        If None, Compton is not produced. The default is None.
+
+    Returns
+    -------
+    vol_yield : NDArrayFloat
+        Voxel-wise fluorescence and Compton yields.
+    vol_att_in : NDArrayFloat
+        Voxel-wise attenuation at the incoming beam energy.
+    vol_att_out : NDArrayFloat
+        Voxel-wise attenuation at the emitted energy.
+    """
+    ph_air = ph_or < 0.1
+    ph_FeO = 0.5 < ph_or
+    ph_CaO = np.logical_and(0.25 < ph_or, ph_or < 0.5)
+    ph_CaC = np.logical_and(0.1 < ph_or, ph_or < 0.25)
+
+    conv_mm_to_cm = 1e-1
+    conv_um_to_mm = 1e-3
+    voxel_size_um = 0.5
+    voxel_size_cm = voxel_size_um * conv_um_to_mm * conv_mm_to_cm  # cm to micron
+    print("Sample size: [%g %g] um" % (ph_or.shape[0] * voxel_size_um, ph_or.shape[1] * voxel_size_um))
+
+    phase_fractions = (ph_air, ph_FeO, ph_CaO, ph_CaC)
+    phase_compound_names = ("Air, Dry (near sea level)", "Ferric Oxide", "Calcium Oxide", "Calcium Carbonate")
+
+    phantom = utils_phys.VolumeMaterial(phase_fractions, phase_compound_names, voxel_size_cm)
+
+    vol_lin_att_in = phantom.get_attenuation(in_energy_keV)
+
+    num_vols_out = len(elements) + (detectors_pos_rad is not None)
+    vol_yield = [np.array([])] * num_vols_out
+    vol_lin_att_out = [np.array([])] * num_vols_out
+
+    for ii, el in enumerate(elements):
+        if isinstance(em_lines, (list, tuple)):
+            line = em_lines[ii]
+        else:
+            line = em_lines
+        out_energy_keV, vol_yield[ii] = phantom.get_fluo_yield(el, in_energy_keV, line)
+        vol_lin_att_out[ii] = phantom.get_attenuation(out_energy_keV)
+
+    if detectors_pos_rad:
+        out_energy_keV, vol_yield[ii + 1] = phantom.get_compton_scattering(in_energy_keV, angle_rad=detectors_pos_rad)
+        vol_lin_att_out[ii + 1] = phantom.get_attenuation(out_energy_keV)
+
+    return (vol_yield, vol_lin_att_in, vol_lin_att_out)
+
+
 def add_noise(
     img_clean: NDArray,
     num_photons: Union[int, float],
@@ -267,6 +341,75 @@ def create_sino(
     )
 
     return (sino_noise, angles_rad, ph * num_photons * detector_solidangle_sr, background)
+
+
+def create_sino_transmission(
+    ph: NDArrayFloat,
+    num_angles: int,
+    start_angle_deg: float = 0,
+    end_angle_deg: float = 180,
+    dwell_time_s: float = 1,
+    photon_flux: float = 1e9,
+    psf: Optional[NDArrayFloat] = None,
+    add_poisson: bool = False,
+    readout_noise_std: Optional[float] = None,
+    data_type: DTypeLike = np.float32,
+) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat]:
+    """Compute the sinogram from a given phantom.
+
+    Parameters
+    ----------
+    ph : NDArrayFloat
+        The phantom volume, with the expected average photon production per voxel per impinging photon.
+    num_angles : int
+        The number of angles.
+    start_angle_deg : float, optional
+        Initial scan angle in degrees. The default is 0.
+    end_angle_deg : float, optional
+        Final scan angle in degrees. The default is 180.
+    dwell_time_s : float, optional
+        The acquisition time per sinogram point. The default is 1.
+    photon_flux : float, optional
+        The impinging photon flux per unit time (second). The default is 1e9.
+    psf : NDArrayFloat, optional
+        Point spread function or probing beam profile. The default is None.
+    add_poisson : bool, optional
+        Switch to turn on Poisson noise. The default is False.
+    readout_noise_std : float, optional
+        Read-out noise standard deviation. The default is None.
+    data_type : numpy.dtype, optional
+        Output datatype. The default is np.float32.
+
+    Returns
+    -------
+    Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat, float]
+        The sinogram (detector readings), the flat-field, and the angular positions.
+    """
+    print("Creating attenuation Sino with %d angles" % num_angles)
+    angles_deg = np.linspace(start_angle_deg, end_angle_deg, num_angles, endpoint=False)
+    angles_rad = np.deg2rad(angles_deg)
+    print(angles_deg)
+
+    num_photons = photon_flux * dwell_time_s
+
+    with projectors.ProjectorUncorrected(ph.shape, angles_rad, psf=psf) as p:
+        sino = np.exp(-p.fp(ph))
+
+    # Adding noise
+    sino_noise, _, _ = add_noise(
+        sino,
+        num_photons=num_photons,
+        add_poisson=add_poisson,
+        readout_noise_std=readout_noise_std,
+    )
+    flat_noise, _, _ = add_noise(
+        np.ones_like(sino),
+        num_photons=num_photons,
+        add_poisson=add_poisson,
+        readout_noise_std=readout_noise_std,
+    )
+
+    return (sino_noise, flat_noise, angles_rad, ph)
 
 
 def compute_error_power(expected_vol: NDArrayFloat, computed_vol: NDArrayFloat) -> Tuple[float, float]:
