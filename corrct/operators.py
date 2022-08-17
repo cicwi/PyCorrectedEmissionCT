@@ -15,7 +15,7 @@ import copy as cp
 
 from numpy.typing import ArrayLike, NDArray
 
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable, Optional, Sequence, Tuple, Union
 
 from abc import abstractmethod
 
@@ -23,7 +23,7 @@ try:
     import pywt
 
     has_pywt = True
-    use_swtn = pywt.version.version >= "1.0.2"  #type: ignore
+    use_swtn = pywt.version.version >= "1.0.2"  # type: ignore
     if not use_swtn:
         print("WARNING - pywavelets version is too old (<1.0.2)")
 except ImportError:
@@ -166,7 +166,11 @@ class TransformFunctions(BaseTransform):
     """Transform class that uses callables."""
 
     def __init__(
-        self, dir_shape: ArrayLike, adj_shape: ArrayLike, A: Callable[[NDArray], NDArray], At: Optional[Callable[[NDArray], NDArray]] = None
+        self,
+        dir_shape: ArrayLike,
+        adj_shape: ArrayLike,
+        A: Callable[[NDArray], NDArray],
+        At: Optional[Callable[[NDArray], NDArray]] = None,
     ) -> None:
         """Initialize the callable transform.
 
@@ -236,18 +240,35 @@ class TransformFunctions(BaseTransform):
 class ProjectorOperator(BaseTransform):
     """Base projector class that fixes the projection interface."""
 
-    vol_shape: NDArray
-    prj_shape: NDArray
+    @property
+    def vol_shape(self) -> NDArray:
+        """Expose the direct space shape as volume shape.
 
-    def __init__(self):
-        """Initialize the projector operator class.
-
-        It sets the fields `dir_shape` and `adj_shape`, from the fields `vol_shape` and `prj_shape` respectively.
-        These two other fields need to have been defined in a derived class.
+        Returns
+        -------
+        NDArray
+            The volume shape.
         """
-        self.dir_shape = np.array(self.vol_shape)
-        self.adj_shape = np.array(self.prj_shape)
-        super().__init__()
+        return self.dir_shape
+
+    @property
+    def prj_shape(self) -> NDArray:
+        """Expose the adjoint space shape as projection shape.
+
+        Returns
+        -------
+        NDArray
+            The projection shape.
+        """
+        return self.adj_shape
+
+    @vol_shape.setter
+    def vol_shape(self, new_shape: Union[Sequence[int], NDArray]) -> None:
+        self.dir_shape = np.array(new_shape, dtype=int)
+
+    @prj_shape.setter
+    def prj_shape(self, new_shape: Union[Sequence[int], NDArray]) -> None:
+        self.adj_shape = np.array(new_shape, dtype=int)
 
     @abstractmethod
     def fp(self, x: NDArray) -> NDArray:
