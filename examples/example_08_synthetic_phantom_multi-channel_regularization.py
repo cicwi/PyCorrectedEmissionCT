@@ -149,6 +149,21 @@ axs[0, 3].set_title(solver_tnv.info())
 axs[0, 0].set_ylabel("Ca")
 axs[1, 0].set_ylabel("Fe")
 axs[2, 0].set_ylabel("Attenuation")
-
 f.tight_layout()
+
+# Comparing FRCs for each reconstruction
+frcs = [np.array([])] * 3
+for ii, rec in enumerate([rec_wls[0], rec_tvs[0], rec_tvm[0]]):
+    frcs[ii], T = cct.utils_proc.compute_frc(expected_ph[0], rec, snrt=0.4142)
+
+f, ax = plt.subplots(1, 1, sharex=True, sharey=True)
+ax.plot(np.squeeze(frcs[0]), label=solver_wls.info().upper())
+ax.plot(np.squeeze(frcs[1]), label=solver_tv.info().upper())
+ax.plot(np.squeeze(frcs[2]), label=solver_tnv.info().upper())
+ax.plot(np.squeeze(T), label="T 1/2 bit")
+ax.legend()
+ax.grid()
+ax.set_title("FRCs for Ca-Ka")
+f.tight_layout()
+
 plt.show(block=False)
