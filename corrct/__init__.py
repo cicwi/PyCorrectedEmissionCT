@@ -39,5 +39,4 @@ except ImportError as exc:
     print("WARNING: X-ray physics support not available. Please install xraylib if you need it.")
 
 # Import all definitions from main module.
-from .corrct import *  # noqa: F401, F402, F403
-
+from ._corrct import create_sino, reconstruct  # noqa: F401, F402, F403
