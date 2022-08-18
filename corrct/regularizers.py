@@ -21,7 +21,7 @@ try:
     import pywt
 
     has_pywt = True
-    use_swtn = pywt.version.version >= "1.0.2"
+    use_swtn = pywt.version.version >= "1.0.2"  # type: ignore
 except ImportError:
     has_pywt = False
     use_swtn = False
@@ -29,7 +29,7 @@ except ImportError:
 
 
 from typing import Union, Sequence, Optional
-from numpy.typing import ArrayLike
+from numpy.typing import NDArray
 
 
 # ---- Data Fidelity terms ----
@@ -55,7 +55,7 @@ class BaseRegularizer(ABC):
 
     Parameters
     ----------
-    weight : Union[float, ArrayLike]
+    weight : Union[float, NDArray]
         The weight of the regularizer.
     norm : DataFidelityBase
         The norm of the regularizer minimization.
@@ -63,7 +63,7 @@ class BaseRegularizer(ABC):
 
     __reg_name__ = ""
 
-    def __init__(self, weight: Union[float, ArrayLike], norm: data_terms.DataFidelityBase):
+    def __init__(self, weight: Union[float, NDArray], norm: data_terms.DataFidelityBase):
         self.weight = np.array(weight)
         self.dtype = None
         self.op = None
@@ -103,53 +103,53 @@ class BaseRegularizer(ABC):
         return self.__reg_name__.lower()
 
     @abstractmethod
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         """
         Initialize the internal state, operator, and sigma. It then returns the tau.
 
         Parameters
         ----------
-        primal : ArrayLike
+        primal : NDArray
             The primal vector.
 
         Returns
         -------
-        Union[float, ArrayLike]
+        Union[float, NDArray]
             The tau to be used in the SIRT or PDHG algorithm.
         """
         raise NotImplementedError()
 
-    def initialize_dual(self) -> ArrayLike:
+    def initialize_dual(self) -> NDArray:
         """
         Return the initialized dual.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             Initialized (zero) dual.
         """
         return np.zeros(self.op.adj_shape, dtype=self.dtype)
 
-    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
+    def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         """
         Update the dual in-place.
 
         Parameters
         ----------
-        dual : ArrayLike
+        dual : NDArray
             Current stat of the dual.
-        primal : ArrayLike
+        primal : NDArray
             Primal or over-relaxation of the primal.
         """
         dual += self.sigma * self.op(primal)
 
-    def apply_proximal(self, dual: ArrayLike) -> None:
+    def apply_proximal(self, dual: NDArray) -> None:
         """
         Apply the proximal operator to the dual in-place.
 
         Parameters
         ----------
-        dual : ArrayLike
+        dual : NDArray
             The dual to be applied the proximal on.
         """
         if isinstance(self.norm, DataFidelity_l1):
@@ -157,18 +157,18 @@ class BaseRegularizer(ABC):
         else:
             self.norm.apply_proximal(dual)
 
-    def compute_update_primal(self, dual: ArrayLike) -> ArrayLike:
+    def compute_update_primal(self, dual: NDArray) -> NDArray:
         """
         Compute the partial update of a primal term, from this regularizer.
 
         Parameters
         ----------
-        dual : ArrayLike
+        dual : NDArray
             The dual associated to this regularizer.
 
         Returns
         -------
-        upd : ArrayLike
+        upd : NDArray
             The update to the primal.
         """
         upd = self.op.T(dual)
@@ -185,7 +185,7 @@ class Regularizer_Grad(BaseRegularizer):
 
     Parameters
     ----------
-    weight : Union[float, ArrayLike]
+    weight : Union[float, NDArray]
         The weight of the regularizer.
     ndims : int, optional
         The number of dimensions. The default is 2.
@@ -201,7 +201,7 @@ class Regularizer_Grad(BaseRegularizer):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         ndims: int = 2,
         axes: Optional[Sequence[int]] = None,
         pad_mode: str = "edge",
@@ -218,7 +218,7 @@ class Regularizer_Grad(BaseRegularizer):
         self.axes = axes
         self.pad_mode = pad_mode.lower()
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         self.dtype = primal.dtype
         self.op = operators.TransformGradient(primal.shape, axes=self.axes, pad_mode=self.pad_mode)
 
@@ -238,7 +238,7 @@ class Regularizer_TV2D(Regularizer_Grad):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         axes: Optional[Sequence[int]] = None,
         pad_mode: str = "edge",
         norm: DataFidelityBase = DataFidelity_l12(),
@@ -253,7 +253,7 @@ class Regularizer_TV3D(Regularizer_Grad):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         axes: Optional[Sequence[int]] = None,
         pad_mode: str = "edge",
         norm: DataFidelityBase = DataFidelity_l12(),
@@ -267,7 +267,7 @@ class Regularizer_HubTV2D(Regularizer_Grad):
     __reg_name__ = "HubTV2D"
 
     def __init__(
-        self, weight: Union[float, ArrayLike], huber_size: int, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"
+        self, weight: Union[float, NDArray], huber_size: int, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"
     ):
         super().__init__(weight=weight, ndims=2, axes=axes, pad_mode=pad_mode, norm=DataFidelity_Huber(huber_size, l2_axis=0))
 
@@ -278,7 +278,7 @@ class Regularizer_HubTV3D(Regularizer_Grad):
     __reg_name__ = "HubTV3D"
 
     def __init__(
-        self, weight: Union[float, ArrayLike], huber_size: int, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"
+        self, weight: Union[float, NDArray], huber_size: int, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"
     ):
         super().__init__(weight=weight, ndims=3, axes=axes, pad_mode=pad_mode, norm=DataFidelity_Huber(huber_size, l2_axis=0))
 
@@ -290,7 +290,7 @@ class Regularizer_smooth2D(Regularizer_Grad):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         axes: Optional[Sequence[int]] = None,
         pad_mode: str = "edge",
         norm: DataFidelityBase = DataFidelity_l2(),
@@ -305,7 +305,7 @@ class Regularizer_smooth3D(Regularizer_Grad):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         axes: Optional[Sequence[int]] = None,
         pad_mode: str = "edge",
         norm: DataFidelityBase = DataFidelity_l2(),
@@ -319,7 +319,7 @@ class Regularizer_lap(BaseRegularizer):
     __reg_name__ = "lap"
 
     def __init__(
-        self, weight: Union[float, ArrayLike], ndims: int = 2, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"
+        self, weight: Union[float, NDArray], ndims: int = 2, axes: Optional[Sequence[int]] = None, pad_mode: str = "edge"
     ):
         super().__init__(weight=weight, norm=DataFidelity_l1())
 
@@ -332,7 +332,7 @@ class Regularizer_lap(BaseRegularizer):
         self.axes = axes
         self.pad_mode = pad_mode.lower()
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         self.dtype = primal.dtype
         self.op = operators.TransformLaplacian(primal.shape, axes=self.axes, pad_mode=self.pad_mode)
 
@@ -365,10 +365,10 @@ class Regularizer_l1(BaseRegularizer):
 
     __reg_name__ = "l1"
 
-    def __init__(self, weight: Union[float, ArrayLike], norm: DataFidelityBase = DataFidelity_l1()):
+    def __init__(self, weight: Union[float, NDArray], norm: DataFidelityBase = DataFidelity_l1()):
         super().__init__(weight=weight, norm=norm)
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
 
@@ -376,7 +376,7 @@ class Regularizer_l1(BaseRegularizer):
 
         return 1
 
-    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
+    def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         dual += primal
 
 
@@ -398,7 +398,7 @@ class Regularizer_swl(BaseRegularizer):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         wavelet: str,
         level: int,
         ndims: int = 2,
@@ -406,7 +406,7 @@ class Regularizer_swl(BaseRegularizer):
         pad_on_demand: str = "constant",
         normalized: bool = False,
         min_approx: bool = True,
-        norm=DataFidelity_l1(),
+        norm: DataFidelityBase = DataFidelity_l1(),
     ):
         if not has_pywt:
             raise ValueError("Cannot use wavelet regularizer because pywavelets is not installed.")
@@ -428,7 +428,7 @@ class Regularizer_swl(BaseRegularizer):
 
         self.pad_on_demand = pad_on_demand
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         self.dtype = primal.dtype
         self.op = operators.TransformStationaryWavelet(
             primal.shape,
@@ -474,7 +474,7 @@ class Regularizer_swl(BaseRegularizer):
             tau *= self.weight
         return tau
 
-    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
+    def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         upd = self.op(primal)
         if not self.normalized:
             upd *= self.sigma
@@ -490,7 +490,7 @@ class Regularizer_l1swl(Regularizer_swl):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         wavelet: str,
         level: int,
         ndims: int = 2,
@@ -519,7 +519,7 @@ class Regularizer_Hub_swl(Regularizer_swl):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         wavelet: str,
         level: int,
         ndims: int = 2,
@@ -560,7 +560,7 @@ class Regularizer_dwl(BaseRegularizer):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         wavelet: str,
         level: int,
         ndims: int = 2,
@@ -586,7 +586,7 @@ class Regularizer_dwl(BaseRegularizer):
 
         self.pad_on_demand = pad_on_demand
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         self.dtype = primal.dtype
         self.op = operators.TransformDecimatedWavelet(
             primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes, pad_on_demand=self.pad_on_demand
@@ -629,7 +629,7 @@ class Regularizer_dwl(BaseRegularizer):
             tau *= self.weight
         return tau
 
-    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
+    def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         super().update_dual(dual, primal)
         if not self.min_approx:
             slices = [slice(0, x) for x in self.op.sub_band_shapes[0]]
@@ -643,7 +643,7 @@ class Regularizer_l1dwl(Regularizer_dwl):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         wavelet: str,
         level: int,
         ndims: int = 2,
@@ -660,7 +660,7 @@ class Regularizer_Hub_dwl(Regularizer_dwl):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         wavelet: str,
         level: int,
         ndims: int = 2,
@@ -689,11 +689,11 @@ class BaseRegularizer_med(BaseRegularizer):
         """
         return self.__reg_name__ + "(s:%s" % np.array(self.filt_size) + "-w:%g" % self.weight.max() + ")"
 
-    def __init__(self, weight: Union[float, ArrayLike], filt_size: int = 3, norm: DataFidelityBase = DataFidelity_l1()):
+    def __init__(self, weight: Union[float, NDArray], filt_size: int = 3, norm: DataFidelityBase = DataFidelity_l1()):
         super().__init__(weight=weight, norm=norm)
         self.filt_size = filt_size
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
         self.norm.assign_data(None, sigma=1)
@@ -703,7 +703,7 @@ class BaseRegularizer_med(BaseRegularizer):
         else:
             return 1
 
-    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
+    def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         dual += primal - spimg.median_filter(primal, self.filt_size)
 
 
@@ -712,7 +712,7 @@ class Regularizer_l1med(BaseRegularizer_med):
 
     __reg_name__ = "l1med"
 
-    def __init__(self, weight: Union[float, ArrayLike], filt_size: int = 3):
+    def __init__(self, weight: Union[float, NDArray], filt_size: int = 3):
         BaseRegularizer_med.__init__(self, weight, filt_size=filt_size, norm=DataFidelity_l1())
 
 
@@ -721,7 +721,7 @@ class Regularizer_l2med(BaseRegularizer_med):
 
     __reg_name__ = "l2med"
 
-    def __init__(self, weight: Union[float, ArrayLike], filt_size: int = 3):
+    def __init__(self, weight: Union[float, NDArray], filt_size: int = 3):
         BaseRegularizer_med.__init__(self, weight, filt_size=filt_size, norm=DataFidelity_l2())
 
 
@@ -732,7 +732,7 @@ class Regularizer_fft(BaseRegularizer):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         ndims: int = 2,
         axes: Optional[Sequence[int]] = None,
         mask: str = "exp",
@@ -750,7 +750,7 @@ class Regularizer_fft(BaseRegularizer):
 
         self.mask = mask
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         self.dtype = primal.dtype
         self.op = operators.TransformFourier(primal.shape, axes=self.axes)
 
@@ -804,7 +804,7 @@ class Constraint_LowerLimit(BaseRegularizer):
         super().__init__(weight=1, norm=norm)
         self.limit = limit
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
 
@@ -815,10 +815,10 @@ class Constraint_LowerLimit(BaseRegularizer):
         else:
             return 1
 
-    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
+    def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         dual += primal
 
-    def apply_proximal(self, dual: ArrayLike) -> None:
+    def apply_proximal(self, dual: NDArray) -> None:
         dual[dual > self.limit] = self.limit
         self.norm.apply_proximal(dual)
 
@@ -843,7 +843,7 @@ class Constraint_UpperLimit(BaseRegularizer):
         super().__init__(weight=1, norm=norm)
         self.limit = limit
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         self.dtype = primal.dtype
         self.op = operators.TransformIdentity(primal.shape)
 
@@ -854,9 +854,9 @@ class Constraint_UpperLimit(BaseRegularizer):
         else:
             return 1
 
-    def update_dual(self, dual: ArrayLike, primal: ArrayLike) -> None:
+    def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         dual += primal
 
-    def apply_proximal(self, dual: ArrayLike) -> None:
+    def apply_proximal(self, dual: NDArray) -> None:
         dual[dual < self.limit] = self.limit
         self.norm.apply_proximal(dual)
