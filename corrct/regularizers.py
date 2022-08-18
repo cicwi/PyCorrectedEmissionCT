@@ -795,12 +795,12 @@ class Regularizer_TNV(Regularizer_Grad):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         ndims: int = 2,
         axes: Optional[Sequence[int]] = None,
         pad_mode: str = "edge",
         spectral_norm: DataFidelityBase = DataFidelity_l1(),
-        x_ref: Optional[ArrayLike] = None,
+        x_ref: Optional[NDArray] = None,
     ):
         super().__init__(weight=weight, ndims=ndims, axes=axes, pad_mode=pad_mode)
 
@@ -808,7 +808,7 @@ class Regularizer_TNV(Regularizer_Grad):
         self.norm = DataFidelity_ln(ln_axes=(1, 0), spectral_norm=spectral_norm)
         self.x_ref = x_ref
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         tau = super().initialize_sigma_tau(primal)
 
         if self.x_ref is not None:
@@ -828,11 +828,11 @@ class Regularizer_VTV(Regularizer_Grad):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         ndims: int = 2,
         pwise_der_norm: Union[int, float] = 2,
         pwise_chan_norm: Union[int, float] = np.inf,
-        x_ref: Optional[ArrayLike] = None,
+        x_ref: Optional[NDArray] = None,
     ):
         super().__init__(weight=weight, ndims=ndims)
 
@@ -858,7 +858,7 @@ class Regularizer_VTV(Regularizer_Grad):
             + f" Provided the following instead: derivatives={self.pwise_der_norm}, channel={self.pwise_chan_norm}"
         )
 
-    def apply_proximal(self, dual: ArrayLike) -> None:
+    def apply_proximal(self, dual: NDArray) -> None:
         # Following assignments will detach the local array from the original one
         dual_tmp = dual.copy()
 
@@ -909,7 +909,7 @@ class Regularizer_lnswl(Regularizer_l1swl):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         wavelet: str,
         level: int,
         ndims: int = 2,
@@ -918,7 +918,7 @@ class Regularizer_lnswl(Regularizer_l1swl):
         normalized: bool = False,
         min_approx: bool = True,
         spectral_norm: DataFidelityBase = DataFidelity_l1(),
-        x_ref: Optional[ArrayLike] = None,
+        x_ref: Optional[NDArray] = None,
     ):
         super().__init__(
             weight,
@@ -934,7 +934,7 @@ class Regularizer_lnswl(Regularizer_l1swl):
         self.norm = DataFidelity_ln(ln_axes=(1, 0), spectral_norm=spectral_norm)
         self.x_ref = x_ref
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         tau = super().initialize_sigma_tau(primal)
 
         if self.x_ref is not None:
@@ -951,7 +951,7 @@ class Regularizer_vl1wl(Regularizer_l1swl):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         wavelet: str,
         level: int,
         ndims: int = 2,
@@ -961,7 +961,7 @@ class Regularizer_vl1wl(Regularizer_l1swl):
         min_approx: bool = True,
         pwise_lvl_norm: Union[int, float] = 1,
         pwise_chan_norm: Union[int, float] = np.Inf,
-        x_ref: ArrayLike = None,
+        x_ref: NDArray = None,
     ):
         super().__init__(
             weight,
@@ -991,7 +991,7 @@ class Regularizer_vl1wl(Regularizer_l1swl):
             + f" Provided the following instead: level={self.pwise_lvl_norm}, channel={self.pwise_chan_norm}"
         )
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         tau = super().initialize_sigma_tau(primal)
 
         if self.x_ref is not None:
@@ -999,7 +999,7 @@ class Regularizer_vl1wl(Regularizer_l1swl):
 
         return tau
 
-    def apply_proximal(self, dual: ArrayLike) -> None:
+    def apply_proximal(self, dual: NDArray) -> None:
         dual_tmp = dual.copy()
 
         if self.q_ref is not None:
@@ -1042,7 +1042,7 @@ class Regularizer_vSVD(BaseRegularizer):
 
     def __init__(
         self,
-        weight: Union[float, ArrayLike],
+        weight: Union[float, NDArray],
         ndims: int = 2,
         axes: Optional[Sequence[int]] = None,
         axis_channels: Sequence[int] = (0,),
@@ -1059,7 +1059,7 @@ class Regularizer_vSVD(BaseRegularizer):
         self.axes = axes
         self.axis_channels = axis_channels
 
-    def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
+    def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
         self.dtype = primal.dtype
         self.op = operators.TransformSVD(primal.shape, axes_rows=self.axis_channels, axes_cols=self.axes, rescale=True)
 
