@@ -26,8 +26,7 @@ gauss_stddev = None
 photon_num = 1e2
 
 # Reconstruction parameters
-lambda_tv_sc = 2.5e-3
-lambda_tv_mc = 1.7e-3
+lambda_tv = 2.5e-3
 iterations = 125
 
 
@@ -68,30 +67,44 @@ c_stddev = tm.time()
 print("Prepared pixel confidence in %g seconds." % (c_stddev - c_noise))
 
 # Single channel TV regularizer
-reg_tv_s = cct.regularizers.Regularizer_TV2D(lambda_tv_sc)
+reg_tv_s = cct.regularizers.Regularizer_TV2D(lambda_tv)
 # Solver, which in this case is the PDHG method from Chambolle and Pock
 solver_tv_s = cct.solvers.PDHG(data_term=data_term, verbose=True, regularizer=reg_tv_s)
 # We now run the solver on the noisy image
 (img_tvs, _) = solver_tv_s(A, img_noise, x0=img_noise, iterations=iterations, lower_limit=0.0)
 
 # Multi channel TV regularizer - aka TNV
-reg_tv_m = cct.regularizers.Regularizer_TNV(lambda_tv_mc)
+reg_tv_m = cct.regularizers.Regularizer_TNV(lambda_tv)
 # Solver, which in this case is the PDHG method from Chambolle and Pock
 solver_tv_m = cct.solvers.PDHG(data_term=data_term, verbose=True, regularizer=reg_tv_m)
 # We now run the solver on the noisy image
 (img_tvm, _) = solver_tv_m(A, img_noise, x0=img_noise, iterations=iterations, lower_limit=0.0)
 
+imgs = np.array([img_orig, img_noise, img_tvs, img_tvm]).clip(0, 1).transpose([0, 2, 3, 1])
+labs = ["Original", "Noisy", f"Single-channel TV, weight: {lambda_tv:.5}", f"Multi-channel TV, weight: {lambda_tv:.5}"]
+
 # Plotting the result
 f, axs = plt.subplots(2, 2, sharex=True, sharey=True, squeeze=False, figsize=[7, 7])
-axs[0, 0].imshow(img_orig.transpose([1, 2, 0]))
-axs[0, 0].set_title("Original")
-axs[1, 0].imshow(img_noise.clip(0, 1).transpose([1, 2, 0]))
-axs[1, 0].set_title("Noise")
-
-axs[0, 1].imshow(img_tvs.clip(0, 1).transpose([1, 2, 0]))
-axs[0, 1].set_title("Single-channel TV, weight: %f" % (lambda_tv_sc))
-axs[1, 1].imshow(img_tvm.clip(0, 1).transpose([1, 2, 0]))
-axs[1, 1].set_title("Multi-channel TV, weight: %f" % (lambda_tv_mc))
-
+for ax, (im, lb) in zip(axs.flatten(), zip(imgs, labs)):
+    ax.imshow(im)
+    ax.set_title(lb)
 f.tight_layout()
+
+# Comparing FRCs for each reconstruction
+frcs = [np.array([])] * (imgs.shape[0] - 1)
+for ii, im in enumerate(imgs[1:]):
+    fc = [np.array([])] * 3
+    for ii_c in range(3):
+        fc[ii_c], T = cct.utils_proc.compute_frc(imgs[0][..., ii_c], im[..., ii_c], snrt=0.4142)
+    frcs[ii] = np.mean(fc, axis=0)
+
+f, ax = plt.subplots(1, 1, sharex=True, sharey=True)
+for fc, lb in zip(frcs, labs[1:]):
+    ax.plot(np.squeeze(fc), label=lb)
+ax.plot(np.squeeze(T), label="T 1/2 bit")
+ax.legend()
+ax.grid()
+ax.set_title("Fourier Ring Correlation")
+f.tight_layout()
+
 plt.show(block=False)
