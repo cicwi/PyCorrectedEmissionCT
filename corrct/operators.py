@@ -32,6 +32,9 @@ except ImportError:
     print("WARNING - pywt was not found")
 
 
+NDArrayInt = NDArray[np.integer]
+
+
 class BaseTransform(LinearOperator):
     """Base operator class.
 
@@ -39,8 +42,8 @@ class BaseTransform(LinearOperator):
     and by the solvers in `scipy.sparse.linalg`.
     """
 
-    dir_shape: NDArray
-    adj_shape: NDArray
+    dir_shape: NDArrayInt
+    adj_shape: NDArrayInt
 
     def __init__(self):
         """Initialize the base operator class.
@@ -187,8 +190,8 @@ class TransformFunctions(BaseTransform):
         At : Optional[Callable[[NDArray], NDArray]], optional
             The adjoint transform function, by default None
         """
-        self.dir_shape = np.array(dir_shape, ndmin=1)
-        self.adj_shape = np.array(adj_shape, ndmin=1)
+        self.dir_shape = np.array(dir_shape, ndmin=1, dtype=int)
+        self.adj_shape = np.array(adj_shape, ndmin=1, dtype=int)
         self.A = A
         self.At = At
         super().__init__()
@@ -241,7 +244,7 @@ class ProjectorOperator(BaseTransform):
     """Base projector class that fixes the projection interface."""
 
     @property
-    def vol_shape(self) -> NDArray:
+    def vol_shape(self) -> NDArrayInt:
         """Expose the direct space shape as volume shape.
 
         Returns
@@ -252,7 +255,7 @@ class ProjectorOperator(BaseTransform):
         return self.dir_shape
 
     @property
-    def prj_shape(self) -> NDArray:
+    def prj_shape(self) -> NDArrayInt:
         """Expose the adjoint space shape as projection shape.
 
         Returns
@@ -264,11 +267,11 @@ class ProjectorOperator(BaseTransform):
 
     @vol_shape.setter
     def vol_shape(self, new_shape: Union[Sequence[int], NDArray]) -> None:
-        self.dir_shape = np.array(new_shape, dtype=int)
+        self.dir_shape = np.array(new_shape, ndmin=1, dtype=int)
 
     @prj_shape.setter
     def prj_shape(self, new_shape: Union[Sequence[int], NDArray]) -> None:
-        self.adj_shape = np.array(new_shape, dtype=int)
+        self.adj_shape = np.array(new_shape, ndmin=1, dtype=int)
 
     @abstractmethod
     def fp(self, x: NDArray) -> NDArray:
@@ -308,8 +311,8 @@ class TransformIdentity(BaseTransform):
         :param x_shape: Shape of the data.
         :type x_shape: ArrayLike
         """
-        self.dir_shape = np.array(x_shape)
-        self.adj_shape = np.array(x_shape)
+        self.dir_shape = np.array(x_shape, ndmin=1, dtype=int)
+        self.adj_shape = np.array(x_shape, ndmin=1, dtype=int)
         super().__init__()
 
     def _op_direct(self, x: NDArray) -> NDArray:
@@ -333,8 +336,8 @@ class TransformDiagonalScaling(BaseTransform):
         :type scale: float or ArrayLike
         """
         self.scale = np.array(scale)
-        self.dir_shape = np.array(x_shape)
-        self.adj_shape = np.array(x_shape)
+        self.dir_shape = np.array(x_shape, ndmin=1, dtype=int)
+        self.adj_shape = np.array(x_shape, ndmin=1, dtype=int)
         super().__init__()
 
     def absolute(self):
@@ -379,8 +382,8 @@ class TransformConvolution(BaseTransform):
     def __init__(
         self, x_shape: ArrayLike, kernel: ArrayLike, pad_mode: str = "edge", is_symm: bool = True, flip_adjoint: bool = False
     ):
-        self.dir_shape = np.array(x_shape)
-        self.adj_shape = np.array(x_shape)
+        self.dir_shape = np.array(x_shape, ndmin=1, dtype=int)
+        self.adj_shape = np.array(x_shape, ndmin=1, dtype=int)
 
         self.kernel = np.array(kernel, ndmin=len(self.dir_shape))
 
@@ -430,7 +433,7 @@ class TransformConvolution(BaseTransform):
 class BaseWaveletTransform(BaseTransform):
     """Base Wavelet transform."""
 
-    axes: NDArray
+    axes: NDArrayInt
     wavelet: str
 
     def _initialize_filter_bank(self) -> None:
@@ -468,7 +471,7 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
 
         :raises ValueError: In case the pywavelets package is not available or its version is not adequate.
         """
-        x_shape = np.array(x_shape, ndmin=1)
+        x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
         if not has_pywt:
             raise ValueError("Cannot use Wavelet transform because pywavelets is not installed.")
@@ -478,7 +481,7 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
 
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=int)
-        self.axes = np.array(axes, ndmin=1)
+        self.axes = np.array(axes, ndmin=1, dtype=int)
 
         self.pad_on_demand = pad_on_demand
 
@@ -486,7 +489,7 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
 
         num_axes = len(self.axes)
 
-        self.dir_shape = np.array(x_shape)
+        self.dir_shape = x_shape
 
         self.sub_band_shapes = pywt.wavedecn_shapes(
             self.dir_shape, self.wavelet, mode=self.pad_on_demand, level=self.level, axes=self.axes
@@ -568,7 +571,7 @@ class TransformStationaryWavelet(BaseWaveletTransform):
 
         :raises ValueError: In case the pywavelets package is not available or its version is not adequate.
         """
-        x_shape = np.array(x_shape, ndmin=1)
+        x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
         if not has_pywt:
             raise ValueError("Cannot use Wavelet transform because pywavelets is not installed.")
@@ -581,13 +584,13 @@ class TransformStationaryWavelet(BaseWaveletTransform):
 
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=int)
-        self.axes = np.array(axes, ndmin=1)
+        self.axes = np.array(axes, ndmin=1, dtype=int)
 
         self.pad_on_demand = pad_on_demand
 
         self._initialize_filter_bank()
 
-        self.dir_shape = np.array(x_shape)
+        self.dir_shape = x_shape
         if self.pad_on_demand is not None:
             alignment = 2**self.level
             x_axes = np.array(self.dir_shape)[np.array(self.axes)]
@@ -669,17 +672,17 @@ class TransformGradient(BaseTransform):
     """
 
     def __init__(self, x_shape: ArrayLike, axes: Optional[ArrayLike] = None, pad_mode: str = "edge"):
-        x_shape = np.array(x_shape, ndmin=1)
+        x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=int)
-        self.axes = np.array(axes, ndmin=1)
+        self.axes = np.array(axes, ndmin=1, dtype=int)
         self.ndims = len(x_shape)
 
         self.pad_mode = pad_mode.lower()
 
-        self.dir_shape = np.array(x_shape)
-        self.adj_shape = np.array((len(self.axes), *self.dir_shape))
+        self.dir_shape = x_shape
+        self.adj_shape = np.array((len(self.axes), *self.dir_shape), ndmin=1, dtype=int)
 
         super().__init__()
 
@@ -735,15 +738,15 @@ class TransformFourier(BaseTransform):
         :param axes: Axes along which to do the gradient, defaults to None
         :type axes: int or tuple of int, optional
         """
-        x_shape = np.array(x_shape, ndmin=1)
+        x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=int)
-        self.axes = np.array(axes, ndmin=1)
+        self.axes = np.array(axes, ndmin=1, dtype=int)
         self.ndims = len(x_shape)
 
-        self.dir_shape = np.array(x_shape)
-        self.adj_shape = np.array((2, *self.dir_shape))
+        self.dir_shape = x_shape
+        self.adj_shape = np.array((2, *self.dir_shape), ndmin=1, dtype=int)
 
         super().__init__()
 
@@ -796,17 +799,17 @@ class TransformLaplacian(BaseTransform):
     """
 
     def __init__(self, x_shape: ArrayLike, axes: Optional[ArrayLike] = None, pad_mode: str = "edge"):
-        x_shape = np.array(x_shape, ndmin=1)
+        x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
         if axes is None:
             axes = np.arange(-len(x_shape), 0, dtype=int)
-        self.axes = np.array(axes, ndmin=1)
+        self.axes = np.array(axes, ndmin=1, dtype=int)
         self.ndims = len(x_shape)
 
         self.pad_mode = pad_mode.lower()
 
-        self.dir_shape = np.array(x_shape)
-        self.adj_shape = np.array(x_shape)
+        self.dir_shape = x_shape
+        self.adj_shape = x_shape
 
         super().__init__()
 
@@ -857,7 +860,7 @@ class TransformSVD(BaseTransform):
 
         :raises IndexError: In case the the axes are outside the range.
         """
-        self.dir_shape = np.array(x_shape)
+        self.dir_shape = np.array(x_shape, ndmin=1, dtype=int)
 
         self.axes_rows = np.atleast_1d(axes_rows) % len(self.dir_shape)
         self.axes_cols = np.atleast_1d(axes_cols) % len(self.dir_shape)
