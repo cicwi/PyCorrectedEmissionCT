@@ -31,7 +31,7 @@ from numpy.typing import DTypeLike, NDArray
 NDArrayFloat = NDArray[np.floating]
 
 
-def roundup_to_pow2(x: Union[int, float, NDArrayFloat], p: int, data_type: DTypeLike = int) -> Union[int, float, NDArrayFloat]:
+def roundup_to_pow2(x: Union[int, float, NDArrayFloat], p: int, dtype: DTypeLike = int) -> Union[int, float, NDArrayFloat]:
     """Round first argument to the power of 2 indicated by second argument.
 
     Parameters
@@ -40,7 +40,7 @@ def roundup_to_pow2(x: Union[int, float, NDArrayFloat], p: int, data_type: DType
         Number to round up.
     p : int
         Power of 2.
-    data_type : DTypeLike, optional
+    dtype : DTypeLike, optional
         data type of the output. The default is int.
 
     Returns
@@ -48,7 +48,7 @@ def roundup_to_pow2(x: Union[int, float, NDArrayFloat], p: int, data_type: DType
     int | float | NDArrayFloat
         Rounding up of input.
     """
-    return np.ceil(np.array(x) / (2**p)).astype(data_type) * (2**p)
+    return np.ceil(np.array(x) / (2**p)).astype(dtype) * (2**p)
 
 
 def download_phantom():
@@ -209,6 +209,7 @@ def add_noise(
     background_avg: Optional[float] = None,
     background_std: Optional[float] = None,
     detection_efficiency: float = 1.0,
+    dtype: DTypeLike = np.float32,
 ) -> Tuple[NDArray, NDArray, float]:
     """Add noise to an image (sinogram).
 
@@ -228,13 +229,15 @@ def add_noise(
         Standard deviation of the background, by default None.
     detection_efficiency : float, optional
         Efficiency of the detection (e.g. detector solid angle, inclination, etc), by default 1.0.
+    dtype : DTypeLike, optional
+        Data type of the volumes, by default np.float32.
 
     Returns
     -------
     Tuple[NDArray, NDArray, float]
         The noised and clean images (scaled by the photons and efficiency), and the background.
     """
-    img_clean = num_photons * detection_efficiency * img_clean.copy()
+    img_clean = num_photons * detection_efficiency * img_clean.copy().astype(dtype)
 
     img_noise = img_clean.copy()
 
@@ -248,7 +251,7 @@ def add_noise(
     background = float(np.mean((img_noise - img_clean).flatten()))
 
     if add_poisson:
-        img_noise = np.random.poisson(img_noise).astype(np.float32)
+        img_noise = np.random.poisson(img_noise).astype(dtype)
     if readout_noise_std is not None:
         img_noise += np.random.normal(0, readout_noise_std, img_clean.shape)
 
@@ -270,7 +273,7 @@ def create_sino(
     background_std: Optional[float] = None,
     add_poisson: bool = False,
     readout_noise_std: Optional[float] = None,
-    data_type: DTypeLike = np.float32,
+    dtype: DTypeLike = np.float32,
 ) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, float]:
     """Compute the sinogram from a given phantom.
 
@@ -304,7 +307,7 @@ def create_sino(
         Switch to turn on Poisson noise. The default is False.
     readout_noise_std : float, optional
         Read-out noise standard deviation. The default is None.
-    data_type : numpy.dtype, optional
+    dtype : numpy.dtype, optional
         Output datatype. The default is np.float32.
 
     Returns
@@ -338,6 +341,7 @@ def create_sino(
         background_avg=background_avg,
         background_std=background_std,
         detection_efficiency=detector_solidangle_sr,
+        dtype=dtype,
     )
 
     return (sino_noise, angles_rad, ph * num_photons * detector_solidangle_sr, background)
@@ -353,7 +357,7 @@ def create_sino_transmission(
     psf: Optional[NDArrayFloat] = None,
     add_poisson: bool = False,
     readout_noise_std: Optional[float] = None,
-    data_type: DTypeLike = np.float32,
+    dtype: DTypeLike = np.float32,
 ) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat]:
     """Compute the sinogram from a given phantom.
 
@@ -377,7 +381,7 @@ def create_sino_transmission(
         Switch to turn on Poisson noise. The default is False.
     readout_noise_std : float, optional
         Read-out noise standard deviation. The default is None.
-    data_type : numpy.dtype, optional
+    dtype : numpy.dtype, optional
         Output datatype. The default is np.float32.
 
     Returns
@@ -401,12 +405,14 @@ def create_sino_transmission(
         num_photons=num_photons,
         add_poisson=add_poisson,
         readout_noise_std=readout_noise_std,
+        dtype=dtype,
     )
     flat_noise, _, _ = add_noise(
         np.ones_like(sino),
         num_photons=num_photons,
         add_poisson=add_poisson,
         readout_noise_std=readout_noise_std,
+        dtype=dtype,
     )
 
     return (sino_noise, flat_noise, angles_rad, ph)
