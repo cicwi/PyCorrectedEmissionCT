@@ -45,6 +45,9 @@ DataFidelity_l1b = data_terms.DataFidelity_l1b
 DataFidelity_Huber = data_terms.DataFidelity_Huber
 DataFidelity_KL = data_terms.DataFidelity_KL
 
+# Multi-channel
+DataFidelity_ln = data_terms.DataFidelity_ln
+
 
 # ---- Regularizers ----
 
@@ -68,6 +71,13 @@ Regularizer_Hub_dwl = regularizers.Regularizer_Hub_dwl
 Regularizer_l1med = regularizers.Regularizer_l1med
 Regularizer_l2med = regularizers.Regularizer_l2med
 Regularizer_fft = regularizers.Regularizer_fft
+
+# Multi-channel
+Regularizer_TNV = regularizers.Regularizer_TNV
+Regularizer_VTV = regularizers.Regularizer_VTV
+Regularizer_lnswl = regularizers.Regularizer_lnswl
+Regularizer_vl1wl = regularizers.Regularizer_vl1wl
+Regularizer_vSVD = regularizers.Regularizer_vSVD
 
 
 # ---- Constraints ----
