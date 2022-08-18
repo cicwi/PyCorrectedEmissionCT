@@ -7,12 +7,14 @@ Data fidelity classes.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from typing import Sequence
 import numpy as np
 
 from abc import ABC, abstractmethod
 
 from . import operators
+
+from typing import Sequence, Union
+from numpy.typing import NDArray
 
 
 eps = np.finfo(np.float32).eps
@@ -32,10 +34,10 @@ class DataFidelityBase(ABC):
 
     __data_fidelity_name__ = ""
 
-    def __init__(self, background=None):
+    def __init__(self, background: Union[float, NDArray, None] = None):
         self.background = background
         self.data = None
-        self.sigma = None
+        self.sigma = 1.0
 
     def info(self) -> str:
         """
@@ -77,34 +79,36 @@ class DataFidelityBase(ABC):
         """
         return self.info().lower()
 
-    def assign_data(self, data=None, sigma=1.0):
+    def assign_data(self, data: Union[NDArray, None] = None, sigma: Union[float, NDArray] = 1.0):
         self.data = data
         self.sigma = sigma
         if self.data is not None:
-            self._compute_sigma_data()
+            self.sigma_data = self._compute_sigma_data()
         else:
             self.sigma_data = None
 
-    def compute_residual(self, proj_primal, mask=None):
+    def compute_residual(self, proj_primal: NDArray, mask: Union[NDArray, None] = None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
+
         if self.data is not None:
             residual = self.data - proj_primal
         else:
-            residual = np.copy(proj_primal)
+            residual = proj_primal.copy()
+
         if mask is not None:
             residual *= mask
         return residual
 
     @abstractmethod
-    def compute_residual_norm(self, dual):
+    def compute_residual_norm(self, dual: NDArray):
         raise NotImplementedError()
 
-    def _compute_sigma_data(self) -> None:
-        self.sigma_data = self.sigma * self.data
+    def _compute_sigma_data(self):
+        return self.sigma * self.data
 
     @staticmethod
-    def _soft_threshold(values, threshold) -> None:
+    def _soft_threshold(values: NDArray, threshold: Union[float, NDArray]) -> None:
         abs_values = np.abs(values)
         valid_values = abs_values > 0
         if isinstance(threshold, (float, int)) or threshold.size == 1:
@@ -113,8 +117,11 @@ class DataFidelityBase(ABC):
             local_threshold = threshold[valid_values]
         values[valid_values] *= np.fmax((abs_values[valid_values] - local_threshold) / abs_values[valid_values], 0)
 
-    def compute_data_dual_dot(self, dual, mask=None):
+    def compute_data_dual_dot(self, dual: NDArray, mask: Union[NDArray, None] = None):
         if self.data is not None:
+            if mask is not None:
+                dual = dual * mask
+
             return np.dot(dual.flatten(), self.data.flatten())
         else:
             return 0
@@ -122,18 +129,18 @@ class DataFidelityBase(ABC):
     def initialize_dual(self):
         return np.zeros_like(self.data)
 
-    def update_dual(self, dual, proj_primal) -> None:
+    def update_dual(self, dual: NDArray, proj_primal: NDArray) -> None:
         if self.background is None:
             dual += proj_primal * self.sigma
         else:
             dual += (proj_primal + self.background) * self.sigma
 
     @abstractmethod
-    def apply_proximal(self, dual) -> None:
+    def apply_proximal(self, dual: NDArray) -> None:
         raise NotImplementedError()
 
     @abstractmethod
-    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
+    def compute_primal_dual_gap(self, proj_primal: NDArray, dual: NDArray, mask=None):
         raise NotImplementedError()
 
 
@@ -339,10 +346,10 @@ class DataFidelity_KL(DataFidelityBase):
     __data_fidelity_name__ = "KL"
 
     def _compute_sigma_data(self):
-        self.sigma_data = 4 * self.sigma * np.fmax(self.data, 0)
+        return 4 * self.sigma * np.fmax(self.data, 0)
 
     def apply_proximal(self, dual):
-        if self.data is not None:
+        if self.sigma_data is not None:
             dual[:] = (1 + dual[:] - np.sqrt((dual[:] - 1) ** 2 + self.sigma_data[:])) / 2
         else:
             dual[:] = (1 + dual[:] - np.sqrt((dual[:] - 1) ** 2)) / 2
@@ -352,7 +359,9 @@ class DataFidelity_KL(DataFidelityBase):
             proj_primal = proj_primal + self.background
         # we take the Moreau envelope here, and apply the proximal to it
         residual = np.fmax(proj_primal, eps) * self.sigma
+
         self.apply_proximal(residual)
+
         if mask is not None:
             residual *= mask
         return -residual
@@ -390,7 +399,7 @@ class DataFidelity_ln(DataFidelityBase):
     def apply_proximal(self, dual):
         dual_tmp = dual.copy()
 
-        if self.data is not None:
+        if self.sigma_data is not None:
             # If we have a bias term, we interpret it as an addition to the rows in the SVD decomposition.
             # Performing this operation before the transpose is a waste of computation, but it simplifies the logic.
             dual_tmp = np.concatenate((dual_tmp, self.sigma_data), axis=self.ln_axes[0])
@@ -423,12 +432,14 @@ class DataFidelity_ln(DataFidelityBase):
         dual[:] = dual_tmp[:]
 
     def compute_residual_norm(self, dual):
-        temp_dual = np.linalg.norm(dual, ord=2, axis=self.l2_axis)
-        return np.linalg.norm(temp_dual.flatten(), ord=1)
+        op_svd = operators.TransformSVD(dual.shape, axes_rows=self.ln_axes[0], axes_cols=self.ln_axes[1])
+        s_p = op_svd(dual)
+        return np.linalg.norm(s_p, ord=1)
 
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
-        return np.linalg.norm(
-            np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2, axis=self.l2_axis), ord=1
-        ) + self.compute_data_dual_dot(dual)
+
+        residual = self.compute_residual(proj_primal, mask)
+
+        return self.compute_residual_norm(residual) + self.compute_data_dual_dot(dual)
