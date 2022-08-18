@@ -860,7 +860,7 @@ class Regularizer_VTV(Regularizer_Grad):
 
     def apply_proximal(self, dual: ArrayLike) -> None:
         # Following assignments will detach the local array from the original one
-        dual_tmp = dual
+        dual_tmp = dual.copy()
 
         dual_is_scalar = len(dual_tmp.shape) == (self.ndims + 1)
         if dual_is_scalar:
@@ -1000,7 +1000,7 @@ class Regularizer_vl1wl(Regularizer_l1swl):
         return tau
 
     def apply_proximal(self, dual: ArrayLike) -> None:
-        dual_tmp = dual
+        dual_tmp = dual.copy()
 
         if self.q_ref is not None:
             dual_tmp = np.concatenate((dual_tmp, self.q_ref), axis=1)
