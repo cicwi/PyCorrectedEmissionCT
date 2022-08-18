@@ -1061,7 +1061,7 @@ class Regularizer_vSVD(BaseRegularizer):
 
     def initialize_sigma_tau(self, primal: ArrayLike) -> Union[float, ArrayLike]:
         self.dtype = primal.dtype
-        self.op = operators.TransformSVD(primal.shape, axes_rows=self.axis_channels, axes_cols=self.axes)
+        self.op = operators.TransformSVD(primal.shape, axes_rows=self.axis_channels, axes_cols=self.axes, rescale=True)
 
         self.sigma = 1
         self.norm.assign_data(None, sigma=self.sigma)

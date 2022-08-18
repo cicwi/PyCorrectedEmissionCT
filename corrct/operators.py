@@ -837,7 +837,10 @@ class TransformLaplacian(BaseTransform):
 class TransformSVD(BaseTransform):
     """Singular value decomposition based decomposition operator."""
 
-    def __init__(self, x_shape, axes_rows=(0,), axes_cols=(-1,)):
+    U: Optional[NDArray]
+    Vt: Optional[NDArray]
+
+    def __init__(self, x_shape, axes_rows=(0,), axes_cols=(-1,), rescale: bool = False):
         """Singular value decomposition operator.
 
         The SVD decomposition will be done over the flattened rows vs flatted cols.
@@ -886,6 +889,8 @@ class TransformSVD(BaseTransform):
         self.U = None
         self.Vt = None
 
+        self.rescale = rescale
+
         super().__init__()
 
     def direct_svd(self, x):
@@ -917,14 +922,22 @@ class TransformSVD(BaseTransform):
     def _op_direct(self, x):
         x = np.transpose(x, self.fwd_transpose)
         x = np.reshape(x, self.fwd_shape)
+
         (self.U, s, self.Vt) = self.direct_svd(x)
-        s /= np.sqrt(self.Vt.shape[-1] * self.U.shape[-2])
-        self.Vt *= np.sqrt(self.Vt.shape[-1])
-        self.U *= np.sqrt(self.U.shape[-2])
+
+        if self.rescale:
+            s /= np.sqrt(self.Vt.shape[-1] * self.U.shape[-2])
+            self.Vt *= np.sqrt(self.Vt.shape[-1])
+            self.U *= np.sqrt(self.U.shape[-2])
+
         return s
 
     def _op_adjoint(self, y):
+        if self.U is None or self.Vt is None:
+            raise ValueError("Operator not initialized!")
+
         x = self.inverse_svd(self.U, y, self.Vt)
+
         x = np.reshape(x, self.bwd_shape)
         return np.transpose(x, self.bwd_transpose)
 
