@@ -292,9 +292,10 @@ class ProjectorBackendSKimage(ProjectorBackend):
             vol = np.empty([self.prj_shape_vwu[-2], *self.vol_shape_zxy], dtype=prj.dtype)
             for ii_a, a in enumerate(self.angles_w_deg):
                 vol[ii_a, ...] = skt.iradon(prj[ii_a, :, np.newaxis], [a], **bpj_size, **filter_name)
-            return vol.sum(axis=0)
+            vol = vol.sum(axis=0)
         else:
-            return skt.iradon(prj[:, np.newaxis], self.angles_w_deg[angle_ind : angle_ind + 1 :], **bpj_size, **filter_name)
+            vol = skt.iradon(prj[:, np.newaxis], self.angles_w_deg[angle_ind : angle_ind + 1 :], **bpj_size, **filter_name)
+        return vol * 2 / np.pi
 
     def fbp(self, prj: NDArray, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> NDArray:
         """Apply filtered back-projection of a sinogram or stack of sinograms.
