@@ -25,14 +25,16 @@ from dataclasses import dataclass, field
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
+NDArrayFloat = NDArray[np.floating]
+
 
 class AttenuationVolume:
     """Attenuation volume computation class."""
 
-    incident_local: Union[NDArray[np.floating], None]
-    emitted_local: Union[NDArray[np.floating], None]
-    angles_rot_rad: NDArray[np.floating]
-    angles_det_rad: NDArray[np.floating]
+    incident_local: Union[NDArrayFloat, None]
+    emitted_local: Union[NDArrayFloat, None]
+    angles_rot_rad: NDArrayFloat
+    angles_det_rad: NDArrayFloat
 
     dtype: DTypeLike
 
@@ -41,10 +43,10 @@ class AttenuationVolume:
 
     def __init__(
         self,
-        incident_local: Union[NDArray[np.floating], None],
-        emitted_local: Union[NDArray[np.floating], None],
+        incident_local: Union[NDArrayFloat, None],
+        emitted_local: Union[NDArrayFloat, None],
         angles_rot_rad: ArrayLike,
-        angles_det_rad: Union[NDArray[np.floating], ArrayLike, float] = np.pi / 2,
+        angles_det_rad: Union[NDArrayFloat, ArrayLike, float] = np.pi / 2,
         dtype: DTypeLike = np.float32,
     ):
         """
@@ -81,10 +83,10 @@ class AttenuationVolume:
         if num_dims not in [2, 3]:
             raise ValueError(f"Maps can only be 2D or 3D Arrays. A {num_dims}-dimensional was passed ({self.vol_shape_zyx}).")
 
-    def _compute_attenuation_angle_in(self, local_att: NDArray[np.floating], angle_rad: float) -> NDArray:
+    def _compute_attenuation_angle_in(self, local_att: NDArrayFloat, angle_rad: float) -> NDArray:
         return prj_backends.ProjectorBackend.compute_attenuation(local_att, angle_rad, invert=False)[None, ...]
 
-    def _compute_attenuation_angle_out(self, local_att: NDArray[np.floating], angle_rad: float) -> NDArray:
+    def _compute_attenuation_angle_out(self, local_att: NDArrayFloat, angle_rad: float) -> NDArray:
         angle_det = angle_rad + self.angles_det_rad
         atts = np.empty(self.maps.shape[1:], dtype=self.dtype)
         for ii, a in enumerate(angle_det):

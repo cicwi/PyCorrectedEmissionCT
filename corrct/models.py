@@ -163,7 +163,7 @@ class ProjectionGeometry(Geometry):
         if patch_astra_2d and int(self.geom_type[-2]) == 2:
             angles = -angles
 
-        rotations = spt.Rotation.from_rotvec(angles * self.rot_dir_xyz)
+        rotations = spt.Rotation.from_rotvec(angles * self.rot_dir_xyz)  # type: ignore
 
         return dc_replace(
             self,
