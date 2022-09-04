@@ -24,7 +24,7 @@ except ImportError as exc:
     __has_physics__ = False
 
 
-from typing import Union, Sequence, Optional, Tuple
+from typing import List, Union, Sequence, Optional, Tuple
 from numpy.typing import DTypeLike, NDArray
 
 
@@ -132,8 +132,8 @@ def phantom_assign_concentration_multi(
     elements: Sequence[str] = ["Ca", "Fe"],
     em_lines: Union[str, Sequence[str]] = "KA",
     in_energy_keV: float = 20.0,
-    detectors_pos_rad: Optional[Union[float, Sequence[float]]] = None,
-) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
+    detectors_pos_rad: Optional[float] = None,
+) -> Tuple[List[NDArrayFloat], NDArrayFloat, List[NDArrayFloat]]:
     """Build an XRF phantom.
 
     The created phantom has been used in:
@@ -157,11 +157,11 @@ def phantom_assign_concentration_multi(
 
     Returns
     -------
-    vol_yield : NDArrayFloat
+    vol_yield : List[NDArrayFloat]
         Voxel-wise fluorescence and Compton yields.
     vol_att_in : NDArrayFloat
         Voxel-wise attenuation at the incoming beam energy.
-    vol_att_out : NDArrayFloat
+    vol_att_out : List[NDArrayFloat]
         Voxel-wise attenuation at the emitted energy.
     """
     ph_air = ph_or < 0.1
@@ -187,16 +187,16 @@ def phantom_assign_concentration_multi(
     vol_lin_att_out = [np.array([])] * num_vols_out
 
     for ii, el in enumerate(elements):
-        if isinstance(em_lines, (list, tuple)):
-            line = em_lines[ii]
-        else:
+        if isinstance(em_lines, str):
             line = em_lines
+        else:
+            line = em_lines[ii]
         out_energy_keV, vol_yield[ii] = phantom.get_fluo_yield(el, in_energy_keV, line)
         vol_lin_att_out[ii] = phantom.get_attenuation(out_energy_keV)
 
     if detectors_pos_rad:
-        out_energy_keV, vol_yield[ii + 1] = phantom.get_compton_scattering(in_energy_keV, angle_rad=detectors_pos_rad)
-        vol_lin_att_out[ii + 1] = phantom.get_attenuation(out_energy_keV)
+        out_energy_keV, vol_yield[-1] = phantom.get_compton_scattering(in_energy_keV, angle_rad=detectors_pos_rad)
+        vol_lin_att_out[-1] = phantom.get_attenuation(out_energy_keV)
 
     return (vol_yield, vol_lin_att_in, vol_lin_att_out)
 

@@ -14,7 +14,7 @@ import numpy as np
 from dataclasses import dataclass
 
 from typing import Union, Sequence, Optional, Tuple, Dict
-from numpy.typing import ArrayLike, DTypeLike
+from numpy.typing import NDArray, DTypeLike
 
 import copy as cp
 
@@ -104,7 +104,7 @@ class FluoLinesSiegbahn:
         lines: Union[str, FluoLine, Sequence[FluoLine]],
         compute_average: bool = False,
         verbose: bool = False,
-    ) -> Union[float, Sequence[float]]:
+    ) -> Union[float, NDArray]:
         """
         Return the energy(ies) of the requested line for the given element.
 
@@ -120,7 +120,7 @@ class FluoLinesSiegbahn:
 
         Returns
         -------
-        energy_keV : Union[float, Sequence[float]]
+        energy_keV : Union[float, NDArray]
             Either the average energy or the list of different energies.
         """
         if isinstance(element, str):
@@ -130,18 +130,17 @@ class FluoLinesSiegbahn:
             el_sym = xraylib.AtomicNumberToSymbol(element)
             el_num = element
 
-        if verbose:
-            requested_lines = lines
-
         if isinstance(lines, FluoLine):
-            lines = [lines]
+            lines_list = [lines]
         elif isinstance(lines, str):
-            lines = FluoLinesSiegbahn.get_lines(lines)
+            lines_list = FluoLinesSiegbahn.get_lines(lines)
         elif len(lines) == 0:
             raise ValueError(f"No line was passed! lines={lines}")
+        else:
+            lines_list = lines
 
-        energy_keV = np.empty(len(lines), dtype=np.float32)
-        for ii, line in enumerate(lines):
+        energy_keV = np.empty(len(lines_list), dtype=np.float32)
+        for ii, line in enumerate(lines_list):
             try:
                 energy_keV[ii] = xraylib.LineEnergy(el_num, line.indx)
             except ValueError as exc:
@@ -151,7 +150,7 @@ class FluoLinesSiegbahn:
 
         if compute_average:
             rates = np.empty(energy_keV.shape)
-            for ii, line in enumerate(lines):
+            for ii, line in enumerate(lines_list):
                 try:
                     rates[ii] = xraylib.RadRate(el_num, line.indx)
                 except ValueError as exc:
@@ -161,7 +160,7 @@ class FluoLinesSiegbahn:
             energy_keV = np.sum(energy_keV * rates / np.sum(rates))
 
         if verbose:
-            print(f"{el_sym}-{requested_lines} emission energy (keV):", energy_keV, "\n")
+            print(f"{el_sym}-{lines} emission energy (keV):", energy_keV, "\n")
 
         return energy_keV
 
@@ -171,16 +170,16 @@ class DetectorXRF(object):
     """Simple XRF detector model."""
 
     surface_mm2: float
-    distance_mm: float
+    distance_mm: Union[float, NDArray]
     angle_rad: float = np.pi / 2
 
     @property
-    def solid_angle_sr(self) -> Union[float, ArrayLike]:
+    def solid_angle_sr(self) -> Union[float, NDArray]:
         """Compute the solid angle covered by the detector.
 
         Returns
         -------
-        float | ArrayLike
+        float | NDArray
             The computed solid angle of the detector geometry.
         """
         return self.surface_mm2 / (np.pi * self.distance_mm**2)
@@ -209,7 +208,7 @@ class VolumeMaterial(object):
 
     def __init__(
         self,
-        phase_fractions: Sequence,
+        phase_fractions: Sequence[NDArray],
         phase_compounds: Sequence,
         voxel_size_cm: float,
         dtype: DTypeLike = None,
@@ -292,7 +291,7 @@ class VolumeMaterial(object):
         cmp["density"] = density
         return cmp
 
-    def get_attenuation(self, energy_keV: float) -> ArrayLike:
+    def get_attenuation(self, energy_keV: float) -> NDArray:
         """
         Compute the local attenuation for each voxel.
 
@@ -303,7 +302,7 @@ class VolumeMaterial(object):
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The computed local attenuation volume.
         """
         ph_lin_att = np.zeros(self.shape, self.dtype)
@@ -324,7 +323,7 @@ class VolumeMaterial(object):
             ph_lin_att += ph * cmp["density"] * cmp_cs
         return ph_lin_att * self.voxel_size_cm
 
-    def get_element_mass_fraction(self, element: Union[str, int]) -> ArrayLike:
+    def get_element_mass_fraction(self, element: Union[str, int]) -> NDArray:
         """Compute the local element mass fraction through out all the phases.
 
         Parameters
@@ -334,7 +333,7 @@ class VolumeMaterial(object):
 
         Returns
         -------
-        mass_fraction : ArrayLike
+        mass_fraction : NDArray
             The local mass fraction in each voxel.
         """
         el_num = self.get_element_number(element)
@@ -363,7 +362,7 @@ class VolumeMaterial(object):
 
     def get_compton_scattering(
         self, energy_in_keV: float, angle_rad: Optional[float] = None, detector: Optional[DetectorXRF] = None
-    ) -> Tuple[float, ArrayLike]:
+    ) -> Tuple[float, NDArray]:
         """Compute the local Compton scattering.
 
         Parameters
@@ -384,14 +383,15 @@ class VolumeMaterial(object):
         -------
         energy_out_keV : float
             The energy of the Compton radiation received by the detector.
-        cmptn_yield : ArrayLike
+        cmptn_yield : NDArray
             Local yield of Compton radiation.
 
         Either `angle_rad` or `detector` need to be supplied.
         """
-        if angle_rad is None and detector is None:
-            raise ValueError("Either 'angle_rad' or 'detector' should be passed.")
-        if detector:
+        if detector is None:
+            if angle_rad is None:
+                raise ValueError("Either 'angle_rad' or 'detector' should be passed.")
+        else:
             if not self._check_parallax_detector(detector):
                 print("WARNING - detector parallax is above 1e-2")
             if angle_rad is None:
@@ -432,7 +432,7 @@ class VolumeMaterial(object):
         energy_in_keV: float,
         fluo_lines: Union[str, FluoLine, Sequence[FluoLine]],
         detector: Optional[DetectorXRF] = None,
-    ) -> Tuple[float, ArrayLike]:
+    ) -> Tuple[float, NDArray]:
         """Compute the local fluorescence yield, for the given line of the given element.
 
         Parameters
@@ -450,7 +450,7 @@ class VolumeMaterial(object):
         -------
         energy_out_keV : float
             The emitted fluorescence energy.
-        el_yield : ArrayLike
+        el_yield : NDArray
             The local fluorescence yield in each voxel.
         """
         if detector:
@@ -479,4 +479,5 @@ class VolumeMaterial(object):
             el_yield *= detector.solid_angle_sr
 
         energy_out_keV = FluoLinesSiegbahn.get_energy(el_num, fluo_lines, compute_average=True)
-        return (energy_out_keV, el_yield)
+
+        return float(energy_out_keV), el_yield
