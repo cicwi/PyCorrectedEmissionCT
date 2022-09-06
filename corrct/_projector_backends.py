@@ -13,7 +13,7 @@ import skimage.transform as skt
 from . import filters
 from .models import ProjectionGeometry, VolumeGeometry
 
-from typing import Optional, Union
+from typing import Optional, Sequence, Union
 from numpy.typing import ArrayLike, NDArray
 
 from abc import ABC, abstractmethod
@@ -104,44 +104,44 @@ class ProjectorBackend(ABC):
             self.dispose()
 
     @abstractmethod
-    def fp(self, vol: ArrayLike, angle_ind: Optional[int] = None) -> ArrayLike:
+    def fp(self, vol: NDArray, angle_ind: Optional[int] = None) -> NDArray:
         """Forward-project volume.
 
         Forward-projection interface. Derived backends need to implement this method.
 
         Parameters
         ----------
-        vol : ArrayLike
+        vol : NDArray
             The volume to forward-project.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
         """
 
     @abstractmethod
-    def bp(self, prj: ArrayLike, angle_ind: Optional[int] = None) -> ArrayLike:
+    def bp(self, prj: NDArray, angle_ind: Optional[int] = None) -> NDArray:
         """Back-project data.
 
         Back-projection interface. Derived backends need to implement this method.
 
         Parameters
         ----------
-        prj : ArrayLike
+        prj : NDArray
             The sinogram to back-project or a single line.
         angle_ind : int, optional
             The angle index to foward project. The default is None.
         """
 
     @abstractmethod
-    def fbp(self, prj: ArrayLike, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> ArrayLike:
+    def fbp(self, prj: NDArray, fbp_filter: Union[str, NDArray], pad_mode: str) -> NDArray:
         """Apply FBP.
 
         Filtered back-projection interface. Derived backends need to implement this method.
 
         Parameters
         ----------
-        prj : ArrayLike
+        prj : NDArray
             The sinogram or stack of sinograms.
-        fbp_filter : str | ArrayLike, optional
+        fbp_filter : str | NDArray, optional
             The filter to use in the filtered back-projection.
         pad_mode: str, optional
             The padding mode to use for the linear convolution.
@@ -485,7 +485,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         super().initialize()
 
-    def _check_data(self, x: NDArray, expected_shape: ArrayLike) -> NDArray:
+    def _check_data(self, x: NDArray, expected_shape: Sequence[int]) -> NDArray:
         if x.dtype != np.float32:
             x = x.astype(np.float32)
         if not x.flags["C_CONTIGUOUS"]:
