@@ -18,7 +18,6 @@ from numpy.typing import ArrayLike, NDArray
 
 from abc import ABC, abstractmethod
 
-
 try:
     import astra
 
@@ -39,47 +38,69 @@ class ProjectorBackend(ABC):
 
     vol_geom: VolumeGeometry
     vol_shape_zxy: NDArray
+
     angles_w_rad: NDArray[np.floating]
+
     prj_shape_vwu: NDArray
     prj_shape_vu: NDArray
 
-    def __init__(self, vol_geom: VolumeGeometry, angles_rot_rad: ArrayLike):
-        """Initialize base abstract projector backend class.
+    is_initialized: bool
+
+    def __init__(self):
+        """Initialize base abstract projector backend class."""
+        self.is_initialized = False
+
+    def initialize_geometry(
+        self,
+        vol_geom: VolumeGeometry,
+        angles_rot_rad: Union[ArrayLike, NDArray],
+        rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
+        prj_geom: Optional[ProjectionGeometry] = None,
+        create_single_projs: bool = True,
+    ):
+        """Initialize the projector geometry.
 
         Parameters
         ----------
         vol_geom : VolumeGeometry
             The volume geometry.
-        angles_rot_rad : ArrayLike
+        angles_rot_rad : ArrayLike | NDArray
             The projection angles.
+        rot_axis_shift_pix : float | NDArray | None, optional
+            Relative position of the rotation center with respect to the volume center. The default is None.
+        prj_geom : ProjectionGeometry, optional
+            The fully specified projection geometry.
+            When active, the rotation axis shift is ignored. The default is None.
+        create_single_projs : bool, optional
+            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
         """
         self.vol_geom = vol_geom
 
-        self.vol_shape_zxy = np.array([*self.vol_geom.shape[2:], self.vol_geom.shape[0], self.vol_geom.shape[1]])
-        self.angles_w_rad = np.array(angles_rot_rad, ndmin=1)
+        self.vol_shape_zxy = np.array([*self.vol_geom.shape[2:], self.vol_geom.shape[0], self.vol_geom.shape[1]], dtype=int)
+        self.angles_w_rad = np.array(angles_rot_rad, ndmin=1, dtype=int)
 
         # Basic sizes, unless overridden
-        self.prj_shape_vwu = np.array([*self.vol_geom.shape[2:], len(self.angles_w_rad), self.vol_geom.shape[1]])
-        self.prj_shape_vu = np.array([*self.vol_geom.shape[2:], 1, self.vol_geom.shape[1]])
+        self.prj_shape_vwu = np.array([*self.vol_geom.shape[2:], len(self.angles_w_rad), self.vol_geom.shape[1]], dtype=int)
+        self.prj_shape_vu = np.array([*self.vol_geom.shape[2:], 1, self.vol_geom.shape[1]], dtype=int)
 
-        self.is_initialized = False
+        self.has_individual_projs = create_single_projs
 
-    def get_vol_shape(self) -> ArrayLike:
+    def get_vol_shape(self) -> NDArray:
         """Return the expected and produced volume shape (in ZXY coordinates).
 
         Returns
         -------
-        tuple
+        NDArray
             The volume shape.
         """
         return self.vol_shape_zxy
 
-    def get_prj_shape(self) -> ArrayLike:
+    def get_prj_shape(self) -> NDArray:
         """Return the expected and produced projection shape (in VWU coordinates).
 
         Returns
         -------
-        tuple
+        NDArray
             The projection shape.
         """
         return self.prj_shape_vwu
@@ -181,7 +202,7 @@ class ProjectorBackend(ABC):
             return skt.rotate(vol, rot_angle_deg, order=1, clip=False)
 
         size_lims = np.array(vol.shape[-2:])
-        min_size = np.ceil(np.sqrt(np.sum(size_lims**2)))
+        min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
         edges = np.ceil((min_size - size_lims) / 2).astype(int)
 
         if invert:
@@ -210,7 +231,17 @@ class ProjectorBackend(ABC):
 class ProjectorBackendSKimage(ProjectorBackend):
     """Projector backend based on scikit-image."""
 
-    def __init__(self, vol_geom: VolumeGeometry, angles_rot_rad: ArrayLike, rot_axis_shift_pix: Union[float, NDArray] = 0.0):
+    def __init__(self):
+        self.is_initialized = True
+
+    def initialize_geometry(
+        self,
+        vol_geom: VolumeGeometry,
+        angles_rot_rad: Union[ArrayLike, NDArray],
+        rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
+        prj_geom: Optional[ProjectionGeometry] = None,
+        create_single_projs: bool = True,
+    ):
         """Initialize projector backend based on scikit-image.
 
         Parameters
@@ -219,8 +250,15 @@ class ProjectorBackendSKimage(ProjectorBackend):
             The volume shape.
         angles_rot_rad : ArrayLike
             The projection angles.
-        rot_axis_shift_pix : float, optional
-            Relative position of the rotation center with respect to the volume center. The default is 0.0.
+        rot_axis_shift_pix : float | NDArray | None, optional
+            Relative position of the rotation center with respect to the volume center. The default is None.
+            NOT SUPPORTED: if anything else than None is passed, it will throw an error!
+        prj_geom : ProjectionGeometry, optional
+            The fully specified projection geometry.
+            When active, the rotation axis shift is ignored. The default is None.
+            NOT SUPPORTED: if anything else than None is passed, it will throw an error!
+        create_single_projs : bool, optional
+            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
 
         Raises
         ------
@@ -228,14 +266,15 @@ class ProjectorBackendSKimage(ProjectorBackend):
             In case the volume dimensionality is larger than 2D, and if a rotation axis shift is passed.
         """
         if vol_geom.is_3D():
-            raise ValueError("With the scikit-image backend only 2D volumes are allowed!")
-        if not float(rot_axis_shift_pix) == 0.0:
-            raise ValueError("With the scikit-image rotation axis shift is not supported!")
+            raise ValueError("With the scikit-image backend, only 2D volumes are allowed!")
+        if rot_axis_shift_pix is not None:
+            raise ValueError("With the scikit-image backend, rotation axis shifts are not supported!")
+        if prj_geom is not None:
+            raise ValueError("With the scikit-image backend, `ProjectionGeometry` is not supported!")
 
-        super().__init__(vol_geom, angles_rot_rad)
+        super().initialize_geometry(vol_geom, angles_rot_rad, create_single_projs=create_single_projs)
 
         self.angles_w_deg = np.rad2deg(self.angles_w_rad)
-        self.is_initialized = True
 
     @staticmethod
     def _set_filter_name(filt):
@@ -336,15 +375,27 @@ class ProjectorBackendASTRA(ProjectorBackend):
     """Projector backend based on astra-toolbox."""
 
     def __init__(
+        self, super_sampling: int = 1,
+    ):
+        """Initialize the ASTRA projector backend.
+
+        Parameters
+        ----------
+        super_sampling : int, optional
+            Super sampling factor for the pixels and voxels, by default 1.
+        """
+        super().__init__()
+        self.super_sampling = super_sampling
+
+    def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: ArrayLike,
-        rot_axis_shift_pix: Union[ArrayLike, NDArray] = 0.0,
+        angles_rot_rad: Union[ArrayLike, NDArray],
+        rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
-        super_sampling: int = 1,
     ):
-        """Initialize projector backend based on astra-toolbox.
+        """Initialize geometry of projector backend based on astra-toolbox.
 
         Parameters
         ----------
@@ -352,15 +403,13 @@ class ProjectorBackendASTRA(ProjectorBackend):
             The volume shape.
         angles_rot_rad : ArrayLike
             The projection angles.
-        rot_axis_shift_pix : float | NDArray, optional
-            Relative position of the rotation center with respect to the volume center. The default is 0.0.
+        rot_axis_shift_pix : float | NDArray | None, optional
+            Relative position of the rotation center with respect to the volume center. The default is None.
         prj_geom : ProjectionGeometry, optional
             The fully specified projection geometry.
             When active, the rotation axis shift is ignored. The default is None.
         create_single_projs : bool, optional
             Whether to create projectors for single projections. Used for corrections and SART. The default is True.
-        super_sampling : int, optional
-            pixel and voxel super-sampling. The default is 1.
 
         Raises
         ------
@@ -369,17 +418,15 @@ class ProjectorBackendASTRA(ProjectorBackend):
         """
         if vol_geom.is_3D() and not has_cuda:
             raise ValueError("CUDA is not available: only 2D volumes are allowed!")
-        if not isinstance(rot_axis_shift_pix, (int, float, list, tuple, np.ndarray)):
+        if not (rot_axis_shift_pix is None or isinstance(rot_axis_shift_pix, (int, float, list, tuple, np.ndarray))):
             raise ValueError(
-                "Rotation axis shift should either be an int, a float or a sequence of floats"
+                "Rotation axis shift should either be None or one of the following: int, a float or a sequence of floats"
                 + f" ({type(rot_axis_shift_pix)} given instead)."
             )
 
-        super().__init__(vol_geom, angles_rot_rad)
+        super().initialize_geometry(vol_geom, angles_rot_rad, create_single_projs=create_single_projs)
 
         self.proj_id = []
-        self.has_individual_projs = create_single_projs
-        self.super_sampling = super_sampling
         self.dispose()
 
         num_angles = self.angles_w_rad.size
@@ -436,22 +483,22 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         self.proj_geom_all = astra.create_proj_geom(geom_type_str + "_vec", *prj_geom.det_shape_vu, vectors)
 
-    def get_vol_shape(self) -> ArrayLike:
+    def get_vol_shape(self) -> NDArray:
         """Return the expected and produced volume shape (in ZYX coordinates).
 
         Returns
         -------
-        tuple
+        NDArray
             The volume shape.
         """
         return astra.functions.geom_size(self.astra_vol_geom)
 
-    def get_prj_shape(self) -> ArrayLike:
+    def get_prj_shape(self) -> NDArray:
         """Return the expected and produced projection shape (in VWU coordinates).
 
         Returns
         -------
-        tuple
+        NDArray
             The projection shape.
         """
         return astra.functions.geom_size(self.proj_geom_all)

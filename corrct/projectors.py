@@ -23,6 +23,7 @@ from numpy.typing import ArrayLike, DTypeLike, NDArray
 
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
+astra_available = prj_backends.has_astra and prj_backends.has_cuda
 
 
 class ProjectorMatrix(operators.ProjectorOperator):
@@ -105,41 +106,7 @@ class ProjectorMatrix(operators.ProjectorOperator):
 
 
 class ProjectorUncorrected(operators.ProjectorOperator):
-    """Base projection class.
-
-    It implements the forward and back projection of the single lines of a sinogram.
-    It takes care of initializing and disposing the ASTRA projectors when used in a *with* statement.
-    It supports both 2D and 3D geometries.
-
-    Parameters
-    ----------
-    vol_shape : ArrayLike
-        The volume shape in Y X and optionally Z.
-    angles_rot_rad : ArrayLike
-        The rotation angles.
-    rot_axis_shift_pix : float | ArrayLike, optional
-        The rotation axis shift(s) in pixels. The default is 0.
-    prj_geom : ProjectionGeometry, optional
-        The fully specified projection geometry.
-        When active, the rotation axis shift is ignored. The default is None.
-    prj_intensities : float | ArrayLike, optional
-        Projection scaling factor. The default is None.
-    psf: ArrayLike | None, optional
-        The "point spread function" of the detector. The default is None.
-    use_astra : bool, optional
-        Whether to use ASTRA or fall back to scikit-image.
-        The default is True if CUDA is available, otherwise False.
-    create_single_projs : bool, optional
-        Whether to create projectors for single projections.
-        Used for corrections and SART. The default is True.
-    super_sampling : int, optional
-        pixel and voxel super-sampling. The default is 1.
-
-    Raises
-    ------
-    ValueError
-        When the geometry is not correct.
-    """
+    """Base projection class."""
 
     vol_geom: models.VolumeGeometry
     angles_rot_rad: NDArray[np.floating]
@@ -155,13 +122,52 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         prj_geom: Optional[models.ProjectionGeometry] = None,
         prj_intensities: Optional[ArrayLike] = None,
         psf: Optional[ArrayLike] = None,
-        use_astra: bool = prj_backends.has_cuda,
+        backend: Union[str, prj_backends.ProjectorBackend] = "astra" if astra_available else "skimage",
         create_single_projs: bool = True,
         super_sampling: int = 1,
     ):
-        if not prj_backends.has_astra and use_astra:
-            use_astra = False
-            print("WARNING: ASTRA requested but not available. Falling back to scikit-image.")
+        """Initialize the base projection class.
+
+        It implements the forward and back projection of the single lines of a sinogram.
+        It takes care of initializing and disposing the ASTRA projectors when used in a *with* statement.
+        It supports both 2D and 3D geometries.
+
+        Parameters
+        ----------
+        vol_geom : Sequence[int] | models.VolumeGeometry
+            The volume shape in Y X and optionally Z.
+        angles_rot_rad : ArrayLike | NDArray
+            The rotation angles.
+        rot_axis_shift_pix : float | ArrayLike | NDArray, optional
+            The rotation axis shift(s) in pixels, by default 0.0.
+        prj_geom : models.ProjectionGeometry | None, optional
+            The fully specified projection geometry.
+            When active, the rotation axis shift is ignored, by default None.
+        prj_intensities : ArrayLike | NDArray | None, optional
+            Projection scaling factor, by default None.
+        psf : ArrayLike | NDArray | None, optional
+            The "point spread function" of the detector, by default None.
+        prj_backend : bool, optional
+            Whether to use ASTRA or fall back to scikit-image.
+            The default is True if CUDA and ASTRA are available, otherwise False.
+        create_single_projs : bool, optional
+            Whether to create projectors for single projections.
+            Used for corrections and SART, by default True.
+        super_sampling : int, optional
+            Pixel and voxel super-sampling, by default 1.
+
+        Raises
+        ------
+        ValueError
+            When the geometry is not correct.
+        """
+        if not astra_available:
+            astra_status = f"astra: {prj_backends.has_astra}, cuda: {prj_backends.has_cuda}"
+            if isinstance(backend, str) and backend == "astra":
+                backend = "skimage"
+                print(f"WARNING: ASTRA backend requested but not available ({astra_status}). Falling back to scikit-image.")
+            elif isinstance(backend, prj_backends.ProjectorBackendASTRA):
+                raise ValueError(f"Passed ASTRA projector, but astra not available ({astra_status}).")
 
         if not isinstance(vol_geom, models.VolumeGeometry):
             vol_geom = models.VolumeGeometry(vol_shape_xyz=np.array(vol_geom))
@@ -174,29 +180,31 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         if not vol_shape[0] == vol_shape[1]:
             raise ValueError("Only square volumes")
 
-        if prj_geom is not None and not use_astra:
-            raise ValueError("Using class `ProjectionGeometry` requires astra-toolbox.")
-
         angles_rot_rad = np.array(np.squeeze(angles_rot_rad), ndmin=1)
         rot_axis_shift_pix = np.array(rot_axis_shift_pix)
 
-        if use_astra:
-            self.projector_backend = prj_backends.ProjectorBackendASTRA(
-                vol_geom,
-                angles_rot_rad,
-                rot_axis_shift_pix=rot_axis_shift_pix,
-                prj_geom=prj_geom,
-                create_single_projs=create_single_projs,
-                super_sampling=super_sampling,
-            )
-        else:
-            self.projector_backend = prj_backends.ProjectorBackendSKimage(
-                vol_geom, angles_rot_rad, rot_axis_shift_pix=rot_axis_shift_pix
-            )
+        if isinstance(backend, str):
+            if backend == "astra":
+                self.projector_backend = prj_backends.ProjectorBackendASTRA(super_sampling=super_sampling)
+            elif backend == "skimage":
+                self.projector_backend = prj_backends.ProjectorBackendSKimage()
+            else:
+                raise ValueError(f"Unknown backend: {backend}. Available options are: 'astra', 'skimage'.")
+
+        if prj_geom is not None and not isinstance(backend, prj_backends.ProjectorBackendASTRA):
+            raise ValueError("Using class `ProjectionGeometry` requires using astra-toolbox.")
+
+        self.projector_backend.initialize_geometry(
+            vol_geom,
+            angles_rot_rad,
+            rot_axis_shift_pix=rot_axis_shift_pix,
+            prj_geom=prj_geom,
+            create_single_projs=create_single_projs,
+        )
 
         self.angles_rot_rad = angles_rot_rad
         if prj_intensities is not None:
-            prj_intensities = np.array(prj_intensities)
+            prj_intensities = np.array(prj_intensities, dtype=np.floating)
         self.prj_intensities = prj_intensities
 
         self._set_psf(psf)
@@ -405,6 +413,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         *,
         prj_geom: Optional[models.ProjectionGeometry] = None,
         prj_intensities: Optional[ArrayLike] = None,
+        backend: Union[str, prj_backends.ProjectorBackend] = "astra" if astra_available else "skimage",
         super_sampling: int = 1,
         att_maps: Optional[NDArray[np.floating]] = None,
         att_in: Optional[NDArray[np.floating]] = None,
@@ -426,6 +435,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             prj_geom=prj_geom,
             psf=psf,
             prj_intensities=prj_intensities,
+            backend=backend,
             super_sampling=super_sampling,
         )
 
