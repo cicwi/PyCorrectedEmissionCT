@@ -224,7 +224,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
     def __enter__(self):
         """Initialize the with statement block."""
-        self.projector_backend.initialize()
+        self.projector_backend.make_ready()
         return self
 
     def __exit__(self, *args):

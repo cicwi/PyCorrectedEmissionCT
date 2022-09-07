@@ -37,23 +37,25 @@ class ProjectorBackend(ABC):
     """Base abstract projector backend class. All backends should inherit from this class."""
 
     vol_geom: VolumeGeometry
-    vol_shape_zxy: NDArray
+    vol_shape_zxy: NDArray[np.integer]
 
     angles_w_rad: NDArray[np.floating]
 
-    prj_shape_vwu: NDArray
-    prj_shape_vu: NDArray
+    prj_shape_vwu: NDArray[np.integer]
+    prj_shape_vu: NDArray[np.integer]
 
     is_initialized: bool
+    is_ready: bool
 
     def __init__(self):
         """Initialize base abstract projector backend class."""
         self.is_initialized = False
+        self.is_ready = False
 
     def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: Union[ArrayLike, NDArray[np.floating]],
+        angles_rot_rad: Union[ArrayLike, NDArray],
         rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
@@ -85,6 +87,8 @@ class ProjectorBackend(ABC):
 
         self.has_individual_projs = create_single_projs
 
+        self.is_initialized = True
+
     def get_vol_shape(self) -> NDArray:
         """Return the expected and produced volume shape (in ZXY coordinates).
 
@@ -105,23 +109,23 @@ class ProjectorBackend(ABC):
         """
         return self.prj_shape_vwu
 
-    def initialize(self) -> None:
+    def make_ready(self) -> None:
         """Initialize the projector.
 
         It should make sure that all the resources have been allocated.
         """
-        self.is_initialized = True
+        self.is_ready = True
 
     def dispose(self) -> None:
         """De-initialize the projector.
 
         It should make sure that all the resources have been de-allocated.
         """
-        self.is_initialized = False
+        self.is_ready = False
 
     def __del__(self):
         """De-initialize projector on deletion."""
-        if self.is_initialized:
+        if self.is_ready:
             self.dispose()
 
     def __repr__(self) -> str:
@@ -132,14 +136,18 @@ class ProjectorBackend(ABC):
         str
             The representation of the projector.
         """
-        return (
-            f"{self.__class__.__name__}:"
-            + "{\n"
-            + f"  Shape vol ZXY: {self.get_vol_shape()}\n"
-            + f"  Shape prj VWU: {self.get_prj_shape()}\n"
-            + f"  Angles (deg): {np.rad2deg(self.angles_w_rad)}\n"
-            + "}"
-        )
+        class_name = f"{self.__class__.__name__}: "
+        if self.is_initialized:
+            return (
+                class_name
+                + "{\n"
+                + f"  Shape vol ZXY: {self.get_vol_shape()}\n"
+                + f"  Shape prj VWU: {self.get_prj_shape()}\n"
+                + f"  Angles (deg): {np.rad2deg(self.angles_w_rad)}\n"
+                + "}"
+            )
+        else:
+            return class_name + "{ Not initialized! }"
 
     @abstractmethod
     def fp(self, vol: NDArray, angle_ind: Optional[int] = None) -> NDArray:
@@ -248,13 +256,14 @@ class ProjectorBackend(ABC):
 class ProjectorBackendSKimage(ProjectorBackend):
     """Projector backend based on scikit-image."""
 
-    def __init__(self):
-        self.is_initialized = True
+    def __init__(self) -> None:
+        super().__init__()
+        self.is_ready = True
 
     def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: Union[ArrayLike, NDArray[np.floating]],
+        angles_rot_rad: Union[ArrayLike, NDArray],
         rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
@@ -405,7 +414,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
     def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: Union[ArrayLike, NDArray[np.floating]],
+        angles_rot_rad: Union[ArrayLike, NDArray],
         rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
@@ -498,29 +507,29 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         self.proj_geom_all = astra.create_proj_geom(geom_type_str + "_vec", *prj_geom.det_shape_vu, vectors)
 
-    def get_vol_shape(self) -> NDArray:
-        """Return the expected and produced volume shape (in ZYX coordinates).
+    # def get_vol_shape(self) -> NDArray:
+    #     """Return the expected and produced volume shape (in ZYX coordinates).
 
-        Returns
-        -------
-        NDArray
-            The volume shape.
-        """
-        return astra.functions.geom_size(self.astra_vol_geom)
+    #     Returns
+    #     -------
+    #     NDArray
+    #         The volume shape.
+    #     """
+    #     return astra.functions.geom_size(self.astra_vol_geom)
 
-    def get_prj_shape(self) -> NDArray:
-        """Return the expected and produced projection shape (in VWU coordinates).
+    # def get_prj_shape(self) -> NDArray:
+    #     """Return the expected and produced projection shape (in VWU coordinates).
 
-        Returns
-        -------
-        NDArray
-            The projection shape.
-        """
-        return astra.functions.geom_size(self.proj_geom_all)
+    #     Returns
+    #     -------
+    #     NDArray
+    #         The projection shape.
+    #     """
+    #     return astra.functions.geom_size(self.proj_geom_all)
 
-    def initialize(self) -> None:
+    def make_ready(self) -> None:
         """Initialize the ASTRA projectors."""
-        if not self.is_initialized:
+        if not self.is_ready:
             if self.vol_geom.is_3D():
                 projector_type = "cuda3d"
                 self.algo_type = "3D_CUDA"
@@ -545,7 +554,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
             self.proj_id.append(astra.create_projector(projector_type, self.proj_geom_all, self.astra_vol_geom, opts))
 
-        super().initialize()
+        super().make_ready()
 
     def _check_data(self, x: NDArray, expected_shape: Sequence[int]) -> NDArray:
         if x.dtype != np.float32:
@@ -581,7 +590,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         NDArray
             The forward-projected sinogram or sinogram line.
         """
-        self.initialize()
+        self.make_ready()
 
         vol = self._check_data(vol, self.vol_shape_zxy)
 
@@ -633,7 +642,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         NDArray
             The back-projected volume.
         """
-        self.initialize()
+        self.make_ready()
 
         vol = np.empty(self.vol_shape_zxy, dtype=np.float32)
         if angle_ind is None:
