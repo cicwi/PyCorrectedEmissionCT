@@ -556,7 +556,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         super().make_ready()
 
-    def _check_data(self, x: NDArray, expected_shape: Sequence[int]) -> NDArray:
+    def _check_data(self, x: NDArray, expected_shape: Union[Sequence[int], NDArray[np.integer]]) -> NDArray:
         if x.dtype != np.float32:
             x = x.astype(np.float32)
         if not x.flags["C_CONTIGUOUS"]:

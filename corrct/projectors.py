@@ -27,14 +27,14 @@ astra_available = prj_backends.has_astra and prj_backends.has_cuda
 
 
 class ProjectorMatrix(operators.ProjectorOperator):
-    """
-    Projector that uses an explicit projection matrix.
-    """
+    """Projector that uses an explicit projection matrix."""
 
     A: Union[NDArray, spmatrix]
 
-    def __init__(self, A: Union[NDArray, spmatrix], vol_shape: ArrayLike, prj_shape: ArrayLike):
+    def __init__(self, A: Union[NDArray, spmatrix], vol_shape: ArrayLike, prj_shape: ArrayLike) -> None:
         """
+        Initialize the matrix projector.
+
         Parameters
         ----------
         A : NDArray | spmatrix
@@ -109,7 +109,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
     """Base projection class."""
 
     vol_geom: models.VolumeGeometry
-    angles_rot_rad: NDArray[np.floating]
+    projector_backend: prj_backends.ProjectorBackend
+
     prj_intensities: Union[NDArray[np.floating], None]
     psf: Union[NDArray[np.floating], float, None]
 
@@ -369,47 +370,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
     Attenuation corrected projection class for XRF, with multi-detector support.
 
     It includes the computation of the attenuation volumes.
-
-    Parameters
-    ----------
-    vol_geom : Sequence[int] | models.VolumeGeometry
-        The volume shape in X Y and optionally Z.
-    angles_rot_rad : Sequence[float] | NDArray
-        The rotation angles.
-    rot_axis_shift_pix : float | ArrayLike | NDArray | None, optional
-        The rotation axis shift(s) in pixels. The default is None.
-    prj_geom : ProjectionGeometry, optional
-        The fully specified projection geometry.
-        When active, the rotation axis shift is ignored. The default is None.
-    prj_intensities : Optional[ArrayLike], optional
-        Projection scaling factor. The default is None.
-    super_sampling : int, optional
-        Pixel and voxel super-sampling. The default is 1.
-    att_in : Optional[ArrayLike], optional
-        Attenuation volume of the incoming beam. The default is None.
-    att_out : Optional[ArrayLike], optional
-        Attenuation volume of the outgoing beam. The default is None.
-    angles_detectors_rad : Union[float, ArrayLike], optional
-        Angles of the detector elements with respect to incident beam. The default is (np.pi / 2).
-    weights_detectors : Optional[ArrayLike], optional
-        Weights (e.g. solid angle, efficiency, etc) of the detector elements. The default is None.
-    psf : Optional[ArrayLike], optional
-        Optical system's point spread function (PSF). The default is None.
-    is_symmetric : bool, optional
-        Whether the projector is symmetric or not. The default is False.
-    weights_angles : Optional[ArrayLike], optional
-        Projection weight for a given element at a given angle. The default is None.
-    use_multithreading : bool, optional
-        Whether to use multiple threads or not. The default is True.
-    data_type : DTypeLike, optional
-        Output data type. The default is np.float32.
-    verbose : bool, optional
-        Whether to produce verbose output. The default is True.
-
-    Raises
-    ------
-    ValueError
-        When given inconsistent numbers of detector weights and detector angles.
     """
 
     att_vol_angles: NDArray[np.floating]
@@ -436,6 +396,54 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         data_type: DTypeLike = np.float32,
         verbose: bool = True,
     ):
+        """
+        Initialize the (attenuation corrected) XRF dedicated projector.
+
+        Parameters
+        ----------
+        vol_geom : Sequence[int] | models.VolumeGeometry
+            The volume shape in X Y and optionally Z.
+        angles_rot_rad : Sequence[float] | NDArray
+            The rotation angles.
+        rot_axis_shift_pix : float | ArrayLike | NDArray | None, optional
+            The rotation axis shift(s) in pixels. The default is None.
+        prj_geom : Optional[models.ProjectionGeometry], optional
+            The fully specified projection geometry.
+            When active, the rotation axis shift is ignored. The default is None.
+        prj_intensities : Optional[ArrayLike], optional
+            Projection scaling factor. The default is None.
+        backend : str | prj_backends.ProjectorBackend, optional
+            Projector backend to use, by default "astra" if astra is available, otherwise "skimage".
+        super_sampling : int, optional
+            Pixel and voxel super-sampling for the ASTRA projector backend. The default is 1.
+        att_maps : Optional[NDArray[np.floating]], optional
+            Precomputed attenuation maps for each angle, by default None
+        att_in : Optional[ArrayLike], optional
+            Attenuation volume of the incoming beam. The default is None.
+        att_out : Optional[ArrayLike], optional
+            Attenuation volume of the outgoing beam. The default is None.
+        angles_detectors_rad : float | ArrayLike, optional
+            Angles of the detector elements with respect to incident beam. The default is (np.pi / 2).
+        weights_detectors : Optional[ArrayLike], optional
+            Weights (e.g. solid angle, efficiency, etc) of the detector elements. The default is None.
+        psf : Optional[ArrayLike], optional
+            Optical system's point spread function (PSF). The default is None.
+        is_symmetric : bool, optional
+            Whether the projector is symmetric or not. The default is False.
+        weights_angles : Optional[ArrayLike], optional
+            Projection weight for a given element at a given angle. The default is None.
+        use_multithreading : bool, optional
+            Whether to use multiple threads or not. The default is True.
+        data_type : DTypeLike, optional
+            Output data type. The default is np.float32.
+        verbose : bool, optional
+            Whether to produce verbose output. The default is True.
+
+        Raises
+        ------
+        ValueError
+            When given inconsistent numbers of detector weights and detector angles.
+        """
         ProjectorUncorrected.__init__(
             self,
             vol_geom=vol_geom,
