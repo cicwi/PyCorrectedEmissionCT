@@ -9,35 +9,54 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 
+from typing import Sequence, Union
+from numpy.typing import NDArray
+
 from abc import ABC, abstractmethod
 
 from . import operators
-
-from typing import Sequence, Union
-from numpy.typing import NDArray
 
 
 eps = np.finfo(np.float32).eps
 
 
+NDArrayFloat = NDArray[np.floating]
+
+
+def _soft_threshold(values, threshold) -> None:
+    abs_values = np.abs(values)
+    valid_values = abs_values > 0
+    if isinstance(threshold, (float, int)) or threshold.size == 1:
+        local_threshold = threshold
+    else:
+        local_threshold = threshold[valid_values]
+    values[valid_values] *= np.fmax((abs_values[valid_values] - local_threshold) / abs_values[valid_values], 0)
+
+
 class DataFidelityBase(ABC):
-    """
-    Initialize the base data-fidelity class.
+    """Define the DataFidelity classes interface."""
 
-    This class that defines the object interface.
+    data: Union[NDArrayFloat, None]
+    sigma: Union[float, NDArrayFloat]
+    background: Union[NDArrayFloat, None]
 
-    Parameters
-    ----------
-    background : Optional[Union[float, ArrayLike]], optional
-        The data background. The default is None.
-    """
+    sigma_data: Union[NDArrayFloat, None]
 
     __data_fidelity_name__ = ""
 
-    def __init__(self, background: Union[float, NDArray, None] = None):
-        self.background = background
+    def __init__(self, background: Union[float, NDArrayFloat, None] = None) -> None:
+        """
+        Initialize the base data-fidelity class.
+
+        Parameters
+        ----------
+        background : float | NDArrayFloat | None, optional
+            The data background. The default is None.
+        """
+        self.background = np.array(background) if background is not None else None
         self.data = None
         self.sigma = 1.0
+        self.sigma_data = None
 
     def info(self) -> str:
         """
@@ -79,15 +98,15 @@ class DataFidelityBase(ABC):
         """
         return self.info().lower()
 
-    def assign_data(self, data: Union[NDArray, None] = None, sigma: Union[float, NDArray] = 1.0):
-        self.data = data
+    def assign_data(self, data: Union[float, NDArrayFloat, None] = None, sigma: Union[float, NDArrayFloat] = 1.0) -> None:
+        self.data = np.array(data) if data is not None else None
         self.sigma = sigma
         if self.data is not None:
             self.sigma_data = self._compute_sigma_data()
         else:
             self.sigma_data = None
 
-    def compute_residual(self, proj_primal: NDArray, mask: Union[NDArray, None] = None):
+    def compute_residual(self, proj_primal: NDArrayFloat, mask: Union[NDArrayFloat, None] = None) -> NDArrayFloat:
         if self.background is not None:
             proj_primal = proj_primal + self.background
 
@@ -101,46 +120,40 @@ class DataFidelityBase(ABC):
         return residual
 
     @abstractmethod
-    def compute_residual_norm(self, dual: NDArray):
+    def compute_residual_norm(self, dual: NDArrayFloat) -> float:
         raise NotImplementedError()
 
     def _compute_sigma_data(self):
+        if self.data is None:
+            raise ValueError("This function should never be called when `self.data` is None.")
         return self.sigma * self.data
 
-    @staticmethod
-    def _soft_threshold(values: NDArray, threshold: Union[float, NDArray]) -> None:
-        abs_values = np.abs(values)
-        valid_values = abs_values > 0
-        if isinstance(threshold, (float, int)) or threshold.size == 1:
-            local_threshold = threshold
-        else:
-            local_threshold = threshold[valid_values]
-        values[valid_values] *= np.fmax((abs_values[valid_values] - local_threshold) / abs_values[valid_values], 0)
-
-    def compute_data_dual_dot(self, dual: NDArray, mask: Union[NDArray, None] = None):
+    def compute_data_dual_dot(self, dual: NDArrayFloat, mask: Union[NDArrayFloat, None] = None) -> float:
         if self.data is not None:
             if mask is not None:
                 dual = dual * mask
 
             return np.dot(dual.flatten(), self.data.flatten())
         else:
-            return 0
+            return 0.0
 
-    def initialize_dual(self):
+    def initialize_dual(self) -> NDArrayFloat:
         return np.zeros_like(self.data)
 
-    def update_dual(self, dual: NDArray, proj_primal: NDArray) -> None:
+    def update_dual(self, dual: NDArrayFloat, proj_primal: NDArrayFloat) -> None:
         if self.background is None:
             dual += proj_primal * self.sigma
         else:
             dual += (proj_primal + self.background) * self.sigma
 
     @abstractmethod
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal(self, dual: NDArrayFloat) -> None:
         raise NotImplementedError()
 
     @abstractmethod
-    def compute_primal_dual_gap(self, proj_primal: NDArray, dual: NDArray, mask=None):
+    def compute_primal_dual_gap(
+        self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: Union[NDArrayFloat, None] = None
+    ) -> float:
         raise NotImplementedError()
 
 
@@ -152,20 +165,22 @@ class DataFidelity_l2(DataFidelityBase):
     def __init__(self, background=None):
         super().__init__(background=background)
 
-    def assign_data(self, data, sigma=1.0):
+    def assign_data(self, data: Union[float, NDArrayFloat, None] = None, sigma: Union[float, NDArrayFloat] = 1.0) -> None:
         super().assign_data(data=data, sigma=sigma)
         self.sigma1 = 1 / (1 + sigma)
 
-    def compute_residual_norm(self, dual):
-        return np.linalg.norm(dual.flatten(), ord=2) ** 2
+    def compute_residual_norm(self, dual: NDArrayFloat) -> float:
+        return float(np.linalg.norm(dual.flatten(), ord=2) ** 2)
 
-    def apply_proximal(self, dual):
-        if self.data is not None:
+    def apply_proximal(self, dual: NDArrayFloat) -> None:
+        if self.data is not None and self.sigma_data is not None:
             dual -= self.sigma_data
         dual *= self.sigma1
 
-    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
-        return (
+    def compute_primal_dual_gap(
+        self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: Union[NDArrayFloat, None] = None
+    ) -> float:
+        return float(
             np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2) + np.linalg.norm(dual, ord=2)
         ) / 2 + self.compute_data_dual_dot(dual)
 
@@ -215,13 +230,13 @@ class DataFidelity_l2b(DataFidelity_l2):
 
     def compute_residual(self, proj_primal, mask=None):
         residual = super().compute_residual(proj_primal, mask)
-        self._soft_threshold(residual, self.sigma_sqrt_error)
+        _soft_threshold(residual, self.sigma_sqrt_error)
         return residual
 
     def apply_proximal(self, dual):
-        if self.data is not None:
+        if self.data is not None and self.sigma_data is not None:
             dual -= self.sigma_data
-        self._soft_threshold(dual, self.sigma_sqrt_error)
+        _soft_threshold(dual, self.sigma_sqrt_error)
         dual *= self.sigma1
 
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
@@ -251,7 +266,7 @@ class DataFidelity_Huber(DataFidelityBase):
         return np.linalg.norm(dual[l2_points].flatten(), ord=2) ** 2 + np.linalg.norm(dual[l1_points].flatten(), ord=1)
 
     def apply_proximal(self, dual):
-        if self.data is not None:
+        if self.data is not None and self.sigma_data is not None:
             dual -= self.sigma_data
 
         dual *= self.one_sigma_error
@@ -337,7 +352,7 @@ class DataFidelity_l1b(DataFidelity_l1):
         super().assign_data(data=data, sigma=sigma)
 
     def _apply_threshold(self, dual):
-        self._soft_threshold(dual, self.local_error)
+        _soft_threshold(dual, self.local_error)
 
 
 class DataFidelity_KL(DataFidelityBase):
@@ -346,6 +361,8 @@ class DataFidelity_KL(DataFidelityBase):
     __data_fidelity_name__ = "KL"
 
     def _compute_sigma_data(self):
+        if self.data is None:
+            raise ValueError("This function should never be called when `self.data` is None.")
         return 4 * self.sigma * np.fmax(self.data, 0)
 
     def apply_proximal(self, dual):

@@ -157,7 +157,7 @@ class FluoLinesSiegbahn:
                     if verbose:
                         print(f"INFO - RadRate - {exc}: el_num={el_num} ({el_sym}) line={line}")
                     rates[ii] = 0
-            energy_keV = np.sum(energy_keV * rates / np.sum(rates))
+            energy_keV = float(np.sum(energy_keV * rates / np.sum(rates)))
 
         if verbose:
             print(f"{el_sym}-{lines} emission energy (keV):", energy_keV, "\n")
