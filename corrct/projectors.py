@@ -116,8 +116,8 @@ class ProjectorUncorrected(operators.ProjectorOperator):
     def __init__(
         self,
         vol_geom: Union[Sequence[int], models.VolumeGeometry],
-        angles_rot_rad: ArrayLike,
-        rot_axis_shift_pix: Union[float, ArrayLike] = 0.0,
+        angles_rot_rad: Union[Sequence[float], NDArray],
+        rot_axis_shift_pix: Union[float, ArrayLike, NDArray, None] = None,
         *,
         prj_geom: Optional[models.ProjectionGeometry] = None,
         prj_intensities: Optional[ArrayLike] = None,
@@ -136,10 +136,10 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         ----------
         vol_geom : Sequence[int] | models.VolumeGeometry
             The volume shape in Y X and optionally Z.
-        angles_rot_rad : ArrayLike | NDArray
+        angles_rot_rad : Sequence[float] | NDArray
             The rotation angles.
         rot_axis_shift_pix : float | ArrayLike | NDArray, optional
-            The rotation axis shift(s) in pixels, by default 0.0.
+            The rotation axis shift(s) in pixels, by default None.
         prj_geom : models.ProjectionGeometry | None, optional
             The fully specified projection geometry.
             When active, the rotation axis shift is ignored, by default None.
@@ -180,9 +180,6 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         if not vol_shape[0] == vol_shape[1]:
             raise ValueError("Only square volumes")
 
-        angles_rot_rad = np.array(np.squeeze(angles_rot_rad), ndmin=1)
-        rot_axis_shift_pix = np.array(rot_axis_shift_pix)
-
         if isinstance(backend, str):
             if backend == "astra":
                 self.projector_backend = prj_backends.ProjectorBackendASTRA(super_sampling=super_sampling)
@@ -190,19 +187,20 @@ class ProjectorUncorrected(operators.ProjectorOperator):
                 self.projector_backend = prj_backends.ProjectorBackendSKimage()
             else:
                 raise ValueError(f"Unknown backend: {backend}. Available options are: 'astra', 'skimage'.")
+        else:
+            self.projector_backend = backend
 
         if prj_geom is not None and not isinstance(backend, prj_backends.ProjectorBackendASTRA):
             raise ValueError("Using class `ProjectionGeometry` requires using astra-toolbox.")
 
         self.projector_backend.initialize_geometry(
-            vol_geom,
-            angles_rot_rad,
+            vol_geom=vol_geom,
+            angles_rot_rad=angles_rot_rad,
             rot_axis_shift_pix=rot_axis_shift_pix,
             prj_geom=prj_geom,
             create_single_projs=create_single_projs,
         )
 
-        self.angles_rot_rad = angles_rot_rad
         if prj_intensities is not None:
             prj_intensities = np.array(prj_intensities, dtype=np.floating)
         self.prj_intensities = prj_intensities
@@ -212,6 +210,17 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         self.vol_shape = np.array(self.projector_backend.get_vol_shape(), ndmin=1)
         self.prj_shape = np.array(self.projector_backend.get_prj_shape(), ndmin=1)
         super().__init__()
+
+    @property
+    def angles_rot_rad(self) -> NDArray:
+        """Simplify access to the rotation angles (in radians).
+
+        Returns
+        -------
+        NDArray
+            The rotation angles (in radians).
+        """
+        return self.projector_backend.angles_w_rad
 
     def __enter__(self):
         """Initialize the with statement block."""
@@ -363,12 +372,12 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
     Parameters
     ----------
-    vol_shape : Sequence[int] | models.VolumeGeometry
+    vol_geom : Sequence[int] | models.VolumeGeometry
         The volume shape in X Y and optionally Z.
-    angles_rot_rad : ArrayLike
+    angles_rot_rad : Sequence[float] | NDArray
         The rotation angles.
-    rot_axis_shift_pix : float, optional
-        The rotation axis shift(s) in pixels. The default is 0.
+    rot_axis_shift_pix : float | ArrayLike | NDArray | None, optional
+        The rotation axis shift(s) in pixels. The default is None.
     prj_geom : ProjectionGeometry, optional
         The fully specified projection geometry.
         When active, the rotation axis shift is ignored. The default is None.
@@ -407,9 +416,9 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
     def __init__(
         self,
-        vol_shape: Union[Sequence[int], models.VolumeGeometry],
-        angles_rot_rad: ArrayLike,
-        rot_axis_shift_pix: float = 0,
+        vol_geom: Union[Sequence[int], models.VolumeGeometry],
+        angles_rot_rad: Union[Sequence[float], NDArray],
+        rot_axis_shift_pix: Union[float, ArrayLike, NDArray, None] = None,
         *,
         prj_geom: Optional[models.ProjectionGeometry] = None,
         prj_intensities: Optional[ArrayLike] = None,
@@ -429,9 +438,9 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
     ):
         ProjectorUncorrected.__init__(
             self,
-            vol_shape,
-            angles_rot_rad,
-            rot_axis_shift_pix,
+            vol_geom=vol_geom,
+            angles_rot_rad=angles_rot_rad,
+            rot_axis_shift_pix=rot_axis_shift_pix,
             prj_geom=prj_geom,
             psf=psf,
             prj_intensities=prj_intensities,

@@ -53,7 +53,7 @@ class ProjectorBackend(ABC):
     def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: Union[ArrayLike, NDArray],
+        angles_rot_rad: Union[ArrayLike, NDArray[np.floating]],
         rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
@@ -77,7 +77,7 @@ class ProjectorBackend(ABC):
         self.vol_geom = vol_geom
 
         self.vol_shape_zxy = np.array([*self.vol_geom.shape[2:], self.vol_geom.shape[0], self.vol_geom.shape[1]], dtype=int)
-        self.angles_w_rad = np.array(angles_rot_rad, ndmin=1, dtype=int)
+        self.angles_w_rad = np.array(angles_rot_rad, ndmin=1, dtype=np.floating)
 
         # Basic sizes, unless overridden
         self.prj_shape_vwu = np.array([*self.vol_geom.shape[2:], len(self.angles_w_rad), self.vol_geom.shape[1]], dtype=int)
@@ -123,6 +123,23 @@ class ProjectorBackend(ABC):
         """De-initialize projector on deletion."""
         if self.is_initialized:
             self.dispose()
+
+    def __repr__(self) -> str:
+        """Build a string representation of the projector backend.
+
+        Returns
+        -------
+        str
+            The representation of the projector.
+        """
+        return (
+            f"{self.__class__.__name__}:"
+            + "{\n"
+            + f"  Shape vol ZXY: {self.get_vol_shape()}\n"
+            + f"  Shape prj VWU: {self.get_prj_shape()}\n"
+            + f"  Angles (deg): {np.rad2deg(self.angles_w_rad)}\n"
+            + "}"
+        )
 
     @abstractmethod
     def fp(self, vol: NDArray, angle_ind: Optional[int] = None) -> NDArray:
@@ -202,7 +219,7 @@ class ProjectorBackend(ABC):
             return skt.rotate(vol, rot_angle_deg, order=1, clip=False)
 
         size_lims = np.array(vol.shape[-2:])
-        min_size = np.ceil(np.sqrt(np.sum(size_lims ** 2)))
+        min_size = np.ceil(np.sqrt(np.sum(size_lims**2)))
         edges = np.ceil((min_size - size_lims) / 2).astype(int)
 
         if invert:
@@ -237,7 +254,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
     def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: Union[ArrayLike, NDArray],
+        angles_rot_rad: Union[ArrayLike, NDArray[np.floating]],
         rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
@@ -374,9 +391,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
 class ProjectorBackendASTRA(ProjectorBackend):
     """Projector backend based on astra-toolbox."""
 
-    def __init__(
-        self, super_sampling: int = 1,
-    ):
+    def __init__(self, super_sampling: int = 1):
         """Initialize the ASTRA projector backend.
 
         Parameters
@@ -390,7 +405,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
     def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: Union[ArrayLike, NDArray],
+        angles_rot_rad: Union[ArrayLike, NDArray[np.floating]],
         rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
         create_single_projs: bool = True,
