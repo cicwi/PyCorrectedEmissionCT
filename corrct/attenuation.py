@@ -82,13 +82,13 @@ class AttenuationVolume:
             raise ValueError(f"Maps can only be 2D or 3D Arrays. A {num_dims}-dimensional was passed ({self.vol_shape_zyx}).")
 
     def _compute_attenuation_angle_in(self, local_att: NDArrayFloat, angle_rad: float) -> NDArray:
-        return prj_backends.ProjectorBackend.compute_attenuation(local_att, angle_rad, invert=False)[None, ...]
+        return prj_backends.compute_attenuation(local_att, angle_rad, invert=False)[None, ...]
 
     def _compute_attenuation_angle_out(self, local_att: NDArrayFloat, angle_rad: float) -> NDArray:
         angle_det = angle_rad + self.angles_det_rad
         atts = np.empty(self.maps.shape[1:], dtype=self.dtype)
         for ii, a in enumerate(angle_det):
-            atts[ii, ...] = prj_backends.ProjectorBackend.compute_attenuation(local_att, a, invert=True)
+            atts[ii, ...] = prj_backends.compute_attenuation(local_att, a, invert=True)
         return atts
 
     def compute_maps(self, use_multithreading: bool = True, verbose: bool = True) -> None:
@@ -161,9 +161,6 @@ class AttenuationVolume:
         ValueError
             In case a slice index is not passed for a 3D volume.
         """
-        slice_shape = self.vol_shape_zyx[list(axes)]
-        coords = [(-(s - 1) / 2, (s - 1) / 2) for s in slice_shape]
-
         att_map = np.squeeze(self.get_maps(rot_ind=rot_ind, det_ind=det_ind))
         other_dim = np.squeeze(np.delete(np.arange(-3, 0), axes))
         if len(att_map.shape) == 3:
@@ -172,7 +169,10 @@ class AttenuationVolume:
 
             att_map = np.take(att_map, slice_ind, axis=int(other_dim))
 
-        ax.imshow(att_map, extent=np.concatenate(coords))
+        slice_shape = self.vol_shape_zyx[list(axes)]
+        coords = [(-(s - 1) / 2, (s - 1) / 2) for s in slice_shape]
+
+        ax.imshow(att_map, extent=list(np.concatenate(coords)))
 
         if other_dim == -3:
             arrow_length = np.linalg.norm(slice_shape) / np.pi
