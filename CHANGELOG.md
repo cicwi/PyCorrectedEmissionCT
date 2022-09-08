@@ -4,7 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.5.1...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.6.0...develop
+
+## 0.6.0 - 2022-09-08
+### Added
+- Multi-channel (collaborative) regularization (including TNV - Total Nuclear Variation).
+- Support for custom (external, user defined) projection backends.
+- Dedicated FBP filters module.
+- Parallelization of guided regularization functions.
+- A lot of work towards full type hinting usage.
+### Fixed
+- Potential memory leak in astra-toolbox projector backend.
+- Gradient and laplacian implementations for arbitrary directions.
+- Output and consistency from tests for solver classes.
+- Residual norm computation in the weighted least squares data term.
+- Dimension mismatch in projector, when using only one angle.
+- Back-projection normalization in scikit-image projector backend.
 
 ## 0.5.1 - 2022-06-23
 ### Added
