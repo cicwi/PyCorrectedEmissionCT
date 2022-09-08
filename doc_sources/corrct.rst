@@ -12,18 +12,26 @@ corrct.attenuation module
    :undoc-members:
    :show-inheritance:
 
-corrct.corrct module
---------------------
-
-.. automodule:: corrct.corrct
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 corrct.data\_terms module
 -------------------------
 
 .. automodule:: corrct.data_terms
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+corrct.denoisers module
+-----------------------
+
+.. automodule:: corrct.denoisers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+corrct.filters module
+---------------------
+
+.. automodule:: corrct.filters
    :members:
    :undoc-members:
    :show-inheritance:
