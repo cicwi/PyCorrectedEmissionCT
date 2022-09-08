@@ -99,14 +99,34 @@ class DataFidelityBase(ABC):
         return self.info().lower()
 
     def assign_data(self, data: Union[float, NDArrayFloat, None] = None, sigma: Union[float, NDArrayFloat] = 1.0) -> None:
+        """Initialize the data bias, and sigma of the data term.
+
+        Parameters
+        ----------
+        data : Union[float, NDArrayFloat, None], optional
+            The data bias, by default None
+        sigma : Union[float, NDArrayFloat], optional
+            The sigma, by default 1.0
+        """
         self.data = np.array(data) if data is not None else None
         self.sigma = sigma
-        if self.data is not None:
-            self.sigma_data = self._compute_sigma_data()
-        else:
-            self.sigma_data = None
+        self.sigma_data = self._compute_sigma_data()
 
     def compute_residual(self, proj_primal: NDArrayFloat, mask: Union[NDArrayFloat, None] = None) -> NDArrayFloat:
+        """Compute the residual in the dual domain.
+
+        Parameters
+        ----------
+        proj_primal : NDArrayFloat
+            Projection of the primal solution
+        mask : Union[NDArrayFloat, None], optional
+            Mask of the dual domain, by default None
+
+        Returns
+        -------
+        NDArrayFloat
+            The residual
+        """
         if self.background is not None:
             proj_primal = proj_primal + self.background
 
@@ -121,14 +141,40 @@ class DataFidelityBase(ABC):
 
     @abstractmethod
     def compute_residual_norm(self, dual: NDArrayFloat) -> float:
-        raise NotImplementedError()
+        """Compute the norm of the residual.
+
+        Parameters
+        ----------
+        dual : NDArrayFloat
+            The residual in the dual domain.
+
+        Returns
+        -------
+        float
+            The residual norm.
+        """
 
     def _compute_sigma_data(self):
         if self.data is None:
-            raise ValueError("This function should never be called when `self.data` is None.")
-        return self.sigma * self.data
+            return None
+        else:
+            return self.sigma * self.data
 
     def compute_data_dual_dot(self, dual: NDArrayFloat, mask: Union[NDArrayFloat, None] = None) -> float:
+        """Compute the dot product of the data bias and the dual solution.
+
+        Parameters
+        ----------
+        dual : NDArrayFloat
+            The dual solution.
+        mask : Union[NDArrayFloat, None], optional
+            Mask of the dual domain, by default None
+
+        Returns
+        -------
+        float
+            The dot product between the data bias and the dual solution
+        """
         if self.data is not None:
             if mask is not None:
                 dual = dual * mask
@@ -138,9 +184,25 @@ class DataFidelityBase(ABC):
             return 0.0
 
     def initialize_dual(self) -> NDArrayFloat:
+        """Initialize the dual domain solution.
+
+        Returns
+        -------
+        NDArrayFloat
+            A zero array with the dimensions of the dual domain.
+        """
         return np.zeros_like(self.data)
 
     def update_dual(self, dual: NDArrayFloat, proj_primal: NDArrayFloat) -> None:
+        """Update the dual solution.
+
+        Parameters
+        ----------
+        dual : NDArrayFloat
+            The current dual solution
+        proj_primal : NDArrayFloat
+            The projected primal solution
+        """
         if self.background is None:
             dual += proj_primal * self.sigma
         else:
@@ -148,13 +210,34 @@ class DataFidelityBase(ABC):
 
     @abstractmethod
     def apply_proximal(self, dual: NDArrayFloat) -> None:
-        raise NotImplementedError()
+        """Apply the proximal in the dual domain.
+
+        Parameters
+        ----------
+        dual : NDArrayFloat
+            The dual solution
+        """
 
     @abstractmethod
     def compute_primal_dual_gap(
         self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: Union[NDArrayFloat, None] = None
     ) -> float:
-        raise NotImplementedError()
+        """Compute the primal-dual gap of the current solution.
+
+        Parameters
+        ----------
+        proj_primal : NDArrayFloat
+            The projected primal solution (in the dual domain)
+        dual : NDArrayFloat
+            The dual solution
+        mask : Union[NDArrayFloat, None], optional
+            Mask in the dual domain, by default None
+
+        Returns
+        -------
+        float
+            The primal-dual gap
+        """
 
 
 class DataFidelity_l2(DataFidelityBase):
@@ -362,8 +445,9 @@ class DataFidelity_KL(DataFidelityBase):
 
     def _compute_sigma_data(self):
         if self.data is None:
-            raise ValueError("This function should never be called when `self.data` is None.")
-        return 4 * self.sigma * np.fmax(self.data, 0)
+            return None
+        else:
+            return 4 * self.sigma * np.fmax(self.data, 0)
 
     def apply_proximal(self, dual):
         if self.sigma_data is not None:
