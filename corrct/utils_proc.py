@@ -584,6 +584,75 @@ def azimuthal_integration(img: NDArray, axes: Sequence[int] = (-2, -1), domain: 
         return np.bincount(r_all, weights=w_all)
 
 
+def compute_lines_intersection(
+    line_1: NDArray, line_2: Union[float, NDArray], position: str = "first"
+) -> Optional[Tuple[float, float]]:
+    """
+    Compute the intersection point between two lines.
+
+    Parameters
+    ----------
+    line_1 : NDArray
+        The first line.
+    line_2 : float | NDArray
+        The second line. It can be a scalar representing a horizontal line.
+    position : str, optional
+        The position of the point to select. Either "first" or "last".
+        The default is "first".
+
+    Raises
+    ------
+    ValueError
+        If position is neither "first" nor "last".
+
+    Returns
+    -------
+    Tuple[float, float] | None
+        It returns either the requested crossing point, or None in case the
+        point was not found.
+    """
+    line_2 = np.array(line_2, ndmin=1)
+    # Find the transition points, by first finding where line_2 is above line_1
+    crossing_points = np.where(line_2 > line_1, 0, 1)
+    crossing_points = np.abs(np.diff(crossing_points))
+    crossing_points = np.where(crossing_points)
+
+    if crossing_points[0].size == 0:
+        "No crossing found!"
+        return None
+
+    if position.lower() == "first":
+        point_l = crossing_points[0]
+    elif position.lower() == "last":
+        point_l = crossing_points[-1]
+    else:
+        raise ValueError(f"Crossing position: {position} unknown. Please choose either 'first' or 'last'.")
+
+    x1 = 0.0
+    x2 = 1.0
+    y1 = line_1[point_l]
+    y2 = line_1[point_l + 1]
+    x3 = 0.0
+    x4 = 1.0
+    if line_2.size == 1:
+        y3 = line_2
+        y4 = line_2
+    else:
+        y3 = line_2[point_l]
+        y4 = line_2[point_l + 1]
+
+    # From wikipedia: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
+    p_den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+
+    p_x_num = (x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)
+    p_y_num = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)
+
+    p_x = p_x_num / p_den + point_l
+    p_y = p_y_num / p_den
+
+    return float(p_x), float(p_y)
+
+
 def compute_frc(
     img1: NDArray,
     img2: NDArray,
@@ -701,7 +770,7 @@ def compute_frc(
         win /= np.sum(win)
         frc = sp.ndimage.convolve(frc, win, mode="nearest")
 
-    return frc[:cut_off], Thb[:cut_off]
+    return frc[..., :cut_off], Thb[..., :cut_off]
 
 
 def norm_cross_corr(
@@ -798,10 +867,16 @@ def norm_cross_corr(
         cc_l = cc_l[: np.min(np.array(img1.shape)[list(axes)])]
 
         if plot:
+            p_xy = compute_lines_intersection(cc_l, 0.5, position="first")
             f, ax = plt.subplots()
-            ax.plot(cc_l)
-            ax.plot(np.ones_like(cc_l) * 0.5)
+            ax.plot(cc_l, label="Cross-correlation")
+            ax.plot(np.ones_like(cc_l) * 0.5, label="Half-maximum")
+            if p_xy is not None:
+                ax.scatter(p_xy[0], p_xy[1])
+                ax.plot([p_xy[0], p_xy[0]], [0, 1], label=f"Resolution: {p_xy[0]:.3} (pix)")
             ax.grid()
+            ax.legend()
+            ax.set_title("Cross-correlation")
             f.tight_layout()
 
         return cc_n, cc_l
