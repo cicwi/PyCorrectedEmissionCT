@@ -62,7 +62,7 @@ vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
 sino_substract = sino - background_avg
 
 sino_variance = cct.utils_proc.compute_variance_poisson(sino)
-sino_weights = cct.utils_proc.compute_variance_weigth(sino_variance)
+sino_weights = cct.utils_proc.compute_variance_weight(sino_variance)
 
 lowlim_l2 = cct.solvers.Constraint_LowerLimit(0, norm=cct.solvers.DataFidelity_l2())
 lowlim_l2w = cct.solvers.Constraint_LowerLimit(0, norm=cct.solvers.DataFidelity_wl2(1 / bckgnd_weight))

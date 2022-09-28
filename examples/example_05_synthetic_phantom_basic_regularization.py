@@ -63,7 +63,7 @@ vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
 sino_substract = sino - background_avg
 
 sino_variance = cct.utils_proc.compute_variance_poisson(sino)
-sino_weights = cct.utils_proc.compute_variance_weigth(sino_variance)
+sino_weights = cct.utils_proc.compute_variance_weight(sino_variance)
 
 reg_tv = cct.regularizers.Regularizer_TV2D(reg_weight)
 reg_tv_hub = cct.regularizers.Regularizer_HubTV2D(reg_weight, huber_size=0.05)

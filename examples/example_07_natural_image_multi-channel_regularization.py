@@ -55,7 +55,7 @@ if gauss_stddev is not None:
 c_noise = tm.time()
 print("Added noise in %g seconds." % (c_noise - c_load))
 
-img_weights = cct.utils_proc.compute_variance_weigth(img_variance, normalized=True)
+img_weights = cct.utils_proc.compute_variance_weight(img_variance, normalized=True)
 
 # Data fitting term: weighted least-squares, based on the standard deviation of the noise. This is optional.
 data_term = cct.data_terms.DataFidelity_wl2(img_weights)

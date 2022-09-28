@@ -63,7 +63,7 @@ sino_substr = sinogram - background_avg
 
 # The pixel weights are computed from their variances
 sino_variance = cct.utils_proc.compute_variance_poisson(sinogram)
-sino_weights = cct.utils_proc.compute_variance_weigth(sino_variance)
+sino_weights = cct.utils_proc.compute_variance_weight(sino_variance)
 
 # Data fitting term: weighted least-squares, based on the standard deviation of the noise.
 data_term_lsw = cct.solvers.DataFidelity_wl2(sino_weights)

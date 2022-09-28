@@ -352,7 +352,7 @@ def compute_variance_transmission(
     return variance
 
 
-def compute_variance_weigth(
+def compute_variance_weight(
     variance: NDArray, *, percentile: float = 0.001, normalized: bool = False, use_std: bool = False, semilog: bool = False
 ) -> NDArray:
     """

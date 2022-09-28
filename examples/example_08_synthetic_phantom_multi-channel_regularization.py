@@ -99,9 +99,9 @@ sino_variances_poisson = cct.utils_proc.compute_variance_poisson(sinogram[:-1, .
 sino_variances_gauss = cct.utils_proc.compute_variance_transmission(sinogram_t, flat)
 
 sino_weights_poisson = np.stack(
-    [cct.utils_proc.compute_variance_weigth(v, normalized=True, semilog=True) for v in sino_variances_poisson], axis=0
+    [cct.utils_proc.compute_variance_weight(v, normalized=True, semilog=True) for v in sino_variances_poisson], axis=0
 )
-sino_weights_transmission = cct.utils_proc.compute_variance_weigth(sino_variances_gauss[None, ...], normalized=True)
+sino_weights_transmission = cct.utils_proc.compute_variance_weight(sino_variances_gauss[None, ...], normalized=True)
 sino_weights = np.concatenate((sino_weights_poisson, sino_weights_transmission), axis=0)
 
 # f, axs = plt.subplots(sino_weights.shape[0], 1, sharex=True, sharey=True)
