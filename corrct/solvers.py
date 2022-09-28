@@ -11,7 +11,7 @@ from typing import Callable, Optional, Sequence, Union, Tuple, Any
 
 import numpy as np
 import numpy.random
-from numpy.typing import ArrayLike, DTypeLike, NDArray
+from numpy.typing import DTypeLike, NDArray
 
 import scipy as sp
 from scipy.sparse import spmatrix
@@ -278,7 +278,7 @@ class FBP(Solver):
     def __init__(
         self,
         verbose: bool = False,
-        regularizer: Optional[BaseRegularizer] = None,
+        regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
         fbp_filter: Union[str, NDArrayFloat, filters.Filter] = "ramp",
         pad_mode: str = "constant",
@@ -289,7 +289,7 @@ class FBP(Solver):
         ----------
         verbose : bool, optional
             Turn on verbose output. The default is False.
-        regularizer : Optional[BaseRegularizer], optional
+        regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional
             NOT USED, only exposed for compatibility reasons.
         data_term : Union[str, DataFidelityBase], optional
             NOT USED, only exposed for compatibility reasons.
@@ -550,7 +550,7 @@ class Sirt(Solver):
         The default is None.
     relaxation : float, optional
         The relaxation length. The default is 1.95.
-    regularizer : Optional[BaseRegularizer], optional
+    regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional
         Regularizer to be used. The default is None.
     data_term : Union[str, DataFidelityBase], optional
         Data fidelity term for computing the data residual. The default is "l2".
@@ -565,7 +565,7 @@ class Sirt(Solver):
         verbose: bool = False,
         relaxation: float = 1.95,
         tolerance: Optional[float] = None,
-        regularizer: Optional[BaseRegularizer] = None,
+        regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
         data_term_test: Optional[DataFidelityBase] = None,
     ):
@@ -725,7 +725,7 @@ class PDHG(Solver):
         The default is None.
     relaxation : float, optional
         The relaxation length. The default is 0.95.
-    regularizer : Optional[BaseRegularizer], optional
+    regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional
         Regularizer to be used. The default is None.
     data_term : Union[str, DataFidelityBase], optional
         Data fidelity term for computing the data residual. The default is "l2".
@@ -740,7 +740,7 @@ class PDHG(Solver):
         verbose: bool = False,
         tolerance: Optional[float] = None,
         relaxation: float = 0.95,
-        regularizer: Optional[BaseRegularizer] = None,
+        regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
         data_term_test: Optional[DataFidelityBase] = None,
     ):
