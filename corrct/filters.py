@@ -136,7 +136,7 @@ class Filter(ABC):
         if fbp_filter is None:
             self.fbp_filter = np.array([1.0], dtype=dtype)
         else:
-            self.fbp_filter = np.array(fbp_filter, dtype=dtype)
+            self.fbp_filter = np.array(np.real(fbp_filter), dtype=dtype)
 
     def get_padding_size(self, data_wu_shape: Sequence[int]) -> int:
         """Compute the projection padding size for a linear convolution.
