@@ -585,7 +585,10 @@ def azimuthal_integration(img: NDArray, axes: Sequence[int] = (-2, -1), domain: 
 
 
 def compute_lines_intersection(
-    line_1: NDArray, line_2: Union[float, NDArray], position: str = "first"
+    line_1: NDArray,
+    line_2: Union[float, NDArray],
+    position: str = "first",
+    x_lims: Optional[Tuple[Optional[float], Optional[float]]] = None,
 ) -> Optional[Tuple[float, float]]:
     """
     Compute the intersection point between two lines.
@@ -611,20 +614,38 @@ def compute_lines_intersection(
         It returns either the requested crossing point, or None in case the
         point was not found.
     """
-    line_2 = np.array(line_2, ndmin=1)
+    line_1 = np.array(np.squeeze(line_1), ndmin=1)
+    line_2 = np.array(np.squeeze(line_2), ndmin=1)
     # Find the transition points, by first finding where line_2 is above line_1
     crossing_points = np.where(line_2 > line_1, 0, 1)
     crossing_points = np.abs(np.diff(crossing_points))
-    crossing_points = np.where(crossing_points)
+
+    if x_lims is not None:
+        if x_lims[0] is None:
+            if x_lims[1] is None:
+                raise ValueError("When passing `x_lims`, at least one of the values should not be None.")
+            else:
+                bias = 0
+                crossing_points = crossing_points[: x_lims[1]]
+        else:
+            bias = x_lims[0]
+            if x_lims[1] is None:
+                crossing_points = crossing_points[x_lims[0] :]
+            else:
+                crossing_points = crossing_points[x_lims[0] : x_lims[1]]
+    else:
+        bias = 0
+
+    crossing_points = np.where(crossing_points)[0]
 
     if crossing_points[0].size == 0:
-        "No crossing found!"
+        print("No crossing found!")
         return None
 
     if position.lower() == "first":
-        point_l = crossing_points[0]
+        point_l = crossing_points[0] + bias
     elif position.lower() == "last":
-        point_l = crossing_points[-1]
+        point_l = crossing_points[-1] + bias
     else:
         raise ValueError(f"Crossing position: {position} unknown. Please choose either 'first' or 'last'.")
 
