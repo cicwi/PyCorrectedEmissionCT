@@ -285,7 +285,7 @@ class Regularizer_HubTV2D(Regularizer_Grad):
     def __init__(
         self,
         weight: Union[float, NDArray],
-        huber_size: int,
+        huber_size: float,
         axes: Union[Sequence[int], NDArray, None] = None,
         pad_mode: str = "edge",
     ):
@@ -300,7 +300,7 @@ class Regularizer_HubTV3D(Regularizer_Grad):
     def __init__(
         self,
         weight: Union[float, NDArray],
-        huber_size: int,
+        huber_size: float,
         axes: Union[Sequence[int], NDArray, None] = None,
         pad_mode: str = "edge",
     ):
