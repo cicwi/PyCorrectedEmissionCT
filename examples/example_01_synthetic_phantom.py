@@ -36,8 +36,8 @@ psf = None
 (sino, angles, expected_ph, _) = cct.testing.create_sino(ph, 120, vol_att_in=vol_att_in, vol_att_out=vol_att_out, psf=psf)
 
 # We create the two solvers that we will use to reconstruct the data
-solver_sart = cct.solvers.Sart(verbose=True)
-solver_sirt = cct.solvers.Sirt(verbose=True)
+solver_sart = cct.solvers.SART(verbose=True)
+solver_sirt = cct.solvers.SIRT(verbose=True)
 
 print("Reconstructing w/o corrections:")
 with cct.projectors.ProjectorUncorrected(ph.shape, angles, psf=psf) as p:

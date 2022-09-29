@@ -155,10 +155,10 @@ def reconstruct(  # noqa: C901
 
         # Algorithms
         if algo.upper() == "SART":
-            algo = solvers.Sart(verbose=True)
+            algo = solvers.SART(verbose=True)
             (vol, _) = algo(A, sino, iterations, len(angles_rad), At=At, x_mask=x_mask)
         elif algo.upper() == "SIRT":
-            algo = solvers.Sirt(verbose=True)
+            algo = solvers.SIRT(verbose=True)
             (vol, _) = algo(A, sino, iterations, x_mask=x_mask)
         elif algo.upper() == "PDHG":
             algo = solvers.PDHG(verbose=True, data_term=data_term)

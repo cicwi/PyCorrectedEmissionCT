@@ -38,8 +38,8 @@ det_angles = [+np.pi / 2, -np.pi / 2]
 )
 
 # We create the two solvers that we will use to reconstruct the data
-solver_sart = cct.solvers.Sart(verbose=True)
-solver_sirt = cct.solvers.Sirt(verbose=True)
+solver_sart = cct.solvers.SART(verbose=True)
+solver_sirt = cct.solvers.SIRT(verbose=True)
 
 print("Reconstructing w/o corrections:")
 with cct.projectors.ProjectorUncorrected(ph.shape, angles, psf=psf) as p:

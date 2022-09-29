@@ -78,7 +78,7 @@ class TestSolvers(unittest.TestCase):
         """Test SIRT algorithm in 2D."""
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
 
-        algo = solvers.Sirt()
+        algo = solvers.SIRT()
         sol, _ = algo(A, self.data_rand_2d, 1000)
 
         sol_diff = self.vol_rand_2d - sol
@@ -105,7 +105,7 @@ class TestSolvers(unittest.TestCase):
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
 
         reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.Sirt(regularizer=reg)
+        algo = solvers.SIRT(regularizer=reg)
         sol, _ = algo(A, self.data_flat_2d, 2500)
 
         sol_diff = self.vol_flat_2d - sol

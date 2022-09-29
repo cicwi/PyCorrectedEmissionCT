@@ -388,7 +388,7 @@ class FBP(Solver):
         return x, info
 
 
-class Sart(Solver):
+class SART(Solver):
     """Solver class implementing the Simultaneous Algebraic Reconstruction Technique (SART) algorithm."""
 
     def compute_residual(
@@ -549,7 +549,7 @@ class Sart(Solver):
         return x, info
 
 
-class Sirt(Solver):
+class SIRT(Solver):
     """
     Initialize the SIRT solver class.
 
