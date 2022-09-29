@@ -31,119 +31,32 @@ ph_or = ph_or[:, :, 1]
 # psf = spsig.gaussian(11, 1)
 psf = None
 
+# We first create the data (with attenuation)
 (ph, vol_att_in, vol_att_out) = cct.testing.phantom_assign_concentration(ph_or)
 (sino, angles, expected_ph, _) = cct.testing.create_sino(ph, 120, vol_att_in=vol_att_in, vol_att_out=vol_att_out, psf=psf)
 
-apply_corrections = True
-short_rec = False
+# We create the two solvers that we will use to reconstruct the data
+solver_sart = cct.solvers.Sart(verbose=True)
+solver_sirt = cct.solvers.Sirt(verbose=True)
 
-if short_rec is True:
-    num_sart_iterations = 1
-    num_sirt_iterations = 25
-    num_cp_iterations = 10
-    num_cptv_iterations = 10
-else:
-    num_sart_iterations = 5
-    num_sirt_iterations = 250
-    num_cp_iterations = 100
-    num_cptv_iterations = 250
+print("Reconstructing w/o corrections:")
+with cct.projectors.ProjectorUncorrected(ph.shape, angles, psf=psf) as p:
 
-renorm_factor = np.max(np.sum(sino, axis=-1)) / np.sqrt(np.sum(np.array(ph.shape) ** 2)) / 50
+    rec_sart_uncorr, _ = solver_sart(p, sino, iterations=5, lower_limit=0.0)
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sart_uncorr))
 
-if apply_corrections:
-    print("Reconstructing with SART w/ corrections")
-    rec_sart = cct.reconstruct(
-        "SART",
-        sino,
-        angles,
-        vol_att_in=vol_att_in,
-        vol_att_out=vol_att_out,
-        psf=psf,
-        lower_limit=0,
-        data_term="l2",
-        iterations=num_sart_iterations,
-    )
-    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sart))
+    rec_sirt_uncorr, _ = solver_sirt(p, sino, iterations=250, lower_limit=0.0)
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sirt_uncorr))
 
-    print("Reconstructing with SIRT w/ corrections")
-    rec_sirt = cct.reconstruct(
-        "SIRT",
-        sino,
-        angles,
-        vol_att_in=vol_att_in,
-        vol_att_out=vol_att_out,
-        psf=psf,
-        lower_limit=0,
-        data_term="l2",
-        iterations=num_sirt_iterations,
-    )
-    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sirt))
+print("Reconstructing w/ corrections:")
+with cct.projectors.ProjectorAttenuationXRF(ph.shape, angles, psf=psf, att_in=vol_att_in, att_out=vol_att_out) as p:
 
-    print("Reconstructing with PDHG - using KL w/ corrections")
-    rec_cpkl = (
-        cct.reconstruct(
-            "PDHG",
-            sino / renorm_factor,
-            angles,
-            iterations=num_cp_iterations,
-            data_term="kl",
-            vol_att_in=vol_att_in,
-            vol_att_out=vol_att_out,
-            psf=psf,
-            lower_limit=0,
-        )
-        * renorm_factor
-    )
-    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_cpkl))
+    rec_sart_corr, _ = solver_sart(p, sino, iterations=5, lower_limit=0.0)
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sart_corr))
 
-    print("Reconstructing with PDHG-TV - using KL w/ corrections")
-    rec_cptvkl = (
-        cct.reconstruct(
-            "PDHG-TV",
-            sino / renorm_factor,
-            angles,
-            iterations=num_cptv_iterations,
-            data_term="kl",
-            vol_att_in=vol_att_in,
-            vol_att_out=vol_att_out,
-            psf=psf,
-            lower_limit=0,
-            lambda_reg=2e-1,
-        )
-        * renorm_factor
-    )
-    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_cptvkl))
+    rec_sirt_corr, _ = solver_sirt(p, sino, iterations=250, lower_limit=0.0)
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sirt_corr))
 
-else:
-    print("Reconstructing with SART w/o corrections")
-    rec_sart = cct.reconstruct("SART", sino, angles, lower_limit=0, data_term="l2", iterations=num_sart_iterations)
-    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sart))
-
-    print("Reconstructing with SIRT w/o corrections")
-    rec_sirt = cct.reconstruct("SIRT", sino, angles, lower_limit=0, data_term="l2", iterations=num_sirt_iterations)
-    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sirt))
-
-    print("Reconstructing with PDHG - using KL w/o corrections")
-    rec_cpkl = (
-        cct.reconstruct("PDHG", sino / renorm_factor, angles, iterations=num_cp_iterations, data_term="kl", lower_limit=0)
-        * renorm_factor
-    )
-    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_cpkl))
-
-    print("Reconstructing with PDHG-TV - using KL w/o corrections")
-    rec_cptvkl = (
-        cct.reconstruct(
-            "PDHG-TV",
-            sino / renorm_factor,
-            angles,
-            iterations=num_cptv_iterations,
-            data_term="kl",
-            lower_limit=0,
-            lambda_reg=2e-1,
-        )
-        * renorm_factor
-    )
-    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_cptvkl))
 
 (fig, axes) = plt.subplots(2, 3)
 
@@ -152,14 +65,14 @@ axes[0, 0].set_title("Phantom")
 axes[1, 0].imshow(sino)
 axes[1, 0].set_title("Sinogram")
 
-axes[0, 1].imshow(rec_sart)
-axes[0, 1].set_title("SART")
-axes[0, 2].imshow(rec_sirt)
-axes[0, 2].set_title("SIRT")
-axes[1, 1].imshow(rec_cpkl)
-axes[1, 1].set_title("PDHG-KL")
-axes[1, 2].imshow(rec_cptvkl)
-axes[1, 2].set_title("PDHG-KL-TV")
+axes[0, 1].imshow(rec_sart_uncorr)
+axes[0, 1].set_title("SART - Uncorrected")
+axes[0, 2].imshow(rec_sirt_uncorr)
+axes[0, 2].set_title("SIRT - Uncorrected")
+axes[1, 1].imshow(rec_sart_corr)
+axes[1, 1].set_title("SART - Corrected")
+axes[1, 2].imshow(rec_sirt_corr)
+axes[1, 2].set_title("SIRT - Corrected")
 
 fig.tight_layout()
 
