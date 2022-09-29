@@ -13,7 +13,7 @@ import skimage.transform as skt
 import matplotlib.pyplot as plt
 
 from .operators import BaseTransform
-from .utils_proc import get_circular_mask
+from .processing import circular_mask
 
 from typing import Union, Sequence, Optional
 from numpy.typing import ArrayLike, DTypeLike, NDArray
@@ -98,7 +98,6 @@ def create_basis(
             basis_r /= np.linalg.norm(basis_r, ord=1, axis=-1, keepdims=True)
 
     return basis_r
-
 
 
 class Filter(ABC):
@@ -464,7 +463,7 @@ class FilterMR(Filter):
             nrows += 2 * grad_vol_size
 
         A = np.zeros((nrows, ncols), dtype=self.dtype)
-        vol_mask = get_circular_mask([num_sino_pixels] * 2)
+        vol_mask = circular_mask([num_sino_pixels] * 2)
 
         for ii, bas_f in enumerate(self.basis_f):
             data_wu_f = self.apply_filter(data_wu, bas_f)

@@ -55,7 +55,7 @@ if gauss_stddev is not None:
 c_noise = tm.time()
 print("Added noise in %g seconds." % (c_noise - c_load))
 
-img_weights = cct.utils_proc.compute_variance_weight(img_variance, normalized=True)
+img_weights = cct.processing.compute_variance_weight(img_variance, normalized=True)
 
 # Data fitting term: weighted least-squares, based on the standard deviation of the noise. This is optional.
 data_term = cct.data_terms.DataFidelity_wl2(img_weights)
@@ -84,27 +84,27 @@ imgs = np.array([img_orig, img_noise, img_tvs, img_tvm]).clip(0, 1).transpose([0
 labs = ["Original", "Noisy", f"Single-channel TV, weight: {lambda_tv:.5}", f"Multi-channel TV, weight: {lambda_tv:.5}"]
 
 # Plotting the result
-f, axs = plt.subplots(2, 2, sharex=True, sharey=True, squeeze=False, figsize=[7, 7])
+fig, axs = plt.subplots(2, 2, sharex=True, sharey=True, squeeze=False, figsize=[7, 7])
 for ax, (im, lb) in zip(axs.flatten(), zip(imgs, labs)):
     ax.imshow(im)
     ax.set_title(lb)
-f.tight_layout()
+fig.tight_layout()
 
 # Comparing FRCs for each reconstruction
 frcs = [np.array([])] * (imgs.shape[0] - 1)
 for ii, im in enumerate(imgs[1:]):
     fc = [np.array([])] * 3
     for ii_c in range(3):
-        fc[ii_c], T = cct.utils_proc.compute_frc(imgs[0][..., ii_c], im[..., ii_c], snrt=0.4142)
+        fc[ii_c], T = cct.processing.post.frc(imgs[0][..., ii_c], im[..., ii_c], snrt=0.4142)
     frcs[ii] = np.mean(fc, axis=0)
 
-f, ax = plt.subplots(1, 1, sharex=True, sharey=True)
+fig, ax = plt.subplots(1, 1, sharex=True, sharey=True)
 for fc, lb in zip(frcs, labs[1:]):
     ax.plot(np.squeeze(fc), label=lb)
 ax.plot(np.squeeze(T), label="T 1/2 bit")
 ax.legend()
 ax.grid()
 ax.set_title("Fourier Ring Correlation")
-f.tight_layout()
+fig.tight_layout()
 
 plt.show(block=False)

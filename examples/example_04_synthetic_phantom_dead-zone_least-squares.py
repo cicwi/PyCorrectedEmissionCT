@@ -17,12 +17,11 @@ from typing import Tuple
 import matplotlib.pyplot as plt
 
 import corrct as cct
-import corrct.utils_test
 
 try:
     import phantom
 except ImportError:
-    cct.utils_test.download_phantom()
+    cct.testing.download_phantom()
     import phantom
 
 
@@ -48,8 +47,8 @@ data_type = np.float32
 ph_or = np.squeeze(phantom.modified_shepp_logan(vol_shape).astype(data_type))
 ph_or = ph_or[:, :, 1]
 
-(ph, vol_att_in, vol_att_out) = cct.utils_test.phantom_assign_concentration(ph_or)
-(sino, angles, expected_ph, background_avg) = cct.utils_test.create_sino(
+(ph, vol_att_in, vol_att_out) = cct.testing.phantom_assign_concentration(ph_or)
+(sino, angles, expected_ph, background_avg) = cct.testing.create_sino(
     ph, 30, psf=None, add_poisson=True, dwell_time_s=1e-2, background_avg=1e-2, background_std=1e-4
 )
 
@@ -57,12 +56,12 @@ bckgnd_weight = np.sqrt(background_avg / (vol_shape[0] * np.sqrt(2)))
 
 num_iterations = 200
 lower_limit = 0
-vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
+vol_mask = cct.processing.circular_mask(ph_or.shape)
 
 sino_substract = sino - background_avg
 
-sino_variance = cct.utils_proc.compute_variance_poisson(sino)
-sino_weights = cct.utils_proc.compute_variance_weight(sino_variance)
+sino_variance = cct.processing.compute_variance_poisson(sino)
+sino_weights = cct.processing.compute_variance_weight(sino_variance)
 
 lowlim_l2 = cct.solvers.Constraint_LowerLimit(0, norm=cct.solvers.DataFidelity_l2())
 lowlim_l2w = cct.solvers.Constraint_LowerLimit(0, norm=cct.solvers.DataFidelity_wl2(1 / bckgnd_weight))
@@ -162,17 +161,8 @@ axs[1].grid()
 f.tight_layout()
 
 # Comparing FRCs for each reconstruction
-frcs = [None] * 3
-for ii, rec in enumerate([rec_ls, rec_wls, rec_lsb]):
-    frcs[ii], T = cct.utils_proc.compute_frc(expected_ph, rec, snrt=0.4142)
-
-f, axs = plt.subplots(1, 1, sharex=True, sharey=True)
-axs.plot(np.squeeze(frcs[0]), label=solver_ls.info().upper())
-axs.plot(np.squeeze(frcs[1]), label=solver_wls.info().upper())
-axs.plot(np.squeeze(frcs[2]), label=solver_lsb.info().upper())
-axs.plot(np.squeeze(T), label="T 1/2 bit")
-axs.legend()
-axs.grid()
-f.tight_layout()
+labels = [solver_ls.info().upper(), solver_wls.info().upper(), solver_lsb.info().upper()]
+vols = [rec_ls, rec_wls, rec_lsb]
+cct.processing.post.plot_frcs([(expected_ph, rec) for rec in vols], labels=labels, snrt=0.4142)
 
 plt.show(block=False)

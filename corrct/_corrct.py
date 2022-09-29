@@ -14,7 +14,7 @@ import numpy as np
 from . import projectors
 from . import regularizers
 from . import solvers
-from . import utils_proc
+from . import processing
 
 
 def create_sino(
@@ -125,7 +125,7 @@ def reconstruct(  # noqa: C901
     vol_shape = [sino.shape[-1], sino.shape[-1]]
 
     if apply_circ_mask:
-        x_mask = utils_proc.get_circular_mask(vol_shape, radius_offset=-1)
+        x_mask = processing.circular_mask(vol_shape, radius_offset=-1)
 
     with projectors.ProjectorAttenuationXRF(
         vol_shape,

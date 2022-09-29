@@ -29,14 +29,16 @@ from . import regularizers  # noqa: F401, F402
 from . import solvers  # noqa: F401, F402
 
 from . import utils_reg  # noqa: F401, F402
-from . import utils_proc  # noqa: F401, F402
+from . import processing  # noqa: F401, F402
 from . import denoisers  # noqa: F401, F402
 
 try:
-    from . import utils_phys  # noqa: F401, F402
+    from . import physics  # noqa: F401, F402
 except ImportError as exc:
     print(exc)
     print("WARNING: X-ray physics support not available. Please install xraylib if you need it.")
+
+from . import testing  # noqa: F401, F402
 
 # Import all definitions from main module.
 from ._corrct import create_sino, reconstruct  # noqa: F401, F402, F403

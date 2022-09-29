@@ -9,8 +9,7 @@ import scipy.signal as spsig
 
 import pytest
 
-from corrct import operators
-from corrct import utils_test
+from corrct import operators, testing
 
 
 eps = np.finfo(np.float32).eps
@@ -117,7 +116,7 @@ class TestTransformStationaryWavelet:
         H = operators.TransformStationaryWavelet(self.vol_ones_2d.shape, "db1", wl_dec_level)
 
         w = H(self.vol_ones_2d)
-        assert np.all(w.shape[1:] == utils_test.roundup_to_pow2(self.vol_ones_2d.shape, wl_dec_level))
+        assert np.all(w.shape[1:] == testing.roundup_to_pow2(self.vol_ones_2d.shape, wl_dec_level))
         assert w.shape[0] == 10
 
         wtw = H.T(w)

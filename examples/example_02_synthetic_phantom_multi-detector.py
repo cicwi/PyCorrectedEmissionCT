@@ -14,12 +14,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import corrct as cct
-import corrct.utils_test
 
 try:
     import phantom
 except ImportError:
-    cct.utils_test.download_phantom()
+    cct.testing.download_phantom()
     import phantom
 
 
@@ -31,11 +30,12 @@ ph_or = ph_or[:, :, 1]
 
 # psf = spsig.gaussian(11, 1)
 psf = None
-det_angles = [+np.pi/2, -np.pi/2]
+det_angles = [+np.pi / 2, -np.pi / 2]
 
-(ph, vol_att_in, vol_att_out) = cct.utils_test.phantom_assign_concentration(ph_or)
-(sino, angles, expected_ph, _) = cct.utils_test.create_sino(
-    ph, 120, detectors_pos_rad=det_angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out, psf=psf)
+(ph, vol_att_in, vol_att_out) = cct.testing.phantom_assign_concentration(ph_or)
+(sino, angles, expected_ph, _) = cct.testing.create_sino(
+    ph, 120, detectors_pos_rad=det_angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out, psf=psf
+)
 
 apply_corrections = True
 short_rec = False
@@ -54,70 +54,120 @@ else:
 renorm_factor = np.max(np.sum(sino, axis=-1)) / np.sqrt(np.sum(np.array(ph.shape) ** 2)) / 50
 
 if apply_corrections:
-    print('Reconstructing with SART w/ corrections')
-    rec_sart = corrct.reconstruct(
-        'SART', sino, angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out,
-        angles_detectors_rad=det_angles, psf=psf, lower_limit=0,
-        data_term='l2', iterations=num_sart_iterations)
-    print('- Phantom power: %g, noise power: %g' % cct.utils_test.compute_error_power(expected_ph, rec_sart))
+    print("Reconstructing with SART w/ corrections")
+    rec_sart = cct.reconstruct(
+        "SART",
+        sino,
+        angles,
+        vol_att_in=vol_att_in,
+        vol_att_out=vol_att_out,
+        angles_detectors_rad=det_angles,
+        psf=psf,
+        lower_limit=0,
+        data_term="l2",
+        iterations=num_sart_iterations,
+    )
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sart))
 
-    print('Reconstructing with SIRT w/ corrections')
-    rec_sirt = corrct.reconstruct(
-        'SIRT', sino, angles, vol_att_in=vol_att_in, vol_att_out=vol_att_out,
-        angles_detectors_rad=det_angles, psf=psf, lower_limit=0,
-        data_term='l2', iterations=num_sirt_iterations)
-    print('- Phantom power: %g, noise power: %g' % cct.utils_test.compute_error_power(expected_ph, rec_sirt))
+    print("Reconstructing with SIRT w/ corrections")
+    rec_sirt = cct.reconstruct(
+        "SIRT",
+        sino,
+        angles,
+        vol_att_in=vol_att_in,
+        vol_att_out=vol_att_out,
+        angles_detectors_rad=det_angles,
+        psf=psf,
+        lower_limit=0,
+        data_term="l2",
+        iterations=num_sirt_iterations,
+    )
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sirt))
 
-    print('Reconstructing with PDHG - using KL w/ corrections')
-    rec_cpkl = corrct.reconstruct(
-        'PDHG', sino / renorm_factor, angles, iterations=num_cp_iterations,
-        data_term='kl', vol_att_in=vol_att_in, vol_att_out=vol_att_out,
-        angles_detectors_rad=det_angles, psf=psf, lower_limit=0) * renorm_factor
-    print('- Phantom power: %g, noise power: %g' % cct.utils_test.compute_error_power(expected_ph, rec_cpkl))
+    print("Reconstructing with PDHG - using KL w/ corrections")
+    rec_cpkl = (
+        cct.reconstruct(
+            "PDHG",
+            sino / renorm_factor,
+            angles,
+            iterations=num_cp_iterations,
+            data_term="kl",
+            vol_att_in=vol_att_in,
+            vol_att_out=vol_att_out,
+            angles_detectors_rad=det_angles,
+            psf=psf,
+            lower_limit=0,
+        )
+        * renorm_factor
+    )
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_cpkl))
 
-    print('Reconstructing with PDHG-TV - using KL w/ corrections')
-    rec_cptvkl = corrct.reconstruct(
-        'PDHG-TV', sino / renorm_factor, angles, iterations=num_cptv_iterations,
-        data_term='kl', vol_att_in=vol_att_in, vol_att_out=vol_att_out,
-        angles_detectors_rad=det_angles, psf=psf, lower_limit=0, lambda_reg=2e-1) * renorm_factor
-    print('- Phantom power: %g, noise power: %g' % cct.utils_test.compute_error_power(expected_ph, rec_cptvkl))
+    print("Reconstructing with PDHG-TV - using KL w/ corrections")
+    rec_cptvkl = (
+        cct.reconstruct(
+            "PDHG-TV",
+            sino / renorm_factor,
+            angles,
+            iterations=num_cptv_iterations,
+            data_term="kl",
+            vol_att_in=vol_att_in,
+            vol_att_out=vol_att_out,
+            angles_detectors_rad=det_angles,
+            psf=psf,
+            lower_limit=0,
+            lambda_reg=2e-1,
+        )
+        * renorm_factor
+    )
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_cptvkl))
 
 else:
-    print('Reconstructing with SART w/o corrections')
-    rec_sart = corrct.reconstruct(
-        'SART', sino, angles, lower_limit=0, data_term='l2', iterations=num_sart_iterations)
-    print('- Phantom power: %g, noise power: %g' % cct.utils_test.compute_error_power(expected_ph, rec_sart))
+    print("Reconstructing with SART w/o corrections")
+    rec_sart = cct.reconstruct("SART", sino, angles, lower_limit=0, data_term="l2", iterations=num_sart_iterations)
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sart))
 
-    print('Reconstructing with SIRT w/o corrections')
-    rec_sirt = corrct.reconstruct(
-        'SIRT', sino, angles, lower_limit=0, data_term='l2', iterations=num_sirt_iterations)
-    print('- Phantom power: %g, noise power: %g' % cct.utils_test.compute_error_power(expected_ph, rec_sirt))
+    print("Reconstructing with SIRT w/o corrections")
+    rec_sirt = cct.reconstruct("SIRT", sino, angles, lower_limit=0, data_term="l2", iterations=num_sirt_iterations)
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sirt))
 
-    print('Reconstructing with PDHG - using KL w/o corrections')
-    rec_cpkl = corrct.reconstruct(
-        'PDHG', sino / renorm_factor, angles, iterations=num_cp_iterations,
-        data_term='kl', lower_limit=0) * renorm_factor
-    print('- Phantom power: %g, noise power: %g' % cct.utils_test.compute_error_power(expected_ph, rec_cpkl))
+    print("Reconstructing with PDHG - using KL w/o corrections")
+    rec_cpkl = (
+        cct.reconstruct("PDHG", sino / renorm_factor, angles, iterations=num_cp_iterations, data_term="kl", lower_limit=0)
+        * renorm_factor
+    )
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_cpkl))
 
-    print('Reconstructing with PDHG-TV - using KL w/o corrections')
-    rec_cptvkl = corrct.reconstruct(
-        'PDHG-TV', sino / renorm_factor, angles, iterations=num_cptv_iterations,
-        data_term='kl', lower_limit=0, lambda_reg=2e-1) * renorm_factor
-    print('- Phantom power: %g, noise power: %g' % cct.utils_test.compute_error_power(expected_ph, rec_cptvkl))
+    print("Reconstructing with PDHG-TV - using KL w/o corrections")
+    rec_cptvkl = (
+        cct.reconstruct(
+            "PDHG-TV",
+            sino / renorm_factor,
+            angles,
+            iterations=num_cptv_iterations,
+            data_term="kl",
+            lower_limit=0,
+            lambda_reg=2e-1,
+        )
+        * renorm_factor
+    )
+    print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_cptvkl))
 
-(f, axes) = plt.subplots(2, 3)
+(fig, axes) = plt.subplots(2, 3)
+
 axes[0, 0].imshow(expected_ph)
-axes[0, 0].set_title('Phantom')
+axes[0, 0].set_title("Phantom")
 axes[1, 0].imshow(np.reshape(sino, [-1, ph.shape[0]]))
-axes[1, 0].set_title('Sinogram')
+axes[1, 0].set_title("Sinogram")
 
 axes[0, 1].imshow(rec_sart)
-axes[0, 1].set_title('SART')
+axes[0, 1].set_title("SART")
 axes[0, 2].imshow(rec_sirt)
-axes[0, 2].set_title('SIRT')
+axes[0, 2].set_title("SIRT")
 axes[1, 1].imshow(rec_cpkl)
-axes[1, 1].set_title('PDHG-KL')
+axes[1, 1].set_title("PDHG-KL")
 axes[1, 2].imshow(rec_cptvkl)
-axes[1, 2].set_title('PDHG-KL-TV')
+axes[1, 2].set_title("PDHG-KL-TV")
+
+fig.tight_layout()
 
 plt.show(block=False)

@@ -13,7 +13,6 @@ import scipy.ndimage as spndi
 import pytest
 
 import corrct as cct
-from corrct import utils_test
 
 import skimage.data as skd
 import skimage.transform as skt
@@ -77,7 +76,7 @@ class TestProjectors:
     def _test_centered_sinogram(self, ref_function):
         debug = False
 
-        ph_added = self.ph + 0.1 * cct.utils_proc.get_circular_mask(self.ph.shape)
+        ph_added = self.ph + 0.1 * cct.processing.circular_mask(self.ph.shape)
 
         prj_ref = ref_function(ph_added, self.angles_rad)
 
@@ -106,7 +105,7 @@ class TestProjectors:
     def test_shifted_sinogram(self):
         debug = False
 
-        ph_added = self.ph + 0.1 * cct.utils_proc.get_circular_mask(self.ph.shape)
+        ph_added = self.ph + 0.1 * cct.processing.circular_mask(self.ph.shape)
 
         prj_ref = _radon_rot_sk_w(ph_added, self.angles_rad, self.shift)
 

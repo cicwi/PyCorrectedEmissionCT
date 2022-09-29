@@ -17,12 +17,11 @@ import mpl_toolkits.axes_grid1 as ax_g
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 import corrct as cct
-import corrct.utils_test
 
 try:
     import phantom
 except ImportError:
-    cct.utils_test.download_phantom()
+    cct.testing.download_phantom()
     import phantom
 
 
@@ -49,21 +48,21 @@ ph_or = np.squeeze(phantom.modified_shepp_logan([256, 256, 3]).astype(data_type)
 ph_or = ph_or[:, :, 1]
 
 # Simulate the XRF-CT acquisition data (sinogram)
-(ph, vol_att_in, vol_att_out) = cct.utils_test.phantom_assign_concentration(ph_or)
-(sinogram, angles, expected_ph, background_avg) = cct.utils_test.create_sino(
+(ph, vol_att_in, vol_att_out) = cct.testing.phantom_assign_concentration(ph_or)
+(sinogram, angles, expected_ph, background_avg) = cct.testing.create_sino(
     ph, 30, add_poisson=True, dwell_time_s=2e-2, background_avg=1e-2, background_std=1e-4
 )
 
 iterations = 200
 lower_limit = 0
-vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
+vol_mask = cct.processing.circular_mask(ph_or.shape)
 
 # Subtract background from sinogram
 sino_substr = sinogram - background_avg
 
 # The pixel weights are computed from their variances
-sino_variance = cct.utils_proc.compute_variance_poisson(sinogram)
-sino_weights = cct.utils_proc.compute_variance_weight(sino_variance)
+sino_variance = cct.processing.compute_variance_poisson(sinogram)
+sino_weights = cct.processing.compute_variance_weight(sino_variance)
 
 # Data fitting term: weighted least-squares, based on the standard deviation of the noise.
 data_term_lsw = cct.solvers.DataFidelity_wl2(sino_weights)
@@ -83,9 +82,7 @@ def solver_spawn(lam_reg):
 # Computes the reconstruction for a given solver and a given cross-validation data mask
 def solver_call(solver, b_test_mask=None):
     with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
-        return solver(
-            A, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, b_test_mask=b_test_mask
-        )
+        return solver(A, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, b_test_mask=b_test_mask)
 
 
 # Computes the isotropic TV semi-norm. Used in the L-curve.
@@ -141,12 +138,12 @@ if save_figs:
         os.makedirs(base_fig_dir)
 
 
-f = plt.figure(figsize=cm2inch([24, 16]))
-gs = f.add_gridspec(2, 2)
-ax_test = f.add_subplot(gs[:, 0])
+fig = plt.figure(figsize=cm2inch([24, 16]))
+gs = fig.add_gridspec(2, 2)
+ax_test = fig.add_subplot(gs[:, 0])
 ax_test.set_xscale("log", nonpositive="clip")
 ax_test.errorbar(
-    lams_reg, f_avgs, yerr=f_stds, ecolor=[0.5, 0.5, 0.5], elinewidth=1, capsize=2, label="Test-set error - wl2-norm"
+    lams_reg, f_avgs, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2, label="Test-set error - wl2-norm"
 )
 if show_zoom:
     ax_ins_test = inset_axes(ax_test, width="30%", height="20%", loc=3, borderpad=0.5)
@@ -168,63 +165,63 @@ if show_zoom:
 ax_test.grid()
 ax_test.legend()
 
-ax_err1 = f.add_subplot(gs[0, 1], sharex=ax_test)
+ax_err1 = fig.add_subplot(gs[0, 1], sharex=ax_test)
 ax_err1.set_xscale("log", nonpositive="clip")
 ax_err1.plot(lams_reg, err_l1, label="Error - l1-norm")
 ax_err1.grid()
 ax_err1.legend()
 
-ax_err2 = f.add_subplot(gs[1, 1], sharex=ax_test)
+ax_err2 = fig.add_subplot(gs[1, 1], sharex=ax_test)
 ax_err2.set_xscale("log", nonpositive="clip")
 ax_err2.plot(lams_reg, err_l2, label="Error - l2-norm ^ 2")
 ax_err2.grid()
 ax_err2.legend()
-f.tight_layout()
+fig.tight_layout()
 
 if save_figs:
-    f.savefig(os.path.join(base_fig_dir, "reg-error.eps"))
-    f.savefig(os.path.join(base_fig_dir, "reg-error.png"))
+    fig.savefig(os.path.join(base_fig_dir, "reg-error.eps"))
+    fig.savefig(os.path.join(base_fig_dir, "reg-error.png"))
 
 # Reconstructions
-f = plt.figure(figsize=cm2inch([48, 12]))
-gs = f.add_gridspec(4, 4)
-ax_ph = f.add_subplot(gs[:, 0])
+fig = plt.figure(figsize=cm2inch([48, 12]))
+gs = fig.add_gridspec(4, 4)
+ax_ph = fig.add_subplot(gs[:, 0])
 im_ph = ax_ph.imshow(expected_ph)
 ax_ph.set_title("Phantom")
-f.colorbar(im_ph, ax=ax_ph)
+fig.colorbar(im_ph, ax=ax_ph)
 
-ax_sino_clean = f.add_subplot(gs[0, 1])
+ax_sino_clean = fig.add_subplot(gs[0, 1])
 with cct.projectors.ProjectorUncorrected(ph_or.shape, angles) as p:
     sino_clean = p.fp(expected_ph)
 im_sino_clean = ax_sino_clean.imshow(sino_clean)
 ax_sino_clean.set_title("Clean sinogram")
 
-ax_sino_noise = f.add_subplot(gs[1, 1])
+ax_sino_noise = fig.add_subplot(gs[1, 1])
 im_sino_noise = ax_sino_noise.imshow(sino_substr)
 ax_sino_noise.set_title("Noisy sinogram")
 
-ax_sino_lines = f.add_subplot(gs[2:, 1])
+ax_sino_lines = fig.add_subplot(gs[2:, 1])
 im_sino_lines = ax_sino_lines.plot(sino_substr[9, :], label="Noisy")
 im_sino_lines = ax_sino_lines.plot(sino_clean[9, :], label="Clean")
 ax_sino_lines.set_title("Sinograms - angle: 10")
 ax_sino_lines.legend()
 
-ax_ls = f.add_subplot(gs[:, 2])
+ax_ls = fig.add_subplot(gs[:, 2])
 im_ls = ax_ls.imshow(np.squeeze(rec_wls))
 ax_ls.set_title(solver_wls.info().upper())
-f.colorbar(im_ls, ax=ax_ls)
+fig.colorbar(im_ls, ax=ax_ls)
 
-ax_reg = f.add_subplot(gs[:, 3])
+ax_reg = fig.add_subplot(gs[:, 3])
 label_2 = solver.info().upper()
 im_reg = ax_reg.imshow(np.squeeze(rec))
 ax_reg.set_title(solver.info().upper())
-f.colorbar(im_reg, ax=ax_reg)
+fig.colorbar(im_reg, ax=ax_reg)
 
-f.tight_layout()
+fig.tight_layout()
 
 if save_figs:
-    f.savefig(os.path.join(base_fig_dir, "rec-comparison.eps"))
-    f.savefig(os.path.join(base_fig_dir, "rec-comparison.png"))
+    fig.savefig(os.path.join(base_fig_dir, "rec-comparison.eps"))
+    fig.savefig(os.path.join(base_fig_dir, "rec-comparison.png"))
 
 plt.tight_layout()
 plt.show(block=False)

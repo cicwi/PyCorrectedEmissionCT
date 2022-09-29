@@ -13,7 +13,6 @@ import numpy.random
 import matplotlib.pyplot as plt
 
 import corrct as cct
-import corrct.utils_test as cct_test
 
 from typing import Tuple
 from numpy.typing import ArrayLike
@@ -21,7 +20,7 @@ from numpy.typing import ArrayLike
 try:
     import phantom
 except ImportError:
-    cct_test.download_phantom()
+    cct.testing.download_phantom()
     import phantom
 
 
@@ -52,7 +51,7 @@ bckgnd_avg = 1e-4  # Background concentrations averages
 beam_energy_keV = 20.0
 
 # Simulate the XRF-CT acquisition data (sinogram)
-(phantoms, vol_att_in, vols_att_out) = cct_test.phantom_assign_concentration_multi(ph_or, in_energy_keV=beam_energy_keV)
+(phantoms, vol_att_in, vols_att_out) = cct.testing.phantom_assign_concentration_multi(ph_or, in_energy_keV=beam_energy_keV)
 
 num_vols = len(phantoms) + 1
 sinogram = [np.array([])] * num_vols
@@ -61,15 +60,15 @@ background_avg = np.zeros((num_vols,))
 
 # Compute Fluorescence and Compton projections
 for ii, (ph, vol_att_out) in enumerate(zip(phantoms, vols_att_out)):
-    (sinogram[ii], angles, expected_ph[ii], background_avg[ii]) = cct_test.create_sino(
+    (sinogram[ii], angles, expected_ph[ii], background_avg[ii]) = cct.testing.create_sino(
         ph, 30, add_poisson=True, dwell_time_s=dwell_time_s, background_avg=bckgnd_avg
     )
 
 # Compute attenuation projections
-(sinogram_t, flat, angles, expected_ph[-1]) = cct_test.create_sino_transmission(
+(sinogram_t, flat, angles, expected_ph[-1]) = cct.testing.create_sino_transmission(
     vol_att_in, 30, add_poisson=True, dwell_time_s=dwell_time_s
 )
-sinogram[-1] = cct.utils_proc.apply_minus_log(cct.utils_proc.apply_flat_field(sinogram_t, flat))
+sinogram[-1] = cct.processing.pre.apply_minus_log(cct.processing.pre.apply_flat_field(sinogram_t, flat))
 
 sinogram = np.array(sinogram)
 expected_ph = np.array(expected_ph)
@@ -77,7 +76,7 @@ expected_ph = np.array(expected_ph)
 iterations = 200
 lower_limit = 0.0
 lambda_tv = 10.0
-vol_mask = cct.utils_proc.get_circular_mask(ph_or.shape)
+vol_mask = cct.processing.circular_mask(ph_or.shape)
 
 # Subtract background from sinogram
 sino_substr = sinogram - background_avg[:, None, None]
@@ -95,13 +94,13 @@ renorm_transm = norm_signals[-1] / np.mean(norm_signals[:2])
 
 sino_substr[-1] /= renorm_transm
 
-sino_variances_poisson = cct.utils_proc.compute_variance_poisson(sinogram[:-1, ...])
-sino_variances_gauss = cct.utils_proc.compute_variance_transmission(sinogram_t, flat)
+sino_variances_poisson = cct.processing.compute_variance_poisson(sinogram[:-1, ...])
+sino_variances_gauss = cct.processing.compute_variance_transmission(sinogram_t, flat)
 
 sino_weights_poisson = np.stack(
-    [cct.utils_proc.compute_variance_weight(v, normalized=True, semilog=True) for v in sino_variances_poisson], axis=0
+    [cct.processing.compute_variance_weight(v, normalized=True, semilog=True) for v in sino_variances_poisson], axis=0
 )
-sino_weights_transmission = cct.utils_proc.compute_variance_weight(sino_variances_gauss[None, ...], normalized=True)
+sino_weights_transmission = cct.processing.compute_variance_weight(sino_variances_gauss[None, ...], normalized=True)
 sino_weights = np.concatenate((sino_weights_poisson, sino_weights_transmission), axis=0)
 
 # f, axs = plt.subplots(sino_weights.shape[0], 1, sharex=True, sharey=True)
@@ -136,7 +135,7 @@ rec_wls[-1] *= renorm_transm
 rec_tvs[-1] *= renorm_transm
 rec_tvm[-1] *= renorm_transm
 
-f, axs = plt.subplots(3, num_vols + 1, sharex=True, sharey=True, figsize=cm2inch([27, 20]))
+fig, axs = plt.subplots(3, num_vols + 1, sharex=True, sharey=True, figsize=cm2inch([27, 20]))
 for ax, ph, vol_wls, vol_tvs, vol_tvm in zip(axs, expected_ph, rec_wls, rec_tvs, rec_tvm):
     ax[0].imshow(ph)
     ax[1].imshow(vol_wls)
@@ -149,21 +148,12 @@ axs[0, 3].set_title(solver_tnv.info())
 axs[0, 0].set_ylabel("Ca")
 axs[1, 0].set_ylabel("Fe")
 axs[2, 0].set_ylabel("Attenuation")
-f.tight_layout()
+fig.tight_layout()
 
 # Comparing FRCs for each reconstruction
-frcs = [np.array([])] * 3
-for ii, rec in enumerate([rec_wls[0], rec_tvs[0], rec_tvm[0]]):
-    frcs[ii], T = cct.utils_proc.compute_frc(expected_ph[0], rec, snrt=0.4142)
+labels = [solver_wls.info().upper(), solver_tv.info().upper(), solver_tnv.info().upper()]
+vols = [rec_wls[0], rec_tvs[0], rec_tvm[0]]
 
-f, ax = plt.subplots(1, 1, sharex=True, sharey=True)
-ax.plot(np.squeeze(frcs[0]), label=solver_wls.info().upper())
-ax.plot(np.squeeze(frcs[1]), label=solver_tv.info().upper())
-ax.plot(np.squeeze(frcs[2]), label=solver_tnv.info().upper())
-ax.plot(np.squeeze(T), label="T 1/2 bit")
-ax.legend()
-ax.grid()
-ax.set_title("FRCs for Ca-Ka")
-f.tight_layout()
+cct.processing.post.plot_frcs([(expected_ph[0], rec) for rec in vols], labels=labels, title="FRCs for Ca-Ka", snrt=0.4142)
 
 plt.show(block=False)

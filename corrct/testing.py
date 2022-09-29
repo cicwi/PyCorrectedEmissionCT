@@ -14,7 +14,7 @@ import numpy as np
 from . import projectors
 
 try:
-    from . import utils_phys
+    from . import physics
 
     __has_physics__ = True
 except ImportError as exc:
@@ -117,7 +117,7 @@ def phantom_assign_concentration(
     phase_fractions = (ph_air, ph_FeO, ph_CaO, ph_CaC)
     phase_compound_names = ("Air, Dry (near sea level)", "Ferric Oxide", "Calcium Oxide", "Calcium Carbonate")
 
-    phantom = utils_phys.VolumeMaterial(phase_fractions, phase_compound_names, voxel_size_cm)
+    phantom = physics.VolumeMaterial(phase_fractions, phase_compound_names, voxel_size_cm)
 
     out_energy_keV, vol_fluo_yield = phantom.get_fluo_yield(element, in_energy_keV, em_line)
 
@@ -178,7 +178,7 @@ def phantom_assign_concentration_multi(
     phase_fractions = (ph_air, ph_FeO, ph_CaO, ph_CaC)
     phase_compound_names = ("Air, Dry (near sea level)", "Ferric Oxide", "Calcium Oxide", "Calcium Carbonate")
 
-    phantom = utils_phys.VolumeMaterial(phase_fractions, phase_compound_names, voxel_size_cm)
+    phantom = physics.VolumeMaterial(phase_fractions, phase_compound_names, voxel_size_cm)
 
     vol_lin_att_in = phantom.get_attenuation(in_energy_keV)
 

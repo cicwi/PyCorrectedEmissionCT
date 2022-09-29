@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 
 from corrct import regularizers
-from corrct import utils_test
+from corrct import testing
 
 
 eps = np.finfo(np.float32).eps
@@ -69,7 +69,7 @@ class TestRegularizers:
         reg.initialize_sigma_tau(vol)
 
         dual = reg.initialize_dual()
-        assert np.all(dual.shape[1:] == utils_test.roundup_to_pow2(vol.shape, level))
+        assert np.all(dual.shape[1:] == testing.roundup_to_pow2(vol.shape, level))
         assert dual.shape[0] == ((2**ndims - 1) * level + 1)
         assert np.all(dual == 0)
 

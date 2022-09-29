@@ -14,9 +14,7 @@ from numpy.typing import NDArray
 
 import unittest
 
-from corrct import projectors
-from corrct import solvers
-from corrct import utils_proc
+from corrct import projectors, solvers, processing
 
 
 eps = np.finfo(np.float32).eps
@@ -41,15 +39,15 @@ class TestSolvers(unittest.TestCase):
         self.test_prjs_shape = (self.__oversize_data, np.prod(self.test_vols_shape))
 
         self.vol_rand_2d = np.fmin(np.random.rand(*self.test_vols_shape[:2]) + eps, 1)
-        self.vol_flat_2d = utils_proc.get_circular_mask(self.test_vols_shape[:2], -2)
+        self.vol_flat_2d = processing.circular_mask(self.test_vols_shape[:2], -2)
 
         self.proj_matrix_2d = (np.random.rand(np.prod(self.test_prjs_shape), np.prod(self.test_vols_shape)) > 0.5).astype(
             np.float32
         )
 
-        self.data_rand_2d = self.fwd_op(self.proj_matrix_2d, self.vol_rand_2d, self.test_prjs_shape)
+        self.data_rand_2d = self._fwd_op(self.proj_matrix_2d, self.vol_rand_2d, self.test_prjs_shape)
 
-        self.data_flat_2d = self.fwd_op(self.proj_matrix_2d, self.vol_flat_2d, self.test_prjs_shape)
+        self.data_flat_2d = self._fwd_op(self.proj_matrix_2d, self.vol_flat_2d, self.test_prjs_shape)
         self.data_flat_2d += np.random.randn(*self.data_flat_2d.shape) * 1e-3
 
         self.tolerance = 1e-2
@@ -57,20 +55,20 @@ class TestSolvers(unittest.TestCase):
     def tearDown(self):
         """Tear down test fixtures, if any."""
 
-    def fwd_op(self, M, x, y_shape):
+    def _fwd_op(self, M, x, y_shape):
         return np.dot(M, x.flatten()).reshape(y_shape)
 
-    def bwd_op(self, M, y, x_shape):
+    def _bwd_op(self, M, y, x_shape):
         return np.dot(y.flatten(), M).reshape(x_shape)
 
-    def get_A_At(self, vol_dims):
+    def _get_A_At(self, vol_dims):
         if vol_dims.lower() == "2d":
 
             def A(x):
-                return self.fwd_op(self.proj_matrix_2d, x, self.test_prjs_shape)
+                return self._fwd_op(self.proj_matrix_2d, x, self.test_prjs_shape)
 
             def At(y):
-                return self.bwd_op(self.proj_matrix_2d, y, self.test_vols_shape[:2])
+                return self._bwd_op(self.proj_matrix_2d, y, self.test_vols_shape[:2])
 
         else:
             raise ValueError("Only 2D implemented.")
