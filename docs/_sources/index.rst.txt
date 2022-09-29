@@ -11,6 +11,7 @@ Contents:
 
 
    readme
+   tutorial
    modules
    changelog
 

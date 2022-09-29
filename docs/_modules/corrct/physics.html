@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>corrct.utils_phys &mdash; PyCorrectedEmissionCT  documentation</title>
+  <title>corrct.physics &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -36,7 +36,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
@@ -56,7 +57,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>corrct.utils_phys</li>
+      <li>corrct.physics</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -65,7 +66,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for corrct.utils_phys</h1><div class="highlight"><pre>
+  <h1>Source code for corrct.physics</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -77,6 +78,14 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">xraylib</span>
+
+    <span class="n">xraylib</span><span class="o">.</span><span class="n">XRayInit</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Physics support is only available when xraylib is installed!&quot;</span><span class="p">)</span>
+    <span class="k">raise</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
@@ -86,16 +95,91 @@
 
 <span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">xraylib</span>
-
-    <span class="n">xraylib</span><span class="o">.</span><span class="n">XRayInit</span><span class="p">()</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Physics support is only available when xraylib is installed!&quot;</span><span class="p">)</span>
-    <span class="k">raise</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 
-<div class="viewcode-block" id="FluoLine"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.FluoLine">[docs]</a><span class="nd">@dataclass</span>
+<div class="viewcode-block" id="pencil_beam_profile"><a class="viewcode-back" href="../../corrct.html#corrct.physics.pencil_beam_profile">[docs]</a><span class="k">def</span> <span class="nf">pencil_beam_profile</span><span class="p">(</span>
+    <span class="n">voxel_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beam_fwhm_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">profile_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">beam_shape</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the pencil beam integration point spread function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    voxel_size_um : float</span>
+<span class="sd">        The integration length.</span>
+<span class="sd">    beam_fwhm_um : float</span>
+<span class="sd">        The beam FWHM.</span>
+<span class="sd">    profile_size : int, optional</span>
+<span class="sd">        The number of pixels of the PSF. The default is 1.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to print verbose information. The default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The beam PSF.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y_points</span> <span class="o">=</span> <span class="n">profile_size</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">extent_um</span> <span class="o">=</span> <span class="n">y_points</span> <span class="o">*</span> <span class="n">voxel_size_um</span>
+    <span class="n">num_points</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">extent_um</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">half_voxel_size_um</span> <span class="o">=</span> <span class="n">voxel_size_um</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+
+    <span class="n">xc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">extent_um</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">extent_um</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">num_points</span><span class="p">)</span>
+
+    <span class="c1"># Box beam shape</span>
+    <span class="n">yb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xc</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">half_voxel_size_um</span>
+    <span class="n">yb</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xc</span><span class="p">)</span> <span class="o">-</span> <span class="n">half_voxel_size_um</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="c1"># Gaussian beam shape</span>
+    <span class="k">if</span> <span class="n">beam_shape</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">:</span>
+        <span class="n">yg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">xc</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">beam_fwhm_um</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">beam_shape</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;lorentzian&quot;</span><span class="p">:</span>
+        <span class="n">beam_hwhm_um</span> <span class="o">=</span> <span class="n">beam_fwhm_um</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">yg</span> <span class="o">=</span> <span class="p">(</span><span class="n">beam_hwhm_um</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">xc</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">beam_hwhm_um</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">beam_shape</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;sech**2&quot;</span><span class="p">:</span>
+        <span class="c1"># doi: 10.1364/ol.20.001160</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">beam_fwhm_um</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arccosh</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="n">yg</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">xc</span> <span class="o">/</span> <span class="n">tau</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown beam shape: </span><span class="si">{</span><span class="n">beam_shape</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">yc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">yb</span><span class="p">,</span> <span class="n">yg</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+    <span class="n">yc</span> <span class="o">=</span> <span class="n">yc</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">yc</span><span class="p">)</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y_points</span><span class="p">,))</span>
+    <span class="k">for</span> <span class="n">ii_p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_points</span><span class="p">):</span>
+        <span class="c1"># Finding the region that overlaps with the given adjacent voxel</span>
+        <span class="n">voxel_center_um</span> <span class="o">=</span> <span class="p">(</span><span class="n">ii_p</span> <span class="o">-</span> <span class="n">profile_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">voxel_size_um</span>
+        <span class="n">yp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xc</span> <span class="o">-</span> <span class="n">voxel_center_um</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">half_voxel_size_um</span>
+        <span class="n">yp</span><span class="p">[(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xc</span> <span class="o">-</span> <span class="n">voxel_center_um</span><span class="p">)</span> <span class="o">-</span> <span class="n">half_voxel_size_um</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+        <span class="n">y</span><span class="p">[</span><span class="n">ii_p</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">yc</span> <span class="o">*</span> <span class="n">yp</span><span class="p">)</span>
+
+    <span class="c1"># Renormalization</span>
+    <span class="n">y</span> <span class="o">/=</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Integration length&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yg</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">beam_shape</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2"> beam shape&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Resulting beam shape&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+
+        <span class="n">pixels_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">y_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">y_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y_points</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">pixels_pos</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;PSF values&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xc</span> <span class="o">/</span> <span class="n">extent_um</span> <span class="o">*</span> <span class="n">profile_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">yc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Resulting beam shape&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="FluoLine"><a class="viewcode-back" href="../../corrct.html#corrct.physics.FluoLine">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">FluoLine</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Fluorescence line description class.&quot;&quot;&quot;</span>
 
@@ -103,7 +187,7 @@
     <span class="n">indx</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
-<div class="viewcode-block" id="FluoLinesSiegbahn"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.FluoLinesSiegbahn">[docs]</a><span class="k">class</span> <span class="nc">FluoLinesSiegbahn</span><span class="p">:</span>
+<div class="viewcode-block" id="FluoLinesSiegbahn"><a class="viewcode-back" href="../../corrct.html#corrct.physics.FluoLinesSiegbahn">[docs]</a><span class="k">class</span> <span class="nc">FluoLinesSiegbahn</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Siegbahn fluorescence lines collection class.&quot;&quot;&quot;</span>
 
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
@@ -148,7 +232,7 @@
         <span class="n">FluoLine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MG&quot;</span><span class="p">,</span> <span class="n">indx</span><span class="o">=</span><span class="n">xraylib</span><span class="o">.</span><span class="n">MG_LINE</span><span class="p">),</span>
     <span class="p">]</span>
 
-<div class="viewcode-block" id="FluoLinesSiegbahn.get_lines"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.FluoLinesSiegbahn.get_lines">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FluoLinesSiegbahn.get_lines"><a class="viewcode-back" href="../../corrct.html#corrct.physics.FluoLinesSiegbahn.get_lines">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_lines</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of xraylib line macro definitions for the requested family.</span>
@@ -166,7 +250,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">FluoLinesSiegbahn</span><span class="o">.</span><span class="n">lines</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)]</span> <span class="o">==</span> <span class="n">line</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="FluoLinesSiegbahn.get_energy"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.FluoLinesSiegbahn.get_energy">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FluoLinesSiegbahn.get_energy"><a class="viewcode-back" href="../../corrct.html#corrct.physics.FluoLinesSiegbahn.get_energy">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span>
         <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
         <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
@@ -233,7 +317,7 @@
         <span class="k">return</span> <span class="n">energy_keV</span></div></div>
 
 
-<div class="viewcode-block" id="DetectorXRF"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.DetectorXRF">[docs]</a><span class="nd">@dataclass</span>
+<div class="viewcode-block" id="DetectorXRF"><a class="viewcode-back" href="../../corrct.html#corrct.physics.DetectorXRF">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">DetectorXRF</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Simple XRF detector model.&quot;&quot;&quot;</span>
 
@@ -253,7 +337,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_mm2</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_mm</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="VolumeMaterial"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial">[docs]</a><span class="k">class</span> <span class="nc">VolumeMaterial</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="VolumeMaterial"><a class="viewcode-back" href="../../corrct.html#corrct.physics.VolumeMaterial">[docs]</a><span class="k">class</span> <span class="nc">VolumeMaterial</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    VolumeMaterial class, that can be used for predicting fluorescence and Compton yields, attenuation, etc.</span>
 
@@ -313,7 +397,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span> <span class="o">=</span> <span class="n">voxel_size_cm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
-<div class="viewcode-block" id="VolumeMaterial.get_element_number"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_element_number">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="VolumeMaterial.get_element_number"><a class="viewcode-back" href="../../corrct.html#corrct.physics.VolumeMaterial.get_element_number">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_element_number</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute the element number from the symbol.</span>
 
@@ -332,7 +416,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">SymbolToAtomicNumber</span><span class="p">(</span><span class="n">element</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VolumeMaterial.get_compound"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_compound">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="VolumeMaterial.get_compound"><a class="viewcode-back" href="../../corrct.html#corrct.physics.VolumeMaterial.get_compound">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_compound</span><span class="p">(</span><span class="n">cmp_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Builds a compound from the compound composition string.</span>
@@ -359,7 +443,7 @@
         <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">density</span>
         <span class="k">return</span> <span class="n">cmp</span></div>
 
-<div class="viewcode-block" id="VolumeMaterial.get_attenuation"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">get_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<div class="viewcode-block" id="VolumeMaterial.get_attenuation"><a class="viewcode-back" href="../../corrct.html#corrct.physics.VolumeMaterial.get_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">get_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the local attenuation for each voxel.</span>
 
@@ -391,7 +475,7 @@
             <span class="n">ph_lin_att</span> <span class="o">+=</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cmp_cs</span>
         <span class="k">return</span> <span class="n">ph_lin_att</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span></div>
 
-<div class="viewcode-block" id="VolumeMaterial.get_element_mass_fraction"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_element_mass_fraction">[docs]</a>    <span class="k">def</span> <span class="nf">get_element_mass_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<div class="viewcode-block" id="VolumeMaterial.get_element_mass_fraction"><a class="viewcode-back" href="../../corrct.html#corrct.physics.VolumeMaterial.get_element_mass_fraction">[docs]</a>    <span class="k">def</span> <span class="nf">get_element_mass_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute the local element mass fraction through out all the phases.</span>
 
 <span class="sd">        Parameters</span>
@@ -428,7 +512,7 @@
         <span class="n">max_parallax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">solid_angles</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">solid_angles</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">max_parallax</span> <span class="o">&lt;</span> <span class="n">tolerance</span>
 
-<div class="viewcode-block" id="VolumeMaterial.get_compton_scattering"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_compton_scattering">[docs]</a>    <span class="k">def</span> <span class="nf">get_compton_scattering</span><span class="p">(</span>
+<div class="viewcode-block" id="VolumeMaterial.get_compton_scattering"><a class="viewcode-back" href="../../corrct.html#corrct.physics.VolumeMaterial.get_compton_scattering">[docs]</a>    <span class="k">def</span> <span class="nf">get_compton_scattering</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">energy_in_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">detector</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DetectorXRF</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Compute the local Compton scattering.</span>
@@ -494,7 +578,7 @@
         <span class="n">energy_out_keV</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">ComptonEnergy</span><span class="p">(</span><span class="n">energy_in_keV</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">energy_out_keV</span><span class="p">,</span> <span class="n">cmptn_yield</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VolumeMaterial.get_fluo_yield"><a class="viewcode-back" href="../../corrct.html#corrct.utils_phys.VolumeMaterial.get_fluo_yield">[docs]</a>    <span class="k">def</span> <span class="nf">get_fluo_yield</span><span class="p">(</span>
+<div class="viewcode-block" id="VolumeMaterial.get_fluo_yield"><a class="viewcode-back" href="../../corrct.html#corrct.physics.VolumeMaterial.get_fluo_yield">[docs]</a>    <span class="k">def</span> <span class="nf">get_fluo_yield</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
         <span class="n">energy_in_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>

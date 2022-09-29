@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>corrct.utils_test &mdash; PyCorrectedEmissionCT  documentation</title>
+  <title>corrct.testing &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -36,7 +36,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
@@ -56,7 +57,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>corrct.utils_test</li>
+      <li>corrct.testing</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -65,7 +66,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for corrct.utils_test</h1><div class="highlight"><pre>
+  <h1>Source code for corrct.testing</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -82,7 +83,7 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">projectors</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils_phys</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">physics</span>
 
     <span class="n">__has_physics__</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
@@ -99,7 +100,7 @@
 <span class="n">NDArrayFloat</span> <span class="o">=</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="roundup_to_pow2"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.roundup_to_pow2">[docs]</a><span class="k">def</span> <span class="nf">roundup_to_pow2</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">],</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
+<div class="viewcode-block" id="roundup_to_pow2"><a class="viewcode-back" href="../../corrct.html#corrct.testing.roundup_to_pow2">[docs]</a><span class="k">def</span> <span class="nf">roundup_to_pow2</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">],</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Round first argument to the power of 2 indicated by second argument.</span>
 
 <span class="sd">    Parameters</span>
@@ -119,7 +120,7 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">p</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">p</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="download_phantom"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.download_phantom">[docs]</a><span class="k">def</span> <span class="nf">download_phantom</span><span class="p">():</span>
+<div class="viewcode-block" id="download_phantom"><a class="viewcode-back" href="../../corrct.html#corrct.testing.download_phantom">[docs]</a><span class="k">def</span> <span class="nf">download_phantom</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Download the phantom generation module from Nicolas Barbey&#39;s repository on github.&quot;&quot;&quot;</span>
     <span class="n">phantom_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/nbarbey/TomograPy/master/tomograpy/phantom.py&quot;</span>
     <span class="n">phantom_path</span> <span class="o">=</span> <span class="s2">&quot;./phantom.py&quot;</span>
@@ -140,7 +141,7 @@
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;xrange&quot;</span><span class="p">,</span> <span class="s2">&quot;range&quot;</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="phantom_assign_concentration"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.phantom_assign_concentration">[docs]</a><span class="k">def</span> <span class="nf">phantom_assign_concentration</span><span class="p">(</span>
+<div class="viewcode-block" id="phantom_assign_concentration"><a class="viewcode-back" href="../../corrct.html#corrct.testing.phantom_assign_concentration">[docs]</a><span class="k">def</span> <span class="nf">phantom_assign_concentration</span><span class="p">(</span>
     <span class="n">ph_or</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Ca&quot;</span><span class="p">,</span> <span class="n">em_line</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;KA&quot;</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">,</span> <span class="n">voxel_size_um</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Build an XRF phantom.</span>
@@ -185,7 +186,7 @@
     <span class="n">phase_fractions</span> <span class="o">=</span> <span class="p">(</span><span class="n">ph_air</span><span class="p">,</span> <span class="n">ph_FeO</span><span class="p">,</span> <span class="n">ph_CaO</span><span class="p">,</span> <span class="n">ph_CaC</span><span class="p">)</span>
     <span class="n">phase_compound_names</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Air, Dry (near sea level)&quot;</span><span class="p">,</span> <span class="s2">&quot;Ferric Oxide&quot;</span><span class="p">,</span> <span class="s2">&quot;Calcium Oxide&quot;</span><span class="p">,</span> <span class="s2">&quot;Calcium Carbonate&quot;</span><span class="p">)</span>
 
-    <span class="n">phantom</span> <span class="o">=</span> <span class="n">utils_phys</span><span class="o">.</span><span class="n">VolumeMaterial</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="n">phase_compound_names</span><span class="p">,</span> <span class="n">voxel_size_cm</span><span class="p">)</span>
+    <span class="n">phantom</span> <span class="o">=</span> <span class="n">physics</span><span class="o">.</span><span class="n">VolumeMaterial</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="n">phase_compound_names</span><span class="p">,</span> <span class="n">voxel_size_cm</span><span class="p">)</span>
 
     <span class="n">out_energy_keV</span><span class="p">,</span> <span class="n">vol_fluo_yield</span> <span class="o">=</span> <span class="n">phantom</span><span class="o">.</span><span class="n">get_fluo_yield</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">in_energy_keV</span><span class="p">,</span> <span class="n">em_line</span><span class="p">)</span>
 
@@ -195,7 +196,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">vol_fluo_yield</span><span class="p">,</span> <span class="n">vol_lin_att_in</span><span class="p">,</span> <span class="n">vol_lin_att_out</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="phantom_assign_concentration_multi"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.phantom_assign_concentration_multi">[docs]</a><span class="k">def</span> <span class="nf">phantom_assign_concentration_multi</span><span class="p">(</span>
+<div class="viewcode-block" id="phantom_assign_concentration_multi"><a class="viewcode-back" href="../../corrct.html#corrct.testing.phantom_assign_concentration_multi">[docs]</a><span class="k">def</span> <span class="nf">phantom_assign_concentration_multi</span><span class="p">(</span>
     <span class="n">ph_or</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
     <span class="n">elements</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Ca&quot;</span><span class="p">,</span> <span class="s2">&quot;Fe&quot;</span><span class="p">],</span>
     <span class="n">em_lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;KA&quot;</span><span class="p">,</span>
@@ -246,7 +247,7 @@
     <span class="n">phase_fractions</span> <span class="o">=</span> <span class="p">(</span><span class="n">ph_air</span><span class="p">,</span> <span class="n">ph_FeO</span><span class="p">,</span> <span class="n">ph_CaO</span><span class="p">,</span> <span class="n">ph_CaC</span><span class="p">)</span>
     <span class="n">phase_compound_names</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Air, Dry (near sea level)&quot;</span><span class="p">,</span> <span class="s2">&quot;Ferric Oxide&quot;</span><span class="p">,</span> <span class="s2">&quot;Calcium Oxide&quot;</span><span class="p">,</span> <span class="s2">&quot;Calcium Carbonate&quot;</span><span class="p">)</span>
 
-    <span class="n">phantom</span> <span class="o">=</span> <span class="n">utils_phys</span><span class="o">.</span><span class="n">VolumeMaterial</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="n">phase_compound_names</span><span class="p">,</span> <span class="n">voxel_size_cm</span><span class="p">)</span>
+    <span class="n">phantom</span> <span class="o">=</span> <span class="n">physics</span><span class="o">.</span><span class="n">VolumeMaterial</span><span class="p">(</span><span class="n">phase_fractions</span><span class="p">,</span> <span class="n">phase_compound_names</span><span class="p">,</span> <span class="n">voxel_size_cm</span><span class="p">)</span>
 
     <span class="n">vol_lin_att_in</span> <span class="o">=</span> <span class="n">phantom</span><span class="o">.</span><span class="n">get_attenuation</span><span class="p">(</span><span class="n">in_energy_keV</span><span class="p">)</span>
 
@@ -269,7 +270,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">vol_yield</span><span class="p">,</span> <span class="n">vol_lin_att_in</span><span class="p">,</span> <span class="n">vol_lin_att_out</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_noise"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.add_noise">[docs]</a><span class="k">def</span> <span class="nf">add_noise</span><span class="p">(</span>
+<div class="viewcode-block" id="add_noise"><a class="viewcode-back" href="../../corrct.html#corrct.testing.add_noise">[docs]</a><span class="k">def</span> <span class="nf">add_noise</span><span class="p">(</span>
     <span class="n">img_clean</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">num_photons</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
     <span class="n">add_poisson</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -326,7 +327,7 @@
     <span class="k">return</span> <span class="n">img_noise</span><span class="p">,</span> <span class="n">img_clean</span><span class="p">,</span> <span class="n">background</span></div>
 
 
-<div class="viewcode-block" id="create_sino"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.create_sino">[docs]</a><span class="k">def</span> <span class="nf">create_sino</span><span class="p">(</span>
+<div class="viewcode-block" id="create_sino"><a class="viewcode-back" href="../../corrct.html#corrct.testing.create_sino">[docs]</a><span class="k">def</span> <span class="nf">create_sino</span><span class="p">(</span>
     <span class="n">ph</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
     <span class="n">num_angles</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">start_angle_deg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -415,7 +416,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">sino_noise</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">num_photons</span> <span class="o">*</span> <span class="n">detector_solidangle_sr</span><span class="p">,</span> <span class="n">background</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="create_sino_transmission"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.create_sino_transmission">[docs]</a><span class="k">def</span> <span class="nf">create_sino_transmission</span><span class="p">(</span>
+<div class="viewcode-block" id="create_sino_transmission"><a class="viewcode-back" href="../../corrct.html#corrct.testing.create_sino_transmission">[docs]</a><span class="k">def</span> <span class="nf">create_sino_transmission</span><span class="p">(</span>
     <span class="n">ph</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
     <span class="n">num_angles</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">start_angle_deg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -486,7 +487,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">sino_noise</span><span class="p">,</span> <span class="n">flat_noise</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">ph</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="compute_error_power"><a class="viewcode-back" href="../../corrct.html#corrct.utils_test.compute_error_power">[docs]</a><span class="k">def</span> <span class="nf">compute_error_power</span><span class="p">(</span><span class="n">expected_vol</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">computed_vol</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<div class="viewcode-block" id="compute_error_power"><a class="viewcode-back" href="../../corrct.html#corrct.testing.compute_error_power">[docs]</a><span class="k">def</span> <span class="nf">compute_error_power</span><span class="p">(</span><span class="n">expected_vol</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">computed_vol</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Compute the expected volume signal power, and computed volume error power.</span>
 
 <span class="sd">    Parameters</span>

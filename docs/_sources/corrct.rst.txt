@@ -1,6 +1,14 @@
 corrct package
 ==============
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   corrct.processing
+
 Submodules
 ----------
 
@@ -52,6 +60,14 @@ corrct.operators module
    :undoc-members:
    :show-inheritance:
 
+corrct.physics module
+---------------------
+
+.. automodule:: corrct.physics
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.projectors module
 ------------------------
 
@@ -76,18 +92,10 @@ corrct.solvers module
    :undoc-members:
    :show-inheritance:
 
-corrct.utils\_phys module
--------------------------
+corrct.testing module
+---------------------
 
-.. automodule:: corrct.utils_phys
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-corrct.utils\_proc module
--------------------------
-
-.. automodule:: corrct.utils_proc
+.. automodule:: corrct.testing
    :members:
    :undoc-members:
    :show-inheritance:
@@ -96,14 +104,6 @@ corrct.utils\_reg module
 ------------------------
 
 .. automodule:: corrct.utils_reg
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-corrct.utils\_test module
--------------------------
-
-.. automodule:: corrct.utils_test
    :members:
    :undoc-members:
    :show-inheritance:

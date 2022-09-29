@@ -1,4 +1,4 @@
-# PyCorrectedEmissionCT
+# PyCorrectedEmissionCT (corrct)
 
 [![Python package](https://github.com/cicwi/PyCorrectedEmissionCT/actions/workflows/pythonpackage.yml/badge.svg)](https://github.com/cicwi/PyCorrectedEmissionCT/actions/workflows/pythonpackage.yml)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/cicwi/PyCorrectedEmissionCT)
@@ -6,19 +6,26 @@
 [![DOI](https://zenodo.org/badge/218092017.svg)](https://zenodo.org/badge/latestdoi/218092017)
 
 Physically corrected projectors for X-ray induced emission CT.
+PyCorrectedEmissionCT is usually abbreviated to its python module name: `corrct` (either pronounced "corr-C-T" or "correct").
 
 This package provides the following functionality:
 
-* Support for correction of the forward-projection and back-projection.
-* Includes the following solvers (reconstruction algorithms):
-  - Simultaneous Iterative Reconstruction Technique (SIRT).
-  - Simultaneous Algebraic Reconstruction Technique (SART).
-  - Primal-dual optimization from Chambolle-Pock, with:
-    * Various data fitting terms, including Gaussian and Poisson noise modelling.
-    * Various optional regularization terms, including: TV-min, l1-min, laplacian, and wavelet l1-min.
+* Support for **attenuation correction** of the forward-projection and back-projection.
+* Various solvers (reconstruction algorithms):
+  - Simultaneous Iterative Reconstruction Technique (**SIRT**).
+  - Simultaneous Algebraic Reconstruction Technique (**SART**).
+  - Primal-dual optimization from Chambolle-Pock (Primal-Dual Hybrid Gradient - **PDHG**), with:
+    * Various data fitting terms, including **Gaussian and Poisson noise** modelling.
+    * Various optional regularization terms, including: **TV-min**, l1-min, laplacian, and **wavelet** l1-min.
+    * Multi-channel (collaborative) regularization terms, like: **TNV** (Total Nuclear Variation).
+  - Filtered Back-Projection (**FBP**), and its data-dependent filter learning variant
+(**[PyMR-FBP](https://github.com/dmpelt/pymrfbp)**)
+* Two projector backends: [astra-toolbox](https://github.com/astra-toolbox/astra-toolbox) and
+[scikit-image](https://github.com/scikit-image/scikit-image).
+* Guided **regularization parameter selection**, through cross-validation and elbow method.
 
 It contains the code used for the following paper, which also provides a
-mathematical description of the concepts and algorithms used here:
+mathematical description of the attenuation correction concepts and algorithms used here:
 
 * N. Viganò and V. A. Solé, "Physically corrected forward operators for
 induced emission tomography: a simulation study," Meas. Sci. Technol., no.

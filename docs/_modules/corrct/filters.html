@@ -36,7 +36,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
@@ -81,7 +82,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="kn">from</span> <span class="nn">.operators</span> <span class="kn">import</span> <span class="n">BaseTransform</span>
-<span class="kn">from</span> <span class="nn">.utils_proc</span> <span class="kn">import</span> <span class="n">get_circular_mask</span>
+<span class="kn">from</span> <span class="nn">.processing</span> <span class="kn">import</span> <span class="n">circular_mask</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
@@ -168,7 +169,6 @@
     <span class="k">return</span> <span class="n">basis_r</span></div>
 
 
-
 <div class="viewcode-block" id="Filter"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter">[docs]</a><span class="k">class</span> <span class="nc">Filter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base FBP filter.&quot;&quot;&quot;</span>
 
@@ -204,7 +204,7 @@
         <span class="k">if</span> <span class="n">fbp_filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fbp_filter</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">fbp_filter</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Filter.get_padding_size"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.get_padding_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_padding_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute the projection padding size for a linear convolution.</span>
@@ -532,7 +532,7 @@
             <span class="n">nrows</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">grad_vol_size</span>
 
         <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">vol_mask</span> <span class="o">=</span> <span class="n">get_circular_mask</span><span class="p">([</span><span class="n">num_sino_pixels</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">vol_mask</span> <span class="o">=</span> <span class="n">circular_mask</span><span class="p">([</span><span class="n">num_sino_pixels</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">bas_f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis_f</span><span class="p">):</span>
             <span class="n">data_wu_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">data_wu</span><span class="p">,</span> <span class="n">bas_f</span><span class="p">)</span>

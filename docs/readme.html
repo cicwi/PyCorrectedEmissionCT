@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PyCorrectedEmissionCT &mdash; PyCorrectedEmissionCT  documentation</title>
+  <title>PyCorrectedEmissionCT (corrct) &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="corrct" href="modules.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
     <link rel="prev" title="Welcome to the documentation of PyCorrectedEmissionCT!" href="index.html" /> 
 </head>
 
@@ -38,7 +38,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">PyCorrectedEmissionCT</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PyCorrectedEmissionCT (corrct)</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#installing-with-conda">Installing with conda</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installing-from-pypi">Installing from PyPI</a></li>
@@ -51,6 +51,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
@@ -69,7 +70,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>PyCorrectedEmissionCT</li>
+      <li>PyCorrectedEmissionCT (corrct)</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/readme.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -79,31 +80,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="pycorrectedemissionct">
-<h1>PyCorrectedEmissionCT<a class="headerlink" href="#pycorrectedemissionct" title="Permalink to this heading"></a></h1>
+  <div class="section" id="pycorrectedemissionct-corrct">
+<h1>PyCorrectedEmissionCT (corrct)<a class="headerlink" href="#pycorrectedemissionct-corrct" title="Permalink to this heading"></a></h1>
 <p><a class="reference external" href="https://github.com/cicwi/PyCorrectedEmissionCT/actions/workflows/pythonpackage.yml"><img alt="Python package" src="https://github.com/cicwi/PyCorrectedEmissionCT/actions/workflows/pythonpackage.yml/badge.svg" /></a>
 <img alt="GitHub tag (latest by date)" src="https://img.shields.io/github/v/tag/cicwi/PyCorrectedEmissionCT" />
 <img alt="License" src="https://img.shields.io/github/license/cicwi/PyCorrectedEmissionCT" />
 <a class="reference external" href="https://zenodo.org/badge/latestdoi/218092017"><img alt="DOI" src="https://zenodo.org/badge/218092017.svg" /></a></p>
-<p>Physically corrected projectors for X-ray induced emission CT.</p>
+<p>Physically corrected projectors for X-ray induced emission CT.
+PyCorrectedEmissionCT is usually abbreviated to its python module name: <code class="docutils literal notranslate"><span class="pre">corrct</span></code> (either pronounced “corr-C-T” or “correct”).</p>
 <p>This package provides the following functionality:</p>
 <ul class="simple">
-<li><p>Support for correction of the forward-projection and back-projection.</p></li>
-<li><p>Includes the following solvers (reconstruction algorithms):</p>
+<li><p>Support for <strong>attenuation correction</strong> of the forward-projection and back-projection.</p></li>
+<li><p>Various solvers (reconstruction algorithms):</p>
 <ul>
-<li><p>Simultaneous Iterative Reconstruction Technique (SIRT).</p></li>
-<li><p>Simultaneous Algebraic Reconstruction Technique (SART).</p></li>
-<li><p>Primal-dual optimization from Chambolle-Pock, with:</p>
+<li><p>Simultaneous Iterative Reconstruction Technique (<strong>SIRT</strong>).</p></li>
+<li><p>Simultaneous Algebraic Reconstruction Technique (<strong>SART</strong>).</p></li>
+<li><p>Primal-dual optimization from Chambolle-Pock (Primal-Dual Hybrid Gradient - <strong>PDHG</strong>), with:</p>
 <ul>
-<li><p>Various data fitting terms, including Gaussian and Poisson noise modelling.</p></li>
-<li><p>Various optional regularization terms, including: TV-min, l1-min, laplacian, and wavelet l1-min.</p></li>
+<li><p>Various data fitting terms, including <strong>Gaussian and Poisson noise</strong> modelling.</p></li>
+<li><p>Various optional regularization terms, including: <strong>TV-min</strong>, l1-min, laplacian, and <strong>wavelet</strong> l1-min.</p></li>
+<li><p>Multi-channel (collaborative) regularization terms, like: <strong>TNV</strong> (Total Nuclear Variation).</p></li>
 </ul>
 </li>
+<li><p>Filtered Back-Projection (<strong>FBP</strong>), and its data-dependent filter learning variant
+(<strong><a class="reference external" href="https://github.com/dmpelt/pymrfbp">PyMR-FBP</a></strong>)</p></li>
 </ul>
 </li>
+<li><p>Two projector backends: <a class="reference external" href="https://github.com/astra-toolbox/astra-toolbox">astra-toolbox</a> and
+<a class="reference external" href="https://github.com/scikit-image/scikit-image">scikit-image</a>.</p></li>
+<li><p>Guided <strong>regularization parameter selection</strong>, through cross-validation and elbow method.</p></li>
 </ul>
 <p>It contains the code used for the following paper, which also provides a
-mathematical description of the concepts and algorithms used here:</p>
+mathematical description of the attenuation correction concepts and algorithms used here:</p>
 <ul class="simple">
 <li><p>N. Viganò and V. A. Solé, “Physically corrected forward operators for
 induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
@@ -182,7 +190,7 @@ examples folder.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Welcome to the documentation of PyCorrectedEmissionCT!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modules.html" class="btn btn-neutral float-right" title="corrct" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tutorial.html" class="btn btn-neutral float-right" title="Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
