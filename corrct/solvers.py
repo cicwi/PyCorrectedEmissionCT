@@ -13,16 +13,13 @@ import numpy as np
 import numpy.random
 from numpy.typing import DTypeLike, NDArray
 
-import scipy as sp
-from scipy.sparse import spmatrix
-from scipy.sparse.linalg import LinearOperator
-
 import copy as cp
 
 from . import operators
 from . import data_terms
 from . import regularizers
 from . import filters
+from . import projectors
 
 from tqdm import tqdm
 
@@ -431,11 +428,11 @@ class Sart(Solver):
 
     def __call__(  # noqa: C901
         self,
-        A: Callable,
+        A: Union[Callable[[NDArray, int], NDArray], projectors.ProjectorUncorrected],
         b: NDArrayFloat,
         iterations: int,
-        A_num_rows: int,
-        At: Callable,
+        A_num_rows: Optional[int] = None,
+        At: Optional[Callable] = None,
         x0: Optional[NDArrayFloat] = None,
         lower_limit: Union[float, NDArrayFloat, None] = None,
         upper_limit: Union[float, NDArrayFloat, None] = None,
@@ -474,6 +471,23 @@ class Sart(Solver):
         Tuple[NDArrayFloat, SolutionInfo]
             The reconstruction, and the residuals.
         """
+        if isinstance(A, projectors.ProjectorUncorrected):
+            p = A
+
+            if not p.projector_backend.has_individual_projs:
+                raise ValueError("The projector needs to have enabled single projections.")
+
+            A = lambda x, ii: p.fp_angle(x, ii)  # noqa: E731
+            if isinstance(p, projectors.ProjectorAttenuationXRF):
+                At = lambda y, ii: p.bp_angle(y, ii, single_line=True)  # noqa: E731
+            else:
+                At = lambda y, ii: p.bp_angle(y, ii)  # noqa: E731
+            A_num_rows = len(p.angles_rot_rad)
+        elif At is None:
+            raise ValueError("Parameter `At` is required, if `A` is not a projector.")
+        elif A_num_rows is None:
+            raise ValueError("Parameter `A_num_rows` is required, if `A` is not a projector.")
+
         # Back-projection diagonal re-scaling
         b_ones = np.ones_like(b)
         if b_mask is not None:
