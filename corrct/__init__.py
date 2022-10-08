@@ -28,7 +28,7 @@ from . import data_terms  # noqa: F401, F402
 from . import regularizers  # noqa: F401, F402
 from . import solvers  # noqa: F401, F402
 
-from . import utils_reg  # noqa: F401, F402
+from . import param_tuning  # noqa: F401, F402
 from . import processing  # noqa: F401, F402
 from . import denoisers  # noqa: F401, F402
 

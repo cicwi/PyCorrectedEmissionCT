@@ -95,7 +95,7 @@ def iso_tv_seminorm(x):
 
 print("Reconstructing:")
 # Create the regularization weight finding helper object (using cross-validation)
-reg_help_cv = cct.utils_reg.CrossValidation(sinogram.shape, verbose=True, num_averages=5)
+reg_help_cv = cct.param_tuning.CrossValidation(sinogram.shape, verbose=True, num_averages=5)
 reg_help_cv.solver_spawning_function = solver_spawn
 reg_help_cv.solver_calling_function = solver_call
 
@@ -120,7 +120,7 @@ with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     rec_wls, _ = solver_wls(A, sino_substr, iterations, x_mask=vol_mask, lower_limit=0)
 
 # Create the regularization weight finding helper object (using L-curve)
-reg_help_lc = cct.utils_reg.LCurve(iso_tv_seminorm, verbose=True, plot_result=True)
+reg_help_lc = cct.param_tuning.LCurve(iso_tv_seminorm, verbose=True, plot_result=True)
 reg_help_lc.solver_spawning_function = solver_spawn
 reg_help_lc.solver_calling_function = solver_call
 

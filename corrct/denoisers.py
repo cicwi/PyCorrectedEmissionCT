@@ -13,7 +13,7 @@ from . import operators
 from . import data_terms
 from . import regularizers
 from . import solvers
-from . import utils_reg
+from . import param_tuning
 
 from typing import Optional, Tuple, Union, Callable
 
@@ -92,7 +92,7 @@ def denoise_image(
 
     reg_weight = np.array(reg_weight)
     if reg_weight.size > 1:
-        reg_help_cv = utils_reg.CrossValidation(img.shape, verbose=True, num_averages=5, plot_result=False)
+        reg_help_cv = param_tuning.CrossValidation(img.shape, verbose=True, num_averages=5, plot_result=False)
         reg_help_cv.solver_spawning_function = solver_spawn
         reg_help_cv.solver_calling_function = solver_call
 
