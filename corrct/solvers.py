@@ -21,7 +21,7 @@ from . import regularizers
 from . import filters
 from . import projectors
 
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from abc import ABC, abstractmethod
 
