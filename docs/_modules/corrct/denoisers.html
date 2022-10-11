@@ -82,7 +82,7 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">data_terms</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">regularizers</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">solvers</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils_reg</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">param_tuning</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span>
 
@@ -161,7 +161,7 @@
 
     <span class="n">reg_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">reg_weight</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">reg_help_cv</span> <span class="o">=</span> <span class="n">utils_reg</span><span class="o">.</span><span class="n">CrossValidation</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_averages</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">reg_help_cv</span> <span class="o">=</span> <span class="n">param_tuning</span><span class="o">.</span><span class="n">CrossValidation</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_averages</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">solver_spawning_function</span> <span class="o">=</span> <span class="n">solver_spawn</span>
         <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">solver_calling_function</span> <span class="o">=</span> <span class="n">solver_call</span>
 

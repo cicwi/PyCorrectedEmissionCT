@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>corrct.utils_reg &mdash; PyCorrectedEmissionCT  documentation</title>
+  <title>corrct.param_tuning &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -57,7 +57,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>corrct.utils_reg</li>
+      <li>corrct.param_tuning</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -66,7 +66,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for corrct.utils_reg</h1><div class="highlight"><pre>
+  <h1>Source code for corrct.param_tuning</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -101,7 +101,7 @@
 <span class="n">NDArrayFloat</span> <span class="o">=</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="create_random_test_mask"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.create_random_test_mask">[docs]</a><span class="k">def</span> <span class="nf">create_random_test_mask</span><span class="p">(</span>
+<div class="viewcode-block" id="create_random_test_mask"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.create_random_test_mask">[docs]</a><span class="k">def</span> <span class="nf">create_random_test_mask</span><span class="p">(</span>
     <span class="n">data_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">test_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -129,7 +129,7 @@
     <span class="k">return</span> <span class="n">data_test_mask</span></div>
 
 
-<div class="viewcode-block" id="BaseRegularizationEstimation"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.BaseRegularizationEstimation">[docs]</a><span class="k">class</span> <span class="nc">BaseRegularizationEstimation</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRegularizationEstimation"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseRegularizationEstimation">[docs]</a><span class="k">class</span> <span class="nc">BaseRegularizationEstimation</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for regularization parameter estimation class.&quot;&quot;&quot;</span>
 
     <span class="n">_solver_calling_function</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">solvers</span><span class="o">.</span><span class="n">SolutionInfo</span><span class="p">]]]</span>
@@ -191,7 +191,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected a solver calling function (callable), with at least one parameter (solver)&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_calling_function</span> <span class="o">=</span> <span class="n">c</span>
 
-<div class="viewcode-block" id="BaseRegularizationEstimation.get_lambda_range"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.BaseRegularizationEstimation.get_lambda_range">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BaseRegularizationEstimation.get_lambda_range"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseRegularizationEstimation.get_lambda_range">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_lambda_range</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num_per_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute regularization weights within an interval.</span>
 
@@ -213,7 +213,7 @@
         <span class="n">num_steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_per_order</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">end</span> <span class="o">/</span> <span class="n">start</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1e-3</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">start</span> <span class="o">*</span> <span class="p">(</span><span class="n">step_size</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="BaseRegularizationEstimation.compute_reconstruction_and_loss"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.BaseRegularizationEstimation.compute_reconstruction_and_loss">[docs]</a>    <span class="k">def</span> <span class="nf">compute_reconstruction_and_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam_reg</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
+<div class="viewcode-block" id="BaseRegularizationEstimation.compute_reconstruction_and_loss"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseRegularizationEstimation.compute_reconstruction_and_loss">[docs]</a>    <span class="k">def</span> <span class="nf">compute_reconstruction_and_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam_reg</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Compute objective function cost for the given regularization weight.</span>
 
 <span class="sd">        Parameters</span>
@@ -238,7 +238,7 @@
         <span class="c1"># Output will be: test objective function cost, and reconstruction</span>
         <span class="k">return</span> <span class="n">rec_info</span><span class="o">.</span><span class="n">residuals_cv_rel</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">rec</span></div>
 
-<div class="viewcode-block" id="BaseRegularizationEstimation.compute_reconstruction_error"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.BaseRegularizationEstimation.compute_reconstruction_error">[docs]</a>    <span class="k">def</span> <span class="nf">compute_reconstruction_error</span><span class="p">(</span>
+<div class="viewcode-block" id="BaseRegularizationEstimation.compute_reconstruction_error"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseRegularizationEstimation.compute_reconstruction_error">[docs]</a>    <span class="k">def</span> <span class="nf">compute_reconstruction_error</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">],</span> <span class="n">gnd_truth</span><span class="p">:</span> <span class="n">NDArrayFloat</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Compute the reconstructions for each regularization weight error against the ground truth.</span>
@@ -297,7 +297,7 @@
 
         <span class="k">return</span> <span class="n">err_l1</span><span class="p">,</span> <span class="n">err_l2</span></div>
 
-<div class="viewcode-block" id="BaseRegularizationEstimation.compute_loss_values"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.BaseRegularizationEstimation.compute_loss_values">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="BaseRegularizationEstimation.compute_loss_values"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseRegularizationEstimation.compute_loss_values">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute the objective function costs for a list of regularization weights.</span>
 
@@ -313,7 +313,7 @@
 <span class="sd">        &quot;&quot;&quot;</span></div></div>
 
 
-<div class="viewcode-block" id="LCurve"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.LCurve">[docs]</a><span class="k">class</span> <span class="nc">LCurve</span><span class="p">(</span><span class="n">BaseRegularizationEstimation</span><span class="p">):</span>
+<div class="viewcode-block" id="LCurve"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.LCurve">[docs]</a><span class="k">class</span> <span class="nc">LCurve</span><span class="p">(</span><span class="n">BaseRegularizationEstimation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;L-curve regularization parameter estimation helper.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -355,7 +355,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The callable &#39;loss_function&#39;, should have one parameter&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">loss_function</span>
 
-<div class="viewcode-block" id="LCurve.compute_loss_values"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.LCurve.compute_loss_values">[docs]</a>    <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
+<div class="viewcode-block" id="LCurve.compute_loss_values"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.LCurve.compute_loss_values">[docs]</a>    <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute objective function values for all regularization weights.</span>
 
 <span class="sd">        Parameters</span>
@@ -402,7 +402,7 @@
         <span class="k">return</span> <span class="n">f_vals</span></div></div>
 
 
-<div class="viewcode-block" id="CrossValidation"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.CrossValidation">[docs]</a><span class="k">class</span> <span class="nc">CrossValidation</span><span class="p">(</span><span class="n">BaseRegularizationEstimation</span><span class="p">):</span>
+<div class="viewcode-block" id="CrossValidation"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.CrossValidation">[docs]</a><span class="k">class</span> <span class="nc">CrossValidation</span><span class="p">(</span><span class="n">BaseRegularizationEstimation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Cross-validation regularization parameter estimation helper.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -444,7 +444,7 @@
     <span class="k">def</span> <span class="nf">_create_random_test_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">create_random_test_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_fraction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CrossValidation.compute_loss_values"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.CrossValidation.compute_loss_values">[docs]</a>    <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
+<div class="viewcode-block" id="CrossValidation.compute_loss_values"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.CrossValidation.compute_loss_values">[docs]</a>    <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lams_reg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Compute objective function values for all regularization weights.</span>
 
 <span class="sd">        Parameters</span>
@@ -510,7 +510,7 @@
 
         <span class="k">return</span> <span class="n">f_avgs</span><span class="p">,</span> <span class="n">f_stds</span><span class="p">,</span> <span class="n">f_vals</span></div>
 
-<div class="viewcode-block" id="CrossValidation.fit_loss_min"><a class="viewcode-back" href="../../corrct.html#corrct.utils_reg.CrossValidation.fit_loss_min">[docs]</a>    <span class="k">def</span> <span class="nf">fit_loss_min</span><span class="p">(</span>
+<div class="viewcode-block" id="CrossValidation.fit_loss_min"><a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.CrossValidation.fit_loss_min">[docs]</a>    <span class="k">def</span> <span class="nf">fit_loss_min</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">lams_reg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">],</span>
         <span class="n">f_vals</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>

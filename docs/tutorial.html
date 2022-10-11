@@ -46,13 +46,17 @@
 <li class="toctree-l3"><a class="reference internal" href="#the-projectors">The projectors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-solvers">The solvers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#fbp">FBP</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#sirt">SIRT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sirt-and-pdhg">SIRT and PDHG</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#attenuation-correction">Attenuation correction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#data-terms-and-regularization">Data terms and regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-terms-and-regularization">Data terms and regularization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#regularizers">Regularizers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-fidelity-terms">Data fidelity terms</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#guided-regularization-parameter-selection">Guided regularization parameter selection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
 </ul>
@@ -162,8 +166,8 @@ Here, we will only see the included solvers, which are:</p>
 </ul>
 <div class="section" id="fbp">
 <h4>FBP<a class="headerlink" href="#fbp" title="Permalink to this heading"></a></h4>
-<p>The FBP is the only analytical (non iterative) algorithm in the group, and it
-exposes one parameter that is not available for the others: <code class="docutils literal notranslate"><span class="pre">fbp_filter</span></code>.
+<p>The FBP is the only analytical (non iterative) algorithm in the group. It
+exposes one parameter that is not available for the other methods: <code class="docutils literal notranslate"><span class="pre">fbp_filter</span></code>.
 This parameter can either be:</p>
 <ul class="simple">
 <li><p>a filter name, as available from <code class="docutils literal notranslate"><span class="pre">scikit-image</span></code>.</p></li>
@@ -190,9 +194,35 @@ filter can be selected, by passing the <code class="docutils literal notranslate
 </pre></div>
 </div>
 </div>
-<div class="section" id="sirt">
-<h4>SIRT<a class="headerlink" href="#sirt" title="Permalink to this heading"></a></h4>
-<p>The SIRT algorithm.</p>
+<div class="section" id="sirt-and-pdhg">
+<h4>SIRT and PDHG<a class="headerlink" href="#sirt-and-pdhg" title="Permalink to this heading"></a></h4>
+<p>The SIRT and PDHG algorithms, are algebraic (iterative) methods. They both
+support regularization, and box constraints on the solution. The PDHG also
+supports various data fidelity terms.</p>
+<p>The interface of the iterative methods is the same as for the FBP, with the only
+difference of requiring an iterations count:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">corrct</span> <span class="k">as</span> <span class="nn">cct</span>
+
+<span class="n">vol_shape_xy</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="n">angles_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+<span class="n">solver_sirt</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">SIRT</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">vol_shape_xy</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+    <span class="n">vol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver_sirt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It is possible to specify an intial solution or box limits on the solutions like
+the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">vol_shape_xy</span><span class="p">)</span>  <span class="c1"># Initial solution</span>
+<span class="n">lower_limit</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># Constraint</span>
+
+<span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">vol_shape_xy</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+    <span class="n">vol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver_sirt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The same goes for the parameter <code class="docutils literal notranslate"><span class="pre">upper_limit</span></code>.</p>
 </div>
 </div>
 </div>
@@ -202,7 +232,25 @@ filter can be selected, by passing the <code class="docutils literal notranslate
 </div>
 <div class="section" id="data-terms-and-regularization">
 <h2>Data terms and regularization<a class="headerlink" href="#data-terms-and-regularization" title="Permalink to this heading"></a></h2>
-<p>Here, we describe how to use data fidelity terms, and regularizers.</p>
+<p>Iterative methods support regularizers, and data fidelity terms. The former can
+be used to impose prior knowledge on the reconstructed solution, while the
+latter impose prior knowledge on the weight given to the data points.</p>
+<div class="section" id="regularizers">
+<h3>Regularizers<a class="headerlink" href="#regularizers" title="Permalink to this heading"></a></h3>
+<p>Famous regularizers are the TV-min and wavelet l1-min. They can be found in the
+<code class="docutils literal notranslate"><span class="pre">regularizers</span></code> module.</p>
+</div>
+<div class="section" id="data-fidelity-terms">
+<h3>Data fidelity terms<a class="headerlink" href="#data-fidelity-terms" title="Permalink to this heading"></a></h3>
+<p>The PDHG algorithm supports various data fidelity terms. They can be found in
+the <code class="docutils literal notranslate"><span class="pre">data_terms</span></code> module, and they include:</p>
+<ul class="simple">
+<li><p>l2 norm - least squares reconstruction - default: <code class="docutils literal notranslate"><span class="pre">DataFidelity_l2</span></code></p></li>
+<li><p>weighted l2 norm - when the variance of the sinogram points is known: <code class="docutils literal notranslate"><span class="pre">DataFidelity_wl2</span></code></p></li>
+<li><p>l1 norm - when the sinogram noise is mostly sparse: <code class="docutils literal notranslate"><span class="pre">DataFidelity_l1</span></code></p></li>
+<li><p>Kullback-Leibler - when dealing with Poisson noise: <code class="docutils literal notranslate"><span class="pre">DataFidelity_KL</span></code></p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="guided-regularization-parameter-selection">
 <h2>Guided regularization parameter selection<a class="headerlink" href="#guided-regularization-parameter-selection" title="Permalink to this heading"></a></h2>
@@ -211,7 +259,7 @@ cross-validation, or the elbow method.</p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h2>
-<p>[1]: Pelt, D. M., &amp; Batenburg, K. J. (2014). Improving filtered backprojection
+<p>[1] Pelt, D. M., &amp; Batenburg, K. J. (2014). Improving filtered backprojection
 reconstruction by data-dependent filtering. Image Processing, IEEE
 Transactions on, 23(11), 4750-4762.</p>
 </div>
