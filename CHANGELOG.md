@@ -4,7 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.6.0...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.7.0...develop
+
+## 0.7.0 - 2022-10-11
+### Added
+- Wide API refactoring: renamed various modules, and moved processing routines to sub-package.
+- Initial draft of tutorial. More documentation on the way.
+- Line intersection computation.
+- Plotting of FRCs.
+- Tests: initial support for projectors.
+### Fixed
+- Typo in function name.
+- Simplified examples 01 and 02.
+- FRC/FSC axes selection.
 
 ## 0.6.0 - 2022-09-08
 ### Added
