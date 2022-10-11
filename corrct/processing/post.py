@@ -20,6 +20,8 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.axes._axes import Axes
 
+from tqdm.auto import tqdm
+
 
 eps = np.finfo(np.float32).eps
 
@@ -172,6 +174,7 @@ def frc(
     if smooth is not None and smooth > 1:
         win = sp.signal.windows.hann(smooth)
         win /= np.sum(win)
+        win = win.reshape([*[1] * (frc.ndim - 1), -1])
         frc = sp.ndimage.convolve(frc, win, mode="nearest")
 
     return frc[..., :cut_off], Thb[..., :cut_off]
@@ -183,6 +186,8 @@ def plot_frcs(
     title: Optional[str] = None,
     smooth: Optional[int] = 5,
     snrt: float = 0.2071,
+    axes: Optional[Sequence[int]] = None,
+    verbose: bool = False,
 ) -> Tuple[Figure, Axes]:
     """Compute and plot the FSCs / FRCs of some volumes.
 
@@ -198,12 +203,21 @@ def plot_frcs(
         The size of the smoothing window for the computed curves, by default 5.
     snrt : float, optional
         The SNR of the T curve, by default 0.2071 - as per half-dataset SNR.
+    axes : Sequence[int] | None, optional
+        The axes along which we want to compute the FRC. The unused axes will be
+        averaged. The default is None.
+    verbose : bool, optional
+        Whether to display verbose output, by default False.
     """
     frcs = [np.array([])] * len(volume_pairs)
     xps: List[Optional[Tuple[float, float]]] = [(0.0, 0.0)] * len(volume_pairs)
 
-    for ii, pair in enumerate(volume_pairs):
-        frcs[ii], T = frc(pair[0], pair[1], snrt=snrt, smooth=smooth)
+    for ii, pair in enumerate(tqdm(volume_pairs, desc="Computing FRCs", disable=not verbose)):
+        frcs[ii], T = frc(pair[0], pair[1], snrt=snrt, smooth=smooth, axes=axes)
+        if T.ndim > 1:
+            reduce_axes = tuple(np.arange(T.ndim - 1))
+            frcs[ii] = frcs[ii].mean(axis=reduce_axes)
+            T = T.mean(axis=reduce_axes)
         xps[ii] = lines_intersection(frcs[ii], T, x_lims=(1, None))
 
     nyquist = len(frcs[0])
