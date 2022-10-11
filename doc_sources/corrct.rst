@@ -60,6 +60,14 @@ corrct.operators module
    :undoc-members:
    :show-inheritance:
 
+corrct.param\_tuning module
+---------------------------
+
+.. automodule:: corrct.param_tuning
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.physics module
 ---------------------
 
@@ -96,14 +104,6 @@ corrct.testing module
 ---------------------
 
 .. automodule:: corrct.testing
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-corrct.utils\_reg module
-------------------------
-
-.. automodule:: corrct.utils_reg
    :members:
    :undoc-members:
    :show-inheritance:

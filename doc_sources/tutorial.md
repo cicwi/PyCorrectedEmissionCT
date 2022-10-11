@@ -78,8 +78,8 @@ Here, we will only see the included solvers, which are:
 
 #### FBP
 
-The FBP is the only analytical (non iterative) algorithm in the group, and it
-exposes one parameter that is not available for the others: `fbp_filter`.
+The FBP is the only analytical (non iterative) algorithm in the group. It
+exposes one parameter that is not available for the other methods: `fbp_filter`.
 This parameter can either be:
 
 * a filter name, as available from `scikit-image`.
@@ -107,9 +107,37 @@ filter can be selected, by passing the `fbp_filter` parameter at initialization:
 solver_fbp = cct.solvers.FBP(fbp_filter="shepp-logan")
 ```
 
-#### SIRT
+#### SIRT and PDHG
 
-The SIRT algorithm.
+The SIRT and PDHG algorithms, are algebraic (iterative) methods. They both
+support regularization, and box constraints on the solution. The PDHG also
+supports various data fidelity terms.
+
+The interface of the iterative methods is the same as for the FBP, with the only
+difference of requiring an iterations count:
+```python
+import numpy as np
+import corrct as cct
+
+vol_shape_xy = [10, 10]
+angles_rad = np.deg2rad(np.linspace(0, 180, 16, endpoint=False))
+
+solver_sirt = cct.solvers.SIRT()
+
+with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:
+    vol, _ = solver_sirt(p, sino, iterations=100)
+```
+
+It is possible to specify an intial solution or box limits on the solutions like
+the following:
+```python
+x0 = np.ones(vol_shape_xy)  # Initial solution
+lower_limit = 0.0  # Constraint
+
+with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:
+    vol, _ = solver_sirt(p, sino, iterations=100, x0=x0, lower_limit=lower_limit)
+```
+The same goes for the parameter `upper_limit`.
 
 ## Attenuation correction
 
@@ -117,7 +145,23 @@ Here, we describe how to do attenuation correction.
 
 ## Data terms and regularization
 
-Here, we describe how to use data fidelity terms, and regularizers.
+Iterative methods support regularizers, and data fidelity terms. The former can
+be used to impose prior knowledge on the reconstructed solution, while the
+latter impose prior knowledge on the weight given to the data points.
+
+### Regularizers
+
+Famous regularizers are the TV-min and wavelet l1-min. They can be found in the
+`regularizers` module.
+
+### Data fidelity terms
+
+The PDHG algorithm supports various data fidelity terms. They can be found in
+the `data_terms` module, and they include:
+* l2 norm - least squares reconstruction - default: `DataFidelity_l2`
+* weighted l2 norm - when the variance of the sinogram points is known: `DataFidelity_wl2`
+* l1 norm - when the sinogram noise is mostly sparse: `DataFidelity_l1`
+* Kullback-Leibler - when dealing with Poisson noise: `DataFidelity_KL`
 
 ## Guided regularization parameter selection
 
@@ -126,6 +170,6 @@ cross-validation, or the elbow method.
 
 ## References
 
-[1]: Pelt, D. M., & Batenburg, K. J. (2014). Improving filtered backprojection
+[1] Pelt, D. M., & Batenburg, K. J. (2014). Improving filtered backprojection
 reconstruction by data-dependent filtering. Image Processing, IEEE
 Transactions on, 23(11), 4750-4762.
