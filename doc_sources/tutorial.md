@@ -141,7 +141,7 @@ The same goes for the parameter `upper_limit`.
 
 ## Attenuation correction
 
-Here, we describe how to do attenuation correction.
+We implement the attenuation correction method described in [2].
 
 ## Data terms and regularization
 
@@ -172,4 +172,7 @@ cross-validation, or the elbow method.
 
 [1] Pelt, D. M., & Batenburg, K. J. (2014). Improving filtered backprojection
 reconstruction by data-dependent filtering. Image Processing, IEEE
-Transactions on, 23(11), 4750-4762.
+Transactions on, 23(11), 4750-4762.  
+[2] N. Viganò and V. A. Solé, "Physically corrected forward operators for
+induced emission tomography: a simulation study," Meas. Sci. Technol., no.
+Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.  
