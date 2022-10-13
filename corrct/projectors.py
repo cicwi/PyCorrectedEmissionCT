@@ -191,7 +191,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         else:
             self.projector_backend = backend
 
-        if prj_geom is not None and not isinstance(backend, prj_backends.ProjectorBackendASTRA):
+        if not (prj_geom is None or isinstance(self.projector_backend, prj_backends.ProjectorBackendASTRA)):
             raise ValueError("Using class `ProjectionGeometry` requires using astra-toolbox.")
 
         self.projector_backend.initialize_geometry(
