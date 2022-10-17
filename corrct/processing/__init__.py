@@ -11,18 +11,20 @@ from . import misc  # noqa: F401, F402
 
 import numpy as np
 
-from typing import Sequence, Optional
+from typing import Sequence, Optional, Union
 from numpy.typing import DTypeLike, NDArray
 
 
 eps = np.finfo(np.float32).eps
 
+NDArrayInt = NDArray[np.signedinteger]
+
 
 def circular_mask(
-    vol_shape: Sequence[int],
+    vol_shape_zxy: Union[Sequence[int], NDArrayInt],
     radius_offset: float = 0,
-    coords_ball: Optional[NDArray[np.signedinteger]] = None,
-    vol_origin: Optional[Sequence[float]] = None,
+    coords_ball: Union[Sequence[int], NDArrayInt, None] = None,
+    vol_origin_zxy: Optional[Sequence[float]] = None,
     mask_drop_off: str = "const",
     super_sampling: int = 1,
     dtype: DTypeLike = np.float32,
@@ -32,13 +34,13 @@ def circular_mask(
 
     Parameters
     ----------
-    vol_shape : Sequence[int]
+    vol_shape_zxy : Sequence[int] | NDArrayInt
         The size of the volume.
     radius_offset : float, optional
         The offset with respect to the volume edge. The default is 0.
-    coords_ball : Optional[Sequence[int]], optional
+    coords_ball : Sequence[int] | NDArrayInt | None, optional
         The coordinates to consider for the non-masked region. The default is None.
-    vol_origin : Optional[Sequence[float]], optional
+    vol_origin_zxy : Optional[Sequence[float]], optional
         The origin of the coordinates in voxels. The default is None.
     mask_drop_off : str, optional
         The mask data type. Allowed types: "const" | "sinc". The default is "const".
@@ -57,23 +59,23 @@ def circular_mask(
     NDArray
         The circular mask.
     """
-    vol_shape_s = np.array(vol_shape, dtype=int) * super_sampling
+    vol_shape_zxy_s = np.array(vol_shape_zxy, dtype=int) * super_sampling
 
     coords = [
-        np.linspace(-(s - 1) / (2 * super_sampling), (s - 1) / (2 * super_sampling), s, dtype=dtype) for s in vol_shape_s
+        np.linspace(-(s - 1) / (2 * super_sampling), (s - 1) / (2 * super_sampling), s, dtype=dtype) for s in vol_shape_zxy_s
     ]
-    if vol_origin:
-        if len(coords) != len(vol_origin):
-            raise ValueError(f"The volume shape ({len(coords)}), and the origin shape ({len(vol_origin)}) should match")
-        coords = [c + vol_origin[ii] for ii, c in enumerate(coords)]
+    if vol_origin_zxy:
+        if len(coords) != len(vol_origin_zxy):
+            raise ValueError(f"The volume shape ({len(coords)}), and the origin shape ({len(vol_origin_zxy)}) should match")
+        coords = [c + vol_origin_zxy[ii] for ii, c in enumerate(coords)]
     coords = np.meshgrid(*coords, indexing="ij")
 
     if coords_ball is None:
-        coords_ball = np.arange(-np.fmin(2, len(vol_shape_s)), 0, dtype=int)
+        coords_ball = np.arange(-np.fmin(2, len(vol_shape_zxy_s)), 0, dtype=int)
     else:
         coords_ball = np.array(coords_ball, dtype=int)
 
-    radius = np.min(vol_shape_s[coords_ball]) / (2 * super_sampling) + radius_offset
+    radius = np.min(vol_shape_zxy_s[coords_ball]) / (2 * super_sampling) + radius_offset
 
     coords = np.stack(coords, axis=0)
     if coords_ball.size == 1:
@@ -84,7 +86,7 @@ def circular_mask(
     if mask_drop_off.lower() == "const":
         mask = (dists <= radius).astype(dtype)
     elif mask_drop_off.lower() == "sinc":
-        cut_off = np.min(vol_shape_s[coords_ball]) / np.sqrt(2) - radius
+        cut_off = np.min(vol_shape_zxy_s[coords_ball]) / np.sqrt(2) - radius
         outter_region = 1.0 - (dists <= radius)
         outter_vals = 1.0 - np.sinc((dists - radius) / cut_off)
         mask = np.fmax(1 - outter_region * outter_vals, 0.0).astype(dtype)
@@ -92,9 +94,9 @@ def circular_mask(
         raise ValueError("Unknown drop-off function: %s" % mask_drop_off)
 
     if super_sampling > 1:
-        new_shape = np.stack([np.array(vol_shape), np.ones_like(vol_shape) * super_sampling], axis=1).flatten()
+        new_shape = np.stack([np.array(vol_shape_zxy), np.ones_like(vol_shape_zxy) * super_sampling], axis=1).flatten()
         mask = mask.reshape(new_shape)
-        mask = np.mean(mask, axis=tuple(np.arange(1, len(vol_shape) * 2, 2, dtype=int)))
+        mask = np.mean(mask, axis=tuple(np.arange(1, len(vol_shape_zxy) * 2, 2, dtype=int)))
 
     return mask
 
