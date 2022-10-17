@@ -231,25 +231,50 @@ class ProjectionGeometry(Geometry):
 class VolumeGeometry(Geometry):
     """Store the volume geometry."""
 
-    vol_shape_xyz: NDArray
+    _vol_shape_xyz: NDArray
     vox_size: float
 
     def __init__(self, vol_shape_xyz: ArrayLike, vox_size: float = 1.0):
         """Initialize the input parameters."""
-        self.vol_shape_xyz = np.array(vol_shape_xyz, ndmin=1)
+        self._vol_shape_xyz = np.array(vol_shape_xyz, ndmin=1)
         self.vox_size = vox_size
 
-    @property
-    def shape(self) -> NDArray:
+    def is_square(self) -> bool:
+        """Compute whether the volume is square in XY.
+
+        Returns
+        -------
+        bool
+            True is the volume is square in XY.
         """
-        Return the volume shape.
+        return self._vol_shape_xyz[0] == self._vol_shape_xyz[1]
+
+    @property
+    def shape_xyz(self) -> NDArray:
+        """
+        Return the volume shape (XYZ).
 
         Returns
         -------
         NDArray
-            Shape of the volume.
+            Shape of the volume (XYZ).
         """
-        return self.vol_shape_xyz
+        return self._vol_shape_xyz
+
+    @property
+    def shape_zxy(self) -> NDArray:
+        """
+        Return the volume shape (ZXY).
+
+        The swap between X and Y is imposed by the astra-toolbox.
+
+        Returns
+        -------
+        NDArray
+            Shape of the volume (ZXY).
+        """
+        vol_shape_zyx = np.flip(self._vol_shape_xyz)
+        return np.array([*vol_shape_zyx[:-2], vol_shape_zyx[-1], vol_shape_zyx[-2]], dtype=int)
 
     @property
     def extent(self) -> Sequence[float]:
@@ -261,7 +286,7 @@ class VolumeGeometry(Geometry):
         Sequence[float]
             The extent of the volume [-x, +x, -y, +y, [-z, +z]].
         """
-        half_size_xyz = self.vol_shape_xyz * self.vox_size / 2
+        half_size_xyz = self._vol_shape_xyz * self.vox_size / 2
         return [hs * sign for hs in half_size_xyz for sign in [-1, +1]]
 
     def is_3D(self) -> bool:
@@ -273,7 +298,7 @@ class VolumeGeometry(Geometry):
         bool
             Whether this is a 3D geometry or not.
         """
-        return len(self.vol_shape_xyz) == 3 and self.vol_shape_xyz[-1] > 1
+        return len(self._vol_shape_xyz) == 3 and self._vol_shape_xyz[-1] > 1
 
     @staticmethod
     def get_default_from_data(data: NDArray, data_format: str = "dvwu") -> "VolumeGeometry":

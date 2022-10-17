@@ -137,12 +137,12 @@ class ProjectorBackend(ABC):
         """
         self.vol_geom = vol_geom
 
-        self.vol_shape_zxy = np.array([*self.vol_geom.shape[2:], self.vol_geom.shape[0], self.vol_geom.shape[1]], dtype=int)
+        self.vol_shape_zxy = self.vol_geom.shape_zxy
         self.angles_w_rad = np.array(angles_rot_rad, ndmin=1, dtype=np.floating)
 
         # Basic sizes, unless overridden
-        self.prj_shape_vwu = np.array([*self.vol_geom.shape[2:], len(self.angles_w_rad), self.vol_geom.shape[1]], dtype=int)
-        self.prj_shape_vu = np.array([*self.vol_geom.shape[2:], 1, self.vol_geom.shape[1]], dtype=int)
+        self.prj_shape_vwu = np.array([*self.vol_shape_zxy[:-2], len(self.angles_w_rad), self.vol_shape_zxy[-1]], dtype=int)
+        self.prj_shape_vu = np.array([*self.vol_shape_zxy[:-2], 1, self.vol_shape_zxy[-1]], dtype=int)
 
         self.has_individual_projs = create_single_projs
 
@@ -456,12 +456,12 @@ class ProjectorBackendASTRA(ProjectorBackend):
         num_angles = self.angles_w_rad.size
 
         if self.vol_geom.is_3D():
-            self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape[list([1, 0, 2])], *self.vol_geom.extent)
+            self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape_xyz[list([1, 0, 2])], *self.vol_geom.extent)
             if prj_geom is None:
                 prj_geom = ProjectionGeometry.get_default_parallel(geom_type="3d", rot_axis_shift_pix=rot_axis_shift_pix)
 
             if prj_geom.det_shape_vu is None:
-                prj_geom.det_shape_vu = np.array(self.vol_geom.shape[list([2, 1])], dtype=int)
+                prj_geom.det_shape_vu = np.array(self.vol_geom.shape_xyz[list([2, 0])], dtype=int)
             else:
                 self.prj_shape_vwu = np.array([prj_geom.det_shape_vu[0], num_angles, prj_geom.det_shape_vu[1]])
                 self.prj_shape_vu = np.array([prj_geom.det_shape_vu[0], 1, prj_geom.det_shape_vu[1]])
@@ -480,12 +480,12 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
             geom_type_str = prj_geom.geom_type
         else:
-            self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape[list([1, 0])], *self.vol_geom.extent)
+            self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape_xyz[list([1, 0])], *self.vol_geom.extent)
             if prj_geom is None:
                 prj_geom = ProjectionGeometry.get_default_parallel(geom_type="2d", rot_axis_shift_pix=rot_axis_shift_pix)
 
             if prj_geom.det_shape_vu is None:
-                prj_geom.det_shape_vu = np.array(self.vol_geom.shape[list([1])], dtype=int)
+                prj_geom.det_shape_vu = np.array(self.vol_geom.shape_xyz[list([0])], dtype=int)
 
             rot_geom = prj_geom.rotate(self.angles_w_rad, patch_astra_2d=True)
 
