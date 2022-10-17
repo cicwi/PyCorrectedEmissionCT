@@ -233,10 +233,10 @@ class ProjectorUncorrected(operators.ProjectorOperator):
     def _set_psf(self, psf: Optional[ArrayLike], is_conv_symm: bool = False) -> None:
         if psf is not None:
             psf = np.squeeze(np.array(psf))
-            if len(psf.shape) >= len(self.vol_geom.shape):
+            if len(psf.shape) >= len(self.vol_geom.shape_xyz):
                 raise ValueError(
                     "PSF should either be 1D (for 2D and 3D reconstructions) or 2D (for 3D reconstructions)."
-                    + f" Passed PSF has shape: {psf.shape}, and the reconstruction is {len(self.vol_geom.shape)}D."
+                    + f" Passed PSF has shape: {psf.shape}, and the reconstruction is {len(self.vol_geom.shape_xyz)}D."
                 )
             # This redundancy is required, due to the different results between the single-angle and multi-angle projections
             prj_shape_vu = [*self.projector_backend.prj_shape_vu[:-2], self.projector_backend.prj_shape_vu[-1]]
