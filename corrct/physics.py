@@ -19,6 +19,8 @@ except ImportError:
 
 import numpy as np
 
+import scipy.constants as spc
+
 from dataclasses import dataclass
 
 from typing import Union, Sequence, Optional, Tuple, Dict
@@ -27,6 +29,14 @@ from numpy.typing import NDArray, DTypeLike
 import copy as cp
 
 import matplotlib.pyplot as plt
+
+
+def convert_keV_to_m(energy_keV: Union[float, NDArray]) -> Union[float, NDArray]:
+    return 1e-3 / (spc.physical_constants["electron volt-inverse meter relationship"][0] * energy_keV)
+
+
+def convert_m_to_keV(energy_m: Union[float, NDArray]) -> Union[float, NDArray]:
+    return 1e-3 / (spc.physical_constants["electron volt-inverse meter relationship"][0] * energy_m)
 
 
 def pencil_beam_profile(
