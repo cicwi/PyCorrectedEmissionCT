@@ -160,7 +160,7 @@ class Solver(ABC):
         relaxation: float = 1.0,
         tolerance: Optional[float] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
-        data_term_test: Optional[DataFidelityBase] = None,
+        data_term_test: Union[str, DataFidelityBase, None] = None,
     ):
         self.verbose = verbose
         self.relaxation = relaxation
@@ -169,7 +169,9 @@ class Solver(ABC):
         self.data_term = self._initialize_data_fidelity_function(data_term)
         if data_term_test is None:
             data_term_test = self.data_term
-        self.data_term_test = cp.deepcopy(self.data_term)
+        else:
+            data_term_test = self._initialize_data_fidelity_function(data_term_test)
+        self.data_term_test = cp.deepcopy(data_term_test)
 
     def info(self) -> str:
         """
@@ -581,7 +583,7 @@ class SIRT(Solver):
         tolerance: Optional[float] = None,
         regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
-        data_term_test: Optional[DataFidelityBase] = None,
+        data_term_test: Union[str, DataFidelityBase, None] = None,
     ):
         super().__init__(
             verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
@@ -756,7 +758,7 @@ class PDHG(Solver):
         relaxation: float = 0.95,
         regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
-        data_term_test: Optional[DataFidelityBase] = None,
+        data_term_test: Union[str, DataFidelityBase, None] = None,
     ):
         super().__init__(
             verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
