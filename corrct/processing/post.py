@@ -14,7 +14,7 @@ import scipy as sp
 from typing import List, Sequence, Optional, Tuple
 from numpy.typing import ArrayLike, NDArray
 
-from .misc import azimuthal_integration, lines_intersection
+from .misc import azimuthal_integration, lines_intersection, circular_mask
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -65,6 +65,7 @@ def frc(
     snrt: float = 0.2071,
     axes: Optional[Sequence[int]] = None,
     smooth: Optional[int] = 5,
+    taper_ratio: Optional[float] = 0.05,
     supersampling: int = 1,
 ) -> Tuple[NDArray, NDArray]:
     """
@@ -90,6 +91,10 @@ def frc(
         If None, all axes will be used The default is None.
     smooth : Optional[int], optional
         Size of the Hann smoothing window. The default is 5.
+    taper_ratio : Optional[float], optional
+        Ratio of the edge pixels to be tapered off. This is necessary when working
+        with truncated volumes / local tomography, to avoid truncation artifacts.
+        The default is 0.05.
     supersampling : int, optional
         Supersampling factor of the images.
         Larger values increase the high-frequency range of the FRC/FSC function.
@@ -141,6 +146,12 @@ def frc(
     axes_shape = img1_shape[list(axes)]
     cut_off = np.min(axes_shape) // 2
 
+    if taper_ratio is not None:
+        taper_size = float(taper_ratio * np.mean(axes_shape))
+        vol_mask = circular_mask(img1_shape, coords_ball=axes, radius_offset=-taper_size, taper_func="cos")
+        img1 = img1 * vol_mask
+        img2 = img2 * vol_mask
+
     img1_f = np.fft.fftn(img1, axes=axes)
     img2_f = np.fft.fftn(img2, axes=axes)
 
@@ -156,7 +167,9 @@ def frc(
 
     f1s_f2s = f1_int * f2_int
     f1s_f2s = f1s_f2s + (f1s_f2s == 0)
-    frc = fc_int / np.sqrt(f1s_f2s)
+    f1s_f2s = np.sqrt(f1s_f2s)
+
+    frc = fc_int / f1s_f2s
 
     rings_size = azimuthal_integration(np.ones_like(img1), axes=axes, domain="fourier")
     # Alternatively:
