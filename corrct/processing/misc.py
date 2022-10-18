@@ -17,6 +17,102 @@ import matplotlib.pyplot as plt
 
 eps = np.finfo(np.float32).eps
 
+NDArrayInt = NDArray[np.signedinteger]
+
+
+def circular_mask(
+    vol_shape_zxy: Union[Sequence[int], NDArrayInt],
+    radius_offset: float = 0,
+    coords_ball: Union[Sequence[int], NDArrayInt, None] = None,
+    vol_origin_zxy: Optional[Sequence[float]] = None,
+    taper_func: Optional[str] = None,
+    taper_target: str = "edge",
+    super_sampling: int = 1,
+    dtype: DTypeLike = np.float32,
+) -> NDArray:
+    """
+    Compute a circular mask for the reconstruction volume.
+
+    Parameters
+    ----------
+    vol_shape_zxy : Sequence[int] | NDArrayInt
+        The size of the volume.
+    radius_offset : float, optional
+        The offset with respect to the volume edge. The default is 0.
+    coords_ball : Sequence[int] | NDArrayInt | None, optional
+        The coordinates to consider for the non-masked region. The default is None.
+    vol_origin_zxy : Optional[Sequence[float]], optional
+        The origin of the coordinates in voxels. The default is None.
+    taper_func : str, optional
+        The mask data type. Allowed types: "const" | "cos". The default is "const".
+    super_sampling : int, optional
+        The pixel super sampling to be used for the mask. The default is 1.
+    dtype : DTypeLike, optional
+        The type of mask. The default is np.float32.
+
+    Raises
+    ------
+    ValueError
+        In case of unknown taper_func value, or mismatching volume origin and shape.
+
+    Returns
+    -------
+    NDArray
+        The circular mask.
+    """
+    vol_shape_zxy_s = np.array(vol_shape_zxy, dtype=int) * super_sampling
+
+    coords = [
+        np.linspace(-(s - 1) / (2 * super_sampling), (s - 1) / (2 * super_sampling), s, dtype=dtype) for s in vol_shape_zxy_s
+    ]
+    if vol_origin_zxy:
+        if len(coords) != len(vol_origin_zxy):
+            raise ValueError(f"The volume shape ({len(coords)}), and the origin shape ({len(vol_origin_zxy)}) should match")
+        coords = [c + vol_origin_zxy[ii] for ii, c in enumerate(coords)]
+    coords = np.meshgrid(*coords, indexing="ij")
+
+    if coords_ball is None:
+        coords_ball = np.arange(-np.fmin(2, len(vol_shape_zxy_s)), 0, dtype=int)
+    else:
+        coords_ball = np.array(coords_ball, dtype=int)
+
+    max_radius = np.min(vol_shape_zxy_s[coords_ball]) / (2 * super_sampling) + radius_offset
+
+    coords = np.stack(coords, axis=0)
+    if coords_ball.size == 1:
+        dists = np.abs(coords[coords_ball, ...])
+    else:
+        dists = np.sqrt(np.sum(coords[coords_ball, ...] ** 2, axis=0))
+
+    if taper_func is None:
+        mask = (dists <= max_radius).astype(dtype)
+    elif isinstance(taper_func, str):
+        if taper_target.lower() == "edge":
+            cut_off_denom = 2
+        elif taper_target.lower() == "diagonal":
+            cut_off_denom = np.sqrt(2)
+        else:
+            raise ValueError(
+                f"Parameter `taper_target` should be one of: 'edge' or 'diagonal', but {taper_target} passed instead."
+            )
+
+        if taper_func.lower() == "cos":
+            cut_off_radius = np.min(vol_shape_zxy_s[coords_ball]) / (cut_off_denom * super_sampling)
+            cut_off_size = cut_off_radius - max_radius
+            outter_vals = np.cos(np.fmax(dists - max_radius, 0) / cut_off_size * np.pi) / 2 + 0.5
+            mask = (outter_vals * (dists < cut_off_radius)).astype(dtype)
+        else:
+            raise ValueError(f"Unknown taper function: {taper_func}")
+    else:
+        raise ValueError(f"Parameter `taper_func` should either be a string or None.")
+
+    if super_sampling > 1:
+        new_shape = np.stack([np.array(vol_shape_zxy), np.ones_like(vol_shape_zxy) * super_sampling], axis=1).flatten()
+        mask = mask.reshape(new_shape)
+        mask = np.mean(mask, axis=tuple(np.arange(1, len(vol_shape_zxy) * 2, 2, dtype=int)))
+
+    return mask
+
 
 def ball(
     data_shape_vu: ArrayLike,
