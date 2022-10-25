@@ -313,11 +313,11 @@ class FBP(Solver):
             Solver info string.
         """
         if isinstance(self.fbp_filter, str):
-            return super().info() + "-" + self.fbp_filter.upper()
+            return super().info() + "(F:" + self.fbp_filter.upper() + ")"
         elif isinstance(self.fbp_filter, np.ndarray):
-            return super().info() + "-" + filters.FilterCustom.__name__.upper()
+            return super().info() + "(F:" + filters.FilterCustom.__name__.upper() + ")"
         else:
-            return super().info() + "-" + type(self.fbp_filter).__name__.upper()
+            return super().info() + "(F:" + type(self.fbp_filter).__name__.upper() + ")"
 
     def __call__(  # noqa: C901
         self,
