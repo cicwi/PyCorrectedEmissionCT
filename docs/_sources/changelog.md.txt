@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.7.0...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.7.1...develop
+
+## 0.7.1 - 2022-10-31
+### Added
+- More documentation / tutorial content.
+- Energy conversion functions (keV to m, and viceversa).
+- Tapering for truncated volumes in FSC computation.
+### Fixed
+- Typo that preventing using `ProjectionGeometry` from `models`.
+- Shape dimensions (XYZ vs ZXY) interpretation in `VolumeGeometry` and other functions.
+- Cross-validation data term initialization in solvers.
+- Tapering to circular masks.
 
 ## 0.7.0 - 2022-10-11
 ### Added
