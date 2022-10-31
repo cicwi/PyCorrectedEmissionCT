@@ -421,6 +421,7 @@ def norm_cross_corr(
 
         if plot:
             p_xy = lines_intersection(cc_l, 0.5, position="first")
+
             f, ax = plt.subplots()
             ax.plot(cc_l, label="Cross-correlation")
             ax.plot(np.ones_like(cc_l) * 0.5, label="Half-maximum")
@@ -431,6 +432,7 @@ def norm_cross_corr(
             ax.legend()
             ax.set_title("Cross-correlation")
             f.tight_layout()
+            plt.show(block=False)
 
         return cc_n, cc_l
     else:

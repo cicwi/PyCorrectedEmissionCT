@@ -148,7 +148,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             Projection scaling factor, by default None.
         psf : ArrayLike | NDArray | None, optional
             The "point spread function" of the detector, by default None.
-        prj_backend : bool, optional
+        backend : bool, optional
             Whether to use ASTRA or fall back to scikit-image.
             The default is True if CUDA and ASTRA are available, otherwise False.
         create_single_projs : bool, optional
