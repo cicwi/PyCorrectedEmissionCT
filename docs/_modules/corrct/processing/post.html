@@ -57,7 +57,6 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-          <li><a href="../processing.html">corrct.processing</a> &raquo;</li>
       <li>corrct.processing.post</li>
       <li class="wy-breadcrumbs-aside">
       </li>
@@ -84,7 +83,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
 
-<span class="kn">from</span> <span class="nn">.misc</span> <span class="kn">import</span> <span class="n">azimuthal_integration</span><span class="p">,</span> <span class="n">lines_intersection</span>
+<span class="kn">from</span> <span class="nn">.misc</span> <span class="kn">import</span> <span class="n">azimuthal_integration</span><span class="p">,</span> <span class="n">lines_intersection</span><span class="p">,</span> <span class="n">circular_mask</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
@@ -135,6 +134,7 @@
     <span class="n">snrt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2071</span><span class="p">,</span>
     <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">smooth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">taper_ratio</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
     <span class="n">supersampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -160,6 +160,10 @@
 <span class="sd">        If None, all axes will be used The default is None.</span>
 <span class="sd">    smooth : Optional[int], optional</span>
 <span class="sd">        Size of the Hann smoothing window. The default is 5.</span>
+<span class="sd">    taper_ratio : Optional[float], optional</span>
+<span class="sd">        Ratio of the edge pixels to be tapered off. This is necessary when working</span>
+<span class="sd">        with truncated volumes / local tomography, to avoid truncation artifacts.</span>
+<span class="sd">        The default is 0.05.</span>
 <span class="sd">    supersampling : int, optional</span>
 <span class="sd">        Supersampling factor of the images.</span>
 <span class="sd">        Larger values increase the high-frequency range of the FRC/FSC function.</span>
@@ -211,6 +215,12 @@
     <span class="n">axes_shape</span> <span class="o">=</span> <span class="n">img1_shape</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]</span>
     <span class="n">cut_off</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axes_shape</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
 
+    <span class="k">if</span> <span class="n">taper_ratio</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">taper_size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">taper_ratio</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axes_shape</span><span class="p">))</span>
+        <span class="n">vol_mask</span> <span class="o">=</span> <span class="n">circular_mask</span><span class="p">(</span><span class="n">img1_shape</span><span class="p">,</span> <span class="n">coords_ball</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">radius_offset</span><span class="o">=-</span><span class="n">taper_size</span><span class="p">,</span> <span class="n">taper_func</span><span class="o">=</span><span class="s2">&quot;cos&quot;</span><span class="p">)</span>
+        <span class="n">img1</span> <span class="o">=</span> <span class="n">img1</span> <span class="o">*</span> <span class="n">vol_mask</span>
+        <span class="n">img2</span> <span class="o">=</span> <span class="n">img2</span> <span class="o">*</span> <span class="n">vol_mask</span>
+
     <span class="n">img1_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
     <span class="n">img2_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">img2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
 
@@ -226,7 +236,9 @@
 
     <span class="n">f1s_f2s</span> <span class="o">=</span> <span class="n">f1_int</span> <span class="o">*</span> <span class="n">f2_int</span>
     <span class="n">f1s_f2s</span> <span class="o">=</span> <span class="n">f1s_f2s</span> <span class="o">+</span> <span class="p">(</span><span class="n">f1s_f2s</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">frc</span> <span class="o">=</span> <span class="n">fc_int</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f1s_f2s</span><span class="p">)</span>
+    <span class="n">f1s_f2s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f1s_f2s</span><span class="p">)</span>
+
+    <span class="n">frc</span> <span class="o">=</span> <span class="n">fc_int</span> <span class="o">/</span> <span class="n">f1s_f2s</span>
 
     <span class="n">rings_size</span> <span class="o">=</span> <span class="n">azimuthal_integration</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">img1</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;fourier&quot;</span><span class="p">)</span>
     <span class="c1"># Alternatively:</span>

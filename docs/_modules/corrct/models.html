@@ -300,25 +300,50 @@
 <div class="viewcode-block" id="VolumeGeometry"><a class="viewcode-back" href="../../corrct.html#corrct.models.VolumeGeometry">[docs]</a><span class="k">class</span> <span class="nc">VolumeGeometry</span><span class="p">(</span><span class="n">Geometry</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Store the volume geometry.&quot;&quot;&quot;</span>
 
-    <span class="n">vol_shape_xyz</span><span class="p">:</span> <span class="n">NDArray</span>
+    <span class="n">_vol_shape_xyz</span><span class="p">:</span> <span class="n">NDArray</span>
     <span class="n">vox_size</span><span class="p">:</span> <span class="nb">float</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol_shape_xyz</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">vox_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize the input parameters.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_shape_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_shape_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vox_size</span> <span class="o">=</span> <span class="n">vox_size</span>
 
+<div class="viewcode-block" id="VolumeGeometry.is_square"><a class="viewcode-back" href="../../corrct.html#corrct.models.VolumeGeometry.is_square">[docs]</a>    <span class="k">def</span> <span class="nf">is_square</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute whether the volume is square in XY.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True is the volume is square in XY.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">shape_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the volume shape.</span>
+<span class="sd">        Return the volume shape (XYZ).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        NDArray</span>
-<span class="sd">            Shape of the volume.</span>
+<span class="sd">            Shape of the volume (XYZ).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_xyz</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape_zxy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the volume shape (ZXY).</span>
+
+<span class="sd">        The swap between X and Y is imposed by the astra-toolbox.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NDArray</span>
+<span class="sd">            Shape of the volume (ZXY).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vol_shape_zyx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">vol_shape_zyx</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">vol_shape_zyx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">vol_shape_zyx</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">extent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
@@ -330,7 +355,7 @@
 <span class="sd">        Sequence[float]</span>
 <span class="sd">            The extent of the volume [-x, +x, -y, +y, [-z, +z]].</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">half_size_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_xyz</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vox_size</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">half_size_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vox_size</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">hs</span> <span class="o">*</span> <span class="n">sign</span> <span class="k">for</span> <span class="n">hs</span> <span class="ow">in</span> <span class="n">half_size_xyz</span> <span class="k">for</span> <span class="n">sign</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
 
 <div class="viewcode-block" id="VolumeGeometry.is_3D"><a class="viewcode-back" href="../../corrct.html#corrct.models.VolumeGeometry.is_3D">[docs]</a>    <span class="k">def</span> <span class="nf">is_3D</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -342,7 +367,7 @@
 <span class="sd">        bool</span>
 <span class="sd">            Whether this is a 3D geometry or not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_xyz</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_xyz</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span></div>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="VolumeGeometry.get_default_from_data"><a class="viewcode-back" href="../../corrct.html#corrct.models.VolumeGeometry.get_default_from_data">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_default_from_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VolumeGeometry&quot;</span><span class="p">:</span>

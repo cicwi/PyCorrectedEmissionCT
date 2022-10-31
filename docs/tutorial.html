@@ -124,13 +124,18 @@ detector shifts with respect to the origin.</p>
 </div>
 <div class="section" id="the-projectors">
 <h3>The projectors<a class="headerlink" href="#the-projectors" title="Permalink to this heading"></a></h3>
-<p>The projection geometry is specified through the creation of <em>projectors</em>.
-The simplest projector is the one in <code class="docutils literal notranslate"><span class="pre">corrct.projectors.ProjectorUncorrected</span></code>.
-The projector <code class="docutils literal notranslate"><span class="pre">corrct.projectors.ProjectorAttenuationXRF</span></code> derives from the
-simpler projector, and it implements the XRF specific bits, with respect to
-multi-detector / multi-element handling and attenuation correction.
-Projectors are usually used through the <code class="docutils literal notranslate"><span class="pre">with</span></code> statement, because it takes care
-of initializing their underlying resources.</p>
+<p>The projection geometry is specified through the creation of <em>projectors</em> from
+the <a class="reference external" href="corrct.html#module-corrct.projectors"><code class="docutils literal notranslate"><span class="pre">projectors</span></code></a> module.
+The simplest projector is called
+<a class="reference external" href="corrct.html#corrct.projectors.ProjectorUncorrected"><code class="docutils literal notranslate"><span class="pre">ProjectorUncorrected</span></code></a>,
+and it serves as basis for more complex projectors. The projector
+<a class="reference external" href="corrct.html#corrct.projectors.ProjectorAttenuationXRF"><code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code></a>
+derives from the
+<a class="reference external" href="corrct.html#corrct.projectors.ProjectorUncorrected"><code class="docutils literal notranslate"><span class="pre">ProjectorUncorrected</span></code></a>,
+and it implements the XRF specific bits, with respect to multi-detector /
+multi-element handling and attenuation correction.</p>
+<p>Projectors are usually used through the <code class="docutils literal notranslate"><span class="pre">with</span></code> statement. This takes care of
+initializing and de-initializing their underlying resources (e.g. GPU usage).</p>
 <p>To create a simple projector for a <code class="docutils literal notranslate"><span class="pre">10</span> <span class="pre">x</span> <span class="pre">10</span></code> volume and <code class="docutils literal notranslate"><span class="pre">16</span> <span class="pre">x</span> <span class="pre">10</span></code> sinogram (16
 angles), we will do:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -151,22 +156,30 @@ of a volume of all ones.</p>
 </pre></div>
 </div>
 <p>Creating attenuation correction projectors is a bit more involved, and we will
-see it later.</p>
+see it later in the <a class="reference external" href="#attenuation-correction">attenuation correction</a> section.</p>
+<p>Projectors can use different backends, depending on the avilable packages,
+system resources, and user requests. The included projector backends are based
+on the <code class="docutils literal notranslate"><span class="pre">scikit-image</span></code> and <code class="docutils literal notranslate"><span class="pre">astra-toolbox</span></code> packages.
+They can be selected by passing the strings <code class="docutils literal notranslate"><span class="pre">&quot;astra&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;skimage&quot;</span></code> to the
+parameter <code class="docutils literal notranslate"><span class="pre">backend</span></code>.
+Advanced users can create custom backends, by deriving the base class
+<code class="docutils literal notranslate"><span class="pre">ProjectorBackend</span></code> from the module <code class="docutils literal notranslate"><span class="pre">_projector_backends</span></code>.</p>
 </div>
 <div class="section" id="the-solvers">
 <h3>The solvers<a class="headerlink" href="#the-solvers" title="Permalink to this heading"></a></h3>
-<p>Tomographic reconstructions can be achieved using either the included solvers,
-or with <code class="docutils literal notranslate"><span class="pre">scipy</span></code>’s solvers.
-Here, we will only see the included solvers, which are:</p>
+<p>Tomographic reconstructions can be achieved using either the included solvers
+from <a class="reference external" href="corrct.html#module-corrct.solvers"><code class="docutils literal notranslate"><span class="pre">solvers</span></code></a> module, or with <code class="docutils literal notranslate"><span class="pre">scipy</span></code>’s
+solvers.
+The included solvers are:</p>
 <ul class="simple">
-<li><p>Filtered Back-Projection (<strong>FBP</strong>).</p></li>
-<li><p>Simultaneous Algebraic Reconstruction Technique (<strong>SART</strong>).</p></li>
-<li><p>Simultaneous Iterative Reconstruction Technique (<strong>SIRT</strong>).</p></li>
-<li><p>Primal-Dual Hybrid Gradient (<strong>PDHG</strong>), from Chambolle and Pock.</p></li>
+<li><p>Filtered Back-Projection: <a class="reference external" href="corrct.html#corrct.solvers.FBP"><strong>FBP</strong></a>.</p></li>
+<li><p>Simultaneous Algebraic Reconstruction Technique <a class="reference external" href="corrct.html#corrct.solvers.SART"><strong>SART</strong></a>.</p></li>
+<li><p>Simultaneous Iterative Reconstruction Technique <a class="reference external" href="corrct.html#corrct.solvers.SIRT"><strong>SIRT</strong></a>.</p></li>
+<li><p>Primal-Dual Hybrid Gradient <a class="reference external" href="corrct.html#corrct.solvers.PDHG"><strong>PDHG</strong></a>, from Chambolle and Pock.</p></li>
 </ul>
 <div class="section" id="fbp">
 <h4>FBP<a class="headerlink" href="#fbp" title="Permalink to this heading"></a></h4>
-<p>The FBP is the only analytical (non iterative) algorithm in the group. It
+<p>FBP is the only analytical (non iterative) algorithm in the group. It
 exposes one parameter that is not available for the other methods: <code class="docutils literal notranslate"><span class="pre">fbp_filter</span></code>.
 This parameter can either be:</p>
 <ul class="simple">
@@ -228,7 +241,31 @@ the following:</p>
 </div>
 <div class="section" id="attenuation-correction">
 <h2>Attenuation correction<a class="headerlink" href="#attenuation-correction" title="Permalink to this heading"></a></h2>
-<p>We implement the attenuation correction method described in [2].</p>
+<p>This package implements the attenuation correction method described in [2].
+The correction of the attenuation effects is subject to the knowledge of an
+attenuation map for the following experimental conditions:</p>
+<ul class="simple">
+<li><p>Acquisition geometry (i.e. sample rotation angles, beam size / resolution, detector position, etc)</p></li>
+<li><p>Excitation beam energy and emission photon energy</p></li>
+<li><p>Sample morphology and local average composition</p></li>
+</ul>
+<p>This is usually achieved in two ways. The simplest way is to provide the projector
+<a class="reference external" href="corrct.html#corrct.projectors.ProjectorAttenuationXRF"><code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code></a>
+with the corresponding attenuation maps for the excitation beam and emitte photons.
+The respective parameters are: <code class="docutils literal notranslate"><span class="pre">att_in</span></code> and <code class="docutils literal notranslate"><span class="pre">att_out</span></code>. This also requires to
+provide the angle(s) of the detector(s) with respect to the incoming beam
+direction, through the parameter <code class="docutils literal notranslate"><span class="pre">angles_detectors_rad</span></code>.
+The values in <code class="docutils literal notranslate"><span class="pre">att_in</span></code> and <code class="docutils literal notranslate"><span class="pre">att_out</span></code> should be in “linear attenuation” per pixel
+length. The values in <code class="docutils literal notranslate"><span class="pre">angles_detectors_rad</span></code> should be in radians, as suggested
+by the name of the parameter.<br />The drawback of the simple way is that the computed local attenuation per angle
+cannot be re-used with other projectors, and the computation / scaling of the
+maps is delegated entirely to the user.</p>
+<p>The user can also choose to use the class
+<a class="reference external" href="corrct.html#corrct.attenuation.AttenuationVolume"><code class="docutils literal notranslate"><span class="pre">AttenuationVolume</span></code></a> from the
+<a class="reference external" href="corrct.html#module-corrct.attenuation"><code class="docutils literal notranslate"><span class="pre">attenuation</span></code></a> module.
+This class is used internally in the projector
+<a class="reference external" href="corrct.html#corrct.projectors.ProjectorAttenuationXRF"><code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code></a>, and it can be used particularly in conjunction with the class
+<a class="reference external" href="corrct.html#corrct.physics.VolumeMaterial"><code class="docutils literal notranslate"><span class="pre">VolumeMaterial</span></code></a> from the <a class="reference external" href="corrct.html#module-corrct.physics"><code class="docutils literal notranslate"><span class="pre">physics</span></code></a> module.</p>
 </div>
 <div class="section" id="data-terms-and-regularization">
 <h2>Data terms and regularization<a class="headerlink" href="#data-terms-and-regularization" title="Permalink to this heading"></a></h2>
@@ -238,17 +275,21 @@ latter impose prior knowledge on the weight given to the data points.</p>
 <div class="section" id="regularizers">
 <h3>Regularizers<a class="headerlink" href="#regularizers" title="Permalink to this heading"></a></h3>
 <p>Famous regularizers are the TV-min and wavelet l1-min. They can be found in the
-<code class="docutils literal notranslate"><span class="pre">regularizers</span></code> module.</p>
+<a class="reference external" href="corrct.html#module-corrct.regularizers"><code class="docutils literal notranslate"><span class="pre">regularizers</span></code></a> module.</p>
 </div>
 <div class="section" id="data-fidelity-terms">
 <h3>Data fidelity terms<a class="headerlink" href="#data-fidelity-terms" title="Permalink to this heading"></a></h3>
 <p>The PDHG algorithm supports various data fidelity terms. They can be found in
-the <code class="docutils literal notranslate"><span class="pre">data_terms</span></code> module, and they include:</p>
+the <a class="reference external" href="corrct.html#module-corrct.data_terms"><code class="docutils literal notranslate"><span class="pre">data_terms</span></code></a> module, and they include:</p>
 <ul class="simple">
-<li><p>l2 norm - least squares reconstruction - default: <code class="docutils literal notranslate"><span class="pre">DataFidelity_l2</span></code></p></li>
-<li><p>weighted l2 norm - when the variance of the sinogram points is known: <code class="docutils literal notranslate"><span class="pre">DataFidelity_wl2</span></code></p></li>
-<li><p>l1 norm - when the sinogram noise is mostly sparse: <code class="docutils literal notranslate"><span class="pre">DataFidelity_l1</span></code></p></li>
-<li><p>Kullback-Leibler - when dealing with Poisson noise: <code class="docutils literal notranslate"><span class="pre">DataFidelity_KL</span></code></p></li>
+<li><p>l2 norm - least squares reconstruction - default:
+<a class="reference external" href="corrct.html#corrct.data_terms.DataFidelity_l2"><code class="docutils literal notranslate"><span class="pre">DataFidelity_l2</span></code></a></p></li>
+<li><p>weighted l2 norm - when the variance of the sinogram points is known:
+<a class="reference external" href="corrct.html#corrct.data_terms.DataFidelity_wl2"><code class="docutils literal notranslate"><span class="pre">DataFidelity_wl2</span></code></a></p></li>
+<li><p>l1 norm - when the sinogram noise is mostly sparse:
+<a class="reference external" href="corrct.html#corrct.data_terms.DataFidelity_l1"><code class="docutils literal notranslate"><span class="pre">DataFidelity_l1</span></code></a></p></li>
+<li><p>Kullback-Leibler - when dealing with Poisson noise:
+<a class="reference external" href="corrct.html#corrct.data_terms.DataFidelity_KL"><code class="docutils literal notranslate"><span class="pre">DataFidelity_KL</span></code></a></p></li>
 </ul>
 </div>
 </div>

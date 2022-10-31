@@ -88,6 +88,8 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
+<span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">spc</span>
+
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
@@ -96,6 +98,14 @@
 <span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<div class="viewcode-block" id="convert_keV_to_m"><a class="viewcode-back" href="../../corrct.html#corrct.physics.convert_keV_to_m">[docs]</a><span class="k">def</span> <span class="nf">convert_keV_to_m</span><span class="p">(</span><span class="n">energy_keV</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="mf">1e-3</span> <span class="o">/</span> <span class="p">(</span><span class="n">spc</span><span class="o">.</span><span class="n">physical_constants</span><span class="p">[</span><span class="s2">&quot;electron volt-inverse meter relationship&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">energy_keV</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="convert_m_to_keV"><a class="viewcode-back" href="../../corrct.html#corrct.physics.convert_m_to_keV">[docs]</a><span class="k">def</span> <span class="nf">convert_m_to_keV</span><span class="p">(</span><span class="n">energy_m</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="mf">1e-3</span> <span class="o">/</span> <span class="p">(</span><span class="n">spc</span><span class="o">.</span><span class="n">physical_constants</span><span class="p">[</span><span class="s2">&quot;electron volt-inverse meter relationship&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">energy_m</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="pencil_beam_profile"><a class="viewcode-back" href="../../corrct.html#corrct.physics.pencil_beam_profile">[docs]</a><span class="k">def</span> <span class="nf">pencil_beam_profile</span><span class="p">(</span>
