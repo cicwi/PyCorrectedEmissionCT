@@ -26,7 +26,7 @@ def circular_mask(
     coords_ball: Union[Sequence[int], NDArrayInt, None] = None,
     vol_origin_zxy: Optional[Sequence[float]] = None,
     taper_func: Optional[str] = None,
-    taper_target: str = "edge",
+    taper_target: Union[str, float] = "edge",
     super_sampling: int = 1,
     dtype: DTypeLike = np.float32,
 ) -> NDArray:
@@ -45,6 +45,8 @@ def circular_mask(
         The origin of the coordinates in voxels. The default is None.
     taper_func : str, optional
         The mask data type. Allowed types: "const" | "cos". The default is "const".
+    taper_target : str | float, optional
+        The size target. Allowed values: "edge" | "diagonal". The default is "edge".
     super_sampling : int, optional
         The pixel super sampling to be used for the mask. The default is 1.
     dtype : DTypeLike, optional
@@ -87,17 +89,25 @@ def circular_mask(
     if taper_func is None:
         mask = (dists <= max_radius).astype(dtype)
     elif isinstance(taper_func, str):
-        if taper_target.lower() == "edge":
-            cut_off_denom = 2
-        elif taper_target.lower() == "diagonal":
-            cut_off_denom = np.sqrt(2)
+        if isinstance(taper_target, str):
+            if taper_target.lower() == "edge":
+                cut_off_denom = 2
+                cut_off_offset = 0
+            elif taper_target.lower() == "diagonal":
+                cut_off_denom = np.sqrt(2)
+                cut_off_offset = 0
+            else:
+                raise ValueError(
+                    f"When `taper_target` is str, it should be one of: 'edge' | 'diagonal', but {taper_target} passed instead."
+                )
         else:
-            raise ValueError(
-                f"Parameter `taper_target` should be one of: 'edge' or 'diagonal', but {taper_target} passed instead."
-            )
+            cut_off_denom = 2
+            if taper_target < radius_offset:
+                print(f"WARNING: parameter `taper_target`={taper_target} is smaller than `radius_offset`={radius_offset}.")
+            cut_off_offset = np.fmax(taper_target, radius_offset)
 
         if taper_func.lower() == "cos":
-            cut_off_radius = np.min(vol_shape_zxy_s[coords_ball]) / (cut_off_denom * super_sampling)
+            cut_off_radius = np.min(vol_shape_zxy_s[coords_ball]) / (cut_off_denom * super_sampling) + cut_off_offset
             cut_off_size = cut_off_radius - max_radius
             outter_vals = np.cos(np.fmax(dists - max_radius, 0) / cut_off_size * np.pi) / 2 + 0.5
             mask = (outter_vals * (dists < cut_off_radius)).astype(dtype)
