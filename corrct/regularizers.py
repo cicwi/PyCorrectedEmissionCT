@@ -247,6 +247,21 @@ class Regularizer_Grad(BaseRegularizer):
         return tau
 
 
+class Regularizer_TV1D(Regularizer_Grad):
+    """Total Variation (TV) regularizer in 1D. It can be used to promote piece-wise constant reconstructions."""
+
+    __reg_name__ = "TV1D"
+
+    def __init__(
+        self,
+        weight: Union[float, NDArray],
+        axes: Union[Sequence[int], NDArray, None] = None,
+        pad_mode: str = "edge",
+        norm: DataFidelityBase = DataFidelity_l12(),
+    ):
+        super().__init__(weight=weight, ndims=1, axes=axes, pad_mode=pad_mode, norm=norm)
+
+
 class Regularizer_TV2D(Regularizer_Grad):
     """Total Variation (TV) regularizer in 2D. It can be used to promote piece-wise constant reconstructions."""
 
@@ -305,6 +320,21 @@ class Regularizer_HubTV3D(Regularizer_Grad):
         pad_mode: str = "edge",
     ):
         super().__init__(weight=weight, ndims=3, axes=axes, pad_mode=pad_mode, norm=DataFidelity_Huber(huber_size, l2_axis=0))
+
+
+class Regularizer_smooth1D(Regularizer_Grad):
+    """It can be used to promote smooth reconstructions."""
+
+    __reg_name__ = "smooth1D"
+
+    def __init__(
+        self,
+        weight: Union[float, NDArray],
+        axes: Union[Sequence[int], NDArray, None] = None,
+        pad_mode: str = "edge",
+        norm: DataFidelityBase = DataFidelity_l2(),
+    ):
+        super().__init__(weight=weight, ndims=1, axes=axes, pad_mode=pad_mode, norm=norm)
 
 
 class Regularizer_smooth2D(Regularizer_Grad):
@@ -368,6 +398,15 @@ class Regularizer_lap(BaseRegularizer):
         self.norm.assign_data(None, sigma=self.sigma)
 
         return 4 * self.ndims
+
+
+class Regularizer_lap1D(Regularizer_lap):
+    """Laplacian regularizer in 1D. It can be used to promote smooth reconstructions."""
+
+    __reg_name__ = "lap1D"
+
+    def __init__(self, weight, axes: Union[Sequence[int], NDArray, None] = None, pad_mode: str = "edge"):
+        Regularizer_lap.__init__(self, weight=weight, ndims=1, axes=axes, pad_mode=pad_mode)
 
 
 class Regularizer_lap2D(Regularizer_lap):
