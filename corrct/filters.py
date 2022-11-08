@@ -7,6 +7,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
+from scipy.interpolate import interp1d
 
 import skimage.transform as skt
 
@@ -15,10 +16,79 @@ import matplotlib.pyplot as plt
 from .operators import BaseTransform
 from .processing import circular_mask
 
-from typing import Union, Sequence, Optional
+from typing import Union, Sequence, Optional, Any
 from numpy.typing import ArrayLike, DTypeLike, NDArray
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from collections.abc import Mapping
+
+try:
+    import pywt
+
+    has_pywt = True
+except ImportError:
+    print("WARNING: You need to install PyWavelets to benefit from wavelet bases.")
+
+    has_pywt = False
+
+
+class BasisOptions(ABC, Mapping):
+    """Options for the different types of bases."""
+
+    def __len__(self) -> int:
+        """Return the number of options.
+
+        Returns
+        -------
+        int
+            The number of options.
+        """
+        return self.__dict__.__len__()
+
+    def __getitem__(self, k: Any) -> Any:
+        """Return the selected option.
+
+        Parameters
+        ----------
+        k : Any
+            The key of the selected option.
+
+        Returns
+        -------
+        Any
+            The selected option.
+        """
+        return self.__dict__.__getitem__(k)
+
+    def __iter__(self) -> Any:
+        """Iterate the options list.
+
+        Returns
+        -------
+        Any
+            The following option.
+        """
+        return iter(self.__dict__)
+
+
+@dataclass
+class BasisOptionsBlocks(BasisOptions):
+    """Options for the wavelet bases."""
+
+    binning_start: Optional[int] = 2
+    binning_type: str = "exponential"
+    order: int = 1
+    normalized: bool = True
+
+
+@dataclass
+class BasisOptionsWavelets(BasisOptions):
+    """Options for the wavelet bases."""
+
+    wavelet: str = "bior2.2"
+    level: int = 5
+    norm: float = 1.0
 
 
 def create_basis(
@@ -40,7 +110,7 @@ def create_basis(
     binning_type : str, optional
         Type of pixel binning, by default "exponential".
     normalized : bool, optional
-        Whether to normalize the bins by the window size.
+        Whether to normalize the bins by the window size, by default True.
     order : int, optional
         Order of the basis functions. Only 0 and 1 supported, by default 1.
     dtype : DTypeLike, optional
@@ -98,6 +168,84 @@ def create_basis(
             basis_r /= np.linalg.norm(basis_r, ord=1, axis=-1, keepdims=True)
 
     return basis_r
+
+
+def create_basis_wavelet(
+    num_pixels: int,
+    wavelet: str = "bior2.2",
+    level: int = 5,
+    norm: float = 1.0,
+    dtype: DTypeLike = np.float32,
+) -> NDArray:
+    """Compute filter basis matrix.
+    Parameters
+    ----------
+    num_pixels : int
+        Number of wavelet filters.
+    wavelet: str, optional
+        The wavelet to use, by default "bior4.4".
+    level : int, optional
+        The decomposition level to reach, by default 5.
+    norm : float, optional
+        The norm to use, by default 1.0.
+    dtype : DTypeLike, optional
+        Data type, by default np.float32.
+    Returns
+    -------
+    NDArray
+        The filter basis.
+    """
+    if not has_pywt:
+        print("WARNING: You need to install PyWavelets to benefit from wavelet bases.")
+        raise ImportError("PyWavelets (pywt) module not found.")
+
+    # max_level = pywt.swt_max_level(num_pixels)
+    # if level > max_level:
+    #     print(f"WARNING: Requested level {level} is too high for {num_pixels} pixels. Max allowed is {max_level}.")
+    #     level = max_level
+
+    w = pywt.Wavelet(wavelet)
+
+    dec_lo = np.trim_zeros(w.dec_lo)
+    dec_hi = np.trim_zeros(w.dec_hi)
+
+    crop_size_l = num_pixels // 2
+    crop_size_u = num_pixels - crop_size_l
+
+    pad_size_u = (num_pixels - len(dec_hi)) // 2
+    pad_size_l = num_pixels - len(dec_hi) - pad_size_u
+    pad_width = (pad_size_l, pad_size_u)
+
+    basis_hi_tmp = np.pad(dec_hi, pad_width=np.array(pad_width))
+
+    pad_size_u = (num_pixels - len(dec_lo)) // 2
+    pad_size_l = num_pixels - len(dec_lo) - pad_size_u
+    pad_width = (pad_size_l, pad_size_u)
+
+    basis_lo_tmp = np.pad(dec_lo, pad_width=np.array(pad_width))
+
+    coords = np.fft.fftshift(np.fft.fftfreq(num_pixels, 1 / num_pixels))
+
+    basis_r = []
+    basis_r.append(basis_hi_tmp)
+    for _ in range(level - 1):
+        basis_lo_old = basis_lo_tmp.copy()
+
+        int_obj = interp1d(coords, basis_hi_tmp, kind="linear")
+        basis_hi_tmp = int_obj((coords + 1 - len(coords) % 2) / 2)
+        basis_hi_tmp = np.convolve(basis_hi_tmp, basis_lo_old, mode="same")
+
+        int_obj = interp1d(coords, basis_lo_tmp, kind="linear")
+        basis_lo_tmp = int_obj((coords + 1 - len(coords) % 2) / 2)
+        basis_lo_tmp = np.convolve(basis_lo_tmp, basis_lo_old, mode="same")
+
+        basis_r.append(basis_hi_tmp)
+    basis_r.append(basis_lo_tmp)
+
+    basis_r = np.array(basis_r, dtype=dtype)
+    basis_r /= np.linalg.norm(basis_r, axis=-1, ord=norm, keepdims=True)
+
+    return np.fft.ifftshift(basis_r, axes=(-1,))
 
 
 class Filter(ABC):
@@ -274,7 +422,7 @@ class Filter(ABC):
         self.compute_filter(data_wu)
         return self.apply_filter(data_wu, self.fbp_filter)
 
-    def plot_filters(self):
+    def plot_filters(self, fourier_abs: bool = False):
         filters_r = np.array(self.filter_real, ndmin=2)
         filters_f = np.array(self.filter_fourier, ndmin=2)
 
@@ -285,7 +433,10 @@ class Filter(ABC):
         axes[0].set_xlabel("Pixel")
 
         for ii in range(self.num_filters):
-            axes[1].plot(filters_f[ii, ...], label=f"Filter-{ii}")
+            filt_f = filters_f[ii, ...]
+            if fourier_abs:
+                filt_f = np.abs(filt_f)
+            axes[1].plot(filt_f, label=f"Filter-{ii}")
         axes[1].set_title("Fourier-space")
         axes[1].set_xlabel("Frequency")
 
