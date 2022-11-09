@@ -125,7 +125,6 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         psf: Optional[ArrayLike] = None,
         backend: Union[str, prj_backends.ProjectorBackend] = "astra" if astra_available else "skimage",
         create_single_projs: bool = True,
-        super_sampling: int = 1,
     ):
         """Initialize the base projection class.
 
@@ -154,8 +153,6 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         create_single_projs : bool, optional
             Whether to create projectors for single projections.
             Used for corrections and SART, by default True.
-        super_sampling : int, optional
-            Pixel and voxel super-sampling, by default 1.
 
         Raises
         ------
@@ -181,7 +178,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
         if isinstance(backend, str):
             if backend == "astra":
-                self.projector_backend = prj_backends.ProjectorBackendASTRA(super_sampling=super_sampling)
+                self.projector_backend = prj_backends.ProjectorBackendASTRA()
             elif backend == "skimage":
                 self.projector_backend = prj_backends.ProjectorBackendSKimage()
             else:
@@ -381,7 +378,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         prj_geom: Optional[models.ProjectionGeometry] = None,
         prj_intensities: Optional[ArrayLike] = None,
         backend: Union[str, prj_backends.ProjectorBackend] = "astra" if astra_available else "skimage",
-        super_sampling: int = 1,
         att_maps: Optional[NDArray[np.floating]] = None,
         att_in: Optional[NDArray[np.floating]] = None,
         att_out: Optional[NDArray[np.floating]] = None,
@@ -412,8 +408,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             Projection scaling factor. The default is None.
         backend : str | prj_backends.ProjectorBackend, optional
             Projector backend to use, by default "astra" if astra is available, otherwise "skimage".
-        super_sampling : int, optional
-            Pixel and voxel super-sampling for the ASTRA projector backend. The default is 1.
         att_maps : Optional[NDArray[np.floating]], optional
             Precomputed attenuation maps for each angle, by default None
         att_in : Optional[ArrayLike], optional
@@ -451,7 +445,6 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             psf=psf,
             prj_intensities=prj_intensities,
             backend=backend,
-            super_sampling=super_sampling,
         )
 
         self.data_type = data_type
