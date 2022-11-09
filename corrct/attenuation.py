@@ -24,6 +24,7 @@ from numpy.typing import ArrayLike, DTypeLike, NDArray
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
 NDArrayFloat = NDArray[np.floating]
+NDArrayInt = NDArray[np.integer]
 
 
 class AttenuationVolume:
@@ -138,7 +139,7 @@ class AttenuationVolume:
         rot_ind: int,
         det_ind: int = 0,
         slice_ind: Optional[int] = None,
-        axes: Union[Sequence[int], NDArray] = (-2, -1),
+        axes: Union[Sequence[int], NDArrayInt] = (-2, -1),
     ) -> None:
         """
         Plot the requested attenuation map.
@@ -198,8 +199,8 @@ class AttenuationVolume:
     def get_maps(
         self,
         roi: Optional[ArrayLike] = None,
-        rot_ind: Union[int, slice, Sequence[int], None] = None,
-        det_ind: Union[int, slice, Sequence[int], None] = None,
+        rot_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
+        det_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
     ) -> NDArray:
         """
         Return the attenuation maps.
@@ -238,8 +239,8 @@ class AttenuationVolume:
     def get_projector_args(
         self,
         roi: Optional[ArrayLike] = None,
-        rot_ind: Union[int, slice, Sequence[int], None] = None,
-        det_ind: Union[int, slice, Sequence[int], None] = None,
+        rot_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
+        det_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
     ) -> Dict[str, NDArray]:
         """
         Return the projector arguments.
