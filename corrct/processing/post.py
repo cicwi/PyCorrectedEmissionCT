@@ -61,7 +61,7 @@ def com(vol: NDArray, axes: Optional[ArrayLike] = None) -> NDArray:
 
 def frc(
     img1: NDArray,
-    img2: NDArray,
+    img2: Optional[NDArray],
     snrt: float = 0.2071,
     axes: Optional[Sequence[int]] = None,
     smooth: Optional[int] = 5,
