@@ -257,6 +257,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
     """Projector backend based on scikit-image."""
 
     def __init__(self) -> None:
+        """Initialize scikit-image projector backend class."""
         super().__init__()
         self.is_ready = True
 
