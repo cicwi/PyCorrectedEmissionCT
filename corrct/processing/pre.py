@@ -133,3 +133,38 @@ def rotate_proj_stack(data_vwu: NDArray, rot_angle_deg: float) -> NDArray:
     for ii in range(data_vwu.shape[-2]):
         data_vwu_r[:, ii, :] = skt.rotate(data_vwu[:, ii, :], -rot_angle_deg, clip=False)
     return data_vwu_r
+
+
+def bin_imgs(imgs: NDArray, binning: Union[int, float], verbose: bool = True) -> NDArray:
+    """Bin a stack of images.
+
+    Parameters
+    ----------
+    imgs : NDArray
+        The stack of images.
+    binning : int | float
+        The binning factor.
+    verbose : bool, optional
+        Whether to print the image shapes, by default True
+
+    Returns
+    -------
+    NDArray
+        The binned images
+    """
+    imgs_shape = imgs.shape
+
+    if isinstance(binning, int):
+        binned_shape = (*imgs_shape[:-2], imgs_shape[-2] // binning, imgs_shape[-1] // binning)
+        imgs = imgs.reshape([*binned_shape[:-1], binning, binned_shape[-1], binning])
+        imgs = imgs.mean(axis=(-3, -1))
+    else:
+        imgs = imgs.reshape([-1, *imgs_shape[-2:]])
+        imgs = skt.rescale(imgs, 1 / binning, channel_axis=0)
+        binned_shape = [*imgs_shape[:-2], *imgs.shape[-2:]]
+        imgs = imgs.reshape(binned_shape)
+
+    if verbose:
+        print(f"Binning: {imgs_shape} => {binned_shape}")
+
+    return imgs

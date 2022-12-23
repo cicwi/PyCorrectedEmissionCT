@@ -447,3 +447,43 @@ def norm_cross_corr(
         return cc_n, cc_l
     else:
         return cc_n
+
+
+def inspect_fourier_img(img: NDArray, remove_zero: bool = False) -> None:
+    """Display Fourier representation of the input image.
+
+    Parameters
+    ----------
+    img : NDArray
+        Input image.
+    remove_zero : bool, optional
+        Remove the zero frequency value. The default is False.
+    """
+    img_f = np.squeeze(np.fft.fft2(img))
+    if remove_zero is True:
+        img_f[0, 0] = 0
+    img_f_sh = np.fft.fftshift(img_f)
+
+    f, axs = plt.subplots(2, 3)
+    f.suptitle("Fourier representation")
+
+    axs[0, 0].imshow(np.real(img_f_sh))
+    axs[0, 0].set_title("Real")
+    axs[0, 1].imshow(np.imag(img_f_sh))
+    axs[0, 1].set_title("Imag")
+    axs[0, 2].imshow(np.abs(img_f_sh))
+    axs[0, 2].set_title("Abs")
+
+    vert_img_f = np.fft.fftshift(img_f[:, 0])
+    axs[1, 0].plot(np.stack((np.real(vert_img_f), np.imag(vert_img_f), np.abs(vert_img_f)), axis=1))
+    axs[1, 0].set_title("Vertical profiles")
+
+    horz_img_f = np.fft.fftshift(img_f[0, :])
+    axs[1, 1].plot(np.stack((np.real(horz_img_f), np.imag(horz_img_f), np.abs(horz_img_f)), axis=1))
+    axs[1, 1].set_title("Horizontal profiles")
+
+    diag_img_f = np.fft.fftshift(np.diag(img_f))
+    axs[1, 2].plot(np.stack((np.real(diag_img_f), np.imag(diag_img_f), np.abs(diag_img_f)), axis=1))
+    axs[1, 2].set_title("Diagonal profiles")
+
+    plt.show(block=False)
