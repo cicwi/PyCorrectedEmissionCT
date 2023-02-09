@@ -321,3 +321,25 @@ class VolumeGeometry(Geometry):
         for ii in range(-len(data.shape), 0):
             dims[data_format[ii]] = [data.shape[ii]]
         return VolumeGeometry([*(dims["u"] * 2), *dims["v"]])
+
+    @staticmethod
+    def get_default_from_volume(volume: NDArray) -> "VolumeGeometry":
+        """
+        Generate a default volume geometry from the given volume.
+
+        Parameters
+        ----------
+        volume : NDArray
+            The volume.
+
+        Returns
+        -------
+        VolumeGeometry
+            The default volume geometry.
+        """
+        vol_shape_zxy = volume.shape
+        if len(vol_shape_zxy) < 2:
+            raise ValueError(
+                f"The volume should be at least 2-dimensional, but the following shape was passed: {vol_shape_zxy}"
+            )
+        return VolumeGeometry([vol_shape_zxy[-2], vol_shape_zxy[-1], *np.flip(vol_shape_zxy[:-2])])
