@@ -17,7 +17,7 @@ import multiprocessing as mp
 
 from tqdm import tqdm
 
-from typing import Dict, Optional, Sequence, Union
+from typing import Dict, Optional, Sequence, Union, List
 from numpy.typing import ArrayLike, DTypeLike, NDArray
 
 
@@ -140,7 +140,7 @@ class AttenuationVolume:
         det_ind: int = 0,
         slice_ind: Optional[int] = None,
         axes: Union[Sequence[int], NDArrayInt] = (-2, -1),
-    ) -> None:
+    ) -> List[float]:
         """
         Plot the requested attenuation map.
 
@@ -156,6 +156,11 @@ class AttenuationVolume:
             Volume slice index (for 3D volumes). The default is None.
         axes : Sequence[int] | NDArray, optional
             Axes of the slice. The default is (-2, -1).
+
+        Returns
+        -------
+        List[float]
+            The extent of the axes plot (min-max coords).
 
         Raises
         ------
@@ -173,7 +178,8 @@ class AttenuationVolume:
         slice_shape = self.vol_shape_zyx[list(axes)]
         coords = [(-(s - 1) / 2, (s - 1) / 2) for s in slice_shape]
 
-        ax.imshow(att_map, extent=list(np.concatenate(coords)))
+        extent = list(np.concatenate(coords))
+        ax.imshow(att_map, extent=extent)
 
         if other_dim == -3:
             arrow_length = np.linalg.norm(slice_shape) / np.pi
@@ -195,6 +201,8 @@ class AttenuationVolume:
 
             ax.arrow(*beam_i_orig, *beam_i_dir, **arrow_args, fc="r", ec="r")
             ax.arrow(*beam_e_orig, *beam_e_dir, **arrow_args, fc="k", ec="k")
+
+        return extent
 
     def get_maps(
         self,
