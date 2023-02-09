@@ -189,7 +189,7 @@ class FluoLinesSiegbahn:
         Sequence
             List of corresponding lines.
         """
-        return [f for f in FluoLinesSiegbahn.lines if f.name[: len(line)] == line]
+        return [f for f in FluoLinesSiegbahn.lines if f.name[: len(line)] == line.upper()]
 
     @staticmethod
     def get_energy(
@@ -360,7 +360,7 @@ class VolumeMaterial(object):
     @staticmethod
     def get_compound(cmp_name: str, density: Optional[float] = None) -> Dict:
         """
-        Builds a compound from the compound composition string.
+        Build a compound from the compound composition string.
 
         Parameters
         ----------
