@@ -619,6 +619,16 @@ class Regularizer_swl(BaseRegularizer):
         if not self.min_approx:
             dual[0, ...] = 0
 
+    def apply_proximal(self, dual: NDArray) -> None:
+        if isinstance(self.norm, DataFidelity_l12):
+            tmp_dual = dual[1:]
+            tmp_dual = tmp_dual.reshape([-1, self.level, *dual.shape[1:]])
+            self.norm.apply_proximal(tmp_dual, self.weight)
+            tmp_dual = dual[0:1:]
+            self.norm.apply_proximal(tmp_dual, self.weight)
+        else:
+            super().apply_proximal(dual)
+
 
 class Regularizer_l1swl(Regularizer_swl):
     """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
@@ -648,6 +658,37 @@ class Regularizer_l1swl(Regularizer_swl):
             normalized=normalized,
             min_approx=min_approx,
             norm=DataFidelity_l1(),
+        )
+
+
+class Regularizer_l12swl(Regularizer_swl):
+    """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
+
+    __reg_name__ = "l12swl"
+
+    def __init__(
+        self,
+        weight: Union[float, NDArray],
+        wavelet: str,
+        level: int,
+        ndims: int = 2,
+        axes: Union[Sequence[int], NDArray, None] = None,
+        pad_on_demand: str = "constant",
+        upd_mask: Optional[NDArray] = None,
+        normalized: bool = False,
+        min_approx: bool = True,
+    ):
+        super().__init__(
+            weight,
+            wavelet,
+            level,
+            ndims=ndims,
+            axes=axes,
+            pad_on_demand=pad_on_demand,
+            upd_mask=upd_mask,
+            normalized=normalized,
+            min_approx=min_approx,
+            norm=DataFidelity_l12(),
         )
 
 
