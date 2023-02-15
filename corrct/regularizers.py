@@ -204,6 +204,10 @@ class BaseRegularizer(ABC):
             upd *= self.weight
         return upd
 
+    def _check_primal(self, primal: NDArray) -> None:
+        if self.dtype != primal.dtype:
+            print(f"WARNING: Regularizer dtype ({self.dtype}) and primal dtype ({primal.dtype}) are different!")
+
 
 class Regularizer_Grad(BaseRegularizer):
     """Gradient regularizer.
@@ -248,7 +252,8 @@ class Regularizer_Grad(BaseRegularizer):
         self.pad_mode = pad_mode.lower()
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
-        self.dtype = primal.dtype
+        self._check_primal(primal)
+
         self.op = operators.TransformGradient(primal.shape, axes=self.axes, pad_mode=self.pad_mode)
 
         self.sigma = 0.5
@@ -429,7 +434,8 @@ class Regularizer_lap(BaseRegularizer):
         self.pad_mode = pad_mode.lower()
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
-        self.dtype = primal.dtype
+        self._check_primal(primal)
+
         self.op = operators.TransformLaplacian(primal.shape, axes=self.axes, pad_mode=self.pad_mode)
 
         self.sigma = 0.25
@@ -497,7 +503,8 @@ class Regularizer_l1(BaseRegularizer):
         super().__init__(weight=weight, norm=norm, upd_mask=upd_mask)
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
-        self.dtype = primal.dtype
+        self._check_primal(primal)
+
         self.op = operators.TransformIdentity(primal.shape)
 
         self.norm.assign_data(None, sigma=1)
@@ -561,7 +568,8 @@ class Regularizer_swl(BaseRegularizer):
         self.pad_on_demand = pad_on_demand
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
-        self.dtype = primal.dtype
+        self._check_primal(primal)
+
         self.op = operators.TransformStationaryWavelet(
             primal.shape,
             wavelet=self.wavelet,
@@ -770,7 +778,8 @@ class Regularizer_dwl(BaseRegularizer):
         self.pad_on_demand = pad_on_demand
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
-        self.dtype = primal.dtype
+        self._check_primal(primal)
+
         self.op = operators.TransformDecimatedWavelet(
             primal.shape, wavelet=self.wavelet, level=self.level, axes=self.axes, pad_on_demand=self.pad_on_demand
         )
@@ -907,7 +916,8 @@ class BaseRegularizer_med(BaseRegularizer):
         self.filt_size = filt_size
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
-        self.dtype = primal.dtype
+        self._check_primal(primal)
+
         self.op = operators.TransformIdentity(primal.shape)
         self.norm.assign_data(None, sigma=1)
 
@@ -968,7 +978,8 @@ class Regularizer_fft(BaseRegularizer):
         self.fft_filter = fft_filter
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
-        self.dtype = primal.dtype
+        self._check_primal(primal)
+
         self.op = operators.TransformFourier(primal.shape, axes=self.axes)
 
         if isinstance(self.fft_filter, str):
@@ -1295,7 +1306,8 @@ class Regularizer_vSVD(BaseRegularizer):
         self.axis_channels = axis_channels
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
-        self.dtype = primal.dtype
+        self._check_primal(primal)
+
         self.op = operators.TransformSVD(primal.shape, axes_rows=self.axis_channels, axes_cols=self.axes, rescale=True)
 
         self.sigma = 1
@@ -1336,7 +1348,8 @@ class Constraint_LowerLimit(BaseRegularizer):
         self.limit = limit
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
-        self.dtype = primal.dtype
+        self._check_primal(primal)
+
         self.op = operators.TransformIdentity(primal.shape)
 
         self.norm.assign_data(self.limit, sigma=1)
@@ -1380,7 +1393,8 @@ class Constraint_UpperLimit(BaseRegularizer):
         self.limit = limit
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:
-        self.dtype = primal.dtype
+        self._check_primal(primal)
+
         self.op = operators.TransformIdentity(primal.shape)
 
         self.norm.assign_data(self.limit, sigma=1)
