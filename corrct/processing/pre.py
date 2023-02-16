@@ -10,8 +10,10 @@ import numpy as np
 
 import skimage.transform as skt
 
-from typing import Sequence, Optional, Union
+from typing import Sequence, Optional, Union, Tuple
 from numpy.typing import DTypeLike, NDArray
+
+import matplotlib.pyplot as plt
 
 
 eps = np.finfo(np.float32).eps
@@ -168,3 +170,60 @@ def bin_imgs(imgs: NDArray, binning: Union[int, float], verbose: bool = True) ->
         print(f"Binning: {imgs_shape} => {binned_shape}")
 
     return imgs
+
+
+def compute_eigen_flats(
+    trans: NDArray, flats: NDArray, darks: NDArray, ndim: int = 2, plot: bool = False
+) -> Tuple[NDArray, NDArray]:
+    """Compute the eigen flats of a stack of transmission images.
+
+    Parameters
+    ----------
+    trans : NDArray
+        The stack of transmission images.
+    flats : NDArray
+        The flats without sample.
+    darks : NDArray
+        The darks.
+    ndim : int, optional
+        The number of dimensions of the images, by default 2
+    plot : bool, optional
+        Whether to plot the results, by default False
+
+    Returns
+    -------
+    Tuple[NDArray, NDArray]
+        The decomposition of the tranmissions of the sample and the flats.
+    """
+    trans_shape = trans.shape
+    trans_num = np.prod(trans_shape[:-ndim])
+    img_shape = trans_shape[-ndim:]
+
+    darks_num = np.prod(darks.shape[:-ndim])
+
+    imgs = np.concatenate((trans.reshape([-1, *img_shape]), flats.reshape([-1, *img_shape]), darks.reshape([-1, *img_shape])))
+    imgs = imgs.reshape([-1, np.prod(img_shape)]).transpose()
+
+    U, s, Vh = np.linalg.svd(imgs, full_matrices=False)
+
+    last_t_ind = -darks_num + 1
+
+    t: NDArray = np.matmul(U[..., 1:last_t_ind] * s[..., None, 1:last_t_ind], Vh[..., 1:last_t_ind, :])
+    t = t.transpose().reshape([-1, *img_shape])[:trans_num]
+
+    f: NDArray = np.matmul(U[..., 0:1:] * s[..., None, 0:1:], Vh[..., 0:1:, :])
+    f = f.transpose().reshape([-1, *img_shape])[:trans_num]
+
+    if plot:
+        fig, ax = plt.subplots(1, 3, figsize=[10, 3.75])
+        ax[0].plot(s)
+        ax[0].grid()
+        ax[0].set_title("Singular values")
+        ax[1].imshow(U[:, 0].reshape(img_shape))
+        ax[1].set_title("Highest value component")
+        ax[2].imshow(U[:, last_t_ind:].mean(axis=1).reshape(img_shape))
+        ax[2].set_title("Noise average")
+        fig.tight_layout()
+        plt.show(block=False)
+
+    return t.reshape(trans_shape), f.reshape(trans_shape)
