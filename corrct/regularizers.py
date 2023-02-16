@@ -207,6 +207,7 @@ class BaseRegularizer(ABC):
     def _check_primal(self, primal: NDArray) -> None:
         if self.dtype != primal.dtype:
             print(f"WARNING: Regularizer dtype ({self.dtype}) and primal dtype ({primal.dtype}) are different!")
+            self.dtype = primal.dtype
 
 
 class Regularizer_Grad(BaseRegularizer):
