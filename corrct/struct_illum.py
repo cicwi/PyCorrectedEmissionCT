@@ -657,8 +657,10 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         """
         self.mc = mask_collection
 
-        self.col_sum = np.sum(self.mc.masks_dec, axis=0)
-        self.row_sum = np.sum(self.mc.masks_enc * self.mc.masks_dec, axis=(1, 2))
+        axes_shifts = np.arange(len(self.mc.shape_shifts))
+        self.col_sum = np.sum(self.mc.masks_dec, axis=tuple(axes_shifts))
+        axes_FoV = np.arange(-len(self.mc.shape_FoV), 0)
+        self.row_sum = np.sum(self.mc.masks_enc * self.mc.masks_dec, axis=tuple(axes_FoV))
 
         self.vol_shape = self.mc.masks_enc.shape[-2:]
         self.prj_shape = np.array(self.mc.num_buckets, ndmin=1)
