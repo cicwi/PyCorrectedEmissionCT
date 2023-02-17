@@ -4,7 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.7.1...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.7.2...develop
+
+## 0.7.2 - 2023-02-17
+### Added
+- Default VolumeGeometry creation from volume.
+- Tapering border size support in volume mask.
+- 1D gradient based regularizer shortcut.
+- Isotropic undecimented wavelet regularizer support.
+### Fixed
+- Fluorescence line selection case sensitive bug.
+- Verbose feedback in parabolic fitting for parameter tuning.
 
 ## 0.7.1 - 2022-10-31
 ### Added
