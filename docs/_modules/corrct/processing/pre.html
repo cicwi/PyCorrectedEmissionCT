@@ -202,6 +202,41 @@
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_vwu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]):</span>
         <span class="n">data_vwu_r</span><span class="p">[:,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">[:,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:],</span> <span class="o">-</span><span class="n">rot_angle_deg</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data_vwu_r</span></div>
+
+
+<div class="viewcode-block" id="bin_imgs"><a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.bin_imgs">[docs]</a><span class="k">def</span> <span class="nf">bin_imgs</span><span class="p">(</span><span class="n">imgs</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">binning</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Bin a stack of images.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    imgs : NDArray</span>
+<span class="sd">        The stack of images.</span>
+<span class="sd">    binning : int | float</span>
+<span class="sd">        The binning factor.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to print the image shapes, by default True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The binned images</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">imgs_shape</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">binning</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">binned_shape</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">imgs_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">imgs_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="n">binning</span><span class="p">,</span> <span class="n">imgs_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">binning</span><span class="p">)</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">*</span><span class="n">binned_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">binning</span><span class="p">,</span> <span class="n">binned_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">binning</span><span class="p">])</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">imgs_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]])</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rescale</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">binning</span><span class="p">,</span> <span class="n">channel_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">binned_shape</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">imgs_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="o">*</span><span class="n">imgs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]]</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">binned_shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Binning: </span><span class="si">{</span><span class="n">imgs_shape</span><span class="si">}</span><span class="s2"> =&gt; </span><span class="si">{</span><span class="n">binned_shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">imgs</span></div>
 </pre></div>
 
            </div>

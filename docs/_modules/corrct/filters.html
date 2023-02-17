@@ -76,6 +76,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 
 <span class="kn">import</span> <span class="nn">skimage.transform</span> <span class="k">as</span> <span class="nn">skt</span>
 
@@ -84,10 +85,79 @@
 <span class="kn">from</span> <span class="nn">.operators</span> <span class="kn">import</span> <span class="n">BaseTransform</span>
 <span class="kn">from</span> <span class="nn">.processing</span> <span class="kn">import</span> <span class="n">circular_mask</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
 
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Mapping</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pywt</span>
+
+    <span class="n">has_pywt</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: You need to install PyWavelets to benefit from wavelet bases.&quot;</span><span class="p">)</span>
+
+    <span class="n">has_pywt</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="BasisOptions"><a class="viewcode-back" href="../../corrct.html#corrct.filters.BasisOptions">[docs]</a><span class="k">class</span> <span class="nc">BasisOptions</span><span class="p">(</span><span class="n">ABC</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Options for the different types of bases.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the number of options.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of options.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the selected option.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        k : Any</span>
+<span class="sd">            The key of the selected option.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Any</span>
+<span class="sd">            The selected option.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Iterate the options list.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Any</span>
+<span class="sd">            The following option.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BasisOptionsBlocks"><a class="viewcode-back" href="../../corrct.html#corrct.filters.BasisOptionsBlocks">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">BasisOptionsBlocks</span><span class="p">(</span><span class="n">BasisOptions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Options for the wavelet bases.&quot;&quot;&quot;</span>
+
+    <span class="n">binning_start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">binning_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;exponential&quot;</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="BasisOptionsWavelets"><a class="viewcode-back" href="../../corrct.html#corrct.filters.BasisOptionsWavelets">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">BasisOptionsWavelets</span><span class="p">(</span><span class="n">BasisOptions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Options for the wavelet bases.&quot;&quot;&quot;</span>
+
+    <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bior2.2&quot;</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">norm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span></div>
 
 
 <div class="viewcode-block" id="create_basis"><a class="viewcode-back" href="../../corrct.html#corrct.filters.create_basis">[docs]</a><span class="k">def</span> <span class="nf">create_basis</span><span class="p">(</span>
@@ -109,7 +179,7 @@
 <span class="sd">    binning_type : str, optional</span>
 <span class="sd">        Type of pixel binning, by default &quot;exponential&quot;.</span>
 <span class="sd">    normalized : bool, optional</span>
-<span class="sd">        Whether to normalize the bins by the window size.</span>
+<span class="sd">        Whether to normalize the bins by the window size, by default True.</span>
 <span class="sd">    order : int, optional</span>
 <span class="sd">        Order of the basis functions. Only 0 and 1 supported, by default 1.</span>
 <span class="sd">    dtype : DTypeLike, optional</span>
@@ -167,6 +237,84 @@
             <span class="n">basis_r</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">basis_r</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">basis_r</span></div>
+
+
+<div class="viewcode-block" id="create_basis_wavelet"><a class="viewcode-back" href="../../corrct.html#corrct.filters.create_basis_wavelet">[docs]</a><span class="k">def</span> <span class="nf">create_basis_wavelet</span><span class="p">(</span>
+    <span class="n">num_pixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bior2.2&quot;</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">norm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Compute filter basis matrix.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    num_pixels : int</span>
+<span class="sd">        Number of wavelet filters.</span>
+<span class="sd">    wavelet: str, optional</span>
+<span class="sd">        The wavelet to use, by default &quot;bior4.4&quot;.</span>
+<span class="sd">    level : int, optional</span>
+<span class="sd">        The decomposition level to reach, by default 5.</span>
+<span class="sd">    norm : float, optional</span>
+<span class="sd">        The norm to use, by default 1.0.</span>
+<span class="sd">    dtype : DTypeLike, optional</span>
+<span class="sd">        Data type, by default np.float32.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The filter basis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_pywt</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: You need to install PyWavelets to benefit from wavelet bases.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;PyWavelets (pywt) module not found.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># max_level = pywt.swt_max_level(num_pixels)</span>
+    <span class="c1"># if level &gt; max_level:</span>
+    <span class="c1">#     print(f&quot;WARNING: Requested level {level} is too high for {num_pixels} pixels. Max allowed is {max_level}.&quot;)</span>
+    <span class="c1">#     level = max_level</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">Wavelet</span><span class="p">(</span><span class="n">wavelet</span><span class="p">)</span>
+
+    <span class="n">dec_lo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trim_zeros</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">dec_lo</span><span class="p">)</span>
+    <span class="n">dec_hi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trim_zeros</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">dec_hi</span><span class="p">)</span>
+
+    <span class="n">crop_size_l</span> <span class="o">=</span> <span class="n">num_pixels</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">crop_size_u</span> <span class="o">=</span> <span class="n">num_pixels</span> <span class="o">-</span> <span class="n">crop_size_l</span>
+
+    <span class="n">pad_size_u</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_pixels</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">dec_hi</span><span class="p">))</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">pad_size_l</span> <span class="o">=</span> <span class="n">num_pixels</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">dec_hi</span><span class="p">)</span> <span class="o">-</span> <span class="n">pad_size_u</span>
+    <span class="n">pad_width</span> <span class="o">=</span> <span class="p">(</span><span class="n">pad_size_l</span><span class="p">,</span> <span class="n">pad_size_u</span><span class="p">)</span>
+
+    <span class="n">basis_hi_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">dec_hi</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pad_width</span><span class="p">))</span>
+
+    <span class="n">pad_size_u</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_pixels</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">dec_lo</span><span class="p">))</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">pad_size_l</span> <span class="o">=</span> <span class="n">num_pixels</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">dec_lo</span><span class="p">)</span> <span class="o">-</span> <span class="n">pad_size_u</span>
+    <span class="n">pad_width</span> <span class="o">=</span> <span class="p">(</span><span class="n">pad_size_l</span><span class="p">,</span> <span class="n">pad_size_u</span><span class="p">)</span>
+
+    <span class="n">basis_lo_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">dec_lo</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pad_width</span><span class="p">))</span>
+
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">num_pixels</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">num_pixels</span><span class="p">))</span>
+
+    <span class="n">basis_r</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">basis_r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">basis_hi_tmp</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">basis_lo_old</span> <span class="o">=</span> <span class="n">basis_lo_tmp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">int_obj</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">basis_hi_tmp</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+        <span class="n">basis_hi_tmp</span> <span class="o">=</span> <span class="n">int_obj</span><span class="p">((</span><span class="n">coords</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">basis_hi_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">basis_hi_tmp</span><span class="p">,</span> <span class="n">basis_lo_old</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+
+        <span class="n">int_obj</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">basis_lo_tmp</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+        <span class="n">basis_lo_tmp</span> <span class="o">=</span> <span class="n">int_obj</span><span class="p">((</span><span class="n">coords</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">basis_lo_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">basis_lo_tmp</span><span class="p">,</span> <span class="n">basis_lo_old</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+
+        <span class="n">basis_r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">basis_hi_tmp</span><span class="p">)</span>
+    <span class="n">basis_r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">basis_lo_tmp</span><span class="p">)</span>
+
+    <span class="n">basis_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">basis_r</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">basis_r</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">basis_r</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">basis_r</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,))</span></div>
 
 
 <div class="viewcode-block" id="Filter"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter">[docs]</a><span class="k">class</span> <span class="nc">Filter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
@@ -343,7 +491,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">compute_filter</span><span class="p">(</span><span class="n">data_wu</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">data_wu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Filter.plot_filters"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.plot_filters">[docs]</a>    <span class="k">def</span> <span class="nf">plot_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Filter.plot_filters"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.plot_filters">[docs]</a>    <span class="k">def</span> <span class="nf">plot_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fourier_abs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="n">filters_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_real</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">filters_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_fourier</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
@@ -354,7 +502,10 @@
         <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Pixel&quot;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_filters</span><span class="p">):</span>
-            <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filters_f</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Filter-</span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">filt_f</span> <span class="o">=</span> <span class="n">filters_f</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">fourier_abs</span><span class="p">:</span>
+                <span class="n">filt_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">filt_f</span><span class="p">)</span>
+            <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filt_f</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Filter-</span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Fourier-space&quot;</span><span class="p">)</span>
         <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency&quot;</span><span class="p">)</span>
 

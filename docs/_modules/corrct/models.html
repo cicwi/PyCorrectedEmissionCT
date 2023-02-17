@@ -389,7 +389,29 @@
         <span class="n">dims</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="p">[],</span> <span class="n">v</span><span class="o">=</span><span class="p">[],</span> <span class="n">w</span><span class="o">=</span><span class="p">[],</span> <span class="n">d</span><span class="o">=</span><span class="p">[])</span>
         <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">dims</span><span class="p">[</span><span class="n">data_format</span><span class="p">[</span><span class="n">ii</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">ii</span><span class="p">]]</span>
-        <span class="k">return</span> <span class="n">VolumeGeometry</span><span class="p">([</span><span class="o">*</span><span class="p">(</span><span class="n">dims</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="o">*</span><span class="n">dims</span><span class="p">[</span><span class="s2">&quot;v&quot;</span><span class="p">]])</span></div></div>
+        <span class="k">return</span> <span class="n">VolumeGeometry</span><span class="p">([</span><span class="o">*</span><span class="p">(</span><span class="n">dims</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="o">*</span><span class="n">dims</span><span class="p">[</span><span class="s2">&quot;v&quot;</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="VolumeGeometry.get_default_from_volume"><a class="viewcode-back" href="../../corrct.html#corrct.models.VolumeGeometry.get_default_from_volume">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_default_from_volume</span><span class="p">(</span><span class="n">volume</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VolumeGeometry&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a default volume geometry from the given volume.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        volume : NDArray</span>
+<span class="sd">            The volume.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        VolumeGeometry</span>
+<span class="sd">            The default volume geometry.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vol_shape_zxy</span> <span class="o">=</span> <span class="n">volume</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol_shape_zxy</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The volume should be at least 2-dimensional, but the following shape was passed: </span><span class="si">{</span><span class="n">vol_shape_zxy</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">VolumeGeometry</span><span class="p">([</span><span class="n">vol_shape_zxy</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">vol_shape_zxy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">vol_shape_zxy</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])])</span></div></div>
 </pre></div>
 
            </div>

@@ -258,7 +258,7 @@
 <span class="sd">        Sequence</span>
 <span class="sd">            List of corresponding lines.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">FluoLinesSiegbahn</span><span class="o">.</span><span class="n">lines</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)]</span> <span class="o">==</span> <span class="n">line</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">FluoLinesSiegbahn</span><span class="o">.</span><span class="n">lines</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)]</span> <span class="o">==</span> <span class="n">line</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span></div>
 
 <div class="viewcode-block" id="FluoLinesSiegbahn.get_energy"><a class="viewcode-back" href="../../corrct.html#corrct.physics.FluoLinesSiegbahn.get_energy">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span>
@@ -429,7 +429,7 @@
 <div class="viewcode-block" id="VolumeMaterial.get_compound"><a class="viewcode-back" href="../../corrct.html#corrct.physics.VolumeMaterial.get_compound">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_compound</span><span class="p">(</span><span class="n">cmp_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Builds a compound from the compound composition string.</span>
+<span class="sd">        Build a compound from the compound composition string.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
