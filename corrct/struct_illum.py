@@ -550,7 +550,6 @@ class MaskGeneratorHalfGaussian(MaskGenerator):
             The shifted mask.
         """
         mask = np.abs(np.random.randn(*self.shape_FoV)).astype(self.dtype)
-        mask /= mask.mean()
         return self._apply_transmission(mask)
 
 
