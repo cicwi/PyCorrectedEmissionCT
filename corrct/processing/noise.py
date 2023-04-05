@@ -98,7 +98,13 @@ def compute_variance_transmission(
 
 
 def compute_variance_weight(
-    variance: NDArray, *, percentile: float = 0.001, normalized: bool = False, use_std: bool = False, semilog: bool = False
+    variance: NDArray,
+    *,
+    percentile: float = 0.001,
+    mask: Optional[NDArray] = None,
+    normalized: bool = False,
+    use_std: bool = False,
+    semilog: bool = False
 ) -> NDArray:
     """
     Compute the weight associated to the given variance, in a weighted least-squares context.
@@ -109,6 +115,8 @@ def compute_variance_weight(
         The variance of the signal.
     percentile : float
         Minimum percentile to discard. The default is 0.001 (0.1%)
+    mask : NDArray | None, optional
+        Mask of valid values. The default is None.
     normalized : bool, optional
         Scale the largest weight to 1. The default is False.
     use_std : bool, optional
@@ -124,18 +132,28 @@ def compute_variance_weight(
     """
     variance = np.abs(variance)
 
-    sorted_variances = np.sort(variance.flatten())
+    vals = variance.flatten()
+    if mask is not None:
+        vals = vals[mask.flatten()]
+
+    sorted_variances = np.sort(vals)
     percentiles_variances = np.cumsum(sorted_variances) / np.sum(sorted_variances)
     ind_threshold = np.fmin(np.fmax(0, np.sum(percentiles_variances < percentile)), percentiles_variances.size)
     min_val = np.fmax(sorted_variances[ind_threshold], eps)
 
-    min_nonzero_variance = np.fmax(np.min(variance[variance > 0]), min_val)
-    weight = np.fmax(variance, min_nonzero_variance)
+    min_nonzero_variance = np.fmax(np.min(vals[vals > 0]), min_val)
+    inv_weight = np.fmax(variance, min_nonzero_variance)
 
     if normalized:
-        weight /= min_nonzero_variance
+        inv_weight /= min_nonzero_variance
     if use_std:
-        weight = np.sqrt(weight)
+        inv_weight = np.sqrt(inv_weight)
     if semilog:
-        weight = np.log(weight + float(normalized is False)) + 1
-    return 1 / weight
+        inv_weight = np.log(inv_weight + float(normalized is False)) + 1
+
+    weight = 1 / inv_weight
+
+    if mask is not None:
+        weight *= mask.astype(weight.dtype)
+
+    return weight
