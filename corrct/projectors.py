@@ -116,7 +116,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
     def __init__(
         self,
-        vol_geom: Union[Sequence[int], models.VolumeGeometry],
+        vol_geom: Union[Sequence[int], NDArray[np.integer], models.VolumeGeometry],
         angles_rot_rad: Union[Sequence[float], NDArray],
         rot_axis_shift_pix: Union[float, ArrayLike, NDArray, None] = None,
         *,
@@ -134,7 +134,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
         Parameters
         ----------
-        vol_geom : Sequence[int] | models.VolumeGeometry
+        vol_geom : Sequence[int] | NDArray[np.integer] | models.VolumeGeometry
             The volume shape in Y X and optionally Z.
         angles_rot_rad : Sequence[float] | NDArray
             The rotation angles.
@@ -371,7 +371,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
     def __init__(
         self,
-        vol_geom: Union[Sequence[int], models.VolumeGeometry],
+        vol_geom: Union[Sequence[int], NDArray[np.integer], models.VolumeGeometry],
         angles_rot_rad: Union[Sequence[float], NDArray],
         rot_axis_shift_pix: Union[float, ArrayLike, NDArray, None] = None,
         *,
@@ -395,7 +395,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
         Parameters
         ----------
-        vol_geom : Sequence[int] | models.VolumeGeometry
+        vol_geom : Sequence[int] | NDArray[np.integer] | models.VolumeGeometry
             The volume shape in X Y and optionally Z.
         angles_rot_rad : Sequence[float] | NDArray
             The rotation angles.
