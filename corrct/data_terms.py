@@ -9,12 +9,14 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 
-from typing import Sequence, Union
+from typing import Sequence, Union, Any
 from numpy.typing import NDArray
 
 from abc import ABC, abstractmethod
 
 from . import operators
+
+from copy import deepcopy
 
 
 eps = np.finfo(np.float32).eps
@@ -57,6 +59,30 @@ class DataFidelityBase(ABC):
         self.data = None
         self.sigma = 1.0
         self.sigma_data = None
+
+    def _slice_attr(self, attr: str, ind: Any) -> None:
+        attr_val = self.__getattribute__(attr)
+        if attr_val is not None and isinstance(attr_val, np.ndarray) and attr_val.size > 1:
+            self.__setattr__(attr, attr_val[ind])
+
+    def __getitem__(self, ind: Any) -> "DataFidelityBase":
+        """
+        Slice the norm and all its attributes.
+
+        Parameters
+        ----------
+        ind : Any
+            Slicing indices.
+
+        Returns
+        -------
+        DataFidelityBase
+            The sliced norm.
+        """
+        new_self = deepcopy(self)
+        for attr in self.__dict__.keys():
+            new_self._slice_attr(attr, ind)
+        return new_self
 
     def info(self) -> str:
         """
@@ -275,11 +301,16 @@ class DataFidelity_wl2(DataFidelity_l2):
 
     def __init__(self, weights: Union[float, NDArrayFloat], background: Union[float, NDArrayFloat, None] = None) -> None:
         super().__init__(background=background)
-        self.weights = weights
+        self.weights = np.array(weights)
 
     def assign_data(self, data: Union[float, NDArrayFloat, None], sigma: Union[float, NDArrayFloat] = 1.0):
         super().assign_data(data=data, sigma=sigma)
-        self.sigma1 = 1 / (1 + sigma / self.weights)
+        if isinstance(self.sigma, np.ndarray):
+            dtype = self.sigma.dtype
+        else:
+            dtype = type(self.sigma)
+        invalid_weights = (self.weights == 0).astype(dtype)
+        self.sigma1 = 1 / (1 + sigma / (self.weights + invalid_weights)) * (1 - invalid_weights)
 
     def compute_residual(self, proj_primal, mask: Union[float, NDArrayFloat, None] = None):
         if self.background is not None:
@@ -293,7 +324,11 @@ class DataFidelity_wl2(DataFidelity_l2):
         return residual
 
     def compute_residual_norm(self, dual: Union[float, NDArrayFloat]) -> float:
-        return float(np.linalg.norm((dual / np.sqrt(self.weights)).flatten(), ord=2) ** 2)
+        valid_weights = self.weights != 0
+        if isinstance(dual, np.ndarray):
+            dual = dual[valid_weights]
+        weights = self.weights[valid_weights]
+        return float(np.linalg.norm((dual / np.sqrt(weights)).flatten(), ord=2) ** 2)
 
 
 class DataFidelity_l2b(DataFidelity_l2):
