@@ -24,7 +24,7 @@ def circular_mask(
     vol_shape_zxy: Union[Sequence[int], NDArrayInt],
     radius_offset: float = 0,
     coords_ball: Union[Sequence[int], NDArrayInt, None] = None,
-    vol_origin_zxy: Optional[Sequence[float]] = None,
+    vol_origin_zxy: Union[Sequence[float], NDArray, None] = None,
     taper_func: Optional[str] = None,
     taper_target: Union[str, float] = "edge",
     super_sampling: int = 1,
@@ -67,7 +67,7 @@ def circular_mask(
     coords = [
         np.linspace(-(s - 1) / (2 * super_sampling), (s - 1) / (2 * super_sampling), s, dtype=dtype) for s in vol_shape_zxy_s
     ]
-    if vol_origin_zxy:
+    if vol_origin_zxy is not None:
         if len(coords) != len(vol_origin_zxy):
             raise ValueError(f"The volume shape ({len(coords)}), and the origin shape ({len(vol_origin_zxy)}) should match")
         coords = [c + vol_origin_zxy[ii] for ii, c in enumerate(coords)]
