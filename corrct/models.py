@@ -104,28 +104,7 @@ class ProjectionGeometry(Geometry):
         ProjectionGeometry
             The default paralle-beam geometry.
         """
-        if rot_axis_shift_pix is None:
-            det_pos_xyz = np.array([0, 0, 0])
-        else:
-            rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
-            det_pos_xyz = np.concatenate([rot_axis_shift_pix[:, None], np.zeros((len(rot_axis_shift_pix), 2))], axis=-1)
-
-        if isinstance(rot_axis_dir, str):
-            if rot_axis_dir.lower() == "clockwise":
-                rot_axis_dir = np.array([0, 0, -1])
-            else:
-                rot_axis_dir = np.array([0, 0, 1])
-        else:
-            rot_axis_dir = np.array(rot_axis_dir, ndmin=1)
-
-        return ProjectionGeometry(
-            geom_type="parallel" + geom_type,
-            src_pos_xyz=np.array([0, -1, 0]),
-            det_pos_xyz=det_pos_xyz,
-            det_u_xyz=np.array([1, 0, 0]),
-            det_v_xyz=np.array([0, 0, 1]),
-            rot_dir_xyz=rot_axis_dir,
-        )
+        return get_prj_geom_parallel(geom_type=geom_type, rot_axis_shift_pix=rot_axis_shift_pix, rot_axis_dir=rot_axis_dir)
 
     def set_detector_shifts_vu(self, det_pos_vu: ArrayLike) -> None:
         """
@@ -277,6 +256,17 @@ class VolumeGeometry(Geometry):
         return np.array([*vol_shape_zyx[:-2], vol_shape_zyx[-1], vol_shape_zyx[-2]], dtype=int)
 
     @property
+    def mask_shape(self) -> NDArray:
+        """Return the XY volume shape for circular masks.
+
+        Returns
+        -------
+        NDArray
+            Shape of the XY volume.
+        """
+        return self.shape_xyz[:2]
+
+    @property
     def extent(self) -> Sequence[float]:
         """
         Return extent of the volume.
@@ -317,10 +307,7 @@ class VolumeGeometry(Geometry):
         VolumeGeometry
             The default volume geometry.
         """
-        dims = dict(u=[], v=[], w=[], d=[])
-        for ii in range(-len(data.shape), 0):
-            dims[data_format[ii]] = [data.shape[ii]]
-        return VolumeGeometry([*(dims["u"] * 2), *dims["v"]])
+        return get_vol_geom_from_data(data=data, data_format=data_format)
 
     @staticmethod
     def get_default_from_volume(volume: NDArray) -> "VolumeGeometry":
@@ -337,9 +324,93 @@ class VolumeGeometry(Geometry):
         VolumeGeometry
             The default volume geometry.
         """
-        vol_shape_zxy = volume.shape
-        if len(vol_shape_zxy) < 2:
-            raise ValueError(
-                f"The volume should be at least 2-dimensional, but the following shape was passed: {vol_shape_zxy}"
-            )
-        return VolumeGeometry([vol_shape_zxy[-2], vol_shape_zxy[-1], *np.flip(vol_shape_zxy[:-2])])
+        return get_vol_geom_from_volume(volume=volume)
+
+
+def get_prj_geom_parallel(
+    *,
+    geom_type: str = "3d",
+    rot_axis_shift_pix: Optional[ArrayLike] = None,
+    rot_axis_dir: Union[str, ArrayLike] = "clockwise",
+) -> ProjectionGeometry:
+    """
+    Generate the default geometry for parallel beam.
+
+    Parameters
+    ----------
+    geom_type : str, optional
+        The geometry type. The default is "parallel3d".
+    rot_axis_shift_pix : Optional[ArrayLike], optional
+        Rotation axis shift in pixels. The default is None.
+    rot_axis_dir : Union[str, ArrayLike], optional
+        Rotation axis direction. It can be either a string or a direction. The default is "clockwise".
+
+    Returns
+    -------
+    ProjectionGeometry
+        The default paralle-beam geometry.
+    """
+    if rot_axis_shift_pix is None:
+        det_pos_xyz = np.array([0, 0, 0])
+    else:
+        rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
+        det_pos_xyz = np.concatenate([rot_axis_shift_pix[:, None], np.zeros((len(rot_axis_shift_pix), 2))], axis=-1)
+
+    if isinstance(rot_axis_dir, str):
+        if rot_axis_dir.lower() == "clockwise":
+            rot_axis_dir = np.array([0, 0, -1])
+        else:
+            rot_axis_dir = np.array([0, 0, 1])
+    else:
+        rot_axis_dir = np.array(rot_axis_dir, ndmin=1)
+
+    return ProjectionGeometry(
+        geom_type="parallel" + geom_type,
+        src_pos_xyz=np.array([0, -1, 0]),
+        det_pos_xyz=det_pos_xyz,
+        det_u_xyz=np.array([1, 0, 0]),
+        det_v_xyz=np.array([0, 0, 1]),
+        rot_dir_xyz=rot_axis_dir,
+    )
+
+
+def get_vol_geom_from_data(data: NDArray, data_format: str = "dvwu") -> VolumeGeometry:
+    """
+    Generate a default volume geometry from the data shape.
+
+    Parameters
+    ----------
+    data : NDArray
+        The data.
+    data_format : str, optional
+        The ordering and meaning of the dimensions in the data. The deault is "dvwu".
+
+    Returns
+    -------
+    VolumeGeometry
+        The default volume geometry.
+    """
+    dims = dict(u=[], v=[], w=[], d=[])
+    for ii in range(-len(data.shape), 0):
+        dims[data_format[ii]] = [data.shape[ii]]
+    return VolumeGeometry([*(dims["u"] * 2), *dims["v"]])
+
+
+def get_vol_geom_from_volume(volume: NDArray) -> VolumeGeometry:
+    """
+    Generate a default volume geometry from the given volume.
+
+    Parameters
+    ----------
+    volume : NDArray
+        The volume.
+
+    Returns
+    -------
+    VolumeGeometry
+        The default volume geometry.
+    """
+    vol_shape_zxy = volume.shape
+    if len(vol_shape_zxy) < 2:
+        raise ValueError(f"The volume should be at least 2-dimensional, but the following shape was passed: {vol_shape_zxy}")
+    return VolumeGeometry([vol_shape_zxy[-2], vol_shape_zxy[-1], *np.flip(vol_shape_zxy[:-2])])
