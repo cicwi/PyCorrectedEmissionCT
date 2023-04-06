@@ -100,6 +100,14 @@ corrct.solvers module
    :undoc-members:
    :show-inheritance:
 
+corrct.struct\_illum module
+---------------------------
+
+.. automodule:: corrct.struct_illum
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.testing module
 ---------------------
 
