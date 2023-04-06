@@ -38,6 +38,9 @@ def _filter_shifts(shifts_vu: NDArrayFloat, max_shifts: NDArrayFloat) -> NDArray
 class DetectorShiftsBase:
     """Compute the detector shifts for a given dataset."""
 
+    data_vwu: NDArrayFloat
+    angles_rad: NDArrayFloat
+
     def __init__(
         self,
         data_dvwu: NDArrayFloat,
@@ -50,6 +53,32 @@ class DetectorShiftsBase:
         precision_decimals: int = 2,
         verbose: bool = True,
     ):
+        """Initialize the base class for detector shifts.
+
+        Parameters
+        ----------
+        data_dvwu : NDArrayFloat
+            The tomographic data.
+        rot_angle_rad : ArrayLike | NDArrayFloat
+            The rotation angles in radians.
+        data_format : str, optional
+            The data organization, by default "dvwu"
+        data_mask_dvwu : NDArray | None, optional
+            The mask of the tomographic data, by default None
+        borders_dvwu : dict, optional
+            The borders of the tomographic data, by default {"d": None, "v": None, "w": None, "u": None}
+        max_shifts : float | NDArrayFloat | None, optional
+            Maximum shifts allowed, by default None
+        precision_decimals : int, optional
+            The precision of the results, by default 2
+        verbose : bool, optional
+            Whether to be verbose, by default True
+
+        Raises
+        ------
+        ValueError
+            Raised when passing incoherent data and angles.
+        """
         self.data_dims = len(data_dvwu.shape)
 
         self.data_shapes = dict(u=0, v=1, w=0, d=1)
@@ -58,7 +87,7 @@ class DetectorShiftsBase:
 
         self.num_dets = self.data_shapes["d"]
 
-        self.angles_rad = np.array(np.squeeze(rot_angle_rad), ndmin=1)
+        self.angles_rad = np.array(np.squeeze(rot_angle_rad), ndmin=1, dtype=np.float32)
         if self.data_shapes["w"] != len(self.angles_rad):
             raise ValueError(
                 f"Mismatch between rotation angles ({len(self.angles_rad)}),"
@@ -166,7 +195,7 @@ class DetectorShiftsPRE(DetectorShiftsBase):
         cc = local_ifft(ccs_f, axis=-2).real
 
         cc_coords = np.fft.fftfreq(cc.shape[-2], 1 / cc.shape[-2])
-        (f_vals, fc_ax) = fitting.extract_peak_regions_1d(cc, axis=-2, cc_coords=cc_coords)
+        f_vals, fc_ax = fitting.extract_peak_regions_1d(cc, axis=-2, cc_coords=cc_coords)
         shifts_v = fitting.refine_max_position_1d(f_vals, decimals=self.decimals) + fc_ax[1, :]
 
         shifts_v = _filter_shifts(shifts_v, self.max_shifts[0, :])
@@ -341,6 +370,13 @@ class DetectorShiftsXC(DetectorShiftsBase):
         return shifts_vu[:, list(angles_order)]
 
     def fit_u_180(self) -> float:
+        """Find the center-of-rotation, using the 0 and 180 degrees projections.
+
+        Returns
+        -------
+        float
+            The center-of-rotation.
+        """
         angle_0 = self.angles_rad.min()
         angle_0_ind = np.argmin(np.abs(self.angles_rad - angle_0))
         angle_180_ind = np.argmin(np.abs(self.angles_rad - (angle_0 + np.pi)))
@@ -355,13 +391,17 @@ class DetectorShiftsXC(DetectorShiftsBase):
         img_180 = np.flip(self.data_vwu[..., [angle_180_ind], :], axis=-1)
         # upsample_factor = 1 / (10 ** (-self.decimals))
         # return skr.phase_cross_correlation(img_0, img_180, upsample_factor=upsample_factor, return_error=False)
-        if self.num_dets > 1:
-            img_0 = img_0.sum(axis=0)
-            img_180 = img_180.sum(axis=0)
         shifts_vu = self.find_shifts_vu(img_0, img_180)
         return -shifts_vu[-1] / 2
 
     def fit_u_360(self) -> float:
+        """Find the center of rotation over a 360 degrees scan, by taking the average of the 0-180 over all pairs of angles.
+
+        Returns
+        -------
+        float
+            The center-of-rotation.
+        """
         # We should be checking whether the scan is really 360 or not.
 
         angles_boundary = self.angles_rad[0] + np.pi
@@ -375,8 +415,8 @@ class DetectorShiftsXC(DetectorShiftsBase):
 
         shifts_vu = np.empty([2, len(iis_1)])
         for ii, (ii1, ii2) in enumerate(tqdm(zip(iis_1, iis_2), total=num_angles)):
-            img_1 = self.data_vwu[..., [ii1], :]  # type: ignore
-            img_2 = np.flip(self.data_vwu[..., [ii2], :], axis=-1)  # type: ignore
+            img_1 = self.data_vwu[..., [ii1], :]
+            img_2 = np.flip(self.data_vwu[..., [ii2], :], axis=-1)
             shifts_vu[..., [ii]] = self.find_shifts_vu(img_1, img_2)
 
         cors = -shifts_vu[-1, :] / 2

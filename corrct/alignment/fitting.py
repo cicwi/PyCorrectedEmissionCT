@@ -15,7 +15,7 @@ import numpy.polynomial
 import scipy.optimize as spopt
 import scipy.ndimage as spimg
 
-from typing import List, Sequence, Tuple, Optional, Union
+from typing import Sequence, Tuple, Optional, Union
 from numpy.typing import ArrayLike, NDArray
 
 
@@ -26,6 +26,25 @@ eps = np.finfo(np.float32).eps
 
 
 def fit_shifts_u_sad(data_wu: NDArrayFloat, proj_wu: NDArrayFloat, error_norm: int = 1, decimals: int = 1) -> NDArrayFloat:
+    """
+    Find the U shifts between two sets of lines, by means of the sum-of-absolute-difference (SAD).
+
+    Parameters
+    ----------
+    data_wu : NDArrayFloat
+        The reference data.
+    proj_wu : NDArrayFloat
+        The other data.
+    error_norm : int, optional
+        The error norm to use, by default 1
+    decimals : int, optional
+        The precision of the result, by default 1
+
+    Returns
+    -------
+    NDArrayFloat
+        A list of one shift for each row.
+    """
     padding = np.zeros((len(data_wu.shape), 2), dtype=int)
     padding[-1, :] = (int(np.ceil(data_wu.shape[-1] / 2)), int(np.floor(data_wu.shape[-1] / 2)))
     pad_data_wu = np.pad(data_wu, pad_width=padding, mode="edge")
@@ -345,7 +364,7 @@ def refine_max_position_1d(
 
 def extract_peak_region_nd(
     cc: NDArrayFloat, peak_radius: int = 1, cc_coords: Union[Tuple[Union[Sequence, NDArray]], None] = None
-) -> Tuple[NDArray, Optional[List[NDArray]]]:
+) -> Tuple[NDArray, Optional[Sequence[NDArray]]]:
     """
     Extract a region around the maximum value.
 
