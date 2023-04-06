@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.7.2...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.8.0...develop
+
+## 0.8.0 - 2023-04-06
+### Added
+- Ghost imaging support (structured illumination):
+  - Theoretical mask generation (incl. MURA, Half-Gaussian, Bernoulli)
+  - Dedicated projector (CPU based).
+### Fixed
+- Circular mask initialization
 
 ## 0.7.2 - 2023-02-17
 ### Added
