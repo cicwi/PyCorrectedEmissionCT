@@ -127,14 +127,23 @@ def frc(
             raise ValueError(
                 f"Image #1 size {img1_shape} and image #2 size {img2_shape} are different, while they should be equal."
             )
+    if img1.dtype != img2.dtype:
+        print(f"WARNING: The two images have different dtype: img1 {img1.dtype}, img2 {img2.dtype}. Forcing the first.")
+        img2 = img2.astype(img1.dtype)
+    dtype = img1.dtype
 
     if supersampling > 1:
-        base_grid = [np.linspace(-(d - 1) / 2, (d - 1) / 2, d) for d in img1_shape]
+        # Bodge to make interpolation work with recent scipy: because the cython implementation does not compile for float32
+        dtype = float
+        img1 = img1.astype(dtype)
+        img2 = img2.astype(dtype)
 
-        interp_grid = [np.linspace(-(d - 1) / 2, (d - 1) / 2, d) for d in img1_shape]
+        base_grid = [np.linspace(-(d - 1) / 2, (d - 1) / 2, d, dtype=dtype) for d in img1_shape]
+
+        interp_grid = [np.linspace(-(d - 1) / 2, (d - 1) / 2, d, dtype=dtype) for d in img1_shape]
         for a in axes:
             d = img1_shape[a] * 2
-            interp_grid[a] = np.linspace(-(d - 1) / 4, (d - 1) / 4, d)
+            interp_grid[a] = np.linspace(-(d - 1) / 4, (d - 1) / 4, d, dtype=dtype)
         interp_grid = np.meshgrid(*interp_grid, indexing="ij")
         interp_grid = np.transpose(interp_grid, [*range(1, len(img1_shape) + 1), 0])
 
