@@ -28,6 +28,7 @@ def circular_mask(
     taper_func: Optional[str] = None,
     taper_target: Union[str, float] = "edge",
     super_sampling: int = 1,
+    squeeze: bool = True,
     dtype: DTypeLike = np.float32,
 ) -> NDArray:
     """
@@ -49,6 +50,8 @@ def circular_mask(
         The size target. Allowed values: "edge" | "diagonal". The default is "edge".
     super_sampling : int, optional
         The pixel super sampling to be used for the mask. The default is 1.
+    squeeze : bool, optional
+        Whether to squeeze the mask. The default is True.
     dtype : DTypeLike, optional
         The type of mask. The default is np.float32.
 
@@ -120,6 +123,9 @@ def circular_mask(
         new_shape = np.stack([np.array(vol_shape_zxy), np.ones_like(vol_shape_zxy) * super_sampling], axis=1).flatten()
         mask = mask.reshape(new_shape)
         mask = np.mean(mask, axis=tuple(np.arange(1, len(vol_shape_zxy) * 2, 2, dtype=int)))
+
+    if squeeze:
+        mask = np.squeeze(mask)
 
     return mask
 
