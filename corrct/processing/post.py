@@ -59,6 +59,66 @@ def com(vol: NDArray, axes: Optional[ArrayLike] = None) -> NDArray:
     return com
 
 
+def power_spectrum(
+    img: NDArray,
+    axes: Optional[Sequence[int]] = None,
+    smooth: Optional[int] = 5,
+    taper_ratio: Optional[float] = 0.05,
+    power: int = 2,
+) -> NDArray:
+    """
+    Compute the power spectrum of a n-dimensional signal.
+
+    Parameters
+    ----------
+    img : NDArray
+        The n-dimensional signal.
+    axes : Optional[Sequence[int]], optional
+        The axes over which we want to compute the power spectrum, by default None
+    smooth : Optional[int], optional
+        The smoothing kernel size, by default 5
+    taper_ratio : Optional[float], optional
+        Whether to taper the signal at the edges (for truncated signals), by default 0.05
+    power : int, optional
+        The exponent to use, by default 2
+
+    Returns
+    -------
+    NDArray
+        The power spectrum
+    """
+    img_shape = np.array(img.shape)
+
+    if axes is None:
+        axes = list(np.arange(-len(img_shape), 0))
+
+    axes_shape = img_shape[list(axes)]
+    cut_off = np.min(axes_shape) // 2
+
+    if taper_ratio is not None:
+        taper_size = float(taper_ratio * np.mean(axes_shape))
+        vol_mask = circular_mask(img_shape, coords_ball=axes, radius_offset=-taper_size, taper_func="cos")
+        img = img * vol_mask
+
+    img_f = np.fft.fftn(img, axes=axes)
+
+    f1 = np.abs(img_f) ** power
+    f1_int = azimuthal_integration(f1, axes=axes, domain="fourier")
+
+    rings_size = azimuthal_integration(np.ones_like(img), axes=axes, domain="fourier")
+    ps = f1_int / rings_size
+    dc_val = np.sqrt(np.min(axes_shape) ** len(axes_shape)) ** power
+    ps /= dc_val
+
+    if smooth is not None and smooth > 1:
+        win = sp.signal.windows.hann(smooth)
+        win /= np.sum(win)
+        win = win.reshape([*[1] * (ps.ndim - 1), -1])
+        ps = sp.ndimage.convolve(ps, win, mode="nearest")
+
+    return ps[..., :cut_off]
+
+
 def frc(
     img1: NDArray,
     img2: Optional[NDArray],
