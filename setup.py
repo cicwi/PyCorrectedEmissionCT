@@ -6,4 +6,4 @@
 from setuptools import find_packages, setup
 
 if __name__ == "__main__":
-    setup(packages=find_packages("./corrct"), package_dir={"": "./corrct"})
+    setup(packages=find_packages(include=["corrct", "corrct.*"]))
