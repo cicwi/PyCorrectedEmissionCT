@@ -307,6 +307,29 @@ class DetectorShiftsPRE(DetectorShiftsBase):
 class DetectorShiftsXC(DetectorShiftsBase):
     """Compute the center-of-rotation for a given dataset, by cross correlation."""
 
+    def fit_vu_accum_drifts(self, ref_data_dvwu: Optional[NDArrayFloat] = None) -> NDArray:
+        if ref_data_dvwu is None:
+            ref_data_dvwu = self.data_vwu[..., [0], :]
+
+        img_inds = np.arange(self.data_shapes["w"])
+        if ref_data_dvwu.shape[-2] == 1:
+            ref_inds = np.zeros_like(img_inds)
+        else:
+            ref_inds = np.arange(ref_data_dvwu.shape[-2])
+        if img_inds.size != ref_inds.size:
+            raise ValueError(
+                f"Reference images should either be 1 or as many as the data images"
+                f" ({img_inds.size}), but {ref_inds.size} were passed instead"
+            )
+
+        is_3d = self.data_shapes["v"] > 1
+        num_dims = 1 + is_3d
+        rel_shifts_vu = np.zeros((num_dims, img_inds.size))
+        for ii, (ind_ref, ind_img) in enumerate(zip(tqdm(ref_inds, desc="Computing drifts"), img_inds)):
+            rel_shifts_vu[..., [ii]] = self.find_shifts_vu(ref_data_dvwu[..., [ind_ref], :], self.data_vwu[..., [ind_img], :])
+
+        return rel_shifts_vu
+
     def fit_vu(self, cor: Optional[float] = None, fit_l1: bool = False) -> NDArray:
         """Compute the pre-alignment vertical and horizontal shifts, using cross-correlation.
 

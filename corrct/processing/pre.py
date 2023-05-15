@@ -13,6 +13,7 @@ import numpy as np
 from numpy.polynomial import Polynomial
 
 import skimage.transform as skt
+import scipy.ndimage as spimg
 
 import matplotlib.pyplot as plt
 
@@ -136,6 +137,36 @@ def rotate_proj_stack(data_vwu: NDArray, rot_angle_deg: float) -> NDArray:
     for ii in range(data_vwu.shape[-2]):
         data_vwu_r[:, ii, :] = skt.rotate(data_vwu[:, ii, :], -rot_angle_deg, clip=False)
     return data_vwu_r
+
+
+def shift_proj_stack(data_vwu: NDArray, shifts: NDArray, use_fft: bool = False) -> NDArray:
+    """Shift each projection in a stack of projections, by projection dependent shifts.
+
+    Parameters
+    ----------
+    data_vwu : NDArray
+        The projection stack
+    shifts : NDArray
+        The shifts
+    use_fft : bool, optional
+        Whether to use fft shift or not, by default False
+
+    Returns
+    -------
+    NDArray
+        The shifted stack
+    """
+    new_data = np.empty_like(data_vwu)
+    for ii in range(data_vwu.shape[-2]):
+        if use_fft:
+            img = data_vwu[..., ii, :]
+            img_f = np.fft.rfftn(img)
+            img_f = spimg.fourier_shift(img_f, shifts[..., ii], n=img.shape[-1])
+            new_data[..., ii, :] = np.fft.irfftn(img_f)
+        else:
+            new_data[..., ii, :] = spimg.shift(data_vwu[..., ii, :], shifts[..., ii], order=1, mode="nearest")
+
+    return new_data
 
 
 def bin_imgs(imgs: NDArray, binning: Union[int, float], verbose: bool = True) -> NDArray:
