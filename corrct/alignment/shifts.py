@@ -316,6 +316,24 @@ class DetectorShiftsXC(DetectorShiftsBase):
     """Compute the center-of-rotation for a given dataset, by cross correlation."""
 
     def fit_vu_accum_drifts(self, ref_data_dvwu: Optional[NDArrayFloat] = None) -> NDArray:
+        """Fit static image drifts.
+
+        Parameters
+        ----------
+        ref_data_dvwu : Optional[NDArrayFloat], optional
+            Reference image, by default None. If None, the first image in the
+            data stack will be used.
+
+        Returns
+        -------
+        NDArray
+            The shifts of the image stack.
+
+        Raises
+        ------
+        ValueError
+            When the number of reference images is either too many or not enough.
+        """
         if ref_data_dvwu is None:
             ref_data_dvwu = self.data_vwu[..., [0], :]
 
