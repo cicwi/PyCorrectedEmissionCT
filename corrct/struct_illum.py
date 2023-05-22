@@ -12,7 +12,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 import numpy as np
 
 from numpy.typing import NDArray, DTypeLike
-from typing import Union, Sequence, Optional
+from typing import Union, Sequence, Optional, Tuple
 
 from abc import abstractmethod, ABC
 
@@ -23,6 +23,37 @@ from . import operators
 import copy as cp
 
 NDArrayInt = NDArray[np.integer]
+
+
+def decompose_qr_masks(masks: NDArray, verbose: bool = False) -> Tuple[NDArray, NDArray]:
+    """Compute QR decomposition of the given masks.
+
+    Parameters
+    ----------
+    masks : NDArray
+        The masks to decompose
+    verbose : bool, optional
+        Whether to emite verbose output, by default False
+
+    Returns
+    -------
+    Tuple[NDArray, NDArray]
+        The Q and R components.
+    """
+    masks_shape = masks.shape
+    masks = masks.reshape([-1, np.prod(masks_shape[-2:])])
+
+    if verbose:
+        print("Computing QR decomposition")
+    Q, R = np.linalg.qr(masks.transpose())
+
+    Rt = R.transpose()
+    Qt = Q.transpose()
+    if verbose:
+        print("Computing inversion of R (fast, because triangular)")
+    R1t = np.linalg.inv(Rt)
+
+    return Qt.reshape(masks_shape), R1t
 
 
 class MaskCollection:
