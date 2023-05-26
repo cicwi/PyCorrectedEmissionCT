@@ -10,6 +10,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
+from scipy import linalg as spalg
 
 from numpy.typing import NDArray, DTypeLike
 from typing import Union, Sequence, Optional, Tuple
@@ -23,6 +24,32 @@ from . import operators
 import copy as cp
 
 NDArrayInt = NDArray[np.integer]
+
+
+def reorder_masks(masks: NDArray, buckets: NDArray, shift: int) -> Tuple[NDArray, NDArray]:
+    """Reorder masks, with a simple rot-n algorithm.
+
+    Parameters
+    ----------
+    masks : NDArray
+        The masks to re-order.
+    buckets : NDArray
+        The corresponding buckets.
+    shift : int
+        The length of the shift.
+
+    Returns
+    -------
+    Tuple[NDArray, NDArray]
+        The reordered masks and buckets.
+    """
+    masks_shape = masks.shape
+    masks = masks.reshape([-1, *masks_shape[-2:]])
+
+    masks = np.roll(masks, -shift, axis=0)
+    buckets = np.roll(buckets, -shift)
+
+    return masks.reshape(masks_shape), buckets
 
 
 def decompose_qr_masks(masks: NDArray, verbose: bool = False) -> Tuple[NDArray, NDArray]:
@@ -192,6 +219,40 @@ class MaskCollection:
             mask = self.masks_dec
 
         return mask[tuple(mask_inds_vu)]
+
+    def get_QR_decomposition(self, buckets: NDArray, shift: int = 0) -> Tuple["MaskCollection", NDArray]:
+        """Compute and return the QR decomposition of the masks.
+
+        Parameters
+        ----------
+        buckets : NDArray
+            The buckets corresponding to the masks.
+        shift : int, optional
+            Index of the first mask, by default 0.
+
+        Returns
+        -------
+        Tuple[MaskCollection, NDArray]
+            The new mask collection and the matrix for modifying buckets accordingly.
+
+        Raises
+        ------
+        ValueError
+            In case the masks have encoding-decoding form.
+        """
+        if np.any(self.masks_dec != self.masks_enc):
+            raise ValueError("Cannot compute QR decomposition of masks that have encoding and decoding forms.")
+
+        new_masks = cp.deepcopy(self)
+        new_buckets = cp.deepcopy(buckets)
+        if shift != 0:
+            new_masks.masks_enc, new_buckets = reorder_masks(new_masks.masks_enc, new_buckets, shift=shift)
+
+        new_masks.masks_enc, R1t = decompose_qr_masks(new_masks.masks_enc)
+        new_masks.masks_dec = new_masks.masks_enc
+        new_buckets = R1t.dot(new_buckets)
+
+        return new_masks, new_buckets
 
     def inspect_masks(self, mask_inds_vu: Union[None, Sequence[int], NDArrayInt] = None):
         """Inspect the encoding and decoding masks at the requested shifts.
@@ -676,6 +737,8 @@ class MaskGeneratorMURA(MaskGenerator):
 class ProjectorGhostImaging(operators.ProjectorOperator):
     """Projector class for the ghost imaging reconstructions."""
 
+    mc: MaskCollection
+
     def __init__(self, mask_collection: MaskCollection):
         """
         Initialize the Ghost Imaging projector class.
@@ -687,10 +750,10 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         """
         self.mc = mask_collection
 
-        axes_shifts = np.arange(len(self.mc.shape_shifts))
-        self.col_sum = np.sum(self.mc.masks_dec, axis=tuple(axes_shifts))
-        axes_FoV = np.arange(-len(self.mc.shape_FoV), 0)
-        self.row_sum = np.sum(self.mc.masks_enc * self.mc.masks_dec, axis=tuple(axes_FoV))
+        self._axes_shifts = np.arange(len(self.mc.shape_shifts))
+        self.col_sum = np.abs(self.mc.masks_dec).sum(axis=tuple(self._axes_shifts))
+        self._axes_fov = np.arange(-len(self.mc.shape_FoV), 0)
+        self.row_sum = np.sqrt(np.abs(self.mc.masks_enc * self.mc.masks_dec)).sum(axis=tuple(self._axes_fov))
 
         self.vol_shape = self.mc.masks_enc.shape[-2:]
         self.prj_shape = np.array(self.mc.num_buckets, ndmin=1)
@@ -733,10 +796,37 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         masks_shape = [np.prod(self.mc.shape_shifts), np.prod(self.mc.shape_FoV)]
         out_shape = [*bucket_vals.shape[:-1], *self.mc.shape_FoV]
 
-        return bucket_vals.dot(self.mc.masks_dec.reshape(masks_shape)).reshape(out_shape)
+        masks_in = self.mc.masks_dec.reshape(masks_shape)
+        img_out: NDArray = bucket_vals.dot(masks_in)
+
+        return img_out.reshape(out_shape)
         # return np.sum(bucket_vals[..., None, None] * self.masks_dec, axis=-3, keepdims=True)
 
-    def fbp(self, bucket_vals: NDArray) -> NDArray:
+    def adjust_sampling_scaling(self, image: NDArray) -> NDArray:
+        """Adjust reconstruction scaling and bias, due to the undersampling.
+
+        Parameters
+        ----------
+        image : NDArray
+            Unscaled image.
+
+        Returns
+        -------
+        NDArray
+            Scaled image.
+        """
+        sampling_ratio = self.mc.num_buckets / np.prod(self.mc.shape_FoV)
+
+        image_f: NDArray = np.fft.rfftn(image, axes=tuple(self._axes_fov), norm="ortho")
+        rec_f_shape = np.array(image_f.shape)[list(self._axes_fov)]
+
+        sampling_filter = np.ones(rec_f_shape, dtype=image.dtype) / sampling_ratio
+        sampling_filter[0, 0] = 1
+        image_f *= sampling_filter
+
+        return np.fft.irfftn(image_f, s=self.mc.shape_FoV, axes=tuple(self._axes_fov), norm="ortho")
+
+    def fbp(self, bucket_vals: NDArray, use_lstsq: bool = True) -> NDArray:
         """Compute cross-correlation reconstruction of the bucket values.
 
         Parameters
@@ -749,7 +839,16 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         NDArray
             The reconstructed image.
         """
-        return self.bp(bucket_vals - np.mean(bucket_vals)) + np.mean(bucket_vals) * np.mean(self.col_sum)
+        # return self.bp(bucket_vals - np.mean(bucket_vals)) + np.mean(bucket_vals) * np.mean(self.col_sum)
+        if np.any(self.mc.masks_enc != self.mc.masks_dec) and not use_lstsq:
+            img = self.bp(bucket_vals)
+        else:
+            masks = self.mc.masks_enc.reshape([-1, np.prod(self.mc.shape_FoV)])
+            result = spalg.lstsq(masks, bucket_vals)
+            img: NDArray = result[0]
+            img = img.reshape(self.mc.shape_FoV)
+
+        return self.adjust_sampling_scaling(img)
 
     def absolute(self):
         """Compute the absolute value of the projection operator coefficients.
