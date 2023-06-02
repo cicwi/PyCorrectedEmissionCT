@@ -6,12 +6,13 @@ Pre-processing routines.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import numpy as np
-
-import skimage.transform as skt
-
 from typing import Sequence, Optional, Union, Tuple
 from numpy.typing import DTypeLike, NDArray
+
+import numpy as np
+from numpy.polynomial import Polynomial
+
+import skimage.transform as skt
 
 import matplotlib.pyplot as plt
 
@@ -170,6 +171,79 @@ def bin_imgs(imgs: NDArray, binning: Union[int, float], verbose: bool = True) ->
         print(f"Binning: {imgs_shape} => {binned_shape}")
 
     return imgs
+
+
+def find_background_from_margin(
+    data_vwu: NDArray, margin: Union[int, Sequence[int], NDArray[np.integer]] = 4, poly_order: int = 0, plot: bool = False
+) -> NDArray:
+    """Compute background of the projection data, from the margins of the projections.
+
+    Parameters
+    ----------
+    data_vwu : NDArray
+        The projection data in the format [V]WU.
+    margin : int | Sequence[int] | NDArray[np.integer], optional
+        The size of the margin, by default 4
+    poly_order : int, optional
+        The order of the interpolation polynome, by default 0
+
+    Returns
+    -------
+    NDArray
+        The computed background.
+
+    Raises
+    ------
+    NotImplementedError
+        Different margins per line are not supported, at the moment.
+    ValueError
+        In case the margins ar larger than the image size in U.
+    """
+    data_shape_u = data_vwu.shape[-1]
+    data_shape_w = data_vwu.shape[-2]
+    margin = np.array(margin, dtype=int, ndmin=1)
+    if margin.size == 1:
+        margin = np.tile(margin, [*np.ones(margin.ndim - 1), 2])
+    if margin.ndim > 1:
+        raise NotImplementedError("Complex masks support has not been implemented, yet.")
+    if margin.sum() > data_shape_u:
+        raise ValueError(f"Margin size ({margin}) should be smaller than the image size in U ({data_shape_u})")
+    if poly_order > 0 and np.any(margin == 0):
+        print("WARNING: parameter `poly_order` cannot be greater than 0 if one of the margins is 0")
+        poly_order = 0
+
+    if poly_order > 0:
+        ydata = np.concatenate([data_vwu[..., : margin[0]], data_vwu[..., -margin[1] :]], axis=-1)
+        xdata = np.concatenate([np.arange(0, margin[0]), np.arange(data_shape_u - margin[1], data_shape_u)])
+
+        if data_vwu.ndim > 2:
+            ydata = ydata.mean(axis=-3)
+
+        background = np.empty([data_shape_w, data_shape_u], dtype=data_vwu.dtype)
+        for ii_w in range(data_shape_w):
+            poly = Polynomial.fit(xdata, ydata[ii_w], deg=poly_order)
+            background[ii_w, :] = poly(np.arange(data_shape_u))
+
+        if plot:
+            fig, axs = plt.subplots(1, 1)
+            axs.plot(background[0])
+            axs.scatter(xdata, ydata[0])
+            axs.grid()
+            axs.set_ylim(0)
+            fig.tight_layout()
+            plt.show(block=False)
+
+        if data_vwu.ndim > 2:
+            background = np.tile(background[None, ...], [data_vwu.shape[-3], 1, 1])
+        return background
+    else:
+        sum_vals = data_vwu[..., : margin[0]].sum(axis=-1) + data_vwu[..., -margin[1] :].sum(axis=-1)
+        background: NDArray = sum_vals / margin.sum(axis=-1)
+
+        if data_vwu.ndim > 2:
+            background = background.mean(axis=-2, keepdims=True)
+
+        return np.tile(background[..., None], [*np.ones(background.ndim, dtype=int), data_shape_u])
 
 
 def compute_eigen_flats(
