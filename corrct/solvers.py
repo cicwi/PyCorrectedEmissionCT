@@ -996,3 +996,153 @@ class PDHG(Solver):
 
 
 CP = PDHG
+
+class MLEM(Solver):
+    """
+    Initialize the MLEM solver class.
+
+    This class implements the Maximul Likelihood Expectation Maximization (MLEM) algorithm.
+
+    Parameters
+    ----------
+    verbose : bool, optional
+        Turn on verbose output. The default is False.
+    tolerance : Optional[float], optional
+        Tolerance on the data residual for computing when to stop iterations.
+        The default is None.
+    relaxation : float, optional
+        The relaxation length. The default is 1.95.
+    ##
+    # JL: TO BE CHECKED if the following are necessary.
+    ##
+    regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional
+        Regularizer to be used. The default is None.
+    data_term : Union[str, DataFidelityBase], optional
+        Data fidelity term for computing the data residual. The default is "l2".
+    data_term_test : Optional[DataFidelityBase], optional
+        The data fidelity to be used for the test set.
+        If None, it will use the same as for the rest of the data.
+        The default is None.
+    """
+
+    def __init__(
+        self,
+        verbose: bool = False,
+        relaxation: float = 1.95,
+        tolerance: Optional[float] = None,
+        regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
+        data_term: Union[str, DataFidelityBase] = "l2",
+        data_term_test: Union[str, DataFidelityBase, None] = None,
+    ):
+        super().__init__(
+            verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
+        )
+        self.regularizer = self._initialize_regularizer(regularizer)
+
+    def info(self) -> str:
+        """
+        Return the MLEM info.
+
+        Returns
+        -------
+        str
+            MLEM info string.
+        """
+        reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+        return Solver.info(self) + "-" + self.data_term.info() + reg_info
+
+    def __call__(  # noqa: C901
+        self,
+        A: operators.BaseTransform,
+        b: NDArrayFloat,
+        iterations: int,
+        x0: Optional[NDArrayFloat] = None,
+        lower_limit: Union[float, NDArrayFloat, None] = None,
+        upper_limit: Union[float, NDArrayFloat, None] = None,
+        x_mask: Optional[NDArrayFloat] = None,
+        b_mask: Optional[NDArrayFloat] = None,
+        b_test_mask: Optional[NDArrayFloat] = None,
+    ) -> Tuple[NDArrayFloat, SolutionInfo]:
+        """
+        Reconstruct the data, using the MLEM algorithm.
+
+        Parameters
+        ----------
+        A : BaseTransform
+            Projection operator.
+        b : NDArrayFloat
+            Data to reconstruct.
+        iterations : int
+            Number of iterations.
+        x0 : Optional[NDArrayFloat], optional
+            Initial solution. The default is None.
+        lower_limit : Union[float, NDArrayFloat], optional
+            Lower clipping value. The default is None.
+        upper_limit : Union[float, NDArrayFloat], optional
+            Upper clipping value. The default is None.
+        x_mask : Optional[NDArrayFloat], optional
+            Solution mask. The default is None.
+        b_mask : Optional[NDArrayFloat], optional
+            Data mask. The default is None.
+        b_test_mask : Optional[NDArrayFloat], optional
+            Test data mask. The default is None.
+
+        Returns
+        -------
+        Tuple[NDArrayFloat, SolutionInfo]
+            The reconstruction, and the residuals.
+        """
+        b = np.array(b)
+
+        (b_mask, b_test_mask) = self._initialize_b_masks(b, b_mask, b_test_mask)
+
+        # Back-projection of ones to prepare normalization step.
+        b_ones = np.ones_like(b)
+        if b_mask is not None:
+            b_ones *= b_mask
+        normalization_factors = A.T(b_ones)
+
+
+        if x0 is None:
+            x = np.ones_like(normalization_factors)
+        else:
+            x = np.array(x0).copy()
+
+        self.data_term.assign_data(b)
+
+        info = SolutionInfo(self.info(), max_iterations=iterations, tolerance=self.tolerance)
+
+        if b_test_mask is not None or self.tolerance is not None:
+            Ax = A(x)
+
+            if b_test_mask is not None:
+                if self.data_term_test.background != self.data_term.background:
+                    print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
+                    self.data_term_test.background = self.data_term.background
+                self.data_term_test.assign_data(b)
+
+                res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
+                info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
+
+            if self.tolerance is not None:
+                res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
+                info.residual0 = self.data_term.compute_residual_norm(res_0)
+
+        reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+        algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
+
+        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
+            info.iterations += 1
+
+            # The MLEM update
+            Ax = A(x)
+            upd = A.T(b / Ax)
+            x *= upd
+            x /= normalization_factors
+
+            if lower_limit is not None or upper_limit is not None:
+                x = x.clip(lower_limit, upper_limit)
+            if x_mask is not None:
+                x *= x_mask
+
+        return x, info
