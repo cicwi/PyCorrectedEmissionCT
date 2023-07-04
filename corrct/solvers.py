@@ -1137,6 +1137,7 @@ class MLEM(Solver):
 
             # The MLEM update
             Ax = A(x)
+            Ax[Ax < eps] += eps
             upd = A.T(b / Ax)
             x *= upd
             x /= normalization_factors
