@@ -169,3 +169,18 @@ class TestSolvers(unittest.TestCase):
         print_max_deviation(test_ind, sol_diff)
 
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
+
+    def test_007_MLEM(self):
+        """Test MLEM algorithm in 2D."""
+        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
+
+        #reg = solvers.Regularizer_TV2D(1e-4)
+        algo = solvers.MLEM()
+        sol, _ = algo(A, self.data_flat_2d, 1000)
+        #sol, _ = algo(A, sino_substract, num_iterations_mlem, x_mask=vol_mask, lower_limit=1e-5, upper_limit=10)
+
+        sol_diff = self.vol_flat_2d - sol
+        test_ind = get_test_ind(sys._getframe().f_code.co_name)
+        print_max_deviation(test_ind, sol_diff)
+
+        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))

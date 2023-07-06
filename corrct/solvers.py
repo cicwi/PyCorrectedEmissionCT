@@ -730,7 +730,7 @@ class PDHG(Solver):
     """
     Initialize the PDHG solver class.
 
-    PDHG stands for primal-dual hybridg gradient algorithm from Chambolle and Pock.
+    PDHG stands for primal-dual hybrid gradient algorithm from Chambolle and Pock.
 
     Parameters
     ----------
@@ -1046,7 +1046,7 @@ class MLEM(Solver):
         Returns
         -------
         str
-            MLEM info string.
+                 info string.
         """
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         return Solver.info(self) + "-" + self.data_term.info() + reg_info
@@ -1062,6 +1062,7 @@ class MLEM(Solver):
         x_mask: Optional[NDArrayFloat] = None,
         b_mask: Optional[NDArrayFloat] = None,
         b_test_mask: Optional[NDArrayFloat] = None,
+        mu: float = 1e-5,
     ) -> Tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the MLEM algorithm.
@@ -1139,8 +1140,21 @@ class MLEM(Solver):
             Ax = A(x)
             Ax[Ax < eps] += eps
             upd = A.T(b / Ax)
-            x *= upd
-            x /= normalization_factors
+            nb_reguls = len(self.regularizer)
+            if  nb_reguls == 0:
+                pinv = 1. / normalization_factors
+            elif nb_reguls == 1:
+                regul_weight = float(self.regularizer[0].weight)
+                # With the existing operators
+                #grad = self.regularizer[0].op.gradient(x)
+                #grad_tv = self.regularizer[0].op.divergence(grad)
+
+                # With new implementation
+                grad_tv = self.grad_tv_smoothed(x,mu)
+                pinv = 1. / (normalization_factors + regul_weight * grad_tv)
+            
+            x *= upd * pinv
+            # x /= normalization_factors
 
             if lower_limit is not None or upper_limit is not None:
                 x = x.clip(lower_limit, upper_limit)
@@ -1148,3 +1162,82 @@ class MLEM(Solver):
                 x *= x_mask
 
         return x, info
+    
+    def gradient(
+        self,
+        x: NDArrayFloat
+    ) -> NDArrayFloat:
+        """
+        Compute the gradient of an image as a numpy array
+        Code from https://github.com/emmanuelle/tomo-tv/
+
+        Parameters
+        ----------
+        x : NDArrayFloat
+            The input image.
+
+        Returns
+        -------
+        NDArrayFloat
+            The gradient of the image: the i-th component along the first
+            axis is the gradient along the i-th axis of the original
+            array x
+        """
+        shape = [x.ndim, ] + list(x.shape)
+        gradient = np.zeros(shape, dtype=x.dtype)
+        slice_all = [0, slice(None, -1),]
+
+        for d in range(x.ndim):
+            gradient[tuple(slice_all)] = np.diff(x, axis=d)
+            slice_all[0] = d + 1
+            slice_all.insert(1, slice(None))
+        
+        return gradient
+
+
+    def divergence(
+        self,
+        gradient: NDArrayFloat
+    ) -> NDArrayFloat:
+        """
+        Compute the divergence of a gradient
+        Code from https://github.com/emmanuelle/tomo-tv/
+
+        Parameters
+        ----------
+        gradient : NDArrayFloat
+            The input gradient.
+
+        Returns
+        -------
+        NDArrayFloat
+            The divergence of the gradient image.
+        """
+        res = np.zeros(gradient.shape[1:])
+        for d in range(gradient.shape[0]):
+            this_grad = np.rollaxis(gradient[d], d)
+            this_res = np.rollaxis(res, d)
+            this_res[:-1] += this_grad[:-1]
+            this_res[1:-1] -= this_grad[:-2]
+            this_res[-1] -= this_grad[-2]
+        return res
+
+    def grad_tv_smoothed(
+        self,
+        x: NDArrayFloat,
+        mu: float
+    ) -> NDArrayFloat:
+        """
+        Gradient of Moreau-Yosida approximation of Total Variation
+
+        Parameters
+        ----------
+        x: NDArrayFloat
+            The input image.
+        mu: float
+            Threshold to avoid null gradient.
+        """
+        g = self.gradient(x)
+        m = np.maximum(mu, np.sqrt(g[0]**2 + g[1]**2))
+        g /= m
+        return -self.divergence(g)
