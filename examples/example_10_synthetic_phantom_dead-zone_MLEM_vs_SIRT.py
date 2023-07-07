@@ -54,7 +54,7 @@ ph_or = ph_or[:, :, 1]
 
 bckgnd_weight = np.sqrt(background_avg / (vol_shape[0] * np.sqrt(2)))
 
-num_iterations_sirt = 200
+num_iterations_sirt = 10000
 num_iterations_mlem = 50
 lower_limit = 0
 vol_mask = cct.processing.circular_mask(ph_or.shape)
@@ -71,18 +71,25 @@ data_term_ls = cct.solvers.DataFidelity_l2()
 data_term_lsw = cct.solvers.DataFidelity_wl2(sino_weights)
 data_term_lsb = cct.solvers.DataFidelity_l2b(sino_variance)
 
+regul_weight = 1
+regul = cct.regularizers.Regularizer_TV2D(regul_weight)
+
 
 with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
-    
-    solver_sirt = cct.solvers.SIRT(verbose=True)
+
+    solver_wls_l = cct.solvers.PDHG(verbose=True, data_term=data_term_lsw, regularizer=[lowlim_l2w])
+    rec_wls_l, _ = solver_wls_l(A, sino_substract, num_iterations_sirt, x_mask=vol_mask)
+    #
+    solver_sirt = cct.solvers.SIRT(verbose=True, data_term=data_term_lsw)
     rec_sirt, _ = solver_sirt(A, sino_substract, num_iterations_sirt, x_mask=vol_mask)
 
-    solver_mlem = cct.solvers.MLEM(verbose=True, data_term=data_term_ls)
+    solver_mlem = cct.solvers.MLEM(verbose=True)
     rec_mlem, _ = solver_mlem(A, sino_substract, num_iterations_mlem, x_mask=vol_mask, lower_limit=1e-5, upper_limit=10)
 
+
 # Reconstructions
-f = plt.figure(figsize=cm2inch([24, 24]))
-gs = f.add_gridspec(8, 2)
+f = plt.figure(figsize=cm2inch([36, 24]))
+gs = f.add_gridspec(8, 3)
 ax_ph = f.add_subplot(gs[:4, 0])
 im_ph = ax_ph.imshow(expected_ph,vmin=0.,vmax=3.)
 ax_ph.set_title("Phantom")
@@ -104,12 +111,17 @@ im_sino_lines = ax_sino_lines.plot(sino_clean[9, :], label="Clean")
 ax_sino_lines.set_title("Sinograms - angle: 10")
 ax_sino_lines.legend()
 
-ax_sirt = f.add_subplot(gs[:4, 1], sharex=ax_ph, sharey=ax_ph)
+ax_wls_l = f.add_subplot(gs[:4, 1], sharex=ax_ph, sharey=ax_ph)
+im_wls_l = ax_wls_l.imshow(np.squeeze(rec_wls_l),vmin=0.,vmax=3.)
+ax_wls_l.set_title(solver_wls_l.info().upper())
+f.colorbar(im_wls_l, ax=ax_wls_l)
+
+ax_sirt = f.add_subplot(gs[4:, 1], sharex=ax_ph, sharey=ax_ph)
 im_sirt = ax_sirt.imshow(np.squeeze(rec_sirt),vmin=0.,vmax=3.)
 ax_sirt.set_title(solver_sirt.info().upper())
 f.colorbar(im_sirt, ax=ax_sirt)
 
-ax_mlem = f.add_subplot(gs[4:, 1], sharex=ax_ph, sharey=ax_ph)
+ax_mlem = f.add_subplot(gs[:4, 2], sharex=ax_ph, sharey=ax_ph)
 im_mlem = ax_mlem.imshow(np.squeeze(rec_mlem),vmin=0.,vmax=3.)
 ax_mlem.set_title(solver_mlem.info().upper())
 f.colorbar(im_mlem, ax=ax_mlem)
@@ -121,6 +133,7 @@ f.tight_layout()
 
 f,ax = plt.subplots()
 ax.plot(np.squeeze(expected_ph[..., 172]), label="Phantom")
+ax.plot(np.squeeze(rec_wls_l[..., 172]), label=solver_wls_l.info().upper())
 ax.plot(np.squeeze(rec_sirt[..., 172]), label=solver_sirt.info().upper())
 ax.plot(np.squeeze(rec_mlem[..., 172]), label=solver_mlem.info().upper())
 ax.legend()
