@@ -174,7 +174,6 @@ class TestSolvers(unittest.TestCase):
         """Test MLEM algorithm in 2D."""
         A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
 
-        #reg = solvers.Regularizer_TV2D(1e-4)
         algo = solvers.MLEM()
         sol, _ = algo(A, self.data_flat_2d, 1000)
         #sol, _ = algo(A, sino_substract, num_iterations_mlem, x_mask=vol_mask, lower_limit=1e-5, upper_limit=10)

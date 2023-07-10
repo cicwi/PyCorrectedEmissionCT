@@ -666,7 +666,8 @@ class MLEM(Solver):
             x = np.ones_like(tau)
         else:
             x = np.array(x0).copy()
-        x *= x_mask
+        if x_mask is not None;
+            x *= x_mask
 
         self.data_term.assign_data(b)
 
