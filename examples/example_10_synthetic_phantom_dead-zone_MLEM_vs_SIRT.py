@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-This example reproduces the l2 dead-zone reconstruction of the phantom used in:
+This example compares MLEM solver with SIRT and standard weighted Least 
+Squares reconstructions of the phantom used in:
 
 - N. Viganò and V. A. Solé, “Physically corrected forward operators for
 induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
@@ -10,7 +11,7 @@ Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.
 """
 
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import    ArrayLike
 from typing import Tuple
 
 import matplotlib.pyplot as plt
@@ -53,7 +54,7 @@ ph_or = ph_or[:, :, 1]
 
 bckgnd_weight = np.sqrt(background_avg / (vol_shape[0] * np.sqrt(2)))
 
-num_iterations_sirt = 100
+num_iterations_sirt = 10000
 num_iterations_mlem = 50
 lower_limit = 0
 vol_mask = cct.processing.circular_mask(ph_or.shape)
@@ -69,10 +70,6 @@ lowlim_l2w = cct.solvers.Constraint_LowerLimit(0, norm=cct.solvers.DataFidelity_
 data_term_ls = cct.solvers.DataFidelity_l2()
 data_term_lsw = cct.solvers.DataFidelity_wl2(sino_weights)
 data_term_lsb = cct.solvers.DataFidelity_l2b(sino_variance)
-
-regul_weight = 1
-regul = cct.regularizers.Regularizer_TV2D(regul_weight)
-
 
 with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
 
