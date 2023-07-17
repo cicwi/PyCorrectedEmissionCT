@@ -564,8 +564,6 @@ class MLEM(Solver):
     tolerance : Optional[float], optional
         Tolerance on the data residual for computing when to stop iterations.
         The default is None.
-    relaxation : float, optional
-        The relaxation length. The default is 1.95.
     regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional
         Regularizer to be used. The default is None.
     data_term : Union[str, DataFidelityBase], optional
@@ -579,14 +577,13 @@ class MLEM(Solver):
     def __init__(
         self,
         verbose: bool = False,
-        relaxation: float = 1.95,
         tolerance: Optional[float] = None,
         regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
         data_term: Union[str, DataFidelityBase] = "l2",
         data_term_test: Union[str, DataFidelityBase, None] = None,
     ):
         super().__init__(
-            verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
+            verbose=verbose, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
         )
         self.regularizer = self._initialize_regularizer(regularizer)
 
@@ -599,8 +596,7 @@ class MLEM(Solver):
         str
                  info string.
         """
-        reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-        return Solver.info(self) + "-" + self.data_term.info() + reg_info
+        return Solver.info(self)
 
     def __call__(  # noqa: C901
         self,

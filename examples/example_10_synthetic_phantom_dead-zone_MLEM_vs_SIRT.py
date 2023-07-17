@@ -6,8 +6,7 @@ This example reproduces the l2 dead-zone reconstruction of the phantom used in:
 induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
 Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.
 
-@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
-and ESRF - The European Synchrotron, Grenoble, France
+@author: Jérome Lesaint, ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
@@ -54,7 +53,7 @@ ph_or = ph_or[:, :, 1]
 
 bckgnd_weight = np.sqrt(background_avg / (vol_shape[0] * np.sqrt(2)))
 
-num_iterations_sirt = 10000
+num_iterations_sirt = 100
 num_iterations_mlem = 50
 lower_limit = 0
 vol_mask = cct.processing.circular_mask(ph_or.shape)
