@@ -609,7 +609,6 @@ class MLEM(Solver):
         x_mask: Optional[NDArrayFloat] = None,
         b_mask: Optional[NDArrayFloat] = None,
         b_test_mask: Optional[NDArrayFloat] = None,
-        mu: float = 1e-5,
     ) -> Tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the MLEM algorithm.
