@@ -826,7 +826,7 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
 
         return np.fft.irfftn(image_f, s=self.mc.shape_FoV, axes=tuple(self._axes_fov), norm="ortho")
 
-    def fbp(self, bucket_vals: NDArray, use_lstsq: bool = True) -> NDArray:
+    def fbp(self, bucket_vals: NDArray, use_lstsq: bool = True, adjust_scaling: bool = True) -> NDArray:
         """Compute cross-correlation reconstruction of the bucket values.
 
         Parameters
@@ -848,7 +848,10 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
             img: NDArray = result[0]
             img = img.reshape(self.mc.shape_FoV)
 
-        return self.adjust_sampling_scaling(img)
+        if adjust_scaling:
+            img = self.adjust_sampling_scaling(img)
+
+        return img
 
     def absolute(self):
         """Compute the absolute value of the projection operator coefficients.
