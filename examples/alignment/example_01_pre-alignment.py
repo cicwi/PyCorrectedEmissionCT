@@ -68,6 +68,18 @@ ph = ph[:, :, 1]
 with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, theo_shifts) as A:
     data_theo = A(ph)
 
+com_ph_yx = cct.processing.post.com(ph)
+
+prj_geom = cct.models.ProjectionGeometry.get_default_parallel(geom_type="2d")
+rot_prj_geom = prj_geom.rotate(angles_rad)
+
+
+def recenter_rec(shifts_vu: Union[float, NDArray], rec: NDArray) -> NDArray:
+    com_rec_yx = cct.processing.post.com(rec)
+    shifts_vu_corrs = rot_prj_geom.project_displacement_to_detector(com_ph_yx - com_rec_yx)
+    return np.around(shifts_vu + shifts_vu_corrs, decimals=2)
+
+
 # Adding noise
 num_photons = 1e1
 background_avg = 2e0
@@ -98,6 +110,19 @@ with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, cor) as A:
 with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, shifts_u_pre) as A:
     rec_noise_pre, _ = solver(A, data_test, iterations=iterations, **solver_opts)
 
+# Recentering the reconstructions on the phantom's center-of-mass -> moving the shifts accordingly
+theo_rot_axis = recenter_rec(theo_rot_axis, rec_noise_theocor)
+cor = recenter_rec(cor, rec_noise_precor)
+shifts_u_pre = recenter_rec(shifts_u_pre, rec_noise_pre)
+
+# Reconstructing again, with centered shifts
+with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, theo_rot_axis) as A:
+    rec_noise_theocor, _ = solver(A, data_test, iterations=iterations, **solver_opts)
+with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, cor) as A:
+    rec_noise_precor, _ = solver(A, data_test, iterations=iterations, **solver_opts)
+with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, shifts_u_pre) as A:
+    rec_noise_pre, _ = solver(A, data_test, iterations=iterations, **solver_opts)
+
 fig, axs = plt.subplots(2, 1, sharex=True, sharey=True, figsize=[5, 2.5])
 axs[0].imshow(data_theo)
 axs[0].set_title("Theoretical data")
@@ -108,15 +133,13 @@ fig.tight_layout()
 vmin = 0.0
 vmax = rec_noise_truth.max()
 
+vols = [rec_noise_truth, rec_noise_theocor, rec_noise_precor, rec_noise_pre]
+labs = ["Ground truth", "Center-of-rotation (theoretical)", "Center-of-rotation (computed)", "Pre-alignment"]
+
 fig, axs = plt.subplots(2, 2, sharex=True, sharey=True, figsize=[6, 6.25])
-axs[0, 0].imshow(rec_noise_truth, vmin=vmin, vmax=vmax)
-axs[0, 0].set_title("Ground truth")
-axs[0, 1].imshow(rec_noise_theocor, vmin=vmin, vmax=vmax)
-axs[0, 1].set_title("Center-of-rotation (theoretical)")
-axs[1, 0].imshow(rec_noise_precor, vmin=vmin, vmax=vmax)
-axs[1, 0].set_title("Center-of-rotation (computed)")
-axs[1, 1].imshow(rec_noise_pre, vmin=vmin, vmax=vmax)
-axs[1, 1].set_title("Pre-alignment")
+for ax, (rec, lab) in zip(axs.flatten(), zip(vols, labs)):
+    ax.imshow(rec)
+    ax.set_title(lab)
 fig.tight_layout()
 
 fig, axs = plt.subplots(1, 1, sharex=True, sharey=True, figsize=[5, 2.5])
@@ -127,5 +150,9 @@ axs.plot(shifts_u_pre, label="Pre-alignment shifts")
 axs.grid()
 axs.legend()
 fig.tight_layout()
+
+vol_pairs = [(ph, rec) for rec in vols]
+
+cct.processing.post.plot_frcs(vol_pairs, labels=labs)
 
 plt.show(block=False)
