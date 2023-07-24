@@ -149,11 +149,11 @@ class DetectorShiftsPRE(DetectorShiftsBase):
 
         Raises
         ------
-        Exception
+        ValueError
             If the dataset is 2D.
         """
         if self.data_shapes["v"] <= 1:
-            raise Exception("Vertical alignment not supported for 2D reconstructions.")
+            raise ValueError("Vertical alignment not supported for 2D reconstructions.")
 
         if use_rfft:
             local_fft = np.fft.rfft
