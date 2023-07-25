@@ -160,6 +160,75 @@ def fit_shifts_vu_xc(
     return shifts_vu
 
 
+def fit_shifts_zyx_xc(
+    ref_vol_zyx: NDArrayFloat,
+    rec_vol_zyx: NDArrayFloat,
+    pad_zyx: bool = False,
+    normalize_fourier: bool = True,
+    use_rfft: bool = True,
+    decimals: int = 2,
+) -> NDArrayFloat:
+    """
+    Find the ZYX shifts of the volume, through cross-correlation.
+
+    Parameters
+    ----------
+    ref_vol_zyx : NDArrayFloat
+        The reference volume.
+    rec_vol_zyx : NDArrayFloat
+        The reconstructed volume to register.
+    pad_zyx : bool, optional
+        Pad the ZYX coordinates. The default is False.
+    normalize_fourier : bool, optional
+        Whether to normalize the Fourier representation of the cross-correlation. The default is True.
+    use_rfft : bool, optional
+        Whether to use the `rfft` transform in place of the complex `fft` transform. The default is True.
+    decimals : int, optional
+        Decimals for the truncation of the sub-pixel  The default is 2.
+
+    Returns
+    -------
+    NDArrayFloat
+        The ZYX shifts.
+    """
+    if use_rfft:
+        local_fftn = np.fft.rfftn
+        local_ifftn = np.fft.irfftn
+    else:
+        local_fftn = np.fft.fftn
+        local_ifftn = np.fft.ifftn
+
+    fft_dims = np.arange(-np.fmin(ref_vol_zyx.ndim, 3), 0)
+    old_fft_shapes = np.array(np.array(ref_vol_zyx.shape)[fft_dims], ndmin=1, dtype=int)
+    new_fft_shapes = old_fft_shapes.copy()
+    if pad_zyx:
+        new_fft_shapes *= 2
+    cc_coords = [np.fft.fftfreq(s, 1 / s) for s in new_fft_shapes]
+
+    data_vwu_f = local_fftn(ref_vol_zyx, s=list(new_fft_shapes), axes=fft_dims)
+    proj_vwu_f = local_fftn(rec_vol_zyx, s=list(new_fft_shapes), axes=fft_dims)
+
+    cc_f = data_vwu_f * proj_vwu_f.conj()
+    if normalize_fourier:
+        cc_f /= np.fmax(np.abs(cc_f), eps)
+    cc: NDArrayFloat = local_ifftn(cc_f).real
+
+    f_vals, f_coords = extract_peak_region_nd(cc, cc_coords=cc_coords)
+    shifts_zyx = np.array([coords[1] for coords in f_coords])
+
+    if decimals > 0:
+        for ii, dim in enumerate(fft_dims):
+            slices = [slice(1, 2)] * ref_vol_zyx.ndim
+            slices[dim] = slice(None)
+            f_vals_slice = f_vals[tuple(slices)].flatten()
+
+            sub_pixel_pos = refine_max_position_1d(f_vals_slice, decimals=decimals)
+
+            shifts_zyx[ii] += sub_pixel_pos
+
+    return shifts_zyx
+
+
 def sinusoid(
     x: Union[NDArrayFloat, float], a: Union[NDArrayFloat, float], p: Union[NDArrayFloat, float], b: Union[NDArrayFloat, float]
 ) -> NDArrayFloat:
