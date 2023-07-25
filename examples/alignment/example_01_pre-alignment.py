@@ -41,24 +41,24 @@ def cm2inch(x: Union[float, Sequence[float], NDArray]) -> Sequence[float]:
 data_type = np.float32
 
 # Basic geometry parameters
-angles_start = 0
-angles_range = 180
-angles_num = 41
-angles_deg = np.linspace(angles_start, angles_start + angles_range, angles_num, endpoint=True)
+ANGLES_START = 0
+ANGLES_RANGE = 180
+ANGLES_NUM = 41
+angles_deg = np.linspace(ANGLES_START, ANGLES_START + ANGLES_RANGE, ANGLES_NUM, endpoint=True)
 angles_rad = np.deg2rad(angles_deg)
 
-theo_rot_axis = -1.25
+THEO_ROT_AXIS = -1.25
 
 # Randomized shift errors
-sigma_error = 0.25
-linear_error = -0.05
-exponential_error = 7.5
+SIGMA_ERROR = 0.25
+LINEAR_ERROR = -0.05
+EXPONENTIAL_ERROR = 7.5
 
-random_drifts = sigma_error * np.random.randn(len(angles_rad))
-linear_drifts = linear_error * np.linspace(-(len(angles_rad) - 1) / 2, (len(angles_rad) - 1) / 2, len(angles_rad))
-exponential_drifts = exponential_error * np.exp(-np.linspace(0, 5, len(angles_rad)))
+random_drifts = SIGMA_ERROR * np.random.randn(ANGLES_NUM)
+linear_drifts = LINEAR_ERROR * np.linspace(-(ANGLES_NUM - 1) / 2, (ANGLES_NUM - 1) / 2, ANGLES_NUM)
+exponential_drifts = EXPONENTIAL_ERROR * np.exp(-np.linspace(0, 5, ANGLES_NUM))
 
-theo_shifts = random_drifts + linear_drifts + exponential_drifts + theo_rot_axis
+theo_shifts = random_drifts + linear_drifts + exponential_drifts + THEO_ROT_AXIS
 theo_shifts = np.around(theo_shifts, decimals=2)
 
 # Create the phantom shape
@@ -69,23 +69,14 @@ with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, theo_shifts) as A
     data_theo = A(ph)
 
 com_ph_yx = cct.processing.post.com(ph)
-
-prj_geom = cct.models.ProjectionGeometry.get_default_parallel(geom_type="2d")
-rot_prj_geom = prj_geom.rotate(angles_rad)
-
-
-def recenter_rec(shifts_vu: Union[float, NDArray], rec: NDArray) -> NDArray:
-    com_rec_yx = cct.processing.post.com(rec)
-    shifts_vu_corrs = rot_prj_geom.project_displacement_to_detector(com_ph_yx - com_rec_yx)
-    return np.around(shifts_vu + shifts_vu_corrs, decimals=2)
-
+recenter = cct.alignment.RecenterVolume(cct.models.ProjectionGeometry.get_default_parallel(geom_type="2d"), angles_rad)
 
 # Adding noise
-num_photons = 1e1
-background_avg = 2e0
-add_poisson = True
+NUM_PHOTONS = 1e1
+BACKGROUND_AVG = 2e0
+ADD_POISSON = True
 data_noise, data_theo, background = cct.testing.add_noise(
-    data_theo, num_photons=num_photons, add_poisson=add_poisson, background_avg=background_avg
+    data_theo, num_photons=NUM_PHOTONS, add_poisson=ADD_POISSON, background_avg=BACKGROUND_AVG
 )
 
 data_test = data_noise - background
@@ -98,30 +89,30 @@ diffs_u_pre, cor = align_pre.fit_u()
 shifts_u_pre = cor + diffs_u_pre
 
 solver_opts = dict(lower_limit=0.0)
-iterations = 100
+ITERATIONS = 100
 
 solver = cct.solvers.SIRT()
 with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, theo_shifts) as A:
-    rec_noise_truth, _ = solver(A, data_test, iterations=iterations, **solver_opts)
-with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, theo_rot_axis) as A:
-    rec_noise_theocor, _ = solver(A, data_test, iterations=iterations, **solver_opts)
+    rec_noise_truth, _ = solver(A, data_test, iterations=ITERATIONS, **solver_opts)
+with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, THEO_ROT_AXIS) as A:
+    rec_noise_theocor, _ = solver(A, data_test, iterations=ITERATIONS, **solver_opts)
 with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, cor) as A:
-    rec_noise_precor, _ = solver(A, data_test, iterations=iterations, **solver_opts)
+    rec_noise_precor, _ = solver(A, data_test, iterations=ITERATIONS, **solver_opts)
 with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, shifts_u_pre) as A:
-    rec_noise_pre, _ = solver(A, data_test, iterations=iterations, **solver_opts)
+    rec_noise_pre, _ = solver(A, data_test, iterations=ITERATIONS, **solver_opts)
 
 # Recentering the reconstructions on the phantom's center-of-mass -> moving the shifts accordingly
-theo_rot_axis = recenter_rec(theo_rot_axis, rec_noise_theocor)
-cor = recenter_rec(cor, rec_noise_precor)
-shifts_u_pre = recenter_rec(shifts_u_pre, rec_noise_pre)
+theo_rot_axis = recenter.recenter_to(THEO_ROT_AXIS, rec_noise_theocor, com_ph_yx)
+cor = recenter.recenter_to(cor, rec_noise_precor, com_ph_yx)
+shifts_u_pre = recenter.recenter_to(shifts_u_pre, rec_noise_pre, com_ph_yx)
 
 # Reconstructing again, with centered shifts
 with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, theo_rot_axis) as A:
-    rec_noise_theocor, _ = solver(A, data_test, iterations=iterations, **solver_opts)
+    rec_noise_theocor, _ = solver(A, data_test, iterations=ITERATIONS, **solver_opts)
 with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, cor) as A:
-    rec_noise_precor, _ = solver(A, data_test, iterations=iterations, **solver_opts)
+    rec_noise_precor, _ = solver(A, data_test, iterations=ITERATIONS, **solver_opts)
 with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, shifts_u_pre) as A:
-    rec_noise_pre, _ = solver(A, data_test, iterations=iterations, **solver_opts)
+    rec_noise_pre, _ = solver(A, data_test, iterations=ITERATIONS, **solver_opts)
 
 fig, axs = plt.subplots(2, 1, sharex=True, sharey=True, figsize=[5, 2.5])
 axs[0].imshow(data_theo)
@@ -130,7 +121,7 @@ axs[1].imshow(data_test)
 axs[1].set_title("Noisy data")
 fig.tight_layout()
 
-vmin = 0.0
+vmin = rec_noise_truth.min()
 vmax = rec_noise_truth.max()
 
 vols = [rec_noise_truth, rec_noise_theocor, rec_noise_precor, rec_noise_pre]
@@ -144,7 +135,7 @@ fig.tight_layout()
 
 fig, axs = plt.subplots(1, 1, sharex=True, sharey=True, figsize=[5, 2.5])
 axs.plot(theo_shifts, label="Ground truth")
-axs.plot(np.ones_like(theo_shifts) * theo_rot_axis, label="Center-of-rotation (theoretical)")
+axs.plot(np.ones_like(theo_shifts) * THEO_ROT_AXIS, label="Center-of-rotation (theoretical)")
 axs.plot(np.ones_like(theo_shifts) * cor, label="Center-of-rotation (computed)")
 axs.plot(shifts_u_pre, label="Pre-alignment shifts")
 axs.grid()
