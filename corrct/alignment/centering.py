@@ -58,8 +58,8 @@ class RecenterVolume:
             The corrected VU shifts.
         """
         com_rec_zyx = post_proc.com(volume)
-        displacemenet_zyx = com_ref_zyx - com_rec_zyx
-        return self._apply_displacement_vu(shifts_vu, displacemenet_zyx)
+        displacemenet_zyx = np.array(com_ref_zyx) - com_rec_zyx
+        return self._apply_displacement_vu(np.array(shifts_vu), displacemenet_zyx)
 
     def as_reference(self, shifts_vu: NDArray, volume: NDArray, reference: NDArray, method: str = "com") -> NDArray:
         """Recenter with respect to a given volume.
