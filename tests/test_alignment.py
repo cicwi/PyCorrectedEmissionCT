@@ -155,12 +155,12 @@ def test_pre_alignment(add_noise: bool, theo_rot_axis: float = -1.25):
     recenter = cct.alignment.RecenterVolume(prj_geom, angles_rad)
 
     # Re-centering the reconstructions on the phantom's center-of-mass -> moving the shifts accordingly
-    shifts_u_pre = recenter.recenter_to(shifts_u_pre, rec_noise_pre, com_ph_yx)
+    shifts_u_pre = recenter.to_com(shifts_u_pre, rec_noise_pre, com_ph_yx)
 
     if debug:
         theo_rot_axis_per_angle = np.ones_like(angles_rad) * theo_rot_axis
-        theo_rot_axis_per_angle = recenter.recenter_to(theo_rot_axis_per_angle, rec_noise_theocor, com_ph_yx)
-        cor = recenter.recenter_to(cor, rec_noise_precor, com_ph_yx)
+        theo_rot_axis_per_angle = recenter.to_com(theo_rot_axis_per_angle, rec_noise_theocor, com_ph_yx)
+        cor = recenter.to_com(cor, rec_noise_precor, com_ph_yx)
 
         print(f"{theo_shifts = }")
         print(f"{shifts_u_pre = }")
@@ -246,14 +246,14 @@ def test_pre_alignment_3d(add_noise: bool, theo_rot_axis: float = -1.25):
     recenter = cct.alignment.RecenterVolume(prj_geom, angles_rad)
 
     # Re-centering the reconstructions on the phantom's center-of-mass -> moving the shifts accordingly
-    shifts_vu_pre = recenter.recenter_to(shifts_vu_pre, rec_noise_xc, com_ph_yx)
+    shifts_vu_pre = recenter.to_com(shifts_vu_pre, rec_noise_xc, com_ph_yx)
     if debug:
         theo_rot_axis_per_angle = cct.models.combine_shifts_vu(
             np.zeros_like(angles_rad), np.ones_like(angles_rad) * theo_rot_axis
         )
-        theo_rot_axis_per_angle = recenter.recenter_to(theo_rot_axis_per_angle, rec_noise_theocor, com_ph_yx)
+        theo_rot_axis_per_angle = recenter.to_com(theo_rot_axis_per_angle, rec_noise_theocor, com_ph_yx)
         cor_pre = cct.models.combine_shifts_vu(np.zeros_like(angles_rad), np.ones_like(angles_rad) * cor_pre)
-        cor_pre = recenter.recenter_to(cor_pre, rec_noise_precor, com_ph_yx)
+        cor_pre = recenter.to_com(cor_pre, rec_noise_precor, com_ph_yx)
 
         print(f"{theo_shifts_vu = }")
         print(f"{shifts_vu_pre = }")

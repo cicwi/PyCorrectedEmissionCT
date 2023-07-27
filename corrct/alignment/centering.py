@@ -17,7 +17,7 @@ from ..processing import post as post_proc
 
 
 class RecenterVolume:
-    """Volume recentering class."""
+    """Volume re-centering class."""
 
     def __init__(
         self, proj_geom: models.ProjectionGeometry, angles_rad: Union[NDArray, ArrayLike], precision: int = 2
@@ -40,9 +40,7 @@ class RecenterVolume:
         shifts_vu_corrs = self.prj_geom.project_displacement_to_detector(displacemenet_zyx)
         return np.around(shifts_vu + shifts_vu_corrs, decimals=self.precision)
 
-    def recenter_to(
-        self, shifts_vu: Union[ArrayLike, NDArray], volume: NDArray, com_ref_zyx: Union[ArrayLike, NDArray]
-    ) -> NDArray:
+    def to_com(self, shifts_vu: Union[ArrayLike, NDArray], volume: NDArray, com_ref_zyx: Union[ArrayLike, NDArray]) -> NDArray:
         """Recenter to a given center-of-mass (CoM).
 
         Parameters
@@ -63,7 +61,7 @@ class RecenterVolume:
         displacemenet_zyx = com_ref_zyx - com_rec_zyx
         return self._apply_displacement_vu(shifts_vu, displacemenet_zyx)
 
-    def recenter_as(self, shifts_vu: NDArray, volume: NDArray, reference: NDArray, method: str = "com") -> NDArray:
+    def as_reference(self, shifts_vu: NDArray, volume: NDArray, reference: NDArray, method: str = "com") -> NDArray:
         """Recenter with respect to a given volume.
 
         Parameters
@@ -89,7 +87,7 @@ class RecenterVolume:
         """
         if method.lower() == "com":
             com_ref_zyx = post_proc.com(reference)
-            return self.recenter_to(shifts_vu, volume, com_ref_zyx)
+            return self.to_com(shifts_vu, volume, com_ref_zyx)
         elif method.lower() == "xc":
             displacemenet_zyx = fitting.fit_shifts_zyx_xc(reference, volume, decimals=self.precision)
             return self._apply_displacement_vu(shifts_vu, displacemenet_zyx)

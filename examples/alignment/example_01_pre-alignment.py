@@ -102,9 +102,9 @@ with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, shifts_u_pre) as 
     rec_noise_pre, _ = solver(A, data_test, iterations=ITERATIONS, **solver_opts)
 
 # Recentering the reconstructions on the phantom's center-of-mass -> moving the shifts accordingly
-theo_rot_axis = recenter.recenter_to(THEO_ROT_AXIS, rec_noise_theocor, com_ph_yx)
-cor = recenter.recenter_to(cor, rec_noise_precor, com_ph_yx)
-shifts_u_pre = recenter.recenter_to(shifts_u_pre, rec_noise_pre, com_ph_yx)
+theo_rot_axis = recenter.to_com(THEO_ROT_AXIS, rec_noise_theocor, com_ph_yx)
+cor = recenter.to_com(cor, rec_noise_precor, com_ph_yx)
+shifts_u_pre = recenter.to_com(shifts_u_pre, rec_noise_pre, com_ph_yx)
 
 # Reconstructing again, with centered shifts
 with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, theo_rot_axis) as A:
