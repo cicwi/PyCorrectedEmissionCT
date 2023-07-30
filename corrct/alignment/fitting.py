@@ -150,6 +150,7 @@ def fit_shifts_vu_xc(
         if decimals > 0:
             shifts_vu += refine_max_position_1d(f_vals, decimals=decimals)
 
+    # import skimage.registration as skr
     # upsample_factor = int(1 / 10 ** (-decimals))
     # shifts_vu = np.empty((len(data_vwu.shape) - 1, num_angles))
     # for ii in range(num_angles):
@@ -205,10 +206,10 @@ def fit_shifts_zyx_xc(
         new_fft_shapes *= 2
     cc_coords = [np.fft.fftfreq(s, 1 / s) for s in new_fft_shapes]
 
-    data_vwu_f = local_fftn(ref_vol_zyx, s=list(new_fft_shapes), axes=fft_dims)
-    proj_vwu_f = local_fftn(rec_vol_zyx, s=list(new_fft_shapes), axes=fft_dims)
+    ref_vol_zyx_f = local_fftn(ref_vol_zyx, s=list(new_fft_shapes), axes=fft_dims)
+    rec_vol_zyx_f = local_fftn(rec_vol_zyx, s=list(new_fft_shapes), axes=fft_dims)
 
-    cc_f = data_vwu_f * proj_vwu_f.conj()
+    cc_f = ref_vol_zyx_f * rec_vol_zyx_f.conj()
     if normalize_fourier:
         cc_f /= np.fmax(np.abs(cc_f), eps)
     cc: NDArrayFloat = local_ifftn(cc_f).real
