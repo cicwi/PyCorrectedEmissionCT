@@ -178,7 +178,10 @@ class ProjectorUncorrected(operators.ProjectorOperator):
 
         if isinstance(backend, str):
             if backend == "astra":
-                self.projector_backend = prj_backends.ProjectorBackendASTRA()
+                if prj_backends.has_astra_direct:
+                    self.projector_backend = prj_backends.ProjectorBackendDirectASTRA()
+                else:
+                    self.projector_backend = prj_backends.ProjectorBackendASTRA()
             elif backend == "skimage":
                 self.projector_backend = prj_backends.ProjectorBackendSKimage()
             else:

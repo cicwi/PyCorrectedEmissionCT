@@ -10,14 +10,15 @@ and ESRF - The European Synchrotron, Grenoble, France
 import numpy as np
 import scipy.ndimage as spndi
 
-import pytest
-
-import corrct as cct
-
 import skimage.data as skd
 import skimage.transform as skt
 
 import matplotlib.pyplot as plt
+
+import pytest
+
+import corrct as cct
+from corrct import _projector_backends as backends
 
 
 eps = np.finfo(np.float32).eps
@@ -124,3 +125,39 @@ class TestProjectors:
             plt.show()
 
         assert np.all(np.isclose(rel_diff, 0, atol=0.015)), "Reference radon transform and astra-toolbox do not match"
+
+    def test_astra_backends(self):
+        debug = False
+
+        projector_legacy = backends.ProjectorBackendASTRA()
+        projector_direct = backends.ProjectorBackendDirectASTRA()
+
+        solver = cct.solvers.SIRT()
+        num_iterations = 25
+
+        prj_ref = _radon_rot_sk_w(self.ph, self.angles_rad, self.shift)
+
+        with cct.projectors.ProjectorUncorrected(
+            self.ph.shape, self.angles_rad, rot_axis_shift_pix=self.shift, backend=projector_legacy
+        ) as A:
+            rec_vol_leg, _ = solver(A, prj_ref, iterations=num_iterations)
+
+        with cct.projectors.ProjectorUncorrected(
+            self.ph.shape, self.angles_rad, rot_axis_shift_pix=self.shift, backend=projector_direct
+        ) as A:
+            rec_vol_dir, _ = solver(A, prj_ref, iterations=num_iterations)
+
+        diff_rec = rec_vol_leg - rec_vol_dir
+        rel_diff = diff_rec / rec_vol_leg.max()
+
+        if debug:
+            print(np.max(np.abs(diff_rec)))
+            print(np.max(np.abs(rel_diff)))
+            fig, ax = plt.subplots(1, 3, figsize=[9, 3])
+            ax[0].imshow(rec_vol_leg)
+            ax[1].imshow(rec_vol_dir)
+            ax[2].imshow(diff_rec)
+            fig.tight_layout()
+            plt.show()
+
+        assert np.all(np.isclose(rel_diff, 0, atol=0.0002)), "Legacy and direct astra-toolbox projectors do not match"
