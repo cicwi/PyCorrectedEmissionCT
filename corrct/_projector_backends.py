@@ -13,7 +13,7 @@ import skimage.transform as skt
 from . import filters
 from .models import ProjectionGeometry, VolumeGeometry
 
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence, Union, Mapping
 from numpy.typing import ArrayLike, NDArray
 
 from abc import ABC, abstractmethod
@@ -410,11 +410,11 @@ class ProjectorBackendSKimage(ProjectorBackend):
 class ProjectorBackendASTRA(ProjectorBackend):
     """Projector backend based on astra-toolbox."""
 
-    proj_id: list
+    proj_id: Sequence
 
-    astra_vol_geom: dict
-    proj_geom_ind: list[dict]
-    proj_geom_all: dict
+    astra_vol_geom: Mapping
+    proj_geom_ind: Sequence[Mapping]
+    proj_geom_all: Mapping
 
     def __init__(self, super_sampling: int = 1):
         """Initialize the ASTRA projector backend.
@@ -458,7 +458,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         """
         if vol_geom.is_3D() and not has_cuda:
             raise ValueError("CUDA is not available: only 2D volumes are allowed!")
-        if not (rot_axis_shift_pix is None or isinstance(rot_axis_shift_pix, (int, float, list, tuple, np.ndarray))):
+        if not (rot_axis_shift_pix is None or isinstance(rot_axis_shift_pix, (int, float, Sequence, np.ndarray))):
             raise ValueError(
                 "Rotation axis shift should either be None or one of the following: int, a float or a sequence of floats"
                 + f" ({type(rot_axis_shift_pix)} given instead)."
@@ -737,10 +737,10 @@ class ProjectorBackendASTRA(ProjectorBackend):
 class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
     """Experimental astra-toolbox functions projector."""
 
-    astra_vol_shape: tuple
-    astra_prj_shape: tuple
-    astra_angle_prj_shape: tuple
-    angle_prj_shape: tuple
+    astra_vol_shape: Sequence
+    astra_prj_shape: Sequence
+    astra_angle_prj_shape: Sequence
+    angle_prj_shape: Sequence
 
     def initialize_geometry(
         self,
@@ -775,7 +775,7 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
             raise ValueError("CUDA is not available, but it is required for the direct functions!")
         if not has_astra_direct:
             raise ValueError("ASTRA direct is not available, but it is required!")
-        if not (rot_axis_shift_pix is None or isinstance(rot_axis_shift_pix, (int, float, list, tuple, np.ndarray))):
+        if not (rot_axis_shift_pix is None or isinstance(rot_axis_shift_pix, (int, float, Sequence, np.ndarray))):
             raise ValueError(
                 "Rotation axis shift should either be None or one of the following: int, a float or a sequence of floats"
                 + f" ({type(rot_axis_shift_pix)} given instead)."
