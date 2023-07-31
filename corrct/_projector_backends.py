@@ -410,6 +410,12 @@ class ProjectorBackendSKimage(ProjectorBackend):
 class ProjectorBackendASTRA(ProjectorBackend):
     """Projector backend based on astra-toolbox."""
 
+    proj_id: list
+
+    astra_vol_geom: dict
+    proj_geom_ind: list[dict]
+    proj_geom_all: dict
+
     def __init__(self, super_sampling: int = 1):
         """Initialize the ASTRA projector backend.
 
@@ -592,7 +598,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         ----------
         vol : NDArray
             The volume to forward-project.
-        angle_ind : int, optional
+        angle_ind : int | None, optional
             The angle index to foward project. The default is None.
 
         Returns
@@ -644,7 +650,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         ----------
         prj : NDArray
             The sinogram to back-project or a single line.
-        angle_ind : int, optional
+        angle_ind : int | None, optional
             The angle index to foward project. The default is None.
 
         Returns
