@@ -106,6 +106,35 @@ class ProjectionGeometry(Geometry):
         """
         return get_prj_geom_parallel(geom_type=geom_type, rot_axis_shift_pix=rot_axis_shift_pix, rot_axis_dir=rot_axis_dir)
 
+    @property
+    def ndim(self) -> int:
+        """Return the number of dimensions of the geometry.
+
+        Returns
+        -------
+        int
+            The numder of dimensions.
+        """
+        return int(self.geom_type[-2])
+
+    def get_3d(self) -> "ProjectionGeometry":
+        """Return the 3D version of the geometry.
+
+        Returns
+        -------
+        ProjectionGeometry
+            The new geometry.
+        """
+        if self.ndim == 2:
+            if self.det_shape_vu is not None:
+                new_det_shape_vu = np.ones(2, dtype=int)
+                new_det_shape_vu[-len(self.det_shape_vu) :] = self.det_shape_vu
+            else:
+                new_det_shape_vu = None
+            return dc_replace(self, geom_type=self.geom_type.replace("2d", "3d"), det_shape_vu=new_det_shape_vu)
+        else:
+            return dc_replace(self)
+
     def set_detector_shifts_vu(self, det_pos_vu: ArrayLike) -> None:
         """
         Set the detector position in XYZ, from VU (vertical, horizontal) coordinates.
@@ -119,7 +148,7 @@ class ProjectionGeometry(Geometry):
 
         self.det_pos_xyz = np.zeros((det_pos_vu.shape[-1], 3))
         self.det_pos_xyz[:, 0] = det_pos_vu[-1, :]
-        if int(self.geom_type[-2]) == 3 and det_pos_vu.shape[0] == 2:
+        if self.ndim == 3 and det_pos_vu.shape[0] == 2:
             self.det_pos_xyz[:, 2] = det_pos_vu[-2, :]
 
     def rotate(self, angles_w_rad: ArrayLike, patch_astra_2d: bool = False) -> "ProjectionGeometry":
@@ -139,7 +168,7 @@ class ProjectionGeometry(Geometry):
         angles = np.array(angles_w_rad, ndmin=1)[:, None]
 
         # Deadling with ASTRA's incoherent 2D and 3D coordinate systems.
-        if patch_astra_2d and int(self.geom_type[-2]) == 2:
+        if patch_astra_2d and self.ndim == 2:
             angles = -angles
 
         rotations = spt.Rotation.from_rotvec(angles * self.rot_dir_xyz)  # type: ignore
@@ -190,33 +219,32 @@ class ProjectionGeometry(Geometry):
         ValueError
             When projection geometry and vector dimensions don match.
         """
-        geom_dims = int(self.geom_type[-2])
         disp_zyx = np.array(disp_zyx, ndmin=1)
 
         disp_dims = len(disp_zyx)
-        if geom_dims != disp_dims:
-            raise ValueError(f"Geometry is {geom_dims}d, while passed displacement is {disp_dims}d.")
+        if self.ndim != disp_dims:
+            raise ValueError(f"Geometry is {self.ndim}d, while passed displacement is {disp_dims}d.")
 
         disp_xyz = np.flip(disp_zyx)
 
-        if geom_dims == 2:
-            return self.det_u_xyz[..., :geom_dims].dot(disp_xyz)
+        if self.ndim == 2:
+            return self.det_u_xyz[..., : self.ndim].dot(disp_xyz)
         else:
             return np.stack(
-                [self.det_v_xyz[..., :geom_dims].dot(disp_xyz), self.det_u_xyz[..., :geom_dims].dot(disp_xyz)], axis=0
+                [self.det_v_xyz[..., : self.ndim].dot(disp_xyz), self.det_u_xyz[..., : self.ndim].dot(disp_xyz)], axis=0
             )
 
 
+@dataclass
 class VolumeGeometry(Geometry):
     """Store the volume geometry."""
 
     _vol_shape_xyz: NDArray
-    vox_size: float
+    vox_size: float = 1.0
 
-    def __init__(self, vol_shape_xyz: ArrayLike, vox_size: float = 1.0):
+    def __post_init__(self):
         """Initialize the input parameters."""
-        self._vol_shape_xyz = np.array(vol_shape_xyz, ndmin=1)
-        self.vox_size = vox_size
+        self._vol_shape_xyz = np.array(self._vol_shape_xyz, ndmin=1)
 
     def is_square(self) -> bool:
         """Compute whether the volume is square in XY.
@@ -289,6 +317,19 @@ class VolumeGeometry(Geometry):
             Whether this is a 3D geometry or not.
         """
         return len(self._vol_shape_xyz) == 3 and self._vol_shape_xyz[-1] > 1
+
+    def get_3d(self) -> "VolumeGeometry":
+        """Return the 3D version of the geometry.
+
+        Returns
+        -------
+        VolumeGeometry
+            The new geometry.
+        """
+        if len(self._vol_shape_xyz) == 2:
+            return dc_replace(self, _vol_shape_xyz=np.concatenate((self._vol_shape_xyz, [1])))
+        else:
+            return dc_replace(self)
 
     @staticmethod
     def get_default_from_data(data: NDArray, data_format: str = "dvwu") -> "VolumeGeometry":
