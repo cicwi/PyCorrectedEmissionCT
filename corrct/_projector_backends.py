@@ -13,7 +13,7 @@ import skimage.transform as skt
 from . import filters
 from .models import ProjectionGeometry, VolumeGeometry
 
-from typing import Optional, Sequence, Union, Mapping
+from typing import Optional, Sequence, Union, Mapping, List
 from numpy.typing import ArrayLike, NDArray
 
 from abc import ABC, abstractmethod
@@ -410,7 +410,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
 class ProjectorBackendASTRA(ProjectorBackend):
     """Projector backend based on astra-toolbox."""
 
-    proj_id: Sequence
+    proj_id: List
 
     astra_vol_geom: Mapping
     proj_geom_ind: Sequence[Mapping]
@@ -479,8 +479,9 @@ class ProjectorBackendASTRA(ProjectorBackend):
             if prj_geom.det_shape_vu is None:
                 prj_geom.det_shape_vu = np.array(self.vol_geom.shape_xyz[list([2, 0])], dtype=int)
             else:
-                self.prj_shape_vwu = np.array([prj_geom.det_shape_vu[0], num_angles, prj_geom.det_shape_vu[1]])
-                self.prj_shape_vu = np.array([prj_geom.det_shape_vu[0], 1, prj_geom.det_shape_vu[1]])
+                # Here the projections are supposed to be larger or smaller than the sample size
+                self.prj_shape_vwu = np.array([prj_geom.det_shape_vu[-2], num_angles, prj_geom.det_shape_vu[-1]])
+                self.prj_shape_vu = np.array([prj_geom.det_shape_vu[-2], 1, prj_geom.det_shape_vu[-1]])
 
             rot_geom = prj_geom.rotate(self.angles_w_rad)
 
@@ -502,6 +503,10 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
             if prj_geom.det_shape_vu is None:
                 prj_geom.det_shape_vu = np.array(self.vol_geom.shape_xyz[list([0])], dtype=int)
+            else:
+                # Here the projections are supposed to be larger or smaller than the sample size
+                self.prj_shape_vwu = np.array([num_angles, prj_geom.det_shape_vu[-1]])
+                self.prj_shape_vu = np.array([1, prj_geom.det_shape_vu[-1]])
 
             rot_geom = prj_geom.rotate(self.angles_w_rad, patch_astra_2d=True)
 
@@ -788,18 +793,22 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
 
         num_angles = self.angles_w_rad.size
 
-        if not self.vol_geom.is_3D() and len(self.vol_geom.shape_xyz) == 2:
-            self.vol_geom._vol_shape_xyz = np.concatenate((self.vol_geom.shape_xyz, (1,)))
+        vol_geom_tmp3d = self.vol_geom.get_3d()
 
-        self.astra_vol_geom = astra.create_vol_geom(*vol_geom.shape_xyz[list([1, 0, 2])], *self.vol_geom.extent)
+        self.astra_vol_geom = astra.create_vol_geom(*vol_geom_tmp3d.shape_xyz[list([1, 0, 2])], *vol_geom_tmp3d.extent)
         if prj_geom is None:
             prj_geom = ProjectionGeometry.get_default_parallel(geom_type="3d", rot_axis_shift_pix=rot_axis_shift_pix)
+        else:
+            if prj_geom.det_shape_vu is not None:
+                # Here the projections are supposed to be larger or smaller than the sample size
+                # We use the original version because it makes sure that 2D is respected.
+                self.prj_shape_vwu = np.array([prj_geom.det_shape_vu[:-1], num_angles, prj_geom.det_shape_vu[-1]])
+                self.prj_shape_vu = np.array([prj_geom.det_shape_vu[:-1], 1, prj_geom.det_shape_vu[-1]])
+
+            prj_geom = prj_geom.get_3d()
 
         if prj_geom.det_shape_vu is None:
-            prj_geom.det_shape_vu = np.array(self.vol_geom.shape_xyz[list([2, 0])], dtype=int)
-        else:
-            self.prj_shape_vwu = np.array([prj_geom.det_shape_vu[0], num_angles, prj_geom.det_shape_vu[1]])
-            self.prj_shape_vu = np.array([prj_geom.det_shape_vu[0], 1, prj_geom.det_shape_vu[1]])
+            prj_geom.det_shape_vu = np.array(vol_geom_tmp3d.shape_xyz[list([2, 0])], dtype=int)
 
         rot_geom = prj_geom.rotate(self.angles_w_rad)
 
@@ -823,10 +832,10 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
 
         self.proj_geom_all = astra.create_proj_geom(geom_type_str + "_vec", *prj_geom.det_shape_vu, vectors)
 
-        self.astra_vol_shape = tuple(self.vol_geom.shape_zxy)
-        self.astra_prj_shape = (self.vol_geom.shape_xyz[2], num_angles, self.vol_geom.shape_xyz[0])
-        self.astra_angle_prj_shape = (self.vol_geom.shape_xyz[2], 1, self.vol_geom.shape_xyz[0])
-        self.angle_prj_shape = (self.vol_geom.shape_xyz[2], self.vol_geom.shape_xyz[0])
+        self.astra_vol_shape = tuple(vol_geom_tmp3d.shape_zxy)
+        self.astra_prj_shape = (vol_geom_tmp3d.shape_xyz[2], num_angles, vol_geom_tmp3d.shape_xyz[0])
+        self.astra_angle_prj_shape = (vol_geom_tmp3d.shape_xyz[2], 1, vol_geom_tmp3d.shape_xyz[0])
+        self.angle_prj_shape = (vol_geom_tmp3d.shape_xyz[2], vol_geom_tmp3d.shape_xyz[0])
 
     def make_ready(self):
         """Initialize the ASTRA projectors."""
