@@ -124,7 +124,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         prj_intensities: Optional[ArrayLike] = None,
         psf: Optional[ArrayLike] = None,
         backend: Union[str, prj_backends.ProjectorBackend] = "astra" if astra_available else "skimage",
-        create_single_projs: bool = True,
+        create_single_projs: bool = False,
     ):
         """Initialize the base projection class.
 
@@ -152,7 +152,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             The default is True if CUDA and ASTRA are available, otherwise False.
         create_single_projs : bool, optional
             Whether to create projectors for single projections.
-            Used for corrections and SART, by default True.
+            Used for corrections and SART, by default False.
 
         Raises
         ------
@@ -168,7 +168,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
                 raise ValueError(f"Passed ASTRA projector, but astra not available ({astra_status}).")
 
         if not isinstance(vol_geom, models.VolumeGeometry):
-            vol_geom = models.VolumeGeometry(vol_shape_xyz=np.array(vol_geom))
+            vol_geom = models.VolumeGeometry(_vol_shape_xyz=np.array(vol_geom))
         self.vol_geom = vol_geom
 
         if not len(self.vol_geom.shape_xyz) in (2, 3):
@@ -448,6 +448,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             psf=psf,
             prj_intensities=prj_intensities,
             backend=backend,
+            create_single_projs=True,
         )
 
         self.data_type = data_type

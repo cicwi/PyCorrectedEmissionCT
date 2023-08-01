@@ -126,7 +126,7 @@ class ProjectorBackend(ABC):
         angles_rot_rad: Union[ArrayLike, NDArray],
         rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
-        create_single_projs: bool = True,
+        create_single_projs: bool = False,
     ):
         """Initialize the projector geometry.
 
@@ -142,7 +142,7 @@ class ProjectorBackend(ABC):
             The fully specified projection geometry.
             When active, the rotation axis shift is ignored. The default is None.
         create_single_projs : bool, optional
-            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
+            Whether to create projectors for single projections. Used for corrections and SART. The default is False.
         """
         self.vol_geom = vol_geom
 
@@ -276,7 +276,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
         angles_rot_rad: Union[ArrayLike, NDArray],
         rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
-        create_single_projs: bool = True,
+        create_single_projs: bool = False,
     ):
         """Initialize projector backend based on scikit-image.
 
@@ -294,7 +294,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
             When active, the rotation axis shift is ignored. The default is None.
             NOT SUPPORTED: if anything else than None is passed, it will throw an error!
         create_single_projs : bool, optional
-            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
+            Whether to create projectors for single projections. Used for corrections and SART. The default is False.
 
         Raises
         ------
@@ -433,7 +433,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         angles_rot_rad: Union[ArrayLike, NDArray],
         rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
-        create_single_projs: bool = True,
+        create_single_projs: bool = False,
     ):
         """Initialize geometry of projector backend based on astra-toolbox.
 
@@ -449,7 +449,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
             The fully specified projection geometry.
             When active, the rotation axis shift is ignored. The default is None.
         create_single_projs : bool, optional
-            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
+            Whether to create projectors for single projections. Used for corrections and SART. The default is False.
 
         Raises
         ------
@@ -753,7 +753,7 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
         angles_rot_rad: Union[ArrayLike, NDArray],
         rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
         prj_geom: Optional[ProjectionGeometry] = None,
-        create_single_projs: bool = True,
+        create_single_projs: bool = False,
     ):
         """Initialize projector backend based on experimental astra-toolbox functions.
 
@@ -769,7 +769,7 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
             The fully specified projection geometry.
             When active, the rotation axis shift is ignored. The default is None.
         create_single_projs : bool, optional
-            Whether to create projectors for single projections. Used for corrections and SART. The default is True.
+            Whether to create projectors for single projections. Used for corrections and SART. The default is False.
 
         Raises
         ------
