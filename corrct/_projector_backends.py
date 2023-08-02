@@ -480,8 +480,8 @@ class ProjectorBackendASTRA(ProjectorBackend):
                 prj_geom.det_shape_vu = np.array(self.vol_geom.shape_xyz[list([2, 0])], dtype=int)
             else:
                 # Here the projections are supposed to be larger or smaller than the sample size
-                self.prj_shape_vwu = np.array([prj_geom.det_shape_vu[-2], num_angles, prj_geom.det_shape_vu[-1]])
-                self.prj_shape_vu = np.array([prj_geom.det_shape_vu[-2], 1, prj_geom.det_shape_vu[-1]])
+                self.prj_shape_vwu = np.array([*prj_geom.det_shape_vu[:-1], num_angles, prj_geom.det_shape_vu[-1]])
+                self.prj_shape_vu = np.array([*prj_geom.det_shape_vu[:-1], 1, prj_geom.det_shape_vu[-1]])
 
             rot_geom = prj_geom.rotate(self.angles_w_rad)
 
@@ -802,8 +802,8 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
             if prj_geom.det_shape_vu is not None:
                 # Here the projections are supposed to be larger or smaller than the sample size
                 # We use the original version because it makes sure that 2D is respected.
-                self.prj_shape_vwu = np.array([prj_geom.det_shape_vu[:-1], num_angles, prj_geom.det_shape_vu[-1]])
-                self.prj_shape_vu = np.array([prj_geom.det_shape_vu[:-1], 1, prj_geom.det_shape_vu[-1]])
+                self.prj_shape_vwu = np.array([*prj_geom.det_shape_vu[:-1], num_angles, prj_geom.det_shape_vu[-1]])
+                self.prj_shape_vu = np.array([*prj_geom.det_shape_vu[:-1], 1, prj_geom.det_shape_vu[-1]])
 
             prj_geom = prj_geom.get_3d()
 
