@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Detector shifts finding classes.
 
@@ -6,17 +5,14 @@ Detector shifts finding classes.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+from typing import Dict, Optional, Tuple, Union
+
+import matplotlib.pyplot as plt
 import numpy as np
-
-from typing import Tuple, Dict, Optional, Union
 from numpy.typing import ArrayLike, NDArray
-
 from tqdm.auto import tqdm
 
 from . import fitting
-
-import matplotlib.pyplot as plt
-
 
 eps = np.finfo(np.float32).eps
 
@@ -48,7 +44,7 @@ class DetectorShiftsBase:
         *,
         data_format: str = "dvwu",
         data_mask_dvwu: Optional[NDArray] = None,
-        borders_dvwu: Dict = {"d": None, "v": None, "w": None, "u": None},
+        borders_dvwu: dict = {"d": None, "v": None, "w": None, "u": None},
         max_shifts: Union[float, NDArrayFloat, None] = None,
         precision_decimals: int = 2,
         verbose: bool = True,
@@ -192,10 +188,10 @@ class DetectorShiftsPRE(DetectorShiftsBase):
         if normalize_fourier:
             ccs_f /= np.fmax(np.abs(ccs_f).max(axis=-2, keepdims=True), eps)
 
-        cc = local_ifft(ccs_f, axis=-2).real
+        cross_corr = local_ifft(ccs_f, axis=-2).real
 
-        cc_coords = np.fft.fftfreq(cc.shape[-2], 1 / cc.shape[-2])
-        f_vals, fc_ax = fitting.extract_peak_regions_1d(cc, axis=-2, cc_coords=cc_coords)
+        cc_coords = np.fft.fftfreq(cross_corr.shape[-2], 1 / cross_corr.shape[-2])
+        f_vals, fc_ax = fitting.extract_peak_regions_1d(cross_corr, axis=-2, cc_coords=cc_coords)
         shifts_v = fitting.refine_max_position_1d(f_vals, decimals=self.decimals) + fc_ax[1, :]
 
         shifts_v = _filter_shifts(shifts_v, self.max_shifts[0, :])
@@ -204,7 +200,7 @@ class DetectorShiftsPRE(DetectorShiftsBase):
         shifts_v = np.around(shifts_v, decimals=self.decimals)
 
         if self.verbose:
-            f, axs = plt.subplots(2, 2, figsize=[10, 5], sharex=True)
+            fig, axs = plt.subplots(2, 2, figsize=[10, 5], sharex=True)
             axs[0, 0].imshow(data_vw)
             axs[0, 0].set_title("Data VW")
             axs[0, 0].set_xlabel("Coord. W (angular)")
@@ -217,9 +213,9 @@ class DetectorShiftsPRE(DetectorShiftsBase):
             axs[0, 1].set_ylabel("Coord. V (vertical)")
             axs[1, 0].imshow(data_vw_p)
             axs[1, 0].set_title("Data used for cross-correlation")
-            axs[1, 1].imshow(np.fft.fftshift(cc, axes=(-2,)))
+            axs[1, 1].imshow(np.fft.fftshift(cross_corr, axes=(-2,)))
             axs[1, 1].set_title("Cross-correlation")
-            f.tight_layout()
+            fig.tight_layout()
             plt.show(block=False)
 
         return shifts_v
@@ -229,7 +225,7 @@ class DetectorShiftsPRE(DetectorShiftsBase):
         fit_l1: bool = False,
         background: Union[float, NDArray, None] = None,
         method: str = "com",
-    ) -> Tuple[NDArrayFloat, float]:
+    ) -> tuple[NDArrayFloat, float]:
         """Compute the pre-alignment shifts for the horizontal dimension.
 
         The pre-alignment shifts, and center-of-rotation (CoR) are computed by
@@ -294,10 +290,14 @@ class DetectorShiftsPRE(DetectorShiftsBase):
             axs[0].grid()
             axs[0].set_xlabel("Coord. W (angular)")
             axs[0].set_ylabel("Coord. U (horizontal)")
+            axs[0].xaxis.label.set_fontsize(16)
+            axs[0].yaxis.label.set_fontsize(16)
             axs[1].imshow(data_vwu)
             axs[1].scatter(-center_of_mass + fx_half_size, np.arange(len(center_of_mass)), c="C1")
             axs[1].set_xlabel("Coord. U (horizontal)")
             axs[1].set_ylabel("Coord. W (angular)")
+            axs[1].xaxis.label.set_fontsize(16)
+            axs[1].yaxis.label.set_fontsize(16)
             fig.tight_layout()
             plt.show(block=False)
             print(f"amplitude = {a} (pix)")
@@ -392,7 +392,7 @@ class DetectorShiftsXC(DetectorShiftsBase):
 
         if self.verbose:
             coords = ["V", "U"] if is_3d else ["U"]
-            f, axs = plt.subplots(1, num_dims, figsize=[10, 5], sharex=True, squeeze=False)
+            fig, axs = plt.subplots(1, num_dims, figsize=[10, 5], sharex=True, squeeze=False)
             angles_deg = np.rad2deg(sorted_angles_rad)
             for ii, (s, coord) in enumerate(zip(shifts_vu, coords)):
                 axs[0, ii].plot(angles_deg, s, label="Shifts")
@@ -404,7 +404,7 @@ class DetectorShiftsXC(DetectorShiftsBase):
                 axs[0, ii].legend()
                 axs[0, ii].grid()
                 axs[0, ii].set_title(f"Shifts {coord}")
-            f.tight_layout()
+            fig.tight_layout()
             plt.show(block=False)
 
         shifts_u: NDArrayFloat = shifts_vu[-1, ...] - fitting.sinusoid(sorted_angles_rad, a, p, b)
@@ -486,12 +486,12 @@ class DetectorShiftsXC(DetectorShiftsBase):
         cor = np.around(np.mean(cors), decimals=self.decimals)
 
         if self.verbose:
-            f, axs = plt.subplots(1, 1, figsize=[10, 5])
+            fig, axs = plt.subplots(1, 1, figsize=[10, 5])
             axs.plot(cors)
             axs.plot(np.ones_like(cors) * cor)
             axs.grid()
             axs.set_title("Centers of rotation")
-            f.tight_layout()
+            fig.tight_layout()
             plt.show(block=False)
 
         return float(cor)

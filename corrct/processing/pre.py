@@ -308,40 +308,40 @@ def compute_eigen_flats(
     trans_num = np.prod(trans_shape[:-ndim])
     img_shape = trans_shape[-ndim:]
 
-    imgs = [trans_wvu.reshape([-1, *img_shape])]
+    stack_imgs = [trans_wvu.reshape([-1, *img_shape])]
 
     if flats_wvu is not None:
-        imgs.append(flats_wvu.reshape([-1, *img_shape]))
+        stack_imgs.append(flats_wvu.reshape([-1, *img_shape]))
 
     if darks_wvu is not None:
         darks_num = np.prod(darks_wvu.shape[:-ndim])
-        imgs.append(darks_wvu.reshape([-1, *img_shape]))
+        stack_imgs.append(darks_wvu.reshape([-1, *img_shape]))
     else:
         darks_num = 0
 
-    imgs = np.concatenate(imgs).reshape([-1, np.prod(img_shape)]).transpose()
+    stack_imgs = np.concatenate(stack_imgs).reshape([-1, np.prod(img_shape)]).transpose()
 
-    U, s, Vh = np.linalg.svd(imgs, full_matrices=False)
+    mat_u, sigma, mat_v_h = np.linalg.svd(stack_imgs, full_matrices=False)
 
-    last_t_ind = -darks_num + 1 if darks_num > 0 else len(s)
+    last_t_ind = -darks_num + 1 if darks_num > 0 else len(sigma)
 
-    t: NDArray = np.matmul(U[..., 1:last_t_ind] * s[..., None, 1:last_t_ind], Vh[..., 1:last_t_ind, :])
-    t = t.transpose().reshape([-1, *img_shape])[:trans_num]
+    eigen_projs: NDArray = (mat_u[..., 1:last_t_ind] * sigma[..., None, 1:last_t_ind]) @ mat_v_h[..., 1:last_t_ind, :]
+    eigen_projs = eigen_projs.transpose().reshape([-1, *img_shape])[:trans_num]
 
-    f: NDArray = np.matmul(U[..., 0:1:] * s[..., None, 0:1:], Vh[..., 0:1:, :])
-    f = f.transpose().reshape([-1, *img_shape])[:trans_num]
+    eigen_flats: NDArray = (mat_u[..., 0:1:] * sigma[..., None, 0:1:]) @ mat_v_h[..., 0:1:, :]
+    eigen_flats = eigen_flats.transpose().reshape([-1, *img_shape])[:trans_num]
 
     if plot:
-        fig, ax = plt.subplots(1, 2 + int(darks_num > 0), figsize=[10, 3.75])
-        ax[0].plot(s)
-        ax[0].grid()
-        ax[0].set_title("Singular values")
-        ax[1].imshow(U[:, 0].reshape(img_shape))
-        ax[1].set_title("Highest value component")
+        fig, axs = plt.subplots(1, 2 + int(darks_num > 0), figsize=[10, 3.75])
+        axs[0].plot(sigma)
+        axs[0].grid()
+        axs[0].set_title("Singular values")
+        axs[1].imshow(mat_u[:, 0].reshape(img_shape))
+        axs[1].set_title("Highest value component")
         if darks_num > 0:
-            ax[2].imshow(U[:, last_t_ind:].mean(axis=1).reshape(img_shape))
-            ax[2].set_title("Noise average")
+            axs[2].imshow(mat_u[:, last_t_ind:].mean(axis=1).reshape(img_shape))
+            axs[2].set_title("Noise average")
         fig.tight_layout()
         plt.show(block=False)
 
-    return t.reshape(trans_shape), f.reshape(trans_shape)
+    return eigen_projs.reshape(trans_shape), eigen_flats.reshape(trans_shape)

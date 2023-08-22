@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Aided regularization parameter estimation.
 
@@ -7,24 +6,19 @@ Aided regularization parameter estimation.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import numpy as np
-from numpy.polynomial.polynomial import Polynomial
+import concurrent.futures as cf
+import inspect
+import multiprocessing as mp
+import time as tm
+from abc import ABC, abstractmethod
+from typing import Any, Callable, Optional, Sequence, Union, Literal
 
 import matplotlib.pyplot as plt
-
-from typing import Callable, Sequence, Optional, Tuple, Any, Union
+import numpy as np
+from numpy.polynomial.polynomial import Polynomial
 from numpy.typing import ArrayLike, DTypeLike, NDArray
-import inspect
-
-from abc import ABC, abstractmethod
-
-import time as tm
-
-import concurrent.futures as cf
-import multiprocessing as mp
 
 from . import solvers
-
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
@@ -63,7 +57,7 @@ def create_random_test_mask(
 class BaseRegularizationEstimation(ABC):
     """Base class for regularization parameter estimation class."""
 
-    _solver_calling_function: Optional[Callable[[Any], Tuple[NDArrayFloat, solvers.SolutionInfo]]]
+    _solver_calling_function: Optional[Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]]]
 
     def __init__(
         self, dtype: DTypeLike = np.float32, parallel_eval: bool = True, verbose: bool = False, plot_result: bool = False
@@ -98,29 +92,29 @@ class BaseRegularizationEstimation(ABC):
         return self._solver_spawning_function
 
     @property
-    def solver_calling_function(self) -> Callable[[Any], Tuple[NDArrayFloat, solvers.SolutionInfo]]:
+    def solver_calling_function(self) -> Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]]:
         """Return the locally stored solver calling function."""
         if self._solver_calling_function is None:
             raise ValueError("Solver spawning function not initialized!")
         return self._solver_calling_function
 
     @solver_spawning_function.setter
-    def solver_spawning_function(self, s: Callable):
-        if not isinstance(s, Callable):
+    def solver_spawning_function(self, solver_spawn: Callable):
+        if not isinstance(solver_spawn, Callable):
             raise ValueError("Expected a solver spawning function (callable)")
-        if len(inspect.signature(s).parameters) != 1:
+        if len(inspect.signature(solver_spawn).parameters) != 1:
             raise ValueError(
                 "Expected a solver spawning function (callable), whose only parameter is the regularization lambda"
             )
-        self._solver_spawning_function = s
+        self._solver_spawning_function = solver_spawn
 
     @solver_calling_function.setter
-    def solver_calling_function(self, c: Callable):
-        if not isinstance(c, Callable):
+    def solver_calling_function(self, solver_call: Callable):
+        if not isinstance(solver_call, Callable):
             raise ValueError("Expected a solver calling function (callable)")
-        if not len(inspect.signature(c).parameters) >= 1:
+        if not len(inspect.signature(solver_call).parameters) >= 1:
             raise ValueError("Expected a solver calling function (callable), with at least one parameter (solver)")
-        self._solver_calling_function = c
+        self._solver_calling_function = solver_call
 
     @staticmethod
     def get_lambda_range(start: float, end: float, num_per_order: int = 4) -> NDArrayFloat:
@@ -144,7 +138,7 @@ class BaseRegularizationEstimation(ABC):
         num_steps = np.ceil(num_per_order * np.log10(end / start) - 1e-3)
         return start * (step_size ** np.arange(num_steps + 1))
 
-    def compute_reconstruction_and_loss(self, lam_reg: float, *args: Any, **kwds: Any) -> Tuple[np.floating, NDArrayFloat]:
+    def compute_reconstruction_and_loss(self, lam_reg: float, *args: Any, **kwds: Any) -> tuple[np.floating, NDArrayFloat]:
         """Compute objective function cost for the given regularization weight.
 
         Parameters
@@ -171,7 +165,7 @@ class BaseRegularizationEstimation(ABC):
 
     def compute_reconstruction_error(
         self, lams_reg: Union[ArrayLike, NDArrayFloat], gnd_truth: NDArrayFloat
-    ) -> Tuple[NDArrayFloat, NDArrayFloat]:
+    ) -> tuple[NDArrayFloat, NDArrayFloat]:
         """Compute the reconstructions for each regularization weight error against the ground truth.
 
         Parameters
@@ -190,10 +184,10 @@ class BaseRegularizationEstimation(ABC):
         """
         lams_reg = np.array(lams_reg, ndmin=1)
 
-        c = tm.perf_counter()
+        counter = tm.perf_counter()
         if self.verbose:
             print("Computing reconstruction error:")
-            print("- Regularization weights range: [%g, %g] in %d steps" % (lams_reg[0], lams_reg[-1], len(lams_reg)))
+            print(f"- Regularization weights range: [{lams_reg[0]}, {lams_reg[-1]}] in {len(lams_reg)} steps")
             print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
 
         if self.parallel_eval:
@@ -213,17 +207,17 @@ class BaseRegularizationEstimation(ABC):
             err_l2[ii_l] = np.linalg.norm(residual.ravel(), ord=2) ** 2
 
         if self.verbose:
-            print("Done in %g seconds.\n" % (tm.perf_counter() - c))
+            print(f"Done in {tm.perf_counter() - counter} seconds.\n")
 
         if self.plot_result:
-            f, axs = plt.subplots(2, 1, sharex=True)
+            fig, axs = plt.subplots(2, 1, sharex=True)
             axs[0].set_xscale("log", nonpositive="clip")  # type: ignore
             axs[0].plot(lams_reg, err_l1, label="Error - l1-norm")  # type: ignore
             axs[0].legend()  # type: ignore
             axs[1].set_xscale("log", nonpositive="clip")  # type: ignore
             axs[1].plot(lams_reg, err_l2, label="Error - l2-norm ^ 2")  # type: ignore
             axs[1].legend()  # type: ignore
-            f.tight_layout()
+            fig.tight_layout()
             plt.show(block=False)
 
         return err_l1, err_l2
@@ -301,33 +295,42 @@ class LCurve(BaseRegularizationEstimation):
         """
         lams_reg = np.array(lams_reg, ndmin=1)
 
-        c = tm.perf_counter()
+        counter = tm.perf_counter()
         if self.verbose:
             print("Computing L-curve loss values:")
-            print("- Regularization weights range: [%g, %g] in %d steps" % (lams_reg[0], lams_reg[-1], len(lams_reg)))
+            print(f"- Regularization weights range: [{lams_reg[0]}, {lams_reg[-1]}] in {len(lams_reg)} steps")
             print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
 
         if self.parallel_eval:
             with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                fr = [executor.submit(self.compute_reconstruction_and_loss, l) for l in lams_reg]
+                future_to_lambda = {
+                    executor.submit(self.compute_reconstruction_and_loss, l): (ii, l) for ii, l in enumerate(lams_reg)
+                }
 
-                recs = [r.result()[1] for r in fr]
+                recs = []
+                for future in cf.as_completed(future_to_lambda):
+                    lam_ind, lam = future_to_lambda[future]
+                    try:
+                        recs.append(future.result()[1])
+                    except ValueError as exc:
+                        print(f"Lambda {lam} (#{lam_ind}) generated an exception: {exc}")
+                        raise
         else:
             recs = [self.compute_reconstruction_and_loss(l)[1] for l in lams_reg]
 
         f_vals = np.array([self.loss_function(rec) for rec in recs], dtype=self.dtype)
 
         if self.verbose:
-            print("Done in %g seconds.\n" % (tm.perf_counter() - c))
+            print(f"Done in {tm.perf_counter() - counter} seconds.\n")
 
         if self.plot_result:
-            f, ax = plt.subplots()
-            ax.set_title("L-Curve loss values")
-            ax.set_xscale("log", nonpositive="clip")
-            ax.set_yscale("log", nonpositive="clip")
-            ax.plot(lams_reg, f_vals)
-            ax.grid()
-            f.tight_layout()
+            fig, axs = plt.subplots()
+            axs.set_title("L-Curve loss values")
+            axs.set_xscale("log", nonpositive="clip")
+            axs.set_yscale("log", nonpositive="clip")
+            axs.plot(lams_reg, f_vals)
+            axs.grid()
+            fig.tight_layout()
             plt.show(block=False)
 
         return f_vals
@@ -375,7 +378,7 @@ class CrossValidation(BaseRegularizationEstimation):
     def _create_random_test_mask(self) -> NDArrayFloat:
         return create_random_test_mask(self.data_shape, self.test_fraction, self.dtype)
 
-    def compute_loss_values(self, lams_reg: Union[ArrayLike, NDArrayFloat]) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
+    def compute_loss_values(self, lams_reg: Union[ArrayLike, NDArrayFloat]) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
         """Compute objective function values for all regularization weights.
 
         Parameters
@@ -394,19 +397,19 @@ class CrossValidation(BaseRegularizationEstimation):
         """
         lams_reg = np.array(lams_reg, ndmin=1)
 
-        c = tm.perf_counter()
+        counter = tm.perf_counter()
         if self.verbose:
             print("Computing cross-validation loss values:")
-            print("- Regularization weights range: [%g, %g] in %d steps" % (lams_reg[0], lams_reg[-1], len(lams_reg)))
-            print("- Number of averages: %d" % self.num_averages)
-            print("- Leave-out pixel fraction: %g%%" % (self.test_fraction * 100))
+            print(f"- Regularization weights range: [{lams_reg[0]}, {lams_reg[-1]}] in {len(lams_reg)} steps")
+            print(f"- Number of averages: {self.num_averages}")
+            print(f"- Leave-out pixel fraction: {self.test_fraction:%}")
             print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
 
         f_vals = np.empty((len(lams_reg), self.num_averages), dtype=self.dtype)
         for ii_avg in range(self.num_averages):
             c_round = tm.perf_counter()
             if self.verbose:
-                print("\nRound: %d/%d" % (ii_avg + 1, self.num_averages))
+                print(f"\nRound: {ii_avg + 1}/{self.num_averages}")
 
             if self.parallel_eval:
                 with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
@@ -422,21 +425,21 @@ class CrossValidation(BaseRegularizationEstimation):
             f_vals[:, ii_avg] = f_vals_ii
 
             if self.verbose:
-                print(" - Done in %g seconds.\n" % (tm.perf_counter() - c_round))
+                print(f" - Done in {tm.perf_counter() - c_round:g} seconds.\n")
 
         f_avgs = np.mean(f_vals, axis=1)
         f_stds = np.std(f_vals, axis=1)
 
         if self.verbose:
-            print("Done in %g seconds.\n" % (tm.perf_counter() - c))
+            print(f"Done in {tm.perf_counter() - counter:g} seconds.\n")
 
         if self.plot_result:
-            f, ax = plt.subplots()
-            ax.set_title("Cross-validation loss values (avgs: %d)" % self.num_averages)
-            ax.set_xscale("log", nonpositive="clip")
-            ax.errorbar(lams_reg, f_avgs, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
-            ax.grid()
-            f.tight_layout()
+            fig, axs = plt.subplots()
+            axs.set_title(f"Cross-validation loss values (avgs: {self.num_averages})")
+            axs.set_xscale("log", nonpositive="clip")
+            axs.errorbar(lams_reg, f_avgs, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
+            axs.grid()
+            fig.tight_layout()
             plt.show(block=False)
 
         return f_avgs, f_stds, f_vals
@@ -446,8 +449,8 @@ class CrossValidation(BaseRegularizationEstimation):
         lams_reg: Union[ArrayLike, NDArrayFloat],
         f_vals: NDArrayFloat,
         f_stds: Optional[NDArrayFloat] = None,
-        scale: str = "log",
-    ) -> Tuple[float, float]:
+        scale: Literal["linear", "log"] = "log",
+    ) -> tuple[float, float]:
         """Parabolic fit of objective function costs for the different regularization weights.
 
         Parameters
@@ -474,7 +477,7 @@ class CrossValidation(BaseRegularizationEstimation):
         if len(lams_reg) < 3 or len(f_vals) < 3 or len(lams_reg) != len(f_vals):
             raise ValueError(
                 "Lengths of the lambdas and function values should be identical and >= 3."
-                "Given: lams=%d, vals=%d" % (len(lams_reg), len(f_vals))
+                f"Given: lams={len(lams_reg)}, vals={len(f_vals)}"
             )
 
         if scale.lower() == "log":
@@ -484,7 +487,7 @@ class CrossValidation(BaseRegularizationEstimation):
             to_fit = lambda x: x
             from_fit = to_fit
         else:
-            raise ValueError("Parameter 'scale' should be either 'log' or 'linear', given '%s' instead" % scale)
+            raise ValueError(f"Parameter 'scale' should be either 'log' or 'linear', given '{scale}' instead")
 
         min_pos = np.argmin(f_vals)
         if min_pos == 0:
@@ -499,11 +502,10 @@ class CrossValidation(BaseRegularizationEstimation):
             lams_reg_fit = to_fit(lams_reg[min_pos - 1 : min_pos + 2])
             f_vals_fit = f_vals[min_pos - 1 : min_pos + 2]
 
-        c = tm.perf_counter()
+        counter = tm.perf_counter()
         if self.verbose:
             print(
-                "Fitting minimum within the parameter interval [%g, %g]: "
-                % (from_fit(lams_reg_fit[0]), from_fit(lams_reg_fit[-1])),
+                f"Fitting minimum within the parameter interval [{from_fit(lams_reg_fit[0])}, {from_fit(lams_reg_fit[-1])}]: ",
                 end="",
                 flush=True,
             )
@@ -524,8 +526,7 @@ class CrossValidation(BaseRegularizationEstimation):
         min_lam, min_val = from_fit(vertex_pos), vertex_val
         if min_lam < lams_reg[0] or min_lam > lams_reg[-1]:
             print(
-                "WARNING: fitted lambda %g is outside the bounds of input lambdas [%g, %g]."
-                % (min_lam, lams_reg[0], lams_reg[-1])
+                f"WARNING: fitted lambda {min_lam} is outside the bounds of input lambdas [{lams_reg[0]}, {lams_reg[-1]}]."
                 + " Returning minimum measured point."
             )
             res_lam, res_val = lams_reg[min_pos], f_vals[min_pos]
@@ -533,21 +534,29 @@ class CrossValidation(BaseRegularizationEstimation):
             res_lam, res_val = min_lam, min_val
 
         if self.verbose:
-            print("Found at %g, in %g seconds.\n" % (min_lam, tm.perf_counter() - c))
+            print(f"Found at {min_lam:g}, in {tm.perf_counter() - counter:g} seconds.\n")
 
         if self.plot_result:
-            f, ax = plt.subplots()
-            ax.set_xscale(scale, nonpositive="clip")
+            fig, axs = plt.subplots()
+            axs.set_xscale(scale, nonpositive="clip")
             if f_stds is None:
-                ax.plot(lams_reg, f_vals)
+                axs.plot(lams_reg, f_vals)
             else:
-                ax.errorbar(lams_reg, f_vals, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
+                axs.errorbar(lams_reg, f_vals, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
             x = np.linspace(lams_reg_fit[0], lams_reg_fit[2])
             y = coeffs[0] + x * (coeffs[1] + x * coeffs[2])
-            ax.plot(from_fit(x), y)
-            ax.scatter(min_lam, min_val)
-            ax.grid()
-            f.tight_layout()
+            axs.plot(from_fit(x), y)
+            axs.scatter(min_lam, min_val)
+            axs.grid()
+            for tl in axs.get_xticklabels():
+                tl.set_fontsize(13)
+            for tl in axs.get_yticklabels():
+                tl.set_fontsize(13)
+            axs.set_xlabel(r"$\lambda$ values")
+            axs.set_ylabel("Cross-validation loss values")
+            axs.xaxis.label.set_fontsize(16)
+            axs.yaxis.label.set_fontsize(16)
+            fig.tight_layout()
             plt.show(block=False)
 
         return res_lam, res_val

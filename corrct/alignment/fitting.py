@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Fitting routines.
 
@@ -9,15 +8,14 @@ Created on Tue May 17 12:11:58 2022
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+from collections.abc import Sequence
+from typing import Optional, Union
+
 import numpy as np
 import numpy.polynomial
-
-import scipy.optimize as spopt
 import scipy.ndimage as spimg
-
-from typing import Sequence, Tuple, Optional, Union
+import scipy.optimize as spopt
 from numpy.typing import ArrayLike, NDArray
-
 
 NDArrayFloat = NDArray[np.floating]
 
@@ -254,7 +252,7 @@ def sinusoid(
     return a * np.sin(x + p) + b
 
 
-def fit_sinusoid(angles: NDArrayFloat, values: NDArrayFloat, fit_l1: bool = False) -> Tuple[float, float, float]:
+def fit_sinusoid(angles: NDArrayFloat, values: NDArrayFloat, fit_l1: bool = False) -> tuple[float, float, float]:
     """Fits a sinusoid to the given values.
 
     Parameters
@@ -292,7 +290,7 @@ def fit_sinusoid(angles: NDArrayFloat, values: NDArrayFloat, fit_l1: bool = Fals
 
 def extract_peak_regions_1d(
     cc: NDArrayFloat, axis: int = -1, peak_radius: int = 1, cc_coords: Union[ArrayLike, NDArray, None] = None
-) -> Tuple[NDArrayFloat, Optional[NDArray]]:
+) -> tuple[NDArrayFloat, Optional[NDArray]]:
     """
     Extract a region around the maximum value.
 
@@ -320,7 +318,7 @@ def extract_peak_regions_1d(
     if not (len(img_shape) == 2):
         raise ValueError(
             "The input image should be either a 1 or 2-dimensional array. Array of shape: [%s] was given."
-            % (" ".join(("%d" % s for s in cc.shape)))
+            % (" ".join("%d" % s for s in cc.shape))
         )
     other_axis = (axis + 1) % 2
     # get pixel having the maximum value of the correlation array
@@ -350,7 +348,7 @@ def extract_peak_regions_1d(
 
 def refine_max_position_1d(
     f_vals: NDArrayFloat, fx: Union[ArrayLike, NDArray, None] = None, return_vertex_val: bool = False, decimals: int = 2
-) -> Union[NDArrayFloat, Tuple[NDArrayFloat, NDArrayFloat]]:
+) -> Union[NDArrayFloat, tuple[NDArrayFloat, NDArrayFloat]]:
     """Compute the sub-pixel max position of the given function sampling.
 
     Parameters
@@ -376,7 +374,7 @@ def refine_max_position_1d(
     if not len(f_vals.shape) in (1, 2):
         raise ValueError(
             "The fitted values should be either one or a collection of 1-dimensional arrays. Array of shape: [%s] was given."
-            % (" ".join(("%d" % s for s in f_vals.shape)))
+            % (" ".join("%d" % s for s in f_vals.shape))
         )
     num_vals = f_vals.shape[0]
 
@@ -433,8 +431,8 @@ def refine_max_position_1d(
 
 
 def extract_peak_region_nd(
-    cc: NDArrayFloat, peak_radius: int = 1, cc_coords: Union[Tuple[Union[Sequence, NDArray]], None] = None
-) -> Tuple[NDArray, Optional[Sequence[NDArray]]]:
+    cc: NDArrayFloat, peak_radius: int = 1, cc_coords: Union[tuple[Union[Sequence, NDArray]], None] = None
+) -> tuple[NDArray, Optional[Sequence[NDArray]]]:
     """
     Extract a region around the maximum value.
 
@@ -504,7 +502,7 @@ def refine_max_position_2d(
     if not (len(f_vals.shape) == 2):
         raise ValueError(
             "The fitted values should form a 2-dimensional array. Array of shape: [%s] was given."
-            % (" ".join(("%d" % s for s in f_vals.shape)))
+            % (" ".join("%d" % s for s in f_vals.shape))
         )
     if fy is None:
         fy = np.linspace(-1, 1, f_vals.shape[0])
@@ -515,7 +513,7 @@ def refine_max_position_2d(
         if not (len(fy.shape) == 1 and np.all(fy.size == f_vals.shape[0])):
             raise ValueError(
                 "Vertical coordinates should have the same length as values matrix. Sizes of fy: %d, f_vals: [%s]"
-                % (fy.size, " ".join(("%d" % s for s in f_vals.shape)))
+                % (fy.size, " ".join("%d" % s for s in f_vals.shape))
             )
 
     if fx is None:
@@ -527,7 +525,7 @@ def refine_max_position_2d(
     if not (len(fx.shape) == 1 and np.all(fx.size == f_vals.shape[1])):
         raise ValueError(
             "Horizontal coordinates should have the same length as values matrix. Sizes of fx: %d, f_vals: [%s]"
-            % (fx.size, " ".join(("%d" % s for s in f_vals.shape)))
+            % (fx.size, " ".join("%d" % s for s in f_vals.shape))
         )
 
     fy, fx = np.meshgrid(fy, fx, indexing="ij")
