@@ -50,6 +50,7 @@ class ProjectionGeometry(Geometry):
     det_shape_vu: Optional[NDArray] = None
 
     def __post_init__(self) -> None:
+        self.geom_type = self.geom_type.lower()
         self.src_pos_xyz = np.array(self.src_pos_xyz)
         self.det_pos_xyz = np.array(self.det_pos_xyz)
         self.det_u_xyz = np.array(self.det_u_xyz)
@@ -115,7 +116,16 @@ class ProjectionGeometry(Geometry):
         int
             The numder of dimensions.
         """
-        return int(self.geom_type[-2])
+        if "parallel" in self.geom_type:
+            return int(self.geom_type[-2])
+        elif self.geom_type.lower() == "cone":
+            return 3
+        elif self.geom_type.lower() == "fanflat":
+            return 2
+        else:
+            raise ValueError(
+                f"Geometry ({self.geom_type}) needs to be one of: 'parallel2d' | 'parallel3d' | 'cone' | 'fanflat'."
+            )
 
     def get_3d(self) -> "ProjectionGeometry":
         """Return the 3D version of the geometry.
