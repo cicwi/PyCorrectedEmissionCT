@@ -34,8 +34,7 @@ def track_marker(prj_data: NDArray, marker_vu: NDArray, stack_axis: int = -2) ->
     """
     marker_v1u = np.expand_dims(marker_vu, stack_axis).astype(np.float32)
     marker_pos = fitting.fit_shifts_vu_xc(prj_data, marker_v1u, stack_axis=stack_axis, normalize_fourier=False)
-    marker_pos = marker_pos.swapaxes(-2, -1) + np.array(marker_vu.shape) / 2
-    return marker_pos
+    return marker_pos + np.array(marker_vu.shape)[:, None] / 2
 
 
 def create_marker_disk(
