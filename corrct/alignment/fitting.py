@@ -10,6 +10,8 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 from typing import Literal, Optional, Union, Sequence
 
+from abc import ABC, abstractmethod
+
 import numpy as np
 from numpy.polynomial import Polynomial
 import scipy.ndimage as spimg
@@ -652,144 +654,83 @@ def fit_parabola_min(
     return min_fx, min_f_val, (coeffs, fx_fit)
 
 
-class Ellipse:
-    """
-    Initialize ellipse class, used for fitting acquisition geometry parameters.
+class Trajectory(ABC):
+    """Base trajectory class."""
 
-    Parameters
-    ----------
-    prj_points_vu : ArrayLike
-        List ofprojected positions over the detector of a test object.
-    prj_center_vu : Optional[ArrayLike], optional
-        Projected position of the rotation center. The default is None.
-    """
-
-    def __init__(self, prj_points_vu: Union[ArrayLike, NDArray], prj_center_vu: Union[ArrayLike, NDArray, None] = None):
-        self.prj_points_vu = np.array(prj_points_vu)
-        if prj_center_vu is not None:
-            prj_center_vu = np.array(prj_center_vu)
-        self.prj_center_vu = prj_center_vu
-
-    def fit_prj_center(self, rescale: bool = True, least_squares: bool = True) -> NDArray:
-        """
-        Fit the projected circle position.
+    @abstractmethod
+    def __call__(self, uus: Union[ArrayLike, NDArray]) -> Sequence[NDArray]:
+        """Compute V coordinates, given V coordinates.
 
         Parameters
         ----------
+        uus : Union[ArrayLike, NDArray]
+            The U coordinates
+
+        Returns
+        -------
+        Sequence[NDArray]
+            Corresponding V coordiantes, given the multiplicity of the trajectory
+        """
+
+
+class Ellipse(Trajectory):
+    """Elliptic trajectory class."""
+
+    a: float
+    b: float
+    c: float
+    u: float
+    v: float
+
+    c_vu: NDArrayFloat
+
+    def __init__(self, prj_points_vu: Union[ArrayLike, NDArray], rescale: bool = True, least_squares: bool = True):
+        """Initialize ellipse class.
+
+        Parameters
+        ----------
+        prj_points_vu : ArrayLike | NDArray
+            List of sampled points over the trajectory.
         rescale : bool, optional
             Whether to rescale the data within the interval [-1, 1]. The default is True.
         least_squares : bool, optional
             Whether to use the least-squares (l2-norm) fit or l1-norm. The default is True.
+        """
+        self.prj_points_vu = np.array(prj_points_vu)
+
+        self.rescale = rescale
+        self.least_squares = least_squares
+
+        self._fit_center()
+        self._fit_parameters()
+
+    @property
+    def center_vu(self) -> NDArray:
+        """Return the fitted ellipse center.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The fitted center position.
         """
-        c_vu = np.mean(self.prj_points_vu, axis=-1, keepdims=True)
-        pos_vu = self.prj_points_vu - c_vu
+        return self.c_vu
 
-        if rescale:
-            scale_vu = np.max(pos_vu, axis=-1, keepdims=True) - np.min(pos_vu, axis=-1, keepdims=True)
-            pos_vu /= scale_vu
-        else:
-            scale_vu = 1.0
-
-        num_lines = pos_vu.shape[-1] // 2
-        pos1_vu = pos_vu[:, :num_lines]
-        pos2_vu = pos_vu[:, num_lines : num_lines * 2]
-
-        diffs_vu = pos2_vu - pos1_vu
-        b = np.cross(pos1_vu, pos2_vu, axis=0)
-        A = np.stack([diffs_vu[-1, :], -diffs_vu[-2, :]], axis=0)
-
-        p_vu = np.linalg.lstsq(A, b, rcond=None)[0]
-        if not least_squares:
-
-            def _func(params: NDArrayFloat) -> float:
-                predicted_b = A.dot(params)
-                l1_diff = np.linalg.norm(predicted_b - b, ord=1)
-                return float(l1_diff)
-
-            opt_p_vu = spopt.minimize(_func, p_vu)
-            p_vu = opt_p_vu.x
-
-        return p_vu * scale_vu + c_vu
-
-    def fit_parameters(self, rescale: bool = True, least_squares: bool = True) -> NDArray:
-        """
-        Fit the ellipse parameters.
-
-        Parameters
-        ----------
-        rescale : bool, optional
-            Whether to rescale the data within the interval [-1, 1]. The default is True.
-        least_squares : bool, optional
-            Whether to use the least-squares (l2-norm) fit or l1-norm. The default is True.
+    @property
+    def parameters(self) -> NDArray:
+        """Return the fitted ellipse parameters.
 
         Returns
         -------
-        ArrayLike
+        NDArray
             The fitted ellipse parameters.
         """
-        # First we fit 5 intermediate variables
-        p_u: NDArray = self.prj_points_vu[-1, :]
-        p_v: NDArray = self.prj_points_vu[-2, :]
+        return np.array([self.b, self.a, self.c, self.v, self.u])
 
-        if rescale:
-            c_h = np.mean(p_u)
-            c_v = np.mean(p_v)
-            p_u = p_u - c_h
-            p_v = p_v - c_v
-
-            p_u_scaling = np.abs(p_u).max()
-            p_v_scaling = np.abs(p_v).max()
-            p_u /= p_u_scaling
-            p_v /= p_v_scaling
-        else:
-            c_h = 0.0
-            c_v = 0.0
-            p_u_scaling = 1.0
-            p_v_scaling = 1.0
-
-        A = np.stack([p_u**2, -2 * p_u, -2 * p_v, 2 * p_u * p_v, np.ones_like(p_u)], axis=-1)
-        b = -(p_v**2)
-
-        params = np.linalg.lstsq(A, b, rcond=None)[0]
-        if not least_squares:
-
-            def _func(pars: NDArrayFloat) -> float:
-                predicted_b = A.dot(pars)
-                l1_diff = np.linalg.norm(predicted_b - b, ord=1)
-                return float(l1_diff)
-
-            opt_params = spopt.minimize(_func, params)
-            params = opt_params.x
-
-        if rescale:
-            params[0] *= (p_v_scaling**2) / (p_u_scaling**2)
-            params[1] *= (p_v_scaling**2) / p_u_scaling
-            params[2] *= p_v_scaling
-            params[3] *= p_v_scaling / p_u_scaling
-            params[4] *= p_v_scaling**2
-
-        u = (params[1] - params[2] * params[3]) / (params[0] - params[3] ** 2)
-        v = (params[0] * params[2] - params[1] * params[3]) / (params[0] - params[2] * params[3])
-
-        a = params[0] / (params[0] * u**2 + v**2 + 2 * params[3] * u * v - params[4])
-        b = a / params[0]
-        c = params[3] * b
-
-        return np.array([b, a, c, v + c_v, u + c_h])
-
-    @staticmethod
-    def predict_v(ell_params: Union[ArrayLike, NDArray], uus: Union[ArrayLike, NDArray]) -> tuple[NDArray, NDArray]:
+    def __call__(self, uus: Union[ArrayLike, NDArray]) -> Sequence[NDArray]:
         """Predict V coordinates of ellipse from its parameters, and U coordinates.
 
         Parameters
         ----------
-        ell_params : Union[ArrayLike, NDArray]
-            The ellipse parameters
         uus : Union[ArrayLike, NDArray]
             The U coordinates
 
@@ -798,7 +739,7 @@ class Ellipse:
         tuple[NDArray, NDArray]
             The corresponding top and bottom V coordinates
         """
-        b, a, c, v, u = np.array(ell_params)
+        b, a, c, v, u = np.array(self.parameters)
         uus = np.array(uus)
 
         a_tilde = b
@@ -809,3 +750,86 @@ class Ellipse:
         v_2 = (-b_tilde - delta_tilde) / (2 * a_tilde)
 
         return v_1, v_2
+
+    def _fit_center(self) -> None:
+        c_vu = np.mean(self.prj_points_vu, axis=-1, keepdims=True)
+        pos_vu = self.prj_points_vu - c_vu
+
+        if self.rescale:
+            scale_vu = np.max(pos_vu, axis=-1, keepdims=True) - np.min(pos_vu, axis=-1, keepdims=True)
+            pos_vu /= scale_vu
+        else:
+            scale_vu = 1.0
+
+        num_lines = pos_vu.shape[-1] // 2
+        pos1_vu = pos_vu[:, :num_lines]
+        pos2_vu = pos_vu[:, num_lines : num_lines * 2]
+
+        diffs_vu = pos2_vu - pos1_vu
+        vandermonde = np.stack([diffs_vu[-1, :], -diffs_vu[-2, :]], axis=-1)
+        values = np.cross(pos1_vu, pos2_vu, axis=0)
+
+        p_vu = np.linalg.lstsq(vandermonde, values, rcond=None)[0]
+        if not self.least_squares:
+
+            def _func(params: NDArrayFloat) -> float:
+                predicted_values = vandermonde.dot(params)
+                l1_diff = np.linalg.norm(predicted_values - values, ord=1)
+                return float(l1_diff)
+
+            opt_p_vu = spopt.minimize(_func, p_vu)
+            p_vu = opt_p_vu.x
+
+        self.c_vu = p_vu * scale_vu + c_vu
+
+    def _fit_parameters(self) -> None:
+        # First we fit 5 intermediate variables
+        p_u: NDArray = self.prj_points_vu[-1, :]
+        p_v: NDArray = self.prj_points_vu[-2, :]
+
+        if self.rescale:
+            c_u = np.mean(p_u)
+            c_v = np.mean(p_v)
+            p_u = p_u - c_u
+            p_v = p_v - c_v
+
+            p_u_scaling = np.abs(p_u).max()
+            p_v_scaling = np.abs(p_v).max()
+            p_u /= p_u_scaling
+            p_v /= p_v_scaling
+        else:
+            c_u = 0.0
+            c_v = 0.0
+            p_u_scaling = 1.0
+            p_v_scaling = 1.0
+
+        vandermonde = np.stack([p_u**2, -2 * p_u, -2 * p_v, 2 * p_u * p_v, np.ones_like(p_u)], axis=-1)
+        values = -(p_v**2)
+
+        coeffs = np.linalg.lstsq(vandermonde, values, rcond=None)[0]
+        if not self.least_squares:
+
+            def _func(pars: NDArrayFloat) -> float:
+                predicted_b = vandermonde.dot(pars)
+                l1_diff = np.linalg.norm(predicted_b - values, ord=1)
+                return float(l1_diff)
+
+            opt_params = spopt.minimize(_func, coeffs)
+            coeffs = opt_params.x
+
+        if self.rescale:
+            coeffs[0] *= (p_v_scaling**2) / (p_u_scaling**2)
+            coeffs[1] *= (p_v_scaling**2) / p_u_scaling
+            coeffs[2] *= p_v_scaling
+            coeffs[3] *= p_v_scaling / p_u_scaling
+            coeffs[4] *= p_v_scaling**2
+
+        self.u = (coeffs[1] - coeffs[2] * coeffs[3]) / (coeffs[0] - coeffs[3] ** 2)
+        self.v = (coeffs[0] * coeffs[2] - coeffs[1] * coeffs[3]) / (coeffs[0] - coeffs[2] * coeffs[3])
+
+        self.a = coeffs[0] / (coeffs[0] * self.u**2 + self.v**2 + 2 * coeffs[3] * self.u * self.v - coeffs[4])
+        self.b = self.a / coeffs[0]
+        self.c = coeffs[3] * self.b
+
+        self.u += c_u
+        self.v += c_v
