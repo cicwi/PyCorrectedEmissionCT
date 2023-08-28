@@ -26,7 +26,7 @@ def _class_to_json(obj: object) -> str:
     return json.dumps(obj, default=lambda o: {o.__class__.__name__: o.__dict__}, sort_keys=True, indent=4)
 
 
-def _diff_axis_angle_rad(center_1_vu: Union[ArrayLike, NDArray], center_2_vu: Union[ArrayLike, NDArray]) -> float:
+def _get_rot_axis_angle_rad(center_1_vu: Union[ArrayLike, NDArray], center_2_vu: Union[ArrayLike, NDArray]) -> float:
     diffs_vu = np.array(center_1_vu) - np.array(center_2_vu)
     angle_rad = np.arctan2(diffs_vu[-1], diffs_vu[-2])
     angle_rad = np.mod(angle_rad, 2 * np.pi)
@@ -245,6 +245,7 @@ class FitConeBeamGeometry:
         points_ell2: Union[ArrayLike, NDArray],
         points_axis: Union[ArrayLike, NDArray, None] = None,
         verbose: bool = True,
+        plot_result: bool = False,
     ):
         """Initialize a cone-beam geometry calibration object.
 
@@ -260,9 +261,12 @@ class FitConeBeamGeometry:
             Points of the rotation axis, by default None
         verbose : bool, optional
             Whether to produce verbose output, by default True
+        plot_result : bool, optional
+            Whether to plot the results of the geometry, by default False
+            It requires verbose to be True.
         """
         self.prj_size_vu = np.array(prj_size_vu)
-        self.center_vu = self.prj_size_vu / 2
+        self.center_vu = self.prj_size_vu[:, None] / 2
 
         self.points_ell1 = np.array(points_ell1) - self.center_vu
         self.points_ell2 = np.array(points_ell2) - self.center_vu
@@ -274,26 +278,27 @@ class FitConeBeamGeometry:
         self.acq_geom = ConeBeamGeometry(det_pix_v=int(self.prj_size_vu[0]), det_pix_u=int(self.prj_size_vu[1]))
 
         self.verbose = verbose
+        self.plot_result = plot_result and verbose
 
         self._pre_fit()
 
     def _pre_fit(self, use_least_squares: bool = False) -> None:
-        ell1 = fitting.Ellipse(self.points_ell1)
-        ell2 = fitting.Ellipse(self.points_ell2)
+        ell1_acq = fitting.Ellipse(self.points_ell1)
+        ell2_acq = fitting.Ellipse(self.points_ell2)
 
         if self.points_axis is not None:
             # Using measured projected center, whenever available
-            self.ell1_prj_center_vu = self.points_axis[0, :]
-            self.ell2_prj_center_vu = self.points_axis[-1, :]
+            self.ell1_prj_center_vu = self.points_axis[:, 0]
+            self.ell2_prj_center_vu = self.points_axis[:, 2]
 
-            self.prj_origin_vu = self.points_axis[1, :]
+            self.prj_origin_vu = self.points_axis[:, 1]
         else:
-            self.ell1_prj_center_vu = ell1.fit_prj_center(least_squares=use_least_squares)
-            self.ell2_prj_center_vu = ell2.fit_prj_center(least_squares=use_least_squares)
+            self.ell1_prj_center_vu = ell1_acq.fit_prj_center(least_squares=use_least_squares)
+            self.ell2_prj_center_vu = ell2_acq.fit_prj_center(least_squares=use_least_squares)
 
             self.prj_origin_vu = None
 
-        self.acq_geom.eta_deg = np.rad2deg(_diff_axis_angle_rad(self.ell1_prj_center_vu, self.ell2_prj_center_vu))
+        self.acq_geom.eta_deg = np.rad2deg(_get_rot_axis_angle_rad(self.ell1_prj_center_vu, self.ell2_prj_center_vu))
 
         if self.verbose:
             print(f"Projected origin on the detector (pix): {self.prj_origin_vu}")
@@ -303,18 +308,35 @@ class FitConeBeamGeometry:
             rot = Rotation.from_rotvec(-np.deg2rad(self.acq_geom.eta_deg) * np.array([0, 0, 1]))
             rot_mat = rot.as_matrix()[:2, :2]
 
-            self.points_ell1_rot = rot_mat.dot(self.points_ell1.T).T
-            self.points_ell2_rot = rot_mat.dot(self.points_ell2.T).T
+            self.points_ell1_rot = rot_mat.dot(self.points_ell1)
+            self.points_ell2_rot = rot_mat.dot(self.points_ell2)
         else:
             self.points_ell1_rot = self.points_ell1.copy()
             self.points_ell2_rot = self.points_ell2.copy()
 
         # Re-instatiate ellipse class, after rotation
-        ell1 = fitting.Ellipse(self.points_ell1_rot)
-        ell2 = fitting.Ellipse(self.points_ell2_rot)
+        ell1_rot = fitting.Ellipse(self.points_ell1_rot)
+        ell2_rot = fitting.Ellipse(self.points_ell2_rot)
 
-        self.ell1_params = ell1.fit_parameters(least_squares=use_least_squares)
-        self.ell2_params = ell2.fit_parameters(least_squares=use_least_squares)
+        self.ell1_params = ell1_rot.fit_parameters(least_squares=use_least_squares)
+        self.ell2_params = ell2_rot.fit_parameters(least_squares=use_least_squares)
+
+        if self.plot_result:
+            fig, axs = plt.subplots()
+            axs.plot(self.points_ell1[1, :], self.points_ell1[0, :], "C0--", label="Ellipse 1 - Acquired")
+            axs.plot(self.points_ell2[1, :], self.points_ell2[0, :], "C1--", label="Ellipse 2 - Acquired")
+            axs.plot(self.points_ell1_rot[1, :], self.points_ell1_rot[0, :], "C0", label="Ellipse 1 - Rotated")
+            axs.plot(self.points_ell2_rot[1, :], self.points_ell2_rot[0, :], "C1", label="Ellipse 2 - Rotated")
+            ell1_acq_params = ell1_acq.fit_parameters(least_squares=use_least_squares)
+            ell2_acq_params = ell2_acq.fit_parameters(least_squares=use_least_squares)
+            axs.plot([ell1_acq_params[-1], ell2_acq_params[-1]], [ell1_acq_params[-2], ell2_acq_params[-2]], "C2--")
+            axs.plot([self.ell1_params[-1], self.ell2_params[-1]], [self.ell1_params[-2], self.ell2_params[-2]], "C2")
+            if self.points_axis is not None:
+                axs.scatter(self.points_axis[1], self.points_axis[0], c="C2", marker="*", label="Centers - Acquired")
+            axs.legend()
+            axs.grid()
+            fig.tight_layout()
+            plt.show(block=False)
 
         self.acq_geom.D = self._fit_distance_det2src(self.ell1_params, self.ell2_params)
 
@@ -540,7 +562,7 @@ class MarkerVisualizer:
         self.curr_pos = 0
 
         if self.ell_params is not None:
-            us = np.sort(self.positions_vu[:, 1])
+            us = np.sort(self.positions_vu[1, :])
             self.v_1, self.v_2 = fitting.Ellipse.predict_v(self.ell_params, us)
 
         self.fig, self.axs = plt.subplots(1, 3, figsize=cm2inch([36, 12]))  # , sharex=True, sharey=True
@@ -568,11 +590,11 @@ class MarkerVisualizer:
             img.remove()
         self.axs[1].cla()
 
-        self.axs[0].plot(self.positions_vu[:, 1], self.positions_vu[:, 0], "bo-", markersize=4)
-        self.axs[0].scatter(self.positions_vu[self.curr_pos, 1], self.positions_vu[self.curr_pos, 0], c="r")
+        self.axs[0].plot(self.positions_vu[1, :], self.positions_vu[0, :], "bo-", markersize=4)
+        self.axs[0].scatter(self.positions_vu[1, self.curr_pos], self.positions_vu[0, self.curr_pos], c="r")
 
         if self.ell_params is not None:
-            us = np.sort(self.positions_vu[:, 1])
+            us = np.sort(self.positions_vu[1, :])
             self.axs[0].plot(us, self.v_1, "g")
             self.axs[0].plot(us, self.v_2, "g")
         self.axs[0].grid()
@@ -585,7 +607,7 @@ class MarkerVisualizer:
             vmax = self.imgs[:, self.curr_pos, :].max()
 
         img = self.axs[1].imshow(self.imgs[:, self.curr_pos, :], vmin=vmin, vmax=vmax)
-        self.axs[1].scatter(self.positions_vu[self.curr_pos, 1], self.positions_vu[self.curr_pos, 0], c="r")
+        self.axs[1].scatter(self.positions_vu[1, self.curr_pos], self.positions_vu[0, self.curr_pos], c="r")
         self.axs[1].set_title(f"Range: [{vmin}, {vmax}]")
         # plt.colorbar(im, ax=self.axs[1])
         self.fig.canvas.draw()

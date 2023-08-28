@@ -686,22 +686,22 @@ class Ellipse:
         ArrayLike
             The fitted center position.
         """
-        c_vu = np.mean(self.prj_points_vu, axis=0)
+        c_vu = np.mean(self.prj_points_vu, axis=-1, keepdims=True)
         pos_vu = self.prj_points_vu - c_vu
 
         if rescale:
-            scale_vu = np.max(pos_vu, axis=0) - np.min(pos_vu, axis=0)
+            scale_vu = np.max(pos_vu, axis=-1, keepdims=True) - np.min(pos_vu, axis=-1, keepdims=True)
             pos_vu /= scale_vu
         else:
             scale_vu = 1.0
 
-        num_lines = pos_vu.shape[-2] // 2
-        pos1_vu = pos_vu[:num_lines, :]
-        pos2_vu = pos_vu[num_lines : num_lines * 2, :]
+        num_lines = pos_vu.shape[-1] // 2
+        pos1_vu = pos_vu[:, :num_lines]
+        pos2_vu = pos_vu[:, num_lines : num_lines * 2]
 
         diffs_vu = pos2_vu - pos1_vu
-        b = np.cross(pos1_vu, pos2_vu)
-        A = np.stack([diffs_vu[:, -1], -diffs_vu[:, -2]], axis=-1)
+        b = np.cross(pos1_vu, pos2_vu, axis=0)
+        A = np.stack([diffs_vu[-1, :], -diffs_vu[-2, :]], axis=0)
 
         p_vu = np.linalg.lstsq(A, b, rcond=None)[0]
         if not least_squares:
@@ -733,8 +733,8 @@ class Ellipse:
             The fitted ellipse parameters.
         """
         # First we fit 5 intermediate variables
-        p_u: NDArray = self.prj_points_vu[:, -1]
-        p_v: NDArray = self.prj_points_vu[:, -2]
+        p_u: NDArray = self.prj_points_vu[-1, :]
+        p_v: NDArray = self.prj_points_vu[-2, :]
 
         if rescale:
             c_h = np.mean(p_u)
@@ -781,67 +781,6 @@ class Ellipse:
         c = params[3] * b
 
         return np.array([b, a, c, v + c_v, u + c_h])
-
-    def fit_ellipse_centroid(self, rescale: bool = True, least_squares: bool = True) -> NDArray:
-        """
-        Fit the ellipse parameters, when assuming the center of mass of the points as center of the ellipse.
-
-        Parameters
-        ----------
-        rescale : bool, optional
-            Whether to rescale the data within the interval [-1, 1]. The default is True.
-        least_squares : bool, optional
-            Whether to use the least-squares (l2-norm) fit or l1-norm. The default is True.
-
-        Returns
-        -------
-        ArrayLike
-            The fitted ellipse parameters.
-        """
-        # First we fit 3 intermediate variables
-        num_to_keep = (self.prj_points_vu.shape[0] // 2) * 2
-        p_u = self.prj_points_vu[:num_to_keep, -1]
-        p_v = self.prj_points_vu[:num_to_keep, -2]
-
-        u = np.mean(p_u)
-        v = np.mean(p_v)
-
-        p_u = p_u - u
-        p_v = p_v - v
-
-        if rescale:
-            p_u_scaling = np.abs(p_u).max()
-            p_v_scaling = np.abs(p_v).max()
-            p_u /= p_u_scaling
-            p_v /= p_v_scaling
-        else:
-            p_u_scaling = 1.0
-            p_v_scaling = 1.0
-
-        A = np.stack([p_u**2, p_u * p_v, np.ones_like(p_u)], axis=-1)
-        b = -(p_v**2)
-
-        params = np.linalg.lstsq(A, b, rcond=None)[0]
-        if not least_squares:
-
-            def _func(pars: NDArrayFloat) -> float:
-                predicted_b = A.dot(pars)
-                l1_diff = np.linalg.norm(predicted_b - b, ord=1)
-                return float(l1_diff)
-
-            opt_params = spopt.minimize(_func, params)
-            params = opt_params.x
-
-        if rescale:
-            params[0] *= (p_v_scaling**2) / (p_u_scaling**2)
-            params[1] *= p_v_scaling / p_u_scaling
-            params[2] *= p_v_scaling**2
-
-        a = -params[0] / params[2]
-        b = -1 / params[2]
-        c = -params[1] / params[2]
-
-        return np.array([b, a, c, v, u])
 
     @staticmethod
     def predict_v(ell_params: Union[ArrayLike, NDArray], uus: Union[ArrayLike, NDArray]) -> tuple[NDArray, NDArray]:
