@@ -62,10 +62,10 @@ class ConeBeamGeometry:
             The human readable representation of the object.
         """
         descr = "AcquisitionGeometry(\n"
-        for f, v in self.__dict__.items():
-            descr += f"    {f} = {v}"
-            if f.lower()[-3:] == "rad":
-                descr += f" ({np.rad2deg(v)} deg)"
+        for field, value in self.__dict__.items():
+            descr += f"    {field} = {value}"
+            if field.lower()[-3:] == "deg":
+                descr += f" ({value} deg)"
             descr += ",\n"
         return descr + ")"
 
@@ -203,7 +203,7 @@ class ConeBeamGeometry:
         """
         return _class_to_json(self)
 
-    def from_json(self, data: str) -> None:
+    def from_json(self, data_json: str) -> None:
         """
         Load instance from JSON.
 
@@ -217,17 +217,20 @@ class ConeBeamGeometry:
         ValueError
             In case we were to load more than one instance, or different classes.
         """
-        d = json.loads(data)
-        if len(d.keys()) > 1:
+        data_tree = json.loads(data_json)
+        if len(data_tree.keys()) > 1:
             raise ValueError("Initialization from JSON: More than one class instance passed.")
-        class_name = list(d.keys())[0]
-        if list(d.keys())[0] != self.__class__.__name__:
+
+        class_name = list(data_tree.keys())[0]
+        if list(data_tree.keys())[0] != self.__class__.__name__:
             raise ValueError(
-                f"Initialization from JSON: expecting {self.__class__.__name__} class instance, but {d.keys()[0]} passed."
+                f"Initialization from JSON: expecting {self.__class__.__name__} class instance,"
+                f" but {data_tree.keys()[0]} passed."
             )
-        d = d[class_name]
-        for k in self.__dict__.keys():
-            self.__dict__[k] = d[k]
+
+        data_dict = data_tree[class_name]
+        for key in self.__dict__.keys():
+            self.__dict__[key] = data_dict[key]
 
 
 class FitConeBeamGeometry:
@@ -237,6 +240,8 @@ class FitConeBeamGeometry:
     - Noo, F., Clackdoyle, R., Mennessier, C., White, T. A. & Roney, T. J. (2000). Phys. Med. Biol. 45, 3489–3508.
       doi: 10.1088/0031-9155/45/11/327
     """
+
+    acq_geom: ConeBeamGeometry
 
     def __init__(
         self,
@@ -267,6 +272,7 @@ class FitConeBeamGeometry:
         """
         self.prj_size_vu = np.array(prj_size_vu)
         self.center_vu = self.prj_size_vu[:, None] / 2
+        self.prj_origin_vu = None
 
         self.points_ell1 = np.array(points_ell1) - self.center_vu
         self.points_ell2 = np.array(points_ell2) - self.center_vu
@@ -280,9 +286,12 @@ class FitConeBeamGeometry:
         self.verbose = verbose
         self.plot_result = plot_result and verbose
 
-        self._pre_fit()
+        self.z1 = np.array([])
+        self.z2 = np.array([])
 
-    def _pre_fit(self, use_least_squares: bool = False) -> None:
+        self._initialize()
+
+    def _initialize(self, use_least_squares: bool = False) -> None:
         self.ell1_acq = fitting.Ellipse(self.points_ell1, least_squares=use_least_squares)
         self.ell2_acq = fitting.Ellipse(self.points_ell2, least_squares=use_least_squares)
 
@@ -398,18 +407,18 @@ class FitConeBeamGeometry:
 
         self.acq_geom.phi_deg = np.rad2deg(np.arcsin(-c1 / (2 * a1) * zeta1 - c2 / (2 * a2) * zeta2))
 
-        R1 = r / rho1
-        R2 = r / rho2
+        R_e1 = r / rho1
+        R_e2 = r / rho2
 
-        self.z1 = R1 * zeta1
-        self.z2 = R2 * zeta2
+        self.z1 = R_e1 * zeta1
+        self.z2 = R_e2 * zeta2
 
         z_full = self.z1 - self.z2
 
         self.acq_geom.theta_deg = 0.0
         # self.acq_geom.theta_rad = np.arcsin((R1 - R2) / z_full) / np.mean(self.prj_size_vu)
 
-        self.acq_geom.R = (-self.z2 * R1 + self.z1 * R2) / z_full
+        self.acq_geom.R = (-self.z2 * R_e1 + self.z1 * R_e2) / z_full
 
         if self.prj_origin_vu is None:
             self.prj_origin_vu = (-self.z2 * self.ell1_prj_center_vu + self.z1 * self.ell2_prj_center_vu) / z_full
@@ -417,7 +426,7 @@ class FitConeBeamGeometry:
                 print(f"Projected origin on the detector (pix): {self.prj_origin_vu}")
 
         if self.verbose:
-            print(f"Fitted distances between source and rotation axis (pix):\n- R1={R1}, R={self.acq_geom.R}, R2={R2}")
+            print(f"Fitted distances between source and rotation axis (pix):\n- R1={R_e1}, R={self.acq_geom.R}, R2={R_e2}")
             print(f"Fitted heights of the two ellipses, with respect to the source (pix): z1={self.z1}, z2={self.z2}")
             print(f"Fitted polar angle of the detector (phi deg): {self.acq_geom.phi_deg}")
             print(f"Fitted azimuthal angle of the detector (theta deg): {self.acq_geom.theta_deg}")
