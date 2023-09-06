@@ -48,18 +48,15 @@ ph_or = np.squeeze(phantom.modified_shepp_logan(vol_shape).astype(data_type))
 ph_or = ph_or[:, :, 1]
 
 (ph, vol_att_in, vol_att_out) = cct.testing.phantom_assign_concentration(ph_or)
+# Create sino with no background noise.
 (sino, angles, expected_ph, background_avg) = cct.testing.create_sino(
-    ph, 30, psf=None, add_poisson=True, dwell_time_s=1e-2, background_avg=1e-2, background_std=1e-4
+    ph, 30, psf=None, add_poisson=True, dwell_time_s=1e-2, background_avg=0., background_std=0.
 )
 
-bckgnd_weight = np.sqrt(background_avg / (vol_shape[0] * np.sqrt(2)))
-
 num_iterations_sirt = 10000
-num_iterations_mlem = 50
+num_iterations_mlem = 100
 lower_limit = 0
 vol_mask = cct.processing.circular_mask(ph_or.shape)
-
-sino_substract = sino - background_avg
 
 sino_variance = cct.processing.compute_variance_poisson(sino)
 sino_weights = cct.processing.compute_variance_weight(sino_variance)
@@ -73,14 +70,14 @@ data_term_lsb = cct.solvers.DataFidelity_l2b(sino_variance)
 
 with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
 
-    solver_wls_l = cct.solvers.PDHG(verbose=True, data_term=data_term_lsw, regularizer=[lowlim_l2w])
-    rec_wls_l, _ = solver_wls_l(A, sino_substract, num_iterations_sirt, x_mask=vol_mask)
+    solver_wls_l = cct.solvers.PDHG(verbose=True, data_term=data_term_lsw)
+    rec_wls_l, _ = solver_wls_l(A, sino, num_iterations_sirt, x_mask=vol_mask)
     #
     solver_sirt = cct.solvers.SIRT(verbose=True, data_term=data_term_lsw)
-    rec_sirt, _ = solver_sirt(A, sino_substract, num_iterations_sirt, x_mask=vol_mask)
+    rec_sirt, _ = solver_sirt(A, sino, num_iterations_sirt, x_mask=vol_mask)
 
     solver_mlem = cct.solvers.MLEM(verbose=True)
-    rec_mlem, _ = solver_mlem(A, sino_substract, num_iterations_mlem, x_mask=vol_mask, lower_limit=1e-5, upper_limit=10)
+    rec_mlem, _ = solver_mlem(A, sino, num_iterations_mlem, x_mask=vol_mask)
 
 
 # Reconstructions
