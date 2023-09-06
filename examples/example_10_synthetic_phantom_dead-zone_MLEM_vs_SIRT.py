@@ -95,11 +95,11 @@ im_sino_clean = ax_sino_clean.imshow(sino_clean)
 ax_sino_clean.set_title("Clean sinogram")
 
 ax_sino_noise = f.add_subplot(gs[5, 0])
-im_sino_noise = ax_sino_noise.imshow(sino_substract)
+im_sino_noise = ax_sino_noise.imshow(sino)
 ax_sino_noise.set_title("Noisy sinogram")
 
 ax_sino_lines = f.add_subplot(gs[6:, 0])
-im_sino_lines = ax_sino_lines.plot(sino_substract[9, :], label="Noisy")
+im_sino_lines = ax_sino_lines.plot(sino[9, :], label="Noisy")
 im_sino_lines = ax_sino_lines.plot(sino_clean[9, :], label="Clean")
 ax_sino_lines.set_title("Sinograms - angle: 10")
 ax_sino_lines.legend()
