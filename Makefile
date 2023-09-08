@@ -100,5 +100,6 @@ conda_package:
 	conda build conda/
 
 pip_package:
-	python setup.py clean --all
-	python setup.py sdist bdist_wheel
+	# python setup.py clean --all
+	# python setup.py sdist bdist_wheel
+	python -m build
