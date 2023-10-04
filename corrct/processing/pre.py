@@ -5,17 +5,15 @@ Pre-processing routines.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from typing import Optional, Union
 from collections.abc import Sequence
-from numpy.typing import DTypeLike, NDArray
-
-import numpy as np
-from numpy.polynomial import Polynomial
-
-import skimage.transform as skt
-import scipy.ndimage as spimg
-
+from typing import Optional, Union
 import matplotlib.pyplot as plt
+import numpy as np
+import pywt
+import scipy.ndimage as spimg
+import skimage.transform as skt
+from numpy.polynomial import Polynomial
+from numpy.typing import DTypeLike, NDArray
 
 
 eps = np.finfo(np.float32).eps
@@ -276,6 +274,69 @@ def find_background_from_margin(
             background = background.mean(axis=-2, keepdims=True)
 
         return np.tile(background[..., None], [*np.ones(background.ndim, dtype=int), data_shape_u])
+
+
+def destripe_wlf_vwu(
+    data: NDArray,
+    sigma: float = 0.005,
+    level: int = 1,
+    wavelet: str = "bior2.2",
+    angle_axis: int = -2,
+    other_axes: Union[Sequence[int], NDArray, None] = None,
+) -> NDArray:
+    """Remove stripes from sinogram, using the Wavelet-Fourier method.
+
+    Parameters
+    ----------
+    data : NDArray
+        The data to destripe
+    sigma : float, optional
+        Fourier space filter coefficient, by default 0.005
+    level : int, optional
+        The wavelet level to use, by default 1
+    wavelet : str, optional
+        The type of wavelet to use, by default "bior2.2"
+    angle_axis : int, optional
+        The axis of the Fourier transform, by default -2
+    other_axes : Union[Sequence[int], NDArray, None], optional
+        The axes of the wavelet decomposition, by default None
+
+    Returns
+    -------
+    NDArray
+        The destriped data.
+    """
+    if other_axes is None:
+        other_axes = np.arange(-data.ndim, 0)
+    else:
+        other_axes = np.array(other_axes)
+
+    if angle_axis is other_axes:
+        other_axes = np.delete(other_axes, angle_axis)
+
+    level_power = 2**level
+
+    data_shape = np.array(data.shape)
+    target_shape = data_shape.copy()
+    target_shape[list(other_axes)] = np.ceil(data_shape[list(other_axes)] / level_power) * level_power
+    diff_size = target_shape - data_shape
+    padding = np.stack((diff_size - diff_size // 2, diff_size // 2), axis=-1)
+    data = np.pad(data, pad_width=padding, mode="edge")
+
+    coeffs = pywt.swtn(data, wavelet=wavelet, axes=other_axes, level=level)
+    for ii_l in range(level):
+        for wl_label, coeffs_l_wl in coeffs[ii_l].items():
+            if wl_label == "a" * len(other_axes):
+                continue
+            coeff_f = np.fft.rfft(coeffs_l_wl, axis=angle_axis)
+            filt_f = 1 - np.exp(-(np.fft.rfftfreq(coeffs_l_wl.shape[angle_axis]) ** 2) / (2 * sigma**2))
+            coeff_f *= filt_f[:, None]
+            coeffs[ii_l][wl_label] = np.fft.irfft(coeff_f, axis=angle_axis, n=coeffs_l_wl.shape[angle_axis])
+
+    data = pywt.iswtn(coeffs, wavelet=wavelet, axes=other_axes)
+    slicing = [slice(padding[ii, 0], data.shape[ii] - padding[ii, 1]) for ii in range(data.ndim)]
+
+    return data[tuple(slicing)]
 
 
 def compute_eigen_flats(
