@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Provide utility functions for testing.
 
@@ -10,8 +9,8 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
-
 from . import projectors
+
 
 try:
     from . import physics
@@ -24,8 +23,11 @@ except ImportError as exc:
     __has_physics__ = False
 
 
-from typing import List, Union, Sequence, Optional, Tuple
-from numpy.typing import DTypeLike, NDArray
+from collections.abc import Sequence
+from typing import Optional
+from typing import Union
+from numpy.typing import DTypeLike
+from numpy.typing import NDArray
 
 
 NDArrayFloat = NDArray[np.floating]
@@ -57,24 +59,23 @@ def download_phantom():
     phantom_path = "./phantom.py"
 
     print(
-        """This example uses the phantom definition from the package Tomograpy,
-            developed by Nicolas Barbey. The needed module will be downloaded from: %s"""
-        % phantom_url
+        "This example uses the phantom definition from the package Tomograpy, "
+        f"developed by Nicolas Barbey. The needed module will be downloaded from: {phantom_url}"
     )
 
     import urllib.request as urlreq
 
     urlreq.urlretrieve(phantom_url, phantom_path)
 
-    with open(phantom_path, "r") as f:
+    with open(phantom_path, "r", encoding="utf-8") as f:
         file_content = f.read()
-    with open(phantom_path, "w") as f:
+    with open(phantom_path, "w", encoding="utf-8") as f:
         f.write(file_content.replace("xrange", "range"))
 
 
 def phantom_assign_concentration(
     ph_or: NDArrayFloat, element: str = "Ca", em_line: str = "KA", in_energy_keV: float = 20.0, voxel_size_um: float = 0.5
-) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
+) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
     """Build an XRF phantom.
 
     The created phantom has been used in:
@@ -104,6 +105,7 @@ def phantom_assign_concentration(
     """
     if not __has_physics__:
         raise RuntimeError("Physics module not available!")
+
     ph_air = ph_or < 0.1
     ph_FeO = 0.5 < ph_or
     ph_CaO = np.logical_and(0.25 < ph_or, ph_or < 0.5)
@@ -112,7 +114,7 @@ def phantom_assign_concentration(
     conv_mm_to_cm = 1e-1
     conv_um_to_mm = 1e-3
     voxel_size_cm = voxel_size_um * conv_um_to_mm * conv_mm_to_cm  # cm to micron
-    print("Sample size: [%g %g] um" % (ph_or.shape[0] * voxel_size_um, ph_or.shape[1] * voxel_size_um))
+    print(f"Sample size: [{ph_or.shape[0] * voxel_size_um} {ph_or.shape[1] * voxel_size_um}] um")
 
     phase_fractions = (ph_air, ph_FeO, ph_CaO, ph_CaC)
     phase_compound_names = ("Air, Dry (near sea level)", "Ferric Oxide", "Calcium Oxide", "Calcium Carbonate")
@@ -129,11 +131,11 @@ def phantom_assign_concentration(
 
 def phantom_assign_concentration_multi(
     ph_or: NDArrayFloat,
-    elements: Sequence[str] = ["Ca", "Fe"],
+    elements: Sequence[str] = ("Ca", "Fe"),
     em_lines: Union[str, Sequence[str]] = "KA",
     in_energy_keV: float = 20.0,
     detectors_pos_rad: Optional[float] = None,
-) -> Tuple[List[NDArrayFloat], NDArrayFloat, List[NDArrayFloat]]:
+) -> tuple[list[NDArrayFloat], NDArrayFloat, list[NDArrayFloat]]:
     """Build an XRF phantom.
 
     The created phantom has been used in:
@@ -164,6 +166,9 @@ def phantom_assign_concentration_multi(
     vol_att_out : List[NDArrayFloat]
         Voxel-wise attenuation at the emitted energy.
     """
+    if not __has_physics__:
+        raise RuntimeError("Physics module not available!")
+
     ph_air = ph_or < 0.1
     ph_FeO = 0.5 < ph_or
     ph_CaO = np.logical_and(0.25 < ph_or, ph_or < 0.5)
@@ -173,7 +178,7 @@ def phantom_assign_concentration_multi(
     conv_um_to_mm = 1e-3
     voxel_size_um = 0.5
     voxel_size_cm = voxel_size_um * conv_um_to_mm * conv_mm_to_cm  # cm to micron
-    print("Sample size: [%g %g] um" % (ph_or.shape[0] * voxel_size_um, ph_or.shape[1] * voxel_size_um))
+    print(f"Sample size: [{ph_or.shape[0] * voxel_size_um} {ph_or.shape[1] * voxel_size_um}] um")
 
     phase_fractions = (ph_air, ph_FeO, ph_CaO, ph_CaC)
     phase_compound_names = ("Air, Dry (near sea level)", "Ferric Oxide", "Calcium Oxide", "Calcium Carbonate")
@@ -210,7 +215,7 @@ def add_noise(
     background_std: Optional[float] = None,
     detection_efficiency: float = 1.0,
     dtype: DTypeLike = np.float32,
-) -> Tuple[NDArray, NDArray, float]:
+) -> tuple[NDArray, NDArray, float]:
     """Add noise to an image (sinogram).
 
     Parameters
@@ -274,7 +279,7 @@ def create_sino(
     add_poisson: bool = False,
     readout_noise_std: Optional[float] = None,
     dtype: DTypeLike = np.float32,
-) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, float]:
+) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, float]:
     """Compute the sinogram from a given phantom.
 
     Parameters
@@ -315,7 +320,7 @@ def create_sino(
     Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, float]
         The sinogram (detector readings), the angular positions, and the expected average phton production per voxel.
     """
-    print("Creating Sino with %d angles" % num_angles)
+    print(f"Creating Sino with {num_angles} angles")
     angles_deg = np.linspace(start_angle_deg, end_angle_deg, num_angles, endpoint=False)
     angles_rad = np.deg2rad(angles_deg)
     print(angles_deg)
@@ -358,7 +363,7 @@ def create_sino_transmission(
     add_poisson: bool = False,
     readout_noise_std: Optional[float] = None,
     dtype: DTypeLike = np.float32,
-) -> Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat]:
+) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat]:
     """Compute the sinogram from a given phantom.
 
     Parameters
@@ -389,7 +394,7 @@ def create_sino_transmission(
     Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat, float]
         The sinogram (detector readings), the flat-field, and the angular positions.
     """
-    print("Creating attenuation Sino with %d angles" % num_angles)
+    print(f"Creating attenuation Sino with {num_angles} angles")
     angles_deg = np.linspace(start_angle_deg, end_angle_deg, num_angles, endpoint=False)
     angles_rad = np.deg2rad(angles_deg)
     print(angles_deg)
@@ -418,7 +423,7 @@ def create_sino_transmission(
     return (sino_noise, flat_noise, angles_rad, ph)
 
 
-def compute_error_power(expected_vol: NDArrayFloat, computed_vol: NDArrayFloat) -> Tuple[float, float]:
+def compute_error_power(expected_vol: NDArrayFloat, computed_vol: NDArrayFloat) -> tuple[float, float]:
     """Compute the expected volume signal power, and computed volume error power.
 
     Parameters
