@@ -54,9 +54,9 @@ def pad_sinogram(
 
 
 def apply_flat_field(
-    projs: NDArray,
-    flats: NDArray,
-    darks: Optional[NDArray] = None,
+    projs_wvu: NDArray,
+    flats_wvu: NDArray,
+    darks_wvu: Optional[NDArray] = None,
     crop: Optional[Sequence[int]] = None,
     dtype: DTypeLike = np.float32,
 ) -> NDArray:
@@ -81,26 +81,27 @@ def apply_flat_field(
     NDArray
         Falt-field corrected and linearized projections.
     """
-    projs = np.ascontiguousarray(projs, dtype=dtype)
-    flats = np.ascontiguousarray(flats, dtype=dtype)
+    projs_wvu = np.ascontiguousarray(projs_wvu, dtype=dtype)
+    flats_wvu = np.ascontiguousarray(flats_wvu, dtype=dtype)
 
     if crop is not None:
-        projs = projs[..., crop[0] : crop[2], crop[1] : crop[3]]
-        flats = flats[..., crop[0] : crop[2], crop[1] : crop[3]]
-        if darks is not None:
-            darks = darks[..., crop[0] : crop[2], crop[1] : crop[3]]
+        projs_wvu = projs_wvu[..., crop[0] : crop[2], crop[1] : crop[3]]
+        flats_wvu = flats_wvu[..., crop[0] : crop[2], crop[1] : crop[3]]
+        if darks_wvu is not None:
+            darks_wvu = darks_wvu[..., crop[0] : crop[2], crop[1] : crop[3]]
 
-    if darks is not None:
-        darks = np.ascontiguousarray(darks, dtype=dtype)
-        projs = projs - darks
-        flats = flats - darks
+    if darks_wvu is not None:
+        darks_wvu = np.ascontiguousarray(darks_wvu, dtype=dtype)
+        projs_wvu = projs_wvu - darks_wvu
+        flats_wvu = flats_wvu - darks_wvu
 
-    flats = np.mean(flats, axis=0)
+    if flats_wvu.ndim == 3:
+        flats_wvu = np.mean(flats_wvu, axis=0)
 
-    return projs / flats
+    return projs_wvu / flats_wvu
 
 
-def apply_minus_log(projs: NDArray) -> NDArray:
+def apply_minus_log(projs: NDArray, lower_limit: float = -np.inf) -> NDArray:
     """
     Apply -log.
 
@@ -114,7 +115,7 @@ def apply_minus_log(projs: NDArray) -> NDArray:
     NDArray
         Linearized projections.
     """
-    return np.fmax(-np.log(projs), 0.0)
+    return np.fmax(-np.log(projs), lower_limit)
 
 
 def rotate_proj_stack(data_vwu: NDArray, rot_angle_deg: float) -> NDArray:
