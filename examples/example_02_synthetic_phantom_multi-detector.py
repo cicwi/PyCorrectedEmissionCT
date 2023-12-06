@@ -23,9 +23,8 @@ except ImportError:
 
 
 vol_shape = [256, 256, 3]
-data_type = np.float32
 
-ph_or = np.squeeze(phantom.modified_shepp_logan(vol_shape).astype(data_type))
+ph_or = np.squeeze(phantom.modified_shepp_logan(vol_shape).astype(np.float32))
 ph_or = ph_or[:, :, 1]
 
 # psf = spsig.gaussian(11, 1)
@@ -42,8 +41,7 @@ solver_sart = cct.solvers.SART(verbose=True)
 solver_sirt = cct.solvers.SIRT(verbose=True)
 
 print("Reconstructing w/o corrections:")
-with cct.projectors.ProjectorUncorrected(ph.shape, angles, psf=psf) as p:
-
+with cct.projectors.ProjectorUncorrected(ph.shape, angles, psf=psf, create_single_projs=True) as p:
     rec_sart_uncorr, _ = solver_sart(p, sino.mean(axis=0), iterations=5, lower_limit=0.0)
     print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sart_uncorr))
 
@@ -54,7 +52,6 @@ print("Reconstructing w/ corrections:")
 with cct.projectors.ProjectorAttenuationXRF(
     ph.shape, angles, psf=psf, att_in=vol_att_in, att_out=vol_att_out, angles_detectors_rad=det_angles
 ) as p:
-
     rec_sart_corr, _ = solver_sart(p, sino, iterations=5, lower_limit=0.0)
     print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_sart_corr))
 
