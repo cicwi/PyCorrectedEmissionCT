@@ -834,6 +834,27 @@ class Regularizer_dwl(BaseRegularizer):
             slices = [slice(0, x) for x in op_wl.sub_band_shapes[0]]
             dual[tuple(slices)] = 0
 
+    def apply_proximal(self, dual: NDArray) -> None:
+        if isinstance(self.norm, DataFidelity_l12):
+            op_wl: operators.TransformDecimatedWavelet = self.op
+            coeffs = pywt.array_to_coeffs(dual, op_wl.slicing_info)
+            for ii_l in range(1, len(coeffs)):
+                c_l = coeffs[ii_l]
+                labels = []
+                details = []
+                for lab, det in c_l.items():
+                    labels.append(lab)
+                    details.append(det)
+                c_ll = np.stack(details, axis=0)
+                self.norm.apply_proximal(c_ll, self.weight)
+                for ii, lab in enumerate(labels):
+                    c_l[lab] = c_ll[ii]
+                coeffs[ii_l] = c_l
+            self.norm.apply_proximal(coeffs[0], self.weight)
+            dual[:] = pywt.coeffs_to_array(coeffs)[0]
+        else:
+            super().apply_proximal(dual)
+
 
 class Regularizer_l1dwl(Regularizer_dwl):
     """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions."""
@@ -859,6 +880,33 @@ class Regularizer_l1dwl(Regularizer_dwl):
             pad_on_demand=pad_on_demand,
             upd_mask=upd_mask,
             norm=DataFidelity_l1(),
+        )
+
+
+class Regularizer_l12dwl(Regularizer_dwl):
+    """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions."""
+
+    __reg_name__ = "l12dwl"
+
+    def __init__(
+        self,
+        weight: Union[float, NDArray],
+        wavelet: str,
+        level: int,
+        ndims: int = 2,
+        axes: Union[Sequence[int], NDArray, None] = None,
+        pad_on_demand: str = "constant",
+        upd_mask: Optional[NDArray] = None,
+    ):
+        super().__init__(
+            weight,
+            wavelet,
+            level,
+            ndims=ndims,
+            axes=axes,
+            pad_on_demand=pad_on_demand,
+            upd_mask=upd_mask,
+            norm=DataFidelity_l12(),
         )
 
 
