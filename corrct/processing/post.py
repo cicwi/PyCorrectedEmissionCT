@@ -305,24 +305,28 @@ def plot_frcs(
     nyquist = len(frcs[0])
     xx = np.linspace(0, 1, nyquist)
 
-    fig, ax = plt.subplots(1, 1, sharex=True, sharey=True)
+    fig, axs = plt.subplots(1, 1, sharex=True, sharey=True)
     for f, l in zip(frcs, labels):
-        ax.plot(xx, np.squeeze(f), label=l)
-    ax.plot(xx, np.squeeze(T), label="T 1/2 bit", linestyle="dashed")
+        axs.plot(xx, np.squeeze(f), label=l)
+    axs.plot(xx, np.squeeze(T), label="T 1/2 bit", linestyle="dashed")
     for ii, p in enumerate(xps):
         if p is not None:
             res = p[0] / (nyquist - 1)
-            ax.stem(res, p[1], label=f"Resolution ({labels[ii]}): {res:.3}", linefmt=f"C{ii}-.", markerfmt=f"C{ii}o")
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, None)
-    ax.legend()
-    ax.grid()
-    ax.set_ylabel("Magnitude")
-    ax.set_xlabel("Spatial frequency / Nyquist")
+            axs.stem(res, p[1], label=f"Resolution ({labels[ii]}): {res:.3}", linefmt=f"C{ii}-.", markerfmt=f"C{ii}o")
+    axs.set_xlim(0, 1)
+    axs.set_ylim(0, None)
+    axs.legend(fontsize=12)
+    axs.grid()
+    axs.set_ylabel("Magnitude", fontdict=dict(fontsize=16))
+    axs.set_xlabel("Spatial frequency / Nyquist", fontdict=dict(fontsize=16))
     if title is not None:
-        ax.set_title(title)
+        axs.set_title(title)
+    for tl in axs.get_xticklabels():
+        tl.set_fontsize(13)
+    for tl in axs.get_yticklabels():
+        tl.set_fontsize(13)
     fig.tight_layout()
 
     plt.show(block=False)
 
-    return fig, ax
+    return fig, axs
