@@ -481,6 +481,8 @@ class FilterFBP(Filter):
 
     filter_name: str
 
+    FILTERS = ("ramp", "shepp-logan", "cosine", "hamming", "hann")
+
     def __init__(
         self, filter_name: str = "ramp", pad_mode: str = "constant", use_rfft: bool = True, dtype: DTypeLike = np.float32
     ) -> None:
@@ -495,6 +497,9 @@ class FilterFBP(Filter):
         dtype : DTypeLike, optional
             The type of the filter, by default np.float32
         """
+        if filter_name not in self.FILTERS:
+            raise ValueError(f"Unknown filter {filter_name}. Available filters: {self.FILTERS}")
+
         super().__init__(fbp_filter=None, pad_mode=pad_mode, use_rfft=use_rfft, dtype=dtype)
 
         self.filter_name = filter_name.lower()
@@ -514,6 +519,16 @@ class FilterFBP(Filter):
 
         if self.use_rfft:
             self.fbp_filter = self.fbp_filter[: (self.fbp_filter.shape[-1]) // 2 + 1]
+
+    def get_available_filters(self) -> Sequence[str]:
+        """Provide available FBP filters.
+
+        Returns
+        -------
+        Sequence[str]
+            The available filters.
+        """
+        return self.FILTERS
 
 
 class FilterMR(Filter):
