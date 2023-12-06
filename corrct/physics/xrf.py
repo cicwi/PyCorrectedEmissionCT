@@ -1,123 +1,27 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Provide X-ray physics related funtionality.
+XRF support functions.
 
-Created on Fri Jan  7 16:07:21 2022
-
-@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
-and ESRF - The European Synchrotron, Grenoble, France
+@author: Nicola VIGANÒ, ESRF - The European Synchrotron, Grenoble, France,
+and CEA-IRIG, Grenoble, France
 """
 
 try:
-    import xraylib
+    from . import xraylib_helper  # noqa: F401, F402
 
-    xraylib.XRayInit()
+    xraylib = xraylib_helper.xraylib
+
 except ImportError:
     print("WARNING: Physics support is only available when xraylib is installed!")
     raise
 
-import numpy as np
-
-import scipy.constants as spc
-
-from dataclasses import dataclass
-
-from typing import Union, Sequence, Optional, Tuple, Dict
-from numpy.typing import NDArray, DTypeLike
 
 import copy as cp
-
-import matplotlib.pyplot as plt
-
-
-def convert_keV_to_m(energy_keV: Union[float, NDArray]) -> Union[float, NDArray]:
-    return 1e-3 / (spc.physical_constants["electron volt-inverse meter relationship"][0] * energy_keV)
-
-
-def convert_m_to_keV(energy_m: Union[float, NDArray]) -> Union[float, NDArray]:
-    return 1e-3 / (spc.physical_constants["electron volt-inverse meter relationship"][0] * energy_m)
-
-
-def pencil_beam_profile(
-    voxel_size_um: float, beam_fwhm_um: float, profile_size: int = 1, beam_shape: str = "gaussian", verbose: bool = False
-) -> NDArray:
-    """
-    Compute the pencil beam integration point spread function.
-
-    Parameters
-    ----------
-    voxel_size_um : float
-        The integration length.
-    beam_fwhm_um : float
-        The beam FWHM.
-    profile_size : int, optional
-        The number of pixels of the PSF. The default is 1.
-    verbose : bool, optional
-        Whether to print verbose information. The default is False.
-
-    Returns
-    -------
-    NDArray
-        The beam PSF.
-    """
-    y_points = profile_size * 2 + 1
-    extent_um = y_points * voxel_size_um
-    num_points = (np.ceil(extent_um * 10) // 2).astype(int) * 2 + 1
-    half_voxel_size_um = voxel_size_um / 2
-
-    eps = np.finfo(np.float32).eps
-
-    xc = np.linspace(-extent_um / 2, extent_um / 2, num_points)
-
-    # Box beam shape
-    yb = np.abs(xc) < half_voxel_size_um
-    yb[np.abs(np.abs(xc) - half_voxel_size_um) <= eps] = 0.5
-
-    # Gaussian beam shape
-    if beam_shape.lower() == "gaussian":
-        yg = np.exp(-4 * np.log(2) * (xc**2) / (beam_fwhm_um**2))
-    elif beam_shape.lower() == "lorentzian":
-        beam_hwhm_um = beam_fwhm_um / 2
-        yg = (beam_hwhm_um**2) / (xc**2 + beam_hwhm_um**2)
-    elif beam_shape.lower() == "sech**2":
-        # doi: 10.1364/ol.20.001160
-        tau = beam_fwhm_um / (2 * np.arccosh(np.sqrt(2)))
-        yg = 1 / np.cosh(xc / tau) ** 2
-    else:
-        raise ValueError(f"Unknown beam shape: {beam_shape.lower()}")
-
-    yc = np.convolve(yb, yg, mode="same")
-    yc = yc / np.max(yc)
-
-    y = np.zeros((y_points,))
-    for ii_p in range(y_points):
-        # Finding the region that overlaps with the given adjacent voxel
-        voxel_center_um = (ii_p - profile_size) * voxel_size_um
-        yp = np.abs(xc - voxel_center_um) < half_voxel_size_um
-        yp[(np.abs(xc - voxel_center_um) - half_voxel_size_um) < eps] = 0.5
-
-        y[ii_p] = np.sum(yc * yp)
-
-    # Renormalization
-    y /= y.sum()
-
-    if verbose:
-        fig, ax = plt.subplots(1, 2, figsize=[10, 5])
-        ax[0].plot(xc, yb, label="Integration length")  # type: ignore
-        ax[0].plot(xc, yg, label=f"{beam_shape.capitalize()} beam shape")  # type: ignore
-        ax[0].plot(xc, yc, label="Resulting beam shape")  # type: ignore
-        ax[0].legend()  # type: ignore
-        ax[0].grid()  # type: ignore
-
-        pixels_pos = np.linspace(-(y_points - 1) / 2, (y_points - 1) / 2, y_points)
-        ax[1].bar(pixels_pos, y, label="PSF values", color="C1", width=1, linewidth=1.5, edgecolor="k", alpha=0.75)  # type: ignore
-        ax[1].plot(xc / extent_um * profile_size * 2, yc, label="Resulting beam shape")  # type: ignore
-        ax[1].legend()  # type: ignore
-        ax[1].grid()  # type: ignore
-        fig.tight_layout()
-
-    return y
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import Union
+import numpy as np
+from numpy.typing import DTypeLike, NDArray
 
 
 @dataclass
@@ -128,7 +32,7 @@ class FluoLine:
     indx: int
 
 
-class FluoLinesSiegbahn:
+class LinesSiegbahn:
     """Siegbahn fluorescence lines collection class."""
 
     lines = [
@@ -189,7 +93,7 @@ class FluoLinesSiegbahn:
         Sequence
             List of corresponding lines.
         """
-        return [f for f in FluoLinesSiegbahn.lines if f.name[: len(line)] == line.upper()]
+        return [f for f in LinesSiegbahn.lines if f.name[: len(line)] == line.upper()]
 
     @staticmethod
     def get_energy(
@@ -216,17 +120,12 @@ class FluoLinesSiegbahn:
         energy_keV : Union[float, NDArray]
             Either the average energy or the list of different energies.
         """
-        if isinstance(element, str):
-            el_sym = element
-            el_num = xraylib.SymbolToAtomicNumber(element)
-        else:
-            el_sym = xraylib.AtomicNumberToSymbol(element)
-            el_num = element
+        el_sym, el_num = xraylib_helper.get_element_number_and_symbol(element)
 
         if isinstance(lines, FluoLine):
             lines_list = [lines]
         elif isinstance(lines, str):
-            lines_list = FluoLinesSiegbahn.get_lines(lines)
+            lines_list = LinesSiegbahn.get_lines(lines)
         elif len(lines) == 0:
             raise ValueError(f"No line was passed! lines={lines}")
         else:
@@ -259,7 +158,7 @@ class FluoLinesSiegbahn:
 
 
 @dataclass
-class DetectorXRF(object):
+class DetectorXRF:
     """Simple XRF detector model."""
 
     surface_mm2: float
@@ -278,16 +177,16 @@ class DetectorXRF(object):
         return self.surface_mm2 / (np.pi * self.distance_mm**2)
 
 
-class VolumeMaterial(object):
+class VolumeMaterial:
     """
     VolumeMaterial class, that can be used for predicting fluorescence and Compton yields, attenuation, etc.
 
     Parameters
     ----------
-    phase_fractions : Sequence
-        Concentration fractions of each phase for each voxel.
-    phase_compounds : Sequence
-        Compound description of each phase.
+    material_fractions : Sequence
+        Concentration fractions of each material for each voxel.
+    material_compounds : Sequence
+        Compound description of each material.
     voxel_size_cm : float
         Voxel size in cm.
     dtype : DTypeLike, optional
@@ -301,88 +200,42 @@ class VolumeMaterial(object):
 
     def __init__(
         self,
-        phase_fractions: Sequence[NDArray],
-        phase_compounds: Sequence,
+        materials_fractions: Sequence[NDArray],
+        materials_composition: Sequence,
         voxel_size_cm: float,
         dtype: DTypeLike = None,
         verbose: bool = False,
     ):
-        if len(phase_fractions) != len(phase_compounds):
+        if len(materials_fractions) != len(materials_composition):
             raise ValueError(
-                "Phase fractions (# %d) and phase compounds (# %d) should have the same length"
-                % (len(phase_fractions), len(phase_compounds))
+                f"Materials fractions (# {len(materials_fractions)}) and "
+                f"materials composition (# {len(materials_composition)}) arrays should have the same length"
             )
-        if len(phase_fractions) == 0:
+        if len(materials_fractions) == 0:
             raise ValueError("Phase list is empty")
 
-        self.phase_fractions = list(phase_fractions)
-        self.shape = np.array(self.phase_fractions[0].shape)
-        for ii, ph in enumerate(self.phase_fractions):
+        self.materials_fractions = list(materials_fractions)
+        self.shape = np.array(self.materials_fractions[0].shape)
+        for ii, ph in enumerate(self.materials_fractions):
             if len(self.shape) != len(ph.shape):
-                raise ValueError("All phase fraction volumes should have the same number of dimensions")
+                raise ValueError("All material fraction volumes should have the same number of dimensions")
             if not np.all(self.shape == ph.shape):
-                raise ValueError("Phase fraction volumes should all have the same shape")
+                raise ValueError("Materials fraction volumes should all have the same shape")
             if ph.dtype == bool:
-                self.phase_fractions[ii] = ph.astype(np.float32)
+                self.materials_fractions[ii] = ph.astype(np.float32)
 
         if dtype is None:
-            dtype = self.phase_fractions[0].dtype
+            dtype = self.materials_fractions[0].dtype
         self.dtype = dtype
-        for ii, ph in enumerate(self.phase_fractions):
-            self.phase_fractions[ii] = ph.astype(self.dtype)
+        for ii, ph in enumerate(self.materials_fractions):
+            self.materials_fractions[ii] = ph.astype(self.dtype)
 
-        self.phase_compounds = [
-            xraylib.GetCompoundDataNISTByName(cmp) if isinstance(cmp, str) else cmp for cmp in phase_compounds
+        self.materials_compositions = [
+            xraylib.GetCompoundDataNISTByName(cmp) if isinstance(cmp, str) else cmp for cmp in materials_composition
         ]
 
         self.voxel_size_cm = voxel_size_cm
         self.verbose = verbose
-
-    @staticmethod
-    def get_element_number(element: Union[str, int]) -> int:
-        """Compute the element number from the symbol.
-
-        Parameters
-        ----------
-        element : str | int
-            The element symbol (or number, which won't be converted).
-
-        Returns
-        -------
-        int
-            The corresponding element number.
-        """
-        if isinstance(element, int):
-            return element
-        else:
-            return xraylib.SymbolToAtomicNumber(element)
-
-    @staticmethod
-    def get_compound(cmp_name: str, density: Optional[float] = None) -> Dict:
-        """
-        Build a compound from the compound composition string.
-
-        Parameters
-        ----------
-        cmp_name : str
-            Compund name / composition.
-        density : float, optional
-            The density of the compound. If not provided it will be approximated from the composing elements.
-            The default is None.
-
-        Returns
-        -------
-        cmp : Dict
-            The compound structure.
-        """
-        cmp = xraylib.CompoundParser(cmp_name)
-        cmp["name"] = cmp_name
-        if density is None:
-            density = 0
-            for ii, el in enumerate(cmp["Elements"]):
-                density += xraylib.ElementDensity(el) * cmp["massFractions"][ii]
-        cmp["density"] = density
-        return cmp
 
     def get_attenuation(self, energy_keV: float) -> NDArray:
         """
@@ -399,7 +252,7 @@ class VolumeMaterial(object):
             The computed local attenuation volume.
         """
         ph_lin_att = np.zeros(self.shape, self.dtype)
-        for ph, cmp in zip(self.phase_fractions, self.phase_compounds):
+        for ph, cmp in zip(self.materials_fractions, self.materials_compositions):
             try:
                 cmp_cs = xraylib.CS_Total_CP(cmp["name"], energy_keV)
             except ValueError:
@@ -412,12 +265,12 @@ class VolumeMaterial(object):
                 print(
                     f" - cross-section * mass fraction = {cmp_cs}, density = {cmp['density']}, pixel-size {self.voxel_size_cm}"
                 )
-                print(f" - total {cmp['density'] * cmp_cs * self.voxel_size_cm} (assuming phase mass fraction = 1)")
+                print(f" - total {cmp['density'] * cmp_cs * self.voxel_size_cm} (assuming material mass fraction = 1)")
             ph_lin_att += ph * cmp["density"] * cmp_cs
         return ph_lin_att * self.voxel_size_cm
 
     def get_element_mass_fraction(self, element: Union[str, int]) -> NDArray:
-        """Compute the local element mass fraction through out all the phases.
+        """Compute the local element mass fraction through out all the materials.
 
         Parameters
         ----------
@@ -429,10 +282,10 @@ class VolumeMaterial(object):
         mass_fraction : NDArray
             The local mass fraction in each voxel.
         """
-        el_num = self.get_element_number(element)
+        el_num = xraylib_helper.get_element_number(element)
 
         mass_fraction = np.zeros(self.shape, self.dtype)
-        for ph, cmp in zip(self.phase_fractions, self.phase_compounds):
+        for ph, cmp in zip(self.materials_fractions, self.materials_compositions):
             if el_num in cmp["Elements"]:
                 el_ind = np.where(np.array(cmp["Elements"]) == el_num)[0][0]
                 mass_fraction += ph * cmp["density"] * cmp["massFractions"][el_ind]
@@ -454,8 +307,8 @@ class VolumeMaterial(object):
         return max_parallax < tolerance
 
     def get_compton_scattering(
-        self, energy_in_keV: float, angle_rad: Optional[float] = None, detector: Optional[DetectorXRF] = None
-    ) -> Tuple[float, NDArray]:
+        self, energy_in_keV: float, angle_rad: Union[float, None] = None, detector: Union[DetectorXRF, None] = None
+    ) -> tuple[float, NDArray]:
         """Compute the local Compton scattering.
 
         Parameters
@@ -491,7 +344,7 @@ class VolumeMaterial(object):
                 angle_rad = detector.angle_rad
 
         cmptn_yield = np.zeros(self.shape, self.dtype)
-        for ph, cmp in zip(self.phase_fractions, self.phase_compounds):
+        for ph, cmp in zip(self.materials_fractions, self.materials_compositions):
             try:
                 cmp_cs = xraylib.DCS_Compt_CP(cmp["name"], energy_in_keV, angle_rad)
             except ValueError:
@@ -508,7 +361,7 @@ class VolumeMaterial(object):
                     + f" outgoing angle {np.rad2deg(angle_rad)} (deg):\n"
                     + f" - cross-section * mass fraction = {cmp_cs}, density = {cmp['density']}"
                     + ", pixel-size {self.voxel_size_cm}"
-                    + f" - total {cmp['density'] * cmp_cs * self.voxel_size_cm} (assuming phase mass fraction = 1)"
+                    + f" - total {cmp['density'] * cmp_cs * self.voxel_size_cm} (assuming material mass fraction = 1)"
                 )
             cmptn_yield += ph * cmp["density"] * cmp_cs
         cmptn_yield *= self.voxel_size_cm
@@ -524,8 +377,8 @@ class VolumeMaterial(object):
         element: Union[str, int],
         energy_in_keV: float,
         fluo_lines: Union[str, FluoLine, Sequence[FluoLine]],
-        detector: Optional[DetectorXRF] = None,
-    ) -> Tuple[float, NDArray]:
+        detector: Union[DetectorXRF, None] = None,
+    ) -> tuple[float, NDArray]:
         """Compute the local fluorescence yield, for the given line of the given element.
 
         Parameters
@@ -553,9 +406,9 @@ class VolumeMaterial(object):
         if isinstance(fluo_lines, FluoLine):
             fluo_lines = [fluo_lines]
         elif isinstance(fluo_lines, str):
-            fluo_lines = FluoLinesSiegbahn.get_lines(fluo_lines)
+            fluo_lines = LinesSiegbahn.get_lines(fluo_lines)
 
-        el_num = self.get_element_number(element)
+        el_num = xraylib_helper.get_element_number(element)
 
         el_cs = np.empty((len(fluo_lines),), self.dtype)
         for ii, line in enumerate(fluo_lines):
@@ -571,6 +424,6 @@ class VolumeMaterial(object):
         if detector:
             el_yield *= detector.solid_angle_sr
 
-        energy_out_keV = FluoLinesSiegbahn.get_energy(el_num, fluo_lines, compute_average=True)
+        energy_out_keV = LinesSiegbahn.get_energy(el_num, fluo_lines, compute_average=True)
 
         return float(energy_out_keV), el_yield

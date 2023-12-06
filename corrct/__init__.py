@@ -35,11 +35,7 @@ from . import denoisers  # noqa: F401, F402
 from . import struct_illum  # noqa: F401, F402
 from . import alignment  # noqa: F401, F402
 
-try:
-    from . import physics  # noqa: F401, F402
-except ImportError as exc:
-    print(exc)
-    print("WARNING: X-ray physics support not available. Please install xraylib if you need it.")
+from . import physics  # noqa: F401, F402
 
 from . import testing  # noqa: F401, F402
 
