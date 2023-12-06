@@ -497,7 +497,7 @@ class FilterFBP(Filter):
         dtype : DTypeLike, optional
             The type of the filter, by default np.float32
         """
-        if filter_name not in self.FILTERS:
+        if filter_name.lower() not in self.FILTERS:
             raise ValueError(f"Unknown filter {filter_name}. Available filters: {self.FILTERS}")
 
         super().__init__(fbp_filter=None, pad_mode=pad_mode, use_rfft=use_rfft, dtype=dtype)
