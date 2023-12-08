@@ -10,13 +10,14 @@ try:
     from . import xraylib_helper  # noqa: F401, F402
     from . import xrf  # noqa: F401, F402
     from . import phase  # noqa: F401, F402
+    from . import materials  # noqa: F401, F402
 
     xraylib = xraylib_helper.xraylib
     get_compound = xraylib_helper.get_compound
     get_element_number = xraylib_helper.get_element_number
 
     FluoLinesSiegbahn = xrf.LinesSiegbahn
-    VolumeMaterial = xrf.VolumeMaterial
+    VolumeMaterial = materials.VolumeMaterial
 
 except ImportError as exc:
     print(exc)
