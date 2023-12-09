@@ -230,12 +230,14 @@ class Solver(ABC):
         if isinstance(data_term, str):
             if data_term.lower() == "l2":
                 return data_terms.DataFidelity_l2()
+            elif data_term.lower() == "kl":
+                return data_terms.DataFidelity_KL()
             else:
-                raise ValueError('Unknown data term: "%s", only accepted terms are: "l2".' % data_term)
+                raise ValueError(f"Unknown data term: '{data_term}', only accepted terms are: 'l2' | 'kl'.")
         elif isinstance(data_term, (data_terms.DataFidelity_l2, data_terms.DataFidelity_KL)):
             return cp.deepcopy(data_term)
         else:
-            raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
+            raise ValueError(f"Unsupported data term: '{data_term.info()}', only accepted terms are 'kl' and 'l2'-based.")
 
     @staticmethod
     def _initialize_regularizer(
@@ -579,12 +581,10 @@ class MLEM(Solver):
         verbose: bool = False,
         tolerance: Optional[float] = None,
         regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
-        data_term: Union[str, DataFidelityBase] = "l2",
+        data_term: Union[str, DataFidelityBase] = "kl",
         data_term_test: Union[str, DataFidelityBase, None] = None,
     ):
-        super().__init__(
-            verbose=verbose, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
-        )
+        super().__init__(verbose=verbose, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test)
         self.regularizer = self._initialize_regularizer(regularizer)
 
     def info(self) -> str:
@@ -692,6 +692,9 @@ class MLEM(Solver):
 
             # The MLEM update
             Ax = A(x)
+
+            if self.data_term.background is not None:
+                Ax = Ax + self.data_term.background
             Ax = Ax.clip(eps, None)
             upd = A.T(b / Ax)
             x *= upd / tau
