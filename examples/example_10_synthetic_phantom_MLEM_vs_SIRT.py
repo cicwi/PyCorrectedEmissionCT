@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This example compares the MLEM solver against SIRT and weighted least-squares
 reconstructions (implemented with the PDHG algorithm) of the Shepp-Logan phantom.
@@ -6,13 +5,11 @@ reconstructions (implemented with the PDHG algorithm) of the Shepp-Logan phantom
 @author: Jérome Lesaint, ESRF - The European Synchrotron, Grenoble, France
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Tuple
-
-import matplotlib.pyplot as plt
-
 import corrct as cct
+
 
 try:
     import phantom
@@ -21,7 +18,7 @@ except ImportError:
     import phantom
 
 
-def cm2inch(x: ArrayLike) -> Tuple[float, float]:
+def cm2inch(x: ArrayLike) -> tuple[float, float]:
     """Convert cm to inch.
 
     Parameters
