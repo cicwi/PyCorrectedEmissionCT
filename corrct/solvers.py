@@ -251,8 +251,8 @@ class Solver(ABC):
             check_regs_ok = [isinstance(r, BaseRegularizer) for r in regularizer]
             if not np.all(check_regs_ok):
                 raise ValueError(
-                    "The following regularizers are not derived from the BaseRegularizer class: %s"
-                    % np.array(np.arange(len(check_regs_ok))[np.array(check_regs_ok, dtype=bool)])
+                    "The following regularizers are not derived from the BaseRegularizer class: "
+                    f"{np.array(np.arange(len(check_regs_ok))[np.array(check_regs_ok, dtype=bool)])}"
                 )
             else:
                 return list(regularizer)
@@ -594,9 +594,9 @@ class MLEM(Solver):
         Returns
         -------
         str
-                 info string.
+            info string.
         """
-        return Solver.info(self)
+        return Solver.info(self) + f"(B:{self.data_term.background:g})" if self.data_term.background is not None else ""
 
     def __call__(  # noqa: C901
         self,
@@ -693,9 +693,20 @@ class MLEM(Solver):
             # The MLEM update
             Ax = A(x)
 
+            if b_test_mask is not None:
+                res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
+                info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test)
+
+            if self.tolerance is not None:
+                res = self.data_term.compute_residual(Ax, mask=b_mask)
+                info.residuals[ii] = self.data_term.compute_residual_norm(res)
+                if self.tolerance > info.residuals[ii]:
+                    break
+
             if self.data_term.background is not None:
                 Ax = Ax + self.data_term.background
             Ax = Ax.clip(eps, None)
+
             upd = A.T(b / Ax)
             x *= upd / tau
 
@@ -1152,4 +1163,3 @@ class PDHG(Solver):
 
 
 CP = PDHG
-
