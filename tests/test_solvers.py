@@ -24,8 +24,9 @@ def get_test_ind(func_name: str) -> str:
     return func_name.split("_")[1]
 
 
-def print_max_deviation(test_ind: str, sol_diff: NDArray[np.floating]) -> None:
-    print(f"\n{test_ind} - Max absolute deviation is: {np.max(np.abs(sol_diff)):.6} -> ", end="", flush=True)
+def print_max_deviation(test_ind: str, sol_diff: NDArray[np.floating], tolerance: float) -> None:
+    max_dev = np.max(np.abs(sol_diff))
+    print(f"\n{test_ind} - Max absolute deviation is: {max_dev:.6} (tolerance: {tolerance:.6}) -> ", end="", flush=True)
 
 
 class TestSolvers(unittest.TestCase):
@@ -83,7 +84,7 @@ class TestSolvers(unittest.TestCase):
 
         sol_diff = self.vol_rand_2d - sol
         test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff)
+        print_max_deviation(test_ind, sol_diff, self.tolerance)
 
         assert np.all(np.isclose(sol, self.vol_rand_2d, atol=self.tolerance))
 
@@ -96,7 +97,7 @@ class TestSolvers(unittest.TestCase):
 
         sol_diff = self.vol_rand_2d - sol
         test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff)
+        print_max_deviation(test_ind, sol_diff, self.tolerance)
 
         assert np.all(np.isclose(sol, self.vol_rand_2d, atol=self.tolerance))
 
@@ -110,7 +111,7 @@ class TestSolvers(unittest.TestCase):
 
         sol_diff = self.vol_flat_2d - sol
         test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff)
+        print_max_deviation(test_ind, sol_diff, self.tolerance)
 
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
@@ -124,7 +125,7 @@ class TestSolvers(unittest.TestCase):
 
         sol_diff = self.vol_flat_2d - sol
         test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff)
+        print_max_deviation(test_ind, sol_diff, self.tolerance)
 
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
@@ -138,7 +139,7 @@ class TestSolvers(unittest.TestCase):
 
         sol_diff = self.vol_flat_2d - sol
         test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff)
+        print_max_deviation(test_ind, sol_diff, self.tolerance)
 
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
@@ -152,7 +153,7 @@ class TestSolvers(unittest.TestCase):
 
         sol_diff = self.vol_flat_2d - sol
         test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff)
+        print_max_deviation(test_ind, sol_diff, self.tolerance)
 
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
 
@@ -166,6 +167,20 @@ class TestSolvers(unittest.TestCase):
 
         sol_diff = self.vol_flat_2d - sol
         test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff)
+        print_max_deviation(test_ind, sol_diff, self.tolerance)
+
+        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
+
+    def test_007_MLEM(self):
+        """Test MLEM algorithm in 2D."""
+        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
+
+        algo = solvers.MLEM()
+        sol, _ = algo(A, self.data_flat_2d, 10_000)
+        # sol, _ = algo(A, sino_substract, num_iterations_mlem, x_mask=vol_mask, lower_limit=1e-5, upper_limit=10)
+
+        sol_diff = self.vol_flat_2d - sol
+        test_ind = get_test_ind(sys._getframe().f_code.co_name)
+        print_max_deviation(test_ind, sol_diff, self.tolerance)
 
         assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))

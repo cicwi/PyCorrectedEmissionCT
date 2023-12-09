@@ -230,12 +230,14 @@ class Solver(ABC):
         if isinstance(data_term, str):
             if data_term.lower() == "l2":
                 return data_terms.DataFidelity_l2()
+            elif data_term.lower() == "kl":
+                return data_terms.DataFidelity_KL()
             else:
-                raise ValueError('Unknown data term: "%s", only accepted terms are: "l2".' % data_term)
+                raise ValueError(f"Unknown data term: '{data_term}', only accepted terms are: 'l2' | 'kl'.")
         elif isinstance(data_term, (data_terms.DataFidelity_l2, data_terms.DataFidelity_KL)):
             return cp.deepcopy(data_term)
         else:
-            raise ValueError('Unsupported data term: "%s", only accepted terms are "l2"-based.' % data_term.info())
+            raise ValueError(f"Unsupported data term: '{data_term.info()}', only accepted terms are 'kl' and 'l2'-based.")
 
     @staticmethod
     def _initialize_regularizer(
@@ -249,8 +251,8 @@ class Solver(ABC):
             check_regs_ok = [isinstance(r, BaseRegularizer) for r in regularizer]
             if not np.all(check_regs_ok):
                 raise ValueError(
-                    "The following regularizers are not derived from the BaseRegularizer class: %s"
-                    % np.array(np.arange(len(check_regs_ok))[np.array(check_regs_ok, dtype=bool)])
+                    "The following regularizers are not derived from the BaseRegularizer class: "
+                    f"{np.array(np.arange(len(check_regs_ok))[np.array(check_regs_ok, dtype=bool)])}"
                 )
             else:
                 return list(regularizer)
@@ -551,6 +553,171 @@ class SART(Solver):
         return x, info
 
 
+class MLEM(Solver):
+    """
+    Initialize the MLEM solver class.
+
+    This class implements the Maximul Likelihood Expectation Maximization (MLEM) algorithm.
+
+    Parameters
+    ----------
+    verbose : bool, optional
+        Turn on verbose output. The default is False.
+    tolerance : Optional[float], optional
+        Tolerance on the data residual for computing when to stop iterations.
+        The default is None.
+    regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional
+        Regularizer to be used. The default is None.
+    data_term : Union[str, DataFidelityBase], optional
+        Data fidelity term for computing the data residual. The default is "l2".
+    data_term_test : Optional[DataFidelityBase], optional
+        The data fidelity to be used for the test set.
+        If None, it will use the same as for the rest of the data.
+        The default is None.
+    """
+
+    def __init__(
+        self,
+        verbose: bool = False,
+        tolerance: Optional[float] = None,
+        regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
+        data_term: Union[str, DataFidelityBase] = "kl",
+        data_term_test: Union[str, DataFidelityBase, None] = None,
+    ):
+        super().__init__(verbose=verbose, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test)
+        self.regularizer = self._initialize_regularizer(regularizer)
+
+    def info(self) -> str:
+        """
+        Return the MLEM info.
+
+        Returns
+        -------
+        str
+            info string.
+        """
+        return Solver.info(self) + f"(B:{self.data_term.background:g})" if self.data_term.background is not None else ""
+
+    def __call__(  # noqa: C901
+        self,
+        A: operators.BaseTransform,
+        b: NDArrayFloat,
+        iterations: int,
+        x0: Optional[NDArrayFloat] = None,
+        lower_limit: Union[float, NDArrayFloat, None] = None,
+        upper_limit: Union[float, NDArrayFloat, None] = None,
+        x_mask: Optional[NDArrayFloat] = None,
+        b_mask: Optional[NDArrayFloat] = None,
+        b_test_mask: Optional[NDArrayFloat] = None,
+    ) -> Tuple[NDArrayFloat, SolutionInfo]:
+        """
+        Reconstruct the data, using the MLEM algorithm.
+
+        Parameters
+        ----------
+        A : BaseTransform
+            Projection operator.
+        b : NDArrayFloat
+            Data to reconstruct.
+        iterations : int
+            Number of iterations.
+        x0 : Optional[NDArrayFloat], optional
+            Initial solution. The default is None.
+        lower_limit : Union[float, NDArrayFloat], optional
+            Lower clipping value. The default is None.
+        upper_limit : Union[float, NDArrayFloat], optional
+            Upper clipping value. The default is None.
+        x_mask : Optional[NDArrayFloat], optional
+            Solution mask. The default is None.
+        b_mask : Optional[NDArrayFloat], optional
+            Data mask. The default is None.
+        b_test_mask : Optional[NDArrayFloat], optional
+            Test data mask. The default is None.
+
+        Returns
+        -------
+        Tuple[NDArrayFloat, SolutionInfo]
+            The reconstruction, and the residuals.
+        """
+        b = np.array(b)
+
+        (b_mask, b_test_mask) = self._initialize_b_masks(b, b_mask, b_test_mask)
+
+        # Back-projection diagonal re-scaling
+        b_ones = np.ones_like(b)
+        if b_mask is not None:
+            b_ones *= b_mask
+        tau = A.T(b_ones)
+
+        # Forward-projection diagonal re-scaling
+        x_ones = np.ones_like(tau)
+        if x_mask is not None:
+            x_ones *= x_mask
+        sigma = np.abs(A(x_ones))
+        sigma[(sigma / np.max(sigma)) < 1e-5] = 1
+        sigma = 1 / sigma
+
+        if x0 is None:
+            x = np.ones_like(tau)
+        else:
+            x = np.array(x0).copy()
+        if x_mask is not None:
+            x *= x_mask
+
+        self.data_term.assign_data(b)
+
+        info = SolutionInfo(self.info(), max_iterations=iterations, tolerance=self.tolerance)
+
+        if b_test_mask is not None or self.tolerance is not None:
+            Ax = A(x)
+
+            if b_test_mask is not None:
+                if self.data_term_test.background != self.data_term.background:
+                    print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
+                    self.data_term_test.background = self.data_term.background
+                self.data_term_test.assign_data(b)
+
+                res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
+                info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
+
+            if self.tolerance is not None:
+                res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
+                info.residual0 = self.data_term.compute_residual_norm(res_0)
+
+        reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+        algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
+
+        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
+            info.iterations += 1
+
+            # The MLEM update
+            Ax = A(x)
+
+            if b_test_mask is not None:
+                res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
+                info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test)
+
+            if self.tolerance is not None:
+                res = self.data_term.compute_residual(Ax, mask=b_mask)
+                info.residuals[ii] = self.data_term.compute_residual_norm(res)
+                if self.tolerance > info.residuals[ii]:
+                    break
+
+            if self.data_term.background is not None:
+                Ax = Ax + self.data_term.background
+            Ax = Ax.clip(eps, None)
+
+            upd = A.T(b / Ax)
+            x *= upd / tau
+
+            if lower_limit is not None or upper_limit is not None:
+                x = x.clip(lower_limit, upper_limit)
+            if x_mask is not None:
+                x *= x_mask
+
+        return x, info
+
+
 class SIRT(Solver):
     """
     Initialize the SIRT solver class.
@@ -730,7 +897,7 @@ class PDHG(Solver):
     """
     Initialize the PDHG solver class.
 
-    PDHG stands for primal-dual hybridg gradient algorithm from Chambolle and Pock.
+    PDHG stands for primal-dual hybrid gradient algorithm from Chambolle and Pock.
 
     Parameters
     ----------
