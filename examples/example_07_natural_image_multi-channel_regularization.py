@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Multi-channel TV regularization example.
 
@@ -7,19 +6,14 @@ Multi-channel TV regularization example.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+import time as tm
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.random
-
-import matplotlib.pyplot as plt
-
-import skimage as sk
-import skimage.data
-
-import time as tm
-
+import skimage.data as skd
+from numpy.typing import NDArray
 import corrct as cct
 
-from numpy.typing import NDArray
 
 # Noise parameters
 gauss_stddev = None
@@ -32,9 +26,9 @@ iterations = 125
 
 c_s = tm.time()
 # Loading the image
-img_orig: NDArray = sk.data.astronaut()
+img_orig: NDArray = skd.astronaut()
 c_load = tm.time()
-print("Loaded img shape: %s, dtype: %s, in %g seconds." % (str(img_orig.shape), str(img_orig.dtype), (c_load - c_s)))
+print(f"Loaded img shape: {img_orig.shape}, dtype: {img_orig.dtype}, in {c_load - c_s:g} seconds.")
 
 # Transposing the image to have the multi-channel dimension as the slowest (axis=0 in Python)
 img_orig = img_orig.transpose([2, 0, 1])
@@ -51,6 +45,8 @@ if gauss_stddev is not None:
     # This adds gaussian noise
     img_noise += np.random.normal(size=img_orig.shape, scale=gauss_stddev)
     img_variance = img_variance + gauss_stddev**2
+img_noise = img_noise.astype(np.float32)
+img_variance = img_variance.astype(np.float32)
 
 c_noise = tm.time()
 print("Added noise in %g seconds." % (c_noise - c_load))
