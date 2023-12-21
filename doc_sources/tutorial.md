@@ -185,7 +185,7 @@ This class is used internally in the projector
 [`VolumeMaterial`](corrct.html#corrct.physics.VolumeMaterial) from the [`physics`](corrct.html#module-corrct.physics) module.
 
 For a dedicated description of the projection and attenuation correction geometry,
-the reader can have a look at the dedicated [geometry page](corrct.html#geometry).
+the reader can have a look at the dedicated [geometry page](geometry.md).
 
 ## Data terms and regularization
 
