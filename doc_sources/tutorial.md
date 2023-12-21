@@ -184,6 +184,9 @@ This class is used internally in the projector
 [`ProjectorAttenuationXRF`](corrct.html#corrct.projectors.ProjectorAttenuationXRF), and it can be used particularly in conjunction with the class
 [`VolumeMaterial`](corrct.html#corrct.physics.VolumeMaterial) from the [`physics`](corrct.html#module-corrct.physics) module.
 
+For a dedicated description of the projection and attenuation correction geometry,
+the reader can have a look at the dedicated [geometry page](corrct.html#geometry).
+
 ## Data terms and regularization
 
 Iterative methods support regularizers, and data fidelity terms. The former can

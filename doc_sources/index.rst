@@ -12,6 +12,7 @@ Contents:
 
    readme
    tutorial
+   geometry
    modules
    changelog
 
