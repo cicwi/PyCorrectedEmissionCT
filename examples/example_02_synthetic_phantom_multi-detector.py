@@ -42,12 +42,12 @@ solver_sirt = cct.solvers.SIRT(verbose=True)
 
 print("Reconstructing w/o corrections:")
 with cct.projectors.ProjectorUncorrected(ph.shape, angles, psf=PSF, create_single_projs=True) as p:
-    rec_sart_uncorr, _ = solver_sart(p, sino, iterations=5, lower_limit=LOWER_LIMIT)
+    rec_sart_uncorr, _ = solver_sart(p, sino.mean(axis=0), iterations=5, lower_limit=LOWER_LIMIT)
 
     expected_power, noise_power = cct.testing.compute_error_power(expected_ph, rec_sart_uncorr)
     print(f"- Phantom power: {expected_power:g}, noise power: {noise_power:g}")
 
-    rec_sirt_uncorr, _ = solver_sirt(p, sino, iterations=250, lower_limit=LOWER_LIMIT)
+    rec_sirt_uncorr, _ = solver_sirt(p, sino.mean(axis=0), iterations=250, lower_limit=LOWER_LIMIT)
 
     expected_power, noise_power = cct.testing.compute_error_power(expected_ph, rec_sirt_uncorr)
     print(f"- Phantom power: {expected_power:g}, noise power: {noise_power:g}")
