@@ -200,7 +200,7 @@ def bin_imgs(imgs: NDArray, binning: Union[int, float], verbose: bool = True) ->
         imgs = imgs.reshape(binned_shape)
 
     if verbose:
-        print(f"Binning: {imgs_shape} => {binned_shape}")
+        print(f"Binning {binning}: {imgs_shape} => {binned_shape}")
 
     return imgs
 
