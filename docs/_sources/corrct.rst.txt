@@ -7,6 +7,8 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   corrct.alignment
+   corrct.physics
    corrct.processing
 
 Submodules
@@ -64,14 +66,6 @@ corrct.param\_tuning module
 ---------------------------
 
 .. automodule:: corrct.param_tuning
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-corrct.physics module
----------------------
-
-.. automodule:: corrct.physics
    :members:
    :undoc-members:
    :show-inheritance:

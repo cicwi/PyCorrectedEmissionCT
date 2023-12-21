@@ -13,16 +13,18 @@ This package provides the following functionality:
 * Support for **attenuation correction** of the forward-projection and back-projection.
 * Various solvers (reconstruction algorithms):
   - Simultaneous Iterative Reconstruction Technique (**SIRT**).
+  - Maximum Likelihood Estimation Maximisation (**MLEM**).
   - Simultaneous Algebraic Reconstruction Technique (**SART**).
   - Primal-dual optimization from Chambolle-Pock (Primal-Dual Hybrid Gradient - **PDHG**), with:
     * Various data fitting terms, including **Gaussian and Poisson noise** modelling.
     * Various optional regularization terms, including: **TV-min**, l1-min, laplacian, and **wavelet** l1-min.
     * Multi-channel (collaborative) regularization terms, like: **TNV** (Total Nuclear Variation).
   - Filtered Back-Projection (**FBP**), and its data-dependent filter learning variant
-(**[PyMR-FBP](https://github.com/dmpelt/pymrfbp)**)
-* Two projector backends: [astra-toolbox](https://github.com/astra-toolbox/astra-toolbox) and
+(**[PyMR-FBP](https://github.com/dmpelt/pymrfbp)**).
+* Two projector backends, based on: [astra-toolbox](https://github.com/astra-toolbox/astra-toolbox) and
 [scikit-image](https://github.com/scikit-image/scikit-image).
 * Guided **regularization parameter selection**, through cross-validation and elbow method.
+* Projection **alignment** routines.
 
 It contains the code used for the following paper, which also provides a
 mathematical description of the attenuation correction concepts and algorithms used here:
@@ -86,7 +88,9 @@ examples folder.
 
 ## Authors and contributors
 
-* **Nicola VIGANÒ** - *Initial work*
+* **Nicola VIGANÒ** - *Main developer*
+* **Jerome LESAINT** - *Contributor*
+* **Patrick HARRISON** - *Contributor*
 
 See also the list of [contributors](https://github.com/cicwi/PyCorrectedEmissionCT/contributors) who participated in this project.
 

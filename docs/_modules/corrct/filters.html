@@ -38,6 +38,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
@@ -550,6 +551,8 @@
 
     <span class="n">filter_name</span><span class="p">:</span> <span class="nb">str</span>
 
+    <span class="n">FILTERS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ramp&quot;</span><span class="p">,</span> <span class="s2">&quot;shepp-logan&quot;</span><span class="p">,</span> <span class="s2">&quot;cosine&quot;</span><span class="p">,</span> <span class="s2">&quot;hamming&quot;</span><span class="p">,</span> <span class="s2">&quot;hann&quot;</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">filter_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ramp&quot;</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="n">use_rfft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -564,6 +567,9 @@
 <span class="sd">        dtype : DTypeLike, optional</span>
 <span class="sd">            The type of the filter, by default np.float32</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">filter_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILTERS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown filter </span><span class="si">{</span><span class="n">filter_name</span><span class="si">}</span><span class="s2">. Available filters: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">FILTERS</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fbp_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">use_rfft</span><span class="o">=</span><span class="n">use_rfft</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">filter_name</span> <span class="o">=</span> <span class="n">filter_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -582,7 +588,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">data_wu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_rfft</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="p">[:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="p">[:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="FilterFBP.get_available_filters"><a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterFBP.get_available_filters">[docs]</a>    <span class="k">def</span> <span class="nf">get_available_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Provide available FBP filters.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Sequence[str]</span>
+<span class="sd">            The available filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILTERS</span></div></div>
 
 
 <div class="viewcode-block" id="FilterMR"><a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterMR">[docs]</a><span class="k">class</span> <span class="nc">FilterMR</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>

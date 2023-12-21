@@ -38,6 +38,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
@@ -193,7 +194,7 @@
         <span class="n">prj_intensities</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">backend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackend</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;astra&quot;</span> <span class="k">if</span> <span class="n">astra_available</span> <span class="k">else</span> <span class="s2">&quot;skimage&quot;</span><span class="p">,</span>
-        <span class="n">create_single_projs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">create_single_projs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize the base projection class.</span>
 
@@ -221,7 +222,7 @@
 <span class="sd">            The default is True if CUDA and ASTRA are available, otherwise False.</span>
 <span class="sd">        create_single_projs : bool, optional</span>
 <span class="sd">            Whether to create projectors for single projections.</span>
-<span class="sd">            Used for corrections and SART, by default True.</span>
+<span class="sd">            Used for corrections and SART, by default False.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -237,7 +238,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Passed ASTRA projector, but astra not available (</span><span class="si">{</span><span class="n">astra_status</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vol_geom</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">VolumeGeometry</span><span class="p">):</span>
-            <span class="n">vol_geom</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">VolumeGeometry</span><span class="p">(</span><span class="n">vol_shape_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_geom</span><span class="p">))</span>
+            <span class="n">vol_geom</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">VolumeGeometry</span><span class="p">(</span><span class="n">_vol_shape_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_geom</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vol_geom</span> <span class="o">=</span> <span class="n">vol_geom</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_geom</span><span class="o">.</span><span class="n">shape_xyz</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
@@ -247,7 +248,10 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;astra&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span> <span class="o">=</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackendASTRA</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">has_astra_direct</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span> <span class="o">=</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackendDirectASTRA</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span> <span class="o">=</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackendASTRA</span><span class="p">()</span>
             <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;skimage&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span> <span class="o">=</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackendSKimage</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
@@ -514,6 +518,7 @@
             <span class="n">psf</span><span class="o">=</span><span class="n">psf</span><span class="p">,</span>
             <span class="n">prj_intensities</span><span class="o">=</span><span class="n">prj_intensities</span><span class="p">,</span>
             <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
+            <span class="n">create_single_projs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span>

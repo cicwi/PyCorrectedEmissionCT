@@ -52,6 +52,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
@@ -94,6 +95,7 @@ PyCorrectedEmissionCT is usually abbreviated to its python module name: <code cl
 <li><p>Various solvers (reconstruction algorithms):</p>
 <ul>
 <li><p>Simultaneous Iterative Reconstruction Technique (<strong>SIRT</strong>).</p></li>
+<li><p>Maximum Likelihood Estimation Maximisation (<strong>MLEM</strong>).</p></li>
 <li><p>Simultaneous Algebraic Reconstruction Technique (<strong>SART</strong>).</p></li>
 <li><p>Primal-dual optimization from Chambolle-Pock (Primal-Dual Hybrid Gradient - <strong>PDHG</strong>), with:</p>
 <ul>
@@ -103,12 +105,13 @@ PyCorrectedEmissionCT is usually abbreviated to its python module name: <code cl
 </ul>
 </li>
 <li><p>Filtered Back-Projection (<strong>FBP</strong>), and its data-dependent filter learning variant
-(<strong><a class="reference external" href="https://github.com/dmpelt/pymrfbp">PyMR-FBP</a></strong>)</p></li>
+(<strong><a class="reference external" href="https://github.com/dmpelt/pymrfbp">PyMR-FBP</a></strong>).</p></li>
 </ul>
 </li>
-<li><p>Two projector backends: <a class="reference external" href="https://github.com/astra-toolbox/astra-toolbox">astra-toolbox</a> and
+<li><p>Two projector backends, based on: <a class="reference external" href="https://github.com/astra-toolbox/astra-toolbox">astra-toolbox</a> and
 <a class="reference external" href="https://github.com/scikit-image/scikit-image">scikit-image</a>.</p></li>
 <li><p>Guided <strong>regularization parameter selection</strong>, through cross-validation and elbow method.</p></li>
+<li><p>Projection <strong>alignment</strong> routines.</p></li>
 </ul>
 <p>It contains the code used for the following paper, which also provides a
 mathematical description of the attenuation correction concepts and algorithms used here:</p>
@@ -170,7 +173,9 @@ examples folder.</p>
 <div class="section" id="authors-and-contributors">
 <h2>Authors and contributors<a class="headerlink" href="#authors-and-contributors" title="Permalink to this heading"></a></h2>
 <ul class="simple">
-<li><p><strong>Nicola VIGANÒ</strong> - <em>Initial work</em></p></li>
+<li><p><strong>Nicola VIGANÒ</strong> - <em>Main developer</em></p></li>
+<li><p><strong>Jerome LESAINT</strong> - <em>Contributor</em></p></li>
+<li><p><strong>Patrick HARRISON</strong> - <em>Contributor</em></p></li>
 </ul>
 <p>See also the list of <a class="reference external" href="https://github.com/cicwi/PyCorrectedEmissionCT/contributors">contributors</a> who participated in this project.</p>
 </div>

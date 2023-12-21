@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.physics.phase &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+          <li><a href="../physics.html">corrct.physics</a> &raquo;</li>
+      <li>corrct.physics.phase</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for corrct.physics.phase</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Phase contrast support functions.</span>
+
+<span class="sd">@author: Nicola VIGANÒ, CEA-IRIG, Grenoble, France</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">xraylib_helper</span>  <span class="c1"># noqa: F401, F402</span>
+
+    <span class="n">xraylib</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">xraylib</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Physics support is only available when xraylib is installed!&quot;</span><span class="p">)</span>
+    <span class="k">raise</span>
+
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.ndimage</span> <span class="k">as</span> <span class="nn">spimg</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
+
+
+<div class="viewcode-block" id="get_delta_beta"><a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.phase.get_delta_beta">[docs]</a><span class="k">def</span> <span class="nf">get_delta_beta</span><span class="p">(</span><span class="n">cmp_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Compute the delta-over-beta parameter for a specific compound.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cmp_name : str</span>
+<span class="sd">        Molar composition of a compound</span>
+<span class="sd">    energy_keV : float</span>
+<span class="sd">        Energy at which the d/b value should be computed</span>
+<span class="sd">    density : Optional[float], optional</span>
+<span class="sd">        Density of the compound, by default None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The computed delta-over-beta.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cmp</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">get_compound</span><span class="p">(</span><span class="n">cmp_name</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">)</span>
+    <span class="n">ref_ind</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">Refractive_Index</span><span class="p">(</span><span class="n">cmp_name</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">,</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ref_ind</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">/</span> <span class="n">ref_ind</span><span class="o">.</span><span class="n">imag</span></div>
+
+
+<div class="viewcode-block" id="get_delta_beta_curves"><a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.phase.get_delta_beta_curves">[docs]</a><span class="k">def</span> <span class="nf">get_delta_beta_curves</span><span class="p">(</span>
+    <span class="n">compounds</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">energy_keV_range</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">800.0</span><span class="p">,</span> <span class="mi">500</span><span class="p">),</span> <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Compute the delta-over-beta curves for the listed compounds, in the requested energy range.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    compounds : Sequence[str]</span>
+<span class="sd">        Sequence of compounds.</span>
+<span class="sd">    energy_keV_range : tuple[float, float, int], optional</span>
+<span class="sd">        The energy range in keV, by default (1.0, 800.0, 500)</span>
+<span class="sd">    plot : bool, optional</span>
+<span class="sd">        Whether to plot the result, by default True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Sequence[NDArray]</span>
+<span class="sd">        The computed delta-over-beta valueas.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">energy_keV_range</span><span class="p">)</span>
+    <span class="n">delta_betas_cmps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="n">compounds</span><span class="p">:</span>
+        <span class="n">delta_betas_cmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">get_delta_beta</span><span class="p">(</span><span class="n">cmp</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">energies</span><span class="p">])</span>
+        <span class="n">delta_betas_cmps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">delta_betas_cmp</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">compounds</span><span class="p">):</span>
+            <span class="n">axs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">delta_betas_cmps</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">cmp</span><span class="p">)</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Energy (keV)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">delta/</span><span class="se">\\</span><span class="s2">beta$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">delta_betas_cmps</span></div>
+
+
+<span class="k">def</span> <span class="nf">_tie_freq_response</span><span class="p">(</span><span class="n">k2</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">dist_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">wlength_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">delta_beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">delta_beta</span> <span class="o">*</span> <span class="n">dist_um</span> <span class="o">*</span> <span class="n">wlength_um</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">k2</span>
+
+
+<span class="k">def</span> <span class="nf">_ctf_freq_response</span><span class="p">(</span><span class="n">k2</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">dist_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">wlength_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">delta_beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">dist_um</span> <span class="o">*</span> <span class="n">wlength_um</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">k2</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span> <span class="o">+</span> <span class="n">delta_beta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="plot_freq_responses"><a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.phase.plot_freq_responses">[docs]</a><span class="k">def</span> <span class="nf">plot_freq_responses</span><span class="p">(</span><span class="n">filter_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">pix_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dist_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">wlength_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">delta_beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Plot frequency response of the wave propagation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filter_length : int</span>
+<span class="sd">        Length of the filter in pixels</span>
+<span class="sd">    pix_size_um : float</span>
+<span class="sd">        Pixel-sise of the detector in microns</span>
+<span class="sd">    dist_um : float</span>
+<span class="sd">        Distance of the detector from sample in microns</span>
+<span class="sd">    wlength_um : float</span>
+<span class="sd">        Wavelength of the wave in microns</span>
+<span class="sd">    delta_beta : float</span>
+<span class="sd">        Radio between the refraction index decrement and the absorption coefficient.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        Figure and axes of the plot</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="n">filter_length</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">pix_size_um</span><span class="p">)</span>
+    <span class="n">k2</span> <span class="o">=</span> <span class="n">k</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">_tie_freq_response</span><span class="p">(</span><span class="n">k2</span><span class="p">,</span> <span class="n">dist_um</span><span class="o">=</span><span class="n">dist_um</span><span class="p">,</span> <span class="n">wlength_um</span><span class="o">=</span><span class="n">wlength_um</span><span class="p">,</span> <span class="n">delta_beta</span><span class="o">=</span><span class="n">delta_beta</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;TIE&quot;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">_ctf_freq_response</span><span class="p">(</span><span class="n">k2</span><span class="p">,</span> <span class="n">dist_um</span><span class="o">=</span><span class="n">dist_um</span><span class="p">,</span> <span class="n">wlength_um</span><span class="o">=</span><span class="n">wlength_um</span><span class="p">,</span> <span class="n">delta_beta</span><span class="o">=</span><span class="n">delta_beta</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;CTF&quot;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span></div>
+
+
+<div class="viewcode-block" id="get_propagation_filter"><a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.phase.get_propagation_filter">[docs]</a><span class="k">def</span> <span class="nf">get_propagation_filter</span><span class="p">(</span>
+    <span class="n">img_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span>
+    <span class="n">pix_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">dist_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">wlength_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">delta_beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">filter_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ctf&quot;</span><span class="p">,</span>
+    <span class="n">use_rfft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">plot_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Compute the phase contrast propagation filter for the given parameters.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img_shape : Union[Sequence[int], NDArray]</span>
+<span class="sd">        Shape of the target image</span>
+<span class="sd">    pix_size_um : float</span>
+<span class="sd">        Pixel size of the detector (in microns)</span>
+<span class="sd">    dist_um : float</span>
+<span class="sd">        Propagation distance (in microns)</span>
+<span class="sd">    wlength_um : float</span>
+<span class="sd">        Wavelength of the radiation (in microns)</span>
+<span class="sd">    delta_beta : float</span>
+<span class="sd">        Delta-over-beta value for the given material</span>
+<span class="sd">    filter_type : str, optional</span>
+<span class="sd">        Type of the filter, by default &quot;ctf&quot;.</span>
+<span class="sd">        Options: &quot;ctf&quot; (Contrast Transfer Function) | &quot;tie&quot; (Transport of Intensity Equation)</span>
+<span class="sd">    use_rfft : bool, optional</span>
+<span class="sd">        Whether to use the rfft, by default False</span>
+<span class="sd">    plot_result : bool, optional</span>
+<span class="sd">        Whether to plot the result, by default False</span>
+<span class="sd">    dtype : DTypeLike, optional</span>
+<span class="sd">        Data type to use, by default np.float32</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[NDArray, NDArray]</span>
+<span class="sd">        The real-space and the Fourier-space filter</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        When choosing an incorrect filter type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_rfft</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">pix_size_um</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">img_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="o">=</span><span class="n">pix_size_um</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">pix_size_um</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">img_shape</span><span class="p">]</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
+    <span class="n">k2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filter_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;ctf&quot;</span><span class="p">:</span>
+        <span class="n">filt_fourier</span> <span class="o">=</span> <span class="n">_ctf_freq_response</span><span class="p">(</span><span class="n">k2</span><span class="o">=</span><span class="n">k2</span><span class="p">,</span> <span class="n">dist_um</span><span class="o">=</span><span class="n">dist_um</span><span class="p">,</span> <span class="n">wlength_um</span><span class="o">=</span><span class="n">wlength_um</span><span class="p">,</span> <span class="n">delta_beta</span><span class="o">=</span><span class="n">delta_beta</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">filter_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;tie&quot;</span><span class="p">:</span>
+        <span class="n">filt_fourier</span> <span class="o">=</span> <span class="n">_tie_freq_response</span><span class="p">(</span><span class="n">k2</span><span class="o">=</span><span class="n">k2</span><span class="p">,</span> <span class="n">dist_um</span><span class="o">=</span><span class="n">dist_um</span><span class="p">,</span> <span class="n">wlength_um</span><span class="o">=</span><span class="n">wlength_um</span><span class="p">,</span> <span class="n">delta_beta</span><span class="o">=</span><span class="n">delta_beta</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid filter type: </span><span class="si">{</span><span class="n">filter_type</span><span class="si">}</span><span class="s2">. Possible choices: &#39;ctf&#39; | &#39;tie&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">use_rfft</span><span class="p">:</span>
+        <span class="n">filt_direct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">irfft2</span><span class="p">(</span><span class="n">filt_fourier</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">img_shape</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filt_direct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft2</span><span class="p">(</span><span class="n">filt_fourier</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">img_shape</span><span class="p">))</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="k">if</span> <span class="n">plot_result</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+            <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">img_shape</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">img_shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+        <span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">filt_fourier</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">filt_direct</span><span class="p">))</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">filt_fourier</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">filt_direct</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="apply_propagation_filter"><a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.phase.apply_propagation_filter">[docs]</a><span class="k">def</span> <span class="nf">apply_propagation_filter</span><span class="p">(</span>
+    <span class="n">data_wvu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">pix_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dist_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">wlength_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">delta_beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">filter_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;tie&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Apply a requested propagation filter to an image or a stack of images.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_wvu : NDArray</span>
+<span class="sd">        The Image or stack of images</span>
+<span class="sd">    pix_size_um : float</span>
+<span class="sd">        Pixel size of the detector (in microns)</span>
+<span class="sd">    dist_um : float</span>
+<span class="sd">        Propagation distance (in microns)</span>
+<span class="sd">    wlength_um : float</span>
+<span class="sd">        Wavelength of the radiation (in microns)</span>
+<span class="sd">    delta_beta : float</span>
+<span class="sd">        Delta-over-beta value for the given material</span>
+<span class="sd">    filter_type : str, optional</span>
+<span class="sd">        Type of the filter, by default &quot;tie&quot;.</span>
+<span class="sd">        Options: &quot;ctf&quot; (Contrast Transfer Function) | &quot;tie&quot; (Transport of Intensity Equation)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The filtered image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pad_width</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_wvu</span><span class="o">.</span><span class="n">ndim</span><span class="p">)]</span>
+    <span class="n">pad_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_wvu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])</span>
+    <span class="n">pad_width</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pad_size</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">pad_size</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pad_size</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">pad_width</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pad_size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pad_size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pad_size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">data_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">data_wvu</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="n">pad_width</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">)</span>
+    <span class="n">data_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftn</span><span class="p">(</span><span class="n">data_p</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">filt_f</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_propagation_filter</span><span class="p">(</span>
+        <span class="n">data_p</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:],</span>
+        <span class="n">pix_size_um</span><span class="o">=</span><span class="n">pix_size_um</span><span class="p">,</span>
+        <span class="n">dist_um</span><span class="o">=</span><span class="n">dist_um</span><span class="p">,</span>
+        <span class="n">wlength_um</span><span class="o">=</span><span class="n">wlength_um</span><span class="p">,</span>
+        <span class="n">delta_beta</span><span class="o">=</span><span class="n">delta_beta</span><span class="p">,</span>
+        <span class="n">filter_type</span><span class="o">=</span><span class="n">filter_type</span><span class="p">,</span>
+        <span class="n">use_rfft</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">data_f</span> <span class="o">=</span> <span class="n">spimg</span><span class="o">.</span><span class="n">fourier_shift</span><span class="p">(</span>
+        <span class="n">data_f</span><span class="p">,</span>
+        <span class="n">shift</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">data_wvu</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">pad_size</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">pad_size</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">pad_size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">pad_size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">data_p</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">data_f</span> <span class="o">/=</span> <span class="n">filt_f</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">irfftn</span><span class="p">(</span><span class="n">data_f</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span> <span class="n">data_wvu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="p">:</span> <span class="n">data_wvu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -38,6 +38,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="readme.html">PyCorrectedEmissionCT (corrct)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
@@ -131,13 +132,21 @@
 </li>
         <li><a href="corrct.html#corrct.operators.TransformStationaryWavelet.adj_shape">(corrct.operators.TransformStationaryWavelet attribute)</a>
 </li>
-        <li><a href="corrct.html#corrct.struct_illum.ProjectorGhostImaging.adj_shape">(corrct.struct_illum.ProjectorGhostImaging attribute)</a>
-</li>
       </ul></li>
-      <li><a href="corrct.html#corrct.physics.DetectorXRF.angle_rad">angle_rad (corrct.physics.DetectorXRF attribute)</a>
+      <li><a href="corrct.html#corrct.struct_illum.ProjectorGhostImaging.adjust_sampling_scaling">adjust_sampling_scaling() (corrct.struct_illum.ProjectorGhostImaging method)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.DetectorXRF.angle_rad">angle_rad (corrct.physics.xrf.DetectorXRF attribute)</a>
 </li>
       <li><a href="corrct.html#corrct.attenuation.AttenuationVolume.angles_det_rad">angles_det_rad (corrct.attenuation.AttenuationVolume attribute)</a>
 </li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsBase.angles_rad">angles_rad (corrct.alignment.shifts.DetectorShiftsBase attribute)</a>
+
+      <ul>
+        <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsPRE.angles_rad">(corrct.alignment.shifts.DetectorShiftsPRE attribute)</a>
+</li>
+        <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.angles_rad">(corrct.alignment.shifts.DetectorShiftsXC attribute)</a>
+</li>
+      </ul></li>
       <li><a href="corrct.html#corrct.attenuation.AttenuationVolume.angles_rot_rad">angles_rot_rad (corrct.attenuation.AttenuationVolume attribute)</a>
 
       <ul>
@@ -148,10 +157,12 @@
 </li>
       <li><a href="corrct.processing.html#corrct.processing.pre.apply_flat_field">apply_flat_field() (in module corrct.processing.pre)</a>
 </li>
-      <li><a href="corrct.processing.html#corrct.processing.pre.apply_minus_log">apply_minus_log() (in module corrct.processing.pre)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="corrct.processing.html#corrct.processing.pre.apply_minus_log">apply_minus_log() (in module corrct.processing.pre)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.phase.apply_propagation_filter">apply_propagation_filter() (in module corrct.physics.phase)</a>
+</li>
       <li><a href="corrct.html#corrct.data_terms.DataFidelity_Huber.apply_proximal">apply_proximal() (corrct.data_terms.DataFidelity_Huber method)</a>
 
       <ul>
@@ -172,6 +183,8 @@
         <li><a href="corrct.html#corrct.regularizers.Constraint_LowerLimit.apply_proximal">(corrct.regularizers.Constraint_LowerLimit method)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Constraint_UpperLimit.apply_proximal">(corrct.regularizers.Constraint_UpperLimit method)</a>
+</li>
+        <li><a href="corrct.html#corrct.regularizers.Regularizer_dwl.apply_proximal">(corrct.regularizers.Regularizer_dwl method)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_swl.apply_proximal">(corrct.regularizers.Regularizer_swl method)</a>
 </li>
@@ -382,15 +395,43 @@
 </li>
       <li><a href="corrct.html#corrct.regularizers.Constraint_UpperLimit">Constraint_UpperLimit (class in corrct.regularizers)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.convert_keV_to_m">convert_keV_to_m() (in module corrct.physics)</a>
+      <li><a href="corrct.physics.html#corrct.physics.convert_energy_to_wlength">convert_energy_to_wlength() (in module corrct.physics)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.convert_m_to_keV">convert_m_to_keV() (in module corrct.physics)</a>
+      <li><a href="corrct.physics.html#corrct.physics.convert_wlength_to_energy">convert_wlength_to_energy() (in module corrct.physics)</a>
 </li>
       <li>
     corrct
 
       <ul>
         <li><a href="corrct.html#module-corrct">module</a>
+</li>
+      </ul></li>
+      <li>
+    corrct.alignment
+
+      <ul>
+        <li><a href="corrct.alignment.html#module-corrct.alignment">module</a>
+</li>
+      </ul></li>
+      <li>
+    corrct.alignment.centering
+
+      <ul>
+        <li><a href="corrct.alignment.html#module-corrct.alignment.centering">module</a>
+</li>
+      </ul></li>
+      <li>
+    corrct.alignment.fitting
+
+      <ul>
+        <li><a href="corrct.alignment.html#module-corrct.alignment.fitting">module</a>
+</li>
+      </ul></li>
+      <li>
+    corrct.alignment.shifts
+
+      <ul>
+        <li><a href="corrct.alignment.html#module-corrct.alignment.shifts">module</a>
 </li>
       </ul></li>
   </ul></td>
@@ -448,7 +489,35 @@
     corrct.physics
 
       <ul>
-        <li><a href="corrct.html#module-corrct.physics">module</a>
+        <li><a href="corrct.physics.html#module-corrct.physics">module</a>
+</li>
+      </ul></li>
+      <li>
+    corrct.physics.materials
+
+      <ul>
+        <li><a href="corrct.physics.html#module-corrct.physics.materials">module</a>
+</li>
+      </ul></li>
+      <li>
+    corrct.physics.phase
+
+      <ul>
+        <li><a href="corrct.physics.html#module-corrct.physics.phase">module</a>
+</li>
+      </ul></li>
+      <li>
+    corrct.physics.xraylib_helper
+
+      <ul>
+        <li><a href="corrct.physics.html#module-corrct.physics.xraylib_helper">module</a>
+</li>
+      </ul></li>
+      <li>
+    corrct.physics.xrf
+
+      <ul>
+        <li><a href="corrct.physics.html#module-corrct.physics.xrf">module</a>
 </li>
       </ul></li>
       <li>
@@ -556,6 +625,14 @@
         <li><a href="corrct.html#corrct.data_terms.DataFidelityBase.data">(corrct.data_terms.DataFidelityBase attribute)</a>
 </li>
       </ul></li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsBase.data_vwu">data_vwu (corrct.alignment.shifts.DetectorShiftsBase attribute)</a>
+
+      <ul>
+        <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsPRE.data_vwu">(corrct.alignment.shifts.DetectorShiftsPRE attribute)</a>
+</li>
+        <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.data_vwu">(corrct.alignment.shifts.DetectorShiftsXC attribute)</a>
+</li>
+      </ul></li>
       <li><a href="corrct.html#corrct.data_terms.DataFidelity_Huber">DataFidelity_Huber (class in corrct.data_terms)</a>
 </li>
       <li><a href="corrct.html#corrct.data_terms.DataFidelity_KL">DataFidelity_KL (class in corrct.data_terms)</a>
@@ -576,6 +653,8 @@
 </li>
       <li><a href="corrct.html#corrct.data_terms.DataFidelityBase">DataFidelityBase (class in corrct.data_terms)</a>
 </li>
+      <li><a href="corrct.html#corrct.struct_illum.decompose_qr_masks">decompose_qr_masks() (in module corrct.struct_illum)</a>
+</li>
       <li><a href="corrct.html#corrct.denoisers.denoise_image">denoise_image() (in module corrct.denoisers)</a>
 </li>
       <li><a href="corrct.html#corrct.models.ProjectionGeometry.det_pos_xyz">det_pos_xyz (corrct.models.ProjectionGeometry attribute)</a>
@@ -586,7 +665,13 @@
 </li>
       <li><a href="corrct.html#corrct.models.ProjectionGeometry.det_v_xyz">det_v_xyz (corrct.models.ProjectionGeometry attribute)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.DetectorXRF">DetectorXRF (class in corrct.physics)</a>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsBase">DetectorShiftsBase (class in corrct.alignment.shifts)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsPRE">DetectorShiftsPRE (class in corrct.alignment.shifts)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC">DetectorShiftsXC (class in corrct.alignment.shifts)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.DetectorXRF">DetectorXRF (class in corrct.physics.xrf)</a>
 </li>
       <li><a href="corrct.html#corrct.operators.BaseTransform.dir_shape">dir_shape (corrct.operators.BaseTransform attribute)</a>
 
@@ -607,8 +692,6 @@
 </li>
         <li><a href="corrct.html#corrct.operators.TransformStationaryWavelet.dir_shape">(corrct.operators.TransformStationaryWavelet attribute)</a>
 </li>
-        <li><a href="corrct.html#corrct.struct_illum.ProjectorGhostImaging.dir_shape">(corrct.struct_illum.ProjectorGhostImaging attribute)</a>
-</li>
       </ul></li>
       <li><a href="corrct.html#corrct.operators.TransformDecimatedWavelet.direct_dwt">direct_dwt() (corrct.operators.TransformDecimatedWavelet method)</a>
 </li>
@@ -616,12 +699,12 @@
 </li>
       <li><a href="corrct.html#corrct.operators.TransformStationaryWavelet.direct_swt">direct_swt() (corrct.operators.TransformStationaryWavelet method)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.DetectorXRF.distance_mm">distance_mm (corrct.physics.DetectorXRF attribute)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.DetectorXRF.distance_mm">distance_mm (corrct.physics.xrf.DetectorXRF attribute)</a>
 </li>
       <li><a href="corrct.html#corrct.operators.TransformGradient.divergence">divergence() (corrct.operators.TransformGradient method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.testing.download_phantom">download_phantom() (in module corrct.testing)</a>
 </li>
       <li><a href="corrct.html#corrct.attenuation.AttenuationVolume.dtype">dtype (corrct.attenuation.AttenuationVolume attribute)</a>
@@ -654,6 +737,8 @@
         <li><a href="corrct.html#corrct.regularizers.Regularizer_HubTV3D.dtype">(corrct.regularizers.Regularizer_HubTV3D attribute)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_l1.dtype">(corrct.regularizers.Regularizer_l1 attribute)</a>
+</li>
+        <li><a href="corrct.html#corrct.regularizers.Regularizer_l12dwl.dtype">(corrct.regularizers.Regularizer_l12dwl attribute)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_l12swl.dtype">(corrct.regularizers.Regularizer_l12swl attribute)</a>
 </li>
@@ -716,11 +801,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.attenuation.AttenuationVolume.emitted_local">emitted_local (corrct.attenuation.AttenuationVolume attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.operators.BaseTransform.explicit">explicit() (corrct.operators.BaseTransform method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.models.VolumeGeometry.extent">extent (corrct.models.VolumeGeometry property)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.fitting.extract_peak_region_nd">extract_peak_region_nd() (in module corrct.alignment.fitting)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.fitting.extract_peak_regions_1d">extract_peak_regions_1d() (in module corrct.alignment.fitting)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -756,17 +845,41 @@
 </li>
       <li><a href="corrct.html#corrct.filters.FilterFBP">FilterFBP (class in corrct.filters)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.filters.FilterMR">FilterMR (class in corrct.filters)</a>
+</li>
+      <li><a href="corrct.html#corrct.filters.FilterFBP.FILTERS">FILTERS (corrct.filters.FilterFBP attribute)</a>
+</li>
+      <li><a href="corrct.processing.html#corrct.processing.pre.find_background_from_margin">find_background_from_margin() (in module corrct.processing.pre)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.find_shifts_vu">find_shifts_vu() (corrct.alignment.shifts.DetectorShiftsXC method)</a>
 </li>
       <li><a href="corrct.html#corrct.param_tuning.CrossValidation.fit_loss_min">fit_loss_min() (corrct.param_tuning.CrossValidation method)</a>
 </li>
+      <li><a href="corrct.alignment.html#corrct.alignment.fitting.fit_shifts_u_sad">fit_shifts_u_sad() (in module corrct.alignment.fitting)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="corrct.alignment.html#corrct.alignment.fitting.fit_shifts_vu_xc">fit_shifts_vu_xc() (in module corrct.alignment.fitting)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.fitting.fit_shifts_zyx_xc">fit_shifts_zyx_xc() (in module corrct.alignment.fitting)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.fitting.fit_sinusoid">fit_sinusoid() (in module corrct.alignment.fitting)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsPRE.fit_u">fit_u() (corrct.alignment.shifts.DetectorShiftsPRE method)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.fit_u_180">fit_u_180() (corrct.alignment.shifts.DetectorShiftsXC method)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.fit_u_360">fit_u_360() (corrct.alignment.shifts.DetectorShiftsXC method)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsPRE.fit_v">fit_v() (corrct.alignment.shifts.DetectorShiftsPRE method)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.fit_vu">fit_vu() (corrct.alignment.shifts.DetectorShiftsXC method)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts">fit_vu_accum_drifts() (corrct.alignment.shifts.DetectorShiftsXC method)</a>
+</li>
       <li><a href="corrct.html#corrct.operators.TransformConvolution.flip_adjoint">flip_adjoint (corrct.operators.TransformConvolution attribute)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.FluoLine">FluoLine (class in corrct.physics)</a>
-</li>
-      <li><a href="corrct.html#corrct.physics.FluoLinesSiegbahn">FluoLinesSiegbahn (class in corrct.physics)</a>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.FluoLine">FluoLine (class in corrct.physics.xrf)</a>
 </li>
       <li><a href="corrct.html#corrct.operators.ProjectorOperator.fp">fp() (corrct.operators.ProjectorOperator method)</a>
 
@@ -812,11 +925,19 @@
 </li>
       <li><a href="corrct.html#corrct.models.Geometry">Geometry (class in corrct.models)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.VolumeMaterial.get_attenuation">get_attenuation() (corrct.physics.VolumeMaterial method)</a>
+      <li><a href="corrct.html#corrct.models.ProjectionGeometry.get_3d">get_3d() (corrct.models.ProjectionGeometry method)</a>
+
+      <ul>
+        <li><a href="corrct.html#corrct.models.VolumeGeometry.get_3d">(corrct.models.VolumeGeometry method)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.VolumeMaterial.get_compound">get_compound() (corrct.physics.VolumeMaterial static method)</a>
+      </ul></li>
+      <li><a href="corrct.physics.html#corrct.physics.materials.VolumeMaterial.get_attenuation">get_attenuation() (corrct.physics.materials.VolumeMaterial method)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.VolumeMaterial.get_compton_scattering">get_compton_scattering() (corrct.physics.VolumeMaterial method)</a>
+      <li><a href="corrct.html#corrct.filters.FilterFBP.get_available_filters">get_available_filters() (corrct.filters.FilterFBP method)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.xraylib_helper.get_compound">get_compound() (in module corrct.physics.xraylib_helper)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.materials.VolumeMaterial.get_compton_scattering">get_compton_scattering() (corrct.physics.materials.VolumeMaterial method)</a>
 </li>
       <li><a href="corrct.html#corrct.models.VolumeGeometry.get_default_from_data">get_default_from_data() (corrct.models.VolumeGeometry static method)</a>
 </li>
@@ -824,23 +945,29 @@
 </li>
       <li><a href="corrct.html#corrct.models.ProjectionGeometry.get_default_parallel">get_default_parallel() (corrct.models.ProjectionGeometry static method)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.VolumeMaterial.get_element_mass_fraction">get_element_mass_fraction() (corrct.physics.VolumeMaterial method)</a>
+      <li><a href="corrct.physics.html#corrct.physics.phase.get_delta_beta">get_delta_beta() (in module corrct.physics.phase)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.VolumeMaterial.get_element_number">get_element_number() (corrct.physics.VolumeMaterial static method)</a>
+      <li><a href="corrct.physics.html#corrct.physics.phase.get_delta_beta_curves">get_delta_beta_curves() (in module corrct.physics.phase)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.materials.VolumeMaterial.get_element_mass_fraction">get_element_mass_fraction() (corrct.physics.materials.VolumeMaterial method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="corrct.html#corrct.physics.FluoLinesSiegbahn.get_energy">get_energy() (corrct.physics.FluoLinesSiegbahn static method)</a>
+      <li><a href="corrct.physics.html#corrct.physics.xraylib_helper.get_element_number">get_element_number() (in module corrct.physics.xraylib_helper)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.xraylib_helper.get_element_number_and_symbol">get_element_number_and_symbol() (in module corrct.physics.xraylib_helper)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.LinesSiegbahn.get_energy">get_energy() (corrct.physics.xrf.LinesSiegbahn static method)</a>
 </li>
       <li><a href="corrct.html#corrct.models.ProjectionGeometry.get_field_scaled">get_field_scaled() (corrct.models.ProjectionGeometry method)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.VolumeMaterial.get_fluo_yield">get_fluo_yield() (corrct.physics.VolumeMaterial method)</a>
+      <li><a href="corrct.physics.html#corrct.physics.materials.VolumeMaterial.get_fluo_yield">get_fluo_yield() (corrct.physics.materials.VolumeMaterial method)</a>
 </li>
       <li><a href="corrct.html#corrct.struct_illum.MaskGenerator.get_interval_shifts">get_interval_shifts() (corrct.struct_illum.MaskGenerator method)</a>
 </li>
       <li><a href="corrct.html#corrct.param_tuning.BaseRegularizationEstimation.get_lambda_range">get_lambda_range() (corrct.param_tuning.BaseRegularizationEstimation static method)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.FluoLinesSiegbahn.get_lines">get_lines() (corrct.physics.FluoLinesSiegbahn static method)</a>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.LinesSiegbahn.get_lines">get_lines() (corrct.physics.xrf.LinesSiegbahn static method)</a>
 </li>
       <li><a href="corrct.html#corrct.attenuation.AttenuationVolume.get_maps">get_maps() (corrct.attenuation.AttenuationVolume method)</a>
 </li>
@@ -851,6 +978,10 @@
       <li><a href="corrct.html#corrct.models.get_prj_geom_parallel">get_prj_geom_parallel() (in module corrct.models)</a>
 </li>
       <li><a href="corrct.html#corrct.attenuation.AttenuationVolume.get_projector_args">get_projector_args() (corrct.attenuation.AttenuationVolume method)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.phase.get_propagation_filter">get_propagation_filter() (in module corrct.physics.phase)</a>
+</li>
+      <li><a href="corrct.html#corrct.struct_illum.MaskCollection.get_QR_decomposition">get_QR_decomposition() (corrct.struct_illum.MaskCollection method)</a>
 </li>
       <li><a href="corrct.html#corrct.struct_illum.MaskGenerator.get_random_shifts">get_random_shifts() (corrct.struct_illum.MaskGenerator method)</a>
 </li>
@@ -872,7 +1003,7 @@
 </li>
       <li><a href="corrct.html#corrct.attenuation.AttenuationVolume.incident_local">incident_local (corrct.attenuation.AttenuationVolume attribute)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.FluoLine.indx">indx (corrct.physics.FluoLine attribute)</a>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.FluoLine.indx">indx (corrct.physics.xrf.FluoLine attribute)</a>
 </li>
       <li><a href="corrct.html#corrct.data_terms.DataFidelityBase.info">info() (corrct.data_terms.DataFidelityBase method)</a>
 
@@ -890,6 +1021,8 @@
         <li><a href="corrct.html#corrct.regularizers.Regularizer_swl.info">(corrct.regularizers.Regularizer_swl method)</a>
 </li>
         <li><a href="corrct.html#corrct.solvers.FBP.info">(corrct.solvers.FBP method)</a>
+</li>
+        <li><a href="corrct.html#corrct.solvers.MLEM.info">(corrct.solvers.MLEM method)</a>
 </li>
         <li><a href="corrct.html#corrct.solvers.PDHG.info">(corrct.solvers.PDHG method)</a>
 </li>
@@ -984,11 +1117,13 @@
 </li>
       <li><a href="corrct.html#corrct.filters.BasisOptionsWavelets.level">level (corrct.filters.BasisOptionsWavelets attribute)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.FluoLinesSiegbahn.lines">lines (corrct.physics.FluoLinesSiegbahn attribute)</a>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.LinesSiegbahn.lines">lines (corrct.physics.xrf.LinesSiegbahn attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.processing.html#corrct.processing.misc.lines_intersection">lines_intersection() (in module corrct.processing.misc)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.LinesSiegbahn">LinesSiegbahn (class in corrct.physics.xrf)</a>
 </li>
       <li><a href="corrct.html#corrct.data_terms.DataFidelityBase.lower">lower() (corrct.data_terms.DataFidelityBase method)</a>
 
@@ -1034,13 +1169,25 @@
 </li>
       <li><a href="corrct.html#corrct.solvers.SolutionInfo.max_iterations">max_iterations (corrct.solvers.SolutionInfo attribute)</a>
 </li>
+      <li><a href="corrct.html#corrct.struct_illum.ProjectorGhostImaging.mc">mc (corrct.struct_illum.ProjectorGhostImaging attribute)</a>
+</li>
       <li><a href="corrct.html#corrct.solvers.SolutionInfo.method">method (corrct.solvers.SolutionInfo attribute)</a>
+</li>
+      <li><a href="corrct.html#corrct.solvers.MLEM">MLEM (class in corrct.solvers)</a>
 </li>
       <li>
     module
 
       <ul>
         <li><a href="corrct.html#module-corrct">corrct</a>
+</li>
+        <li><a href="corrct.alignment.html#module-corrct.alignment">corrct.alignment</a>
+</li>
+        <li><a href="corrct.alignment.html#module-corrct.alignment.centering">corrct.alignment.centering</a>
+</li>
+        <li><a href="corrct.alignment.html#module-corrct.alignment.fitting">corrct.alignment.fitting</a>
+</li>
+        <li><a href="corrct.alignment.html#module-corrct.alignment.shifts">corrct.alignment.shifts</a>
 </li>
         <li><a href="corrct.html#module-corrct.attenuation">corrct.attenuation</a>
 </li>
@@ -1056,7 +1203,15 @@
 </li>
         <li><a href="corrct.html#module-corrct.param_tuning">corrct.param_tuning</a>
 </li>
-        <li><a href="corrct.html#module-corrct.physics">corrct.physics</a>
+        <li><a href="corrct.physics.html#module-corrct.physics">corrct.physics</a>
+</li>
+        <li><a href="corrct.physics.html#module-corrct.physics.materials">corrct.physics.materials</a>
+</li>
+        <li><a href="corrct.physics.html#module-corrct.physics.phase">corrct.physics.phase</a>
+</li>
+        <li><a href="corrct.physics.html#module-corrct.physics.xraylib_helper">corrct.physics.xraylib_helper</a>
+</li>
+        <li><a href="corrct.physics.html#module-corrct.physics.xrf">corrct.physics.xrf</a>
 </li>
         <li><a href="corrct.processing.html#module-corrct.processing">corrct.processing</a>
 </li>
@@ -1083,7 +1238,9 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="corrct.html#corrct.physics.FluoLine.name">name (corrct.physics.FluoLine attribute)</a>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.FluoLine.name">name (corrct.physics.xrf.FluoLine attribute)</a>
+</li>
+      <li><a href="corrct.html#corrct.models.ProjectionGeometry.ndim">ndim (corrct.models.ProjectionGeometry property)</a>
 </li>
       <li><a href="corrct.html#corrct.filters.BasisOptionsWavelets.norm">norm (corrct.filters.BasisOptionsWavelets attribute)</a>
 </li>
@@ -1131,6 +1288,8 @@
         <li><a href="corrct.html#corrct.regularizers.Regularizer_HubTV3D.op">(corrct.regularizers.Regularizer_HubTV3D attribute)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_l1.op">(corrct.regularizers.Regularizer_l1 attribute)</a>
+</li>
+        <li><a href="corrct.html#corrct.regularizers.Regularizer_l12dwl.op">(corrct.regularizers.Regularizer_l12dwl attribute)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_l12swl.op">(corrct.regularizers.Regularizer_l12swl attribute)</a>
 </li>
@@ -1197,7 +1356,7 @@
 </li>
       <li><a href="corrct.html#corrct.solvers.PDHG">PDHG (class in corrct.solvers)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.pencil_beam_profile">pencil_beam_profile() (in module corrct.physics)</a>
+      <li><a href="corrct.physics.html#corrct.physics.pencil_beam_profile">pencil_beam_profile() (in module corrct.physics)</a>
 </li>
       <li><a href="corrct.html#corrct.testing.phantom_assign_concentration">phantom_assign_concentration() (in module corrct.testing)</a>
 </li>
@@ -1205,16 +1364,20 @@
 </li>
       <li><a href="corrct.html#corrct.models.ProjectionGeometry.pix2vox_ratio">pix2vox_ratio (corrct.models.ProjectionGeometry attribute)</a>
 </li>
+      <li><a href="corrct.physics.html#corrct.physics.materials.plot_effective_attenuation">plot_effective_attenuation() (in module corrct.physics.materials)</a>
+</li>
       <li><a href="corrct.html#corrct.filters.Filter.plot_filters">plot_filters() (corrct.filters.Filter method)</a>
 </li>
       <li><a href="corrct.processing.html#corrct.processing.post.plot_frcs">plot_frcs() (in module corrct.processing.post)</a>
 </li>
-      <li><a href="corrct.html#corrct.attenuation.AttenuationVolume.plot_map">plot_map() (corrct.attenuation.AttenuationVolume method)</a>
+      <li><a href="corrct.physics.html#corrct.physics.phase.plot_freq_responses">plot_freq_responses() (in module corrct.physics.phase)</a>
 </li>
-      <li><a href="corrct.html#corrct.solvers.PDHG.power_method">power_method() (corrct.solvers.PDHG method)</a>
+      <li><a href="corrct.html#corrct.attenuation.AttenuationVolume.plot_map">plot_map() (corrct.attenuation.AttenuationVolume method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="corrct.html#corrct.solvers.PDHG.power_method">power_method() (corrct.solvers.PDHG method)</a>
+</li>
       <li><a href="corrct.processing.html#corrct.processing.post.power_spectrum">power_spectrum() (in module corrct.processing.post)</a>
 </li>
       <li><a href="corrct.html#corrct.projectors.ProjectorUncorrected.prj_intensities">prj_intensities (corrct.projectors.ProjectorUncorrected attribute)</a>
@@ -1247,6 +1410,16 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="corrct.alignment.html#corrct.alignment.centering.RecenterVolume.recenter_as">recenter_as() (corrct.alignment.centering.RecenterVolume method)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.centering.RecenterVolume.recenter_to">recenter_to() (corrct.alignment.centering.RecenterVolume method)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.centering.RecenterVolume">RecenterVolume (class in corrct.alignment.centering)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.fitting.refine_max_position_1d">refine_max_position_1d() (in module corrct.alignment.fitting)</a>
+</li>
+      <li><a href="corrct.alignment.html#corrct.alignment.fitting.refine_max_position_2d">refine_max_position_2d() (in module corrct.alignment.fitting)</a>
+</li>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_dwl">Regularizer_dwl (class in corrct.regularizers)</a>
 </li>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_fft">Regularizer_fft (class in corrct.regularizers)</a>
@@ -1262,6 +1435,8 @@
       <li><a href="corrct.html#corrct.regularizers.Regularizer_HubTV3D">Regularizer_HubTV3D (class in corrct.regularizers)</a>
 </li>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_l1">Regularizer_l1 (class in corrct.regularizers)</a>
+</li>
+      <li><a href="corrct.html#corrct.regularizers.Regularizer_l12dwl">Regularizer_l12dwl (class in corrct.regularizers)</a>
 </li>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_l12swl">Regularizer_l12swl (class in corrct.regularizers)</a>
 </li>
@@ -1281,14 +1456,14 @@
 </li>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_lap3D">Regularizer_lap3D (class in corrct.regularizers)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_lnswl">Regularizer_lnswl (class in corrct.regularizers)</a>
 </li>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_smooth1D">Regularizer_smooth1D (class in corrct.regularizers)</a>
 </li>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_smooth2D">Regularizer_smooth2D (class in corrct.regularizers)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_smooth3D">Regularizer_smooth3D (class in corrct.regularizers)</a>
 </li>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_swl">Regularizer_swl (class in corrct.regularizers)</a>
@@ -1306,6 +1481,8 @@
       <li><a href="corrct.html#corrct.regularizers.Regularizer_vSVD">Regularizer_vSVD (class in corrct.regularizers)</a>
 </li>
       <li><a href="corrct.html#corrct.regularizers.Regularizer_VTV">Regularizer_VTV (class in corrct.regularizers)</a>
+</li>
+      <li><a href="corrct.html#corrct.struct_illum.reorder_masks">reorder_masks() (in module corrct.struct_illum)</a>
 </li>
       <li><a href="corrct.html#corrct.solvers.SolutionInfo.residual0">residual0 (corrct.solvers.SolutionInfo attribute)</a>
 </li>
@@ -1385,6 +1562,8 @@
 </li>
       <li><a href="corrct.html#corrct.models.VolumeGeometry.shape_zxy">shape_zxy (corrct.models.VolumeGeometry property)</a>
 </li>
+      <li><a href="corrct.processing.html#corrct.processing.pre.shift_proj_stack">shift_proj_stack() (in module corrct.processing.pre)</a>
+</li>
       <li><a href="corrct.html#corrct.data_terms.DataFidelity_Huber.sigma">sigma (corrct.data_terms.DataFidelity_Huber attribute)</a>
 
       <ul>
@@ -1429,6 +1608,8 @@
         <li><a href="corrct.html#corrct.regularizers.Regularizer_HubTV3D.sigma">(corrct.regularizers.Regularizer_HubTV3D attribute)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_l1.sigma">(corrct.regularizers.Regularizer_l1 attribute)</a>
+</li>
+        <li><a href="corrct.html#corrct.regularizers.Regularizer_l12dwl.sigma">(corrct.regularizers.Regularizer_l12dwl attribute)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_l12swl.sigma">(corrct.regularizers.Regularizer_l12swl attribute)</a>
 </li>
@@ -1497,9 +1678,11 @@
         <li><a href="corrct.html#corrct.data_terms.DataFidelityBase.sigma_data">(corrct.data_terms.DataFidelityBase attribute)</a>
 </li>
       </ul></li>
+      <li><a href="corrct.alignment.html#corrct.alignment.fitting.sinusoid">sinusoid() (in module corrct.alignment.fitting)</a>
+</li>
       <li><a href="corrct.html#corrct.solvers.SIRT">SIRT (class in corrct.solvers)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.DetectorXRF.solid_angle_sr">solid_angle_sr (corrct.physics.DetectorXRF property)</a>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.DetectorXRF.solid_angle_sr">solid_angle_sr (corrct.physics.xrf.DetectorXRF property)</a>
 </li>
       <li><a href="corrct.html#corrct.solvers.SolutionInfo">SolutionInfo (class in corrct.solvers)</a>
 </li>
@@ -1511,7 +1694,7 @@
 </li>
       <li><a href="corrct.html#corrct.models.ProjectionGeometry.src_pos_xyz">src_pos_xyz (corrct.models.ProjectionGeometry attribute)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.DetectorXRF.surface_mm2">surface_mm2 (corrct.physics.DetectorXRF attribute)</a>
+      <li><a href="corrct.physics.html#corrct.physics.xrf.DetectorXRF.surface_mm2">surface_mm2 (corrct.physics.xrf.DetectorXRF attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1591,6 +1774,8 @@
         <li><a href="corrct.html#corrct.regularizers.Regularizer_HubTV3D.upd_mask">(corrct.regularizers.Regularizer_HubTV3D attribute)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_l1.upd_mask">(corrct.regularizers.Regularizer_l1 attribute)</a>
+</li>
+        <li><a href="corrct.html#corrct.regularizers.Regularizer_l12dwl.upd_mask">(corrct.regularizers.Regularizer_l12dwl attribute)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_l12swl.upd_mask">(corrct.regularizers.Regularizer_l12swl attribute)</a>
 </li>
@@ -1687,7 +1872,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.models.VolumeGeometry">VolumeGeometry (class in corrct.models)</a>
 </li>
-      <li><a href="corrct.html#corrct.physics.VolumeMaterial">VolumeMaterial (class in corrct.physics)</a>
+      <li><a href="corrct.physics.html#corrct.physics.materials.VolumeMaterial">VolumeMaterial (class in corrct.physics.materials)</a>
 </li>
       <li><a href="corrct.html#corrct.models.VolumeGeometry.vox_size">vox_size (corrct.models.VolumeGeometry attribute)</a>
 </li>
@@ -1733,6 +1918,8 @@
         <li><a href="corrct.html#corrct.regularizers.Regularizer_HubTV3D.weight">(corrct.regularizers.Regularizer_HubTV3D attribute)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_l1.weight">(corrct.regularizers.Regularizer_l1 attribute)</a>
+</li>
+        <li><a href="corrct.html#corrct.regularizers.Regularizer_l12dwl.weight">(corrct.regularizers.Regularizer_l12dwl attribute)</a>
 </li>
         <li><a href="corrct.html#corrct.regularizers.Regularizer_l12swl.weight">(corrct.regularizers.Regularizer_l12swl attribute)</a>
 </li>

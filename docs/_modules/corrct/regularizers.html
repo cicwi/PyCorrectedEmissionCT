@@ -38,6 +38,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
@@ -901,7 +902,28 @@
 
             <span class="n">op_wl</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformDecimatedWavelet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span>  <span class="c1"># type: ignore</span>
             <span class="n">slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">op_wl</span><span class="o">.</span><span class="n">sub_band_shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-            <span class="n">dual</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span></div></div>
+            <span class="n">dual</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="Regularizer_dwl.apply_proximal"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_dwl.apply_proximal">[docs]</a>    <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">DataFidelity_l12</span><span class="p">):</span>
+            <span class="n">op_wl</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformDecimatedWavelet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span>
+            <span class="n">coeffs</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">array_to_coeffs</span><span class="p">(</span><span class="n">dual</span><span class="p">,</span> <span class="n">op_wl</span><span class="o">.</span><span class="n">slicing_info</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ii_l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)):</span>
+                <span class="n">c_l</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">[</span><span class="n">ii_l</span><span class="p">]</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">details</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">lab</span><span class="p">,</span> <span class="n">det</span> <span class="ow">in</span> <span class="n">c_l</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lab</span><span class="p">)</span>
+                    <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">det</span><span class="p">)</span>
+                <span class="n">c_ll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">details</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">c_ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">lab</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+                    <span class="n">c_l</span><span class="p">[</span><span class="n">lab</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+                <span class="n">coeffs</span><span class="p">[</span><span class="n">ii_l</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_l</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+            <span class="n">dual</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">coeffs_to_array</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Regularizer_l1dwl"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_l1dwl">[docs]</a><span class="k">class</span> <span class="nc">Regularizer_l1dwl</span><span class="p">(</span><span class="n">Regularizer_dwl</span><span class="p">):</span>
@@ -928,6 +950,33 @@
             <span class="n">pad_on_demand</span><span class="o">=</span><span class="n">pad_on_demand</span><span class="p">,</span>
             <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">,</span>
             <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l1</span><span class="p">(),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Regularizer_l12dwl"><a class="viewcode-back" href="../../corrct.html#corrct.regularizers.Regularizer_l12dwl">[docs]</a><span class="k">class</span> <span class="nc">Regularizer_l12dwl</span><span class="p">(</span><span class="n">Regularizer_dwl</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions.&quot;&quot;&quot;</span>
+
+    <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l12dwl&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">weight</span><span class="p">,</span>
+            <span class="n">wavelet</span><span class="p">,</span>
+            <span class="n">level</span><span class="p">,</span>
+            <span class="n">ndims</span><span class="o">=</span><span class="n">ndims</span><span class="p">,</span>
+            <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+            <span class="n">pad_on_demand</span><span class="o">=</span><span class="n">pad_on_demand</span><span class="p">,</span>
+            <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">,</span>
+            <span class="n">norm</span><span class="o">=</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
         <span class="p">)</span></div>
 
 

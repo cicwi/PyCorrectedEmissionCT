@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.physics package &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="corrct.processing package" href="corrct.processing.html" />
+    <link rel="prev" title="corrct.alignment package" href="corrct.alignment.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">corrct</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html">corrct package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.alignment.html">corrct.alignment package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">corrct.physics package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.processing.html">corrct.processing package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.attenuation">corrct.attenuation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.data_terms">corrct.data_terms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.denoisers">corrct.denoisers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.filters">corrct.filters module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.models">corrct.models module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.operators">corrct.operators module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.param_tuning">corrct.param_tuning module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.projectors">corrct.projectors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.regularizers">corrct.regularizers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.solvers">corrct.solvers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.struct_illum">corrct.struct_illum module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct.testing">corrct.testing module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#module-corrct">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">corrct</a> &raquo;</li>
+          <li><a href="corrct.html">corrct package</a> &raquo;</li>
+      <li>corrct.physics package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/corrct.physics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="corrct-physics-package">
+<h1>corrct.physics package<a class="headerlink" href="#corrct-physics-package" title="Permalink to this heading"></a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</div>
+<div class="section" id="module-corrct.physics.materials">
+<span id="corrct-physics-materials-module"></span><h2>corrct.physics.materials module<a class="headerlink" href="#module-corrct.physics.materials" title="Permalink to this heading"></a></h2>
+<p>Materials support functions and classes.</p>
+<p>&#64;author: Nicola VIGANÒ, ESRF - The European Synchrotron, Grenoble, France,
+and CEA-IRIG, Grenoble, France</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.physics.materials.VolumeMaterial">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.physics.materials.</span></span><span class="sig-name descname"><span class="pre">VolumeMaterial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">materials_fractions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">materials_composition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_size_cm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_SupportsDType</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">SupportsIndex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">SupportsIndex</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_DTypeDict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/physics/materials.html#VolumeMaterial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.materials.VolumeMaterial" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>VolumeMaterial class, that can be used for predicting fluorescence and Compton yields, attenuation, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>material_fractions</strong> (<em>Sequence</em>) – Concentration fractions of each material for each voxel.</p></li>
+<li><p><strong>material_compounds</strong> (<em>Sequence</em>) – Compound description of each material.</p></li>
+<li><p><strong>voxel_size_cm</strong> (<em>float</em>) – Voxel size in cm.</p></li>
+<li><p><strong>dtype</strong> (<em>DTypeLike</em><em>, </em><em>optional</em>) – Data type of the produced data. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Raised in case of incorrect parameters.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.materials.VolumeMaterial.get_attenuation">
+<span class="sig-name descname"><span class="pre">get_attenuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics/materials.html#VolumeMaterial.get_attenuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.materials.VolumeMaterial.get_attenuation" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the local attenuation for each voxel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>energy_keV</strong> (<em>float</em>) – The X-ray energy.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The computed local attenuation volume.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.materials.VolumeMaterial.get_compton_scattering">
+<span class="sig-name descname"><span class="pre">get_compton_scattering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_in_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.physics.xrf.DetectorXRF" title="corrct.physics.xrf.DetectorXRF"><span class="pre">DetectorXRF</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple[float,</span> <span class="pre">numpy.ndarray[typing.Any,</span> <span class="pre">numpy.dtype[+ScalarType]]]</span></span></span><a class="reference internal" href="_modules/corrct/physics/materials.html#VolumeMaterial.get_compton_scattering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.materials.VolumeMaterial.get_compton_scattering" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the local Compton scattering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>energy_in_keV</strong> (<em>float</em>) – Incoming beam energy.</p></li>
+<li><p><strong>angle_rad</strong> (<em>float</em><em>, </em><em>optional</em>) – The detector angle, with respect to incoming beam direction. The default is None.</p></li>
+<li><p><strong>detector</strong> (<a class="reference internal" href="#corrct.physics.xrf.DetectorXRF" title="corrct.physics.xrf.DetectorXRF"><em>DetectorXRF</em></a><em>, </em><em>optional</em>) – The detector object. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – In case neither of <cite>angle_rad</cite> nor <cite>detector</cite> have been passed.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>energy_out_keV</strong> (<em>float</em>) – The energy of the Compton radiation received by the detector.</p></li>
+<li><p><strong>cmptn_yield</strong> (<em>NDArray</em>) – Local yield of Compton radiation.</p></li>
+<li><p>Either <cite>angle_rad</cite> or <cite>detector</cite> need to be supplied.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.materials.VolumeMaterial.get_element_mass_fraction">
+<span class="sig-name descname"><span class="pre">get_element_mass_fraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics/materials.html#VolumeMaterial.get_element_mass_fraction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.materials.VolumeMaterial.get_element_mass_fraction" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the local element mass fraction through out all the materials.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>element</strong> (<em>str</em><em> | </em><em>int</em>) – The element to look for.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>mass_fraction</strong> – The local mass fraction in each voxel.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.materials.VolumeMaterial.get_fluo_yield">
+<span class="sig-name descname"><span class="pre">get_fluo_yield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_in_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluo_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">FluoLine</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">FluoLine</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.physics.xrf.DetectorXRF" title="corrct.physics.xrf.DetectorXRF"><span class="pre">DetectorXRF</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple[float,</span> <span class="pre">numpy.ndarray[typing.Any,</span> <span class="pre">numpy.dtype[+ScalarType]]]</span></span></span><a class="reference internal" href="_modules/corrct/physics/materials.html#VolumeMaterial.get_fluo_yield"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.materials.VolumeMaterial.get_fluo_yield" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the local fluorescence yield, for the given line of the given element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element</strong> (<em>str</em><em> | </em><em>int</em>) – The element to consider.</p></li>
+<li><p><strong>energy_in_keV</strong> (<em>float</em>) – The incombing X-ray beam energy.</p></li>
+<li><p><strong>fluo_lines</strong> (<em>str</em><em> | </em><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><em>FluoLine</em></a><em> | </em><em>Sequence</em><em>[</em><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><em>FluoLine</em></a><em>]</em>) – The fluorescence line to consider.</p></li>
+<li><p><strong>detector</strong> (<a class="reference internal" href="#corrct.physics.xrf.DetectorXRF" title="corrct.physics.xrf.DetectorXRF"><em>DetectorXRF</em></a><em>, </em><em>optional</em>) – The detector geometry. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>energy_out_keV</strong> (<em>float</em>) – The emitted fluorescence energy.</p></li>
+<li><p><strong>el_yield</strong> (<em>NDArray</em>) – The local fluorescence yield in each voxel.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.materials.plot_effective_attenuation">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.materials.</span></span><span class="sig-name descname"><span class="pre">plot_effective_attenuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'lorentzian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">201</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/corrct/physics/materials.html#plot_effective_attenuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.materials.plot_effective_attenuation" title="Permalink to this definition"></a></dt>
+<dd><p>Plot spectral attenuation of a given line.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>compound</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>dict</em><em>]</em>) – Compound to consider</p></li>
+<li><p><strong>thickness_um</strong> (<em>float</em>) – Thickness of the compound (in microns)</p></li>
+<li><p><strong>mean_energy_keV</strong> (<em>float</em>) – Average energy of the line</p></li>
+<li><p><strong>fwhm_keV</strong> (<em>float</em>) – Full-width half-maximum of the line</p></li>
+<li><p><strong>line_shape</strong> (<em>str</em><em>, </em><em>optional</em>) – Shape of the line, by default “lorentzian”.
+Options are: “gaussian” | “lorentzian” | “sech**2”.</p></li>
+<li><p><strong>num_points</strong> (<em>int</em><em>, </em><em>optional</em>) – number of discretization points, by default 201</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – When an unsupported line is chosen.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-corrct.physics.phase">
+<span id="corrct-physics-phase-module"></span><h2>corrct.physics.phase module<a class="headerlink" href="#module-corrct.physics.phase" title="Permalink to this heading"></a></h2>
+<p>Phase contrast support functions.</p>
+<p>&#64;author: Nicola VIGANÒ, CEA-IRIG, Grenoble, France</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.phase.apply_propagation_filter">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.phase.</span></span><span class="sig-name descname"><span class="pre">apply_propagation_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_wvu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pix_size_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wlength_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'tie'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics/phase.html#apply_propagation_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.phase.apply_propagation_filter" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a requested propagation filter to an image or a stack of images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_wvu</strong> (<em>NDArray</em>) – The Image or stack of images</p></li>
+<li><p><strong>pix_size_um</strong> (<em>float</em>) – Pixel size of the detector (in microns)</p></li>
+<li><p><strong>dist_um</strong> (<em>float</em>) – Propagation distance (in microns)</p></li>
+<li><p><strong>wlength_um</strong> (<em>float</em>) – Wavelength of the radiation (in microns)</p></li>
+<li><p><strong>delta_beta</strong> (<em>float</em>) – Delta-over-beta value for the given material</p></li>
+<li><p><strong>filter_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of the filter, by default “tie”.
+Options: “ctf” (Contrast Transfer Function) | “tie” (Transport of Intensity Equation)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The filtered image</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.phase.get_delta_beta">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.phase.</span></span><span class="sig-name descname"><span class="pre">get_delta_beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmp_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/corrct/physics/phase.html#get_delta_beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.phase.get_delta_beta" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the delta-over-beta parameter for a specific compound.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmp_name</strong> (<em>str</em>) – Molar composition of a compound</p></li>
+<li><p><strong>energy_keV</strong> (<em>float</em>) – Energy at which the d/b value should be computed</p></li>
+<li><p><strong>density</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Density of the compound, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The computed delta-over-beta.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.phase.get_delta_beta_curves">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.phase.</span></span><span class="sig-name descname"><span class="pre">get_delta_beta_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_keV_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(1.0,</span> <span class="pre">800.0,</span> <span class="pre">500)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics/phase.html#get_delta_beta_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.phase.get_delta_beta_curves" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the delta-over-beta curves for the listed compounds, in the requested energy range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>compounds</strong> (<em>Sequence</em><em>[</em><em>str</em><em>]</em>) – Sequence of compounds.</p></li>
+<li><p><strong>energy_keV_range</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The energy range in keV, by default (1.0, 800.0, 500)</p></li>
+<li><p><strong>plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the result, by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The computed delta-over-beta valueas.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Sequence[NDArray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.phase.get_propagation_filter">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.phase.</span></span><span class="sig-name descname"><span class="pre">get_propagation_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">img_shape:</span> <span class="pre">~typing.Union[~collections.abc.Sequence[int],</span> <span class="pre">~numpy.ndarray[~typing.Any,</span> <span class="pre">~numpy.dtype[~numpy.typing._generic_alias.ScalarType]]],</span> <span class="pre">pix_size_um:</span> <span class="pre">float,</span> <span class="pre">dist_um:</span> <span class="pre">float,</span> <span class="pre">wlength_um:</span> <span class="pre">float,</span> <span class="pre">delta_beta:</span> <span class="pre">float,</span> <span class="pre">filter_type:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'ctf',</span> <span class="pre">use_rfft:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">plot_result:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">dtype:</span> <span class="pre">~typing.Union[~numpy.dtype[~typing.Any],</span> <span class="pre">None,</span> <span class="pre">~typing.Type[~typing.Any],</span> <span class="pre">~numpy.typing._dtype_like._SupportsDType[~numpy.dtype[~typing.Any]],</span> <span class="pre">str,</span> <span class="pre">~typing.Tuple[~typing.Any,</span> <span class="pre">int],</span> <span class="pre">~typing.Tuple[~typing.Any,</span> <span class="pre">~typing.Union[~typing.SupportsIndex,</span> <span class="pre">~typing.Sequence[~typing.SupportsIndex]]],</span> <span class="pre">~typing.List[~typing.Any],</span> <span class="pre">~numpy.typing._dtype_like._DTypeDict,</span> <span class="pre">~typing.Tuple[~typing.Any,</span> <span class="pre">~typing.Any]]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple[numpy.ndarray[typing.Any,</span> <span class="pre">numpy.dtype[+ScalarType]],</span> <span class="pre">numpy.ndarray[typing.Any,</span> <span class="pre">numpy.dtype[+ScalarType]]]</span></span></span><a class="reference internal" href="_modules/corrct/physics/phase.html#get_propagation_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.phase.get_propagation_filter" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the phase contrast propagation filter for the given parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_shape</strong> (<em>Union</em><em>[</em><em>Sequence</em><em>[</em><em>int</em><em>]</em><em>, </em><em>NDArray</em><em>]</em>) – Shape of the target image</p></li>
+<li><p><strong>pix_size_um</strong> (<em>float</em>) – Pixel size of the detector (in microns)</p></li>
+<li><p><strong>dist_um</strong> (<em>float</em>) – Propagation distance (in microns)</p></li>
+<li><p><strong>wlength_um</strong> (<em>float</em>) – Wavelength of the radiation (in microns)</p></li>
+<li><p><strong>delta_beta</strong> (<em>float</em>) – Delta-over-beta value for the given material</p></li>
+<li><p><strong>filter_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of the filter, by default “ctf”.
+Options: “ctf” (Contrast Transfer Function) | “tie” (Transport of Intensity Equation)</p></li>
+<li><p><strong>use_rfft</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use the rfft, by default False</p></li>
+<li><p><strong>plot_result</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the result, by default False</p></li>
+<li><p><strong>dtype</strong> (<em>DTypeLike</em><em>, </em><em>optional</em>) – Data type to use, by default np.float32</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The real-space and the Fourier-space filter</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple[NDArray, NDArray]</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – When choosing an incorrect filter type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.phase.plot_freq_responses">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.phase.</span></span><span class="sig-name descname"><span class="pre">plot_freq_responses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pix_size_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wlength_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/corrct/physics/phase.html#plot_freq_responses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.phase.plot_freq_responses" title="Permalink to this definition"></a></dt>
+<dd><p>Plot frequency response of the wave propagation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_length</strong> (<em>int</em>) – Length of the filter in pixels</p></li>
+<li><p><strong>pix_size_um</strong> (<em>float</em>) – Pixel-sise of the detector in microns</p></li>
+<li><p><strong>dist_um</strong> (<em>float</em>) – Distance of the detector from sample in microns</p></li>
+<li><p><strong>wlength_um</strong> (<em>float</em>) – Wavelength of the wave in microns</p></li>
+<li><p><strong>delta_beta</strong> (<em>float</em>) – Radio between the refraction index decrement and the absorption coefficient.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Figure and axes of the plot</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-corrct.physics.xraylib_helper">
+<span id="corrct-physics-xraylib-helper-module"></span><h2>corrct.physics.xraylib_helper module<a class="headerlink" href="#module-corrct.physics.xraylib_helper" title="Permalink to this heading"></a></h2>
+<p>xraylib handling functions.</p>
+<p>&#64;author: Nicola VIGANÒ, CEA-IRIG, Grenoble, France</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.xraylib_helper.get_compound">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.xraylib_helper.</span></span><span class="sig-name descname"><span class="pre">get_compound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmp_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/corrct/physics/xraylib_helper.html#get_compound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xraylib_helper.get_compound" title="Permalink to this definition"></a></dt>
+<dd><p>Build a compound from the compound composition string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmp_name</strong> (<em>str</em>) – Compund name / composition.</p></li>
+<li><p><strong>density</strong> (<em>float</em><em>, </em><em>optional</em>) – The density of the compound. If not provided it will be approximated from the composing elements.
+The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>cmp</strong> – The compound structure.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.xraylib_helper.get_element_number">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.xraylib_helper.</span></span><span class="sig-name descname"><span class="pre">get_element_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/corrct/physics/xraylib_helper.html#get_element_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xraylib_helper.get_element_number" title="Permalink to this definition"></a></dt>
+<dd><p>Return the element number from the symbol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>element</strong> (<em>str</em><em> | </em><em>int</em>) – The element symbol (or number, which won’t be converted).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The corresponding element number.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.xraylib_helper.get_element_number_and_symbol">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.xraylib_helper.</span></span><span class="sig-name descname"><span class="pre">get_element_number_and_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics/xraylib_helper.html#get_element_number_and_symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xraylib_helper.get_element_number_and_symbol" title="Permalink to this definition"></a></dt>
+<dd><p>Return both the element symbol and number from either the symbol or the number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>element</strong> (<em>str</em><em> | </em><em>int</em>) – The element symbol (or number, which won’t be converted).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The element symbol and number.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple[str, int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-corrct.physics.xrf">
+<span id="corrct-physics-xrf-module"></span><h2>corrct.physics.xrf module<a class="headerlink" href="#module-corrct.physics.xrf" title="Permalink to this heading"></a></h2>
+<p>XRF support functions.</p>
+<p>&#64;author: Nicola VIGANÒ, ESRF - The European Synchrotron, Grenoble, France,
+and CEA-IRIG, Grenoble, France</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.physics.xrf.DetectorXRF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.physics.xrf.</span></span><span class="sig-name descname"><span class="pre">DetectorXRF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface_mm2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.5707963267948966</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/physics/xrf.html#DetectorXRF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.DetectorXRF" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Simple XRF detector model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.DetectorXRF.angle_rad">
+<span class="sig-name descname"><span class="pre">angle_rad</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.5707963267948966</span></em><a class="headerlink" href="#corrct.physics.xrf.DetectorXRF.angle_rad" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.DetectorXRF.distance_mm">
+<span class="sig-name descname"><span class="pre">distance_mm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.physics.xrf.DetectorXRF.distance_mm" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.physics.xrf.DetectorXRF.solid_angle_sr">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solid_angle_sr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.physics.xrf.DetectorXRF.solid_angle_sr" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the solid angle covered by the detector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The computed solid angle of the detector geometry.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float | NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.DetectorXRF.surface_mm2">
+<span class="sig-name descname"><span class="pre">surface_mm2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.physics.xrf.DetectorXRF.surface_mm2" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.physics.xrf.FluoLine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.physics.xrf.</span></span><span class="sig-name descname"><span class="pre">FluoLine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/corrct/physics/xrf.html#FluoLine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.FluoLine" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Fluorescence line description class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.FluoLine.indx">
+<span class="sig-name descname"><span class="pre">indx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corrct.physics.xrf.FluoLine.indx" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.FluoLine.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#corrct.physics.xrf.FluoLine.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.physics.xrf.LinesSiegbahn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.physics.xrf.</span></span><span class="sig-name descname"><span class="pre">LinesSiegbahn</span></span><a class="reference internal" href="_modules/corrct/physics/xrf.html#LinesSiegbahn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.LinesSiegbahn" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Siegbahn fluorescence lines collection class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.xrf.LinesSiegbahn.get_energy">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">FluoLine</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">FluoLine</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_average</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics/xrf.html#LinesSiegbahn.get_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.LinesSiegbahn.get_energy" title="Permalink to this definition"></a></dt>
+<dd><p>Return the energy(ies) of the requested line for the given element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>int</em><em>]</em>) – The requested element.</p></li>
+<li><p><strong>line</strong> (<em>str</em>) – The requested line. It can be a whole shell (transition to that shell),
+or sub-shells.</p></li>
+<li><p><strong>compute_average</strong> (<em>bool</em><em>, </em><em>optional</em>) – Weighted averaging the lines, using the radiation rate. The default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>energy_keV</strong> – Either the average energy or the list of different energies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Union[float, NDArray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.xrf.LinesSiegbahn.get_lines">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span></span></span><a class="reference internal" href="_modules/corrct/physics/xrf.html#LinesSiegbahn.get_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.LinesSiegbahn.get_lines" title="Permalink to this definition"></a></dt>
+<dd><p>Return the list of xraylib line macro definitions for the requested family.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>line</strong> (<em>str</em>) – The requested line. It can be a whole shell (transition to that shell),
+or sub-shells.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of corresponding lines.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Sequence</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.LinesSiegbahn.lines">
+<span class="sig-name descname"><span class="pre">lines</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[FluoLine(name='KA1',</span> <span class="pre">indx=-3),</span> <span class="pre">FluoLine(name='KA2',</span> <span class="pre">indx=-2),</span> <span class="pre">FluoLine(name='KA3',</span> <span class="pre">indx=-1),</span> <span class="pre">FluoLine(name='KB1',</span> <span class="pre">indx=-6),</span> <span class="pre">FluoLine(name='KB2',</span> <span class="pre">indx=-11),</span> <span class="pre">FluoLine(name='KB3',</span> <span class="pre">indx=-5),</span> <span class="pre">FluoLine(name='KB4',</span> <span class="pre">indx=-13),</span> <span class="pre">FluoLine(name='KB5',</span> <span class="pre">indx=-8),</span> <span class="pre">FluoLine(name='LA1',</span> <span class="pre">indx=-90),</span> <span class="pre">FluoLine(name='LA2',</span> <span class="pre">indx=-89),</span> <span class="pre">FluoLine(name='LB1',</span> <span class="pre">indx=-63),</span> <span class="pre">FluoLine(name='LB2',</span> <span class="pre">indx=-95),</span> <span class="pre">FluoLine(name='LB3',</span> <span class="pre">indx=-34),</span> <span class="pre">FluoLine(name='LB4',</span> <span class="pre">indx=-33),</span> <span class="pre">FluoLine(name='LB5',</span> <span class="pre">indx=-102),</span> <span class="pre">FluoLine(name='LB6',</span> <span class="pre">indx=-91),</span> <span class="pre">FluoLine(name='LB7',</span> <span class="pre">indx=-98),</span> <span class="pre">FluoLine(name='LB9',</span> <span class="pre">indx=-36),</span> <span class="pre">FluoLine(name='LB10',</span> <span class="pre">indx=-35),</span> <span class="pre">FluoLine(name='LB15',</span> <span class="pre">indx=-94),</span> <span class="pre">FluoLine(name='LB17',</span> <span class="pre">indx=-62),</span> <span class="pre">FluoLine(name='LG1',</span> <span class="pre">indx=-68),</span> <span class="pre">FluoLine(name='LG2',</span> <span class="pre">indx=-38),</span> <span class="pre">FluoLine(name='LG3',</span> <span class="pre">indx=-39),</span> <span class="pre">FluoLine(name='LG4',</span> <span class="pre">indx=-47),</span> <span class="pre">FluoLine(name='LG5',</span> <span class="pre">indx=-65),</span> <span class="pre">FluoLine(name='LG6',</span> <span class="pre">indx=-75),</span> <span class="pre">FluoLine(name='LG8',</span> <span class="pre">indx=-72),</span> <span class="pre">FluoLine(name='LE',</span> <span class="pre">indx=-60),</span> <span class="pre">FluoLine(name='LH',</span> <span class="pre">indx=-60),</span> <span class="pre">FluoLine(name='LL',</span> <span class="pre">indx=-86),</span> <span class="pre">FluoLine(name='LS',</span> <span class="pre">indx=-88),</span> <span class="pre">FluoLine(name='LT',</span> <span class="pre">indx=-87),</span> <span class="pre">FluoLine(name='LU',</span> <span class="pre">indx=-96),</span> <span class="pre">FluoLine(name='LV',</span> <span class="pre">indx=-70),</span> <span class="pre">FluoLine(name='MA1',</span> <span class="pre">indx=-207),</span> <span class="pre">FluoLine(name='MA2',</span> <span class="pre">indx=-206),</span> <span class="pre">FluoLine(name='MB',</span> <span class="pre">indx=-187),</span> <span class="pre">FluoLine(name='MG',</span> <span class="pre">indx=-165)]</span></em><a class="headerlink" href="#corrct.physics.xrf.LinesSiegbahn.lines" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-corrct.physics">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-corrct.physics" title="Permalink to this heading"></a></h2>
+<p>Physics module.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.convert_energy_to_wlength">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">convert_energy_to_wlength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics.html#convert_energy_to_wlength"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.convert_energy_to_wlength" title="Permalink to this definition"></a></dt>
+<dd><p>Convert from energy in keV to wavelength in meters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>energy_keV</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The energy in keV</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The wavelength in m</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float | NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.convert_wlength_to_energy">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">convert_wlength_to_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wlength_m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics.html#convert_wlength_to_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.convert_wlength_to_energy" title="Permalink to this definition"></a></dt>
+<dd><p>Convert wavelength in meters to energy in keV.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>wlength_m</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The wavelength in meter</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The energy in keV</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float | NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.pencil_beam_profile">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">pencil_beam_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voxel_size_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_fwhm_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">ScalarType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics.html#pencil_beam_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.pencil_beam_profile" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the pencil beam integration point spread function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>voxel_size_um</strong> (<em>float</em>) – The integration length.</p></li>
+<li><p><strong>beam_fwhm_um</strong> (<em>float</em>) – The beam FWHM.</p></li>
+<li><p><strong>profile_size</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of pixels of the PSF. The default is 1.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to print verbose information. The default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The beam PSF.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.alignment.html" class="btn btn-neutral float-left" title="corrct.alignment package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.processing.html" class="btn btn-neutral float-right" title="corrct.processing package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

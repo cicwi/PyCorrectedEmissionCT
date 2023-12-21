@@ -38,6 +38,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
@@ -79,9 +80,10 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">linalg</span> <span class="k">as</span> <span class="n">spalg</span>
 
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">DTypeLike</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABC</span>
 
@@ -92,6 +94,63 @@
 <span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
 
 <span class="n">NDArrayInt</span> <span class="o">=</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="reorder_masks"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.reorder_masks">[docs]</a><span class="k">def</span> <span class="nf">reorder_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">buckets</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Reorder masks, with a simple rot-n algorithm.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    masks : NDArray</span>
+<span class="sd">        The masks to re-order.</span>
+<span class="sd">    buckets : NDArray</span>
+<span class="sd">        The corresponding buckets.</span>
+<span class="sd">    shift : int</span>
+<span class="sd">        The length of the shift.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[NDArray, NDArray]</span>
+<span class="sd">        The reordered masks and buckets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">masks_shape</span> <span class="o">=</span> <span class="n">masks</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">masks</span> <span class="o">=</span> <span class="n">masks</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">masks_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]])</span>
+
+    <span class="n">masks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">masks</span><span class="p">,</span> <span class="o">-</span><span class="n">shift</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">buckets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">buckets</span><span class="p">,</span> <span class="o">-</span><span class="n">shift</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">masks</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">masks_shape</span><span class="p">),</span> <span class="n">buckets</span></div>
+
+
+<div class="viewcode-block" id="decompose_qr_masks"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.decompose_qr_masks">[docs]</a><span class="k">def</span> <span class="nf">decompose_qr_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Compute QR decomposition of the given masks.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    masks : NDArray</span>
+<span class="sd">        The masks to decompose</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to emite verbose output, by default False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[NDArray, NDArray]</span>
+<span class="sd">        The Q and R components.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">masks_shape</span> <span class="o">=</span> <span class="n">masks</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">masks</span> <span class="o">=</span> <span class="n">masks</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">masks_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])])</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing QR decomposition&quot;</span><span class="p">)</span>
+    <span class="n">Q</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">masks</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+
+    <span class="n">Rt</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">Qt</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing inversion of R (fast, because triangular)&quot;</span><span class="p">)</span>
+    <span class="n">R1t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Rt</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Qt</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">masks_shape</span><span class="p">),</span> <span class="n">R1t</span></div>
 
 
 <div class="viewcode-block" id="MaskCollection"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.MaskCollection">[docs]</a><span class="k">class</span> <span class="nc">MaskCollection</span><span class="p">:</span>
@@ -230,6 +289,40 @@
             <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">masks_dec</span>
 
         <span class="k">return</span> <span class="n">mask</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">mask_inds_vu</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="MaskCollection.get_QR_decomposition"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.MaskCollection.get_QR_decomposition">[docs]</a>    <span class="k">def</span> <span class="nf">get_QR_decomposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buckets</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">&quot;MaskCollection&quot;</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute and return the QR decomposition of the masks.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        buckets : NDArray</span>
+<span class="sd">            The buckets corresponding to the masks.</span>
+<span class="sd">        shift : int, optional</span>
+<span class="sd">            Index of the first mask, by default 0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[MaskCollection, NDArray]</span>
+<span class="sd">            The new mask collection and the matrix for modifying buckets accordingly.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            In case the masks have encoding-decoding form.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">masks_dec</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot compute QR decomposition of masks that have encoding and decoding forms.&quot;</span><span class="p">)</span>
+
+        <span class="n">new_masks</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">new_buckets</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">buckets</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shift</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">,</span> <span class="n">new_buckets</span> <span class="o">=</span> <span class="n">reorder_masks</span><span class="p">(</span><span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">,</span> <span class="n">new_buckets</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">)</span>
+
+        <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">,</span> <span class="n">R1t</span> <span class="o">=</span> <span class="n">decompose_qr_masks</span><span class="p">(</span><span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">)</span>
+        <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_dec</span> <span class="o">=</span> <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span>
+        <span class="n">new_buckets</span> <span class="o">=</span> <span class="n">R1t</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">new_buckets</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_masks</span><span class="p">,</span> <span class="n">new_buckets</span></div>
 
 <div class="viewcode-block" id="MaskCollection.inspect_masks"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.MaskCollection.inspect_masks">[docs]</a>    <span class="k">def</span> <span class="nf">inspect_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Inspect the encoding and decoding masks at the requested shifts.</span>
@@ -714,6 +807,8 @@
 <div class="viewcode-block" id="ProjectorGhostImaging"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.ProjectorGhostImaging">[docs]</a><span class="k">class</span> <span class="nc">ProjectorGhostImaging</span><span class="p">(</span><span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Projector class for the ghost imaging reconstructions.&quot;&quot;&quot;</span>
 
+    <span class="n">mc</span><span class="p">:</span> <span class="n">MaskCollection</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_collection</span><span class="p">:</span> <span class="n">MaskCollection</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Ghost Imaging projector class.</span>
@@ -725,10 +820,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mc</span> <span class="o">=</span> <span class="n">mask_collection</span>
 
-        <span class="n">axes_shifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_shifts</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">col_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">axes_shifts</span><span class="p">))</span>
-        <span class="n">axes_FoV</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_FoV</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">row_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_enc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">axes_FoV</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes_shifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_shifts</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axes_shifts</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes_fov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_FoV</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">row_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_enc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axes_fov</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_enc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prj_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">num_buckets</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -771,10 +866,37 @@
         <span class="n">masks_shape</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_shifts</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_FoV</span><span class="p">)]</span>
         <span class="n">out_shape</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">bucket_vals</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_FoV</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">bucket_vals</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">masks_shape</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">out_shape</span><span class="p">)</span></div>
+        <span class="n">masks_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">masks_shape</span><span class="p">)</span>
+        <span class="n">img_out</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">bucket_vals</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">masks_in</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">img_out</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">out_shape</span><span class="p">)</span></div>
         <span class="c1"># return np.sum(bucket_vals[..., None, None] * self.masks_dec, axis=-3, keepdims=True)</span>
 
-<div class="viewcode-block" id="ProjectorGhostImaging.fbp"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.ProjectorGhostImaging.fbp">[docs]</a>    <span class="k">def</span> <span class="nf">fbp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<div class="viewcode-block" id="ProjectorGhostImaging.adjust_sampling_scaling"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.ProjectorGhostImaging.adjust_sampling_scaling">[docs]</a>    <span class="k">def</span> <span class="nf">adjust_sampling_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Adjust reconstruction scaling and bias, due to the undersampling.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        image : NDArray</span>
+<span class="sd">            Unscaled image.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NDArray</span>
+<span class="sd">            Scaled image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sampling_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">num_buckets</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_FoV</span><span class="p">)</span>
+
+        <span class="n">image_f</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftn</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axes_fov</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;ortho&quot;</span><span class="p">)</span>
+        <span class="n">rec_f_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">image_f</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axes_fov</span><span class="p">)]</span>
+
+        <span class="n">sampling_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">rec_f_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">/</span> <span class="n">sampling_ratio</span>
+        <span class="n">sampling_filter</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">image_f</span> <span class="o">*=</span> <span class="n">sampling_filter</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">irfftn</span><span class="p">(</span><span class="n">image_f</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_FoV</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axes_fov</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;ortho&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProjectorGhostImaging.fbp"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.ProjectorGhostImaging.fbp">[docs]</a>    <span class="k">def</span> <span class="nf">fbp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">use_lstsq</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">adjust_scaling</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute cross-correlation reconstruction of the bucket values.</span>
 
 <span class="sd">        Parameters</span>
@@ -787,7 +909,19 @@
 <span class="sd">        NDArray</span>
 <span class="sd">            The reconstructed image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">bucket_vals</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">bucket_vals</span><span class="p">))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">bucket_vals</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">col_sum</span><span class="p">)</span></div>
+        <span class="c1"># return self.bp(bucket_vals - np.mean(bucket_vals)) + np.mean(bucket_vals) * np.mean(self.col_sum)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_enc</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">use_lstsq</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">bucket_vals</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_enc</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_FoV</span><span class="p">)])</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">spalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">masks</span><span class="p">,</span> <span class="n">bucket_vals</span><span class="p">)</span>
+            <span class="n">img</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_FoV</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">adjust_scaling</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_sampling_scaling</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">img</span></div>
 
 <div class="viewcode-block" id="ProjectorGhostImaging.absolute"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.ProjectorGhostImaging.absolute">[docs]</a>    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Compute the absolute value of the projection operator coefficients.</span>

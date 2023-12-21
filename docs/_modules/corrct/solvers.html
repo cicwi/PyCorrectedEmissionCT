@@ -38,6 +38,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
@@ -299,12 +300,14 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_term</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">data_term</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;l2&quot;</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">data_term</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;kl&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_KL</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown data term: &quot;</span><span class="si">%s</span><span class="s1">&quot;, only accepted terms are: &quot;l2&quot;.&#39;</span> <span class="o">%</span> <span class="n">data_term</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown data term: &#39;</span><span class="si">{</span><span class="n">data_term</span><span class="si">}</span><span class="s2">&#39;, only accepted terms are: &#39;l2&#39; | &#39;kl&#39;.&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_term</span><span class="p">,</span> <span class="p">(</span><span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_KL</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_term</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unsupported data term: &quot;</span><span class="si">%s</span><span class="s1">&quot;, only accepted terms are &quot;l2&quot;-based.&#39;</span> <span class="o">%</span> <span class="n">data_term</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported data term: &#39;</span><span class="si">{</span><span class="n">data_term</span><span class="o">.</span><span class="n">info</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;, only accepted terms are &#39;kl&#39; and &#39;l2&#39;-based.&quot;</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_initialize_regularizer</span><span class="p">(</span>
@@ -318,8 +321,8 @@
             <span class="n">check_regs_ok</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">BaseRegularizer</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">regularizer</span><span class="p">]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">check_regs_ok</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;The following regularizers are not derived from the BaseRegularizer class: </span><span class="si">%s</span><span class="s2">&quot;</span>
-                    <span class="o">%</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">check_regs_ok</span><span class="p">))[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">check_regs_ok</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)])</span>
+                    <span class="s2">&quot;The following regularizers are not derived from the BaseRegularizer class: &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">check_regs_ok</span><span class="p">))[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">check_regs_ok</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)])</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">regularizer</span><span class="p">)</span>
@@ -620,6 +623,171 @@
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">info</span></div>
 
 
+<div class="viewcode-block" id="MLEM"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.MLEM">[docs]</a><span class="k">class</span> <span class="nc">MLEM</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the MLEM solver class.</span>
+
+<span class="sd">    This class implements the Maximul Likelihood Expectation Maximization (MLEM) algorithm.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Turn on verbose output. The default is False.</span>
+<span class="sd">    tolerance : Optional[float], optional</span>
+<span class="sd">        Tolerance on the data residual for computing when to stop iterations.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional</span>
+<span class="sd">        Regularizer to be used. The default is None.</span>
+<span class="sd">    data_term : Union[str, DataFidelityBase], optional</span>
+<span class="sd">        Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
+<span class="sd">    data_term_test : Optional[DataFidelityBase], optional</span>
+<span class="sd">        The data fidelity to be used for the test set.</span>
+<span class="sd">        If None, it will use the same as for the rest of the data.</span>
+<span class="sd">        The default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">BaseRegularizer</span><span class="p">],</span> <span class="n">BaseRegularizer</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;kl&quot;</span><span class="p">,</span>
+        <span class="n">data_term_test</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataFidelityBase</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term_test</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_regularizer</span><span class="p">(</span><span class="n">regularizer</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MLEM.info"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.MLEM.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the MLEM info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            info string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Solver</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;(B:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">background</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span></div>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span>
+        <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
+        <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">x0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">SolutionInfo</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reconstruct the data, using the MLEM algorithm.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        A : BaseTransform</span>
+<span class="sd">            Projection operator.</span>
+<span class="sd">        b : NDArrayFloat</span>
+<span class="sd">            Data to reconstruct.</span>
+<span class="sd">        iterations : int</span>
+<span class="sd">            Number of iterations.</span>
+<span class="sd">        x0 : Optional[NDArrayFloat], optional</span>
+<span class="sd">            Initial solution. The default is None.</span>
+<span class="sd">        lower_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">            Lower clipping value. The default is None.</span>
+<span class="sd">        upper_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">            Upper clipping value. The default is None.</span>
+<span class="sd">        x_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">            Solution mask. The default is None.</span>
+<span class="sd">        b_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">            Data mask. The default is None.</span>
+<span class="sd">        b_test_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">            Test data mask. The default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[NDArrayFloat, SolutionInfo]</span>
+<span class="sd">            The reconstruction, and the residuals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="p">(</span><span class="n">b_mask</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_b_masks</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">b_mask</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">)</span>
+
+        <span class="c1"># Back-projection diagonal re-scaling</span>
+        <span class="n">b_ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">b_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">b_ones</span> <span class="o">*=</span> <span class="n">b_mask</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">b_ones</span><span class="p">)</span>
+
+        <span class="c1"># Forward-projection diagonal re-scaling</span>
+        <span class="n">x_ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_ones</span> <span class="o">*=</span> <span class="n">x_mask</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="n">x_ones</span><span class="p">))</span>
+        <span class="n">sigma</span><span class="p">[(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sigma</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sigma</span>
+
+        <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">x_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">*=</span> <span class="n">x_mask</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="n">SolutionInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(),</span> <span class="n">max_iterations</span><span class="o">=</span><span class="n">iterations</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">b_test_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">Ax</span> <span class="o">=</span> <span class="n">A</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">b_test_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term_test</span><span class="o">.</span><span class="n">background</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">background</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING - the data_term and and data_term_test should have the same background. Making them equal.&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_term_test</span><span class="o">.</span><span class="n">background</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">background</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_term_test</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+
+                <span class="n">res_test_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term_test</span><span class="o">.</span><span class="n">compute_residual</span><span class="p">(</span><span class="n">Ax</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">b_test_mask</span><span class="p">)</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">residual0_cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term_test</span><span class="o">.</span><span class="n">compute_residual_norm</span><span class="p">(</span><span class="n">res_test_0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">res_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">compute_residual</span><span class="p">(</span><span class="n">Ax</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">b_mask</span><span class="p">)</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">residual0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">compute_residual_norm</span><span class="p">(</span><span class="n">res_0</span><span class="p">)</span>
+
+        <span class="n">reg_info</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">info</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span><span class="p">])</span>
+        <span class="n">algo_info</span> <span class="o">=</span> <span class="s2">&quot;- Performing </span><span class="si">%s</span><span class="s2">-</span><span class="si">%s%s</span><span class="s2"> iterations: &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">reg_info</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="n">algo_info</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)):</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">iterations</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># The MLEM update</span>
+            <span class="n">Ax</span> <span class="o">=</span> <span class="n">A</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">b_test_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">res_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term_test</span><span class="o">.</span><span class="n">compute_residual</span><span class="p">(</span><span class="n">Ax</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">b_test_mask</span><span class="p">)</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">residuals_cv</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term_test</span><span class="o">.</span><span class="n">compute_residual_norm</span><span class="p">(</span><span class="n">res_test</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">compute_residual</span><span class="p">(</span><span class="n">Ax</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">b_mask</span><span class="p">)</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">residuals</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">compute_residual_norm</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span> <span class="o">&gt;</span> <span class="n">info</span><span class="o">.</span><span class="n">residuals</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">Ax</span> <span class="o">=</span> <span class="n">Ax</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">background</span>
+            <span class="n">Ax</span> <span class="o">=</span> <span class="n">Ax</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="n">upd</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">b</span> <span class="o">/</span> <span class="n">Ax</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">*=</span> <span class="n">upd</span> <span class="o">/</span> <span class="n">tau</span>
+
+            <span class="k">if</span> <span class="n">lower_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">upper_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">upper_limit</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">x_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">*=</span> <span class="n">x_mask</span>
+
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">info</span></div>
+
+
 <div class="viewcode-block" id="SIRT"><a class="viewcode-back" href="../../corrct.html#corrct.solvers.SIRT">[docs]</a><span class="k">class</span> <span class="nc">SIRT</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize the SIRT solver class.</span>
@@ -799,7 +967,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize the PDHG solver class.</span>
 
-<span class="sd">    PDHG stands for primal-dual hybridg gradient algorithm from Chambolle and Pock.</span>
+<span class="sd">    PDHG stands for primal-dual hybrid gradient algorithm from Chambolle and Pock.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
