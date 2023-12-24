@@ -71,7 +71,7 @@ with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:
 Creating attenuation correction projectors is a bit more involved, and we will
 see it later in the [attenuation correction](#attenuation-correction) section.
 
-Projectors can use different backends, depending on the avilable packages,
+Projectors can use different backends, depending on the available packages,
 system resources, and user requests. The included projector backends are based
 on the `scikit-image` and `astra-toolbox` packages.
 They can be selected by passing the strings `"astra"` or `"skimage"` to the
@@ -122,11 +122,12 @@ filter can be selected, by passing the `fbp_filter` parameter at initialization:
 solver_fbp = cct.solvers.FBP(fbp_filter="shepp-logan")
 ```
 
-#### SIRT and PDHG
+#### SIRT, PDHG, and MLEM
 
 The SIRT and PDHG algorithms, are algebraic (iterative) methods. They both
 support regularization, and box constraints on the solution. The PDHG also
 supports various data fidelity terms.
+The MLEM algorithm is also an iterative algorithm to find the maximum likelihood estimation of the reconstructed signal. The MLEM does not currently support any regularization.
 
 The interface of the iterative methods is the same as for the FBP, with the only
 difference of requiring an iterations count:
@@ -153,6 +154,7 @@ with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:
     vol, _ = solver_sirt(p, sino, iterations=100, x0=x0, lower_limit=lower_limit)
 ```
 The same goes for the parameter `upper_limit`.
+The MLEM algorithm assumes a `lower_limit` of 0.
 
 ## Attenuation correction
 
@@ -166,7 +168,7 @@ attenuation map for the following experimental conditions:
 
 This is usually achieved in two ways. The simplest way is to provide the projector
 [`ProjectorAttenuationXRF`](corrct.html#corrct.projectors.ProjectorAttenuationXRF)
-with the corresponding attenuation maps for the excitation beam and emitte photons.
+with the corresponding attenuation maps for the excitation beam and emitted photons.
 The respective parameters are: `att_in` and `att_out`. This also requires to
 provide the angle(s) of the detector(s) with respect to the incoming beam
 direction, through the parameter `angles_detectors_rad`.
@@ -181,11 +183,15 @@ The user can also choose to use the class
 [`AttenuationVolume`](corrct.html#corrct.attenuation.AttenuationVolume) from the
 [`attenuation`](corrct.html#module-corrct.attenuation) module.
 This class is used internally in the projector
-[`ProjectorAttenuationXRF`](corrct.html#corrct.projectors.ProjectorAttenuationXRF), and it can be used particularly in conjunction with the class
-[`VolumeMaterial`](corrct.html#corrct.physics.VolumeMaterial) from the [`physics`](corrct.html#module-corrct.physics) module.
+[`ProjectorAttenuationXRF`](corrct.html#corrct.projectors.ProjectorAttenuationXRF),
+and it can be used particularly in conjunction with the class
+[`VolumeMaterial`](corrct.html#corrct.physics.VolumeMaterial) from the
+[`physics`](corrct.html#module-corrct.physics) module.
 
 For a dedicated description of the projection and attenuation correction geometry,
 the reader can have a look at the dedicated [geometry page](geometry.md).
+For a in-depth description of the functionality available in the physics module,
+instead, the reader can have a look at the dedicated [physics page](physics_model.md).
 
 ## Data terms and regularization
 

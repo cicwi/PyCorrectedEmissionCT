@@ -13,6 +13,7 @@ Contents:
    readme
    tutorial
    geometry
+   physics_model
    modules
    changelog
 

@@ -77,7 +77,7 @@ class LinesSiegbahn:
     ]
 
     @staticmethod
-    def get_lines(line: str) -> Sequence:
+    def get_lines(line: str) -> Sequence[FluoLine]:
         """
         Return the list of xraylib line macro definitions for the requested family.
 
