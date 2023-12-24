@@ -4,7 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.8.1...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.9.0...develop
+
+## 0.9.0 - 2023-12-24
+### Added
+- QR decomposition for structured illumination
+- Background computation function from projection edges
+- Basic alignment routines:
+  - Simple pre-alignment methods, for projection alignment
+  - Stack shift tracking, for correcting image drifts
+- Experimental astra-toolbox backend support (direct FP and BP)
+- Basic phase contrast support:
+  - Computing and plotting delta-over-beta
+  - Computing TIE and CTF phase propagation functions
+- MLEM solver (thanks to J. Lesaint #20)
+### Fixed
+- Multi-platform pip conda package building
+- Type hinting fixes
+- Full-field transmission flat-fielding
 
 ## 0.8.1 - 2023-05-16
 ### Added
@@ -33,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.7.1 - 2022-10-31
 ### Added
 - More documentation / tutorial content.
-- Energy conversion functions (keV to m, and viceversa).
+- Energy conversion functions (keV to m, and vice versa).
 - Tapering for truncated volumes in FSC computation.
 ### Fixed
 - Typo that preventing using `ProjectionGeometry` from `models`.

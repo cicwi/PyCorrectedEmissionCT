@@ -14,6 +14,7 @@ Contents:
    tutorial
    geometry
    physics_model
+   alignment_tools
    modules
    changelog
 
