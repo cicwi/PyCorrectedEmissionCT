@@ -46,7 +46,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#the-projectors">The projectors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-solvers">The solvers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#fbp">FBP</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#sirt-and-pdhg">SIRT and PDHG</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sirt-pdhg-and-mlem">SIRT, PDHG, and MLEM</a></li>
 </ul>
 </li>
 </ul>
@@ -62,6 +62,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
@@ -158,7 +159,7 @@ of a volume of all ones.</p>
 </div>
 <p>Creating attenuation correction projectors is a bit more involved, and we will
 see it later in the <a class="reference external" href="#attenuation-correction">attenuation correction</a> section.</p>
-<p>Projectors can use different backends, depending on the avilable packages,
+<p>Projectors can use different backends, depending on the available packages,
 system resources, and user requests. The included projector backends are based
 on the <code class="docutils literal notranslate"><span class="pre">scikit-image</span></code> and <code class="docutils literal notranslate"><span class="pre">astra-toolbox</span></code> packages.
 They can be selected by passing the strings <code class="docutils literal notranslate"><span class="pre">&quot;astra&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;skimage&quot;</span></code> to the
@@ -208,11 +209,12 @@ filter can be selected, by passing the <code class="docutils literal notranslate
 </pre></div>
 </div>
 </div>
-<div class="section" id="sirt-and-pdhg">
-<h4>SIRT and PDHG<a class="headerlink" href="#sirt-and-pdhg" title="Permalink to this heading"></a></h4>
+<div class="section" id="sirt-pdhg-and-mlem">
+<h4>SIRT, PDHG, and MLEM<a class="headerlink" href="#sirt-pdhg-and-mlem" title="Permalink to this heading"></a></h4>
 <p>The SIRT and PDHG algorithms, are algebraic (iterative) methods. They both
 support regularization, and box constraints on the solution. The PDHG also
-supports various data fidelity terms.</p>
+supports various data fidelity terms.
+The MLEM algorithm is also an iterative algorithm to find the maximum likelihood estimation of the reconstructed signal. The MLEM does not currently support any regularization.</p>
 <p>The interface of the iterative methods is the same as for the FBP, with the only
 difference of requiring an iterations count:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -236,7 +238,8 @@ the following:</p>
     <span class="n">vol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver_sirt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The same goes for the parameter <code class="docutils literal notranslate"><span class="pre">upper_limit</span></code>.</p>
+<p>The same goes for the parameter <code class="docutils literal notranslate"><span class="pre">upper_limit</span></code>.
+The MLEM algorithm assumes a <code class="docutils literal notranslate"><span class="pre">lower_limit</span></code> of 0.</p>
 </div>
 </div>
 </div>
@@ -252,7 +255,7 @@ attenuation map for the following experimental conditions:</p>
 </ul>
 <p>This is usually achieved in two ways. The simplest way is to provide the projector
 <a class="reference external" href="corrct.html#corrct.projectors.ProjectorAttenuationXRF"><code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code></a>
-with the corresponding attenuation maps for the excitation beam and emitte photons.
+with the corresponding attenuation maps for the excitation beam and emitted photons.
 The respective parameters are: <code class="docutils literal notranslate"><span class="pre">att_in</span></code> and <code class="docutils literal notranslate"><span class="pre">att_out</span></code>. This also requires to
 provide the angle(s) of the detector(s) with respect to the incoming beam
 direction, through the parameter <code class="docutils literal notranslate"><span class="pre">angles_detectors_rad</span></code>.
@@ -265,10 +268,14 @@ maps is delegated entirely to the user.</p>
 <a class="reference external" href="corrct.html#corrct.attenuation.AttenuationVolume"><code class="docutils literal notranslate"><span class="pre">AttenuationVolume</span></code></a> from the
 <a class="reference external" href="corrct.html#module-corrct.attenuation"><code class="docutils literal notranslate"><span class="pre">attenuation</span></code></a> module.
 This class is used internally in the projector
-<a class="reference external" href="corrct.html#corrct.projectors.ProjectorAttenuationXRF"><code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code></a>, and it can be used particularly in conjunction with the class
-<a class="reference external" href="corrct.html#corrct.physics.VolumeMaterial"><code class="docutils literal notranslate"><span class="pre">VolumeMaterial</span></code></a> from the <a class="reference external" href="corrct.html#module-corrct.physics"><code class="docutils literal notranslate"><span class="pre">physics</span></code></a> module.</p>
+<a class="reference external" href="corrct.html#corrct.projectors.ProjectorAttenuationXRF"><code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code></a>,
+and it can be used particularly in conjunction with the class
+<a class="reference external" href="corrct.html#corrct.physics.VolumeMaterial"><code class="docutils literal notranslate"><span class="pre">VolumeMaterial</span></code></a> from the
+<a class="reference external" href="corrct.html#module-corrct.physics"><code class="docutils literal notranslate"><span class="pre">physics</span></code></a> module.</p>
 <p>For a dedicated description of the projection and attenuation correction geometry,
-the reader can have a look at the dedicated <a class="reference internal" href="geometry.html"><span class="doc">geometry page</span></a>.</p>
+the reader can have a look at the dedicated <a class="reference internal" href="geometry.html"><span class="doc">geometry page</span></a>.
+For a in-depth description of the functionality available in the physics module,
+instead, the reader can have a look at the dedicated <a class="reference internal" href="physics_model.html"><span class="doc">physics page</span></a>.</p>
 </div>
 <div class="section" id="data-terms-and-regularization">
 <h2>Data terms and regularization<a class="headerlink" href="#data-terms-and-regularization" title="Permalink to this heading"></a></h2>
