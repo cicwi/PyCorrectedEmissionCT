@@ -145,21 +145,61 @@ class ProjectionGeometry(Geometry):
         else:
             return dc_replace(self)
 
-    def set_detector_shifts_vu(self, det_pos_vu: ArrayLike) -> None:
+    def set_detector_shifts_vu(
+        self, det_pos_vu: Union[ArrayLike, NDArray, None] = None, cor_pos_u: Union[float, None] = None
+    ) -> None:
         """
-        Set the detector position in XYZ, from VU (vertical, horizontal) coordinates.
+        Set the detector position in XZ, from VU (vertical, horizontal) coordinates.
 
         Parameters
         ----------
-        det_pos_vu : ArrayLike
+        det_pos_vu : ArrayLike | NDArray | None
             Detector vertical and horizontal positions. Vertical is optional.
+        cor_pos_u : float | None
+            Center of rotation position along U.
         """
-        det_pos_vu = np.array(det_pos_vu, ndmin=2)
+        if det_pos_vu is None and cor_pos_u is None:
+            return
 
+        det_pos_vu = np.array(det_pos_vu if det_pos_vu is not None else 0.0, ndmin=2)
+        if cor_pos_u is not None:
+            det_pos_vu[-1, ...] = det_pos_vu[-1, ...] + cor_pos_u
+
+        if self.det_pos_xyz.shape[1] > 1 and self.det_pos_xyz.shape[1] != det_pos_vu.shape[1]:
+            raise ValueError(
+                f"Current number of angles ({self.det_pos_xyz.shape[-2]}) and new number of angles ({det_pos_vu.shape[-2]}) differ!"
+            )
+        det_pos_y = self.det_pos_xyz[:, 1].copy()
         self.det_pos_xyz = np.zeros((det_pos_vu.shape[-1], 3))
         self.det_pos_xyz[:, 0] = det_pos_vu[-1, :]
+        self.det_pos_xyz[:, 1] = det_pos_y
         if self.ndim == 3 and det_pos_vu.shape[0] == 2:
             self.det_pos_xyz[:, 2] = det_pos_vu[-2, :]
+
+    def set_source_shifts_vu(self, src_pos_vu: Union[ArrayLike, NDArray, None] = None) -> None:
+        """
+        Set the source position in XZ, from VU (vertical, horizontal) coordinates.
+
+        Parameters
+        ----------
+        src_pos_vu : ArrayLike | NDArray | None
+            Source vertical and horizontal positions. Vertical is optional.
+        """
+        if src_pos_vu is None:
+            return
+
+        src_pos_vu = np.array(src_pos_vu, ndmin=2)
+
+        if self.src_pos_xyz.shape[1] > 1 and self.src_pos_xyz.shape[1] != src_pos_vu.shape[1]:
+            raise ValueError(
+                f"Current number of angles ({self.src_pos_xyz.shape[-2]}) and new number of angles ({src_pos_vu.shape[-2]}) differ!"
+            )
+        src_pos_y = self.src_pos_xyz[:, 1].copy()
+        self.src_pos_xyz = np.zeros((src_pos_vu.shape[-1], 3))
+        self.src_pos_xyz[:, 0] = src_pos_vu[-1, :]
+        self.src_pos_xyz[:, 1] = src_pos_y
+        if self.ndim == 3 and src_pos_vu.shape[0] == 2:
+            self.src_pos_xyz[:, 2] = src_pos_vu[-2, :]
 
     def rotate(self, angles_w_rad: ArrayLike, patch_astra_2d: bool = False) -> "ProjectionGeometry":
         """
@@ -378,11 +418,42 @@ class VolumeGeometry(Geometry):
         return get_vol_geom_from_volume(volume=volume)
 
 
+def get_rot_axis_dir(rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise") -> NDArray:
+    """Process the requested rotation axis direction and return a meaningful value.
+
+    Parameters
+    ----------
+    rot_axis_dir : Union[str, ArrayLike, NDArray], optional
+        The requested direction, by default "clockwise"
+
+    Returns
+    -------
+    NDArray
+        The vector corresponding to the rotation direction.
+
+    Raises
+    ------
+    ValueError
+        In case of malformed direction.
+    """
+    if isinstance(rot_axis_dir, str):
+        ROT_DIR_STR = ("clockwise", "counter-clockwise")
+        if rot_axis_dir.lower() not in ROT_DIR_STR:
+            raise ValueError(f"Rotation axis direction {rot_axis_dir} not allowed. It should be one of: {ROT_DIR_STR}")
+
+        if rot_axis_dir.lower() == "clockwise":
+            return np.array([0.0, 0.0, -1.0])
+        else:
+            return np.array([0.0, 0.0, 1.0])
+    else:
+        return np.array(rot_axis_dir, ndmin=1)
+
+
 def get_prj_geom_parallel(
     *,
     geom_type: str = "3d",
-    rot_axis_shift_pix: Optional[ArrayLike] = None,
-    rot_axis_dir: Union[str, ArrayLike] = "clockwise",
+    rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
+    rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise",
 ) -> ProjectionGeometry:
     """
     Generate the default geometry for parallel beam.
@@ -391,9 +462,9 @@ def get_prj_geom_parallel(
     ----------
     geom_type : str, optional
         The geometry type. The default is "parallel3d".
-    rot_axis_shift_pix : Optional[ArrayLike], optional
+    rot_axis_shift_pix : ArrayLike | NDArray | None, optional
         Rotation axis shift in pixels. The default is None.
-    rot_axis_dir : Union[str, ArrayLike], optional
+    rot_axis_dir : str | ArrayLike | NDArray, optional
         Rotation axis direction. It can be either a string or a direction. The default is "clockwise".
 
     Returns
@@ -402,26 +473,57 @@ def get_prj_geom_parallel(
         The default paralle-beam geometry.
     """
     if rot_axis_shift_pix is None:
-        det_pos_xyz = np.array([0, 0, 0])
+        det_pos_xyz = np.zeros(3)
     else:
         rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
         det_pos_xyz = np.concatenate([rot_axis_shift_pix[:, None], np.zeros((len(rot_axis_shift_pix), 2))], axis=-1)
 
-    if isinstance(rot_axis_dir, str):
-        if rot_axis_dir.lower() == "clockwise":
-            rot_axis_dir = np.array([0, 0, -1])
-        else:
-            rot_axis_dir = np.array([0, 0, 1])
-    else:
-        rot_axis_dir = np.array(rot_axis_dir, ndmin=1)
-
     return ProjectionGeometry(
         geom_type="parallel" + geom_type,
-        src_pos_xyz=np.array([0, -1, 0]),
+        src_pos_xyz=np.array([0.0, -1.0, 0.0]),
         det_pos_xyz=det_pos_xyz,
-        det_u_xyz=np.array([1, 0, 0]),
-        det_v_xyz=np.array([0, 0, 1]),
-        rot_dir_xyz=rot_axis_dir,
+        det_u_xyz=np.array([1.0, 0.0, 0.0]),
+        det_v_xyz=np.array([0.0, 0.0, 1.0]),
+        rot_dir_xyz=get_rot_axis_dir(rot_axis_dir),
+    )
+
+
+def get_prj_geom_cone(
+    *,
+    src_to_sam_dist: float,
+    rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
+    rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise",
+) -> ProjectionGeometry:
+    """
+    Generate the default geometry for parallel beam.
+
+    Parameters
+    ----------
+    geom_type : str, optional
+        The geometry type. The default is "parallel3d".
+    rot_axis_shift_pix : ArrayLike | NDArray | None, optional
+        Rotation axis shift in pixels. The default is None.
+    rot_axis_dir : str | ArrayLike | NDArray, optional
+        Rotation axis direction. It can be either a string or a direction. The default is "clockwise".
+
+    Returns
+    -------
+    ProjectionGeometry
+        The default paralle-beam geometry.
+    """
+    if rot_axis_shift_pix is None:
+        det_pos_xyz = np.zeros(3)
+    else:
+        rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
+        det_pos_xyz = np.concatenate([rot_axis_shift_pix[:, None], np.zeros((len(rot_axis_shift_pix), 2))], axis=-1)
+
+    return ProjectionGeometry(
+        geom_type="cone",
+        src_pos_xyz=np.array([0.0, -src_to_sam_dist, 0.0]),
+        det_pos_xyz=det_pos_xyz,
+        det_u_xyz=np.array([1.0, 0.0, 0.0]),
+        det_v_xyz=np.array([0.0, 0.0, 1.0]),
+        rot_dir_xyz=get_rot_axis_dir(rot_axis_dir),
     )
 
 
