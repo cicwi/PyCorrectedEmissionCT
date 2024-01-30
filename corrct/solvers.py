@@ -380,6 +380,11 @@ class FBP(Solver):
             local_filter = self.fbp_filter
         local_filter.pad_mode = self.pad_mode
 
+        if isinstance(A, operators.ProjectorOperator):
+            pre_weights = A.get_pre_weights()
+            if pre_weights is not None:
+                b = b * pre_weights
+
         b_f = local_filter(b)
 
         x = A.T(b_f)

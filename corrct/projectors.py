@@ -170,6 +170,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         if not isinstance(vol_geom, models.VolumeGeometry):
             vol_geom = models.VolumeGeometry(_vol_shape_xyz=np.array(vol_geom))
         self.vol_geom = vol_geom
+        self.prj_geom = prj_geom
 
         if not len(self.vol_geom.shape_xyz) in (2, 3):
             raise ValueError("Only 2D or 3D volumes are valid")
@@ -246,6 +247,19 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             self.psf_vwu = operators.TransformConvolution(prj_shape_vwu, kernel=psf[..., None, :], is_symm=is_conv_symm)
         else:
             self.psf_vu = self.psf_vwu = None
+
+    def get_pre_weights(self) -> Union[NDArray, None]:
+        """Compute the pre-weights of the projector geometry (notably for cone-beam geometries).
+
+        Returns
+        -------
+        Union[NDArray, None]
+            The computed detector weights
+        """
+        if self.prj_geom is None:
+            return None
+        else:
+            return self.prj_geom.get_pre_weights([*self.prj_shape[-3:-2], self.prj_shape[-1]])
 
     def fp_angle(self, vol: NDArray, angle_ind: int) -> NDArray:
         """Forward-project a volume to a single sinogram line.

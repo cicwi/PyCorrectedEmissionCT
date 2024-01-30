@@ -301,6 +301,16 @@ class ProjectorOperator(BaseTransform):
     def _op_adjoint(self, x: NDArray) -> NDArray:
         return self.bp(x)
 
+    def get_pre_weights(self) -> Union[NDArray, None]:
+        """Compute the pre-weights of the projector geometry (notably for cone-beam geometries).
+
+        Returns
+        -------
+        Union[NDArray, None]
+            The computed detector weights
+        """
+        return None
+
 
 class TransformIdentity(BaseTransform):
     """Identity operator."""

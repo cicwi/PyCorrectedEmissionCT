@@ -340,6 +340,48 @@ class ProjectionGeometry(Geometry):
                 [self.det_v_xyz[..., : self.ndim].dot(disp_xyz), self.det_u_xyz[..., : self.ndim].dot(disp_xyz)], axis=0
             )
 
+    def get_pre_weights(self, det_shape_vu: Union[Sequence[int], NDArray, None] = None) -> Union[NDArray, None]:
+        """Compute the pre-weights of the projector geometry (notably for cone-beam geometries).
+
+        Parameters
+        ----------
+        det_shape_vu : Sequence[int] | NDArray | None, optional
+            Shape of the detector in [V]U coordinates, by default None
+
+        Returns
+        -------
+        NDArray | None
+            The computed detector weights
+        """
+        if self.geom_type != "cone":
+            return None
+        else:
+            if det_shape_vu is None:
+                if self.det_shape_vu is None:
+                    print("WARNING: pre-weights cannot be computed because detector shape is None.")
+                    return None
+                else:
+                    det_shape_vu = self.det_shape_vu
+            det_shape_vu = np.array(det_shape_vu, dtype=int)
+            if self.det_shape_vu is not None and np.any(det_shape_vu != self.det_shape_vu):
+                print("WARNING: overriding the detector shape in the computation of the pre-weights.")
+
+            src2det_xyz = self.det_pos_xyz + self.src_pos_xyz
+
+            pixel_coords_vu = [np.linspace(-s / 2, s / 2, int(s)) for s in det_shape_vu]
+            pixel_coords_vu = np.meshgrid(*pixel_coords_vu, indexing="ij")
+            pixel_coords_vu = [coords[..., None, None] for coords in pixel_coords_vu]
+
+            pixel_coords_xyz = pixel_coords_vu[-1] * self.det_u_xyz
+            if len(pixel_coords_vu) > 1:
+                pixel_coords_xyz += pixel_coords_vu[-2] * self.det_v_xyz
+
+            src2pixel_dict = np.linalg.norm(pixel_coords_xyz + src2det_xyz, axis=-1)
+            src2det_dist = np.linalg.norm(src2det_xyz, axis=-1)
+
+            pre_weights = src2det_dist / (src2pixel_dict + (src2pixel_dict == 0))
+            return pre_weights.swapaxes(-2, -1)
+
 
 @dataclass
 class VolumeGeometry(Geometry):
