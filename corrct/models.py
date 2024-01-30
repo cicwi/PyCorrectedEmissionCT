@@ -146,7 +146,10 @@ class ProjectionGeometry(Geometry):
             return dc_replace(self)
 
     def set_detector_shifts_vu(
-        self, det_pos_vu: Union[ArrayLike, NDArray, None] = None, cor_pos_u: Union[float, None] = None
+        self,
+        det_pos_vu: Union[ArrayLike, NDArray, None] = None,
+        cor_pos_u: Union[float, None] = None,
+        det_dist_y: ArrayLike = 0.0,
     ) -> None:
         """
         Set the detector position in XZ, from VU (vertical, horizontal) coordinates.
@@ -157,24 +160,34 @@ class ProjectionGeometry(Geometry):
             Detector vertical and horizontal positions. Vertical is optional.
         cor_pos_u : float | None
             Center of rotation position along U.
+        det_dist_y : ArrayLike, optional
+            Detector distance from origin along Y. The default is 0.0.
         """
-        if det_pos_vu is None and cor_pos_u is None:
-            return
-
-        det_pos_vu = np.array(det_pos_vu if det_pos_vu is not None else 0.0, ndmin=2)
+        det_pos_vu = np.array(det_pos_vu if det_pos_vu is not None else 0.0, ndmin=2, dtype=np.float64)
         if cor_pos_u is not None:
             det_pos_vu[-1, ...] = det_pos_vu[-1, ...] + cor_pos_u
 
-        if self.det_pos_xyz.shape[1] > 1 and self.det_pos_xyz.shape[1] != det_pos_vu.shape[1]:
+        det_dist_y = np.array(det_dist_y, ndmin=1, dtype=np.float64)
+        if det_dist_y.size > 1 and (
+            det_dist_y.ndim > 1 or (det_pos_vu.shape[1] > 1 and det_dist_y.size != det_pos_vu.shape[1])
+        ):
             raise ValueError(
-                f"Current number of angles ({self.det_pos_xyz.shape[-2]}) and new number of angles ({det_pos_vu.shape[-2]}) differ!"
+                f"Detector distance along Y (shape: {det_dist_y.shape}) should either be a scalar or a 1D array of the "
+                f"same length as the detector positions (shape: {det_pos_vu.shape}), if detector positions are more than 1."
             )
-        det_pos_y = self.det_pos_xyz[:, 1].copy()
-        self.det_pos_xyz = np.zeros((det_pos_vu.shape[-1], 3))
-        self.det_pos_xyz[:, 0] = det_pos_vu[-1, :]
-        self.det_pos_xyz[:, 1] = det_pos_y
+
+        if self.det_pos_xyz.shape[0] > 1 and det_pos_vu.shape[-1] > 1 and self.det_pos_xyz.shape[0] != det_pos_vu.shape[-1]:
+            raise ValueError(
+                f"Current number of angles ({self.det_pos_xyz.shape[-2]}) and new number of "
+                f"angles ({det_pos_vu.shape[-1]}) differ!"
+            )
+
+        self.det_pos_xyz = np.zeros((det_pos_vu.shape[-1], 3), dtype=np.float64)
+        self.det_pos_xyz += self.det_u_xyz * det_pos_vu[-1, :].reshape([-1, 1])
         if self.ndim == 3 and det_pos_vu.shape[0] == 2:
-            self.det_pos_xyz[:, 2] = det_pos_vu[-2, :]
+            self.det_pos_xyz += self.det_v_xyz * det_pos_vu[-2, :].reshape([-1, 1])
+
+        self.det_pos_xyz[:, 1] += det_dist_y
 
     def set_source_shifts_vu(self, src_pos_vu: Union[ArrayLike, NDArray, None] = None) -> None:
         """
@@ -190,9 +203,9 @@ class ProjectionGeometry(Geometry):
 
         src_pos_vu = np.array(src_pos_vu, ndmin=2)
 
-        if self.src_pos_xyz.shape[1] > 1 and self.src_pos_xyz.shape[1] != src_pos_vu.shape[1]:
+        if self.src_pos_xyz.shape[0] > 1 and src_pos_vu.shape[-1] > 1 and self.src_pos_xyz.shape[0] != src_pos_vu.shape[-1]:
             raise ValueError(
-                f"Current number of angles ({self.src_pos_xyz.shape[-2]}) and new number of angles ({src_pos_vu.shape[-2]}) differ!"
+                f"Current number of angles ({self.src_pos_xyz.shape[-2]}) and new number of angles ({src_pos_vu.shape[-1]}) differ!"
             )
         src_pos_y = self.src_pos_xyz[:, 1].copy()
         self.src_pos_xyz = np.zeros((src_pos_vu.shape[-1], 3))
@@ -200,6 +213,49 @@ class ProjectionGeometry(Geometry):
         self.src_pos_xyz[:, 1] = src_pos_y
         if self.ndim == 3 and src_pos_vu.shape[0] == 2:
             self.src_pos_xyz[:, 2] = src_pos_vu[-2, :]
+
+    def set_detector_tilt(
+        self, angles_t_rad: ArrayLike, tilt_axis: Union[Sequence[float], NDArray] = (0, 1, 0), tilt_source: bool = False
+    ) -> None:
+        """
+        Rotate the detector by the given angle(s) and axis(axes).
+
+        Parameters
+        ----------
+        angles_t_rad : ArrayLike
+            Rotation angle(s) in radians.
+        tilt_axis : Sequence[float] | NDArray, optional
+            The tilt axis or axes. The default is (0, 1, 0)
+        tilt_source : bool, optional
+            Whether to also tilt the source. The default is False.
+        """
+        angles = np.array(angles_t_rad, ndmin=1)[:, None]
+        tilt_axis = np.array(tilt_axis, ndmin=1)
+        if tilt_axis.shape[-1] != 3:
+            raise ValueError(
+                f"Tilt axis/axes should be three-dimensional, along the last dimension. Current shape: {tilt_axis.shape}"
+            )
+        if tilt_axis.ndim == 1:
+            tilt_axis = tilt_axis[None, :]
+        elif tilt_axis.ndim > 2:
+            raise ValueError(
+                f"Tilt axis/axes should be three-dimensional, along the last dimension. Current shape: {tilt_axis.shape}"
+            )
+        elif angles.size > 1 and tilt_axis.shape[0] != angles.shape[0]:
+            raise ValueError(
+                "Tilt axes and tilt angles multiplicity should match. "
+                f"Current shapes: {tilt_axis.shape = }, {angles.shape = }"
+            )
+
+        rotations = spt.Rotation.from_rotvec(angles * tilt_axis)  # type: ignore
+
+        if tilt_source:
+            self.src_pos_xyz = rotations.apply(self.src_pos_xyz)
+
+        self.det_u_xyz = rotations.apply(self.det_u_xyz)
+        self.det_v_xyz = rotations.apply(self.det_v_xyz)
+
+        self.det_pos_xyz = rotations.apply(self.det_pos_xyz)
 
     def rotate(self, angles_w_rad: ArrayLike, patch_astra_2d: bool = False) -> "ProjectionGeometry":
         """
