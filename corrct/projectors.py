@@ -345,37 +345,6 @@ class ProjectorUncorrected(operators.ProjectorOperator):
             prj_vwu = self.psf_vwu.T(prj_vwu)
         return self.projector_backend.bp(prj_vwu)
 
-    def fbp(self, projs: NDArray, fbp_filter: Union[str, Callable] = "ramp", pad_mode: str = "constant") -> NDArray:
-        """
-        Compute the filtered back-projection of the projection data to the volume.
-
-        The data could either be a sinogram, or a stack of sinograms.
-
-        Parameters
-        ----------
-        projs : NDArray
-            The projection data to back-project.
-        fbp_filter : str | Callable, optional
-            The FBP filter to use. The default is "ramp".
-        pad_mode: str, optional
-            The padding mode to use for the linear convolution. The default is "constant".
-
-        Raises
-        ------
-        ValueError
-            When trying to use fbp with a 3D projection geometry.
-
-        Returns
-        -------
-        NDArray
-            The FBP reconstructed volume.
-        """
-        if isinstance(fbp_filter, str):
-            return self.projector_backend.fbp(projs, fbp_filter=fbp_filter, pad_mode=pad_mode)
-        else:
-            projs = fbp_filter(projs, self)
-            return self.bp(projs) / self.angles_rot_rad.size
-
 
 class ProjectorAttenuationXRF(ProjectorUncorrected):
     """

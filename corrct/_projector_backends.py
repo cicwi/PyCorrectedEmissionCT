@@ -245,22 +245,6 @@ class ProjectorBackend(ABC):
             The angle index to foward project. The default is None.
         """
 
-    @abstractmethod
-    def fbp(self, prj: NDArray, fbp_filter: Union[str, NDArray], pad_mode: str) -> NDArray:
-        """Apply FBP.
-
-        Filtered back-projection interface. Derived backends need to implement this method.
-
-        Parameters
-        ----------
-        prj : NDArray
-            The sinogram or stack of sinograms.
-        fbp_filter : str | NDArray, optional
-            The filter to use in the filtered back-projection.
-        pad_mode: str, optional
-            The padding mode to use for the linear convolution.
-        """
-
 
 class ProjectorBackendSKimage(ProjectorBackend):
     """Projector backend based on scikit-image."""
@@ -371,40 +355,6 @@ class ProjectorBackendSKimage(ProjectorBackend):
         else:
             vol = skt.iradon(prj[:, np.newaxis], self.angles_w_deg[angle_ind : angle_ind + 1 :], **bpj_size, **filter_name)
         return vol * 2 / np.pi
-
-    def fbp(self, prj: NDArray, fbp_filter: Union[str, ArrayLike], pad_mode: str) -> NDArray:
-        """Apply filtered back-projection of a sinogram or stack of sinograms.
-
-        Parameters
-        ----------
-        prj : NDArray
-            The sinogram or stack of sinograms.
-        fbp_filter : str | ArrayLike, optional
-            The filter to use in the filtered back-projection.
-        pad_mode: str, optional
-            The padding mode to use for the linear convolution.
-
-        Returns
-        -------
-        vol : NDArray
-            The reconstructed volume.
-        """
-        if pad_mode.lower() != "constant":
-            raise ValueError(f"Argument 'pad_mode' only supports 'constant', while {pad_mode.lower()} was given.")
-        if not isinstance(fbp_filter, str):
-            raise ValueError(f"Custom filters not supported in the scikit-image backend.")
-
-        filter_name = self._set_filter_name(fbp_filter.lower())
-        bpj_size = self._set_bpj_size(self.vol_shape_zxy[-1])
-        if len(prj.shape) > 2:
-            num_lines = prj.shape[1]
-            vol = np.empty([num_lines, *self.vol_shape_zxy], dtype=prj.dtype)
-
-            for ii_v in range(num_lines):
-                vol[ii_v, ...] = skt.iradon(prj[ii_v, ...].transpose(), self.angles_w_deg, **bpj_size, **filter_name)
-            return vol
-        else:
-            return skt.iradon(prj.transpose(), self.angles_w_deg, **bpj_size, **filter_name)
 
 
 class ProjectorBackendASTRA(ProjectorBackend):
@@ -698,45 +648,6 @@ class ProjectorBackendASTRA(ProjectorBackend):
             self.data_mod.delete([vid])
 
         return vol
-
-    def fbp(self, prj: NDArray, fbp_filter: Union[str, NDArray, filters.Filter], pad_mode: str) -> NDArray:
-        """Apply filtered back-projection of a sinogram or stack of sinograms.
-
-        Parameters
-        ----------
-        prj : NDArray
-            The sinogram or stack of sinograms.
-        fbp_filter : str | NDArray | filtering.Filter, optional
-            The filter to use in the filtered back-projection.
-        pad_mode: str, optional
-            The padding mode to use for the linear convolution.
-
-        Returns
-        -------
-        vol : NDArray
-            The reconstructed volume.
-        """
-        if isinstance(fbp_filter, str):
-            local_filter = filters.FilterFBP(filter_name=fbp_filter)
-        elif isinstance(fbp_filter, np.ndarray):
-            local_filter = filters.FilterCustom(fbp_filter)
-        else:
-            local_filter = fbp_filter
-        local_filter.pad_mode = pad_mode
-
-        prj_f = local_filter(prj)
-
-        if self.vol_geom.is_3D() or len(prj.shape) == 2:
-            return self.bp(prj_f)
-        else:
-            num_lines = prj.shape[-3]
-            vols = []
-
-            for ii_v in range(num_lines):
-                prj_v = np.ascontiguousarray(prj_f[ii_v, :, :])
-                vols.append(self.bp(prj_v))
-
-            return np.ascontiguousarray(np.stack(vols, axis=0))
 
 
 class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
