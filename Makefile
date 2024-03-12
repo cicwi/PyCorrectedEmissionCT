@@ -93,13 +93,12 @@ install_dev:
 	pip install -e .[dev]
 
 prepare_packages:
-	conda install conda-build -y
-	conda install setuptools wheel twine -y
+	conda install conda-build setuptools wheel twine build -y
 
 conda_package:
 	conda build conda/
 
 pip_package:
-	python setup.py clean --all
-	python setup.py sdist bdist_wheel
-	# python -m build
+	# python setup.py clean --all
+	# python setup.py sdist bdist_wheel
+	python -m build
