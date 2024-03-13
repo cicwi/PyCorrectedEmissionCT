@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Miscellaneous processing routines.
 
@@ -9,7 +8,8 @@ and ESRF - The European Synchrotron, Grenoble, France
 import numpy as np
 import scipy as sp
 
-from typing import Sequence, Optional, Tuple, Union, Callable
+from typing import Optional, Union, Callable
+from collections.abc import Sequence
 from numpy.typing import NDArray, ArrayLike, DTypeLike
 
 import matplotlib.pyplot as plt
@@ -256,8 +256,8 @@ def lines_intersection(
     line_1: NDArray,
     line_2: Union[float, NDArray],
     position: str = "first",
-    x_lims: Optional[Tuple[Optional[float], Optional[float]]] = None,
-) -> Optional[Tuple[float, float]]:
+    x_lims: Optional[tuple[Optional[float], Optional[float]]] = None,
+) -> Optional[tuple[float, float]]:
     """
     Compute the intersection point between two lines.
 
@@ -350,7 +350,7 @@ def norm_cross_corr(
     mode_full: bool = True,
     compute_profile: bool = True,
     plot: bool = True,
-) -> Union[NDArray, Tuple[NDArray, NDArray]]:
+) -> Union[NDArray, tuple[NDArray, NDArray]]:
     """
     Compute the normalized cross-correlation between two images.
 

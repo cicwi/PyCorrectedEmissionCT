@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Pre-processing routines.
 
@@ -6,7 +5,8 @@ Pre-processing routines.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from typing import Sequence, Optional, Union, Tuple
+from typing import Optional, Union
+from collections.abc import Sequence
 from numpy.typing import DTypeLike, NDArray
 
 import numpy as np
@@ -284,7 +284,7 @@ def compute_eigen_flats(
     darks_wvu: Optional[NDArray] = None,
     ndim: int = 2,
     plot: bool = False,
-) -> Tuple[NDArray, NDArray]:
+) -> tuple[NDArray, NDArray]:
     """Compute the eigen flats of a stack of transmission images.
 
     Parameters

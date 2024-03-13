@@ -8,13 +8,14 @@ Created on Tue Mar 24 15:25:14 2020
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+from collections.abc import Sequence
 import numpy as np
 import scipy as sp
 
-from typing import List, Sequence, Optional, Tuple
 from numpy.typing import ArrayLike, NDArray
 
 from .misc import azimuthal_integration, lines_intersection, circular_mask
+from typing import Optional
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -127,7 +128,7 @@ def frc(
     smooth: Optional[int] = 5,
     taper_ratio: Optional[float] = 0.05,
     supersampling: int = 1,
-) -> Tuple[NDArray, NDArray]:
+) -> tuple[NDArray, NDArray]:
     """
     Compute the FRC/FSC (Fourier ring/shell correlation) between two images / volumes.
 
@@ -263,14 +264,14 @@ def frc(
 
 
 def plot_frcs(
-    volume_pairs: Sequence[Tuple[NDArray, NDArray]],
+    volume_pairs: Sequence[tuple[NDArray, NDArray]],
     labels: Sequence[str],
     title: Optional[str] = None,
     smooth: Optional[int] = 5,
     snrt: float = 0.2071,
     axes: Optional[Sequence[int]] = None,
     verbose: bool = False,
-) -> Tuple[Figure, Axes]:
+) -> tuple[Figure, Axes]:
     """Compute and plot the FSCs / FRCs of some volumes.
 
     Parameters
@@ -292,7 +293,7 @@ def plot_frcs(
         Whether to display verbose output, by default False.
     """
     frcs = [np.array([])] * len(volume_pairs)
-    xps: List[Optional[Tuple[float, float]]] = [(0.0, 0.0)] * len(volume_pairs)
+    xps: list[Optional[tuple[float, float]]] = [(0.0, 0.0)] * len(volume_pairs)
 
     for ii, pair in enumerate(tqdm(volume_pairs, desc="Computing FRCs", disable=not verbose)):
         frcs[ii], T = frc(pair[0], pair[1], snrt=snrt, smooth=smooth, axes=axes)
