@@ -25,6 +25,47 @@ from numpy.typing import DTypeLike, NDArray
 import matplotlib.pyplot as plt
 
 
+def _get_compound_cross_section(compound: dict, mean_energy_keV: float) -> float:
+    try:
+        return xraylib.CS_Total_CP(compound["name"], mean_energy_keV)
+    except ValueError:
+        elemets_cs = [
+            xraylib.CS_Total(el, mean_energy_keV) * compound["massFractions"][ii] for ii, el in enumerate(compound["Elements"])
+        ]
+        return np.sum(elemets_cs, axis=0)
+
+
+def get_linear_attenuation_coefficient(
+    compound: Union[str, dict], energy_keV: float, pixel_size_um: float, density: Union[float, None] = None
+) -> float:
+    """Compute the linear attenuation coefficient for given compound, energy, and pixel size.
+
+    Parameters
+    ----------
+    compound : Union[str, dict]
+        The compound for which we compute the linear attenuation coefficient
+    energy_keV : float
+        The energy of the photons
+    pixel_size_um : float
+        The pixel size in microns
+    density : Union[float, None], optional
+        The density of the compound (if different from the default value), by default None
+
+    Returns
+    -------
+    float
+        The linear attenuation coefficient
+    """
+    if isinstance(compound, str):
+        compound = xraylib_helper.get_compound(compound)
+
+    if density is not None:
+        compound["density"] = density
+
+    cmp_cs = _get_compound_cross_section(compound, energy_keV)
+    return pixel_size_um * 1e-4 * compound["density"] * cmp_cs
+
+
 def plot_effective_attenuation(
     compound: Union[str, dict],
     thickness_um: float,
@@ -81,13 +122,7 @@ def plot_effective_attenuation(
     atts = np.empty_like(yg)
 
     for ii, nrg in enumerate(nrgs_keV):
-        try:
-            cmp_cs = xraylib.CS_Total_CP(compound["name"], nrg)
-        except ValueError:
-            cmp_cs = np.sum(
-                [xraylib.CS_Total(el, nrg) * compound["massFractions"][ii] for ii, el in enumerate(compound["Elements"])],
-                axis=0,
-            )
+        cmp_cs = _get_compound_cross_section(compound, nrg)
         atts[ii] = np.exp(-thickness_um * 1e-4 * compound["density"] * cmp_cs)
 
     yg = yg / np.max(yg)
@@ -186,13 +221,7 @@ class VolumeMaterial:
         """
         ph_lin_att = np.zeros(self.shape, self.dtype)
         for ph, cmp in zip(self.materials_fractions, self.materials_compositions):
-            try:
-                cmp_cs = xraylib.CS_Total_CP(cmp["name"], energy_keV)
-            except ValueError:
-                cmp_cs = np.sum(
-                    [xraylib.CS_Total(el, energy_keV) * cmp["massFractions"][ii] for ii, el in enumerate(cmp["Elements"])],
-                    axis=0,
-                )
+            cmp_cs = _get_compound_cross_section(cmp, energy_keV)
             if self.verbose:
                 print(f"Attenuation ({cmp['name']} at {energy_keV}):")
                 print(
