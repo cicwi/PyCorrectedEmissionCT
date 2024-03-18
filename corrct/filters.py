@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Filtered back-projection filters.
 
@@ -6,22 +5,19 @@ Filtered back-projection filters.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import numpy as np
-from scipy.interpolate import interp1d
-
-import skimage.transform as skt
-
+from abc import ABC, abstractmethod
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from typing import Any, Optional, Union
 import matplotlib.pyplot as plt
+import numpy as np
+from numpy.typing import ArrayLike, DTypeLike, NDArray
+from scipy.interpolate import interp1d
+from skimage.transform.radon_transform import _get_fourier_filter
 
 from .operators import BaseTransform
 from .processing import circular_mask
 
-from typing import Union, Sequence, Optional, Any
-from numpy.typing import ArrayLike, DTypeLike, NDArray
-
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from collections.abc import Mapping
 
 try:
     import pywt
@@ -514,7 +510,7 @@ class FilterFBP(Filter):
         """
         prj_size_pad = self.get_padding_size(data_wu.shape)
 
-        self.fbp_filter = skt.radon_transform._get_fourier_filter(prj_size_pad, self.filter_name)
+        self.fbp_filter = _get_fourier_filter(prj_size_pad, self.filter_name)
         self.fbp_filter = np.squeeze(self.fbp_filter) * np.pi / (2 * data_wu.shape[-2])
 
         if self.use_rfft:
