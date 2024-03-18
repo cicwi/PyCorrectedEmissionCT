@@ -147,7 +147,7 @@ class ProjectorBackend(ABC):
         self.vol_geom = vol_geom
 
         self.vol_shape_zxy = self.vol_geom.shape_zxy
-        self.angles_w_rad = np.array(angles_rot_rad, ndmin=1, dtype=np.floating)
+        self.angles_w_rad = np.array(angles_rot_rad, ndmin=1, dtype=np.float32)
 
         # Basic sizes, unless overridden
         self.prj_shape_vwu = np.array([*self.vol_shape_zxy[:-2], len(self.angles_w_rad), self.vol_shape_zxy[-1]], dtype=int)
