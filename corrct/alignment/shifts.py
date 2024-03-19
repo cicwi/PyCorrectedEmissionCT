@@ -259,22 +259,20 @@ class DetectorShiftsPRE(DetectorShiftsBase):
         if self.num_dets > 1:
             data_vwu = np.mean(data_vwu, axis=0)
 
+        if is_3d:
+            data_vwu = np.mean(data_vwu, axis=-3)
+
         fx_half_size = (data_vwu.shape[-1] - 1) / 2
 
         if method.lower() == "com":
             fx = np.linspace(-fx_half_size, fx_half_size, data_vwu.shape[-1])
-            center_of_mass = -np.sum(data_vwu * fx, axis=-1) / np.sum(data_vwu, axis=-1)
-            if is_3d:
-                center_of_mass = np.mean(center_of_mass, axis=-2)
-                data_vwu = np.mean(data_vwu, axis=-3)
+            ref_points = -np.sum(data_vwu * fx, axis=-1) / np.sum(data_vwu, axis=-1)
         elif method.lower() == "max":
-            if is_3d:
-                data_vwu = np.mean(data_vwu, axis=-3)
-            center_of_mass = fx_half_size - np.argmax(data_vwu, axis=-1)
+            ref_points = fx_half_size - np.argmax(data_vwu, axis=-1)
         else:
             raise ValueError(f"Unkown selected method {method}. Please choose one among: 'com' | 'max'")
 
-        a, p, b = fitting.fit_sinusoid(self.angles_rad, center_of_mass, fit_l1=fit_l1)
+        a, p, b = fitting.fit_sinusoid(self.angles_rad, ref_points, fit_l1=fit_l1)
 
         cor = np.around(b, decimals=self.decimals)
 
@@ -283,7 +281,7 @@ class DetectorShiftsPRE(DetectorShiftsBase):
             sort_angles_deg = np.sort(angles_deg)
             sort_angles_rad = np.sort(self.angles_rad)
             fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-            axs[0].scatter(angles_deg, center_of_mass, label="Centers of mass")
+            axs[0].scatter(angles_deg, ref_points, label="Centers of mass")
             axs[0].plot(sort_angles_deg, fitting.sinusoid(sort_angles_rad, a, p, b), c="C1", label="Fitted sinusoid")
             axs[0].plot(sort_angles_deg, np.ones_like(sort_angles_deg) * b, c="C2", label="Bias (CoR)")
             axs[0].legend()
@@ -293,7 +291,7 @@ class DetectorShiftsPRE(DetectorShiftsBase):
             axs[0].xaxis.label.set_fontsize(16)
             axs[0].yaxis.label.set_fontsize(16)
             axs[1].imshow(data_vwu)
-            axs[1].scatter(-center_of_mass + fx_half_size, np.arange(len(center_of_mass)), c="C1")
+            axs[1].scatter(-ref_points + fx_half_size, np.arange(len(ref_points)), c="C1")
             axs[1].set_xlabel("Coord. U (horizontal)")
             axs[1].set_ylabel("Coord. W (angular)")
             axs[1].xaxis.label.set_fontsize(16)
@@ -305,7 +303,7 @@ class DetectorShiftsPRE(DetectorShiftsBase):
             print(f"bias = {b} (pix)")
             print(f" -> cor = {cor} (pix)")
 
-        shifts_u: NDArrayFloat = center_of_mass - fitting.sinusoid(self.angles_rad, a, p, b)
+        shifts_u: NDArrayFloat = ref_points - fitting.sinusoid(self.angles_rad, a, p, b)
         shifts_u = _filter_shifts(shifts_u, self.max_shifts[-1, :])
         shifts_u = np.around(shifts_u, decimals=self.decimals)
 
