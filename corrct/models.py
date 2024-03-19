@@ -519,7 +519,7 @@ class VolumeGeometry(Geometry):
         return get_vol_geom_from_volume(volume=volume)
 
 
-def combine_shifts_vu(shifts_v: NDArray, shifts_u: NDArray, cor: Union[float, NDArray, None] = None) -> NDArray:
+def combine_shifts_vu(shifts_v: NDArray, shifts_u: NDArray) -> NDArray:
     """Combine vertical and horizontal shifts.
 
     Parameters
@@ -528,8 +528,6 @@ def combine_shifts_vu(shifts_v: NDArray, shifts_u: NDArray, cor: Union[float, ND
         The vertical shifts
     shifts_u : NDArray
         The horizontal shifts
-    cor : Union[float, NDArray, None], optional
-        The center-of-rotation, if applicable, by default None
 
     Returns
     -------
@@ -542,12 +540,8 @@ def combine_shifts_vu(shifts_v: NDArray, shifts_u: NDArray, cor: Union[float, ND
         raise ValueError(f"Expected 1-dimensional array for horizontal shifts, but an array {shifts_u.shape = } was passed")
     if shifts_v.size != shifts_u.size:
         raise ValueError(f"Number of vertical shifts ({shifts_v.size}) and horizontal shifts ({shifts_u.size}) should match")
-    if cor is not None:
-        cor = np.array(cor)
-        if cor.ndim > 0 and np.any(np.array(shifts_u.shape) > 1):
-            raise ValueError(f"Expected 0-dimensional array for center-of-rotation, but an array {cor.shape = } was passed")
 
-    return np.stack([shifts_v, shifts_u + cor if cor is not None else 0], axis=-1)
+    return np.stack([np.squeeze(shifts_v), np.squeeze(shifts_u)], axis=-2)
 
 
 def get_rot_axis_dir(rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise") -> NDArray:
