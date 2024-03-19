@@ -18,6 +18,9 @@ from dataclasses import dataclass, replace as dc_replace
 from abc import ABC
 
 
+ROT_DIRS_VALID = ("clockwise", "counter-clockwise")
+
+
 class Geometry(ABC):
     """Base geometry class."""
 
@@ -51,11 +54,11 @@ class ProjectionGeometry(Geometry):
 
     def __post_init__(self) -> None:
         self.geom_type = self.geom_type.lower()
-        self.src_pos_xyz = np.array(self.src_pos_xyz)
-        self.det_pos_xyz = np.array(self.det_pos_xyz)
-        self.det_u_xyz = np.array(self.det_u_xyz)
-        self.det_v_xyz = np.array(self.det_v_xyz)
-        self.rot_dir_xyz = np.array(self.rot_dir_xyz)
+        self.src_pos_xyz = np.array(self.src_pos_xyz, ndmin=2)
+        self.det_pos_xyz = np.array(self.det_pos_xyz, ndmin=2)
+        self.det_u_xyz = np.array(self.det_u_xyz, ndmin=2)
+        self.det_v_xyz = np.array(self.det_v_xyz, ndmin=2)
+        self.rot_dir_xyz = np.array(self.rot_dir_xyz, ndmin=2)
 
     def __getitem__(self, indx: Any):
         """
@@ -535,9 +538,8 @@ def get_rot_axis_dir(rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise")
         In case of malformed direction.
     """
     if isinstance(rot_axis_dir, str):
-        ROT_DIR_STR = ("clockwise", "counter-clockwise")
-        if rot_axis_dir.lower() not in ROT_DIR_STR:
-            raise ValueError(f"Rotation axis direction {rot_axis_dir} not allowed. It should be one of: {ROT_DIR_STR}")
+        if rot_axis_dir.lower() not in ROT_DIRS_VALID:
+            raise ValueError(f"Rotation axis direction {rot_axis_dir} not allowed. It should be one of: {ROT_DIRS_VALID}")
 
         if rot_axis_dir.lower() == "clockwise":
             return np.array([0.0, 0.0, -1.0])
