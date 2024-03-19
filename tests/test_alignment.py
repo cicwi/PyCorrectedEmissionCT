@@ -52,6 +52,64 @@ def _generate_noise(data_theo: NDArray) -> NDArray:
     return data_noise - background
 
 
+def test_api_det_shifts_vu():
+    """Test the API of the detector VU shifts manipulation in `models`."""
+    num_angles: int = 41
+    angles_deg = np.linspace(0, 180, num_angles)
+    shifts_u = np.random.randn(num_angles)
+    shifts_v = np.random.randn(num_angles)
+
+    shifts_vu = cct.models.combine_shifts_vu(shifts_v, shifts_u)
+    assert np.all(shifts_vu[-1] == shifts_u), "Wrong composition of shifts from `cct.models.combine_shifts_vu`"
+    assert np.all(shifts_vu[-2] == shifts_v), "Wrong composition of shifts from `cct.models.combine_shifts_vu`"
+
+    prj_geom = cct.models.get_prj_geom_parallel(geom_type="2d")
+    prj_geom.set_detector_shifts_vu(shifts_u)
+
+    msg = f"Wrong dimensions of `det_pos_xyz` in ProjectionGeometry. Should be 2-dimensional, of shape: {[num_angles, 3]}"
+    assert prj_geom.det_pos_xyz.ndim == 2, msg
+    assert np.all(np.array(prj_geom.det_pos_xyz.shape) == [num_angles, 3]), msg
+    assert np.all(prj_geom.det_pos_xyz[:, -3] == shifts_u), "The shifts along U are wrong"
+
+    rot_prj_geom = prj_geom.rotate(np.deg2rad(10))
+    assert rot_prj_geom.det_pos_xyz.ndim == 2, msg
+    assert np.all(np.array(rot_prj_geom.det_pos_xyz.shape) == [num_angles, 3]), msg
+
+    rot_prj_geom = prj_geom.rotate(np.deg2rad(angles_deg))
+    assert rot_prj_geom.det_pos_xyz.ndim == 2, msg
+    assert np.all(np.array(rot_prj_geom.det_pos_xyz.shape) == [num_angles, 3]), msg
+
+    prj_geom = cct.models.get_prj_geom_parallel(geom_type="3d")
+    prj_geom.set_detector_shifts_vu(shifts_vu)
+
+    msg = f"Detector position in ProjectionGeometry should be 2-dimensional, of shape: {[num_angles, 3]}"
+    assert prj_geom.det_pos_xyz.ndim == 2, msg
+    assert np.all(np.array(prj_geom.det_pos_xyz.shape) == [num_angles, 3]), msg
+    assert np.all(prj_geom.det_pos_xyz[:, -3] == shifts_u), "The shifts along U are wrong"
+    assert np.all(prj_geom.det_pos_xyz[:, -1] == shifts_v), "The shifts along v are wrong"
+
+    rot_prj_geom = prj_geom.rotate(np.deg2rad(10))
+    assert rot_prj_geom.det_pos_xyz.ndim == 2, msg
+    assert np.all(np.array(rot_prj_geom.det_pos_xyz.shape) == [num_angles, 3]), msg
+
+    rot_prj_geom = prj_geom.rotate(np.deg2rad(angles_deg))
+    assert rot_prj_geom.det_pos_xyz.ndim == 2, msg
+    assert np.all(np.array(rot_prj_geom.det_pos_xyz.shape) == [num_angles, 3]), msg
+
+    prj_geom = cct.models.get_prj_geom_parallel(geom_type="3d")
+    prj_geom.set_detector_shifts_vu(shifts_vu)
+
+    prj_geom.set_detector_tilt(np.pi / 2)
+
+    assert np.all(np.isclose(prj_geom.det_pos_xyz[:, -1], -shifts_u)), "The tilted shifts along U are wrong"
+    assert np.all(np.isclose(prj_geom.det_pos_xyz[:, -3], shifts_v)), "The tilted shifts along v are wrong"
+
+    prj_geom.set_detector_tilt(np.pi / 2)
+
+    assert np.all(np.isclose(prj_geom.det_pos_xyz[:, -3], -shifts_u)), "The tilted shifts along U are wrong"
+    assert np.all(np.isclose(prj_geom.det_pos_xyz[:, -1], -shifts_v)), "The tilted shifts along v are wrong"
+
+
 @pytest.mark.skipif(not cct.projectors.astra_available, reason="astra-toolbox not available")
 @pytest.mark.parametrize("add_noise", [(False,), (True,)])
 def test_pre_alignment(add_noise: bool, theo_rot_axis: float = -1.25):
