@@ -354,13 +354,11 @@ class DetectorShiftsXC(DetectorShiftsBase):
 
         return rel_shifts_vu
 
-    def fit_vu(self, cor: Optional[float] = None, fit_l1: bool = False) -> NDArray:
+    def fit_vu(self, fit_l1: bool = False) -> NDArray:
         """Compute the pre-alignment vertical and horizontal shifts, using cross-correlation.
 
         Parameters
         ----------
-        cor : Optional[float], optional
-            Center-of-Rotation guess, by default None
         fit_l1 : bool, optional
             Computes the l1-min fit of the sinusoid, by default False.
 
@@ -376,7 +374,8 @@ class DetectorShiftsXC(DetectorShiftsBase):
         sorted_angles_rad = self.angles_rad[angles_order]
 
         rel_shifts_vu = np.zeros((num_dims, len(self.angles_rad)))
-        for ii, (a_prev, a_curr) in enumerate(zip(angles_order[:-1], angles_order[1:])):
+        desc = "Computing adjacent images shifts"
+        for ii, (a_prev, a_curr) in enumerate(zip(tqdm(angles_order[:-1], desc=desc), angles_order[1:])):
             rel_shifts_vu[..., [ii + 1]] = self.find_shifts_vu(
                 self.data_vwu[..., [a_prev], :], self.data_vwu[..., [a_curr], :]
             )
@@ -408,11 +407,6 @@ class DetectorShiftsXC(DetectorShiftsBase):
         shifts_u: NDArrayFloat = shifts_vu[-1, ...] - fitting.sinusoid(sorted_angles_rad, a, p, b)
         shifts_u = _filter_shifts(shifts_u, self.max_shifts[-1, :])
         shifts_u = np.around(shifts_u, decimals=self.decimals)
-
-        if cor is None:
-            cor = self.fit_u_180()
-
-        shifts_vu[-1, ...] = cor + shifts_u
 
         return shifts_vu[:, list(angles_order)]
 
