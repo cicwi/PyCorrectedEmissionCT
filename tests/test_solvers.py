@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Test `corrct.solvers` package.
@@ -8,179 +7,93 @@ Test `corrct.solvers` package.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import sys
 import numpy as np
+import pytest
 from numpy.typing import NDArray
-
-import unittest
-
-from corrct import projectors, solvers, processing
+from corrct import processing, projectors, solvers
 
 
 eps = np.finfo(np.float32).eps
+OVERSIZE_DATA = 5
+
+VOL_SHAPE_2D = np.asarray((10, 10))
+PRJ_SHAPE_2D = np.asarray((OVERSIZE_DATA, np.prod(VOL_SHAPE_2D)))
+
+TOLERANCE = 1e-2
 
 
-def get_test_ind(func_name: str) -> str:
-    return func_name.split("_")[1]
-
-
-def print_max_deviation(test_ind: str, sol_diff: NDArray[np.floating], tolerance: float) -> None:
+def _print_max_deviation(test_ind: str, sol_diff: NDArray[np.floating], tolerance: float) -> None:
     max_dev = np.max(np.abs(sol_diff))
     print(f"\n{test_ind} - Max absolute deviation is: {max_dev:.6} (tolerance: {tolerance:.6}) -> ", end="", flush=True)
 
 
-class TestSolvers(unittest.TestCase):
-    """Tests for the solvers in `corrct.solvers` package."""
+def _fwd_op(M: NDArray, x: NDArray, y_shape: tuple[int, int]) -> NDArray:
+    return np.dot(M, x.flatten()).reshape(y_shape)
 
-    __oversize_data = 5
 
-    def setUp(self):
-        """Set up test fixtures, if any."""
-        self.test_vols_shape = (10, 10)
-        self.test_prjs_shape = (self.__oversize_data, np.prod(self.test_vols_shape))
+# def _bwd_op(M: NDArray, y: NDArray, x_shape: tuple[int, int]) -> NDArray:
+#     return np.dot(y.flatten(), M).reshape(x_shape)
 
-        self.vol_rand_2d = np.fmin(np.random.rand(*self.test_vols_shape[:2]) + eps, 1)
-        self.vol_flat_2d = processing.circular_mask(self.test_vols_shape[:2], -2)
 
-        self.proj_matrix_2d = (np.random.rand(np.prod(self.test_prjs_shape), np.prod(self.test_vols_shape)) > 0.5).astype(
-            np.float32
-        )
+@pytest.fixture(scope="module")
+def flat_2d_data() -> tuple[NDArray, NDArray, NDArray]:
+    vol_rand_2d = np.fmin(np.random.rand(*VOL_SHAPE_2D[:2]) + eps, 1)
+    proj_matrix_2d = (np.random.rand(np.prod(PRJ_SHAPE_2D), np.prod(VOL_SHAPE_2D)) > 0.5).astype(np.float32)
+    data_rand_2d = _fwd_op(proj_matrix_2d, vol_rand_2d, PRJ_SHAPE_2D)
+    return proj_matrix_2d, vol_rand_2d, data_rand_2d
 
-        self.data_rand_2d = self._fwd_op(self.proj_matrix_2d, self.vol_rand_2d, self.test_prjs_shape)
 
-        self.data_flat_2d = self._fwd_op(self.proj_matrix_2d, self.vol_flat_2d, self.test_prjs_shape)
-        self.data_flat_2d += np.random.randn(*self.data_flat_2d.shape) * 1e-3
+@pytest.fixture(scope="module")
+def flat_2d_data() -> tuple[NDArray, NDArray, NDArray]:
+    vol_flat_2d = processing.circular_mask(VOL_SHAPE_2D[:2], -2)
+    proj_matrix_2d = (np.random.rand(np.prod(PRJ_SHAPE_2D), np.prod(VOL_SHAPE_2D)) > 0.5).astype(np.float32)
+    data_flat_2d = _fwd_op(proj_matrix_2d, vol_flat_2d, PRJ_SHAPE_2D)
+    data_flat_2d += np.random.randn(*data_flat_2d.shape) * 1e-3
+    return proj_matrix_2d, vol_flat_2d, data_flat_2d
 
-        self.tolerance = 1e-2
 
-    def tearDown(self):
-        """Tear down test fixtures, if any."""
+@pytest.mark.parametrize("algo_it", [(solvers.SIRT, 1_000), (solvers.PDHG, 500), (solvers.MLEM, 10_000)])
+def test_algo_rand(flat_2d_data, algo_it: tuple[type[solvers.Solver], int]):
+    """Test algorithms in 2D on a random image."""
+    proj_matrix_2d, vol_rand_2d, data_rand_2d = flat_2d_data
+    algo_class, iterations = algo_it
 
-    def _fwd_op(self, M, x, y_shape):
-        return np.dot(M, x.flatten()).reshape(y_shape)
+    prj_mat = projectors.ProjectorMatrix(proj_matrix_2d, VOL_SHAPE_2D, PRJ_SHAPE_2D)
 
-    def _bwd_op(self, M, y, x_shape):
-        return np.dot(y.flatten(), M).reshape(x_shape)
+    algo = algo_class()
+    sol, _ = algo(prj_mat, data_rand_2d, iterations=iterations)
 
-    def _get_A_At(self, vol_dims):
-        if vol_dims.lower() == "2d":
+    sol_diff = vol_rand_2d - sol
+    _print_max_deviation(algo.info(), sol_diff, TOLERANCE)
 
-            def A(x):
-                return self._fwd_op(self.proj_matrix_2d, x, self.test_prjs_shape)
+    assert np.all(np.isclose(sol, vol_rand_2d, atol=TOLERANCE))
 
-            def At(y):
-                return self._bwd_op(self.proj_matrix_2d, y, self.test_vols_shape[:2])
 
-        else:
-            raise ValueError("Only 2D implemented.")
-        return (A, At)
+FLAT_2D_CASES = [
+    (solvers.SIRT, 2_500, {}),
+    (solvers.PDHG, 500, {}),
+    (solvers.PDHG, 1_000, dict(precondition=False)),
+    (solvers.PDHG, 500, dict(lower_limit=0, upper_limit=1)),
+    (solvers.MLEM, 10_000, dict(lower_limit=0, upper_limit=1)),
+]
 
-    def test_000_SIRT(self):
-        """Test SIRT algorithm in 2D."""
-        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
 
-        algo = solvers.SIRT()
-        sol, _ = algo(A, self.data_rand_2d, 1000)
+@pytest.mark.parametrize("algo_it_pars", FLAT_2D_CASES)
+def test_algo_flat(flat_2d_data, algo_it_pars: tuple[type[solvers.Solver], int, dict]):
+    """Test algorithms in 2D on a flat image."""
+    proj_matrix_2d, vol_flat_2d, data_flat_2d = flat_2d_data
+    algo_class, iterations, extra_params = algo_it_pars
 
-        sol_diff = self.vol_rand_2d - sol
-        test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff, self.tolerance)
+    prj_mat = projectors.ProjectorMatrix(proj_matrix_2d, VOL_SHAPE_2D, PRJ_SHAPE_2D)
 
-        assert np.all(np.isclose(sol, self.vol_rand_2d, atol=self.tolerance))
-
-    def test_001_PDHG_LS(self):
-        """Test Chambolle-Pock least-squares algorithm in 2D."""
-        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
-
-        algo = solvers.PDHG()
-        sol, _ = algo(A, self.data_rand_2d, 500)
-
-        sol_diff = self.vol_rand_2d - sol
-        test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff, self.tolerance)
-
-        assert np.all(np.isclose(sol, self.vol_rand_2d, atol=self.tolerance))
-
-    def test_002_SIRT_TV(self):
-        """Test SIRT TV-min algorithm in 2D."""
-        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
-
+    if algo_class in (solvers.SIRT, solvers.PDHG):
         reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.SIRT(regularizer=reg)
-        sol, _ = algo(A, self.data_flat_2d, 2500)
+        algo = algo_class(regularizer=reg)
+    else:
+        algo = algo_class()
+    sol, _ = algo(prj_mat, data_flat_2d, iterations=iterations, **extra_params)
 
-        sol_diff = self.vol_flat_2d - sol
-        test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff, self.tolerance)
+    sol_diff = vol_flat_2d - sol
+    _print_max_deviation(algo.info(), sol_diff, TOLERANCE)
 
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
-
-    def test_003_PDHG_LS_TV(self):
-        """Test Chambolle-Pock unconstrained least-squares TV-min algorithm in 2D."""
-        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
-
-        reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.PDHG(regularizer=reg)
-        sol, _ = algo(A, self.data_flat_2d, 500)
-
-        sol_diff = self.vol_flat_2d - sol
-        test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff, self.tolerance)
-
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
-
-    def test_004_PDHG_LS_TV_unconstrained(self):
-        """Test Chambolle-Pock unconstrained least-squares TV-min algorithm in 2D."""
-        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
-
-        reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.PDHG(regularizer=reg)
-        sol, _ = algo(A, self.data_flat_2d, 500)
-
-        sol_diff = self.vol_flat_2d - sol
-        test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff, self.tolerance)
-
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
-
-    def test_005_PDHG_LS_TV_constrained01(self):
-        """Test Chambolle-Pock constrained [0, 1] least-squares TV-min algorithm in 2D."""
-        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
-
-        reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.PDHG(regularizer=reg)
-        sol, _ = algo(A, self.data_flat_2d, 500, lower_limit=0, upper_limit=1)
-
-        sol_diff = self.vol_flat_2d - sol
-        test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff, self.tolerance)
-
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
-
-    def test_006_PDHG_LS_TV_unconstrained_no_precond(self):
-        """Test Chambolle-Pock not preconditioned, unconstrained least-squares TV-min algorithm in 2D."""
-        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
-
-        reg = solvers.Regularizer_TV2D(1e-4)
-        algo = solvers.PDHG(regularizer=reg)
-        sol, _ = algo(A, self.data_flat_2d, 1000, precondition=False)
-
-        sol_diff = self.vol_flat_2d - sol
-        test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff, self.tolerance)
-
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
-
-    def test_007_MLEM(self):
-        """Test MLEM algorithm in 2D."""
-        A = projectors.ProjectorMatrix(self.proj_matrix_2d, self.test_vols_shape, self.test_prjs_shape)
-
-        algo = solvers.MLEM()
-        sol, _ = algo(A, self.data_flat_2d, 10_000)
-        # sol, _ = algo(A, sino_substract, num_iterations_mlem, x_mask=vol_mask, lower_limit=1e-5, upper_limit=10)
-
-        sol_diff = self.vol_flat_2d - sol
-        test_ind = get_test_ind(sys._getframe().f_code.co_name)
-        print_max_deviation(test_ind, sol_diff, self.tolerance)
-
-        assert np.all(np.isclose(sol, self.vol_flat_2d, atol=self.tolerance))
+    assert np.all(np.isclose(sol, vol_flat_2d, atol=TOLERANCE))
