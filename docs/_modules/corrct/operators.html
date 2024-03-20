@@ -371,7 +371,17 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ProjectorOperator.get_pre_weights"><a class="viewcode-back" href="../../corrct.html#corrct.operators.ProjectorOperator.get_pre_weights">[docs]</a>    <span class="k">def</span> <span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the pre-weights of the projector geometry (notably for cone-beam geometries).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Union[NDArray, None]</span>
+<span class="sd">            The computed detector weights</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span></div></div>
 
 
 <div class="viewcode-block" id="TransformIdentity"><a class="viewcode-back" href="../../corrct.html#corrct.operators.TransformIdentity">[docs]</a><span class="k">class</span> <span class="nc">TransformIdentity</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>

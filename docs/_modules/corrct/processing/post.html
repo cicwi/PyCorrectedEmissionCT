@@ -70,8 +70,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for corrct.processing.post</h1><div class="highlight"><pre>
-<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Post-processing routines.</span>
 
 <span class="sd">Created on Tue Mar 24 15:25:14 2020</span>
@@ -80,19 +79,21 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
-
-<span class="kn">from</span> <span class="nn">.misc</span> <span class="kn">import</span> <span class="n">azimuthal_integration</span><span class="p">,</span> <span class="n">lines_intersection</span><span class="p">,</span> <span class="n">circular_mask</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
 <span class="kn">from</span> <span class="nn">matplotlib.axes._axes</span> <span class="kn">import</span> <span class="n">Axes</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
 
 <span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">corrct.operators</span> <span class="kn">import</span> <span class="n">BaseTransform</span><span class="p">,</span> <span class="n">TransformIdentity</span>
+<span class="kn">from</span> <span class="nn">corrct.processing.misc</span> <span class="kn">import</span> <span class="n">azimuthal_integration</span><span class="p">,</span> <span class="n">circular_mask</span><span class="p">,</span> <span class="n">lines_intersection</span>
 
 
 <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
@@ -122,13 +123,13 @@
     <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]]</span>
 
     <span class="n">num_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-    <span class="n">com</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">),))</span>
+    <span class="n">center_of_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">),))</span>
     <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axes</span><span class="p">):</span>
         <span class="n">sum_axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_dims</span><span class="p">),</span> <span class="n">a</span><span class="p">),</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">vol</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">sum_axes</span><span class="p">))</span>
-        <span class="n">com</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span> <span class="o">/</span> <span class="n">line</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">center_of_mass</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span> <span class="o">/</span> <span class="n">line</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="n">com</span></div>
+    <span class="k">return</span> <span class="n">center_of_mass</span></div>
 
 
 <div class="viewcode-block" id="power_spectrum"><a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.post.power_spectrum">[docs]</a><span class="k">def</span> <span class="nf">power_spectrum</span><span class="p">(</span>
@@ -199,7 +200,7 @@
     <span class="n">smooth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">taper_ratio</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
     <span class="n">supersampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the FRC/FSC (Fourier ring/shell correlation) between two images / volumes.</span>
 
@@ -335,14 +336,14 @@
 
 
 <div class="viewcode-block" id="plot_frcs"><a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.post.plot_frcs">[docs]</a><span class="k">def</span> <span class="nf">plot_frcs</span><span class="p">(</span>
-    <span class="n">volume_pairs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]],</span>
+    <span class="n">volume_pairs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]],</span>
     <span class="n">labels</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">smooth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">snrt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2071</span><span class="p">,</span>
     <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">Axes</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">Axes</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Compute and plot the FSCs / FRCs of some volumes.</span>
 
 <span class="sd">    Parameters</span>
@@ -364,7 +365,7 @@
 <span class="sd">        Whether to display verbose output, by default False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">frcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">volume_pairs</span><span class="p">)</span>
-    <span class="n">xps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">volume_pairs</span><span class="p">)</span>
+    <span class="n">xps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">volume_pairs</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">pair</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">volume_pairs</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Computing FRCs&quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">verbose</span><span class="p">)):</span>
         <span class="n">frcs</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">T</span> <span class="o">=</span> <span class="n">frc</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">snrt</span><span class="o">=</span><span class="n">snrt</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="n">smooth</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
@@ -402,6 +403,44 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span></div>
+
+
+<div class="viewcode-block" id="fit_scale_bias"><a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.post.fit_scale_bias">[docs]</a><span class="k">def</span> <span class="nf">fit_scale_bias</span><span class="p">(</span><span class="n">img_data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">prj_data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">prj</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BaseTransform</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Fit the scale and bias of an image, against its projection in a different space.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img_data : NDArray</span>
+<span class="sd">        The image data</span>
+<span class="sd">    prj_data : NDArray</span>
+<span class="sd">        The projected data</span>
+<span class="sd">    prj : BaseTransform | None, optional</span>
+<span class="sd">        The projection operator. The default is None, which uses the identity (TransformIdentity)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[float, float]</span>
+<span class="sd">        The scale and bias</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">prj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">prj</span> <span class="o">=</span> <span class="n">TransformIdentity</span><span class="p">(</span><span class="n">img_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">prj_x</span> <span class="o">=</span> <span class="n">prj</span><span class="p">(</span><span class="n">img_data</span><span class="p">)</span>
+    <span class="n">prj_1</span> <span class="o">=</span> <span class="n">prj</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">img_data</span><span class="p">))</span>
+    <span class="n">m_y_dot_prj_x</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prj_data</span> <span class="o">*</span> <span class="n">prj_x</span><span class="p">))</span>
+    <span class="n">m_y_dot_prj_1</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prj_data</span> <span class="o">*</span> <span class="n">prj_1</span><span class="p">))</span>
+    <span class="n">prj_x_2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prj_x</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">prj_1_2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prj_1</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">prj_1_dot_prj_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prj_1</span> <span class="o">*</span> <span class="n">prj_x</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">obj_func</span><span class="p">(</span><span class="n">ab</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">prj</span><span class="p">(</span><span class="n">img_data</span> <span class="o">*</span> <span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">prj_data</span>
+        <span class="n">grad_a</span> <span class="o">=</span> <span class="n">m_y_dot_prj_x</span> <span class="o">+</span> <span class="n">prj_x_2</span> <span class="o">*</span> <span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">prj_1_dot_prj_x</span> <span class="o">*</span> <span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">grad_b</span> <span class="o">=</span> <span class="n">m_y_dot_prj_1</span> <span class="o">+</span> <span class="n">prj_1_2</span> <span class="o">*</span> <span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">prj_1_dot_prj_x</span> <span class="o">*</span> <span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">grad_a</span><span class="p">,</span> <span class="n">grad_b</span><span class="p">))</span>
+
+    <span class="n">opt_res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="n">obj_func</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">jac</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">opt_res</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">opt_res</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 </pre></div>
 
            </div>

@@ -71,7 +71,6 @@
              
   <h1>Source code for corrct.struct_illum</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
-<span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Provide structured illumination support.</span>
 
@@ -81,24 +80,27 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">linalg</span> <span class="k">as</span> <span class="n">spalg</span>
+<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
 
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">DTypeLike</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
-
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.linalg</span> <span class="k">as</span> <span class="nn">spalg</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">operators</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
 
-<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
+<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">operators</span><span class="p">,</span> <span class="n">processing</span>
+
 
 <span class="n">NDArrayInt</span> <span class="o">=</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="reorder_masks"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.reorder_masks">[docs]</a><span class="k">def</span> <span class="nf">reorder_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">buckets</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<div class="viewcode-block" id="reorder_masks"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.reorder_masks">[docs]</a><span class="k">def</span> <span class="nf">reorder_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">buckets</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Reorder masks, with a simple rot-n algorithm.</span>
 
 <span class="sd">    Parameters</span>
@@ -124,7 +126,7 @@
     <span class="k">return</span> <span class="n">masks</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">masks_shape</span><span class="p">),</span> <span class="n">buckets</span></div>
 
 
-<div class="viewcode-block" id="decompose_qr_masks"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.decompose_qr_masks">[docs]</a><span class="k">def</span> <span class="nf">decompose_qr_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<div class="viewcode-block" id="decompose_qr_masks"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.decompose_qr_masks">[docs]</a><span class="k">def</span> <span class="nf">decompose_qr_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Compute QR decomposition of the given masks.</span>
 
 <span class="sd">    Parameters</span>
@@ -155,6 +157,47 @@
     <span class="k">return</span> <span class="n">Qt</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">masks_shape</span><span class="p">),</span> <span class="n">R1t</span></div>
 
 
+<div class="viewcode-block" id="estimate_resolution"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.estimate_resolution">[docs]</a><span class="k">def</span> <span class="nf">estimate_resolution</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">plot_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Estimate the mask collection resolution through auto-correlation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    masks : NDArray</span>
+<span class="sd">        The list of encoding masks</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to produce verbose output, by default True</span>
+<span class="sd">    plot_result : bool, optional</span>
+<span class="sd">        Whether to plot the results, by default True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[float, float]</span>
+<span class="sd">        The mean and minimum HWHM of the auto-correlation functions for all the masks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">masks</span> <span class="o">=</span> <span class="n">masks</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">masks</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]])</span>
+
+    <span class="n">resolutions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">mask</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">masks</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Computing auto-correlations&quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">verbose</span><span class="p">)):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">auto_corr</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">norm_cross_corr</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">lines_intersection</span><span class="p">(</span><span class="n">auto_corr</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span>
+        <span class="n">resolutions</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">point</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="n">res_mean</span> <span class="o">=</span> <span class="n">resolutions</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">res_min</span> <span class="o">=</span> <span class="n">resolutions</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">plot_result</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">resolutions</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;HWHM auto-correlation&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">res_mean</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolutions</span><span class="p">),</span> <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;C1&quot;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Mean (</span><span class="si">{</span><span class="n">res_mean</span><span class="si">:</span><span class="s2">.3</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">res_min</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolutions</span><span class="p">),</span> <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;C2&quot;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Min (</span><span class="si">{</span><span class="n">res_min</span><span class="si">:</span><span class="s2">.3</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+        <span class="n">axs</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res_mean</span><span class="p">,</span> <span class="n">res_min</span></div>
+
+
 <div class="viewcode-block" id="MaskCollection"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.MaskCollection">[docs]</a><span class="k">class</span> <span class="nc">MaskCollection</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Define mask collection class.&quot;&quot;&quot;</span>
 
@@ -169,7 +212,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">masks_enc</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
-        <span class="n">masks_dec</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">masks_dec</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mask_dims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
         <span class="n">mask_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;measured&quot;</span><span class="p">,</span>
         <span class="n">mask_support</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -292,7 +335,7 @@
 
         <span class="k">return</span> <span class="n">mask</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">mask_inds_vu</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="MaskCollection.get_QR_decomposition"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.MaskCollection.get_QR_decomposition">[docs]</a>    <span class="k">def</span> <span class="nf">get_QR_decomposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buckets</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">&quot;MaskCollection&quot;</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<div class="viewcode-block" id="MaskCollection.get_QR_decomposition"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.MaskCollection.get_QR_decomposition">[docs]</a>    <span class="k">def</span> <span class="nf">get_QR_decomposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buckets</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="s2">&quot;MaskCollection&quot;</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Compute and return the QR decomposition of the masks.</span>
 
 <span class="sd">        Parameters</span>
@@ -325,6 +368,26 @@
         <span class="n">new_buckets</span> <span class="o">=</span> <span class="n">R1t</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">new_buckets</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">new_masks</span><span class="p">,</span> <span class="n">new_buckets</span></div>
+
+<div class="viewcode-block" id="MaskCollection.bin_masks"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.MaskCollection.bin_masks">[docs]</a>    <span class="k">def</span> <span class="nf">bin_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binning</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;MaskCollection&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Bin the masks.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        binning : float</span>
+<span class="sd">            The binning size.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        MaskCollection</span>
+<span class="sd">            A new collection of binned masks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_masks</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">pre</span><span class="o">.</span><span class="n">bin_imgs</span><span class="p">(</span><span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">binning</span><span class="p">)</span>
+        <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_dec</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">pre</span><span class="o">.</span><span class="n">bin_imgs</span><span class="p">(</span><span class="n">new_masks</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">binning</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_masks</span></div>
 
 <div class="viewcode-block" id="MaskCollection.inspect_masks"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.MaskCollection.inspect_masks">[docs]</a>    <span class="k">def</span> <span class="nf">inspect_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Inspect the encoding and decoding masks at the requested shifts.</span>
@@ -577,7 +640,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">disp</span><span class="p">[</span><span class="n">perms</span><span class="p">]</span> <span class="k">for</span> <span class="n">disp</span> <span class="ow">in</span> <span class="n">disps</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="MaskGenerator.get_sequential_shifts"><a class="viewcode-back" href="../../corrct.html#corrct.struct_illum.MaskGenerator.get_sequential_shifts">[docs]</a>    <span class="k">def</span> <span class="nf">get_sequential_shifts</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">num_shifts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">axes_order</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">num_shifts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">axes_order</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Produce shifts for the &quot;sequential&quot; shift type.</span>
 

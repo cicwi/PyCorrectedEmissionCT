@@ -90,6 +90,9 @@
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
 
 
+<span class="n">ROT_DIRS_VALID</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;clockwise&quot;</span><span class="p">,</span> <span class="s2">&quot;counter-clockwise&quot;</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="Geometry"><a class="viewcode-back" href="../../corrct.html#corrct.models.Geometry">[docs]</a><span class="k">class</span> <span class="nc">Geometry</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base geometry class.&quot;&quot;&quot;</span>
 
@@ -123,11 +126,11 @@
 
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rot_dir_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot_dir_xyz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_dir_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot_dir_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indx</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -217,21 +220,117 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">dc_replace</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProjectionGeometry.set_detector_shifts_vu"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.set_detector_shifts_vu">[docs]</a>    <span class="k">def</span> <span class="nf">set_detector_shifts_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_pos_vu</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="ProjectionGeometry.set_detector_shifts_vu"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.set_detector_shifts_vu">[docs]</a>    <span class="k">def</span> <span class="nf">set_detector_shifts_vu</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">det_pos_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cor_pos_u</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">det_dist_y</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the detector position in XYZ, from VU (vertical, horizontal) coordinates.</span>
+<span class="sd">        Set the detector position in XZ, from VU (vertical, horizontal) coordinates.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        det_pos_vu : ArrayLike</span>
+<span class="sd">        det_pos_vu : ArrayLike | NDArray | None</span>
 <span class="sd">            Detector vertical and horizontal positions. Vertical is optional.</span>
+<span class="sd">        cor_pos_u : float | None</span>
+<span class="sd">            Center of rotation position along U.</span>
+<span class="sd">        det_dist_y : ArrayLike, optional</span>
+<span class="sd">            Detector distance from origin along Y. The default is 0.0.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">det_pos_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">det_pos_vu</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">det_pos_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">det_pos_vu</span> <span class="k">if</span> <span class="n">det_pos_vu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cor_pos_u</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">det_pos_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">det_pos_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">+</span> <span class="n">cor_pos_u</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">det_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">det_pos_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">det_dist_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">det_dist_y</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">det_dist_y</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">det_dist_y</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="p">(</span><span class="n">det_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">det_dist_y</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">det_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Detector distance along Y (shape: </span><span class="si">{</span><span class="n">det_dist_y</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">) should either be a scalar or a 1D array of the &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;same length as the detector positions (shape: </span><span class="si">{</span><span class="n">det_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">), if detector positions are more than 1.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">det_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">det_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Current number of angles (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">) and new number of &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;angles (</span><span class="si">{</span><span class="n">det_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">) differ!&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">det_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span> <span class="o">*</span> <span class="n">det_pos_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">det_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">det_pos_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span> <span class="o">*</span> <span class="n">det_pos_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">det_dist_y</span></div>
+
+<div class="viewcode-block" id="ProjectionGeometry.set_source_shifts_vu"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.set_source_shifts_vu">[docs]</a>    <span class="k">def</span> <span class="nf">set_source_shifts_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_pos_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the source position in XZ, from VU (vertical, horizontal) coordinates.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        src_pos_vu : ArrayLike | NDArray | None</span>
+<span class="sd">            Source vertical and horizontal positions. Vertical is optional.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">src_pos_vu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">src_pos_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">src_pos_vu</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">src_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">src_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Current number of angles (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">) and new number of angles (</span><span class="si">{</span><span class="n">src_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">) differ!&quot;</span>
+            <span class="p">)</span>
+        <span class="n">src_pos_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">src_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_pos_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_pos_y</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">src_pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_pos_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span></div>
+
+<div class="viewcode-block" id="ProjectionGeometry.set_detector_tilt"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.set_detector_tilt">[docs]</a>    <span class="k">def</span> <span class="nf">set_detector_tilt</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">angles_t_rad</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">tilt_axis</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">tilt_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rotate the detector by the given angle(s) and axis(axes).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        angles_t_rad : ArrayLike</span>
+<span class="sd">            Rotation angle(s) in radians.</span>
+<span class="sd">        tilt_axis : Sequence[float] | NDArray, optional</span>
+<span class="sd">            The tilt axis or axes. The default is (0, 1, 0)</span>
+<span class="sd">        tilt_source : bool, optional</span>
+<span class="sd">            Whether to also tilt the source. The default is False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angles_t_rad</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">tilt_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tilt_axis</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tilt_axis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Tilt axis/axes should be three-dimensional, along the last dimension. Current shape: </span><span class="si">{</span><span class="n">tilt_axis</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">tilt_axis</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tilt_axis</span> <span class="o">=</span> <span class="n">tilt_axis</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">tilt_axis</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Tilt axis/axes should be three-dimensional, along the last dimension. Current shape: </span><span class="si">{</span><span class="n">tilt_axis</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">angles</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">tilt_axis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">angles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Tilt axes and tilt angles multiplicity should match. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Current shapes: </span><span class="si">{</span><span class="n">tilt_axis</span><span class="o">.</span><span class="n">shape</span> <span class="si">= }</span><span class="s2">, </span><span class="si">{</span><span class="n">angles</span><span class="o">.</span><span class="n">shape</span> <span class="si">= }</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">rotations</span> <span class="o">=</span> <span class="n">spt</span><span class="o">.</span><span class="n">Rotation</span><span class="o">.</span><span class="n">from_rotvec</span><span class="p">(</span><span class="n">angles</span> <span class="o">*</span> <span class="n">tilt_axis</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+        <span class="k">if</span> <span class="n">tilt_source</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span> <span class="o">=</span> <span class="n">rotations</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span> <span class="o">=</span> <span class="n">rotations</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span> <span class="o">=</span> <span class="n">rotations</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">rotations</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ProjectionGeometry.rotate"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.rotate">[docs]</a>    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angles_w_rad</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">patch_astra_2d</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -314,7 +413,49 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
                 <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">disp_xyz</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">disp_xyz</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-            <span class="p">)</span></div></div>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProjectionGeometry.get_pre_weights"><a class="viewcode-back" href="../../corrct.html#corrct.models.ProjectionGeometry.get_pre_weights">[docs]</a>    <span class="k">def</span> <span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_shape_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the pre-weights of the projector geometry (notably for cone-beam geometries).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        det_shape_vu : Sequence[int] | NDArray | None, optional</span>
+<span class="sd">            Shape of the detector in [V]U coordinates, by default None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NDArray | None</span>
+<span class="sd">            The computed detector weights</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">!=</span> <span class="s2">&quot;cone&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">det_shape_vu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape_vu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: pre-weights cannot be computed because detector shape is None.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">det_shape_vu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape_vu</span>
+            <span class="n">det_shape_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">det_shape_vu</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape_vu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">det_shape_vu</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape_vu</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: overriding the detector shape in the computation of the pre-weights.&quot;</span><span class="p">)</span>
+
+            <span class="n">src2det_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span>
+
+            <span class="n">pixel_coords_vu</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">s</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">s</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">det_shape_vu</span><span class="p">]</span>
+            <span class="n">pixel_coords_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">pixel_coords_vu</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
+            <span class="n">pixel_coords_vu</span> <span class="o">=</span> <span class="p">[</span><span class="n">coords</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="k">for</span> <span class="n">coords</span> <span class="ow">in</span> <span class="n">pixel_coords_vu</span><span class="p">]</span>
+
+            <span class="n">pixel_coords_xyz</span> <span class="o">=</span> <span class="n">pixel_coords_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_u_xyz</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pixel_coords_vu</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">pixel_coords_xyz</span> <span class="o">+=</span> <span class="n">pixel_coords_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_v_xyz</span>
+
+            <span class="n">src2pixel_dict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">pixel_coords_xyz</span> <span class="o">+</span> <span class="n">src2det_xyz</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">src2det_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">src2det_xyz</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">pre_weights</span> <span class="o">=</span> <span class="n">src2det_dist</span> <span class="o">/</span> <span class="p">(</span><span class="n">src2pixel_dict</span> <span class="o">+</span> <span class="p">(</span><span class="n">src2pixel_dict</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">pre_weights</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="VolumeGeometry"><a class="viewcode-back" href="../../corrct.html#corrct.models.VolumeGeometry">[docs]</a><span class="nd">@dataclass</span>
@@ -450,11 +591,66 @@
         <span class="k">return</span> <span class="n">get_vol_geom_from_volume</span><span class="p">(</span><span class="n">volume</span><span class="o">=</span><span class="n">volume</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="combine_shifts_vu"><a class="viewcode-back" href="../../corrct.html#corrct.models.combine_shifts_vu">[docs]</a><span class="k">def</span> <span class="nf">combine_shifts_vu</span><span class="p">(</span><span class="n">shifts_v</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shifts_u</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Combine vertical and horizontal shifts.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    shifts_v : NDArray</span>
+<span class="sd">        The vertical shifts</span>
+<span class="sd">    shifts_u : NDArray</span>
+<span class="sd">        The horizontal shifts</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The combined shifts</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shifts_v</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected 1-dimensional array for vertical shifts, but an array </span><span class="si">{</span><span class="n">shifts_v</span><span class="o">.</span><span class="n">shape</span> <span class="si">= }</span><span class="s2"> was passed&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shifts_u</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected 1-dimensional array for horizontal shifts, but an array </span><span class="si">{</span><span class="n">shifts_u</span><span class="o">.</span><span class="n">shape</span> <span class="si">= }</span><span class="s2"> was passed&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">shifts_v</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">shifts_u</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of vertical shifts (</span><span class="si">{</span><span class="n">shifts_v</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2">) and horizontal shifts (</span><span class="si">{</span><span class="n">shifts_u</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2">) should match&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">shifts_v</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">shifts_u</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_rot_axis_dir"><a class="viewcode-back" href="../../corrct.html#corrct.models.get_rot_axis_dir">[docs]</a><span class="k">def</span> <span class="nf">get_rot_axis_dir</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Process the requested rotation axis direction and return a meaningful value.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rot_axis_dir : Union[str, ArrayLike, NDArray], optional</span>
+<span class="sd">        The requested direction, by default &quot;clockwise&quot;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The vector corresponding to the rotation direction.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        In case of malformed direction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">rot_axis_dir</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ROT_DIRS_VALID</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rotation axis direction </span><span class="si">{</span><span class="n">rot_axis_dir</span><span class="si">}</span><span class="s2"> not allowed. It should be one of: </span><span class="si">{</span><span class="n">ROT_DIRS_VALID</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">rot_axis_dir</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="get_prj_geom_parallel"><a class="viewcode-back" href="../../corrct.html#corrct.models.get_prj_geom_parallel">[docs]</a><span class="k">def</span> <span class="nf">get_prj_geom_parallel</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">geom_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;3d&quot;</span><span class="p">,</span>
-    <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">,</span>
+    <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProjectionGeometry</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate the default geometry for parallel beam.</span>
@@ -463,9 +659,9 @@
 <span class="sd">    ----------</span>
 <span class="sd">    geom_type : str, optional</span>
 <span class="sd">        The geometry type. The default is &quot;parallel3d&quot;.</span>
-<span class="sd">    rot_axis_shift_pix : Optional[ArrayLike], optional</span>
+<span class="sd">    rot_axis_shift_pix : ArrayLike | NDArray | None, optional</span>
 <span class="sd">        Rotation axis shift in pixels. The default is None.</span>
-<span class="sd">    rot_axis_dir : Union[str, ArrayLike], optional</span>
+<span class="sd">    rot_axis_dir : str | ArrayLike | NDArray, optional</span>
 <span class="sd">        Rotation axis direction. It can be either a string or a direction. The default is &quot;clockwise&quot;.</span>
 
 <span class="sd">    Returns</span>
@@ -474,26 +670,57 @@
 <span class="sd">        The default paralle-beam geometry.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">rot_axis_shift_pix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">rot_axis_shift_pix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rot_axis_shift_pix</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">rot_axis_shift_pix</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">rot_axis_shift_pix</span><span class="p">),</span> <span class="mi">2</span><span class="p">))],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">rot_axis_dir</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">:</span>
-            <span class="n">rot_axis_dir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rot_axis_dir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">rot_axis_dir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
     <span class="k">return</span> <span class="n">ProjectionGeometry</span><span class="p">(</span>
         <span class="n">geom_type</span><span class="o">=</span><span class="s2">&quot;parallel&quot;</span> <span class="o">+</span> <span class="n">geom_type</span><span class="p">,</span>
-        <span class="n">src_pos_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+        <span class="n">src_pos_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
         <span class="n">det_pos_xyz</span><span class="o">=</span><span class="n">det_pos_xyz</span><span class="p">,</span>
-        <span class="n">det_u_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
-        <span class="n">det_v_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
-        <span class="n">rot_dir_xyz</span><span class="o">=</span><span class="n">rot_axis_dir</span><span class="p">,</span>
+        <span class="n">det_u_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+        <span class="n">det_v_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span>
+        <span class="n">rot_dir_xyz</span><span class="o">=</span><span class="n">get_rot_axis_dir</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">),</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_prj_geom_cone"><a class="viewcode-back" href="../../corrct.html#corrct.models.get_prj_geom_cone">[docs]</a><span class="k">def</span> <span class="nf">get_prj_geom_cone</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">src_to_sam_dist</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProjectionGeometry</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate the default geometry for parallel beam.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    geom_type : str, optional</span>
+<span class="sd">        The geometry type. The default is &quot;parallel3d&quot;.</span>
+<span class="sd">    rot_axis_shift_pix : ArrayLike | NDArray | None, optional</span>
+<span class="sd">        Rotation axis shift in pixels. The default is None.</span>
+<span class="sd">    rot_axis_dir : str | ArrayLike | NDArray, optional</span>
+<span class="sd">        Rotation axis direction. It can be either a string or a direction. The default is &quot;clockwise&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ProjectionGeometry</span>
+<span class="sd">        The default paralle-beam geometry.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">rot_axis_shift_pix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rot_axis_shift_pix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rot_axis_shift_pix</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">rot_axis_shift_pix</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">rot_axis_shift_pix</span><span class="p">),</span> <span class="mi">2</span><span class="p">))],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ProjectionGeometry</span><span class="p">(</span>
+        <span class="n">geom_type</span><span class="o">=</span><span class="s2">&quot;cone&quot;</span><span class="p">,</span>
+        <span class="n">src_pos_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">src_to_sam_dist</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+        <span class="n">det_pos_xyz</span><span class="o">=</span><span class="n">det_pos_xyz</span><span class="p">,</span>
+        <span class="n">det_u_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+        <span class="n">det_v_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span>
+        <span class="n">rot_dir_xyz</span><span class="o">=</span><span class="n">get_rot_axis_dir</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">),</span>
     <span class="p">)</span></div>
 
 

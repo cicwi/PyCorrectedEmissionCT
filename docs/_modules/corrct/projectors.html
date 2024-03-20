@@ -242,6 +242,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vol_geom</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">VolumeGeometry</span><span class="p">):</span>
             <span class="n">vol_geom</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">VolumeGeometry</span><span class="p">(</span><span class="n">_vol_shape_xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_geom</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vol_geom</span> <span class="o">=</span> <span class="n">vol_geom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prj_geom</span> <span class="o">=</span> <span class="n">prj_geom</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_geom</span><span class="o">.</span><span class="n">shape_xyz</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only 2D or 3D volumes are valid&quot;</span><span class="p">)</span>
@@ -318,6 +319,19 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">psf_vwu</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformConvolution</span><span class="p">(</span><span class="n">prj_shape_vwu</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="n">psf</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">is_symm</span><span class="o">=</span><span class="n">is_conv_symm</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">psf_vu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_vwu</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ProjectorUncorrected.get_pre_weights"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.get_pre_weights">[docs]</a>    <span class="k">def</span> <span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Compute the pre-weights of the projector geometry (notably for cone-beam geometries).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Union[NDArray, None]</span>
+<span class="sd">            The computed detector weights</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj_geom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj_geom</span><span class="o">.</span><span class="n">get_pre_weights</span><span class="p">([</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">prj_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span></div>
 
 <div class="viewcode-block" id="ProjectorUncorrected.fp_angle"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fp_angle">[docs]</a>    <span class="k">def</span> <span class="nf">fp_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">angle_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Forward-project a volume to a single sinogram line.</span>
@@ -401,38 +415,7 @@
             <span class="n">prj_vwu</span> <span class="o">=</span> <span class="n">prj_vwu</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj_intensities</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>  <span class="c1"># Needs copy</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_vwu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">prj_vwu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_vwu</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">prj_vwu</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">prj_vwu</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="ProjectorUncorrected.fbp"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorUncorrected.fbp">[docs]</a>    <span class="k">def</span> <span class="nf">fbp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projs</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">fbp_filter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ramp&quot;</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Compute the filtered back-projection of the projection data to the volume.</span>
-
-<span class="sd">        The data could either be a sinogram, or a stack of sinograms.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        projs : NDArray</span>
-<span class="sd">            The projection data to back-project.</span>
-<span class="sd">        fbp_filter : str | Callable, optional</span>
-<span class="sd">            The FBP filter to use. The default is &quot;ramp&quot;.</span>
-<span class="sd">        pad_mode: str, optional</span>
-<span class="sd">            The padding mode to use for the linear convolution. The default is &quot;constant&quot;.</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ValueError</span>
-<span class="sd">            When trying to use fbp with a 3D projection geometry.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        NDArray</span>
-<span class="sd">            The FBP reconstructed volume.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fbp_filter</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">fbp</span><span class="p">(</span><span class="n">projs</span><span class="p">,</span> <span class="n">fbp_filter</span><span class="o">=</span><span class="n">fbp_filter</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">projs</span> <span class="o">=</span> <span class="n">fbp_filter</span><span class="p">(</span><span class="n">projs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">projs</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="o">.</span><span class="n">size</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector_backend</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">prj_vwu</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ProjectorAttenuationXRF"><a class="viewcode-back" href="../../corrct.html#corrct.projectors.ProjectorAttenuationXRF">[docs]</a><span class="k">class</span> <span class="nc">ProjectorAttenuationXRF</span><span class="p">(</span><span class="n">ProjectorUncorrected</span><span class="p">):</span>

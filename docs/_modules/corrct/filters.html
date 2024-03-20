@@ -70,30 +70,26 @@
            <div itemprop="articleBody">
              
   <h1>Source code for corrct.filters</h1><div class="highlight"><pre>
-<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Filtered back-projection filters.</span>
 
 <span class="sd">@author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,</span>
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
-
-<span class="kn">import</span> <span class="nn">skimage.transform</span> <span class="k">as</span> <span class="nn">skt</span>
-
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">skimage.transform.radon_transform</span> <span class="kn">import</span> <span class="n">_get_fourier_filter</span>
 
 <span class="kn">from</span> <span class="nn">.operators</span> <span class="kn">import</span> <span class="n">BaseTransform</span>
 <span class="kn">from</span> <span class="nn">.processing</span> <span class="kn">import</span> <span class="n">circular_mask</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
-
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Mapping</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">pywt</span>
@@ -586,7 +582,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">prj_size_pad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_padding_size</span><span class="p">(</span><span class="n">data_wu</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">radon_transform</span><span class="o">.</span><span class="n">_get_fourier_filter</span><span class="p">(</span><span class="n">prj_size_pad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">_get_fourier_filter</span><span class="p">(</span><span class="n">prj_size_pad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">data_wu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_rfft</span><span class="p">:</span>

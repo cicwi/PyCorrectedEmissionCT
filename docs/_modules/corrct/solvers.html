@@ -452,6 +452,11 @@
             <span class="n">local_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span>
         <span class="n">local_filter</span><span class="o">.</span><span class="n">pad_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_mode</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
+            <span class="n">pre_weights</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">get_pre_weights</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">pre_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="n">pre_weights</span>
+
         <span class="n">b_f</span> <span class="o">=</span> <span class="n">local_filter</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">b_f</span><span class="p">)</span>
