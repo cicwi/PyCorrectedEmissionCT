@@ -11,8 +11,8 @@ source:
 
 build:
     number: '0'
-    script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record record.txt || exit 1"
-    # script: "{{ PYTHON }} -m pip install --no-deps --ignore-installed . -vv || exit 1"
+    # script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record record.txt || exit 1"
+    script: "{{ PYTHON }} -m pip install --no-deps --ignore-installed . -vv || exit 1"
 
 requirements:
     build:
