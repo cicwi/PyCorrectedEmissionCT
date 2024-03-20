@@ -4,7 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.9.0...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.9.1...develop
+
+## 0.9.1 - 2024-03-20
+### Added
+- Overall improvements to `ProjectionGeometry` in the module `models`:
+  - Initial support for cone-beam geometry, including Parker weights for FDK
+  - Support for detector tilts
+  - Better support for detector VU shifts (respecting axes orientation)
+- Function to fit scale and bias of an image against data (possibly in a different space)
+- Wavelet-Fourier method for the destriping of sinograms
+- Ghost Imaging / Structured Illumination:
+  - Resolution estimation
+  - Mask binning support
+- Linear attenuation coefficient computation for a given material
+### Fixed
+- Bug introduced with scikit-image 0.22
+- Alignment and solvers tests
 
 ## 0.9.0 - 2023-12-24
 ### Added
