@@ -270,6 +270,7 @@ def plot_frcs(
     smooth: Optional[int] = 5,
     snrt: float = 0.2071,
     axes: Optional[Sequence[int]] = None,
+    supersampling: int = 1,
     verbose: bool = False,
 ) -> tuple[Figure, Axes]:
     """Compute and plot the FSCs / FRCs of some volumes.
@@ -296,7 +297,7 @@ def plot_frcs(
     xps: list[Optional[tuple[float, float]]] = [(0.0, 0.0)] * len(volume_pairs)
 
     for ii, pair in enumerate(tqdm(volume_pairs, desc="Computing FRCs", disable=not verbose)):
-        frcs[ii], T = frc(pair[0], pair[1], snrt=snrt, smooth=smooth, axes=axes)
+        frcs[ii], T = frc(pair[0], pair[1], snrt=snrt, smooth=smooth, axes=axes, supersampling=supersampling)
         if T.ndim > 1:
             reduce_axes = tuple(np.arange(T.ndim - 1))
             frcs[ii] = frcs[ii].mean(axis=reduce_axes)
