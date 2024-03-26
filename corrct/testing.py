@@ -9,7 +9,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
-from . import projectors
+from . import projectors, processing
 
 
 try:
@@ -28,6 +28,11 @@ from typing import Optional
 from typing import Union
 from numpy.typing import DTypeLike
 from numpy.typing import NDArray
+import skimage.data as skd
+import skimage.filters as skf
+import skimage.transform as skt
+import skimage.segmentation as sks
+import skimage.morphology as skm
 
 
 NDArrayFloat = NDArray[np.floating]
@@ -71,6 +76,74 @@ def download_phantom():
         file_content = f.read()
     with open(phantom_path, "w", encoding="utf-8") as f:
         f.write(file_content.replace("xrange", "range"))
+
+
+def create_phantom_nuclei3d(
+    FoV_size: Union[int, None] = 100, dtype: DTypeLike = np.float32
+) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
+    """Create a 3D phantom of cell nuclei.
+
+    Parameters
+    ----------
+    FoV_size : int | None
+        Size of the field-of-view in pixels, per edge, by default None
+    dtype : DTypeLike, optional
+        The dtype of the produced data, by default np.float32
+
+    Returns
+    -------
+    tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]
+        The nuclei 3D phantom, the background, and the pixel sizes along each axis
+    """
+    phantom = np.array(skd.cells3d(), dtype=dtype).swapaxes(0, 1)
+    nuclei: NDArrayFloat = phantom[1]
+
+    if FoV_size is None:
+        FoV_size = nuclei.shape[-1]
+    else:
+        nuclei = skt.rescale(nuclei, scale=FoV_size / nuclei.shape[-1], mode="reflect", channel_axis=0)
+    print(f"{FoV_size = }")
+    scale_factor = FoV_size / nuclei.shape[-1]
+    pixel_size_um = np.array([0.29, 0.26, 0.26], dtype=dtype) / scale_factor
+
+    circ_mask = processing.circular_mask([FoV_size, FoV_size], dtype=dtype)
+
+    altitude = skf.sobel(nuclei)
+
+    seeds_precip = nuclei > ((nuclei.max() - nuclei.min()) * 0.8 + nuclei.min())
+    seeds_nuclei = nuclei > (nuclei.mean() + nuclei.std())
+
+    seeds = np.zeros_like(nuclei, dtype=int)
+    seeds[seeds_nuclei] = 2
+    seeds[nuclei == nuclei.min()] = 1
+    seg_nuclei = sks.watershed(altitude, seeds)
+    seeds = np.zeros_like(nuclei, dtype=int)
+    seeds[np.logical_and(seeds_nuclei, np.logical_not(circ_mask))] = 2
+    seeds[nuclei == nuclei.min()] = 1
+    seg_nuclei_out = sks.watershed(altitude, seeds)
+    seg_nuclei = np.logical_and(seg_nuclei == 2, np.logical_not(seg_nuclei_out == 2))
+    seg_nuclei = skm.remove_small_objects(seg_nuclei)
+    seg_nuclei = skm.binary_dilation(seg_nuclei, footprint=skm.ball(1.5))
+
+    seeds = np.zeros_like(nuclei, dtype=int)
+    seeds[seeds_precip] = 2
+    seeds[nuclei == nuclei.min()] = 1
+    seg_precip = sks.watershed(skf.sobel(seg_nuclei), seeds)
+    seg_precip = skm.binary_dilation(seg_precip == 2)
+
+    ph_seg = seg_nuclei.copy() * 2
+    ph_seg[seg_precip] = 3
+    ph_seg[skm.dilation(seg_nuclei_out == 2, footprint=skm.ball(1.5))] = 1
+
+    background = nuclei * (ph_seg == 0)
+    for _ in range(15):
+        if np.all(background != 0):
+            break
+        dil_back = skm.dilation(nuclei * (ph_seg == 0), footprint=skm.ball(1))
+        background[background == 0] = dil_back[background == 0]
+    background = skf.gaussian(background, sigma=9)
+
+    return nuclei * (ph_seg == 2) + (ph_seg != 2) * background, background, pixel_size_um
 
 
 def phantom_assign_concentration(
