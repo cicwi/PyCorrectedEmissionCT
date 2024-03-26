@@ -408,6 +408,8 @@ class DetectorShiftsXC(DetectorShiftsBase):
         shifts_u = _filter_shifts(shifts_u, self.max_shifts[-1, :])
         shifts_u = np.around(shifts_u, decimals=self.decimals)
 
+        shifts_vu[-1] = shifts_u
+
         return shifts_vu[:, list(angles_order)]
 
     def fit_u_180(self) -> float:
