@@ -17,6 +17,8 @@ from dataclasses import dataclass, replace as dc_replace
 
 from abc import ABC
 
+from copy import deepcopy
+
 
 ROT_DIRS_VALID = ("clockwise", "counter-clockwise")
 
@@ -71,7 +73,7 @@ class ProjectionGeometry(Geometry):
         """
 
         def slice_array(vecs_arr: NDArray, indx: Any):
-            if len(vecs_arr.shape) > 1:
+            if len(vecs_arr.shape) > 1 and vecs_arr.shape[0] > 1:
                 return vecs_arr[indx, :]
             else:
                 return vecs_arr
@@ -83,6 +85,16 @@ class ProjectionGeometry(Geometry):
             det_u_xyz=slice_array(self.det_u_xyz, indx),
             det_v_xyz=slice_array(self.det_v_xyz, indx),
         )
+
+    def copy(self) -> "ProjectionGeometry":
+        """Deepcopy an existing geometry.
+
+        Returns
+        -------
+        ProjectionGeometry
+            The new instance of ProjectionGeometry
+        """
+        return deepcopy(self)
 
     @staticmethod
     def get_default_parallel(
