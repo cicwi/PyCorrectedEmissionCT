@@ -5,7 +5,8 @@ Detector shifts finding classes.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from typing import Dict, Optional, Tuple, Union
+from collections.abc import Mapping
+from typing import Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -490,7 +491,13 @@ class DetectorShiftsXC(DetectorShiftsBase):
 
         return float(cor)
 
-    def find_shifts_vu(self, data_dvwu: NDArrayFloat, proj_dvwu: NDArrayFloat, use_derivative: bool = False) -> NDArrayFloat:
+    def find_shifts_vu(
+        self,
+        data_dvwu: NDArrayFloat,
+        proj_dvwu: NDArrayFloat,
+        use_derivative: bool = False,
+        xc_opts: Mapping = dict(normalize_fourier=False),
+    ) -> NDArrayFloat:
         """Find shifts between two images or sets of lines.
 
         Parameters
@@ -522,7 +529,7 @@ class DetectorShiftsXC(DetectorShiftsBase):
                 proj_vwu = np.diff(proj_vwu, axis=-1)
 
             # Allow to choose different shift finding functions
-            shifts_vu = fitting.fit_shifts_vu_xc(data_vwu, proj_vwu, decimals=self.decimals)
+            shifts_vu = fitting.fit_shifts_vu_xc(data_vwu, proj_vwu, decimals=self.decimals, **xc_opts)
             # shifts_vu = fitting.fit_shifts_u_sad(data_vwu, proj_vwu, decimals=self.decimals)
 
             shifts_vu_all[ii_d] = _filter_shifts(shifts_vu, self.max_shifts)
