@@ -655,7 +655,9 @@ class MaskGeneratorBernoulli(MaskGenerator):
 
     __mask_name__ = "bernoulli"
 
-    def __init__(self, fov_size_mm: Union[float, Sequence[float], NDArray], req_res_mm: float = 1.0):
+    def __init__(
+        self, fov_size_mm: Union[float, Sequence[float], NDArray], req_res_mm: float = 1.0, max_masks_ratio: float = 1.2
+    ):
         """
         Bernulli masks collection class.
 
@@ -667,9 +669,13 @@ class MaskGeneratorBernoulli(MaskGenerator):
             Size of the Field-of-View in mm.
         req_res_mm : float
             The required pixel size in mm.
+        max_masks_ratio : float
+            The ratio of maximum available masks per pixels in each direction, by default 1.2.
         """
         num_points = self._init_fov_mm(fov_size_mm, req_res_mm)
-        super().__init__(shape_fov=num_points, shape_mask=num_points, shape_shifts=np.ceil(num_points * 1.2).astype(int))
+        super().__init__(
+            shape_fov=num_points, shape_mask=num_points, shape_shifts=np.ceil(num_points * max_masks_ratio).astype(int)
+        )
 
     def generate_shifted_mask(self, mask_inds_vu: Union[Sequence, NDArray], mask_encoding: bool = True) -> NDArray:
         """Produce the shifted masks.
@@ -695,7 +701,9 @@ class MaskGeneratorHalfGaussian(MaskGenerator):
 
     __mask_name__ = "half-gaussian"
 
-    def __init__(self, fov_size_mm: Union[float, Sequence[float], NDArray], req_res_mm: float = 1.0):
+    def __init__(
+        self, fov_size_mm: Union[float, Sequence[float], NDArray], req_res_mm: float = 1.0, max_masks_ratio: float = 1.2
+    ):
         """
         Half Gaussian masks collection class.
 
@@ -707,9 +715,13 @@ class MaskGeneratorHalfGaussian(MaskGenerator):
             Size of the Field-of-View in mm.
         req_res_mm : float
             The required pixel size in mm.
+        max_masks_ratio : float
+            The ratio of maximum available masks per pixels in each direction, by default 1.2.
         """
         num_points = self._init_fov_mm(fov_size_mm, req_res_mm)
-        super().__init__(shape_fov=num_points, shape_mask=num_points, shape_shifts=np.ceil(num_points * 1.2).astype(int))
+        super().__init__(
+            shape_fov=num_points, shape_mask=num_points, shape_shifts=np.ceil(num_points * max_masks_ratio).astype(int)
+        )
 
     def generate_shifted_mask(self, mask_inds_vu: Union[Sequence, NDArray], mask_encoding: bool = True) -> NDArray:
         """Produce the shifted masks.
@@ -911,13 +923,17 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
 
         return np.fft.irfftn(image_f, s=self.mc.shape_fov, axes=tuple(self._axes_fov), norm="ortho")
 
-    def fbp(self, bucket_vals: NDArray, use_lstsq: bool = True, adjust_scaling: bool = True) -> NDArray:
+    def fbp(self, bucket_vals: NDArray, use_lstsq: bool = True, adjust_scaling: bool = False) -> NDArray:
         """Compute cross-correlation reconstruction of the bucket values.
 
         Parameters
         ----------
         bucket_vals : NDArray
             The bucket vales to reconstruct.
+        use_lstsq : bool, optional
+            If True, uses least squares for reconstruction, by default True.
+        adjust_scaling : bool, optional
+            If True, adjusts scaling of the reconstructed image, to account for the intensity loss, by default False.
 
         Returns
         -------
