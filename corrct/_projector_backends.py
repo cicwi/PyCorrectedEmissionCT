@@ -538,6 +538,18 @@ class ProjectorBackendASTRA(ProjectorBackend):
             print(f"Could not reshape input data of shape={x.shape} into expected shape={expected_shape}")
             raise
 
+    def _check_prj_shape(self, prj: NDArray) -> None:
+        inds_vu = list(np.delete(np.arange(-len(self.prj_shape_vu), 0), obj=-2))
+        expected_prj_shape_vu = self.prj_shape_vu[inds_vu]
+        given_prj_shape_vu = np.array(prj.shape)[inds_vu]
+        if np.any(given_prj_shape_vu != expected_prj_shape_vu):
+            raise ValueError(
+                f"Expected prj shape (VU: {expected_prj_shape_vu} - likely inferred from `vol_geom`),"
+                f" and passed prj shape (VU: {given_prj_shape_vu}) from the projection data, do not match.\n"
+                "If you intend to use projection shapes different from the volume shape, please adjust"
+                " the `prj_geom` object's `det_shape_vu` accordingly."
+            )
+
     def dispose(self) -> None:
         """De-initialize the ASTRA projectors."""
         for p in self.proj_id:
@@ -554,7 +566,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         vol : NDArray
             The volume to forward-project.
         angle_ind : int | None, optional
-            The angle index to foward project. The default is None.
+            The angle index to forward project. The default is None.
 
         Returns
         -------
@@ -606,7 +618,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
         prj : NDArray
             The sinogram to back-project or a single line.
         angle_ind : int | None, optional
-            The angle index to foward project. The default is None.
+            The angle index to forward project. The default is None.
 
         Returns
         -------
@@ -614,6 +626,8 @@ class ProjectorBackendASTRA(ProjectorBackend):
             The back-projected volume.
         """
         self.make_ready()
+
+        self._check_prj_shape(prj)
 
         vol = np.empty(self.vol_shape_zxy, dtype=np.float32)
         if angle_ind is None:
@@ -744,9 +758,9 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
         self.proj_geom_all = astra.create_proj_geom(geom_type_str + "_vec", *prj_geom.det_shape_vu, vectors)
 
         self.astra_vol_shape = tuple(vol_geom_tmp3d.shape_zxy)
-        self.astra_prj_shape = (vol_geom_tmp3d.shape_xyz[2], num_angles, vol_geom_tmp3d.shape_xyz[0])
-        self.astra_angle_prj_shape = (vol_geom_tmp3d.shape_xyz[2], 1, vol_geom_tmp3d.shape_xyz[0])
-        self.angle_prj_shape = (vol_geom_tmp3d.shape_xyz[2], vol_geom_tmp3d.shape_xyz[0])
+        self.astra_prj_shape = (prj_geom.det_shape_vu[-2], num_angles, prj_geom.det_shape_vu[-1])
+        self.astra_angle_prj_shape = (prj_geom.det_shape_vu[-2], 1, prj_geom.det_shape_vu[-1])
+        self.angle_prj_shape = (prj_geom.det_shape_vu[-2], prj_geom.det_shape_vu[-1])
 
     def make_ready(self):
         """Initialize the ASTRA projectors."""
@@ -810,6 +824,8 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
             The back-projected volume.
         """
         self.make_ready()
+
+        self._check_prj_shape(prj)
 
         if angle_ind is None:
             prj = self._check_data(prj, self.astra_prj_shape)
