@@ -129,7 +129,7 @@ class ProjectionGeometry(Geometry):
         Returns
         -------
         int
-            The numder of dimensions.
+            The number of dimensions.
         """
         if "parallel" in self.geom_type:
             return int(self.geom_type[-2])
@@ -159,6 +159,16 @@ class ProjectionGeometry(Geometry):
             return dc_replace(self, geom_type=self.geom_type.replace("2d", "3d"), det_shape_vu=new_det_shape_vu)
         else:
             return dc_replace(self)
+
+    def set_detector_shape_vu(self, vu: Union[int, Sequence[int], NDArray]) -> None:
+        """Set the detector VU shape.
+
+        Parameters
+        ----------
+        vu : int | Sequence[int] | NDArray
+            The VU shape of the projection data.
+        """
+        self.det_shape_vu = np.array(vu, ndmin=1)
 
     def set_detector_shifts_vu(
         self,
@@ -288,7 +298,7 @@ class ProjectionGeometry(Geometry):
         """
         angles = np.array(angles_w_rad, ndmin=1)[:, None]
 
-        # Deadling with ASTRA's incoherent 2D and 3D coordinate systems.
+        # Dealing with ASTRA's incoherent 2D and 3D coordinate systems.
         if patch_astra_2d and self.ndim == 2:
             angles = -angles
 
@@ -586,11 +596,20 @@ def get_rot_axis_dir(rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise")
         return np.array(rot_axis_dir, ndmin=1)
 
 
+def _get_data_dims(data_shape: Union[Sequence[int], NDArray], data_format: str = "dvwu") -> dict:
+    dims = dict(u=1, v=1, w=1, d=1)
+    for ii in range(-len(data_shape), 0):
+        dims[data_format[ii]] = data_shape[ii]
+    return dims
+
+
 def get_prj_geom_parallel(
     *,
     geom_type: str = "3d",
     rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
     rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise",
+    data_shape: Union[Sequence[int], NDArray, None] = None,
+    data_format: str = "dvwu",
 ) -> ProjectionGeometry:
     """
     Generate the default geometry for parallel beam.
@@ -607,22 +626,34 @@ def get_prj_geom_parallel(
     Returns
     -------
     ProjectionGeometry
-        The default paralle-beam geometry.
+        The default parallel-beam geometry.
     """
-    if rot_axis_shift_pix is None:
-        det_pos_xyz = np.zeros(3)
-    else:
-        rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
-        det_pos_xyz = np.concatenate([rot_axis_shift_pix[:, None], np.zeros((len(rot_axis_shift_pix), 2))], axis=-1)
+    geom_type = geom_type.lower()
 
-    return ProjectionGeometry(
+    prj_geom = ProjectionGeometry(
         geom_type="parallel" + geom_type,
         src_pos_xyz=np.array([0.0, -1.0, 0.0]),
-        det_pos_xyz=det_pos_xyz,
+        det_pos_xyz=np.zeros(3),
         det_u_xyz=np.array([1.0, 0.0, 0.0]),
         det_v_xyz=np.array([0.0, 0.0, 1.0]),
         rot_dir_xyz=get_rot_axis_dir(rot_axis_dir),
     )
+
+    if rot_axis_shift_pix is not None:
+        rot_axis_shift_pix = np.array(rot_axis_shift_pix)
+        if rot_axis_shift_pix.size == 1:
+            prj_geom.set_detector_shifts_vu(cor_pos_u=float(rot_axis_shift_pix))
+        else:
+            prj_geom.set_detector_shifts_vu(det_pos_vu=rot_axis_shift_pix)
+
+    if data_shape is not None:
+        data_dims = _get_data_dims(data_shape, data_format)
+        if geom_type == "3d":
+            prj_geom.set_detector_shape_vu([data_dims["v"], data_dims["u"]])
+        else:
+            prj_geom.set_detector_shape_vu([data_dims["u"]])
+
+    return prj_geom
 
 
 def get_prj_geom_cone(
@@ -630,6 +661,8 @@ def get_prj_geom_cone(
     src_to_sam_dist: float,
     rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
     rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise",
+    data_shape: Union[Sequence[int], NDArray, None] = None,
+    data_format: str = "dvwu",
 ) -> ProjectionGeometry:
     """
     Generate the default geometry for parallel beam.
@@ -646,25 +679,34 @@ def get_prj_geom_cone(
     Returns
     -------
     ProjectionGeometry
-        The default paralle-beam geometry.
+        The default cone-beam geometry.
     """
-    if rot_axis_shift_pix is None:
-        det_pos_xyz = np.zeros(3)
-    else:
-        rot_axis_shift_pix = np.array(rot_axis_shift_pix, ndmin=1)
-        det_pos_xyz = np.concatenate([rot_axis_shift_pix[:, None], np.zeros((len(rot_axis_shift_pix), 2))], axis=-1)
-
-    return ProjectionGeometry(
+    prj_geom = ProjectionGeometry(
         geom_type="cone",
         src_pos_xyz=np.array([0.0, -src_to_sam_dist, 0.0]),
-        det_pos_xyz=det_pos_xyz,
+        det_pos_xyz=np.zeros(3),
         det_u_xyz=np.array([1.0, 0.0, 0.0]),
         det_v_xyz=np.array([0.0, 0.0, 1.0]),
         rot_dir_xyz=get_rot_axis_dir(rot_axis_dir),
     )
 
+    if rot_axis_shift_pix is not None:
+        rot_axis_shift_pix = np.array(rot_axis_shift_pix)
+        if rot_axis_shift_pix.size == 1:
+            prj_geom.set_detector_shifts_vu(cor_pos_u=float(rot_axis_shift_pix))
+        else:
+            prj_geom.set_detector_shifts_vu(det_pos_vu=rot_axis_shift_pix)
 
-def get_vol_geom_from_data(data: NDArray, data_format: str = "dvwu") -> VolumeGeometry:
+    if data_shape is not None:
+        data_dims = _get_data_dims(data_shape, data_format)
+        prj_geom.set_detector_shape_vu([data_dims["v"], data_dims["u"]])
+
+    return prj_geom
+
+
+def get_vol_geom_from_data(
+    data: NDArray, padding_u: Union[int, Sequence[int], NDArray] = 0, data_format: str = "dvwu"
+) -> VolumeGeometry:
     """
     Generate a default volume geometry from the data shape.
 
@@ -672,18 +714,25 @@ def get_vol_geom_from_data(data: NDArray, data_format: str = "dvwu") -> VolumeGe
     ----------
     data : NDArray
         The data.
+    padding_u : int | Sequence[int]
     data_format : str, optional
-        The ordering and meaning of the dimensions in the data. The deault is "dvwu".
+        The ordering and meaning of the dimensions in the data. The default is "dvwu".
 
     Returns
     -------
     VolumeGeometry
         The default volume geometry.
     """
-    dims = dict(u=[], v=[], w=[], d=[])
-    for ii in range(-len(data.shape), 0):
-        dims[data_format[ii]] = [data.shape[ii]]
-    return VolumeGeometry([*(dims["u"] * 2), *dims["v"]])
+    dims = _get_data_dims(data.shape, data_format)
+    if isinstance(padding_u, (Sequence, np.ndarray)):
+        if len(padding_u) != 2:
+            raise ValueError(
+                f"Padding along U can only either be an integer or a Sequence/NDArray of 2 values. {padding_u} passed instead."
+            )
+        dims["u"] -= padding_u[0] + padding_u[1]
+    else:
+        dims["u"] -= padding_u * 2
+    return VolumeGeometry(np.array([*([dims["u"]] * 2), dims["v"]]))
 
 
 def get_vol_geom_from_volume(volume: NDArray) -> VolumeGeometry:
