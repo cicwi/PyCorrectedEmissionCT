@@ -164,7 +164,7 @@ def get_propagation_filter(
     Returns
     -------
     tuple[NDArray, NDArray]
-        The real-space and the Fourier-space filter
+        The Fourier-space and real-space filters, respectively
 
     Raises
     ------
