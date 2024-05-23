@@ -93,7 +93,9 @@ def _ctf_freq_response(k2: NDArray, dist_um: float, wlength_um: float, delta_bet
     return np.cos(steps) + delta_beta * np.sin(steps)
 
 
-def plot_freq_responses(filter_length: int, pix_size_um: float, dist_um: float, wlength_um: float, delta_beta: float) -> tuple:
+def plot_filter_responses(
+    filter_length: int, pix_size_um: float, dist_um: float, wlength_um: float, delta_beta: float, domain: str = "fourier"
+) -> tuple:
     """Plot frequency response of the wave propagation.
 
     Parameters
@@ -101,13 +103,15 @@ def plot_freq_responses(filter_length: int, pix_size_um: float, dist_um: float, 
     filter_length : int
         Length of the filter in pixels
     pix_size_um : float
-        Pixel-sise of the detector in microns
+        Pixel-wise of the detector in microns
     dist_um : float
         Distance of the detector from sample in microns
     wlength_um : float
         Wavelength of the wave in microns
     delta_beta : float
         Radio between the refraction index decrement and the absorption coefficient.
+    domain : str
+        Whether to plot Fourier or direct-space responses. By default, "Fourier".
 
     Returns
     -------
@@ -116,9 +120,23 @@ def plot_freq_responses(filter_length: int, pix_size_um: float, dist_um: float, 
     """
     k = np.fft.rfftfreq(filter_length, d=pix_size_um)
     k2 = k**2
+    tie_resp = _tie_freq_response(k2, dist_um=dist_um, wlength_um=wlength_um, delta_beta=delta_beta)
+    ctf_resp = _ctf_freq_response(k2, dist_um=dist_um, wlength_um=wlength_um, delta_beta=delta_beta)
+    if domain.lower() == "fourier":
+        step = k
+    elif domain.lower() == "direct":
+        tie_resp = np.fft.fftshift(np.fft.irfft(tie_resp))
+        ctf_resp = np.fft.fftshift(np.fft.irfft(ctf_resp))
+        p = np.fft.fftfreq(filter_length, d=1.0 / (pix_size_um * filter_length))
+        p = np.fft.fftshift(p)
+        step = p
+    else:
+        raise ValueError(f"Unknown domain {domain}, please choose one of 'Fourier' | 'direct'.")
+
     fig, axs = plt.subplots(1, 1, figsize=[8, 4])
-    axs.plot(k, _tie_freq_response(k2, dist_um=dist_um, wlength_um=wlength_um, delta_beta=delta_beta), label="TIE")
-    axs.plot(k, _ctf_freq_response(k2, dist_um=dist_um, wlength_um=wlength_um, delta_beta=delta_beta), label="CTF")
+    axs.set_title(f"Domain: {domain}")
+    axs.plot(step, tie_resp, label="TIE")
+    axs.plot(step, ctf_resp, label="CTF")
     axs.grid()
     axs.legend()
     fig.tight_layout()
