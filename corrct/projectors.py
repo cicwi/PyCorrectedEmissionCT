@@ -269,7 +269,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         vol : NDArray
             The volume to forward-project.
         angle_ind : int
-            The angle index to foward project.
+            The angle index to forward project.
 
         Returns
         -------
@@ -452,7 +452,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             elif num_det_weights > 1 and not num_det_weights == num_det_angles:
                 raise ValueError(
                     "Number of detector weights differs from number of"
-                    + " detector angles: %d vs %d" % (num_det_weights, num_det_angles)
+                    f" detector angles: {num_det_weights} vs {num_det_angles}"
                 )
 
         if weights_angles is None:
