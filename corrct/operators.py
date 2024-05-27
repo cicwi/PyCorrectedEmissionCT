@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Operators module.
 
@@ -7,17 +6,15 @@ Operators module.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import numpy as np
-from scipy.sparse.linalg import LinearOperator
-import scipy.signal as spsig
-
 import copy as cp
-
+from abc import ABC, abstractmethod
+from collections.abc import Sequence
+from typing import Callable, Optional, Union
+import numpy as np
+import scipy.signal as spsig
 from numpy.typing import ArrayLike, NDArray
+from scipy.sparse.linalg import LinearOperator
 
-from typing import Callable, Optional, Sequence, Tuple, Union
-
-from abc import abstractmethod
 
 try:
     import pywt
@@ -35,21 +32,34 @@ except ImportError:
 NDArrayInt = NDArray[np.integer]
 
 
-class BaseTransform(LinearOperator):
+class BaseTransform(LinearOperator, ABC):
     """Base operator class.
 
     It implements the linear operator behavior that can be used with the solvers in the `.solvers` module,
     and by the solvers in `scipy.sparse.linalg`.
+
+    Parameters
+    ----------
+    dir_shape : NDArrayInt
+        Shape of the direct space.
+    adj_shape : NDArrayInt
+        Shape of the adjoint space
+
+    Attributes
+    ----------
+    is_dir_operator : bool
+        Flag indicating if the operator is a direct operator.
+
+    Notes
+    -----
+        It assumes that the fields `dir_shape` and `adj_shape` have been set during the initialization of the derived classes.
     """
 
     dir_shape: NDArrayInt
     adj_shape: NDArrayInt
 
-    def __init__(self):
-        """Initialize the base operator class.
-
-        It assumes that the fields `dir_shape` and `adj_shape` have been set during the initialization of the derived classes.
-        """
+    def __init__(self) -> None:
+        """Initialize the base operator class."""
         num_cols = np.prod(self.dir_shape)
         num_rows = np.prod(self.adj_shape)
         super().__init__(np.float32, [num_rows, num_cols])
@@ -58,8 +68,15 @@ class BaseTransform(LinearOperator):
     def _matvec(self, x: NDArray) -> NDArray:
         """Implement the direct operator for column vectors from the right.
 
-        :param x: Either row from the left or column from the right.
-        :type x: numpy.array_like
+        Parameters
+        ----------
+        x : NDArray
+            Either row from the left or column from the right.
+
+        Returns
+        -------
+        NDArray
+            Result of applying the direct operator.
         """
         if self.is_dir_operator:
             x = x.reshape(self.dir_shape)
@@ -71,8 +88,15 @@ class BaseTransform(LinearOperator):
     def rmatvec(self, x: NDArray) -> NDArray:
         """Implement the direct operator for row vectors from the left.
 
-        :param x: Either row from the left or column from the right on transpose.
-        :type x: numpy.array_like
+        Parameters
+        ----------
+        x : NDArray
+            Either row from the left or column from the right on transpose.
+
+        Returns
+        -------
+        NDArray
+            Result of applying the direct operator for row vectors.
         """
         if self.is_dir_operator:
             x = x.reshape(self.adj_shape)
@@ -81,33 +105,46 @@ class BaseTransform(LinearOperator):
             x = x.reshape(self.dir_shape)
             return self._op_direct(x).flatten()
 
-    def _transpose(self):
+    def _transpose(self) -> "BaseTransform":
         """Create the transpose operator.
 
-        :returns: The transpose operator
-        :rtype: BaseTransform
+        Returns
+        -------
+        BaseTransform
+            The transpose operator.
         """
         Op_t = cp.copy(self)
         Op_t.shape = [Op_t.shape[1], Op_t.shape[0]]
         Op_t.is_dir_operator = False
         return Op_t
 
-    def _adjoint(self):
+    def _adjoint(self) -> "BaseTransform":
+        """Create the adjoint operator.
+
+        Returns
+        -------
+        BaseTransform
+            The adjoint operator.
+        """
         return self._transpose()
 
-    def absolute(self):
-        """Return the projection operator using the absolute value of the projection coefficients.
+    def absolute(self) -> "BaseTransform":
+        """Return the absolute value of the operator.
 
-        :returns: The absolute value operator
-        :rtype: ProjectorOperator
+        Returns
+        -------
+        BaseTransform
+            The absolute value operator.
         """
         return self
 
     def explicit(self) -> NDArray:
-        """Return the explicit transformation matrix associated to the operator.
+        """Return the explicit transformation matrix associated with the operator.
 
-        :returns: The explicit transformation matrix
-        :rtype: NDArray
+        Returns
+        -------
+        NDArray
+            The explicit transformation matrix, as a NumPy array.
         """
         He = np.empty(self.shape, dtype=self.dtype)
         if self.is_dir_operator:
@@ -121,13 +158,17 @@ class BaseTransform(LinearOperator):
         return He
 
     def __call__(self, x: NDArray) -> NDArray:
-        """Apply the operator to the input vector.
+        """Apply the operator to the input vector `x`.
 
-        :param x: Input vector.
-        :type x: NDArray
+        Parameters
+        ----------
+        x : NDArray
+            Input vector.
 
-        :returns: The result of the application of the operator on the input vector.
-        :rtype: NDArray
+        Returns
+        -------
+        result : NDArray
+            The result of applying the operator to `x`.
         """
         if self.is_dir_operator:
             return self._op_direct(x)
@@ -170,8 +211,8 @@ class TransformFunctions(BaseTransform):
 
     def __init__(
         self,
-        dir_shape: ArrayLike,
-        adj_shape: ArrayLike,
+        dir_shape: Union[ArrayLike, NDArray],
+        adj_shape: Union[ArrayLike, NDArray],
         A: Callable[[NDArray], NDArray],
         At: Optional[Callable[[NDArray], NDArray]] = None,
     ) -> None:
@@ -229,7 +270,7 @@ class TransformFunctions(BaseTransform):
         else:
             return self.A(x)
 
-    def absolute(self):
+    def absolute(self) -> "TransformFunctions":
         """Compute the absolute value of the operator. Raise an error, because not supported.
 
         Raises
@@ -275,24 +316,34 @@ class ProjectorOperator(BaseTransform):
 
     @abstractmethod
     def fp(self, x: NDArray) -> NDArray:
-        """Define the interface for the forward-projection.
+        """
+        Define the interface of the forward-projection.
 
-        :param x: Input volume.
-        :type x: NDArray
+        Parameters
+        ----------
+        x : NDArray
+            Input volume.
 
-        :returns: The projection data.
-        :rtype: NDArray
+        Returns
+        -------
+        NDArray
+            The projection data.
         """
 
     @abstractmethod
     def bp(self, x: NDArray) -> NDArray:
-        """Define the interface for the back-projection.
+        """
+        Define the interface for the back-projection.
 
-        :param x: Input projection data.
-        :type x: NDArray
+        Parameters
+        ----------
+        x : NDArray
+            Input projection data.
 
-        :returns: The back-projected volume.
-        :rtype: NDArray
+        Returns
+        -------
+        NDArray
+            The back-projected volume.
         """
 
     def _op_direct(self, x: NDArray) -> NDArray:
@@ -315,11 +366,13 @@ class ProjectorOperator(BaseTransform):
 class TransformIdentity(BaseTransform):
     """Identity operator."""
 
-    def __init__(self, x_shape: ArrayLike):
+    def __init__(self, x_shape: Union[ArrayLike, NDArray]):
         """Identity operator.
 
-        :param x_shape: Shape of the data.
-        :type x_shape: ArrayLike
+        Parameters
+        ----------
+        x_shape : ArrayLike | NDArray
+            Shape of the data.
         """
         self.dir_shape = np.array(x_shape, ndmin=1, dtype=int)
         self.adj_shape = np.array(x_shape, ndmin=1, dtype=int)
@@ -337,24 +390,28 @@ class TransformDiagonalScaling(BaseTransform):
 
     scale: NDArray
 
-    def __init__(self, x_shape: ArrayLike, scale: Union[float, ArrayLike]):
+    def __init__(self, x_shape: Union[ArrayLike, NDArray], scale: Union[ArrayLike, NDArray]):
         """Diagonal scaling operator.
 
-        :param x_shape: Shape of the data.
-        :type x_shape: ArrayLike
-        :param scale: Operator diagonal.
-        :type scale: float or ArrayLike
+        Parameters
+        ----------
+        x_shape : ArrayLike
+            Shape of the data.
+        scale : float or ArrayLike
+            Operator diagonal.
         """
         self.scale = np.array(scale)
         self.dir_shape = np.array(x_shape, ndmin=1, dtype=int)
         self.adj_shape = np.array(x_shape, ndmin=1, dtype=int)
         super().__init__()
 
-    def absolute(self):
+    def absolute(self) -> "TransformDiagonalScaling":
         """Return the projection operator using the absolute value of the projection coefficients.
 
-        :returns: The absolute value operator
-        :rtype: Diagonal operator of the absolute values
+        Returns
+        -------
+        TransformDiagonalScaling
+            The absolute value operator
         """
         return TransformDiagonalScaling(self.dir_shape, np.abs(self.scale))
 
@@ -414,7 +471,7 @@ class TransformConvolution(BaseTransform):
         """
         return TransformConvolution(self.dir_shape, np.abs(self.kernel))
 
-    def _pad_valid(self, x: NDArray) -> Tuple[NDArray, NDArray]:
+    def _pad_valid(self, x: NDArray) -> tuple[NDArray, NDArray]:
         pad_width = (np.array(self.kernel.shape) - 1) // 2
         return np.pad(x, pad_width=pad_width[:, None], mode=self.pad_mode), pad_width  # type: ignore
 
@@ -440,11 +497,12 @@ class TransformConvolution(BaseTransform):
             return x
 
 
-class BaseWaveletTransform(BaseTransform):
+class BaseWaveletTransform(BaseTransform, ABC):
     """Base Wavelet transform."""
 
     axes: NDArrayInt
     wavelet: str
+    labels: list[str]
 
     def _initialize_filter_bank(self) -> None:
         num_axes = len(self.axes)
@@ -464,22 +522,34 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
     """Decimated wavelet Transform operator."""
 
     def __init__(
-        self, x_shape: ArrayLike, wavelet: str, level: int, axes: Optional[ArrayLike] = None, pad_on_demand: str = "edge"
+        self,
+        x_shape: Union[ArrayLike, NDArray],
+        wavelet: str,
+        level: int,
+        axes: Optional[ArrayLike] = None,
+        pad_on_demand: str = "edge",
     ):
-        """Decimated wavelet Transform operator.
+        """
+        Decimated wavelet Transform operator.
 
-        :param x_shape: Shape of the data to be wavelet transformed.
-        :type x_shape: ArrayLike
-        :param wavelet: Wavelet type
-        :type wavelet: string
-        :param level: Numer of wavelet decomposition levels
-        :type level: int
-        :param axes: Axes along which to do the transform, defaults to None
-        :type axes: int or tuple of int, optional
-        :param pad_on_demand: Padding type to fit the `2 ** level` shape requirements, defaults to 'edge'
-        :type pad_on_demand: string, optional. Options are all the `numpy.pad` padding modes.
+        Parameters
+        ----------
+        x_shape : ArrayLike
+            Shape of the data to be wavelet transformed.
+        wavelet : str
+            Wavelet type.
+        level : int
+            Number of wavelet decomposition levels.
+        axes : int or tuple of int, optional
+            Axes along which to do the transform. Defaults to None.
+        pad_on_demand : str, optional
+            Padding type to fit the `2 ** level` shape requirements. Defaults to 'edge'.
+            Options are all the `numpy.pad` padding modes.
 
-        :raises ValueError: In case the pywavelets package is not available or its version is not adequate.
+        Raises
+        ------
+        ValueError
+            In case the pywavelets package is not available or its version is not adequate.
         """
         x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
@@ -514,24 +584,34 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
         super().__init__()
 
     def direct_dwt(self, x: NDArray) -> list:
-        """Perform the direct wavelet transform.
+        """
+        Perform the direct wavelet transform.
 
-        :param x: Data to transform.
-        :type x: NDArray
+        Parameters
+        ----------
+        x : NDArray
+            Data to transform.
 
-        :return: Transformed data.
-        :rtype: list
+        Returns
+        -------
+        list
+            Transformed data.
         """
         return pywt.wavedecn(x, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand, level=self.level)
 
     def inverse_dwt(self, y: list) -> NDArray:
-        """Perform the inverse wavelet transform.
+        """
+        Perform the inverse wavelet transform.
 
-        :param x: Data to anti-transform.
-        :type x: list
+        Parameters
+        ----------
+        y : list
+            Data to anti-transform.
 
-        :return: Anti-transformed data.
-        :rtype: NDArray
+        Returns
+        -------
+        NDArray
+            Anti-transformed data.
         """
         rec = pywt.waverecn(y, wavelet=self.wavelet, axes=self.axes, mode=self.pad_on_demand)
         if not np.all(rec.shape == self.dir_shape):
@@ -566,20 +646,26 @@ class TransformStationaryWavelet(BaseWaveletTransform):
     ):
         """Stationary wavelet Transform operator.
 
-        :param x_shape: Shape of the data to be wavelet transformed.
-        :type x_shape: ArrayLike
-        :param wavelet: Wavelet type
-        :type wavelet: string
-        :param level: Numer of wavelet decomposition levels
-        :type level: int
-        :param axes: Axes along which to do the transform, defaults to None
-        :type axes: int or tuple of int, optional
-        :param pad_on_demand: Padding type to fit the `2 ** level` shape requirements, defaults to 'constant'
-        :type pad_on_demand: string, optional. Options are all the `numpy.pad` padding modes.
-        :param normalized: Whether to use a normalized transform. Defaults to True.
-        :type normalized: boolean, optional.
+        Parameters
+        ----------
+        x_shape : ArrayLike
+            Shape of the data to be wavelet transformed.
+        wavelet : string
+            Wavelet type
+        level : int
+            Number of wavelet decomposition levels
+        axes : int or tuple of int, optional
+            Axes along which to do the transform, defaults to None
+        pad_on_demand : string, optional
+            Padding type to fit the `2 ** level` shape requirements, defaults to 'constant'
+            Options are all the `numpy.pad` padding modes.
+        normalized : boolean, optional
+            Whether to use a normalized transform. Defaults to True.
 
-        :raises ValueError: In case the pywavelets package is not available or its version is not adequate.
+        Raises
+        ------
+        ValueError
+            In case the pywavelets package is not available or its version is not adequate.
         """
         x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
@@ -615,13 +701,18 @@ class TransformStationaryWavelet(BaseWaveletTransform):
         super().__init__()
 
     def direct_swt(self, x: NDArray) -> list:
-        """Perform the direct wavelet transform.
+        """
+        Perform the direct wavelet transform.
 
-        :param x: Data to transform.
-        :type x: NDArray
+        Parameters
+        ----------
+        x : NDArray
+            Data to transform.
 
-        :return: Transformed data.
-        :rtype: list
+        Returns
+        -------
+        list
+            Transformed data.
         """
         if self.pad_on_demand is not None and np.any(self.pad_axes):
             for ax in np.nonzero(self.pad_axes)[0]:
@@ -633,13 +724,18 @@ class TransformStationaryWavelet(BaseWaveletTransform):
         return pywt.swtn(x, wavelet=self.wavelet, axes=self.axes, norm=self.normalized, level=self.level, trim_approx=True)
 
     def inverse_swt(self, y: list) -> NDArray:
-        """Perform the inverse wavelet transform.
+        """
+        Perform the inverse wavelet transform.
 
-        :param x: Data to anti-transform.
-        :type x: list
+        Parameters
+        ----------
+        y : list
+            Data to anti-transform.
 
-        :return: Anti-transformed data.
-        :rtype: NDArray
+        Returns
+        -------
+        NDArray
+            Anti-transformed data.
         """
         x = pywt.iswtn(y, wavelet=self.wavelet, axes=self.axes, norm=self.normalized)
         if self.pad_on_demand is not None and np.any(self.pad_axes):
@@ -697,13 +793,18 @@ class TransformGradient(BaseTransform):
         super().__init__()
 
     def gradient(self, x: NDArray) -> NDArray:
-        """Compute the gradient.
+        """
+        Compute the gradient.
 
-        :param x: Input data.
-        :type x: NDArray
+        Parameters
+        ----------
+        x : NDArray
+            Input data.
 
-        :return: Gradient of data.
-        :rtype: NDArray
+        Returns
+        -------
+        NDArray
+            Gradient of data.
         """
         d = [np.array([])] * len(self.axes)
         for ii, ax in enumerate(self.axes):
@@ -714,13 +815,18 @@ class TransformGradient(BaseTransform):
         return np.stack(d, axis=0)
 
     def divergence(self, x: NDArray) -> NDArray:
-        """Compute the divergence - transpose of gradient.
+        """
+        Compute the divergence - transpose of gradient.
 
-        :param x: Input data.
-        :type x: NDArray
+        Parameters
+        ----------
+        x : NDArray
+            Input data.
 
-        :return: Divergence of data.
-        :rtype: NDArray
+        Returns
+        -------
+        NDArray
+            Divergence of data.
         """
         d = [np.array([])] * len(self.axes)
         for ii, ax in enumerate(self.axes):
@@ -741,12 +847,19 @@ class TransformFourier(BaseTransform):
     """Fourier transform operator."""
 
     def __init__(self, x_shape: ArrayLike, axes: Optional[ArrayLike] = None):
-        """Fourier transform.
+        """
+        Fourier transform.
 
-        :param x_shape: Shape of the data to be wavelet transformed.
-        :type x_shape: ArrayLike
-        :param axes: Axes along which to do the gradient, defaults to None
-        :type axes: int or tuple of int, optional
+        Parameters
+        ----------
+        x_shape : ArrayLike
+            Shape of the data to be Fourier transformed.
+        axes : Optional[ArrayLike], optional
+            Axes along which to do the Fourier transform.
+
+        Returns
+        -------
+        None
         """
         x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
@@ -761,13 +874,18 @@ class TransformFourier(BaseTransform):
         super().__init__()
 
     def fft(self, x: NDArray) -> NDArray:
-        """Compute the fft.
+        """
+        Compute the fft.
 
-        :param x: Input data.
-        :type x: NDArray
+        Parameters
+        ----------
+        x : NDArray
+            Input data.
 
-        :return: FFT of data.
-        :rtype: NDArray
+        Returns
+        -------
+        NDArray
+            FFT of data.
         """
         d = np.empty(self.adj_shape, dtype=x.dtype)
         x_f = np.fft.fftn(x, axes=tuple(self.axes), norm="ortho")
@@ -778,11 +896,15 @@ class TransformFourier(BaseTransform):
     def ifft(self, x: NDArray) -> NDArray:
         """Compute the inverse of the fft.
 
-        :param x: Input data.
-        :type x: NDArray
+        Parameters
+        ----------
+        x : NDArray
+            Input data.
 
-        :return: iFFT of data.
-        :rtype: NDArray
+        Returns
+        -------
+        NDArray
+            iFFT of data.
         """
         d = x[0, ...] + 1j * x[1, ...]
         return np.fft.ifftn(d, axes=tuple(self.axes), norm="ortho").real
@@ -826,11 +948,15 @@ class TransformLaplacian(BaseTransform):
     def laplacian(self, x: NDArray) -> NDArray:
         """Compute the laplacian.
 
-        :param x: Input data.
-        :type x: NDArray
+        Parameters
+        ----------
+        x : NDArray
+            Input data.
 
-        :return: Gradient of data.
-        :rtype: NDArray
+        Returns
+        -------
+        NDArray
+            Laplacian of the input data.
         """
         d = [np.array([])] * len(self.axes)
         for ii, ax in enumerate(self.axes):
@@ -854,21 +980,27 @@ class TransformSVD(BaseTransform):
     Vt: Optional[NDArray]
 
     def __init__(self, x_shape, axes_rows=(0,), axes_cols=(-1,), rescale: bool = False):
-        """Singular value decomposition operator.
+        """
+        Singular value decomposition operator.
 
         The SVD decomposition will be done over the flattened rows vs flatted cols.
         This means that the channels should always be the rows (expected to be only
         one dimension, usually), while the volume dimensions should always be the
         columns (expected to be the last two or three dimensions).
 
-        :param x_shape: Shape of the data to be wavelet transformed.
-        :type x_shape: `numpy.array_like`
-        :param axes_rows: Axes expanded in rows of the SVD, defaults to (0, )
-        :type axes_rows: tuple of int, optional
-        :param axes_cols: Axes expanded in cols of the SVD, defaults to (-1, )
-        :type axes_cols: tuple of int, optional
+        Parameters
+        ----------
+        x_shape : numpy.array_like
+            Shape of the data to be wavelet transformed.
+        axes_rows : tuple of int, optional
+            Axes expanded in rows of the SVD. Defaults to (0, ).
+        axes_cols : tuple of int, optional
+            Axes expanded in cols of the SVD. Defaults to (-1, ).
 
-        :raises IndexError: In case the the axes are outside the range.
+        Raises
+        ------
+        IndexError
+            In case the axes are outside the range.
         """
         self.dir_shape = np.array(x_shape, ndmin=1, dtype=int)
 
@@ -907,28 +1039,38 @@ class TransformSVD(BaseTransform):
         super().__init__()
 
     def direct_svd(self, x):
-        """Performs the SVD decomposition.
+        """
+        Performs the SVD decomposition.
 
-        :param x: Data to transform.
-        :type x: `numpy.array_like`
+        Parameters
+        ----------
+        x : `numpy.array_like`
+            Data to transform.
 
-        :return: Transformed data.
-        :rtype: tuple(U, s, Vt)
+        Returns
+        -------
+        tuple(U, s, Vt)
+            Transformed data.
         """
         return np.linalg.svd(x, full_matrices=False)
 
     def inverse_svd(self, U, s, Vt):
-        """Performs the inverse SVD decomposition.
+        """
+        Performs the inverse SVD decomposition.
 
-        :param U: Rows of the SVD dcomposition.
-        :type U: `numpy.array_like`
-        :param s: Singular values.
-        :type s: `numpy.array_like`
-        :param Vt: Columns of the SVD dcomposition.
-        :type Vt: `numpy.array_like`
+        Parameters
+        ----------
+        U : `numpy.array_like`
+            Rows of the SVD decomposition.
+        s : `numpy.array_like`
+            Singular values.
+        Vt : `numpy.array_like`
+            Columns of the SVD decomposition.
 
-        :return: Anti-transformed data.
-        :rtype: `numpy.array_like`
+        Returns
+        -------
+        `numpy.array_like`
+            Anti-transformed data.
         """
         return np.matmul(U, s[..., None] * Vt)
 
