@@ -289,6 +289,8 @@ class ProjectionGeometry(Geometry):
             self.det_u_xyz = rotations.apply(self.det_u_xyz)
             self.det_v_xyz = rotations.apply(self.det_v_xyz)
 
+            self.det_pos_xyz = rotations.apply(self.det_pos_xyz)
+
     def rotate(self, angles_w_rad: ArrayLike, patch_astra_2d: bool = False) -> "ProjectionGeometry":
         """
         Rotate the geometry by the given angle(s).
