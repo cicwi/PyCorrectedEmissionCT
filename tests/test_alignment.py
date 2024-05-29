@@ -11,6 +11,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 import pytest
 import skimage.data as skd
+import skimage.transform as skt
 from numpy.typing import NDArray
 import corrct as cct
 
@@ -160,6 +161,66 @@ def test_set_detector_tilt():
     rotation = Rotation.from_rotvec(angles_t_rad * np.array([0, 1, 0]))
     expected_src = rotation.apply(prj_geom_orig.src_pos_xyz)
     assert np.allclose(prj_geom_test.src_pos_xyz, expected_src), "Failed: Tilting the source"
+
+
+def test_fit_image_rotation_and_scale():
+    """
+    Test the fit_image_rotation_and_scale function from the cct.alignment.fitting module.
+
+    This function should return a tuple (angle, scale) that represents the rotation angle
+    and scaling factor required to align an input image with a reference image. The
+    function is tested using various combinations of identical images, simple rotations,
+    scaling, and both rotation and scaling. It is also tested with images of different
+    shapes, in which case it should raise a ValueError.
+    """
+    # Load the camera image from scikit-image's data package
+    img: NDArray = skd.camera() / 255
+
+    # Test with two identical images should return 0 degrees and 1 scale
+    result = cct.alignment.fitting.fit_image_rotation_and_scale(img, img)
+    assert np.allclose(result, (0.0, 1.0))
+
+    # Test with a simple rotation of an image by 10 degrees
+    img_10 = skt.rotate(img, angle=10.0)
+    result = cct.alignment.fitting.fit_image_rotation_and_scale(img, img_10)
+    assert np.allclose(result, (10.0, 1), rtol=0.01)
+
+    # Test with a simple rotation of an image by 45 degrees
+    img_45 = skt.rotate(img, angle=45.0)
+    result = cct.alignment.fitting.fit_image_rotation_and_scale(img, img_45)
+    assert np.allclose(result, (45.0, 1), rtol=0.01)
+
+    # Test with a rotation of an image by 360 degrees
+    img_360 = np.copy(img)
+    result = cct.alignment.fitting.fit_image_rotation_and_scale(img, img_360)
+    assert np.allclose(result, (0.0, 1.0), rtol=0.01)
+
+    # Test with a scaling of an image by 10% using scikit-image's rescale function
+    img_scaled: NDArray = skt.rescale(img, scale=1.1)
+    center_y, center_x = img.shape[0] // 2, img.shape[1] // 2
+    img_scaled_cropped = img_scaled[
+        center_y - img.shape[0] // 2 : center_y + img.shape[0] // 2,
+        center_x - img.shape[1] // 2 : center_x + img.shape[1] // 2,
+    ]
+    result = cct.alignment.fitting.fit_image_rotation_and_scale(img, img_scaled_cropped)
+    assert np.allclose(result, (0.0, 1.1), rtol=0.01, atol=0.05)
+
+    # Test with a rotation and scaling of an image
+    img_scaled = skt.rescale(img, scale=1.1)
+    img_scaled_cropped = img_scaled[
+        center_y - img.shape[0] // 2 : center_y + img.shape[0] // 2,
+        center_x - img.shape[1] // 2 : center_x + img.shape[1] // 2,
+    ]
+    img_10_scaled = skt.rotate(img_scaled_cropped, angle=10.0)
+    result = cct.alignment.fitting.fit_image_rotation_and_scale(img, img_10_scaled)
+    assert np.allclose(result, (10.0, 1.1), rtol=0.01)
+
+    # Test with images of different shapes should raise a ValueError
+    try:
+        cct.alignment.fitting.fit_image_rotation_and_scale(img, np.random.rand(10, 20))
+        assert False, "Expected a ValueError"
+    except ValueError:
+        pass
 
 
 @pytest.mark.skipif(not cct.projectors.astra_available, reason="astra-toolbox not available")
