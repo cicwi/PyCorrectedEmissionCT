@@ -240,19 +240,27 @@ class ProjectionGeometry(Geometry):
             self.src_pos_xyz[:, 2] = src_pos_vu[-2, :]
 
     def set_detector_tilt(
-        self, angles_t_rad: ArrayLike, tilt_axis: Union[Sequence[float], NDArray] = (0, 1, 0), tilt_source: bool = False
+        self,
+        angles_t_rad: Union[ArrayLike, NDArray],
+        tilt_axis: Union[Sequence[float], NDArray] = (0, 1, 0),
+        tilt_source: bool = False,
     ) -> None:
         """
         Rotate the detector by the given angle(s) and axis(axes).
 
         Parameters
         ----------
-        angles_t_rad : ArrayLike
+        angles_t_rad : ArrayLike | NDArray
             Rotation angle(s) in radians.
         tilt_axis : Sequence[float] | NDArray, optional
             The tilt axis or axes. The default is (0, 1, 0)
         tilt_source : bool, optional
             Whether to also tilt the source. The default is False.
+
+        Notes
+        -----
+        When applying multiple axes, they will be applied in order. This means
+        that the application is not going to be independent.
         """
         angles = np.array(angles_t_rad, ndmin=1)[:, None]
         tilt_axis = np.array(tilt_axis, ndmin=1)
@@ -272,15 +280,14 @@ class ProjectionGeometry(Geometry):
                 f"Current shapes: {tilt_axis.shape = }, {angles.shape = }"
             )
 
-        rotations = spt.Rotation.from_rotvec(angles * tilt_axis)  # type: ignore
+        for angle, axis in zip(angles, tilt_axis):
+            rotations = spt.Rotation.from_rotvec(angle * axis)  # type: ignore
 
-        if tilt_source:
-            self.src_pos_xyz = rotations.apply(self.src_pos_xyz)
+            if tilt_source:
+                self.src_pos_xyz = rotations.apply(self.src_pos_xyz)
 
-        self.det_u_xyz = rotations.apply(self.det_u_xyz)
-        self.det_v_xyz = rotations.apply(self.det_v_xyz)
-
-        self.det_pos_xyz = rotations.apply(self.det_pos_xyz)
+            self.det_u_xyz = rotations.apply(self.det_u_xyz)
+            self.det_v_xyz = rotations.apply(self.det_v_xyz)
 
     def rotate(self, angles_w_rad: ArrayLike, patch_astra_2d: bool = False) -> "ProjectionGeometry":
         """
