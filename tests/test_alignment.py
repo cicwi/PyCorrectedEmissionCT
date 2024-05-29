@@ -8,6 +8,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.spatial.transform import Rotation
 import pytest
 import skimage.data as skd
 from numpy.typing import NDArray
@@ -108,6 +109,59 @@ def test_api_det_shifts_vu():
     assert np.all(np.isclose(prj_geom.det_pos_xyz[:, -1], -shifts_v)), "The tilted shifts along v are wrong"
 
 
+def test_set_detector_tilt():
+    """
+    Test ProjectionGeometry.set_detector_tilt method with various scenarios of angles, axes and source tilting.
+
+    Checks if detector u and v vectors are correctly tilted after calling the function. Also checks if the source is
+    correctly tilted when specified.
+    """
+    # Setup: Create a default geometry
+    prj_geom_orig = cct.models.get_prj_geom_parallel(geom_type="3d")
+
+    prj_geom_test = prj_geom_orig.copy()
+    # Test 1: Single tilt along the default axis (0, 1, 0)
+    angles_t_rad = np.deg2rad(30)
+    prj_geom_test.set_detector_tilt(angles_t_rad)
+
+    rotation = Rotation.from_rotvec(angles_t_rad * np.array([0, 1, 0]))
+    expected_u = rotation.apply(prj_geom_orig.det_u_xyz)
+    assert np.allclose(prj_geom_test.det_u_xyz, expected_u), "Failed: Single tilt along default axis"
+
+    prj_geom_test = prj_geom_orig.copy()
+    # Test 2: Single tilt along a custom axis
+    angles_t_rad = np.deg2rad(-45)
+    tilt_axis = (1, 0, 0)
+    prj_geom_test.set_detector_tilt(angles_t_rad, tilt_axis=tilt_axis)
+
+    rotation = Rotation.from_rotvec(angles_t_rad * np.array(tilt_axis))
+    expected_v = rotation.apply(prj_geom_orig.det_v_xyz)
+    assert np.allclose(prj_geom_test.det_v_xyz, expected_v), "Failed: Single tilt along custom axis"
+
+    prj_geom_test = prj_geom_orig.copy()
+    # Test 3: Multiple tilts along different axes
+    angles_t_rad = np.deg2rad([45, -60])
+    tilt_axis = [(1, 0, 0), (0, 1, 0)]
+    prj_geom_test.set_detector_tilt(angles_t_rad, tilt_axis=tilt_axis)
+
+    expected_u = prj_geom_orig.det_u_xyz
+    for angle, axis in zip(angles_t_rad, tilt_axis):
+        rotations = Rotation.from_rotvec(angle * np.array(axis))  # type: ignore
+        expected_u = rotations.apply(expected_u)
+
+    assert np.allclose(prj_geom_test.det_u_xyz, expected_u), "Failed: Multiple tilts along different axes"
+
+    prj_geom_test = prj_geom_orig.copy()
+    # Test 4: Tilt the source as well
+    angles_t_rad = np.deg2rad(-90)
+    tilt_source = True
+    prj_geom_test.set_detector_tilt(angles_t_rad, tilt_source=tilt_source)
+
+    rotation = Rotation.from_rotvec(angles_t_rad * np.array([0, 1, 0]))
+    expected_src = rotation.apply(prj_geom_orig.src_pos_xyz)
+    assert np.allclose(prj_geom_test.src_pos_xyz, expected_src), "Failed: Tilting the source"
+
+
 @pytest.mark.skipif(not cct.projectors.astra_available, reason="astra-toolbox not available")
 @pytest.mark.parametrize("add_noise", [(False,), (True,)])
 def test_pre_alignment(add_noise: bool, theo_rot_axis: float = -1.25):
@@ -178,7 +232,7 @@ def test_pre_alignment(add_noise: bool, theo_rot_axis: float = -1.25):
         plt.show()
 
     tolerance = 0.8 if add_noise else 0.3
-    assert np.all(np.isclose(shifts_u_pre, theo_shifts, atol=tolerance)), "Theoretical and computed shifts do not match"
+    assert np.allclose(shifts_u_pre, theo_shifts, atol=tolerance), "Theoretical and computed shifts do not match"
 
 
 @pytest.mark.skipif(not cct.projectors.astra_available, reason="astra-toolbox not available")
@@ -277,4 +331,4 @@ def test_pre_alignment_3d(add_noise: bool, theo_rot_axis: float = -1.25):
         plt.show()
 
     tolerance = 0.8 if add_noise else 0.3
-    assert np.all(np.isclose(shifts_vu_pre, theo_shifts_vu, atol=tolerance)), "Theoretical and computed shifts do not match"
+    assert np.allclose(shifts_vu_pre, theo_shifts_vu, atol=tolerance), "Theoretical and computed shifts do not match"
