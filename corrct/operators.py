@@ -549,7 +549,7 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
         Raises
         ------
         ValueError
-            In case the pywavelets package is not available or its version is not adequate.
+            If the pywavelets package is not available or its version is not adequate.
         """
         x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
@@ -633,7 +633,7 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
 
 
 class TransformStationaryWavelet(BaseWaveletTransform):
-    """Stationary avelet Transform operator."""
+    """Stationary wavelet Transform operator."""
 
     def __init__(
         self,
@@ -649,23 +649,23 @@ class TransformStationaryWavelet(BaseWaveletTransform):
         Parameters
         ----------
         x_shape : ArrayLike
-            Shape of the data to be wavelet transformed.
-        wavelet : string
-            Wavelet type
+            The shape of the data to be wavelet transformed.
+        wavelet : str
+            The type of wavelet to use.
         level : int
-            Number of wavelet decomposition levels
+            Number of wavelet decomposition levels.
         axes : int or tuple of int, optional
-            Axes along which to do the transform, defaults to None
-        pad_on_demand : string, optional
-            Padding type to fit the `2 ** level` shape requirements, defaults to 'constant'
-            Options are all the `numpy.pad` padding modes.
-        normalized : boolean, optional
-            Whether to use a normalized transform. Defaults to True.
+            Axes along which to perform the transform. Default is None.
+        pad_on_demand : str, optional
+            The padding type to fit the `2 ** level` shape requirements.
+            Default is 'constant'. Options are all the `numpy.pad` padding modes.
+        normalized : bool, optional
+            Whether to use a normalized transform. Default is True.
 
         Raises
         ------
         ValueError
-            In case the pywavelets package is not available or its version is not adequate.
+            If the pywavelets package is not available or its version is not adequate.
         """
         x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
@@ -757,8 +757,7 @@ class TransformStationaryWavelet(BaseWaveletTransform):
             return (lvl - 1) * (2 ** len(self.axes) - 1) + 1
 
         x = [y[0]] + [
-            dict(((k, y[ii_lbl + get_lvl_pos(lvl), ...]) for ii_lbl, k in enumerate(self.labels)))
-            for lvl in range(1, self.level + 1)
+            {k: y[ii_lbl + get_lvl_pos(lvl), ...] for ii_lbl, k in enumerate(self.labels)} for lvl in range(1, self.level + 1)
         ]
         return self.inverse_swt(x)
 
