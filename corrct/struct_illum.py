@@ -154,7 +154,7 @@ class MaskCollection:
         masks_dec : NDArray | None, optional
             The decoding masks. The default (None) will assume them identical to the encoding masks.
         mask_dims : int, optional
-            The dimensions of a single mask. The feault is 2.
+            The dimensions of a single mask. The default is 2.
         mask_type : str, optional
             The type of masks. The default is "measured".
         mask_support : Sequence[int] | NDArray[np.integer] | None, optional
@@ -162,10 +162,21 @@ class MaskCollection:
         """
         self.mask_dims = mask_dims
 
-        # TODO: check sizes of masks
+        if masks_enc.ndim < mask_dims + 1:
+            raise ValueError(f"Encoding masks should have at least {mask_dims + 1} dimensions")
+
+        if masks_dec is not None:
+            if masks_dec.ndim < mask_dims + 1:
+                raise ValueError(f"Decoding masks should have at least {mask_dims + 1} dimensions")
+
+            if masks_enc.shape[:-mask_dims] != masks_dec.shape[:-mask_dims]:
+                raise ValueError("Encoding and decoding masks should have the same shape for the stack dimensions")
+
+            if masks_enc.shape[-mask_dims:] != masks_dec.shape[-mask_dims:]:
+                raise ValueError("Encoding and decoding masks should have the same shape for each mask")
+
         self.masks_enc = masks_enc
         self.masks_dec = masks_dec if masks_dec is not None else masks_enc
-        # TODO: check the decoding masks are consistent with the encoding masks
 
         self.mask_type = mask_type
 
