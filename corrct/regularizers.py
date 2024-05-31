@@ -8,7 +8,6 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
-import numpy.random
 
 import scipy.ndimage as spimg
 

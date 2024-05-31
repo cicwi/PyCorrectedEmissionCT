@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tomographic projectors.
 
@@ -6,20 +5,20 @@ Tomographic projectors.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import numpy as np
-
-from scipy.sparse import spmatrix
-
-from . import operators
-from . import _projector_backends as prj_backends
-from . import models
-from .attenuation import AttenuationVolume
-
 import concurrent.futures as cf
 import multiprocessing as mp
-
-from typing import Union, Sequence, Optional, Callable
-from numpy.typing import ArrayLike, DTypeLike, NDArray
+from collections.abc import Sequence
+from typing import Optional
+from typing import Union
+import numpy as np
+from numpy.typing import ArrayLike
+from numpy.typing import DTypeLike
+from numpy.typing import NDArray
+from scipy.sparse import spmatrix
+from . import _projector_backends as prj_backends
+from . import models
+from . import operators
+from .attenuation import AttenuationVolume
 
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
@@ -291,7 +290,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         prj_vu : NDArray
             The sinogram to back-project or a single line.
         angle_ind : int
-            The angle index to foward project.
+            The angle index to forward project.
 
         Returns
         -------
@@ -354,6 +353,8 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
     """
 
     att_vol_angles: NDArray[np.floating]
+
+    executor: Union[cf.ThreadPoolExecutor, None]
 
     def __init__(
         self,
@@ -475,17 +476,22 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
                 )
             self.att_vol_angles = att_maps
 
+        self.executor = None
+
     def __enter__(self):
         """Initialize the with statement block."""
         if self.use_multithreading and isinstance(self.projector_backend, prj_backends.ProjectorBackendSKimage):
-            self.executor = cf.ThreadPoolExecutor(max_workers=num_threads)
+            if self.executor is None:
+                self.executor = cf.ThreadPoolExecutor(max_workers=num_threads)
         return super().__enter__()
 
     def __exit__(self, *args):
         """De-initialize the with statement block."""
         super().__exit__()
         if self.use_multithreading and isinstance(self.projector_backend, prj_backends.ProjectorBackendSKimage):
-            self.executor.shutdown()
+            if self.executor is not None:
+                self.executor.shutdown()
+                self.executor = None
 
     def collapse_detectors(self) -> None:
         """Convert multi-detector configurations into single-detector."""
@@ -507,7 +513,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         vol : NDArray
             The volume to forward-project.
         angle_ind : int
-            The angle index to foward project.
+            The angle index to forward project.
 
         Returns
         -------
@@ -538,7 +544,7 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
         sino : NDArray
             The sinogram to back-project or a single line.
         angle_ind : int
-            The angle index to foward project.
+            The angle index to forward project.
         single_line : bool, optional
             Whether the input is a single sinogram line. The default is False.
 
