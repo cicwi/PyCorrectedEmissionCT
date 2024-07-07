@@ -118,7 +118,7 @@ class ProjectionGeometry(Geometry):
         Returns
         -------
         ProjectionGeometry
-            The default paralle-beam geometry.
+            The default parallel-beam geometry.
         """
         return get_prj_geom_parallel(geom_type=geom_type, rot_axis_shift_pix=rot_axis_shift_pix, rot_axis_dir=rot_axis_dir)
 
@@ -605,8 +605,8 @@ def get_rot_axis_dir(rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise")
         return np.array(rot_axis_dir, ndmin=1)
 
 
-def _get_data_dims(data_shape: Union[Sequence[int], NDArray], data_format: str = "dvwu") -> dict:
-    dims = dict(u=1, v=1, w=1, d=1)
+def _get_data_dims(data_shape: Union[Sequence[int], NDArray], data_format: str = "dvwu") -> dict[str, Union[int, None]]:
+    dims: dict[str, Union[int, None]] = dict(u=None, v=None, w=None, d=None)
     for ii in range(-len(data_shape), 0):
         dims[data_format[ii]] = data_shape[ii]
     return dims
@@ -657,7 +657,17 @@ def get_prj_geom_parallel(
 
     if data_shape is not None:
         data_dims = _get_data_dims(data_shape, data_format)
+        if data_dims["u"] is None:
+            raise ValueError(
+                "Could not determine data dimensions. Coordinate U cannot be undetermined."
+                f" Data shape: {data_shape}, data format: {data_format}"
+            )
         if geom_type == "3d":
+            if data_dims["v"] is None:
+                raise ValueError(
+                    "Could not determine data dimensions. Coordinate V cannot be undetermined in a 3D geometry."
+                    f" Data shape: {data_shape}, data format: {data_format}"
+                )
             prj_geom.set_detector_shape_vu([data_dims["v"], data_dims["u"]])
         else:
             prj_geom.set_detector_shape_vu([data_dims["u"]])
@@ -708,6 +718,11 @@ def get_prj_geom_cone(
 
     if data_shape is not None:
         data_dims = _get_data_dims(data_shape, data_format)
+        if data_dims["v"] is None or data_dims["u"] is None:
+            raise ValueError(
+                "Could not determine data dimensions. Coordinates UV cannot be undetermined in a cone-beam geometry."
+                f" Data shape: {data_shape}, data format: {data_format}"
+            )
         prj_geom.set_detector_shape_vu([data_dims["v"], data_dims["u"]])
 
     return prj_geom
@@ -732,16 +747,26 @@ def get_vol_geom_from_data(
     VolumeGeometry
         The default volume geometry.
     """
-    dims = _get_data_dims(data.shape, data_format)
+    data_dims = _get_data_dims(data.shape, data_format)
+    if data_dims["u"] is None:
+        raise ValueError(
+            "Could not determine data dimensions. Coordinate U cannot be undetermined."
+            f" Data shape: {data.shape}, data format: {data_format}"
+        )
+
     if isinstance(padding_u, (Sequence, np.ndarray)):
         if len(padding_u) != 2:
             raise ValueError(
                 f"Padding along U can only either be an integer or a Sequence/NDArray of 2 values. {padding_u} passed instead."
             )
-        dims["u"] -= padding_u[0] + padding_u[1]
+        data_dims["u"] -= padding_u[0] + padding_u[1]
     else:
-        dims["u"] -= padding_u * 2
-    return VolumeGeometry(np.array([*([dims["u"]] * 2), dims["v"]]))
+        data_dims["u"] -= padding_u * 2
+
+    if data_dims["v"] is None:
+        return VolumeGeometry(np.array([data_dims["u"]] * 2))
+    else:
+        return VolumeGeometry(np.array([*([data_dims["u"]] * 2), data_dims["v"]]))
 
 
 def get_vol_geom_from_volume(volume: NDArray) -> VolumeGeometry:
