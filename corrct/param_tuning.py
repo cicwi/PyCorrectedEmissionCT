@@ -54,6 +54,28 @@ def create_random_test_mask(
     return data_test_mask
 
 
+def get_lambda_range(start: float, end: float, num_per_order: int = 4) -> NDArrayFloat:
+    """Compute regularization weights within an interval.
+
+    Parameters
+    ----------
+    start : float
+        First regularization weight.
+    end : float
+        Last regularization weight.
+    num_per_order : int, optional
+        Number of steps per order of magnitude. The default is 4.
+
+    Returns
+    -------
+    NDArrayFloat
+        List of regularization weights.
+    """
+    step_size = 10 ** (1 / num_per_order)
+    num_steps = np.ceil(num_per_order * np.log10(end / start) - 1e-3)
+    return start * (step_size ** np.arange(num_steps + 1))
+
+
 class BaseRegularizationEstimation(ABC):
     """Base class for regularization parameter estimation class."""
 
@@ -134,9 +156,7 @@ class BaseRegularizationEstimation(ABC):
         NDArrayFloat
             List of regularization weights.
         """
-        step_size = 10 ** (1 / num_per_order)
-        num_steps = np.ceil(num_per_order * np.log10(end / start) - 1e-3)
-        return start * (step_size ** np.arange(num_steps + 1))
+        return get_lambda_range(start=start, end=end, num_per_order=num_per_order)
 
     def compute_reconstruction_and_loss(self, lam_reg: float, *args: Any, **kwds: Any) -> tuple[np.floating, NDArrayFloat]:
         """Compute objective function cost for the given regularization weight.
@@ -461,7 +481,7 @@ class CrossValidation(BaseRegularizationEstimation):
             Objective function costs of each regularization weight.
         f_stds : NDArrayFloat, optional
             Objective function cost standard deviations of each regularization weight.
-            It is only used for plotting purpouses. The default is None.
+            It is only used for plotting purposes. The default is None.
         scale : str, optional
             Scale of the fit. Options are: "log" | "linear". The default is "log".
 
