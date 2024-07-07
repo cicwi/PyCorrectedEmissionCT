@@ -539,7 +539,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
             raise
 
     def _check_prj_shape(self, prj: NDArray) -> None:
-        inds_vu = list(np.delete(np.arange(-len(self.prj_shape_vu), 0), obj=-2))
+        inds_vu = [ind for ind in range(-len(self.prj_shape_vu), 0) if self.prj_shape_vu[ind] > 1]
         expected_prj_shape_vu = self.prj_shape_vu[inds_vu]
         given_prj_shape_vu = np.array(prj.shape)[inds_vu]
         if np.any(given_prj_shape_vu != expected_prj_shape_vu):
@@ -784,7 +784,7 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
         vol : NDArray
             The volume to forward-project.
         angle_ind : int | None, optional
-            The angle index to foward project. The default is None.
+            The angle index to forward project. The default is None.
 
         Returns
         -------
@@ -816,7 +816,7 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
         prj : NDArray
             The sinogram to back-project or a single line.
         angle_ind : int | None, optional
-            The angle index to foward project. The default is None.
+            The angle index to forward project. The default is None.
 
         Returns
         -------
