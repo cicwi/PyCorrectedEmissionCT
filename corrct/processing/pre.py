@@ -364,7 +364,7 @@ def compute_eigen_flats(
     Returns
     -------
     Tuple[NDArray, NDArray]
-        The decomposition of the tranmissions of the sample and the flats.
+        The decomposition of the transmissions of the sample and the flats.
     """
     trans_shape = trans_wvu.shape
     trans_num = np.prod(trans_shape[:-ndim])
@@ -375,34 +375,36 @@ def compute_eigen_flats(
     if flats_wvu is not None:
         stack_imgs.append(flats_wvu.reshape([-1, *img_shape]))
 
-    if darks_wvu is not None:
-        darks_num = np.prod(darks_wvu.shape[:-ndim])
-        stack_imgs.append(darks_wvu.reshape([-1, *img_shape]))
-    else:
-        darks_num = 0
+    stack_imgs = np.concatenate(stack_imgs)
 
-    stack_imgs = np.concatenate(stack_imgs).reshape([-1, np.prod(img_shape)]).transpose()
+    if darks_wvu is not None:
+        if darks_wvu.ndim > 2:
+            darks_wvu = darks_wvu.mean(axis=tuple(np.arange(darks_wvu.ndim - 2)))
+        stack_imgs = np.fmax(stack_imgs - darks_wvu, np.finfo(np.float32).eps)
+
+    stack_imgs = stack_imgs.reshape([-1, np.prod(img_shape)]).transpose()
+    stack_imgs = np.log(stack_imgs)
 
     mat_u, sigma, mat_v_h = np.linalg.svd(stack_imgs, full_matrices=False)
 
-    last_t_ind = -darks_num + 1 if darks_num > 0 else len(sigma)
-
-    eigen_projs: NDArray = (mat_u[..., 1:last_t_ind] * sigma[..., None, 1:last_t_ind]) @ mat_v_h[..., 1:last_t_ind, :]
+    eigen_projs: NDArray = (mat_u[..., 1:] * sigma[..., None, 1:]) @ mat_v_h[..., 1:, :]
+    eigen_projs = np.exp(eigen_projs)
     eigen_projs = eigen_projs.transpose().reshape([-1, *img_shape])[:trans_num]
 
     eigen_flats: NDArray = (mat_u[..., 0:1:] * sigma[..., None, 0:1:]) @ mat_v_h[..., 0:1:, :]
+    eigen_flats = np.exp(eigen_flats)
     eigen_flats = eigen_flats.transpose().reshape([-1, *img_shape])[:trans_num]
 
     if plot:
-        fig, axs = plt.subplots(1, 2 + int(darks_num > 0), figsize=[10, 3.75])
+        fig, axs = plt.subplots(1, 3, figsize=[10, 3.75])
         axs[0].plot(sigma)
         axs[0].grid()
         axs[0].set_title("Singular values")
         axs[1].imshow(mat_u[:, 0].reshape(img_shape))
         axs[1].set_title("Highest value component")
-        if darks_num > 0:
-            axs[2].imshow(mat_u[:, last_t_ind:].mean(axis=1).reshape(img_shape))
-            axs[2].set_title("Noise average")
+        axs[2].plot(eigen_flats.mean(axis=(-2, -1)).flatten())
+        axs[2].grid()
+        axs[2].set_title("Eigen intensities")
         fig.tight_layout()
         plt.show(block=False)
 
