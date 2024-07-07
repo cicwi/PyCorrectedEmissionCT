@@ -168,7 +168,7 @@ def shift_proj_stack(data_vwu: NDArray, shifts: NDArray, use_fft: bool = False) 
     return new_data
 
 
-def bin_imgs(imgs: NDArray, binning: Union[int, float], verbose: bool = True) -> NDArray:
+def bin_imgs(imgs: NDArray, binning: Union[int, float], auto_crop: bool = False, verbose: bool = True) -> NDArray:
     """Bin a stack of images.
 
     Parameters
@@ -177,6 +177,8 @@ def bin_imgs(imgs: NDArray, binning: Union[int, float], verbose: bool = True) ->
         The stack of images.
     binning : int | float
         The binning factor.
+    auto_crop : bool, optional
+        Whether to automatically crop the images to match, by default False
     verbose : bool, optional
         Whether to print the image shapes, by default True
 
@@ -185,6 +187,15 @@ def bin_imgs(imgs: NDArray, binning: Union[int, float], verbose: bool = True) ->
     NDArray
         The binned images
     """
+    if auto_crop:
+        imgs_shape = imgs.shape
+        excess_pixels_vu = (np.array(imgs.shape[-2:]) % binning).astype(int)
+        crop_vu = (excess_pixels_vu - excess_pixels_vu // 2, np.array(imgs.shape[-2:]) - excess_pixels_vu // 2)
+        imgs = imgs[..., crop_vu[0][0] : crop_vu[1][0], crop_vu[0][1] : crop_vu[1][1]]
+
+        if verbose:
+            print(f"Auto-cropping {crop_vu}: {imgs_shape} => {imgs.shape}")
+
     imgs_shape = imgs.shape
 
     if isinstance(binning, int):
@@ -203,7 +214,7 @@ def bin_imgs(imgs: NDArray, binning: Union[int, float], verbose: bool = True) ->
     return imgs
 
 
-def find_background_from_margin(
+def background_from_margin(
     data_vwu: NDArray, margin: Union[int, Sequence[int], NDArray[np.integer]] = 4, poly_order: int = 0, plot: bool = False
 ) -> NDArray:
     """Compute background of the projection data, from the margins of the projections.
@@ -215,7 +226,7 @@ def find_background_from_margin(
     margin : int | Sequence[int] | NDArray[np.integer], optional
         The size of the margin, by default 4
     poly_order : int, optional
-        The order of the interpolation polynome, by default 0
+        The order of the interpolation polynomial, by default 0
 
     Returns
     -------
@@ -289,7 +300,7 @@ def destripe_wlf_vwu(
     Parameters
     ----------
     data : NDArray
-        The data to destripe
+        The data to de-stripe
     sigma : float, optional
         Fourier space filter coefficient, by default 0.005
     level : int, optional
@@ -304,7 +315,7 @@ def destripe_wlf_vwu(
     Returns
     -------
     NDArray
-        The destriped data.
+        The de-striped data.
     """
     if other_axes is None:
         other_axes = np.arange(-data.ndim, 0)
