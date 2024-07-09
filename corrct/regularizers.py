@@ -1120,11 +1120,11 @@ class Regularizer_VTV(Regularizer_Grad):
         super().__init__(weight=weight, ndims=ndims, upd_mask=upd_mask)
 
         self.pwise_der_norm = pwise_der_norm
-        if self.pwise_der_norm not in [1, 2, np.Inf]:
+        if self.pwise_der_norm not in [1, 2, np.inf]:
             self._raise_pwise_norm_error()
 
         self.pwise_chan_norm = pwise_chan_norm
-        if self.pwise_chan_norm not in [1, 2, np.Inf]:
+        if self.pwise_chan_norm not in [1, 2, np.inf]:
             self._raise_pwise_norm_error()
 
         if x_ref is not None:
@@ -1249,7 +1249,7 @@ class Regularizer_vl1wl(Regularizer_l1swl):
         normalized: bool = False,
         min_approx: bool = True,
         pwise_lvl_norm: Union[int, float] = 1,
-        pwise_chan_norm: Union[int, float] = np.Inf,
+        pwise_chan_norm: Union[int, float] = np.inf,
         x_ref: Optional[NDArray] = None,
     ):
         super().__init__(
@@ -1265,11 +1265,11 @@ class Regularizer_vl1wl(Regularizer_l1swl):
         )
 
         self.pwise_lvl_norm = pwise_lvl_norm
-        if self.pwise_lvl_norm not in [1, 2, np.Inf]:
+        if self.pwise_lvl_norm not in [1, 2, np.inf]:
             self._raise_pwise_norm_error()
 
         self.pwise_chan_norm = pwise_chan_norm
-        if self.pwise_chan_norm not in [1, 2, np.Inf]:
+        if self.pwise_chan_norm not in [1, 2, np.inf]:
             self._raise_pwise_norm_error()
 
         self.x_ref = x_ref
