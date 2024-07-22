@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.polynomial.polynomial import Polynomial
 from numpy.typing import ArrayLike, DTypeLike, NDArray
+from matplotlib.ticker import StrMethodFormatter
 
 from . import solvers
 
@@ -572,10 +573,9 @@ class CrossValidation(BaseRegularizationEstimation):
                 tl.set_fontsize(13)
             for tl in axs.get_yticklabels():
                 tl.set_fontsize(13)
-            axs.set_xlabel(r"$\lambda$ values")
-            axs.set_ylabel("Cross-validation loss values")
-            axs.xaxis.label.set_fontsize(16)
-            axs.yaxis.label.set_fontsize(16)
+            axs.set_xlabel(r"$\lambda$ values", fontsize=16)
+            axs.set_ylabel("Cross-validation loss values", fontsize=16)
+            axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.2e}"))
             fig.tight_layout()
             plt.show(block=False)
 
