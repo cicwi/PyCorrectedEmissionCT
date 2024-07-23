@@ -85,7 +85,7 @@ def fit_shifts_vu_xc(
     proj_vwu: NDArrayFloat,
     pad_u: bool = False,
     normalize_fourier: bool = False,
-    margin: int = 2,
+    margin: int = 0,
     use_rfft: bool = True,
     stack_axis: int = -2,
     decimals: int = 2,
@@ -140,7 +140,7 @@ def fit_shifts_vu_xc(
         slices = [slice(None)] * proj_vwu.ndim
         for d in fft_dims:
             slices[d] = slice(margin, proj_vwu.shape[d] - margin)
-        mask[slices] = 1.0
+        mask[tuple(slices)] = 1.0
         proj_vwu = proj_vwu * mask[..., None, :]
 
     if len(fft_dims) == 2:
