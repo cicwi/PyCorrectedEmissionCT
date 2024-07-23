@@ -26,7 +26,14 @@ NDArrayFloat = NDArray[np.floating]
 eps = np.finfo(np.float32).eps
 
 
-def fit_shifts_u_sad(data_wu: NDArrayFloat, proj_wu: NDArrayFloat, error_norm: int = 1, decimals: int = 1) -> NDArrayFloat:
+def fit_shifts_u_sad(
+    data_wu: NDArrayFloat,
+    proj_wu: NDArrayFloat,
+    search_range: int = 16,
+    pad_u: bool = False,
+    error_norm: int = 1,
+    decimals: int = 2,
+) -> NDArrayFloat:
     """
     Find the U shifts between two sets of lines, by means of the sum-of-absolute-difference (SAD).
 
@@ -36,41 +43,49 @@ def fit_shifts_u_sad(data_wu: NDArrayFloat, proj_wu: NDArrayFloat, error_norm: i
         The reference data.
     proj_wu : NDArrayFloat
         The other data.
+    search_rage : int, optional
+        The range in pixels of the search, by default 16
     error_norm : int, optional
         The error norm to use, by default 1
     decimals : int, optional
-        The precision of the result, by default 1
+        The precision of the result, by default 2
 
     Returns
     -------
     NDArrayFloat
         A list of one shift for each row.
     """
-    padding = np.zeros((len(data_wu.shape), 2), dtype=int)
-    padding[-1, :] = (int(np.ceil(data_wu.shape[-1] / 2)), int(np.floor(data_wu.shape[-1] / 2)))
-    pad_data_wu = np.pad(data_wu, pad_width=padding, mode="edge")
-    pad_proj_wu = np.pad(proj_wu, pad_width=padding, mode="edge")
+    if pad_u:
+        padding = np.zeros((len(data_wu.shape), 2), dtype=int)
+        padding[-1, :] = (search_range, search_range)
+        pad_data_wu = np.pad(data_wu, pad_width=padding, mode="edge")
+        pad_proj_wu = np.pad(proj_wu, pad_width=padding, mode="constant")
 
     fft_proj_wu = np.fft.fft2(pad_proj_wu)
 
-    delta = 1 / (10 ** (-decimals))
-    num_shifts = np.ceil(data_wu.shape[-1] * np.sqrt(1 / delta)).astype(int)
-    shifts = np.fft.fftfreq(num_shifts, 1 / (data_wu.shape[-1] * delta))
+    num_shifts = search_range * 2 + 1
+    shift_coords = np.fft.fftfreq(num_shifts, 1 / num_shifts)
 
-    vals = np.empty((len(shifts), data_wu.shape[-2]))
-    for ii, s in enumerate(shifts):
+    diffs = np.empty((data_wu.shape[-2], len(shift_coords)))
+    for ii, s in enumerate(shift_coords):
         shifted_proj_wu = np.fft.ifft2(spimg.fourier_shift(fft_proj_wu, (0, s))).real
-        vals[ii, :] = np.linalg.norm(pad_data_wu - shifted_proj_wu, axis=-1, ord=error_norm)
+        diffs[:, ii] = np.linalg.norm(pad_data_wu - shifted_proj_wu, axis=-1, ord=error_norm)
 
-    iis_min = np.argmin(vals, axis=0)
-    return shifts[list(iis_min)]
+    f_vals, f_h = extract_peak_regions_1d(-diffs, axis=-1, cc_coords=shift_coords)
+    shifts_vu = f_h[1, :]
+
+    if decimals > 0:
+        shifts_vu += refine_max_position_1d(f_vals, decimals=decimals)
+
+    return shifts_vu
 
 
 def fit_shifts_vu_xc(
     data_vwu: NDArrayFloat,
     proj_vwu: NDArrayFloat,
     pad_u: bool = False,
-    normalize_fourier: bool = True,
+    normalize_fourier: bool = False,
+    margin: int = 2,
     use_rfft: bool = True,
     stack_axis: int = -2,
     decimals: int = 2,
@@ -87,7 +102,9 @@ def fit_shifts_vu_xc(
     pad_u : bool, optional
         Pad the u coordinate. The default is False.
     normalize_fourier : bool, optional
-        Whether to normalize the Fourier representation of the cross-correlation. The default is True.
+        Whether to normalize the Fourier representation of the cross-correlation. The default is False.
+    margin : int, optional
+        The margin of the region to compare, the default is 0.
     use_rfft : bool, optional
         Whether to use the `rfft` transform in place of the complex `fft` transform. The default is True.
     stack_axis : int, optional
@@ -118,9 +135,18 @@ def fit_shifts_vu_xc(
         new_fft_shapes[u_axis] *= 2
     cc_coords = [np.fft.fftfreq(s, 1 / s) for s in new_fft_shapes]
 
+    if margin > 0:
+        mask = np.zeros([proj_vwu.shape[d] for d in fft_dims], dtype=proj_vwu.dtype)
+        slices = [slice(None)] * proj_vwu.ndim
+        for d in fft_dims:
+            slices[d] = slice(margin, proj_vwu.shape[d] - margin)
+        mask[slices] = 1.0
+        proj_vwu = proj_vwu * mask[..., None, :]
+
     if len(fft_dims) == 2:
         shifts_vu = np.empty((len(data_vwu.shape) - 1, num_angles))
         slices = [slice(None)] * len(data_vwu.shape)
+
         for ii_a in range(num_angles):
             # For performance reasons, it is better to do the fft on each image
             slices[stack_axis] = slice(ii_a, ii_a + 1)
@@ -466,11 +492,8 @@ def extract_peak_regions_1d(
     if len(cc.shape) == 1:
         cc = cc[None, ...]
     img_shape = np.array(cc.shape)
-    if not (len(img_shape) == 2):
-        raise ValueError(
-            "The input image should be either a 1 or 2-dimensional array. Array of shape: [%s] was given."
-            % (" ".join("%d" % s for s in cc.shape))
-        )
+    if len(img_shape) != 2:
+        raise ValueError(f"The input image should be either a 1 or 2-dimensional array. Array of shape: {cc.shape} was given.")
     other_axis = (axis + 1) % 2
     # get pixel having the maximum value of the correlation array
     pix_max = np.argmax(cc, axis=axis)
@@ -524,8 +547,8 @@ def refine_max_position_1d(
     """
     if not len(f_vals.shape) in (1, 2):
         raise ValueError(
-            "The fitted values should be either one or a collection of 1-dimensional arrays. Array of shape: [%s] was given."
-            % (" ".join("%d" % s for s in f_vals.shape))
+            f"The fitted values should be either one or a collection of 1-dimensional arrays."
+            f" Array of shape: {f_vals.shape} was given."
         )
     num_vals = f_vals.shape[0]
 
@@ -536,8 +559,7 @@ def refine_max_position_1d(
         f_x = np.squeeze(f_x)
         if not (len(f_x.shape) == 1 and np.all(f_x.size == num_vals)):
             raise ValueError(
-                "Base coordinates should have the same length as values array. Sizes of fx: %d, f_vals: %d"
-                % (f_x.size, num_vals)
+                f"Base coordinates should have the same length as values array. Sizes of fx: {f_x.size}, f_vals: {num_vals}"
             )
 
     if len(f_vals.shape) == 1:
@@ -561,12 +583,12 @@ def refine_max_position_1d(
     if not np.all(lower_bound_ok * upper_bound_ok):
         if len(f_vals.shape) == 1:
             message = (
-                f"Fitted position {vertex_x} is outide the input margins [{vertex_min_x}, {vertex_max_x}]."
+                f"Fitted position {vertex_x} is outside the input margins [{vertex_min_x}, {vertex_max_x}]."
                 f" Input values: {f_vals}"
             )
         else:
             message = (
-                f"Fitted positions outide the input margins [{vertex_min_x}, {vertex_max_x}]:"
+                f"Fitted positions outside the input margins [{vertex_min_x}, {vertex_max_x}]:"
                 f" {np.sum(1 - lower_bound_ok)} below and {np.sum(1 - upper_bound_ok)} above"
             )
         raise ValueError(message)
@@ -649,10 +671,7 @@ def refine_max_position_2d(
         coordinates in fy and fx.
     """
     if not (len(f_vals.shape) == 2):
-        raise ValueError(
-            "The fitted values should form a 2-dimensional array. Array of shape: [%s] was given."
-            % (" ".join("%d" % s for s in f_vals.shape))
-        )
+        raise ValueError(f"The fitted values should form a 2-dimensional array. Array of shape: {f_vals.shape} was given.")
     if fy is None:
         fy = np.linspace(-1, 1, f_vals.shape[0])
         y_scaling = (f_vals.shape[0] - 1) / 2
@@ -661,8 +680,8 @@ def refine_max_position_2d(
         y_scaling = 1.0
         if not (len(fy.shape) == 1 and np.all(fy.size == f_vals.shape[0])):
             raise ValueError(
-                "Vertical coordinates should have the same length as values matrix. Sizes of fy: %d, f_vals: [%s]"
-                % (fy.size, " ".join("%d" % s for s in f_vals.shape))
+                f"Vertical coordinates should have the same length as values matrix."
+                f" Sizes of fy: {fy.size}, f_vals: {f_vals.shape}"
             )
 
     if fx is None:
@@ -673,8 +692,8 @@ def refine_max_position_2d(
         x_scaling = 1.0
     if not (len(fx.shape) == 1 and np.all(fx.size == f_vals.shape[1])):
         raise ValueError(
-            "Horizontal coordinates should have the same length as values matrix. Sizes of fx: %d, f_vals: [%s]"
-            % (fx.size, " ".join("%d" % s for s in f_vals.shape))
+            f"Horizontal coordinates should have the same length as values matrix."
+            f"Sizes of fx: {fx.size}, f_vals: {f_vals.shape}"
         )
 
     fy, fx = np.meshgrid(fy, fx, indexing="ij")
