@@ -183,12 +183,12 @@ def test_fit_image_rotation_and_scale():
     # Test with a simple rotation of an image by 10 degrees
     img_10 = skt.rotate(img, angle=10.0)
     result = cct.alignment.fitting.fit_image_rotation_and_scale(img, img_10)
-    assert np.allclose(result, (10.0, 1), rtol=0.01)
+    assert np.allclose(result, (10.0, 1.0), rtol=0.01)
 
     # Test with a simple rotation of an image by 45 degrees
     img_45 = skt.rotate(img, angle=45.0)
     result = cct.alignment.fitting.fit_image_rotation_and_scale(img, img_45)
-    assert np.allclose(result, (45.0, 1), rtol=0.01)
+    assert np.allclose(result, (45.0, 1.0), rtol=0.01)
 
     # Test with a rotation of an image by 360 degrees
     img_360 = np.copy(img)

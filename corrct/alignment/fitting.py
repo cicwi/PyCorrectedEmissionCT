@@ -137,9 +137,7 @@ def fit_shifts_vu_xc(
 
     if margin > 0:
         mask = np.zeros([proj_vwu.shape[d] for d in fft_dims], dtype=proj_vwu.dtype)
-        slices = [slice(None)] * proj_vwu.ndim
-        for d in fft_dims:
-            slices[d] = slice(margin, proj_vwu.shape[d] - margin)
+        slices = [slice(margin, proj_vwu.shape[d] - margin) for d in fft_dims]
         mask[tuple(slices)] = 1.0
         proj_vwu = proj_vwu * mask[..., None, :]
 
@@ -330,7 +328,7 @@ def fit_image_rotation_and_scale(
     img_fft_1_p = img_fft_1_p[..., : img_fft_1_p.shape[0] // 2, :]
     img_fft_2_p = img_fft_2_p[..., : img_fft_2_p.shape[0] // 2, :]
 
-    fft_polar_shifts_rs = fit_shifts_vu_xc(img_fft_1_p[:, None, 1:], img_fft_2_p[:, None, 1:])
+    fft_polar_shifts_rs = fit_shifts_vu_xc(img_fft_1_p[:, None, 1:], img_fft_2_p[:, None, 1:], normalize_fourier=True)
     tilt_pix = np.squeeze(fft_polar_shifts_rs[0])
     tilt_deg = (180 / img_fft_2_p.shape[0]) * tilt_pix
 
