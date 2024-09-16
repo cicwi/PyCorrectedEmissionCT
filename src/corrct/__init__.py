@@ -45,6 +45,3 @@ from . import alignment  # noqa: F401, F402
 from . import physics  # noqa: F401, F402
 
 from . import testing  # noqa: F401, F402
-
-# Import all definitions from main module.
-from ._corrct import create_sino, reconstruct  # noqa: F401, F402, F403
