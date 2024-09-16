@@ -2,20 +2,27 @@
 
 """Top-level package for PyCorrectedEmissionCT."""
 
+from importlib import metadata
+
+
+def get_version(dist: str = "corrct") -> str:
+    """Get version of the given distribution.
+
+    Parameters:
+        dist: A distribution name.
+
+    Returns:
+        A version number.
+    """
+    try:
+        return metadata.version(dist)
+    except metadata.PackageNotFoundError:
+        return "0.0.0"
+
+
 __author__ = """Nicola VIGANÒ"""
 __email__ = "N.R.Vigano@cwi.nl"
-
-
-def __get_version():
-    import os.path
-
-    version_filename = os.path.join(os.path.dirname(__file__), "VERSION")
-    with open(version_filename) as version_file:
-        version = version_file.read().strip()
-    return version
-
-
-__version__ = __get_version()
+__version__ = get_version()
 
 from . import models  # noqa: F401, F402
 
