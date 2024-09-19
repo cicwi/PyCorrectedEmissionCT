@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Solvers for the tomographic reconstruction problem.
 
@@ -7,84 +6,18 @@ Solvers for the tomographic reconstruction problem.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from typing import Callable, Optional, Sequence, Union, Tuple, Any
+import copy as cp
+from abc import ABC, abstractmethod
+from typing import Any, Callable, Optional, Union
+from collections.abc import Sequence
 
 import numpy as np
-import numpy.random
 from numpy.typing import DTypeLike, NDArray
-
-import copy as cp
-
-from . import operators
-from . import data_terms
-from . import regularizers
-from . import filters
-from . import projectors
-
 from tqdm.auto import tqdm
 
-from abc import ABC, abstractmethod
-
+from . import data_terms, filters, operators, projectors, regularizers
 
 eps = np.finfo(np.float32).eps
-
-
-# ---- Data Fidelity terms ----
-
-
-DataFidelityBase = data_terms.DataFidelityBase
-DataFidelity_l2 = data_terms.DataFidelity_l2
-DataFidelity_wl2 = data_terms.DataFidelity_wl2
-DataFidelity_l2b = data_terms.DataFidelity_l2b
-DataFidelity_l12 = data_terms.DataFidelity_l12
-DataFidelity_l1 = data_terms.DataFidelity_l1
-DataFidelity_l1b = data_terms.DataFidelity_l1b
-DataFidelity_Huber = data_terms.DataFidelity_Huber
-DataFidelity_KL = data_terms.DataFidelity_KL
-
-# Multi-channel
-DataFidelity_ln = data_terms.DataFidelity_ln
-
-
-# ---- Regularizers ----
-
-
-BaseRegularizer = regularizers.BaseRegularizer
-Regularizer_Grad = regularizers.Regularizer_Grad
-Regularizer_TV2D = regularizers.Regularizer_TV2D
-Regularizer_TV3D = regularizers.Regularizer_TV3D
-Regularizer_HubTV2D = regularizers.Regularizer_HubTV2D
-Regularizer_HubTV3D = regularizers.Regularizer_HubTV3D
-Regularizer_smooth2D = regularizers.Regularizer_smooth2D
-Regularizer_smooth3D = regularizers.Regularizer_smooth3D
-Regularizer_lap = regularizers.Regularizer_lap
-Regularizer_lap2D = regularizers.Regularizer_lap2D
-Regularizer_lap3D = regularizers.Regularizer_lap3D
-Regularizer_l1 = regularizers.Regularizer_l1
-Regularizer_l1swl = regularizers.Regularizer_l1swl
-Regularizer_Hub_swl = regularizers.Regularizer_Hub_swl
-Regularizer_l1dwl = regularizers.Regularizer_l1dwl
-Regularizer_Hub_dwl = regularizers.Regularizer_Hub_dwl
-Regularizer_l1med = regularizers.Regularizer_l1med
-Regularizer_l2med = regularizers.Regularizer_l2med
-Regularizer_fft = regularizers.Regularizer_fft
-
-# Multi-channel
-Regularizer_TNV = regularizers.Regularizer_TNV
-Regularizer_VTV = regularizers.Regularizer_VTV
-Regularizer_lnswl = regularizers.Regularizer_lnswl
-Regularizer_vl1wl = regularizers.Regularizer_vl1wl
-Regularizer_vSVD = regularizers.Regularizer_vSVD
-
-
-# ---- Constraints ----
-
-
-Constraint_LowerLimit = regularizers.Constraint_LowerLimit
-Constraint_UpperLimit = regularizers.Constraint_UpperLimit
-
-
-# ---- Solvers ----
 
 
 NDArrayFloat = NDArray[np.floating]
@@ -146,9 +79,9 @@ class Solver(ABC):
         The default is None.
     relaxation : float, optional
         The relaxation length. The default is 1.0.
-    data_term : Union[str, DataFidelityBase], optional
+    data_term : Union[str, data_terms.DataFidelityBase], optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : Optional[DataFidelityBase], optional
+    data_term_test : Optional[data_terms.DataFidelityBase], optional
         The data fidelity to be used for the test set.
         If None, it will use the same as for the rest of the data.
         The default is None.
@@ -159,8 +92,8 @@ class Solver(ABC):
         verbose: bool = False,
         relaxation: float = 1.0,
         tolerance: Optional[float] = None,
-        data_term: Union[str, DataFidelityBase] = "l2",
-        data_term_test: Union[str, DataFidelityBase, None] = None,
+        data_term: Union[str, data_terms.DataFidelityBase] = "l2",
+        data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
     ):
         self.verbose = verbose
         self.relaxation = relaxation
@@ -209,7 +142,7 @@ class Solver(ABC):
     @abstractmethod
     def __call__(
         self, A: operators.BaseTransform, b: NDArrayFloat, *args: Any, **kwds: Any
-    ) -> Tuple[NDArrayFloat, SolutionInfo]:
+    ) -> tuple[NDArrayFloat, SolutionInfo]:
         """Execute the reconstruction of the data.
 
         Parameters
@@ -226,7 +159,7 @@ class Solver(ABC):
         """
 
     @staticmethod
-    def _initialize_data_fidelity_function(data_term: Union[str, DataFidelityBase]) -> DataFidelityBase:
+    def _initialize_data_fidelity_function(data_term: Union[str, data_terms.DataFidelityBase]) -> data_terms.DataFidelityBase:
         if isinstance(data_term, str):
             if data_term.lower() == "l2":
                 return data_terms.DataFidelity_l2()
@@ -241,17 +174,17 @@ class Solver(ABC):
 
     @staticmethod
     def _initialize_regularizer(
-        regularizer: Union[BaseRegularizer, None, Sequence[BaseRegularizer]]
-    ) -> Sequence[BaseRegularizer]:
+        regularizer: Union[regularizers.BaseRegularizer, None, Sequence[regularizers.BaseRegularizer]]
+    ) -> Sequence[regularizers.BaseRegularizer]:
         if regularizer is None:
             return []
         elif isinstance(regularizer, regularizers.BaseRegularizer):
             return [regularizer]
         elif isinstance(regularizer, (list, tuple)):
-            check_regs_ok = [isinstance(r, BaseRegularizer) for r in regularizer]
+            check_regs_ok = [isinstance(r, regularizers.BaseRegularizer) for r in regularizer]
             if not np.all(check_regs_ok):
                 raise ValueError(
-                    "The following regularizers are not derived from the BaseRegularizer class: "
+                    "The following regularizers are not derived from the regularizers.BaseRegularizer class: "
                     f"{np.array(np.arange(len(check_regs_ok))[np.array(check_regs_ok, dtype=bool)])}"
                 )
             else:
@@ -262,7 +195,7 @@ class Solver(ABC):
     @staticmethod
     def _initialize_b_masks(
         b: NDArrayFloat, b_mask: Optional[NDArrayFloat], b_test_mask: Optional[NDArrayFloat]
-    ) -> Tuple[Optional[NDArrayFloat], Optional[NDArrayFloat]]:
+    ) -> tuple[Optional[NDArrayFloat], Optional[NDArrayFloat]]:
         if b_test_mask is not None:
             if b_mask is None:
                 b_mask = np.ones_like(b)
@@ -279,8 +212,8 @@ class FBP(Solver):
     def __init__(
         self,
         verbose: bool = False,
-        regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
-        data_term: Union[str, DataFidelityBase] = "l2",
+        regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
+        data_term: Union[str, data_terms.DataFidelityBase] = "l2",
         fbp_filter: Union[str, NDArrayFloat, filters.Filter] = "ramp",
         pad_mode: str = "constant",
     ):
@@ -290,9 +223,9 @@ class FBP(Solver):
         ----------
         verbose : bool, optional
             Turn on verbose output. The default is False.
-        regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional
+        regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional
             NOT USED, only exposed for compatibility reasons.
-        data_term : Union[str, DataFidelityBase], optional
+        data_term : Union[str, data_terms.DataFidelityBase], optional
             NOT USED, only exposed for compatibility reasons.
         fbp_filter : Union[str, NDArrayFloat], optional
             FBP filter to use. Either a string from scikit-image's list of `iradon` filters, or an array. The default is "ramp".
@@ -331,7 +264,7 @@ class FBP(Solver):
         upper_limit: Union[float, NDArrayFloat, None] = None,
         x_mask: Optional[NDArrayFloat] = None,
         b_mask: Optional[NDArrayFloat] = None,
-    ) -> Tuple[NDArrayFloat, SolutionInfo]:
+    ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the FBP algorithm.
 
@@ -447,7 +380,7 @@ class SART(Solver):
         upper_limit: Union[float, NDArrayFloat, None] = None,
         x_mask: Optional[NDArrayFloat] = None,
         b_mask: Optional[NDArrayFloat] = None,
-    ) -> Tuple[NDArrayFloat, SolutionInfo]:
+    ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the SART algorithm.
 
@@ -571,11 +504,11 @@ class MLEM(Solver):
     tolerance : Optional[float], optional
         Tolerance on the data residual for computing when to stop iterations.
         The default is None.
-    regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional
+    regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional
         Regularizer to be used. The default is None.
-    data_term : Union[str, DataFidelityBase], optional
+    data_term : Union[str, data_terms.DataFidelityBase], optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : Optional[DataFidelityBase], optional
+    data_term_test : Optional[data_terms.DataFidelityBase], optional
         The data fidelity to be used for the test set.
         If None, it will use the same as for the rest of the data.
         The default is None.
@@ -585,9 +518,9 @@ class MLEM(Solver):
         self,
         verbose: bool = False,
         tolerance: Optional[float] = None,
-        regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
-        data_term: Union[str, DataFidelityBase] = "kl",
-        data_term_test: Union[str, DataFidelityBase, None] = None,
+        regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
+        data_term: Union[str, data_terms.DataFidelityBase] = "kl",
+        data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
     ):
         super().__init__(verbose=verbose, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test)
         self.regularizer = self._initialize_regularizer(regularizer)
@@ -614,7 +547,7 @@ class MLEM(Solver):
         x_mask: Optional[NDArrayFloat] = None,
         b_mask: Optional[NDArrayFloat] = None,
         b_test_mask: Optional[NDArrayFloat] = None,
-    ) -> Tuple[NDArrayFloat, SolutionInfo]:
+    ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the MLEM algorithm.
 
@@ -690,7 +623,7 @@ class MLEM(Solver):
                 info.residual0 = self.data_term.compute_residual_norm(res_0)
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-        algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
+        algo_info = "- Performing {}-{}{} iterations: ".format(self.upper(), self.data_term.upper(), reg_info)
 
         for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
             info.iterations += 1
@@ -738,11 +671,11 @@ class SIRT(Solver):
         The default is None.
     relaxation : float, optional
         The relaxation length. The default is 1.95.
-    regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional
+    regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional
         Regularizer to be used. The default is None.
-    data_term : Union[str, DataFidelityBase], optional
+    data_term : Union[str, data_terms.DataFidelityBase], optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : Optional[DataFidelityBase], optional
+    data_term_test : Optional[data_terms.DataFidelityBase], optional
         The data fidelity to be used for the test set.
         If None, it will use the same as for the rest of the data.
         The default is None.
@@ -753,9 +686,9 @@ class SIRT(Solver):
         verbose: bool = False,
         relaxation: float = 1.95,
         tolerance: Optional[float] = None,
-        regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
-        data_term: Union[str, DataFidelityBase] = "l2",
-        data_term_test: Union[str, DataFidelityBase, None] = None,
+        regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
+        data_term: Union[str, data_terms.DataFidelityBase] = "l2",
+        data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
     ):
         super().__init__(
             verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
@@ -785,7 +718,7 @@ class SIRT(Solver):
         x_mask: Optional[NDArrayFloat] = None,
         b_mask: Optional[NDArrayFloat] = None,
         b_test_mask: Optional[NDArrayFloat] = None,
-    ) -> Tuple[NDArrayFloat, SolutionInfo]:
+    ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the SIRT algorithm.
 
@@ -863,7 +796,7 @@ class SIRT(Solver):
                 info.residual0 = self.data_term.compute_residual_norm(res_0)
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-        algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
+        algo_info = "- Performing {}-{}{} iterations: ".format(self.upper(), self.data_term.upper(), reg_info)
 
         for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
             info.iterations += 1
@@ -913,11 +846,11 @@ class PDHG(Solver):
         The default is None.
     relaxation : float, optional
         The relaxation length. The default is 0.95.
-    regularizer : Sequence[BaseRegularizer] | BaseRegularizer | None, optional
+    regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional
         Regularizer to be used. The default is None.
-    data_term : Union[str, DataFidelityBase], optional
+    data_term : Union[str, data_terms.DataFidelityBase], optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : Optional[DataFidelityBase], optional
+    data_term_test : Optional[data_terms.DataFidelityBase], optional
         The data fidelity to be used for the test set.
         If None, it will use the same as for the rest of the data.
         The default is None.
@@ -928,9 +861,9 @@ class PDHG(Solver):
         verbose: bool = False,
         tolerance: Optional[float] = None,
         relaxation: float = 0.95,
-        regularizer: Union[Sequence[BaseRegularizer], BaseRegularizer, None] = None,
-        data_term: Union[str, DataFidelityBase] = "l2",
-        data_term_test: Union[str, DataFidelityBase, None] = None,
+        regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
+        data_term: Union[str, data_terms.DataFidelityBase] = "l2",
+        data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
     ):
         super().__init__(
             verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
@@ -950,14 +883,14 @@ class PDHG(Solver):
         return Solver.info(self) + "-" + self.data_term.info() + reg_info
 
     @staticmethod
-    def _initialize_data_fidelity_function(data_term: Union[str, DataFidelityBase]):
+    def _initialize_data_fidelity_function(data_term: Union[str, data_terms.DataFidelityBase]):
         if isinstance(data_term, str):
             if data_term.lower() == "l2":
-                return DataFidelity_l2()
+                return data_terms.DataFidelity_l2()
             if data_term.lower() == "l1":
-                return DataFidelity_l1()
+                return data_terms.DataFidelity_l1()
             if data_term.lower() == "kl":
-                return DataFidelity_KL()
+                return data_terms.DataFidelity_KL()
             else:
                 raise ValueError('Unknown data term: "%s", accepted terms are: "l2" | "l1" | "kl".' % data_term)
         else:
@@ -965,7 +898,7 @@ class PDHG(Solver):
 
     def power_method(
         self, A: operators.BaseTransform, b: NDArrayFloat, iterations: int = 5
-    ) -> Tuple[np.floating, Sequence[int], DTypeLike]:
+    ) -> tuple[np.floating, Sequence[int], DTypeLike]:
         """
         Compute the l2-norm of the operator A, with the power method.
 
@@ -1024,7 +957,7 @@ class PDHG(Solver):
         b_mask: Optional[NDArrayFloat] = None,
         b_test_mask: Optional[NDArrayFloat] = None,
         precondition: bool = True,
-    ) -> Tuple[NDArrayFloat, SolutionInfo]:
+    ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the PDHG algorithm.
 
@@ -1122,7 +1055,7 @@ class PDHG(Solver):
                 info.residual0 = self.data_term.compute_residual_norm(res_0)
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-        algo_info = "- Performing %s-%s%s iterations: " % (self.upper(), self.data_term.upper(), reg_info)
+        algo_info = "- Performing {}-{}{} iterations: ".format(self.upper(), self.data_term.upper(), reg_info)
 
         for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
             info.iterations += 1
