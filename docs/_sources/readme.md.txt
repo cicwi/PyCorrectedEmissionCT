@@ -96,7 +96,7 @@ See also the list of [contributors](https://github.com/cicwi/PyCorrectedEmission
 
 ## How to contribute
 
-Contributions are always welcome. Please submit pull requests against the `master` branch.
+Contributions are always welcome. Please submit pull requests against the `main` branch.
 
 If you have any issues, questions, or remarks, then please open an issue on GitHub.
 

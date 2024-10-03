@@ -1,20 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Physics &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -27,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> PyCorrectedEmissionCT
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -65,8 +72,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Physics</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Physics</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/physics_model.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -79,16 +86,16 @@
   <!-- <script
   src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
   type="text/javascript">
-</script> --><div class="section" id="physics">
-<h1>Physics<a class="headerlink" href="#physics" title="Permalink to this heading"></a></h1>
+</script> --><section id="physics">
+<h1>Physics<a class="headerlink" href="#physics" title="Link to this heading"></a></h1>
 <p>The <a class="reference external" href="corrct.html#module-corrct.physics"><code class="docutils literal notranslate"><span class="pre">physics</span></code></a> module includes functionality
 for modeling and treating various signal related to X-ray physics.
 In particular, we offer modeling of X-ray fluorescence (XRF) emission and X-ray
 attenuation, and some useful tools for X-ray phase contrast.
 The back-end of this module is the famous X-ray physics package called
 <a class="reference external" href="https://github.com/tschoonj/xraylib">xraylib</a>.</p>
-<div class="section" id="x-ray-fluorescence">
-<h2>X-ray Fluorescence<a class="headerlink" href="#x-ray-fluorescence" title="Permalink to this heading"></a></h2>
+<section id="x-ray-fluorescence">
+<h2>X-ray Fluorescence<a class="headerlink" href="#x-ray-fluorescence" title="Link to this heading"></a></h2>
 <p>The <a class="reference external" href="corrct.html#module-corrct.physics.xrf"><code class="docutils literal notranslate"><span class="pre">physics.xrf</span></code></a> sub-module offers
 mainly two classes: <code class="docutils literal notranslate"><span class="pre">LinesSiegbahn</span></code> and <code class="docutils literal notranslate"><span class="pre">DetectorXRF</span></code>.
 The former exposes a simplified interface for handling XRF emission lines, using
@@ -97,7 +104,7 @@ geometry of a XRF detector, that is used in the <code class="docutils literal no
 <a class="reference external" href="corrct.html#module-corrct.physics.materials"><code class="docutils literal notranslate"><span class="pre">physics.materials</span></code></a> sub-module.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">LinesSiegbahn</span></code> class, exposes two important static methods:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LinesSiegbahn</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Siegbahn fluorescence lines collection class.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Siegbahn fluorescence lines collection class.&quot;&quot;&quot;</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_lines</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]:</span>
@@ -118,9 +125,9 @@ family, e.g. the K<sub>α</sub> and K<sub>β</sub> lines for the K line family.
 The method <code class="docutils literal notranslate"><span class="pre">get_energy</span></code>, instead, returns the energy(ies) of the requested line(s)
 for a given element. If the requested expression matches more than one line, it
 can either be the list of all the line energies, or their average.</p>
-</div>
-<div class="section" id="material-modeling">
-<h2>Material modeling<a class="headerlink" href="#material-modeling" title="Permalink to this heading"></a></h2>
+</section>
+<section id="material-modeling">
+<h2>Material modeling<a class="headerlink" href="#material-modeling" title="Link to this heading"></a></h2>
 <p>The main class of the <a class="reference external" href="corrct.html#module-corrct.physics.materials"><code class="docutils literal notranslate"><span class="pre">physics.materials</span></code></a>
 sub-module is <code class="docutils literal notranslate"><span class="pre">VolumeMaterial</span></code>, that allows one to model heterogeneous material
 compositions in the reconstruction volume, with the aim of generating:</p>
@@ -128,14 +135,14 @@ compositions in the reconstruction volume, with the aim of generating:</p>
 <li><p>Attenuation maps (local linear attenuation coefficient).</p></li>
 <li><p>Emission cross-sections maps for XRF and Compton.</p></li>
 </ol>
-</div>
-<div class="section" id="x-ray-phase-contrast">
-<h2>X-ray Phase Contrast<a class="headerlink" href="#x-ray-phase-contrast" title="Permalink to this heading"></a></h2>
+</section>
+<section id="x-ray-phase-contrast">
+<h2>X-ray Phase Contrast<a class="headerlink" href="#x-ray-phase-contrast" title="Link to this heading"></a></h2>
 <p>The <a class="reference external" href="corrct.html#module-corrct.physics.phase"><code class="docutils literal notranslate"><span class="pre">physics.phase</span></code></a> sub-module contains
 functions to model the delta-over-beta value and transfer functions encountered
 in phase contrast problems.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

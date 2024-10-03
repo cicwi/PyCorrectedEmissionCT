@@ -1,20 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tutorial &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -27,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> PyCorrectedEmissionCT
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -81,8 +88,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Tutorial</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tutorial</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/tutorial.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -92,17 +99,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="tutorial">
-<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this heading"></a></h1>
+  <section id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Link to this heading"></a></h1>
 <p>In this tutorial, we will first learn the basics of how to reconstruct
 projection data.
 We will then introduce attenuation correction, data terms, and regularizers.
 Finally, we will see the more advanced topics like guided regularization
 parameter selection.</p>
-<div class="section" id="reconstructing-projection-data">
-<h2>Reconstructing projection data<a class="headerlink" href="#reconstructing-projection-data" title="Permalink to this heading"></a></h2>
-<div class="section" id="the-data-model">
-<h3>The data model<a class="headerlink" href="#the-data-model" title="Permalink to this heading"></a></h3>
+<section id="reconstructing-projection-data">
+<h2>Reconstructing projection data<a class="headerlink" href="#reconstructing-projection-data" title="Link to this heading"></a></h2>
+<section id="the-data-model">
+<h3>The data model<a class="headerlink" href="#the-data-model" title="Link to this heading"></a></h3>
 <p>In <code class="docutils literal notranslate"><span class="pre">corrct</span></code>, the volumes are always organized with coordinates [Z]YX, where Z
 is only present in 3D volumes.
 The projection data is organized with coordinates [V]WU, where:</p>
@@ -113,9 +120,9 @@ present for 3D reconstructions.</p></li>
 angle.</p></li>
 <li><p>U is the horizontal coordinate of the detector images.</p></li>
 </ul>
-</div>
-<div class="section" id="the-geometry">
-<h3>The geometry<a class="headerlink" href="#the-geometry" title="Permalink to this heading"></a></h3>
+</section>
+<section id="the-geometry">
+<h3>The geometry<a class="headerlink" href="#the-geometry" title="Link to this heading"></a></h3>
 <p>The geometry is supposed to be circular parallel-beam by default, at least in
 the simplest settings.
 Attenuation correction is usually meant in X-ray Fluorescence (XRF) settings.
@@ -124,9 +131,9 @@ needs to be specified.
 The rotation axis is supposed to be in the center of the reconstruction volume.
 Shifts in the rotation axis position are either intended as or converted to
 detector shifts with respect to the origin.</p>
-</div>
-<div class="section" id="the-projectors">
-<h3>The projectors<a class="headerlink" href="#the-projectors" title="Permalink to this heading"></a></h3>
+</section>
+<section id="the-projectors">
+<h3>The projectors<a class="headerlink" href="#the-projectors" title="Link to this heading"></a></h3>
 <p>The projection geometry is specified through the creation of <em>projectors</em> from
 the <a class="reference external" href="corrct.html#module-corrct.projectors"><code class="docutils literal notranslate"><span class="pre">projectors</span></code></a> module.
 The simplest projector is called
@@ -167,9 +174,9 @@ They can be selected by passing the strings <code class="docutils literal notran
 parameter <code class="docutils literal notranslate"><span class="pre">backend</span></code>.
 Advanced users can create custom backends, by deriving the base class
 <code class="docutils literal notranslate"><span class="pre">ProjectorBackend</span></code> from the module <code class="docutils literal notranslate"><span class="pre">_projector_backends</span></code>.</p>
-</div>
-<div class="section" id="the-solvers">
-<h3>The solvers<a class="headerlink" href="#the-solvers" title="Permalink to this heading"></a></h3>
+</section>
+<section id="the-solvers">
+<h3>The solvers<a class="headerlink" href="#the-solvers" title="Link to this heading"></a></h3>
 <p>Tomographic reconstructions can be achieved using either the included solvers
 from <a class="reference external" href="corrct.html#module-corrct.solvers"><code class="docutils literal notranslate"><span class="pre">solvers</span></code></a> module, or with <code class="docutils literal notranslate"><span class="pre">scipy</span></code>’s
 solvers.
@@ -180,8 +187,8 @@ The included solvers are:</p>
 <li><p>Simultaneous Iterative Reconstruction Technique <a class="reference external" href="corrct.html#corrct.solvers.SIRT"><strong>SIRT</strong></a>.</p></li>
 <li><p>Primal-Dual Hybrid Gradient <a class="reference external" href="corrct.html#corrct.solvers.PDHG"><strong>PDHG</strong></a>, from Chambolle and Pock.</p></li>
 </ul>
-<div class="section" id="fbp">
-<h4>FBP<a class="headerlink" href="#fbp" title="Permalink to this heading"></a></h4>
+<section id="fbp">
+<h4>FBP<a class="headerlink" href="#fbp" title="Link to this heading"></a></h4>
 <p>FBP is the only analytical (non iterative) algorithm in the group. It
 exposes one parameter that is not available for the other methods: <code class="docutils literal notranslate"><span class="pre">fbp_filter</span></code>.
 This parameter can either be:</p>
@@ -209,9 +216,9 @@ filter can be selected, by passing the <code class="docutils literal notranslate
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">solver_fbp</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">FBP</span><span class="p">(</span><span class="n">fbp_filter</span><span class="o">=</span><span class="s2">&quot;shepp-logan&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="sirt-pdhg-and-mlem">
-<h4>SIRT, PDHG, and MLEM<a class="headerlink" href="#sirt-pdhg-and-mlem" title="Permalink to this heading"></a></h4>
+</section>
+<section id="sirt-pdhg-and-mlem">
+<h4>SIRT, PDHG, and MLEM<a class="headerlink" href="#sirt-pdhg-and-mlem" title="Link to this heading"></a></h4>
 <p>The SIRT and PDHG algorithms, are algebraic (iterative) methods. They both
 support regularization, and box constraints on the solution. The PDHG also
 supports various data fidelity terms.
@@ -241,11 +248,11 @@ the following:</p>
 </div>
 <p>The same goes for the parameter <code class="docutils literal notranslate"><span class="pre">upper_limit</span></code>.
 The MLEM algorithm assumes a <code class="docutils literal notranslate"><span class="pre">lower_limit</span></code> of 0.</p>
-</div>
-</div>
-</div>
-<div class="section" id="attenuation-correction">
-<h2>Attenuation correction<a class="headerlink" href="#attenuation-correction" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+</section>
+<section id="attenuation-correction">
+<h2>Attenuation correction<a class="headerlink" href="#attenuation-correction" title="Link to this heading"></a></h2>
 <p>This package implements the attenuation correction method described in [2].
 The correction of the attenuation effects is subject to the knowledge of an
 attenuation map for the following experimental conditions:</p>
@@ -277,19 +284,19 @@ and it can be used particularly in conjunction with the class
 the reader can have a look at the dedicated <a class="reference internal" href="geometry.html"><span class="doc">geometry page</span></a>.
 For a in-depth description of the functionality available in the physics module,
 instead, the reader can have a look at the dedicated <a class="reference internal" href="physics_model.html"><span class="doc">physics page</span></a>.</p>
-</div>
-<div class="section" id="data-terms-and-regularization">
-<h2>Data terms and regularization<a class="headerlink" href="#data-terms-and-regularization" title="Permalink to this heading"></a></h2>
+</section>
+<section id="data-terms-and-regularization">
+<h2>Data terms and regularization<a class="headerlink" href="#data-terms-and-regularization" title="Link to this heading"></a></h2>
 <p>Iterative methods support regularizers, and data fidelity terms. The former can
 be used to impose prior knowledge on the reconstructed solution, while the
 latter impose prior knowledge on the weight given to the data points.</p>
-<div class="section" id="regularizers">
-<h3>Regularizers<a class="headerlink" href="#regularizers" title="Permalink to this heading"></a></h3>
+<section id="regularizers">
+<h3>Regularizers<a class="headerlink" href="#regularizers" title="Link to this heading"></a></h3>
 <p>Famous regularizers are the TV-min and wavelet l1-min. They can be found in the
 <a class="reference external" href="corrct.html#module-corrct.regularizers"><code class="docutils literal notranslate"><span class="pre">regularizers</span></code></a> module.</p>
-</div>
-<div class="section" id="data-fidelity-terms">
-<h3>Data fidelity terms<a class="headerlink" href="#data-fidelity-terms" title="Permalink to this heading"></a></h3>
+</section>
+<section id="data-fidelity-terms">
+<h3>Data fidelity terms<a class="headerlink" href="#data-fidelity-terms" title="Link to this heading"></a></h3>
 <p>The PDHG algorithm supports various data fidelity terms. They can be found in
 the <a class="reference external" href="corrct.html#module-corrct.data_terms"><code class="docutils literal notranslate"><span class="pre">data_terms</span></code></a> module, and they include:</p>
 <ul class="simple">
@@ -302,22 +309,22 @@ the <a class="reference external" href="corrct.html#module-corrct.data_terms"><c
 <li><p>Kullback-Leibler - when dealing with Poisson noise:
 <a class="reference external" href="corrct.html#corrct.data_terms.DataFidelity_KL"><code class="docutils literal notranslate"><span class="pre">DataFidelity_KL</span></code></a></p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="guided-regularization-parameter-selection">
-<h2>Guided regularization parameter selection<a class="headerlink" href="#guided-regularization-parameter-selection" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+<section id="guided-regularization-parameter-selection">
+<h2>Guided regularization parameter selection<a class="headerlink" href="#guided-regularization-parameter-selection" title="Link to this heading"></a></h2>
 <p>Regularizer parameter selection can be performed through either
 cross-validation, or the elbow method.</p>
-</div>
-<div class="section" id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h2>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
 <p>[1] Pelt, D. M., &amp; Batenburg, K. J. (2014). Improving filtered backprojection
 reconstruction by data-dependent filtering. Image Processing, IEEE
 Transactions on, 23(11), 4750-4762.<br />[2] N. Viganò and V. A. Solé, “Physically corrected forward operators for
 induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
 Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

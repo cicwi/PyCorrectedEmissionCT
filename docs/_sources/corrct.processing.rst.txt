@@ -12,6 +12,14 @@ corrct.processing.misc module
    :undoc-members:
    :show-inheritance:
 
+corrct.processing.noise module
+------------------------------
+
+.. automodule:: corrct.processing.noise
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.processing.post module
 -----------------------------
 

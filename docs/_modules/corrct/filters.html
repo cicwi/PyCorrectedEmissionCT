@@ -1,20 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.filters &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -25,11 +27,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> PyCorrectedEmissionCT
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,9 +64,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>corrct.filters</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../corrct.html">corrct</a></li>
+      <li class="breadcrumb-item active">corrct.filters</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -101,11 +108,13 @@
     <span class="n">has_pywt</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<div class="viewcode-block" id="BasisOptions"><a class="viewcode-back" href="../../corrct.html#corrct.filters.BasisOptions">[docs]</a><span class="k">class</span> <span class="nc">BasisOptions</span><span class="p">(</span><span class="n">ABC</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Options for the different types of bases.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BasisOptions">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.BasisOptions">[docs]</a>
+<span class="k">class</span> <span class="nc">BasisOptions</span><span class="p">(</span><span class="n">ABC</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Options for the different types of bases.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return the number of options.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of options.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -115,7 +124,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return the selected option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the selected option.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -130,7 +139,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Iterate the options list.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate the options list.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -140,9 +149,12 @@
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="BasisOptionsBlocks"><a class="viewcode-back" href="../../corrct.html#corrct.filters.BasisOptionsBlocks">[docs]</a><span class="nd">@dataclass</span>
+
+<div class="viewcode-block" id="BasisOptionsBlocks">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.BasisOptionsBlocks">[docs]</a>
+<span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">BasisOptionsBlocks</span><span class="p">(</span><span class="n">BasisOptions</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Options for the wavelet bases.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Options for the wavelet bases.&quot;&quot;&quot;</span>
 
     <span class="n">binning_start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="n">binning_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;exponential&quot;</span>
@@ -150,16 +162,22 @@
     <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="BasisOptionsWavelets"><a class="viewcode-back" href="../../corrct.html#corrct.filters.BasisOptionsWavelets">[docs]</a><span class="nd">@dataclass</span>
+
+<div class="viewcode-block" id="BasisOptionsWavelets">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.BasisOptionsWavelets">[docs]</a>
+<span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">BasisOptionsWavelets</span><span class="p">(</span><span class="n">BasisOptions</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Options for the wavelet bases.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Options for the wavelet bases.&quot;&quot;&quot;</span>
 
     <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bior2.2&quot;</span>
     <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
     <span class="n">norm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span></div>
 
 
-<div class="viewcode-block" id="create_basis"><a class="viewcode-back" href="../../corrct.html#corrct.filters.create_basis">[docs]</a><span class="k">def</span> <span class="nf">create_basis</span><span class="p">(</span>
+
+<div class="viewcode-block" id="create_basis">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.create_basis">[docs]</a>
+<span class="k">def</span> <span class="nf">create_basis</span><span class="p">(</span>
     <span class="n">num_pixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">binning_start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
     <span class="n">binning_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;exponential&quot;</span><span class="p">,</span>
@@ -167,7 +185,7 @@
     <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Compute filter basis matrix.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute filter basis matrix.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -238,14 +256,17 @@
     <span class="k">return</span> <span class="n">basis_r</span></div>
 
 
-<div class="viewcode-block" id="create_basis_wavelet"><a class="viewcode-back" href="../../corrct.html#corrct.filters.create_basis_wavelet">[docs]</a><span class="k">def</span> <span class="nf">create_basis_wavelet</span><span class="p">(</span>
+
+<div class="viewcode-block" id="create_basis_wavelet">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.create_basis_wavelet">[docs]</a>
+<span class="k">def</span> <span class="nf">create_basis_wavelet</span><span class="p">(</span>
     <span class="n">num_pixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bior2.2&quot;</span><span class="p">,</span>
     <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">norm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Compute filter basis matrix.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute filter basis matrix.</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    num_pixels : int</span>
@@ -316,8 +337,11 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">basis_r</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,))</span></div>
 
 
-<div class="viewcode-block" id="Filter"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter">[docs]</a><span class="k">class</span> <span class="nc">Filter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base FBP filter.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Filter">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter">[docs]</a>
+<span class="k">class</span> <span class="nc">Filter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base FBP filter.&quot;&quot;&quot;</span>
 
     <span class="n">fbp_filter</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
     <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span>
@@ -331,7 +355,7 @@
         <span class="n">use_rfft</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Initialize Base FBP filter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Base FBP filter.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -353,8 +377,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">fbp_filter</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Filter.get_padding_size"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.get_padding_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_padding_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Compute the projection padding size for a linear convolution.</span>
+<div class="viewcode-block" id="Filter.get_padding_size">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.get_padding_size">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_padding_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the projection padding size for a linear convolution.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -368,21 +394,28 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">data_wu_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))))</span></div>
 
-<div class="viewcode-block" id="Filter.to_fourier"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.to_fourier">[docs]</a>    <span class="k">def</span> <span class="nf">to_fourier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Filter.to_fourier">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.to_fourier">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_fourier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_rfft</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">data_wu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">data_wu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Filter.to_real"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.to_real">[docs]</a>    <span class="k">def</span> <span class="nf">to_real</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Filter.to_real">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.to_real">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_real</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_rfft</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">irfft</span><span class="p">(</span><span class="n">data_wu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">data_wu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">real</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">filter_fourier</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Fourier representation of the filter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fourier representation of the filter.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -393,7 +426,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">filter_real</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Real-space representation of the filter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Real-space representation of the filter.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -415,8 +448,10 @@
     <span class="k">def</span> <span class="nf">num_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
 
-<div class="viewcode-block" id="Filter.apply_filter"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.apply_filter">[docs]</a>    <span class="k">def</span> <span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">fbp_filter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Apply the filter to the data_wu.</span>
+<div class="viewcode-block" id="Filter.apply_filter">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.apply_filter">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">fbp_filter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the filter to the data_wu.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -464,9 +499,12 @@
             <span class="n">prj_f</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">local_filter</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data_wu_shape</span><span class="p">))</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_real</span><span class="p">(</span><span class="n">prj_f</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span> <span class="n">data_wu_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span></div>
 
-<div class="viewcode-block" id="Filter.compute_filter"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.compute_filter">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="Filter.compute_filter">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.compute_filter">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Compute the FBP filter for the given data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the FBP filter for the given data.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -474,8 +512,9 @@
 <span class="sd">            The reference sinogram / projection data.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Filter the sinogram, by first computing the filter, and then applying it.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter the sinogram, by first computing the filter, and then applying it.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -490,7 +529,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">compute_filter</span><span class="p">(</span><span class="n">data_wu</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">data_wu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Filter.plot_filters"><a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.plot_filters">[docs]</a>    <span class="k">def</span> <span class="nf">plot_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fourier_abs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Filter.plot_filters">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.Filter.plot_filters">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fourier_abs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="n">filters_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_real</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">filters_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_fourier</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
@@ -512,11 +553,15 @@
         <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_filters</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
+        <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
+</div>
 
 
-<div class="viewcode-block" id="FilterCustom"><a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterCustom">[docs]</a><span class="k">class</span> <span class="nc">FilterCustom</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Custom FBP filter.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FilterCustom">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterCustom">[docs]</a>
+<span class="k">class</span> <span class="nc">FilterCustom</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom FBP filter.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -525,7 +570,7 @@
         <span class="n">use_rfft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Initialize Custom FBP filter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Custom FBP filter.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -540,12 +585,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fbp_filter</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">,</span> <span class="n">use_rfft</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
-<div class="viewcode-block" id="FilterCustom.compute_filter"><a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterCustom.compute_filter">[docs]</a>    <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Provide dummy implementation, because it is not required.&quot;&quot;&quot;</span></div></div>
+<div class="viewcode-block" id="FilterCustom.compute_filter">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterCustom.compute_filter">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Provide dummy implementation, because it is not required.&quot;&quot;&quot;</span></div>
+</div>
 
 
-<div class="viewcode-block" id="FilterFBP"><a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterFBP">[docs]</a><span class="k">class</span> <span class="nc">FilterFBP</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Traditional FBP filter.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FilterFBP">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterFBP">[docs]</a>
+<span class="k">class</span> <span class="nc">FilterFBP</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Traditional FBP filter.&quot;&quot;&quot;</span>
 
     <span class="n">filter_name</span><span class="p">:</span> <span class="nb">str</span>
 
@@ -554,7 +605,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">filter_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ramp&quot;</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="n">use_rfft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Initialize traditional FBP filter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize traditional FBP filter.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -572,8 +623,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">filter_name</span> <span class="o">=</span> <span class="n">filter_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-<div class="viewcode-block" id="FilterFBP.compute_filter"><a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterFBP.compute_filter">[docs]</a>    <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Compute the traditional FBP filter for the given data.</span>
+<div class="viewcode-block" id="FilterFBP.compute_filter">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterFBP.compute_filter">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the traditional FBP filter for the given data.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -588,19 +641,26 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_rfft</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="p">[:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="FilterFBP.get_available_filters"><a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterFBP.get_available_filters">[docs]</a>    <span class="k">def</span> <span class="nf">get_available_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Provide available FBP filters.</span>
+
+<div class="viewcode-block" id="FilterFBP.get_available_filters">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterFBP.get_available_filters">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_available_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Provide available FBP filters.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Sequence[str]</span>
 <span class="sd">            The available filters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILTERS</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILTERS</span></div>
+</div>
 
 
-<div class="viewcode-block" id="FilterMR"><a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterMR">[docs]</a><span class="k">class</span> <span class="nc">FilterMR</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data dependent FBP filter.</span>
+
+<div class="viewcode-block" id="FilterMR">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterMR">[docs]</a>
+<span class="k">class</span> <span class="nc">FilterMR</span><span class="p">(</span><span class="n">Filter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data dependent FBP filter.</span>
 
 <span class="sd">    This is a simplified implementation from:</span>
 
@@ -630,7 +690,7 @@
         <span class="n">use_rfft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Initialize data-driven FBP filter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize data-driven FBP filter.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -655,8 +715,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="FilterMR.initialize"><a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterMR.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Initialize filter.</span>
+<div class="viewcode-block" id="FilterMR.initialize">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterMR.initialize">[docs]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize filter.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -673,8 +735,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">is_initialized</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="FilterMR.compute_filter"><a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterMR.compute_filter">[docs]</a>    <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Compute the filter.</span>
+
+<div class="viewcode-block" id="FilterMR.compute_filter">
+<a class="viewcode-back" href="../../corrct.html#corrct.filters.FilterMR.compute_filter">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the filter.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -717,7 +782,9 @@
         <span class="n">b</span><span class="p">[:</span><span class="n">sino_size</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_wu</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="n">fitted_components</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">fitted_components</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis_f</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span> <span class="o">=</span> <span class="n">fitted_components</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis_f</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>
