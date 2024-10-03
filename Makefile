@@ -76,8 +76,9 @@ docs_env:
 
 docs: docs/.nojekyll install_dev ## generate Sphinx HTML documentation, including API docs
 	rm -f doc_sources/corrct.rst
+	rm -f doc_sources/corrct.*.rst
 	rm -f doc_sources/modules.rst
-	sphinx-apidoc -o doc_sources/ corrct
+	sphinx-apidoc -o doc_sources/ src/corrct
 	make -C doc_sources clean
 	make -C doc_sources html
 	$(BROWSER) docs/index.html
