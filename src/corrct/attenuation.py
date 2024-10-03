@@ -15,7 +15,7 @@ from . import models
 import concurrent.futures as cf
 import multiprocessing as mp
 
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from typing import Dict, Optional, Sequence, Union, List
 from numpy.typing import ArrayLike, DTypeLike, NDArray
