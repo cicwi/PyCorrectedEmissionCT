@@ -10,7 +10,6 @@ import os
 
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Tuple
 
 import matplotlib.pyplot as plt
 import mpl_toolkits.axes_grid1 as ax_g
@@ -25,7 +24,7 @@ except ImportError:
     import phantom
 
 
-def cm2inch(x: ArrayLike) -> Tuple[float, float]:
+def cm2inch(x: ArrayLike) -> tuple[float, float]:
     """Convert cm to inch.
 
     Parameters
@@ -65,12 +64,12 @@ sino_variance = cct.processing.compute_variance_poisson(sinogram)
 sino_weights = cct.processing.compute_variance_weight(sino_variance)
 
 # Data fitting term: weighted least-squares, based on the standard deviation of the noise.
-data_term_lsw = cct.solvers.DataFidelity_wl2(sino_weights)
+data_term_lsw = cct.regularizers.DataFidelity_wl2(sino_weights)
 
-reg = cct.solvers.Regularizer_TV2D
-# reg = cct.solvers.Regularizer_smooth2D
-# reg = lambda l: cct.solvers.Regularizer_l1swl(l, "haar", 4)
-# reg = cct.solvers.Regularizer_fft
+reg = cct.regularizers.Regularizer_TV2D
+# reg = cct.regularizers.Regularizer_smooth2D
+# reg = lambda l: cct.regularizers.Regularizer_l1swl(l, "haar", 4)
+# reg = cct.regularizers.Regularizer_fft
 
 
 # Instantiates the solver object, that is later used for computing the reconstruction

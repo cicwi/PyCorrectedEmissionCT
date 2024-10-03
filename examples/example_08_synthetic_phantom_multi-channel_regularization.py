@@ -8,13 +8,11 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
-import numpy.random
 
 import matplotlib.pyplot as plt
 
 import corrct as cct
 
-from typing import Tuple
 from numpy.typing import ArrayLike
 
 try:
@@ -24,7 +22,7 @@ except ImportError:
     import phantom
 
 
-def cm2inch(x: ArrayLike) -> Tuple[float, float]:
+def cm2inch(x: ArrayLike) -> tuple[float, float]:
     """Convert cm to inch.
 
     Parameters

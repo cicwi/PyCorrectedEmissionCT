@@ -12,7 +12,6 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Tuple
 
 import matplotlib.pyplot as plt
 
@@ -25,7 +24,7 @@ except ImportError:
     import phantom
 
 
-def cm2inch(x: ArrayLike) -> Tuple[float, float]:
+def cm2inch(x: ArrayLike) -> tuple[float, float]:
     """Convert cm to inch.
 
     Parameters
@@ -63,12 +62,12 @@ sino_substract = sino - background_avg
 sino_variance = cct.processing.compute_variance_poisson(sino)
 sino_weights = cct.processing.compute_variance_weight(sino_variance)
 
-lowlim_l2 = cct.solvers.Constraint_LowerLimit(0, norm=cct.solvers.DataFidelity_l2())
-lowlim_l2w = cct.solvers.Constraint_LowerLimit(0, norm=cct.solvers.DataFidelity_wl2(1 / bckgnd_weight))
+lowlim_l2 = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_l2())
+lowlim_l2w = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_wl2(1 / bckgnd_weight))
 
-data_term_ls = cct.solvers.DataFidelity_l2()
-data_term_lsw = cct.solvers.DataFidelity_wl2(sino_weights)
-data_term_lsb = cct.solvers.DataFidelity_l2b(sino_variance)
+data_term_ls = cct.regularizers.DataFidelity_l2()
+data_term_lsw = cct.regularizers.DataFidelity_wl2(sino_weights)
+data_term_lsb = cct.regularizers.DataFidelity_l2b(sino_variance)
 
 with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     solver_ls = cct.solvers.PDHG(verbose=True, data_term=data_term_ls)

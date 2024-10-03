@@ -91,7 +91,7 @@ frcs = [np.array([])] * (imgs.shape[0] - 1)
 for ii, im in enumerate(imgs[1:]):
     fc = [np.array([])] * 3
     for ii_c in range(3):
-        fc[ii_c], T = cct.processing.post.frc(imgs[0][..., ii_c], im[..., ii_c], snrt=0.4142)
+        fc[ii_c], T = cct.processing.post.compute_frc(imgs[0][..., ii_c], im[..., ii_c], snrt=0.4142)
     frcs[ii] = np.mean(fc, axis=0)
 
 fig, ax = plt.subplots(1, 1, sharex=True, sharey=True)

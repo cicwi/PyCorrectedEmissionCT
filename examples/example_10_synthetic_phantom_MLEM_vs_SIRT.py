@@ -53,12 +53,12 @@ vol_mask = cct.processing.circular_mask(ph_or.shape)
 sino_variance = cct.processing.compute_variance_poisson(sino)
 sino_weights = cct.processing.compute_variance_weight(sino_variance)
 
-data_term_ls = cct.solvers.DataFidelity_l2(background=background_avg)
-data_term_lsw = cct.solvers.DataFidelity_wl2(sino_weights, background=background_avg)
-data_term_kl = cct.solvers.DataFidelity_KL(background=background_avg)
+data_term_ls = cct.data_terms.DataFidelity_l2(background=background_avg)
+data_term_lsw = cct.data_terms.DataFidelity_wl2(sino_weights, background=background_avg)
+data_term_kl = cct.data_terms.DataFidelity_KL(background=background_avg)
 
 with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
-    solver_pdhg = cct.solvers.PDHG(verbose=True, data_term=data_term_lsw)
+    solver_pdhg = cct.solvers.PDHG(verbose=True, data_term=data_term_kl)
     rec_pdhg, _ = solver_pdhg(A, sino, num_iterations, x_mask=vol_mask)
 
     solver_sirt = cct.solvers.SIRT(verbose=True, data_term=data_term_ls)
