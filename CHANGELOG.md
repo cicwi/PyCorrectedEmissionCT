@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.9.1...develop
 
+## 1.0.0rc1 - 2024-10-03
+### Added
+- Moved to a src/ directory structure
+- Moved to pyproject.toml instead of setup.cfg
+### Fixed
+- NumPy 2.0 compatibility
+
 ## 0.9.1 - 2024-03-20
 ### Added
 - Overall improvements to `ProjectionGeometry` in the module `models`:
