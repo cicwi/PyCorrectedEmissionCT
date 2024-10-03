@@ -120,7 +120,7 @@ def power_spectrum(
     return ps[..., :cut_off]
 
 
-def frc(
+def compute_frc(
     img1: NDArray,
     img2: Optional[NDArray],
     snrt: float = 0.2071,
@@ -128,6 +128,7 @@ def frc(
     smooth: Optional[int] = 5,
     taper_ratio: Optional[float] = 0.05,
     supersampling: int = 1,
+    theo_threshold: bool = True,
 ) -> tuple[NDArray, NDArray]:
     """
     Compute the FRC/FSC (Fourier ring/shell correlation) between two images / volumes.
@@ -241,18 +242,19 @@ def frc(
 
     frc = fc_int / f1s_f2s
 
-    rings_size = azimuthal_integration(np.ones_like(img1), axes=axes, domain="fourier")
-    # Alternatively:
-    # # The number of pixels in a ring is given by the surface.
-    # # We compute the n-dimensional hyper-sphere surface, where n is given by the number of axes.
-    # n = len(axes)
-    # num_surf = 2 * np.pi ** (n / 2)
-    # den_surf = sp.special.gamma(n / 2)
-    # rings_size = np.concatenate(((1.0, ), num_surf / den_surf * np.arange(1, len(frc)) ** (n - 1)))
+    if theo_threshold:
+        # The number of pixels in a ring is given by the surface.
+        # We compute the n-dimensional hyper-sphere surface, where n is given by the number of axes.
+        n = len(axes)
+        num_surf = 2 * np.pi ** (n / 2)
+        den_surf = sp.special.gamma(n / 2)
+        rings_size = np.concatenate(((1.0,), num_surf / den_surf * np.arange(1, len(frc)) ** (n - 1)))
+    else:
+        rings_size = azimuthal_integration(np.ones_like(img1), axes=axes, domain="fourier")
 
-    Tnum = snrt + (2 * np.sqrt(snrt) + 1) / np.sqrt(rings_size)
-    Tden = snrt + 1 + 2 * np.sqrt(snrt) / np.sqrt(rings_size)
-    Thb = Tnum / Tden
+    t_num = snrt + (2 * np.sqrt(snrt) + 1) / np.sqrt(rings_size)
+    t_den = snrt + 1 + 2 * np.sqrt(snrt) / np.sqrt(rings_size)
+    t_hb = t_num / t_den
 
     if smooth is not None and smooth > 1:
         win = sp.signal.windows.hann(smooth)
@@ -260,7 +262,29 @@ def frc(
         win = win.reshape([*[1] * (frc.ndim - 1), -1])
         frc = sp.ndimage.convolve(frc, win, mode="nearest")
 
-    return frc[..., :cut_off], Thb[..., :cut_off]
+    return frc[..., :cut_off], t_hb[..., :cut_off]
+
+
+def estimate_resolution(frc: NDArray, t_hb: NDArray) -> tuple[float, float] | None:
+    """Estimate the resolution or bandwidth, given an FRC and a threshold curve.
+
+    Parameters
+    ----------
+    frc : NDArray
+        The FRC curve
+    t_hb : NDArray
+        The threshold curve
+
+    Returns
+    -------
+    tuple[float, float] | None
+        The resolution or bandwidth, if a crossing point was found. Otherwise None.
+    """
+    if t_hb.ndim > 1:
+        reduce_axes = tuple(np.arange(t_hb.ndim - 1))
+        frc = frc.mean(axis=reduce_axes)
+        t_hb = t_hb.mean(axis=reduce_axes)
+    return lines_intersection(frc, t_hb, x_lims=(1, None))
 
 
 def plot_frcs(
@@ -297,12 +321,8 @@ def plot_frcs(
     xps: list[Optional[tuple[float, float]]] = [(0.0, 0.0)] * len(volume_pairs)
 
     for ii, pair in enumerate(tqdm(volume_pairs, desc="Computing FRCs", disable=not verbose)):
-        frcs[ii], T = frc(pair[0], pair[1], snrt=snrt, smooth=smooth, axes=axes, supersampling=supersampling)
-        if T.ndim > 1:
-            reduce_axes = tuple(np.arange(T.ndim - 1))
-            frcs[ii] = frcs[ii].mean(axis=reduce_axes)
-            T = T.mean(axis=reduce_axes)
-        xps[ii] = lines_intersection(frcs[ii], T, x_lims=(1, None))
+        frcs[ii], t_hb = compute_frc(pair[0], pair[1], snrt=snrt, smooth=smooth, axes=axes, supersampling=supersampling)
+        xps[ii] = estimate_resolution(frcs[ii], t_hb)
 
     nyquist = len(frcs[0])
     xx = np.linspace(0, 1, nyquist)
@@ -310,7 +330,7 @@ def plot_frcs(
     fig, axs = plt.subplots(1, 1, sharex=True, sharey=True)
     for f, l in zip(frcs, labels):
         axs.plot(xx, np.squeeze(f), label=l)
-    axs.plot(xx, np.squeeze(T), label="T 1/2 bit", linestyle="dashed")
+    axs.plot(xx, np.squeeze(t_hb), label="T 1/2 bit", linestyle="dashed")
     for ii, p in enumerate(xps):
         if p is not None:
             res = p[0] / (nyquist - 1)
