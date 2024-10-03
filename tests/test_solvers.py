@@ -10,7 +10,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 import numpy as np
 import pytest
 from numpy.typing import NDArray
-from corrct import processing, projectors, solvers
+from corrct import processing, projectors, solvers, regularizers
 
 
 eps = np.finfo(np.float32).eps
@@ -87,7 +87,7 @@ def test_algo_flat(flat_2d_data, algo_it_pars: tuple[type[solvers.Solver], int, 
     prj_mat = projectors.ProjectorMatrix(proj_matrix_2d, VOL_SHAPE_2D, PRJ_SHAPE_2D)
 
     if algo_class in (solvers.SIRT, solvers.PDHG):
-        reg = solvers.Regularizer_TV2D(1e-4)
+        reg = regularizers.Regularizer_TV2D(1e-4)
         algo = algo_class(regularizer=reg)
     else:
         algo = algo_class()
