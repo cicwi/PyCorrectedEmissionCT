@@ -265,7 +265,7 @@ def compute_frc(
     return frc[..., :cut_off], t_hb[..., :cut_off]
 
 
-def estimate_resolution(frc: NDArray, t_hb: NDArray) -> tuple[float, float] | None:
+def estimate_resolution(frc: NDArray, t_hb: NDArray) -> Optional[tuple[float, float]]:
     """Estimate the resolution or bandwidth, given an FRC and a threshold curve.
 
     Parameters
