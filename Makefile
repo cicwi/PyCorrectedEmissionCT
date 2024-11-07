@@ -87,11 +87,11 @@ servedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C doc_sources html' -R -D .
 
 install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+	python -m pip install .
 
 install_dev:
 	# https://stackoverflow.com/a/28842733
-	pip install -e .[dev]
+	python -m pip install -e .[dev]
 
 prepare_packages:
 	conda install conda-build setuptools wheel twine build -y
