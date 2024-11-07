@@ -64,7 +64,7 @@ sino_variance = cct.processing.compute_variance_poisson(sinogram)
 sino_weights = cct.processing.compute_variance_weight(sino_variance)
 
 # Data fitting term: weighted least-squares, based on the standard deviation of the noise.
-data_term_lsw = cct.regularizers.DataFidelity_wl2(sino_weights)
+data_term_lsw = cct.data_terms.DataFidelity_wl2(sino_weights)
 
 reg = cct.regularizers.Regularizer_TV2D
 # reg = cct.regularizers.Regularizer_smooth2D
@@ -75,7 +75,9 @@ reg = cct.regularizers.Regularizer_TV2D
 # Instantiates the solver object, that is later used for computing the reconstruction
 def solver_spawn(lam_reg):
     # Using the PDHG solver from Chambolle and Pock
-    return cct.solvers.PDHG(verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw)
+    return cct.solvers.PDHG(
+        verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw, leave_progress=False
+    )
 
 
 # Computes the reconstruction for a given solver and a given cross-validation data mask
