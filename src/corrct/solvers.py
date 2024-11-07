@@ -90,12 +90,14 @@ class Solver(ABC):
     def __init__(
         self,
         verbose: bool = False,
+        leave_progress: bool = True,
         relaxation: float = 1.0,
         tolerance: Optional[float] = None,
         data_term: Union[str, data_terms.DataFidelityBase] = "l2",
         data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
     ):
         self.verbose = verbose
+        self.leave_progress = leave_progress
         self.relaxation = relaxation
         self.tolerance = tolerance
 
@@ -212,6 +214,7 @@ class FBP(Solver):
     def __init__(
         self,
         verbose: bool = False,
+        leave_progress: bool = False,
         regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
         data_term: Union[str, data_terms.DataFidelityBase] = "l2",
         fbp_filter: Union[str, NDArrayFloat, filters.Filter] = "ramp",
@@ -223,6 +226,8 @@ class FBP(Solver):
         ----------
         verbose : bool, optional
             Turn on verbose output. The default is False.
+        leave_progress: bool, optional
+            Leave the progress bar after the computation is finished. The default is True.
         regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional
             NOT USED, only exposed for compatibility reasons.
         data_term : Union[str, data_terms.DataFidelityBase], optional
@@ -462,9 +467,9 @@ class SART(Solver):
 
         rows_sequence = np.random.permutation(A_num_rows)
 
-        algo_info = "- Performing %s iterations: " % self.upper()
+        algo_info = f"- Performing {self.upper()} iterations: "
 
-        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
+        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose), leave=self.leave_progress):
             info.iterations += 1
 
             for ii_a in rows_sequence:
@@ -501,6 +506,8 @@ class MLEM(Solver):
     ----------
     verbose : bool, optional
         Turn on verbose output. The default is False.
+    leave_progress: bool, optional
+        Leave the progress bar after the computation is finished. The default is True.
     tolerance : Optional[float], optional
         Tolerance on the data residual for computing when to stop iterations.
         The default is None.
@@ -517,12 +524,19 @@ class MLEM(Solver):
     def __init__(
         self,
         verbose: bool = False,
+        leave_progress: bool = True,
         tolerance: Optional[float] = None,
         regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
         data_term: Union[str, data_terms.DataFidelityBase] = "kl",
         data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
     ):
-        super().__init__(verbose=verbose, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test)
+        super().__init__(
+            verbose=verbose,
+            leave_progress=leave_progress,
+            tolerance=tolerance,
+            data_term=data_term,
+            data_term_test=data_term_test,
+        )
         self.regularizer = self._initialize_regularizer(regularizer)
 
     def info(self) -> str:
@@ -623,9 +637,9 @@ class MLEM(Solver):
                 info.residual0 = self.data_term.compute_residual_norm(res_0)
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-        algo_info = "- Performing {}-{}{} iterations: ".format(self.upper(), self.data_term.upper(), reg_info)
+        algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
 
-        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
+        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose), leave=self.leave_progress):
             info.iterations += 1
 
             # The MLEM update
@@ -666,6 +680,8 @@ class SIRT(Solver):
     ----------
     verbose : bool, optional
         Turn on verbose output. The default is False.
+    leave_progress: bool, optional
+        Leave the progress bar after the computation is finished. The default is True.
     tolerance : Optional[float], optional
         Tolerance on the data residual for computing when to stop iterations.
         The default is None.
@@ -684,6 +700,7 @@ class SIRT(Solver):
     def __init__(
         self,
         verbose: bool = False,
+        leave_progress: bool = True,
         relaxation: float = 1.95,
         tolerance: Optional[float] = None,
         regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
@@ -691,7 +708,12 @@ class SIRT(Solver):
         data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
     ):
         super().__init__(
-            verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
+            verbose=verbose,
+            leave_progress=leave_progress,
+            relaxation=relaxation,
+            tolerance=tolerance,
+            data_term=data_term,
+            data_term_test=data_term_test,
         )
         self.regularizer = self._initialize_regularizer(regularizer)
 
@@ -796,9 +818,9 @@ class SIRT(Solver):
                 info.residual0 = self.data_term.compute_residual_norm(res_0)
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-        algo_info = "- Performing {}-{}{} iterations: ".format(self.upper(), self.data_term.upper(), reg_info)
+        algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
 
-        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
+        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose), leave=self.leave_progress):
             info.iterations += 1
 
             Ax = A(x)
@@ -841,6 +863,8 @@ class PDHG(Solver):
     ----------
     verbose : bool, optional
         Turn on verbose output. The default is False.
+    leave_progress: bool, optional
+        Leave the progress bar after the computation is finished. The default is True.
     tolerance : Optional[float], optional
         Tolerance on the data residual for computing when to stop iterations.
         The default is None.
@@ -859,6 +883,7 @@ class PDHG(Solver):
     def __init__(
         self,
         verbose: bool = False,
+        leave_progress: bool = True,
         tolerance: Optional[float] = None,
         relaxation: float = 0.95,
         regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
@@ -866,7 +891,12 @@ class PDHG(Solver):
         data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
     ):
         super().__init__(
-            verbose=verbose, relaxation=relaxation, tolerance=tolerance, data_term=data_term, data_term_test=data_term_test
+            verbose=verbose,
+            leave_progress=leave_progress,
+            relaxation=relaxation,
+            tolerance=tolerance,
+            data_term=data_term,
+            data_term_test=data_term_test,
         )
         self.regularizer = self._initialize_regularizer(regularizer)
 
@@ -892,7 +922,7 @@ class PDHG(Solver):
             if data_term.lower() == "kl":
                 return data_terms.DataFidelity_KL()
             else:
-                raise ValueError('Unknown data term: "%s", accepted terms are: "l2" | "l1" | "kl".' % data_term)
+                raise ValueError(f'Unknown data term: "{data_term}", accepted terms are: "l2" | "l1" | "kl".')
         else:
             return cp.deepcopy(data_term)
 
@@ -924,7 +954,7 @@ class PDHG(Solver):
         x_norm = np.linalg.norm(x)
         L = x_norm
 
-        for ii in range(iterations):
+        for _ in range(iterations):
             x /= x_norm
             x = A.T(A(x))
 
@@ -1055,9 +1085,9 @@ class PDHG(Solver):
                 info.residual0 = self.data_term.compute_residual_norm(res_0)
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
-        algo_info = "- Performing {}-{}{} iterations: ".format(self.upper(), self.data_term.upper(), reg_info)
+        algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
 
-        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose)):
+        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose), leave=self.leave_progress):
             info.iterations += 1
 
             Ax_rlx = A(x_relax)
@@ -1098,6 +1128,3 @@ class PDHG(Solver):
                         break
 
         return x, info
-
-
-CP = PDHG
