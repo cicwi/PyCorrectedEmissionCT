@@ -12,12 +12,14 @@ import multiprocessing as mp
 import time as tm
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional, Sequence, Union, Literal
+from warnings import warn
 
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.polynomial.polynomial import Polynomial
 from numpy.typing import ArrayLike, DTypeLike, NDArray
 from matplotlib.ticker import StrMethodFormatter
+from tqdm.auto import tqdm
 
 from . import solvers
 
@@ -55,26 +57,157 @@ def create_random_test_mask(
     return data_test_mask
 
 
-def get_lambda_range(start: float, end: float, num_per_order: int = 4) -> NDArrayFloat:
-    """Compute regularization weights within an interval.
+def get_lambda_range(start: float, end: float, num_per_order: int = 4, aligned_order: bool = True) -> NDArrayFloat:
+    """Compute hyper-parameter values within an interval.
 
     Parameters
     ----------
     start : float
-        First regularization weight.
+        First hyper-parameter value.
     end : float
-        Last regularization weight.
+        Last hyper-parameter value.
     num_per_order : int, optional
         Number of steps per order of magnitude. The default is 4.
+    aligned_order : bool, optional
+        Whether to align the 1 of each order of magnitude or to the given start value. The default is True.
 
     Returns
     -------
     NDArrayFloat
-        List of regularization weights.
+        List of hyper-parameter values.
     """
     step_size = 10 ** (1 / num_per_order)
-    num_steps = np.ceil(num_per_order * np.log10(end / start) - 1e-3)
-    return start * (step_size ** np.arange(num_steps + 1))
+    if aligned_order:
+        order_start = 10 ** np.floor(np.log10(start))
+        order_end = 10 ** np.ceil(np.log10(end))
+        num_steps = np.ceil(num_per_order * np.log10(order_end / order_start) - 1e-3)
+        tmp_steps = order_start * (step_size ** np.arange(num_steps + 1))
+        return tmp_steps[np.logical_and(tmp_steps >= start, (tmp_steps * (1 - 1e-3)) <= end)]
+    else:
+        num_steps = np.ceil(num_per_order * np.log10(end / start) - 1e-3)
+        return start * (step_size ** np.arange(num_steps + 1))
+
+
+def fit_func_min(
+    hp_vals: Union[ArrayLike, NDArrayFloat],
+    f_vals: NDArrayFloat,
+    f_stds: Optional[NDArrayFloat] = None,
+    scale: Literal["linear", "log"] = "log",
+    verbose: bool = False,
+    plot_result: bool = False,
+) -> tuple[float, float]:
+    """Parabolic fit of objective function costs for the different hyper-parameter values.
+
+    Parameters
+    ----------
+    hp_vals : Union[ArrayLike, NDArrayFloat]
+        Hyper-parameter values.
+    f_vals : NDArrayFloat
+        Objective function costs of each hyper-parameter value.
+    f_stds : NDArrayFloat, optional
+        Objective function cost standard deviations of each hyper-parameter value.
+        It is only used for plotting purposes. The default is None.
+    scale : str, optional
+        Scale of the fit. Options are: "log" | "linear". The default is "log".
+    verbose : bool, optional
+        Whether to produce verbose output, by default False
+    plot_result : bool, optional
+        Whether to plot the result, by default False
+
+    Returns
+    -------
+    min_hp_val : float
+        Expected hyper-parameter value of the fitted minimum.
+    min_f_val : float
+        Expected objective function cost of the fitted minimum.
+    """
+    hp_vals = np.array(hp_vals, ndmin=1)
+
+    if len(hp_vals) < 3 or len(f_vals) < 3 or len(hp_vals) != len(f_vals):
+        raise ValueError(
+            "Lengths of the lambdas and function values should be identical and >= 3."
+            f"Given: lams={len(hp_vals)}, vals={len(f_vals)}"
+        )
+
+    if scale.lower() == "log":
+        to_fit = np.log10
+        from_fit = lambda x: 10**x
+    elif scale.lower() == "linear":
+        to_fit = lambda x: x
+        from_fit = to_fit
+    else:
+        raise ValueError(f"Parameter 'scale' should be either 'log' or 'linear', given '{scale}' instead")
+
+    min_pos = np.argmin(f_vals)
+    if min_pos == 0:
+        warn("Minimum value at the beginning of the lambda range.")
+        hp_inds_fit = list(np.arange(3))
+    elif min_pos == (len(f_vals) - 1):
+        warn("Minimum value at the end of the lambda range.")
+        hp_inds_fit = list(np.mod(np.arange(-3, 0), hp_vals.size))
+    else:
+        hp_inds_fit = list(np.arange(min_pos - 1, min_pos + 2))
+    lams_reg_fit = to_fit(hp_vals[hp_inds_fit])
+    f_vals_fit = f_vals[hp_inds_fit]
+
+    counter = tm.perf_counter()
+    if verbose:
+        print(
+            f"Fitting minimum within the interval [{hp_vals[hp_inds_fit[0]]:.3e}, {hp_vals[hp_inds_fit[-1]]:.3e}]"
+            f" (indices: [{hp_inds_fit[0]}, {hp_inds_fit[-1]}]): ",
+            end="",
+            flush=True,
+        )
+
+    # using Polynomial.fit, because it is supposed to be more numerically
+    # stable than previous solutions (according to numpy).
+    poly = Polynomial.fit(lams_reg_fit, f_vals_fit, deg=2)
+    coeffs = poly.convert().coef
+    if coeffs[2] <= 0:
+        warn("Fitted curve is concave. Returning minimum measured point.")
+        return hp_vals[min_pos], f_vals[min_pos]
+
+    # For a 1D parabola `f(x) = c + bx + ax^2`, the vertex position is:
+    # x_v = -b / 2a.
+    vertex_pos = -coeffs[1] / (2 * coeffs[2])
+    vertex_val = coeffs[0] + vertex_pos * coeffs[1] / 2
+
+    min_hp_val, min_f_val = from_fit(vertex_pos), vertex_val
+    if min_hp_val < hp_vals[0] or min_hp_val > hp_vals[-1]:
+        warn(
+            f"Fitted lambda {min_hp_val:.3e} is outside the bounds of input lambdas [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}]."
+            " Returning minimum measured point."
+        )
+        res_hp_val, res_f_val = hp_vals[min_pos], f_vals[min_pos]
+    else:
+        res_hp_val, res_f_val = min_hp_val, min_f_val
+
+    if verbose:
+        print(f"Found at {min_hp_val:.3e}, in {tm.perf_counter() - counter:g} seconds.\n")
+
+    if plot_result:
+        fig, axs = plt.subplots()
+        axs.set_xscale(scale, nonpositive="clip")
+        if f_stds is None:
+            axs.plot(hp_vals, f_vals)
+        else:
+            axs.errorbar(hp_vals, f_vals, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
+        x = np.linspace(lams_reg_fit[0], lams_reg_fit[2])
+        y = coeffs[0] + x * (coeffs[1] + x * coeffs[2])
+        axs.plot(from_fit(x), y)
+        axs.scatter(min_hp_val, min_f_val)
+        axs.grid()
+        for tl in axs.get_xticklabels():
+            tl.set_fontsize(13)
+        for tl in axs.get_yticklabels():
+            tl.set_fontsize(13)
+        axs.set_xlabel(r"$\lambda$ values", fontsize=16)
+        axs.set_ylabel("Cross-validation loss values", fontsize=16)
+        axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.2e}"))
+        fig.tight_layout()
+        plt.show(block=False)
+
+    return res_hp_val, res_f_val
 
 
 class BaseRegularizationEstimation(ABC):
@@ -159,13 +292,13 @@ class BaseRegularizationEstimation(ABC):
         """
         return get_lambda_range(start=start, end=end, num_per_order=num_per_order)
 
-    def compute_reconstruction_and_loss(self, lam_reg: float, *args: Any, **kwds: Any) -> tuple[np.floating, NDArrayFloat]:
-        """Compute objective function cost for the given regularization weight.
+    def compute_reconstruction_and_loss(self, hp_val: float, *args: Any, **kwds: Any) -> tuple[float, NDArrayFloat]:
+        """Compute objective function cost for the given hyper-parameter value.
 
         Parameters
         ----------
-        lam_reg : float
-            Regularization weight.
+        hp_val : float
+            hyper-parameter value.
         *args : Any
             Optional positional arguments for the reconstruction.
         **kwds : Any
@@ -173,26 +306,26 @@ class BaseRegularizationEstimation(ABC):
 
         Returns
         -------
-        cost
+        cost : float
             Cost of the given regularization weight.
-        rec : ArrayLike
+        rec : NDArray
             Reconstruction at the given weight.
         """
-        solver = self.solver_spawning_function(lam_reg)
+        solver = self.solver_spawning_function(hp_val)
         rec, rec_info = self.solver_calling_function(solver, *args, **kwds)
 
         # Output will be: test objective function cost, and reconstruction
-        return rec_info.residuals_cv_rel[-1], rec
+        return float(rec_info.residuals_cv_rel[-1]), rec
 
     def compute_reconstruction_error(
-        self, lams_reg: Union[ArrayLike, NDArrayFloat], gnd_truth: NDArrayFloat
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], gnd_truth: NDArrayFloat
     ) -> tuple[NDArrayFloat, NDArrayFloat]:
-        """Compute the reconstructions for each regularization weight error against the ground truth.
+        """Compute the reconstruction errors for each hyper-parameter values against the ground truth.
 
         Parameters
         ----------
-        lams_reg : Union[ArrayLike, NDArrayFloat]
-            List of regularization weights.
+        hp_vals : Union[ArrayLike, NDArrayFloat]
+            List of hyper-parameter values.
         gnd_truth : NDArrayFloat
             Expected reconstruction.
 
@@ -203,40 +336,59 @@ class BaseRegularizationEstimation(ABC):
         err_l2 : NDArrayFloat
             l2-norm errors for each reconstruction.
         """
-        lams_reg = np.array(lams_reg, ndmin=1)
+        hp_vals = np.array(hp_vals, ndmin=1)
 
-        counter = tm.perf_counter()
         if self.verbose:
             print("Computing reconstruction error:")
-            print(f"- Regularization weights range: [{lams_reg[0]}, {lams_reg[-1]}] in {len(lams_reg)} steps")
+            print(f"- Hyper-parameter values range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
             print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
 
         if self.parallel_eval:
             with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                fr = [executor.submit(self.compute_reconstruction_and_loss, l) for l in lams_reg]
+                future_to_lambda = {
+                    executor.submit(self.compute_reconstruction_and_loss, l): (ii, l) for ii, l in enumerate(hp_vals)
+                }
 
-                recs = [r.result()[1] for r in fr]
+                recs = [np.array([])] * len(hp_vals)
+                try:
+                    for future in tqdm(
+                        cf.as_completed(future_to_lambda),
+                        desc="Hyper-parameter values",
+                        disable=not self.verbose,
+                        total=len(hp_vals),
+                    ):
+                        hp_ind, hp_val = future_to_lambda[future]
+                        try:
+                            recs[hp_ind] = future.result()[1]
+                        except ValueError as exc:
+                            print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
+                            raise
+                except:
+                    print("Shutting down..", end="", flush=True)
+                    executor.shutdown(cancel_futures=True)
+                    print("\b\b: Done.")
+                    raise
         else:
-            recs = [self.compute_reconstruction_and_loss(l)[1] for l in lams_reg]
+            recs = [
+                self.compute_reconstruction_and_loss(l)[1]
+                for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
+            ]
 
-        err_l1 = np.zeros((len(lams_reg),), dtype=self.dtype)
-        err_l2 = np.zeros((len(lams_reg),), dtype=self.dtype)
+        err_l1 = np.zeros((len(hp_vals),), dtype=self.dtype)
+        err_l2 = np.zeros((len(hp_vals),), dtype=self.dtype)
 
         for ii_l, rec in enumerate(recs):
             residual = np.abs(gnd_truth - rec)
             err_l1[ii_l] = np.linalg.norm(residual.ravel(), ord=1)
             err_l2[ii_l] = np.linalg.norm(residual.ravel(), ord=2) ** 2
 
-        if self.verbose:
-            print(f"Done in {tm.perf_counter() - counter} seconds.\n")
-
         if self.plot_result:
             fig, axs = plt.subplots(2, 1, sharex=True)
             axs[0].set_xscale("log", nonpositive="clip")  # type: ignore
-            axs[0].plot(lams_reg, err_l1, label="Error - l1-norm")  # type: ignore
+            axs[0].plot(hp_vals, err_l1, label="Error - l1-norm")  # type: ignore
             axs[0].legend()  # type: ignore
             axs[1].set_xscale("log", nonpositive="clip")  # type: ignore
-            axs[1].plot(lams_reg, err_l2, label="Error - l2-norm ^ 2")  # type: ignore
+            axs[1].plot(hp_vals, err_l2, label="Error - l2-norm ^ 2")  # type: ignore
             axs[1].legend()  # type: ignore
             fig.tight_layout()
             plt.show(block=False)
@@ -244,18 +396,18 @@ class BaseRegularizationEstimation(ABC):
         return err_l1, err_l2
 
     @abstractmethod
-    def compute_loss_values(self, lams_reg: Union[ArrayLike, NDArrayFloat]) -> NDArrayFloat:
-        """Compute the objective function costs for a list of regularization weights.
+    def compute_loss_values(self, hp_vals: Union[ArrayLike, NDArrayFloat]) -> NDArrayFloat:
+        """Compute the objective function costs for a list of hyper-parameter values.
 
         Parameters
         ----------
-        lams_reg : Union[ArrayLike, NDArrayFloat]
-            List of regularization weights.
+        hp_vals : Union[ArrayLike, NDArrayFloat]
+            List of hyper-parameter values.
 
         Returns
         -------
         NDArrayFloat
-            Objective function cost for each regularization weight.
+            Objective function cost for each hyper-parameter value.
         """
 
 
@@ -301,43 +453,57 @@ class LCurve(BaseRegularizationEstimation):
             raise ValueError("The callable 'loss_function', should have one parameter")
         self.loss_function = loss_function
 
-    def compute_loss_values(self, lams_reg: Union[ArrayLike, NDArrayFloat]) -> NDArrayFloat:
-        """Compute objective function values for all regularization weights.
+    def compute_loss_values(self, hp_vals: Union[ArrayLike, NDArrayFloat]) -> NDArrayFloat:
+        """Compute objective function values for all hyper-parameter values.
 
         Parameters
         ----------
-        lams_reg : Union[ArrayLike, NDArrayFloat]
-            Regularization weights to use for computing the different objective function values.
+        hp_vals : Union[ArrayLike, NDArrayFloat]
+            Hyper-parameter values to use for computing the different objective function values.
 
         Returns
         -------
         f_vals : NDArrayFloat
-            Objective function cost for each regularization weight.
+            Objective function cost for each hyper-parameter value.
         """
-        lams_reg = np.array(lams_reg, ndmin=1)
+        hp_vals = np.array(hp_vals, ndmin=1)
 
         counter = tm.perf_counter()
         if self.verbose:
             print("Computing L-curve loss values:")
-            print(f"- Regularization weights range: [{lams_reg[0]}, {lams_reg[-1]}] in {len(lams_reg)} steps")
+            print(f"- Hyper-parameter values range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
             print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
 
         if self.parallel_eval:
             with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
                 future_to_lambda = {
-                    executor.submit(self.compute_reconstruction_and_loss, l): (ii, l) for ii, l in enumerate(lams_reg)
+                    executor.submit(self.compute_reconstruction_and_loss, l): (ii, l) for ii, l in enumerate(hp_vals)
                 }
 
-                recs = []
-                for future in cf.as_completed(future_to_lambda):
-                    lam_ind, lam = future_to_lambda[future]
-                    try:
-                        recs.append(future.result()[1])
-                    except ValueError as exc:
-                        print(f"Lambda {lam} (#{lam_ind}) generated an exception: {exc}")
-                        raise
+                recs = [np.array([])] * len(hp_vals)
+                try:
+                    for future in tqdm(
+                        cf.as_completed(future_to_lambda),
+                        desc="Hyper-parameter values",
+                        disable=not self.verbose,
+                        total=len(hp_vals),
+                    ):
+                        hp_ind, hp_val = future_to_lambda[future]
+                        try:
+                            recs[hp_ind] = future.result()[1]
+                        except ValueError as exc:
+                            print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
+                            raise
+                except:
+                    print("Shutting down..", end="", flush=True)
+                    executor.shutdown(cancel_futures=True)
+                    print("\b\b: Done.")
+                    raise
         else:
-            recs = [self.compute_reconstruction_and_loss(l)[1] for l in lams_reg]
+            recs = [
+                self.compute_reconstruction_and_loss(l)[1]
+                for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
+            ]
 
         f_vals = np.array([self.loss_function(rec) for rec in recs], dtype=self.dtype)
 
@@ -349,7 +515,7 @@ class LCurve(BaseRegularizationEstimation):
             axs.set_title("L-Curve loss values")
             axs.set_xscale("log", nonpositive="clip")
             axs.set_yscale("log", nonpositive="clip")
-            axs.plot(lams_reg, f_vals)
+            axs.plot(hp_vals, f_vals)
             axs.grid()
             fig.tight_layout()
             plt.show(block=False)
@@ -358,19 +524,19 @@ class LCurve(BaseRegularizationEstimation):
 
 
 class CrossValidation(BaseRegularizationEstimation):
-    """Cross-validation regularization parameter estimation helper."""
+    """Cross-validation hyper-parameter estimation class."""
 
     def __init__(
         self,
         data_shape: Sequence[int],
         dtype: DTypeLike = np.float32,
-        test_fraction: float = 0.1,
+        cv_fraction: float = 0.1,
         num_averages: int = 7,
         parallel_eval: bool = True,
         verbose: bool = False,
         plot_result: bool = False,
     ):
-        """Create a cross-validation regularization parameter estimation helper.
+        """Create a cross-validation hyper-parameter estimation helper.
 
         Parameters
         ----------
@@ -378,7 +544,7 @@ class CrossValidation(BaseRegularizationEstimation):
             Shape of the projection data.
         data_dtype : DTypeLike, optional
             Type of the input data. The default is np.float32.
-        test_fraction : float, optional
+        cv_fraction : float, optional
             Fraction of detector points to use for the leave-out set. The default is 0.1.
         num_averages : int, optional
             Number of averages random leave-out sets to use. The default is 7.
@@ -391,21 +557,21 @@ class CrossValidation(BaseRegularizationEstimation):
         """
         super().__init__(dtype=dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result)
         self.data_shape = data_shape
-        self.test_fraction = test_fraction
+        self.cv_fraction = cv_fraction
         self.num_averages = num_averages
 
-        self.data_test_masks = [self._create_random_test_mask() for ii in range(self.num_averages)]
+        self.data_test_masks = [self._create_random_test_mask() for _ in range(self.num_averages)]
 
     def _create_random_test_mask(self) -> NDArrayFloat:
-        return create_random_test_mask(self.data_shape, self.test_fraction, self.dtype)
+        return create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype)
 
-    def compute_loss_values(self, lams_reg: Union[ArrayLike, NDArrayFloat]) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
-        """Compute objective function values for all regularization weights.
+    def compute_loss_values(self, hp_vals: Union[ArrayLike, NDArrayFloat]) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
+        """Compute objective function values for all requested hyper-parameter values..
 
         Parameters
         ----------
-        lams_reg : Union[ArrayLike, NDArrayFloat]
-            Regularization weights to use for computing the different objective function values.
+        params : Union[ArrayLike, NDArrayFloat]
+            Hyper-parameter values (e.g. regularization weight) to evaluate.
 
         Returns
         -------
@@ -416,37 +582,54 @@ class CrossValidation(BaseRegularizationEstimation):
         f_vals : NDArrayFloat
             Objective function costs for each regularization weight.
         """
-        lams_reg = np.array(lams_reg, ndmin=1)
+        hp_vals = np.array(hp_vals, ndmin=1)
 
         counter = tm.perf_counter()
         if self.verbose:
             print("Computing cross-validation loss values:")
-            print(f"- Regularization weights range: [{lams_reg[0]}, {lams_reg[-1]}] in {len(lams_reg)} steps")
+            print(f"- Hyper-parameter range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
             print(f"- Number of averages: {self.num_averages}")
-            print(f"- Leave-out pixel fraction: {self.test_fraction:%}")
+            print(f"- Leave-out pixel fraction: {self.cv_fraction:%}")
             print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
 
-        f_vals = np.empty((len(lams_reg), self.num_averages), dtype=self.dtype)
+        f_vals = np.empty((len(hp_vals), self.num_averages), dtype=self.dtype)
         for ii_avg in range(self.num_averages):
-            c_round = tm.perf_counter()
             if self.verbose:
                 print(f"\nRound: {ii_avg + 1}/{self.num_averages}")
 
             if self.parallel_eval:
                 with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    fr = [
-                        executor.submit(self.compute_reconstruction_and_loss, l, self.data_test_masks[ii_avg])
-                        for l in lams_reg
-                    ]
+                    future_to_lambda = {
+                        executor.submit(self.compute_reconstruction_and_loss, l, self.data_test_masks[ii_avg]): (ii, l)
+                        for ii, l in enumerate(hp_vals)
+                    }
 
-                    f_vals_ii = [r.result()[0] for r in fr]
+                    f_vals_ii = [0.0] * len(hp_vals)
+                    try:
+                        for future in tqdm(
+                            cf.as_completed(future_to_lambda),
+                            desc="Hyper-parameter values",
+                            disable=not self.verbose,
+                            total=len(hp_vals),
+                        ):
+                            hp_ind, hp_val = future_to_lambda[future]
+                            try:
+                                f_vals_ii[hp_ind] = future.result()[0]
+                            except ValueError as exc:
+                                print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
+                                raise
+                    except:
+                        print("Shutting down..", end="", flush=True)
+                        executor.shutdown(cancel_futures=True)
+                        print("\b\b: Done.")
+                        raise
             else:
-                f_vals_ii = [self.compute_reconstruction_and_loss(l, self.data_test_masks[ii_avg])[0] for l in lams_reg]
+                f_vals_ii = [
+                    self.compute_reconstruction_and_loss(l, self.data_test_masks[ii_avg])[0]
+                    for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
+                ]
 
-            f_vals[:, ii_avg] = f_vals_ii
-
-            if self.verbose:
-                print(f" - Done in {tm.perf_counter() - c_round:g} seconds.\n")
+            f_vals[:, ii_avg] = np.array(f_vals_ii)
 
         f_avgs = np.mean(f_vals, axis=1)
         f_stds = np.std(f_vals, axis=1)
@@ -458,7 +641,7 @@ class CrossValidation(BaseRegularizationEstimation):
             fig, axs = plt.subplots()
             axs.set_title(f"Cross-validation loss values (avgs: {self.num_averages})")
             axs.set_xscale("log", nonpositive="clip")
-            axs.errorbar(lams_reg, f_avgs, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
+            axs.errorbar(hp_vals, f_avgs, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
             axs.grid()
             fig.tight_layout()
             plt.show(block=False)
@@ -467,116 +650,32 @@ class CrossValidation(BaseRegularizationEstimation):
 
     def fit_loss_min(
         self,
-        lams_reg: Union[ArrayLike, NDArrayFloat],
+        hp_vals: Union[ArrayLike, NDArrayFloat],
         f_vals: NDArrayFloat,
         f_stds: Optional[NDArrayFloat] = None,
         scale: Literal["linear", "log"] = "log",
     ) -> tuple[float, float]:
-        """Parabolic fit of objective function costs for the different regularization weights.
+        """Parabolic fit of objective function costs for the different hyper-parameter values.
 
         Parameters
         ----------
-        lams_reg : Union[ArrayLike, NDArrayFloat]
-            Regularization weights.
+        hp_vals : Union[ArrayLike, NDArrayFloat]
+            Hyper-parameter values.
         f_vals : NDArrayFloat
-            Objective function costs of each regularization weight.
+            Objective function costs of each hyper-parameter value.
         f_stds : NDArrayFloat, optional
-            Objective function cost standard deviations of each regularization weight.
+            Objective function cost standard deviations of each hyper-parameter value.
             It is only used for plotting purposes. The default is None.
         scale : str, optional
             Scale of the fit. Options are: "log" | "linear". The default is "log".
 
         Returns
         -------
-        min_lam : float
-            Expected regularization weight of the fitted minimum.
-        min_val : float
+        min_hp_val : float
+            Expected hyper-parameter value of the fitted minimum.
+        min_f_val : float
             Expected objective function cost of the fitted minimum.
         """
-        lams_reg = np.array(lams_reg, ndmin=1)
-
-        if len(lams_reg) < 3 or len(f_vals) < 3 or len(lams_reg) != len(f_vals):
-            raise ValueError(
-                "Lengths of the lambdas and function values should be identical and >= 3."
-                f"Given: lams={len(lams_reg)}, vals={len(f_vals)}"
-            )
-
-        if scale.lower() == "log":
-            to_fit = lambda x: np.log10(x)
-            from_fit = lambda x: 10**x
-        elif scale.lower() == "linear":
-            to_fit = lambda x: x
-            from_fit = to_fit
-        else:
-            raise ValueError(f"Parameter 'scale' should be either 'log' or 'linear', given '{scale}' instead")
-
-        min_pos = np.argmin(f_vals)
-        if min_pos == 0:
-            print("WARNING: minimum value at the beginning of the lambda range.")
-            lams_reg_fit = to_fit(lams_reg[:3])
-            f_vals_fit = f_vals[:3]
-        elif min_pos == (len(f_vals) - 1):
-            print("WARNING: minimum value at the end of the lambda range.")
-            lams_reg_fit = to_fit(lams_reg[-3:])
-            f_vals_fit = f_vals[-3:]
-        else:
-            lams_reg_fit = to_fit(lams_reg[min_pos - 1 : min_pos + 2])
-            f_vals_fit = f_vals[min_pos - 1 : min_pos + 2]
-
-        counter = tm.perf_counter()
-        if self.verbose:
-            print(
-                f"Fitting minimum within the parameter interval [{from_fit(lams_reg_fit[0])}, {from_fit(lams_reg_fit[-1])}]: ",
-                end="",
-                flush=True,
-            )
-
-        # using Polynomial.fit, because it is supposed to be more numerically
-        # stable than previous solutions (according to numpy).
-        poly = Polynomial.fit(lams_reg_fit, f_vals_fit, deg=2)
-        coeffs = poly.convert().coef
-        if coeffs[2] <= 0:
-            print("WARNING: fitted curve is concave. Returning minimum measured point.")
-            return lams_reg[min_pos], f_vals[min_pos]
-
-        # For a 1D parabola `f(x) = c + bx + ax^2`, the vertex position is:
-        # x_v = -b / 2a.
-        vertex_pos = -coeffs[1] / (2 * coeffs[2])
-        vertex_val = coeffs[0] + vertex_pos * coeffs[1] / 2
-
-        min_lam, min_val = from_fit(vertex_pos), vertex_val
-        if min_lam < lams_reg[0] or min_lam > lams_reg[-1]:
-            print(
-                f"WARNING: fitted lambda {min_lam} is outside the bounds of input lambdas [{lams_reg[0]}, {lams_reg[-1]}]."
-                + " Returning minimum measured point."
-            )
-            res_lam, res_val = lams_reg[min_pos], f_vals[min_pos]
-        else:
-            res_lam, res_val = min_lam, min_val
-
-        if self.verbose:
-            print(f"Found at {min_lam:g}, in {tm.perf_counter() - counter:g} seconds.\n")
-
-        if self.plot_result:
-            fig, axs = plt.subplots()
-            axs.set_xscale(scale, nonpositive="clip")
-            if f_stds is None:
-                axs.plot(lams_reg, f_vals)
-            else:
-                axs.errorbar(lams_reg, f_vals, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
-            x = np.linspace(lams_reg_fit[0], lams_reg_fit[2])
-            y = coeffs[0] + x * (coeffs[1] + x * coeffs[2])
-            axs.plot(from_fit(x), y)
-            axs.scatter(min_lam, min_val)
-            axs.grid()
-            for tl in axs.get_xticklabels():
-                tl.set_fontsize(13)
-            for tl in axs.get_yticklabels():
-                tl.set_fontsize(13)
-            axs.set_xlabel(r"$\lambda$ values", fontsize=16)
-            axs.set_ylabel("Cross-validation loss values", fontsize=16)
-            axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.2e}"))
-            fig.tight_layout()
-            plt.show(block=False)
-
-        return res_lam, res_val
+        return fit_func_min(
+            hp_vals=hp_vals, f_vals=f_vals, f_stds=f_stds, scale=scale, verbose=self.verbose, plot_result=self.plot_result
+        )
