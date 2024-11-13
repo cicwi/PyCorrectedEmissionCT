@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.9.1...develop
 
+## 1.0.0rc2 - 2024-11-13
+### Added
+- Cleanup progress support in solvers
+- Cleanup of legacy API
+- Modern multi-threading code
+### Fixed
+- Building documentation
+
 ## 1.0.0rc1 - 2024-10-03
 ### Added
 - Moved to a src/ directory structure
