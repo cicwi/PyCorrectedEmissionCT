@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Incident beam and emidded radiation attenuation support.
 
@@ -6,20 +5,18 @@ Incident beam and emidded radiation attenuation support.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from matplotlib.axes._axes import Axes
+import concurrent.futures as cf
+import multiprocessing as mp
+from collections.abc import Sequence
+from typing import Callable, Optional, Union
+
 import numpy as np
+from matplotlib.axes._axes import Axes
+from numpy.typing import ArrayLike, DTypeLike, NDArray
+from tqdm.auto import tqdm
 
 from . import _projector_backends as prj_backends
 from . import models
-
-import concurrent.futures as cf
-import multiprocessing as mp
-
-from tqdm.auto import tqdm
-
-from typing import Dict, Optional, Sequence, Union, List
-from numpy.typing import ArrayLike, DTypeLike, NDArray
-
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
@@ -106,32 +103,44 @@ class AttenuationVolume:
         num_rot_angles = len(self.angles_rot_rad)
         self.maps = np.ones([num_rot_angles, len(self.angles_det_rad), *self.vol_shape_zyx], dtype=self.dtype)
 
-        if self.incident_local is not None:
-            description = "Computing attenuation maps for incident beam: "
+        def process_angles(
+            func: Callable[[Callable, NDArray, float], NDArray], att_vol: NDArrayFloat, angles: NDArrayFloat, description: str
+        ) -> None:
             if use_multithreading:
-                r = []
                 with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    # angle_atts = executor.map(self._compute_attenuation_angle_in, self.angles_rot_rad)
-                    for a in self.angles_rot_rad:
-                        r.append(executor.submit(self._compute_attenuation_angle_in, self.incident_local, a))
-                    for ii in tqdm(range(num_rot_angles), desc=description, disable=(not verbose)):
-                        self.maps[ii, ...] *= r[ii].result()
+                    futures_to_angle = {executor.submit(func, att_vol, a): (ii, a) for ii, a in enumerate(angles)}
+                    try:
+                        for f in tqdm(
+                            cf.as_completed(futures_to_angle),
+                            desc=description,
+                            disable=(not verbose),
+                            total=num_rot_angles,
+                        ):
+                            ii, a = futures_to_angle[f]
+                            try:
+                                self.maps[ii, ...] *= f.result()
+                            except ValueError as exc:
+                                raise RuntimeError(f"Angle {a} (#{ii}) generated an exception") from exc
+                    except:
+                        print("Shutting down..", end="", flush=True)
+                        executor.shutdown(cancel_futures=True)
+                        print("\b\b: Done.")
+                        raise
             else:
-                for ii, a in enumerate(tqdm(self.angles_rot_rad, desc=description, disable=(not verbose))):
-                    self.maps[ii, ...] *= self._compute_attenuation_angle_in(self.incident_local, a)
+                for ii, a in enumerate(tqdm(angles, desc=description, disable=(not verbose))):
+                    self.maps[ii, ...] *= func(att_vol, a)
+
+        if self.incident_local is not None:
+            description = "Computing attenuation maps for incident beam"
+            process_angles(
+                self._compute_attenuation_angle_in, self.incident_local, angles=self.angles_rot_rad, description=description
+            )
 
         if self.emitted_local is not None:
-            description = "Computing attenuation maps for emitted photons: "
-            if use_multithreading:
-                r = []
-                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    for a in self.angles_rot_rad:
-                        r.append(executor.submit(self._compute_attenuation_angle_out, self.emitted_local, a))
-                    for ii in tqdm(range(num_rot_angles), desc=description, disable=(not verbose)):
-                        self.maps[ii, ...] *= r[ii].result()
-            else:
-                for ii, a in enumerate(tqdm(self.angles_rot_rad, desc=description, disable=(not verbose))):
-                    self.maps[ii, ...] *= self._compute_attenuation_angle_out(self.emitted_local, a)
+            description = "Computing attenuation maps for emitted photons"
+            process_angles(
+                self._compute_attenuation_angle_out, self.emitted_local, angles=self.angles_rot_rad, description=description
+            )
 
     def plot_map(
         self,
@@ -140,7 +149,7 @@ class AttenuationVolume:
         det_ind: int = 0,
         slice_ind: Optional[int] = None,
         axes: Union[Sequence[int], NDArrayInt] = (-2, -1),
-    ) -> List[float]:
+    ) -> Sequence[float]:
         """
         Plot the requested attenuation map.
 
@@ -159,7 +168,7 @@ class AttenuationVolume:
 
         Returns
         -------
-        List[float]
+        Sequence[float]
             The extent of the axes plot (min-max coords).
 
         Raises
@@ -249,7 +258,7 @@ class AttenuationVolume:
         roi: Optional[ArrayLike] = None,
         rot_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
         det_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
-    ) -> Dict[str, NDArray]:
+    ) -> dict[str, NDArray]:
         """
         Return the projector arguments.
 
@@ -264,7 +273,7 @@ class AttenuationVolume:
 
         Returns
         -------
-        Dict[str, NDArray]
+        dict[str, NDArray]
             A dictionary containing the attenuation maps and the detector angle.
         """
         if det_ind is None:
