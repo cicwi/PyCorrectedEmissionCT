@@ -104,6 +104,8 @@ def estimate_resolution(masks: NDArray, verbose: bool = True, plot_result: bool 
     """
     masks = masks.reshape([-1, *masks.shape[-2:]])
 
+    masks = masks - masks.mean(axis=(-2, -1), keepdims=True)
+
     resolutions = np.zeros(len(masks))
     for ind, mask in enumerate(tqdm(masks, desc="Computing auto-correlations", disable=not verbose)):
         _, auto_corr = processing.misc.norm_cross_corr(mask, plot=False)
@@ -114,12 +116,13 @@ def estimate_resolution(masks: NDArray, verbose: bool = True, plot_result: bool 
     res_min = resolutions.min()
 
     if plot_result:
-        fig, axs = plt.subplots(1, 1, figsize=[9, 4])
+        fig, axs = plt.subplots(1, 1, figsize=[9, 3.75])
         axs.plot(resolutions, label="HWHM auto-correlation")
-        axs.hlines(res_mean, 0, len(resolutions), colors=["C1"], label=f"Mean ({res_mean:.3})")
-        axs.hlines(res_min, 0, len(resolutions), colors=["C2"], label=f"Min ({res_min:.3})")
+        axs.hlines(res_mean, 0, len(resolutions), colors=["C1"], label=f"Mean: {res_mean:.3} pix")
+        axs.hlines(res_min, 0, len(resolutions), colors=["C2"], label=f"Min: {res_min:.3} pix")
         axs.grid()
-        axs.legend()
+        axs.legend(fontsize=13)
+        axs.tick_params(labelsize=16)
         fig.tight_layout()
         plt.show(block=False)
 
