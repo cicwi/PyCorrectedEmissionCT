@@ -10,6 +10,7 @@ import multiprocessing as mp
 from collections.abc import Sequence
 from typing import Callable, Optional, Union
 
+import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes._axes import Axes
 from numpy.typing import ArrayLike, DTypeLike, NDArray
@@ -17,11 +18,14 @@ from tqdm.auto import tqdm
 
 from corrct import _projector_backends as prj_backends
 from corrct import models
+from corrct.physics.xraylib_helper import get_compound, get_compound_cross_section
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
 NDArrayFloat = NDArray[np.floating]
 NDArrayInt = NDArray[np.integer]
+
+CONVERT_UM_TO_CM = 1e-4
 
 
 class AttenuationVolume:
@@ -281,3 +285,157 @@ class AttenuationVolume:
         else:
             det_angles = self.angles_det_rad[det_ind]
         return dict(att_maps=self.get_maps(roi=roi, rot_ind=rot_ind, det_ind=det_ind), angles_detectors_rad=det_angles)
+
+
+def get_linear_attenuation_coefficient(
+    compound: Union[str, dict], energy_keV: float, pixel_size_um: float, density: Union[float, None] = None
+) -> float:
+    """Compute the linear attenuation coefficient for given compound, energy, and pixel size.
+
+    Parameters
+    ----------
+    compound : Union[str, dict]
+        The compound for which we compute the linear attenuation coefficient
+    energy_keV : float
+        The energy of the photons
+    pixel_size_um : float
+        The pixel size in microns
+    density : Union[float, None], optional
+        The density of the compound (if different from the default value), by default None
+
+    Returns
+    -------
+    float
+        The linear attenuation coefficient
+    """
+    if isinstance(compound, str):
+        compound = get_compound(compound)
+
+    if density is not None:
+        compound["density"] = density
+
+    cmp_cs = get_compound_cross_section(compound, energy_keV)
+    return pixel_size_um * CONVERT_UM_TO_CM * compound["density"] * cmp_cs
+
+
+def plot_emission_line_attenuation(
+    compound: Union[str, dict],
+    thickness_um: float,
+    mean_energy_keV: float,
+    fwhm_keV: float,
+    line_shape: str = "lorentzian",
+    num_points: int = 201,
+) -> None:
+    """Plot spectral attenuation of a given line.
+
+    Parameters
+    ----------
+    compound : Union[str, dict]
+        Compound to consider
+    thickness_um : float
+        Thickness of the compound (in microns)
+    mean_energy_keV : float
+        Average energy of the line
+    fwhm_keV : float
+        Full-width half-maximum of the line
+    line_shape : str, optional
+        Shape of the line, by default "lorentzian".
+        Options are: "gaussian" | "lorentzian" | "sech**2".
+    num_points : int, optional
+        number of discretization points, by default 201
+
+    Raises
+    ------
+    ValueError
+        When an unsupported line is chosen.
+    """
+    xc = np.linspace(-0.5, 0.5, num_points)
+
+    if line_shape.lower() == "gaussian":
+        xc *= fwhm_keV * 3
+        yg = np.exp(-4 * np.log(2) * (xc**2) / (fwhm_keV**2))
+    elif line_shape.lower() == "lorentzian":
+        xc *= fwhm_keV * 13
+        hwhm_keV = fwhm_keV / 2
+        yg = hwhm_keV / (xc**2 + hwhm_keV**2)
+    elif line_shape.lower() == "sech**2":
+        # doi: 10.1364/ol.20.001160
+        xc *= fwhm_keV * 4
+        tau = fwhm_keV / (2 * np.arccosh(np.sqrt(2)))
+        yg = 1 / np.cosh(xc / tau) ** 2
+    else:
+        raise ValueError(f"Unknown beam shape: {line_shape.lower()}")
+
+    nrgs_keV = xc + mean_energy_keV
+
+    if isinstance(compound, str):
+        compound = get_compound(compound)
+
+    atts = np.empty_like(yg)
+
+    for ii, nrg in enumerate(nrgs_keV):
+        cmp_cs = get_compound_cross_section(compound, nrg)
+        atts[ii] = np.exp(-thickness_um * CONVERT_UM_TO_CM * compound["density"] * cmp_cs)
+
+    yg = yg / np.max(yg)
+
+    fig, axs_line = plt.subplots(1, 1)
+    pl_line = axs_line.plot(nrgs_keV, yg, label="$I_0$", color="C0")
+    axs_line.tick_params(axis="y", labelcolor="C0")
+    axs_atts = axs_line.twinx()
+    pl_atts = axs_atts.plot(nrgs_keV, atts, label="$\\mu (E)$", color="C1")
+    pl_line_att = axs_atts.plot(nrgs_keV, yg * atts, label="$I_m$", color="C2")
+    axs_atts.tick_params(axis="y", labelcolor="C1")
+    all_pls = pl_line + pl_atts + pl_line_att
+    axs_atts.legend(all_pls, [str(pl.get_label()) for pl in all_pls])
+    axs_line.grid()
+    fig.tight_layout()
+
+    I_lin = np.sum(yg * atts[num_points // 2])
+    I_meas = yg.dot(atts)
+    print(f"Expected intensity: {I_lin}, measured: {I_meas} ({I_meas / I_lin:%})")
+    print(f"Mean energy {nrgs_keV.dot(yg / np.sum(yg) * (atts / atts[len(atts) // 2]))}, {nrgs_keV.dot(yg / np.sum(yg))}")
+
+    
+def plot_transmittance_decay(
+    compounds: Union[str, dict, Sequence[Union[str, dict]]],
+    mean_energy_keV: float,
+    thickness_range_um: tuple[float, float, int] = (0.0, 10.0, 101),
+) -> None:
+    """Plot transmittance decay curve(s) for the given compound(s) at a given energy and thickness range.
+
+    Parameters
+    ----------
+    compounds : str | dict | Sequence[str | dict]
+        The compound(s) description
+    mean_energy_keV : float
+        The mean photon energy
+    thickness_range_um : tuple[float, float, int], optional
+        The thickness range as (start, end, num_points), by default (0.0, 10.0, 101)
+    """
+    if isinstance(compounds, (str, dict)):
+        compounds = [compounds]
+
+    compounds = [get_compound(c) if isinstance(c, str) else c for c in compounds]
+
+    thicknesses_um = np.linspace(*thickness_range_um)
+
+    atts = np.zeros((len(compounds), len(thicknesses_um)), dtype=np.float32)
+    for ii, cmp in enumerate(compounds):
+        cmp_cs = get_compound_cross_section(cmp, mean_energy_keV)
+        atts[ii] = np.exp(-thicknesses_um * CONVERT_UM_TO_CM * cmp["density"] * cmp_cs)
+
+    fig, axs = plt.subplots(1, 1, figsize=(8, 4))
+    for ii, cmp in enumerate(compounds):
+        axs.plot(thicknesses_um, atts[ii], label=cmp["name"])
+    axs.legend(fontsize=13)
+    axs.grid()
+    axs.tick_params(labelsize=14)
+    axs.set_xlabel("Thickness [$\mu m$]", fontsize=14)
+    axs.set_xlim(thickness_range_um[0], thickness_range_um[1])
+    axs.set_ylabel("Transmittance", fontsize=14)
+    axs.set_ylim(0.0, 1.0)
+    axs.set_title(f"Transmittance curve at {mean_energy_keV:.2f} keV", fontsize=14)
+    fig.tight_layout()
+    plt.plot(block=False)
+

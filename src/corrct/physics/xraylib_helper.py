@@ -7,13 +7,11 @@ xraylib handling functions.
 
 from typing import Union
 
-try:
-    import xraylib
+import numpy as np
 
-    xraylib.XRayInit()
-except ImportError:
-    print("WARNING: Physics support is only available when _xraylib_ is installed!")
-    raise
+import xraylib
+
+xraylib.XRayInit()
 
 
 def get_element_number(element: Union[str, int]) -> int:
@@ -87,3 +85,27 @@ def get_compound(cmp_name: str, density: Union[float, None] = None) -> dict:
             density += xraylib.ElementDensity(el) * cmp["massFractions"][ii]
     cmp["density"] = density
     return cmp
+
+
+def get_compound_cross_section(compound: dict, mean_energy_keV: float) -> float:
+    """Compute a compound cross section for the given incoming photon energy.
+
+    Parameters
+    ----------
+    compound : dict
+        The compound structure (as returned by `get_compound`)
+    mean_energy_keV : float
+        The average photon energy
+
+    Returns
+    -------
+    float
+        The computed cross-section
+    """
+    try:
+        return xraylib.CS_Total_CP(compound["name"], mean_energy_keV)
+    except ValueError:
+        elemets_cs = [
+            xraylib.CS_Total(el, mean_energy_keV) * compound["massFractions"][ii] for ii, el in enumerate(compound["Elements"])
+        ]
+        return np.sum(elemets_cs, axis=0)

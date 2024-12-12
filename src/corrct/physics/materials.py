@@ -6,143 +6,17 @@ Materials support functions and classes.
 and CEA-IRIG, Grenoble, France
 """
 
-try:
-    from . import xraylib_helper  # noqa: F401, F402
-    from . import xrf  # noqa: F401, F402
-
-    xraylib = xraylib_helper.xraylib
-
-except ImportError:
-    print("WARNING: Physics support is only available when xraylib is installed!")
-    raise
-
-
 import copy as cp
 from collections.abc import Sequence
 from typing import Union
+
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
-import matplotlib.pyplot as plt
 
-
-def _get_compound_cross_section(compound: dict, mean_energy_keV: float) -> float:
-    try:
-        return xraylib.CS_Total_CP(compound["name"], mean_energy_keV)
-    except ValueError:
-        elemets_cs = [
-            xraylib.CS_Total(el, mean_energy_keV) * compound["massFractions"][ii] for ii, el in enumerate(compound["Elements"])
-        ]
-        return np.sum(elemets_cs, axis=0)
-
-
-def get_linear_attenuation_coefficient(
-    compound: Union[str, dict], energy_keV: float, pixel_size_um: float, density: Union[float, None] = None
-) -> float:
-    """Compute the linear attenuation coefficient for given compound, energy, and pixel size.
-
-    Parameters
-    ----------
-    compound : Union[str, dict]
-        The compound for which we compute the linear attenuation coefficient
-    energy_keV : float
-        The energy of the photons
-    pixel_size_um : float
-        The pixel size in microns
-    density : Union[float, None], optional
-        The density of the compound (if different from the default value), by default None
-
-    Returns
-    -------
-    float
-        The linear attenuation coefficient
-    """
-    if isinstance(compound, str):
-        compound = xraylib_helper.get_compound(compound)
-
-    if density is not None:
-        compound["density"] = density
-
-    cmp_cs = _get_compound_cross_section(compound, energy_keV)
-    return pixel_size_um * 1e-4 * compound["density"] * cmp_cs
-
-
-def plot_effective_attenuation(
-    compound: Union[str, dict],
-    thickness_um: float,
-    mean_energy_keV: float,
-    fwhm_keV: float,
-    line_shape: str = "lorentzian",
-    num_points: int = 201,
-) -> None:
-    """Plot spectral attenuation of a given line.
-
-    Parameters
-    ----------
-    compound : Union[str, dict]
-        Compound to consider
-    thickness_um : float
-        Thickness of the compound (in microns)
-    mean_energy_keV : float
-        Average energy of the line
-    fwhm_keV : float
-        Full-width half-maximum of the line
-    line_shape : str, optional
-        Shape of the line, by default "lorentzian".
-        Options are: "gaussian" | "lorentzian" | "sech**2".
-    num_points : int, optional
-        number of discretization points, by default 201
-
-    Raises
-    ------
-    ValueError
-        When an unsupported line is chosen.
-    """
-    xc = np.linspace(-0.5, 0.5, num_points)
-
-    if line_shape.lower() == "gaussian":
-        xc *= fwhm_keV * 3
-        yg = np.exp(-4 * np.log(2) * (xc**2) / (fwhm_keV**2))
-    elif line_shape.lower() == "lorentzian":
-        xc *= fwhm_keV * 13
-        hwhm_keV = fwhm_keV / 2
-        yg = hwhm_keV / (xc**2 + hwhm_keV**2)
-    elif line_shape.lower() == "sech**2":
-        # doi: 10.1364/ol.20.001160
-        xc *= fwhm_keV * 4
-        tau = fwhm_keV / (2 * np.arccosh(np.sqrt(2)))
-        yg = 1 / np.cosh(xc / tau) ** 2
-    else:
-        raise ValueError(f"Unknown beam shape: {line_shape.lower()}")
-
-    nrgs_keV = xc + mean_energy_keV
-
-    if isinstance(compound, str):
-        compound = xraylib_helper.get_compound(compound)
-
-    atts = np.empty_like(yg)
-
-    for ii, nrg in enumerate(nrgs_keV):
-        cmp_cs = _get_compound_cross_section(compound, nrg)
-        atts[ii] = np.exp(-thickness_um * 1e-4 * compound["density"] * cmp_cs)
-
-    yg = yg / np.max(yg)
-
-    fig, axs_line = plt.subplots(1, 1)
-    pl_line = axs_line.plot(nrgs_keV, yg, label="$I_0$", color="C0")
-    axs_line.tick_params(axis="y", labelcolor="C0")
-    axs_atts = axs_line.twinx()
-    pl_atts = axs_atts.plot(nrgs_keV, atts, label="$\\mu (E)$", color="C1")
-    pl_line_att = axs_atts.plot(nrgs_keV, yg * atts, label="$I_m$", color="C2")
-    axs_atts.tick_params(axis="y", labelcolor="C1")
-    all_pls = pl_line + pl_atts + pl_line_att
-    axs_atts.legend(all_pls, [pl.get_label() for pl in all_pls])
-    axs_line.grid()
-    fig.tight_layout()
-
-    I_lin = np.sum(yg * atts[num_points // 2])
-    I_meas = yg.dot(atts)
-    print(f"Expected intensity: {I_lin}, measured: {I_meas} ({I_meas / I_lin:%})")
-    print(f"Mean energy {nrgs_keV.dot(yg / np.sum(yg) * (atts / atts[len(atts) // 2]))}, {nrgs_keV.dot(yg / np.sum(yg))}")
+from corrct.physics import xrf  # noqa: F401, F402
+from corrct.physics.xraylib_helper import get_compound_cross_section
+from corrct.physics.xraylib_helper import get_element_number
+from corrct.physics.xraylib_helper import xraylib
 
 
 class VolumeMaterial:
@@ -221,7 +95,7 @@ class VolumeMaterial:
         """
         ph_lin_att = np.zeros(self.shape, self.dtype)
         for ph, cmp in zip(self.materials_fractions, self.materials_compositions):
-            cmp_cs = _get_compound_cross_section(cmp, energy_keV)
+            cmp_cs = get_compound_cross_section(cmp, energy_keV)
             if self.verbose:
                 print(f"Attenuation ({cmp['name']} at {energy_keV}):")
                 print(
@@ -244,7 +118,7 @@ class VolumeMaterial:
         mass_fraction : NDArray
             The local mass fraction in each voxel.
         """
-        el_num = xraylib_helper.get_element_number(element)
+        el_num = get_element_number(element)
 
         mass_fraction = np.zeros(self.shape, self.dtype)
         for ph, cmp in zip(self.materials_fractions, self.materials_compositions):
@@ -370,7 +244,7 @@ class VolumeMaterial:
         elif isinstance(fluo_lines, str):
             fluo_lines = xrf.LinesSiegbahn.get_lines(fluo_lines)
 
-        el_num = xraylib_helper.get_element_number(element)
+        el_num = get_element_number(element)
 
         el_cs = np.empty((len(fluo_lines),), self.dtype)
         for ii, line in enumerate(fluo_lines):

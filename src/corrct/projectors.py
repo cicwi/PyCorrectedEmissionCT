@@ -15,10 +15,10 @@ from numpy.typing import ArrayLike
 from numpy.typing import DTypeLike
 from numpy.typing import NDArray
 from scipy.sparse import spmatrix
-from . import _projector_backends as prj_backends
-from . import models
-from . import operators
-from .attenuation import AttenuationVolume
+from corrct import _projector_backends as prj_backends
+from corrct import models
+from corrct import operators
+from corrct.physics.attenuation import AttenuationVolume
 
 
 num_threads = round(np.log2(mp.cpu_count() + 1))

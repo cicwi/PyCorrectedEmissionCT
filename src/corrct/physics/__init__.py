@@ -6,28 +6,25 @@ __author__ = """Nicola VIGANÒ"""
 __email__ = "N.R.Vigano@cwi.nl"
 
 
-try:
-    from . import xraylib_helper  # noqa: F401, F402
-    from . import xrf  # noqa: F401, F402
-    from . import phase  # noqa: F401, F402
-    from . import materials  # noqa: F401, F402
-
-    xraylib = xraylib_helper.xraylib
-    get_compound = xraylib_helper.get_compound
-    get_element_number = xraylib_helper.get_element_number
-
-    FluoLinesSiegbahn = xrf.LinesSiegbahn
-    VolumeMaterial = materials.VolumeMaterial
-
-except ImportError as exc:
-    print(exc)
-    print("WARNING: X-ray physics support not available. Please install xraylib if you need it.")
-
 from typing import Union
+
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants as spc
 from numpy.typing import NDArray
+
+from . import attenuation  # noqa: F401, F402
+from . import materials  # noqa: F401, F402
+from . import phase  # noqa: F401, F402
+from . import xraylib_helper  # noqa: F401, F402
+from . import xrf  # noqa: F401, F402
+
+xraylib = xraylib_helper.xraylib
+get_compound = xraylib_helper.get_compound
+get_element_number = xraylib_helper.get_element_number
+
+FluoLinesSiegbahn = xrf.LinesSiegbahn
+VolumeMaterial = materials.VolumeMaterial
 
 
 def convert_energy_to_wlength(energy_keV: Union[float, NDArray]) -> Union[float, NDArray]:

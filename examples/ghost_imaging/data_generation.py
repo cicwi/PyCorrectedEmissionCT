@@ -128,7 +128,7 @@ def compute_buckets_3D(
     local_att_out = phantom_obj.get_attenuation(energy_out_keV)
 
     angles_rot_rad = np.deg2rad(angles_rot_deg)
-    att = cct.attenuation.AttenuationVolume(local_att_in, local_att_out, angles_rot_rad=angles_rot_rad)
+    att = cct.physics.attenuation.AttenuationVolume(local_att_in, local_att_out, angles_rot_rad=angles_rot_rad)
     att.compute_maps()
 
     vol_geom = cct.models.VolumeGeometry.get_default_from_volume(phantom_Zn)

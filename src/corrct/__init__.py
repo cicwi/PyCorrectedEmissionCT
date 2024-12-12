@@ -8,7 +8,6 @@ from . import models  # noqa: F401, F402
 
 from . import operators  # noqa: F401, F402
 from . import projectors  # noqa: F401, F402
-from . import attenuation  # noqa: F401, F402
 
 from . import filters  # noqa: F401, F402
 from . import data_terms  # noqa: F401, F402
