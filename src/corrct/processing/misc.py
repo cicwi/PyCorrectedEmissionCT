@@ -392,7 +392,10 @@ def norm_cross_corr(
         return y
 
     if img2 is None:
+        is_autocorrelation = True
         img2 = img1
+    else:
+        is_autocorrelation = False
 
     img1 = img1.astype(np.float32)
     img2 = img2.astype(np.float32)
@@ -438,16 +441,17 @@ def norm_cross_corr(
         if plot:
             p_xy = lines_intersection(cc_l, 0.5, position="first")
 
-            f, ax = plt.subplots()
-            ax.plot(cc_l, label="Cross-correlation")
-            ax.plot(np.ones_like(cc_l) * 0.5, label="Half-maximum")
+            fig, axs = plt.subplots(1, 1, figsize=(7, 3.5))
+            axs.plot(cc_l, label="Auto-correlation" if is_autocorrelation else "Cross-correlation")
+            axs.plot(np.ones_like(cc_l) * 0.5, label="Half-maximum")
             if p_xy is not None:
-                ax.scatter(p_xy[0], p_xy[1])
-                ax.plot([p_xy[0], p_xy[0]], [0, 1], label=f"Resolution: {p_xy[0]:.3} (pix)")
-            ax.grid()
-            ax.legend()
-            ax.set_title("Cross-correlation")
-            f.tight_layout()
+                axs.scatter(p_xy[0], p_xy[1])
+                axs.plot([p_xy[0], p_xy[0]], [0, 1], label=f"Resolution: {p_xy[0]:.3} pix")
+            axs.grid()
+            axs.legend(fontsize=13)
+            axs.tick_params(labelsize=16)
+            axs.set_title("Cross-correlation")
+            fig.tight_layout()
             plt.show(block=False)
 
         return cc_n, cc_l
