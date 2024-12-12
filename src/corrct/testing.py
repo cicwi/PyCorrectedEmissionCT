@@ -10,18 +10,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import numpy as np
 from . import projectors, processing
-
-
-try:
-    from . import physics
-
-    __has_physics__ = True
-except ImportError as exc:
-    print("WARNING:", exc)
-    print("Physics based phantom creation will not be available.")
-
-    __has_physics__ = False
-
+from . import physics
 
 from collections.abc import Sequence
 from typing import Optional
@@ -176,9 +165,6 @@ def phantom_assign_concentration(
     vol_att_out : NDArrayFloat
         Voxel-wise attenuation at the emitted energy.
     """
-    if not __has_physics__:
-        raise RuntimeError("Physics module not available!")
-
     ph_air = ph_or < 0.1
     ph_FeO = 0.5 < ph_or
     ph_CaO = np.logical_and(0.25 < ph_or, ph_or < 0.5)
@@ -239,9 +225,6 @@ def phantom_assign_concentration_multi(
     vol_att_out : List[NDArrayFloat]
         Voxel-wise attenuation at the emitted energy.
     """
-    if not __has_physics__:
-        raise RuntimeError("Physics module not available!")
-
     ph_air = ph_or < 0.1
     ph_FeO = 0.5 < ph_or
     ph_CaO = np.logical_and(0.25 < ph_or, ph_or < 0.5)

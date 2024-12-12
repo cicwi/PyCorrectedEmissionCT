@@ -14,8 +14,6 @@ from dataclasses import dataclass
 from numpy.typing import NDArray
 from typing import Sequence, Union
 
-import xraylib
-
 from tqdm.auto import tqdm
 
 
@@ -59,7 +57,7 @@ def compute_buckets(
     conv_um_to_mm = 1e-3
     voxel_size_cm = voxel_size_um * conv_um_to_mm * conv_mm_to_cm  # cm to micron
 
-    detector = cct.physics.DetectorXRF(distance_mm=12.0, surface_mm2=6.0)
+    detector = cct.physics.xrf.DetectorXRF(distance_mm=12.0, surface_mm2=6.0)
 
     phantom_obj = cct.physics.VolumeMaterial((phantom,), ("Potassium Oxide",), voxel_size_cm)
     _, phantom_yield = phantom_obj.get_fluo_yield(
@@ -115,11 +113,11 @@ def compute_buckets_3D(
     phantom_Zn = phantom_3d[1]  # Selecting nuclei
     phantom_C02 = phantom_3d[2]  # Water content
 
-    detector = cct.physics.DetectorXRF(distance_mm=12.0, surface_mm2=6.0)
+    detector = cct.physics.xrf.DetectorXRF(distance_mm=12.0, surface_mm2=6.0)
 
     # Tomo data creation
-    cmp_p = cct.physics.VolumeMaterial.get_compound("P")
-    cmp_zn = cct.physics.VolumeMaterial.get_compound("Zn")
+    cmp_p = cct.physics.get_compound("P")
+    cmp_zn = cct.physics.get_compound("Zn")
     phantom_obj = cct.physics.VolumeMaterial(
         [phantom_P, phantom_Zn, phantom_C02], [cmp_p, cmp_zn, "Water, Liquid"], voxel_size_cm[-1]
     )
@@ -225,12 +223,12 @@ def compute_buckets_multichannel(
     photon_density_per_pixel = float(num_incident_photons_beam / np.prod(beam_waist_vox))
     print("- Average incident photons per beam: %e" % num_incident_photons_beam)
 
-    detector = cct.physics.DetectorXRF(distance_mm=34.0, surface_mm2=6.0)
+    detector = cct.physics.xrf.DetectorXRF(distance_mm=34.0, surface_mm2=6.0)
 
     incident_photons_pixel = photon_density_per_pixel * projector.col_sum
     print("- Average incident photons per pixel: %e" % np.mean(incident_photons_pixel))
 
-    cu2o = xraylib.CompoundParser("Cu2O")
+    cu2o = cct.physics.xraylib_helper.get_compound("Cu2O")
     cu2o["name"] = "Cuprous Oxide"
     cu2o["density"] = 6.0
     phase_compounds = ("Air, Dry (near sea level)", "Calcium Oxide", "Ferrous Oxide", cu2o)

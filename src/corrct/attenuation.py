@@ -15,8 +15,8 @@ from matplotlib.axes._axes import Axes
 from numpy.typing import ArrayLike, DTypeLike, NDArray
 from tqdm.auto import tqdm
 
-from . import _projector_backends as prj_backends
-from . import models
+from corrct import _projector_backends as prj_backends
+from corrct import models
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
@@ -104,7 +104,7 @@ class AttenuationVolume:
         self.maps = np.ones([num_rot_angles, len(self.angles_det_rad), *self.vol_shape_zyx], dtype=self.dtype)
 
         def process_angles(
-            func: Callable[[Callable, NDArray, float], NDArray], att_vol: NDArrayFloat, angles: NDArrayFloat, description: str
+            func: Callable[[NDArray, float], NDArray], att_vol: NDArrayFloat, angles: NDArrayFloat, description: str
         ) -> None:
             if use_multithreading:
                 with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
