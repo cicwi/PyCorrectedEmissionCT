@@ -210,14 +210,15 @@ def fit_func_min(
     return res_hp_val, res_f_val
 
 
-class BaseRegularizationEstimation(ABC):
-    """Base class for regularization parameter estimation class."""
+class BaseParameterTuning(ABC):
+    """Base class for parameter tuning classes."""
 
+    _solver_spawning_functionls: Optional[Callable]
     _solver_calling_function: Optional[Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]]]
 
     def __init__(
         self, dtype: DTypeLike = np.float32, parallel_eval: bool = True, verbose: bool = False, plot_result: bool = False
-    ):
+    ) -> None:
         """Initialize a base helper class.
 
         Parameters
@@ -248,14 +249,14 @@ class BaseRegularizationEstimation(ABC):
         return self._solver_spawning_function
 
     @property
-    def solver_calling_function(self) -> Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]]:
+    def solver_calling_function(self) -> Callable[[Any, ...], tuple[NDArrayFloat, solvers.SolutionInfo]]:
         """Return the locally stored solver calling function."""
         if self._solver_calling_function is None:
             raise ValueError("Solver spawning function not initialized!")
         return self._solver_calling_function
 
     @solver_spawning_function.setter
-    def solver_spawning_function(self, solver_spawn: Callable):
+    def solver_spawning_function(self, solver_spawn: Callable) -> None:
         if not isinstance(solver_spawn, Callable):
             raise ValueError("Expected a solver spawning function (callable)")
         if len(inspect.signature(solver_spawn).parameters) != 1:
@@ -265,7 +266,7 @@ class BaseRegularizationEstimation(ABC):
         self._solver_spawning_function = solver_spawn
 
     @solver_calling_function.setter
-    def solver_calling_function(self, solver_call: Callable):
+    def solver_calling_function(self, solver_call: Callable[[Any, ...], tuple[NDArrayFloat, solvers.SolutionInfo]]) -> None:
         if not isinstance(solver_call, Callable):
             raise ValueError("Expected a solver calling function (callable)")
         if not len(inspect.signature(solver_call).parameters) >= 1:
@@ -411,7 +412,7 @@ class BaseRegularizationEstimation(ABC):
         """
 
 
-class LCurve(BaseRegularizationEstimation):
+class LCurve(BaseParameterTuning):
     """L-curve regularization parameter estimation helper."""
 
     def __init__(
@@ -523,7 +524,7 @@ class LCurve(BaseRegularizationEstimation):
         return f_vals
 
 
-class CrossValidation(BaseRegularizationEstimation):
+class CrossValidation(BaseParameterTuning):
     """Cross-validation hyper-parameter estimation class."""
 
     def __init__(
