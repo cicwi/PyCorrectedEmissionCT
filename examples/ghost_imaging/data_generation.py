@@ -60,7 +60,7 @@ def compute_buckets(
     detector = cct.physics.xrf.DetectorXRF(distance_mm=12.0, surface_mm2=6.0)
 
     phantom_obj = cct.physics.VolumeMaterial((phantom,), ("Potassium Oxide",), voxel_size_cm)
-    _, phantom_yield = phantom_obj.get_fluo_yield(
+    _, phantom_yield = phantom_obj.get_fluo_production(
         element=element, energy_in_keV=energy_in_keV, fluo_lines=fluo_lines, detector=detector
     )
 
@@ -121,7 +121,7 @@ def compute_buckets_3D(
     phantom_obj = cct.physics.VolumeMaterial(
         [phantom_P, phantom_Zn, phantom_C02], [cmp_p, cmp_zn, "Water, Liquid"], voxel_size_cm[-1]
     )
-    energy_out_keV, phantom_Zn_fluo_yield = phantom_obj.get_fluo_yield(
+    energy_out_keV, phantom_Zn_fluo_yield = phantom_obj.get_fluo_production(
         element, energy_in_keV=energy_in_keV, fluo_lines=fluo_lines, detector=detector
     )
     local_att_in = phantom_obj.get_attenuation(energy_in_keV)
@@ -245,7 +245,7 @@ def compute_buckets_multichannel(
 
     for ii, el in enumerate(elements):
         print("\nElement: '%s'" % el)
-        _, phantom_yield = phantom_obj.get_fluo_yield(
+        _, phantom_yield = phantom_obj.get_fluo_production(
             element=el, energy_in_keV=in_energy_keV, fluo_lines="KA", detector=detector
         )
 

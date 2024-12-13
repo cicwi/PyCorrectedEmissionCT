@@ -191,7 +191,7 @@ class AttenuationVolume:
         slice_shape = self.vol_shape_zyx[list(axes)]
         coords = [(-(s - 1) / 2, (s - 1) / 2) for s in slice_shape]
 
-        extent = list(np.concatenate(coords))
+        extent = tuple(np.concatenate(coords))
         ax.imshow(att_map, extent=extent)
 
         if other_dim == -3:
@@ -396,7 +396,7 @@ def plot_emission_line_attenuation(
     print(f"Expected intensity: {I_lin}, measured: {I_meas} ({I_meas / I_lin:%})")
     print(f"Mean energy {nrgs_keV.dot(yg / np.sum(yg) * (atts / atts[len(atts) // 2]))}, {nrgs_keV.dot(yg / np.sum(yg))}")
 
-    
+
 def plot_transmittance_decay(
     compounds: Union[str, dict, Sequence[Union[str, dict]]],
     mean_energy_keV: float,
@@ -438,4 +438,3 @@ def plot_transmittance_decay(
     axs.set_title(f"Transmittance curve at {mean_energy_keV:.2f} keV", fontsize=14)
     fig.tight_layout()
     plt.plot(block=False)
-

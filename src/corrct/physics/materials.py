@@ -21,7 +21,7 @@ from corrct.physics.xraylib_helper import xraylib
 
 class VolumeMaterial:
     """
-    VolumeMaterial class, that can be used for predicting fluorescence and Compton yields, attenuation, etc.
+    VolumeMaterial class, that can be used for predicting fluorescence and Compton productions, attenuation, etc.
 
     Parameters
     ----------
@@ -165,8 +165,8 @@ class VolumeMaterial:
         -------
         energy_out_keV : float
             The energy of the Compton radiation received by the detector.
-        cmptn_yield : NDArray
-            Local yield of Compton radiation.
+        cmptn_prod : NDArray
+            Local production of Compton radiation.
 
         Either `angle_rad` or `detector` need to be supplied.
         """
@@ -179,7 +179,7 @@ class VolumeMaterial:
             if angle_rad is None:
                 angle_rad = detector.angle_rad
 
-        cmptn_yield = np.zeros(self.shape, self.dtype)
+        cmptn_prod = np.zeros(self.shape, self.dtype)
         for ph, cmp in zip(self.materials_fractions, self.materials_compositions):
             try:
                 cmp_cs = xraylib.DCS_Compt_CP(cmp["name"], energy_in_keV, angle_rad)
@@ -199,30 +199,34 @@ class VolumeMaterial:
                     + ", pixel-size {self.voxel_size_cm}"
                     + f" - total {cmp['density'] * cmp_cs * self.voxel_size_cm} (assuming material mass fraction = 1)"
                 )
-            cmptn_yield += ph * cmp["density"] * cmp_cs
-        cmptn_yield *= self.voxel_size_cm
+            cmptn_prod += ph * cmp["density"] * cmp_cs
+        cmptn_prod *= self.voxel_size_cm
 
         if detector:
-            cmptn_yield *= detector.solid_angle_sr
+            cmptn_prod *= detector.solid_angle_sr
 
         energy_out_keV = xraylib.ComptonEnergy(energy_in_keV, angle_rad)
-        return (energy_out_keV, cmptn_yield)
+        return (energy_out_keV, cmptn_prod)
 
-    def get_fluo_yield(
+    def get_fluo_production(
         self,
         element: Union[str, int],
         energy_in_keV: float,
         fluo_lines: Union[str, xrf.FluoLine, Sequence[xrf.FluoLine]],
         detector: Union[xrf.DetectorXRF, None] = None,
     ) -> tuple[float, NDArray]:
-        """Compute the local fluorescence yield, for the given line of the given element.
+        """Compute the local fluorescence production, for the given line of the given element.
+
+        Using Eq. (1) from:
+        - T. Schoonjans et al., "The xraylib library for X-ray-matter interactions. Recent developments," Spectrochim. Acta
+          Part B At. Spectrosc., vol. 66, no. 11-12, pp. 776-784, Nov. 2011, doi: 10.1016/j.sab.2011.09.011.
 
         Parameters
         ----------
         element : str | int
             The element to consider.
         energy_in_keV : float
-            The incombing X-ray beam energy.
+            The incoming X-ray beam energy.
         fluo_lines : str | FluoLine | Sequence[FluoLine]
             The fluorescence line to consider.
         detector : DetectorXRF, optional
@@ -232,8 +236,8 @@ class VolumeMaterial:
         -------
         energy_out_keV : float
             The emitted fluorescence energy.
-        el_yield : NDArray
-            The local fluorescence yield in each voxel.
+        el_prod : NDArray
+            The local fluorescence production in each voxel.
         """
         if detector:
             if not self._check_parallax_detector(detector):
@@ -246,20 +250,20 @@ class VolumeMaterial:
 
         el_num = get_element_number(element)
 
-        el_cs = np.empty((len(fluo_lines),), self.dtype)
+        el_yield = np.empty((len(fluo_lines),), self.dtype)
         for ii, line in enumerate(fluo_lines):
             try:
-                el_cs[ii] = xraylib.CS_FluorLine_Kissel(el_num, line.indx, energy_in_keV)  # fluo production for cm2/g
+                el_yield[ii] = xraylib.CS_FluorLine_Kissel(el_num, line.indx, energy_in_keV)  # fluo production for cm2/g
             except ValueError as exc:
                 el_sym = xraylib.AtomicNumberToSymbol(el_num)
                 if self.verbose:
                     print(f"Energy {exc}: el_num={el_num} ({el_sym}) line={line}")
-                el_cs[ii] = 0
-        el_yield = self.get_element_mass_fraction(el_num) * np.sum(el_cs) * self.voxel_size_cm
+                el_yield[ii] = 0
+        el_prod = self.get_element_mass_fraction(el_num) * np.sum(el_yield) * self.voxel_size_cm
 
         if detector:
-            el_yield *= detector.solid_angle_sr
+            el_prod *= detector.solid_angle_sr
 
-        energy_out_keV = xrf.LinesSiegbahn.get_energy(el_num, fluo_lines, compute_average=True)
+        energy_out_keV = xrf.get_energy(el_num, fluo_lines, compute_average=True)
 
-        return float(energy_out_keV), el_yield
+        return float(energy_out_keV), el_prod

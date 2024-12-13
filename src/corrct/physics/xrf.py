@@ -94,66 +94,100 @@ class LinesSiegbahn:
         """
         return [f for f in LinesSiegbahn.lines if f.name[: len(line)] == line.upper()]
 
-    @staticmethod
-    def get_energy(
-        element: Union[str, int],
-        lines: Union[str, FluoLine, Sequence[FluoLine]],
-        compute_average: bool = False,
-        verbose: bool = False,
-    ) -> Union[float, NDArray]:
-        """
-        Return the energy(ies) of the requested line for the given element.
 
-        Parameters
-        ----------
-        element : Union[str, int]
-            The requested element.
-        line : str
-            The requested line. It can be a whole shell (transition to that shell),
-            or sub-shells.
-        compute_average : bool, optional
-            Weighted averaging the lines, using the radiation rate. The default is False.
+def _get_lines_list(lines) -> Sequence[FluoLine]:
+    if isinstance(lines, FluoLine):
+        return [lines]
+    elif isinstance(lines, str):
+        return LinesSiegbahn.get_lines(lines)
+    elif len(lines) == 0:
+        raise ValueError(f"No line was passed! lines={lines}")
+    else:
+        return lines
 
-        Returns
-        -------
-        energy_keV : Union[float, NDArray]
-            Either the average energy or the list of different energies.
-        """
-        el_sym, el_num = xraylib_helper.get_element_number_and_symbol(element)
 
-        if isinstance(lines, FluoLine):
-            lines_list = [lines]
-        elif isinstance(lines, str):
-            lines_list = LinesSiegbahn.get_lines(lines)
-        elif len(lines) == 0:
-            raise ValueError(f"No line was passed! lines={lines}")
-        else:
-            lines_list = lines
+def get_radiation_rate(
+    element: Union[str, int],
+    lines: Union[str, FluoLine, Sequence[FluoLine]],
+    verbose: bool = False,
+) -> NDArray:
+    """Return the radiation rates of the requested lines for the given element.
 
-        energy_keV = np.empty(len(lines_list), dtype=np.float32)
-        for ii, line in enumerate(lines_list):
-            try:
-                energy_keV[ii] = xraylib.LineEnergy(el_num, line.indx)
-            except ValueError as exc:
-                if verbose:
-                    print(f"INFO - Energy - {exc}: el_num={el_num} ({el_sym}) line={line}")
-                energy_keV[ii] = 0
+    Parameters
+    ----------
+    element : Union[str, int]
+        The requested element
+    lines : Union[str, FluoLine, Sequence[FluoLine]]
+        The requested line. It can be a whole shell (transition to that shell),
+        or sub-shells.
+    verbose : bool, optional
+        Whether to produce verbose output in case of errors, by default False
 
-        if compute_average:
-            rates = np.empty(energy_keV.shape)
-            for ii, line in enumerate(lines_list):
-                try:
-                    rates[ii] = xraylib.RadRate(el_num, line.indx)
-                except ValueError as exc:
-                    if verbose:
-                        print(f"INFO - RadRate - {exc}: el_num={el_num} ({el_sym}) line={line}")
-                    rates[ii] = 0
-            energy_keV = float(np.sum(energy_keV * rates / np.sum(rates)))
+    Returns
+    -------
+    NDArray
+        The list of radiation rates
+    """
+    el_sym, el_num = xraylib_helper.get_element_number_and_symbol(element)
 
-        if verbose:
-            print(f"{el_sym}-{lines} emission energy (keV):", energy_keV, "\n")
+    lines_list = _get_lines_list(lines)
 
-        return energy_keV
+    rates = np.empty(len(lines_list), dtype=np.float32)
+    for ii, line in enumerate(lines_list):
+        try:
+            rates[ii] = xraylib.RadRate(el_num, line.indx)
+        except ValueError as exc:
+            if verbose:
+                print(f"INFO - RadRate - {exc}: el_num={el_num} ({el_sym}) line={line}")
+            rates[ii] = 0
+    return rates
+
+
+def get_energy(
+    element: Union[str, int],
+    lines: Union[str, FluoLine, Sequence[FluoLine]],
+    compute_average: bool = False,
+    verbose: bool = False,
+) -> Union[float, NDArray]:
+    """
+    Return the energy(ies) of the requested line for the given element.
+
+    Parameters
+    ----------
+    element : Union[str, int]
+        The requested element.
+    line : str
+        The requested line. It can be a whole shell (transition to that shell),
+        or sub-shells.
+    compute_average : bool, optional
+        Weighted averaging the lines, using the radiation rate. The default is False.
+
+    Returns
+    -------
+    energy_keV : Union[float, NDArray]
+        Either the average energy or the list of different energies.
+    """
+    el_sym, el_num = xraylib_helper.get_element_number_and_symbol(element)
+
+    lines_list = _get_lines_list(lines)
+
+    energy_keV = np.empty(len(lines_list), dtype=np.float32)
+    for ii, line in enumerate(lines_list):
+        try:
+            energy_keV[ii] = xraylib.LineEnergy(el_num, line.indx)
+        except ValueError as exc:
+            if verbose:
+                print(f"INFO - Energy - {exc}: el_num={el_num} ({el_sym}) line={line}")
+            energy_keV[ii] = 0
+
+    if compute_average:
+        rates = get_radiation_rate(element, lines_list)
+        energy_keV = float(np.sum(energy_keV * rates / np.sum(rates)))
+
+    if verbose:
+        print(f"{el_sym}-{lines} emission energy (keV):", energy_keV, "\n")
+
+    return energy_keV
 
 
 @dataclass
@@ -173,4 +207,4 @@ class DetectorXRF:
         float | NDArray
             The computed solid angle of the detector geometry.
         """
-        return self.surface_mm2 / (np.pi * self.distance_mm**2)
+        return self.surface_mm2 / (4 * np.pi * self.distance_mm**2)

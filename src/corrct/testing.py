@@ -180,7 +180,7 @@ def phantom_assign_concentration(
 
     phantom = physics.VolumeMaterial(phase_fractions, phase_compound_names, voxel_size_cm)
 
-    out_energy_keV, vol_fluo_yield = phantom.get_fluo_yield(element, in_energy_keV, em_line)
+    out_energy_keV, vol_fluo_yield = phantom.get_fluo_production(element, in_energy_keV, em_line)
 
     vol_lin_att_in = phantom.get_attenuation(in_energy_keV)
     vol_lin_att_out = phantom.get_attenuation(out_energy_keV)
@@ -252,7 +252,7 @@ def phantom_assign_concentration_multi(
             line = em_lines
         else:
             line = em_lines[ii]
-        out_energy_keV, vol_yield[ii] = phantom.get_fluo_yield(el, in_energy_keV, line)
+        out_energy_keV, vol_yield[ii] = phantom.get_fluo_production(el, in_energy_keV, line)
         vol_lin_att_out[ii] = phantom.get_attenuation(out_energy_keV)
 
     if detectors_pos_rad:
