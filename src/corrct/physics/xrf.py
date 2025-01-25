@@ -18,7 +18,7 @@ except ImportError:
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Union
+from typing import overload, Literal, Union
 import numpy as np
 from numpy.typing import NDArray
 
@@ -143,9 +143,30 @@ def get_radiation_rate(
     return rates
 
 
+@overload
 def get_energy(
     element: Union[str, int],
     lines: Union[str, FluoLine, Sequence[FluoLine]],
+    *,
+    compute_average: Literal[False] = False,
+    verbose: bool = False,
+) -> NDArray: ...
+
+
+@overload
+def get_energy(
+    element: Union[str, int],
+    lines: Union[str, FluoLine, Sequence[FluoLine]],
+    *,
+    compute_average: Literal[True] = True,
+    verbose: bool = False,
+) -> float: ...
+
+
+def get_energy(
+    element: Union[str, int],
+    lines: Union[str, FluoLine, Sequence[FluoLine]],
+    *,
     compute_average: bool = False,
     verbose: bool = False,
 ) -> Union[float, NDArray]:
