@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.9.1...develop
 
+## 1.0.0rc3 - 2025-02-01
+### Added
+- Cleanup of physics API, by merging attenuation correction support
+### Fixed
+- GI mask resolution computation
+
 ## 1.0.0rc2 - 2024-11-13
 ### Added
 - Cleanup progress support in solvers
