@@ -4,6 +4,14 @@ corrct.physics package
 Submodules
 ----------
 
+corrct.physics.attenuation module
+---------------------------------
+
+.. automodule:: corrct.physics.attenuation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.physics.materials module
 -------------------------------
 

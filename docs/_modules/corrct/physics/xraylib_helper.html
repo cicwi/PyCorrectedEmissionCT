@@ -87,13 +87,11 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">xraylib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-    <span class="n">xraylib</span><span class="o">.</span><span class="n">XRayInit</span><span class="p">()</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Physics support is only available when _xraylib_ is installed!&quot;</span><span class="p">)</span>
-    <span class="k">raise</span>
+<span class="kn">import</span> <span class="nn">xraylib</span>
+
+<span class="n">xraylib</span><span class="o">.</span><span class="n">XRayInit</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="get_element_number">
@@ -175,6 +173,33 @@
             <span class="n">density</span> <span class="o">+=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">ElementDensity</span><span class="p">(</span><span class="n">el</span><span class="p">)</span> <span class="o">*</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span>
     <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">density</span>
     <span class="k">return</span> <span class="n">cmp</span></div>
+
+
+
+<div class="viewcode-block" id="get_compound_cross_section">
+<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.xraylib_helper.get_compound_cross_section">[docs]</a>
+<span class="k">def</span> <span class="nf">get_compound_cross_section</span><span class="p">(</span><span class="n">compound</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">mean_energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a compound cross section for the given incoming photon energy.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    compound : dict</span>
+<span class="sd">        The compound structure (as returned by `get_compound`)</span>
+<span class="sd">    mean_energy_keV : float</span>
+<span class="sd">        The average photon energy</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The computed cross-section</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total_CP</span><span class="p">(</span><span class="n">compound</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">mean_energy_keV</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">elemets_cs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">xraylib</span><span class="o">.</span><span class="n">CS_Total</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">mean_energy_keV</span><span class="p">)</span> <span class="o">*</span> <span class="n">compound</span><span class="p">[</span><span class="s2">&quot;massFractions&quot;</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span> <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">compound</span><span class="p">[</span><span class="s2">&quot;Elements&quot;</span><span class="p">])</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">elemets_cs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 </pre></div>
 

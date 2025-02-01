@@ -85,28 +85,25 @@
 <span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;N.R.Vigano@cwi.nl&quot;</span>
 
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">xraylib_helper</span>  <span class="c1"># noqa: F401, F402</span>
-    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">xrf</span>  <span class="c1"># noqa: F401, F402</span>
-    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">phase</span>  <span class="c1"># noqa: F401, F402</span>
-    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">materials</span>  <span class="c1"># noqa: F401, F402</span>
-
-    <span class="n">xraylib</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">xraylib</span>
-    <span class="n">get_compound</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">get_compound</span>
-    <span class="n">get_element_number</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">get_element_number</span>
-
-    <span class="n">FluoLinesSiegbahn</span> <span class="o">=</span> <span class="n">xrf</span><span class="o">.</span><span class="n">LinesSiegbahn</span>
-    <span class="n">VolumeMaterial</span> <span class="o">=</span> <span class="n">materials</span><span class="o">.</span><span class="n">VolumeMaterial</span>
-
-<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: X-ray physics support not available. Please install xraylib if you need it.&quot;</span><span class="p">)</span>
-
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">spc</span>
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">attenuation</span>  <span class="c1"># noqa: F401, F402</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">materials</span>  <span class="c1"># noqa: F401, F402</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">phase</span>  <span class="c1"># noqa: F401, F402</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">xraylib_helper</span>  <span class="c1"># noqa: F401, F402</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">xrf</span>  <span class="c1"># noqa: F401, F402</span>
+
+<span class="n">xraylib</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">xraylib</span>
+<span class="n">get_compound</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">get_compound</span>
+<span class="n">get_element_number</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">get_element_number</span>
+
+<span class="n">FluoLinesSiegbahn</span> <span class="o">=</span> <span class="n">xrf</span><span class="o">.</span><span class="n">LinesSiegbahn</span>
+<span class="n">VolumeMaterial</span> <span class="o">=</span> <span class="n">materials</span><span class="o">.</span><span class="n">VolumeMaterial</span>
 
 
 <div class="viewcode-block" id="convert_energy_to_wlength">

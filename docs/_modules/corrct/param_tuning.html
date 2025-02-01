@@ -298,16 +298,17 @@
 
 
 
-<div class="viewcode-block" id="BaseRegularizationEstimation">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseRegularizationEstimation">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseRegularizationEstimation</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for regularization parameter estimation class.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BaseParameterTuning">
+<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseParameterTuning">[docs]</a>
+<span class="k">class</span> <span class="nc">BaseParameterTuning</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for parameter tuning classes.&quot;&quot;&quot;</span>
 
+    <span class="n">_solver_spawning_functionls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span>
     <span class="n">_solver_calling_function</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">solvers</span><span class="o">.</span><span class="n">SolutionInfo</span><span class="p">]]]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">parallel_eval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">plot_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">):</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a base helper class.</span>
 
 <span class="sd">        Parameters</span>
@@ -338,14 +339,14 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_spawning_function</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">solver_calling_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">solvers</span><span class="o">.</span><span class="n">SolutionInfo</span><span class="p">]]:</span>
+    <span class="k">def</span> <span class="nf">solver_calling_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">solvers</span><span class="o">.</span><span class="n">SolutionInfo</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the locally stored solver calling function.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_calling_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Solver spawning function not initialized!&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_calling_function</span>
 
     <span class="nd">@solver_spawning_function</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">solver_spawning_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solver_spawn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">solver_spawning_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solver_spawn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">solver_spawn</span><span class="p">,</span> <span class="n">Callable</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected a solver spawning function (callable)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">solver_spawn</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
@@ -355,15 +356,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_spawning_function</span> <span class="o">=</span> <span class="n">solver_spawn</span>
 
     <span class="nd">@solver_calling_function</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">solver_calling_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solver_call</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">solver_calling_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solver_call</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">solvers</span><span class="o">.</span><span class="n">SolutionInfo</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">solver_call</span><span class="p">,</span> <span class="n">Callable</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected a solver calling function (callable)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">solver_call</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected a solver calling function (callable), with at least one parameter (solver)&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_calling_function</span> <span class="o">=</span> <span class="n">solver_call</span>
 
-<div class="viewcode-block" id="BaseRegularizationEstimation.get_lambda_range">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseRegularizationEstimation.get_lambda_range">[docs]</a>
+<div class="viewcode-block" id="BaseParameterTuning.get_lambda_range">
+<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseParameterTuning.get_lambda_range">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_lambda_range</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num_per_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute regularization weights within an interval.</span>
@@ -385,8 +386,8 @@
         <span class="k">return</span> <span class="n">get_lambda_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">num_per_order</span><span class="o">=</span><span class="n">num_per_order</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="BaseRegularizationEstimation.compute_reconstruction_and_loss">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseRegularizationEstimation.compute_reconstruction_and_loss">[docs]</a>
+<div class="viewcode-block" id="BaseParameterTuning.compute_reconstruction_and_loss">
+<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseParameterTuning.compute_reconstruction_and_loss">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_reconstruction_and_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hp_val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute objective function cost for the given hyper-parameter value.</span>
 
@@ -413,8 +414,8 @@
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">rec_info</span><span class="o">.</span><span class="n">residuals_cv_rel</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">rec</span></div>
 
 
-<div class="viewcode-block" id="BaseRegularizationEstimation.compute_reconstruction_error">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseRegularizationEstimation.compute_reconstruction_error">[docs]</a>
+<div class="viewcode-block" id="BaseParameterTuning.compute_reconstruction_error">
+<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseParameterTuning.compute_reconstruction_error">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_reconstruction_error</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">hp_vals</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">],</span> <span class="n">gnd_truth</span><span class="p">:</span> <span class="n">NDArrayFloat</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
@@ -494,8 +495,8 @@
         <span class="k">return</span> <span class="n">err_l1</span><span class="p">,</span> <span class="n">err_l2</span></div>
 
 
-<div class="viewcode-block" id="BaseRegularizationEstimation.compute_loss_values">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseRegularizationEstimation.compute_loss_values">[docs]</a>
+<div class="viewcode-block" id="BaseParameterTuning.compute_loss_values">
+<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseParameterTuning.compute_loss_values">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hp_vals</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the objective function costs for a list of hyper-parameter values.</span>
@@ -516,7 +517,7 @@
 
 <div class="viewcode-block" id="LCurve">
 <a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.LCurve">[docs]</a>
-<span class="k">class</span> <span class="nc">LCurve</span><span class="p">(</span><span class="n">BaseRegularizationEstimation</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">LCurve</span><span class="p">(</span><span class="n">BaseParameterTuning</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;L-curve regularization parameter estimation helper.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -634,7 +635,7 @@
 
 <div class="viewcode-block" id="CrossValidation">
 <a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.CrossValidation">[docs]</a>
-<span class="k">class</span> <span class="nc">CrossValidation</span><span class="p">(</span><span class="n">BaseRegularizationEstimation</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">CrossValidation</span><span class="p">(</span><span class="n">BaseParameterTuning</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Cross-validation hyper-parameter estimation class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>

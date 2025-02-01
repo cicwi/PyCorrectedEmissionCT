@@ -98,7 +98,7 @@
 
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">overload</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
 
@@ -180,71 +180,129 @@
 <span class="sd">            List of corresponding lines.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">LinesSiegbahn</span><span class="o">.</span><span class="n">lines</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)]</span> <span class="o">==</span> <span class="n">line</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span></div>
-
-
-<div class="viewcode-block" id="LinesSiegbahn.get_energy">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.xrf.LinesSiegbahn.get_energy">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span>
-        <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
-        <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
-        <span class="n">compute_average</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the energy(ies) of the requested line for the given element.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        element : Union[str, int]</span>
-<span class="sd">            The requested element.</span>
-<span class="sd">        line : str</span>
-<span class="sd">            The requested line. It can be a whole shell (transition to that shell),</span>
-<span class="sd">            or sub-shells.</span>
-<span class="sd">        compute_average : bool, optional</span>
-<span class="sd">            Weighted averaging the lines, using the radiation rate. The default is False.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        energy_keV : Union[float, NDArray]</span>
-<span class="sd">            Either the average energy or the list of different energies.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">el_sym</span><span class="p">,</span> <span class="n">el_num</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">get_element_number_and_symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">):</span>
-            <span class="n">lines_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">lines</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">lines_list</span> <span class="o">=</span> <span class="n">LinesSiegbahn</span><span class="o">.</span><span class="n">get_lines</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No line was passed! lines=</span><span class="si">{</span><span class="n">lines</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">lines_list</span> <span class="o">=</span> <span class="n">lines</span>
-
-        <span class="n">energy_keV</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines_list</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines_list</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">energy_keV</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">LineEnergy</span><span class="p">(</span><span class="n">el_num</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">indx</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;INFO - Energy - </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">: el_num=</span><span class="si">{</span><span class="n">el_num</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">el_sym</span><span class="si">}</span><span class="s2">) line=</span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">energy_keV</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="k">if</span> <span class="n">compute_average</span><span class="p">:</span>
-            <span class="n">rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">energy_keV</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines_list</span><span class="p">):</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">rates</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">RadRate</span><span class="p">(</span><span class="n">el_num</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">indx</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;INFO - RadRate - </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">: el_num=</span><span class="si">{</span><span class="n">el_num</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">el_sym</span><span class="si">}</span><span class="s2">) line=</span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="n">rates</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">energy_keV</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">energy_keV</span> <span class="o">*</span> <span class="n">rates</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rates</span><span class="p">)))</span>
-
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">el_sym</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">lines</span><span class="si">}</span><span class="s2"> emission energy (keV):&quot;</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">energy_keV</span></div>
 </div>
+
+
+
+<span class="k">def</span> <span class="nf">_get_lines_list</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">lines</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">LinesSiegbahn</span><span class="o">.</span><span class="n">get_lines</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No line was passed! lines=</span><span class="si">{</span><span class="n">lines</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">lines</span>
+
+
+<div class="viewcode-block" id="get_radiation_rate">
+<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.xrf.get_radiation_rate">[docs]</a>
+<span class="k">def</span> <span class="nf">get_radiation_rate</span><span class="p">(</span>
+    <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the radiation rates of the requested lines for the given element.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    element : Union[str, int]</span>
+<span class="sd">        The requested element</span>
+<span class="sd">    lines : Union[str, FluoLine, Sequence[FluoLine]]</span>
+<span class="sd">        The requested line. It can be a whole shell (transition to that shell),</span>
+<span class="sd">        or sub-shells.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to produce verbose output in case of errors, by default False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The list of radiation rates</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">el_sym</span><span class="p">,</span> <span class="n">el_num</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">get_element_number_and_symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+    <span class="n">lines_list</span> <span class="o">=</span> <span class="n">_get_lines_list</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="n">rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines_list</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines_list</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rates</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">RadRate</span><span class="p">(</span><span class="n">el_num</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">indx</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;INFO - RadRate - </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">: el_num=</span><span class="si">{</span><span class="n">el_num</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">el_sym</span><span class="si">}</span><span class="s2">) line=</span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">rates</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">rates</span></div>
+
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span>
+    <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">compute_average</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span>
+    <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">compute_average</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span> <span class="o">...</span>
+
+
+<div class="viewcode-block" id="get_energy">
+<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.xrf.get_energy">[docs]</a>
+<span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span>
+    <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">compute_average</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the energy(ies) of the requested line for the given element.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    element : Union[str, int]</span>
+<span class="sd">        The requested element.</span>
+<span class="sd">    line : str</span>
+<span class="sd">        The requested line. It can be a whole shell (transition to that shell),</span>
+<span class="sd">        or sub-shells.</span>
+<span class="sd">    compute_average : bool, optional</span>
+<span class="sd">        Weighted averaging the lines, using the radiation rate. The default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    energy_keV : Union[float, NDArray]</span>
+<span class="sd">        Either the average energy or the list of different energies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">el_sym</span><span class="p">,</span> <span class="n">el_num</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">get_element_number_and_symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+    <span class="n">lines_list</span> <span class="o">=</span> <span class="n">_get_lines_list</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="n">energy_keV</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines_list</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines_list</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">energy_keV</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">LineEnergy</span><span class="p">(</span><span class="n">el_num</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">indx</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;INFO - Energy - </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">: el_num=</span><span class="si">{</span><span class="n">el_num</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">el_sym</span><span class="si">}</span><span class="s2">) line=</span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">energy_keV</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">compute_average</span><span class="p">:</span>
+        <span class="n">rates</span> <span class="o">=</span> <span class="n">get_radiation_rate</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">lines_list</span><span class="p">)</span>
+        <span class="n">energy_keV</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">energy_keV</span> <span class="o">*</span> <span class="n">rates</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rates</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">el_sym</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">lines</span><span class="si">}</span><span class="s2"> emission energy (keV):&quot;</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">energy_keV</span></div>
 
 
 
@@ -267,7 +325,7 @@
 <span class="sd">        float | NDArray</span>
 <span class="sd">            The computed solid angle of the detector geometry.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_mm2</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_mm</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_mm2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_mm</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
 
 </pre></div>
 
