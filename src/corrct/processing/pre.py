@@ -14,6 +14,7 @@ import scipy.ndimage as spimg
 import skimage.transform as skt
 from numpy.polynomial import Polynomial
 from numpy.typing import DTypeLike, NDArray
+from skimage.measure import block_reduce
 
 
 eps = np.finfo(np.float32).eps
@@ -56,6 +57,7 @@ def apply_flat_field(
     flats_wvu: NDArray,
     darks_wvu: Optional[NDArray] = None,
     crop: Optional[Sequence[int]] = None,
+    cap_intensity: Optional[float] = None,
     dtype: DTypeLike = np.float32,
 ) -> NDArray:
     """
@@ -71,13 +73,15 @@ def apply_flat_field(
         Dark noise. The default is None.
     crop : Optional[Sequence[int]], optional
         Crop region. The default is None.
+    cap_intensity: float | None, optional
+        Cap the intensity to a given value. The default is None.
     dtype : DTypeLike, optional
         Data type of the processed data. The default is np.float32.
 
     Returns
     -------
     NDArray
-        Falt-field corrected and linearized projections.
+        Flat-field corrected and linearized projections.
     """
     projs_wvu = np.ascontiguousarray(projs_wvu, dtype=dtype)
     flats_wvu = np.ascontiguousarray(flats_wvu, dtype=dtype)
@@ -96,7 +100,12 @@ def apply_flat_field(
     if flats_wvu.ndim == 3:
         flats_wvu = np.mean(flats_wvu, axis=0)
 
-    return projs_wvu / flats_wvu
+    projs_wvu = projs_wvu / flats_wvu
+
+    if cap_intensity is not None:
+        projs_wvu = np.fmin(projs_wvu, cap_intensity)
+
+    return projs_wvu
 
 
 def apply_minus_log(projs: NDArray, lower_limit: float = -np.inf) -> NDArray:
@@ -168,7 +177,9 @@ def shift_proj_stack(data_vwu: NDArray, shifts: NDArray, use_fft: bool = False) 
     return new_data
 
 
-def bin_imgs(imgs: NDArray, binning: Union[int, float], auto_crop: bool = False, verbose: bool = True) -> NDArray:
+def bin_imgs(
+    imgs: NDArray, binning: Union[int, float], axes: Sequence[int] = (-2, -1), auto_crop: bool = False, verbose: bool = True
+) -> NDArray:
     """Bin a stack of images.
 
     Parameters
@@ -188,10 +199,14 @@ def bin_imgs(imgs: NDArray, binning: Union[int, float], auto_crop: bool = False,
         The binned images
     """
     if auto_crop:
-        imgs_shape = imgs.shape
-        excess_pixels_vu = (np.array(imgs.shape[-2:]) % binning).astype(int)
-        crop_vu = (excess_pixels_vu - excess_pixels_vu // 2, np.array(imgs.shape[-2:]) - excess_pixels_vu // 2)
-        imgs = imgs[..., crop_vu[0][0] : crop_vu[1][0], crop_vu[0][1] : crop_vu[1][1]]
+        imgs_shape = np.array(imgs.shape)
+        excess_pixels = (imgs_shape[list(axes)] % binning).astype(int)
+        crop_vu = (excess_pixels - excess_pixels // 2, imgs_shape[list(axes)] - excess_pixels // 2)
+        slicing = [slice(None)] * len(imgs_shape)
+        for ii, ax in enumerate(axes):
+            if excess_pixels[ii] > 0:
+                slicing[ax] = slice(crop_vu[0][ii], crop_vu[1][ii])
+        imgs = imgs[tuple(slicing)]
 
         if verbose:
             print(f"Auto-cropping {crop_vu}: {imgs_shape} => {imgs.shape}")
@@ -199,12 +214,14 @@ def bin_imgs(imgs: NDArray, binning: Union[int, float], auto_crop: bool = False,
     imgs_shape = imgs.shape
 
     if isinstance(binning, int):
-        binned_shape = (*imgs_shape[:-2], imgs_shape[-2] // binning, imgs_shape[-1] // binning)
-        imgs = imgs.reshape([*binned_shape[:-1], binning, binned_shape[-1], binning])
-        imgs = imgs.mean(axis=(-3, -1))
+        binning_shape = np.ones_like(imgs_shape)
+        for ax in axes:
+            binning_shape[ax] = binning
+        imgs = block_reduce(imgs, tuple(binning_shape), np.mean)
+        binned_shape = imgs.shape
     else:
         imgs = imgs.reshape([-1, *imgs_shape[-2:]])
-        imgs = skt.rescale(imgs, 1 / binning, channel_axis=0)
+        imgs = skt.rescale(imgs, 1 / binning, channel_axis=0 if len(imgs_shape) > 2 else None)
         binned_shape = [*imgs_shape[:-2], *imgs.shape[-2:]]
         imgs = imgs.reshape(binned_shape)
 
