@@ -149,9 +149,13 @@ class ProjectorBackend(ABC):
         self.vol_shape_zxy = self.vol_geom.shape_zxy
         self.angles_w_rad = np.array(angles_rot_rad, ndmin=1, dtype=np.float32)
 
+        self.vol_eff_shape_zxy = np.floor(self.vol_shape_zxy * self.vol_geom.vox_size).astype(int)
+
         # Basic sizes, unless overridden
-        self.prj_shape_vwu = np.array([*self.vol_shape_zxy[:-2], len(self.angles_w_rad), self.vol_shape_zxy[-1]], dtype=int)
-        self.prj_shape_vu = np.array([*self.vol_shape_zxy[:-2], 1, self.vol_shape_zxy[-1]], dtype=int)
+        self.prj_shape_vwu = np.array(
+            [*self.vol_eff_shape_zxy[:-2], len(self.angles_w_rad), self.vol_eff_shape_zxy[-1]], dtype=int
+        )
+        self.prj_shape_vu = np.array([*self.vol_eff_shape_zxy[:-2], 1, self.vol_eff_shape_zxy[-1]], dtype=int)
 
         self.has_individual_projs = create_single_projs
 
@@ -427,7 +431,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
                 prj_geom = ProjectionGeometry.get_default_parallel(geom_type="3d", rot_axis_shift_pix=rot_axis_shift_pix)
 
             if prj_geom.det_shape_vu is None:
-                prj_geom.det_shape_vu = np.array(self.vol_geom.shape_xyz[list([2, 0])], dtype=int)
+                prj_geom.det_shape_vu = np.array(self.prj_shape_vwu[list([-3, -1])], dtype=int)
             else:
                 # Here the projections are supposed to be larger or smaller than the sample size
                 self.prj_shape_vwu = np.array([*prj_geom.det_shape_vu[:-1], num_angles, prj_geom.det_shape_vu[-1]])
@@ -452,7 +456,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
                 prj_geom = ProjectionGeometry.get_default_parallel(geom_type="2d", rot_axis_shift_pix=rot_axis_shift_pix)
 
             if prj_geom.det_shape_vu is None:
-                prj_geom.det_shape_vu = np.array(self.vol_geom.shape_xyz[list([0])], dtype=int)
+                prj_geom.det_shape_vu = np.array(self.prj_shape_vwu[list([-1])], dtype=int)
             else:
                 # Here the projections are supposed to be larger or smaller than the sample size
                 self.prj_shape_vwu = np.array([num_angles, prj_geom.det_shape_vu[-1]])
@@ -469,6 +473,8 @@ class ProjectorBackendASTRA(ProjectorBackend):
             vectors[:, 4:6] = rot_geom.get_field_scaled("det_u_xyz")
 
             geom_type_str = prj_geom.geom_type[:-2]
+
+        vectors /= vol_geom.vox_size
 
         if self.has_individual_projs:
             self.proj_geom_ind = [
@@ -733,7 +739,9 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
             prj_geom = prj_geom.get_3d()
 
         if prj_geom.det_shape_vu is None:
-            prj_geom.det_shape_vu = np.array(vol_geom_tmp3d.shape_xyz[list([2, 0])], dtype=int)
+            prj_shape_vu = np.delete(self.prj_shape_vwu, obj=-2)
+            prj_geom.det_shape_vu = np.ones(2, dtype=int)
+            prj_geom.det_shape_vu[-len(prj_shape_vu) :] = prj_shape_vu
 
         rot_geom = prj_geom.rotate(self.angles_w_rad)
 
