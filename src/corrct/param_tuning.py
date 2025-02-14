@@ -643,6 +643,8 @@ class CrossValidation(BaseParameterTuning):
             axs.set_title(f"Cross-validation loss values (avgs: {self.num_averages})")
             axs.set_xscale("log", nonpositive="clip")
             axs.errorbar(hp_vals, f_avgs, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
+            for f in f_vals.T:
+                axs.plot(hp_vals, f, linewidth=1, linestyle="--")
             axs.grid()
             fig.tight_layout()
             plt.show(block=False)
