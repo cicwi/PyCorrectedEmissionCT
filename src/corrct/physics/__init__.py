@@ -6,7 +6,7 @@ __author__ = """Nicola VIGANÒ"""
 __email__ = "N.R.Vigano@cwi.nl"
 
 
-from typing import Union
+from typing import overload, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,36 +27,102 @@ FluoLinesSiegbahn = xrf.LinesSiegbahn
 VolumeMaterial = materials.VolumeMaterial
 
 
-def convert_energy_to_wlength(energy_keV: Union[float, NDArray]) -> Union[float, NDArray]:
+class ConversionMetric:
+    """Conversion factors between orders of magnitude of the metric units."""
+
+    str_to_order = {
+        "km": 1e-3,
+        "m": 1e0,
+        "cm": 1e2,
+        "mm": 1e3,
+        "um": 1e6,
+        "nm": 1e9,
+        "a": 1e10,
+    }
+
+    order_to_str = {
+        1e-3: "km",
+        1e0: "m",
+        1e2: "cm",
+        1e3: "mm",
+        1e6: "um",
+        1e9: "nm",
+        1e10: "a",
+    }
+
+    @staticmethod
+    def convert(from_unit: str, to_unit: str) -> float:
+        """Convert numbers from the source unit to the destination unit.
+
+        Parameters
+        ----------
+        from_unit : str
+            The source unit
+        to_unit : str
+            The destination unit
+
+        Returns
+        -------
+        float
+            The conversion factor
+        """
+        return ConversionMetric.str_to_order[to_unit] / ConversionMetric.str_to_order[from_unit]
+
+
+@overload
+def convert_energy_to_wlength(energy_keV: float, unit: str = "m") -> float: ...
+
+
+@overload
+def convert_energy_to_wlength(energy_keV: NDArray, unit: str = "m") -> NDArray: ...
+
+
+@overload
+def convert_energy_to_wlength(energy_keV: Union[float, NDArray], unit: str = "m") -> Union[float, NDArray]:
     """Convert from energy in keV to wavelength in meters.
 
     Parameters
     ----------
     energy_keV : float | NDArray
         The energy in keV
+    unit : str, optional
+        The chosen unit for the output wavelength. The default is "m"
 
     Returns
     -------
     float | NDArray
-        The wavelength in m
+        The wavelength in the chosen unit
     """
-    return 1e-3 / (spc.physical_constants["electron volt-inverse meter relationship"][0] * energy_keV)
+    factor = ConversionMetric.convert("m", unit)
+    return 1e-3 / (spc.physical_constants["electron volt-inverse meter relationship"][0] * energy_keV) * factor
 
 
-def convert_wlength_to_energy(wlength_m: Union[float, NDArray]) -> Union[float, NDArray]:
+@overload
+def convert_wlength_to_energy(w_length: float, unit: str = "m") -> float: ...
+
+
+@overload
+def convert_wlength_to_energy(w_length: NDArray, unit: str = "m") -> NDArray: ...
+
+
+@overload
+def convert_wlength_to_energy(w_length: Union[float, NDArray], unit: str = "m") -> Union[float, NDArray]:
     """Convert wavelength in meters to energy in keV.
 
     Parameters
     ----------
-    wlength_m : float | NDArray
-        The wavelength in meter
+    w_length : float | NDArray
+        The wavelength in the chosen unit
+    unit : str, optional
+        The chosen unit for the input wavelength. The default is "m"
 
     Returns
     -------
     float | NDArray
         The energy in keV
     """
-    return 1e-3 / (spc.physical_constants["electron volt-inverse meter relationship"][0] * wlength_m)
+    factor = ConversionMetric.convert("m", unit)
+    return 1e-3 / (spc.physical_constants["electron volt-inverse meter relationship"][0] * w_length) * factor
 
 
 def pencil_beam_profile(
