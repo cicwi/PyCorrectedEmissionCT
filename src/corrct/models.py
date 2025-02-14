@@ -729,7 +729,7 @@ def get_prj_geom_cone(
 
 
 def get_vol_geom_from_data(
-    data: NDArray, padding_u: Union[int, Sequence[int], NDArray] = 0, data_format: str = "dvwu"
+    data: NDArray, padding_u: Union[int, Sequence[int], NDArray] = 0, data_format: str = "dvwu", super_sampling: int = 1
 ) -> VolumeGeometry:
     """
     Generate a default volume geometry from the data shape.
@@ -741,6 +741,8 @@ def get_vol_geom_from_data(
     padding_u : int | Sequence[int]
     data_format : str, optional
         The ordering and meaning of the dimensions in the data. The default is "dvwu".
+    super_sampling: int, optional
+        The super-sampling size of the voxels. The default is 1.
 
     Returns
     -------
@@ -763,10 +765,11 @@ def get_vol_geom_from_data(
     else:
         data_dims["u"] -= padding_u * 2
 
-    if data_dims["v"] is None:
-        return VolumeGeometry(np.array([data_dims["u"]] * 2))
-    else:
-        return VolumeGeometry(np.array([*([data_dims["u"]] * 2), data_dims["v"]]))
+    dims_xyz = [data_dims["u"]] * 2
+    if data_dims["v"] is not None:
+        dims_xyz.append(data_dims["v"])
+
+    return VolumeGeometry(np.array(dims_xyz) * super_sampling, vox_size=1 / super_sampling)
 
 
 def get_vol_geom_from_volume(volume: NDArray) -> VolumeGeometry:
