@@ -24,6 +24,13 @@ from tqdm.auto import tqdm
 
 from . import operators, processing
 
+try:
+    import torch as pt
+
+    __has_torch_cuda__ = pt.cuda.is_available()
+except ImportError:
+    __has_torch_cuda__ = False
+
 
 NDArrayInt = NDArray[np.integer]
 
@@ -850,7 +857,7 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
 
     mc: MaskCollection
 
-    def __init__(self, mask_collection: MaskCollection):
+    def __init__(self, mask_collection: Union[MaskCollection, NDArray], backend: str = "torch"):
         """
         Initialize the Ghost Imaging projector class.
 
@@ -859,6 +866,8 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         mask_collection : MaskCollection
             Container of the masks.
         """
+        if isinstance(mask_collection, np.ndarray):
+            mask_collection = MaskCollection(mask_collection)
         self.mc = mask_collection
 
         self._axes_shifts = np.arange(len(self.mc.shape_shifts))
@@ -869,6 +878,22 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         self.vol_shape = self.mc.masks_enc.shape[-2:]
         self.prj_shape = np.array(self.mc.num_buckets, ndmin=1)
         super().__init__()
+
+        if backend.lower() == "torch" and not __has_torch_cuda__:
+            print("WARNING: Requested PyTorch's backend, but CUDA is not available. Reverting back to NumPy.")
+            backend = "numpy"
+        self.backend = backend.lower()
+        self._init_backend()
+
+    def _init_backend(self):
+        if self.backend == "torch":
+            self.masks_enc: pt.Tensor = pt.tensor(self.mc.masks_enc, device="cuda")
+            self.masks_dec: pt.Tensor = pt.tensor(self.mc.masks_dec, device="cuda")
+        elif self.backend == "numpy":
+            self.masks_enc: NDArray = self.mc.masks_enc
+            self.masks_dec: NDArray = self.mc.masks_dec
+        else:
+            raise ValueError(f"Unknown requested backend {self.backend}")
 
     def fp(self, image: NDArray) -> NDArray:
         """Compute forward-projection (prediction) of the bucket values.
@@ -886,8 +911,16 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         masks_shape = [np.prod(self.mc.shape_shifts), np.prod(self.mc.shape_fov)]
         image_shape = [*image.shape[: -self.mc.mask_dims], np.prod(image.shape[-self.mc.mask_dims :])]
 
-        return np.squeeze(image.reshape(image_shape).dot(self.mc.masks_enc.reshape(masks_shape).T))
-        # return np.sum(self.masks_enc * image, axis=(-2, -1))
+        image = image.reshape(image_shape)
+        masks = self.masks_enc.reshape(masks_shape).T
+
+        if self.backend == "numpy":
+            return np.squeeze(image.dot(masks))
+            # return np.sum(self.masks_enc * image, axis=(-2, -1))
+        else:
+            image: pt.Tensor = pt.tensor(image, device="cuda")
+            bucket_vals = pt.tensordot(image, masks, ([-1], [0])).to("cpu").numpy()
+            return np.squeeze(bucket_vals)
 
     def bp(self, bucket_vals: NDArray) -> NDArray:
         """Compute back-projection of the bucket values.
@@ -907,8 +940,12 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         masks_shape = [np.prod(self.mc.shape_shifts), np.prod(self.mc.shape_fov)]
         out_shape = [*bucket_vals.shape[:-1], *self.mc.shape_fov]
 
-        masks_in = self.mc.masks_dec.reshape(masks_shape)
-        img_out: NDArray = bucket_vals.dot(masks_in)
+        masks_in = self.masks_dec.reshape(masks_shape)
+        if self.backend == "numpy":
+            img_out: NDArray = bucket_vals.dot(masks_in)
+        else:
+            buckets: pt.Tensor = pt.tensor(np.array(bucket_vals, ndmin=2), device="cuda")
+            img_out: NDArray = pt.tensordot(buckets, masks_in, ([-1], [0])).to("cpu").numpy()
 
         return img_out.reshape(out_shape)
         # return np.sum(bucket_vals[..., None, None] * self.masks_dec, axis=-3, keepdims=True)
@@ -979,4 +1016,5 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         Op_a = cp.deepcopy(self)
         Op_a.mc.masks_enc = np.abs(Op_a.mc.masks_enc)
         Op_a.mc.masks_dec = np.abs(Op_a.mc.masks_dec)
+        Op_a._init_backend()
         return Op_a
