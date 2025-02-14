@@ -203,10 +203,11 @@ def get_propagation_filter(
     else:
         raise ValueError(f"Invalid filter type: {filter_type}. Possible choices: 'ctf' | 'tie'")
 
+    fft_axes = tuple(np.arange(-len(img_shape), 0))
     if use_rfft:
-        filt_direct = np.fft.irfft2(filt_fourier, s=tuple(img_shape))
+        filt_direct = np.fft.irfftn(filt_fourier, s=tuple(img_shape), axes=fft_axes)
     else:
-        filt_direct = np.fft.ifft2(filt_fourier, s=tuple(img_shape)).real
+        filt_direct = np.fft.ifftn(filt_fourier, s=tuple(img_shape), axes=fft_axes).real
 
     if plot_result:
         fig, axs = plt.subplots(
