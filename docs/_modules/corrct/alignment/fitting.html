@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -708,7 +709,7 @@
 <div class="viewcode-block" id="extract_peak_region_nd">
 <a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.extract_peak_region_nd">[docs]</a>
 <span class="k">def</span> <span class="nf">extract_peak_region_nd</span><span class="p">(</span>
-    <span class="n">cc</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">peak_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cc_coords</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cc</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">peak_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cc_coords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract a region around the maximum value.</span>
@@ -726,7 +727,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    f_vals: NDArrayFloat</span>
 <span class="sd">        The extracted function values.</span>
-<span class="sd">    f_coords: Tuple[NDArrayFloat]</span>
+<span class="sd">    f_coords: Sequence[NDArrayFloat] | None</span>
 <span class="sd">        The coordinates of the extracted values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">img_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>

@@ -180,14 +180,17 @@ cannot be re-used with other projectors, and the computation / scaling of the
 maps is delegated entirely to the user.
 
 The user can also choose to use the class
-[`AttenuationVolume`](corrct.html#corrct.attenuation.AttenuationVolume) from the
-[`attenuation`](corrct.html#module-corrct.attenuation) module.
+[`AttenuationVolume`](corrct.html#corrct.physics.attenuation.AttenuationVolume) from the
+[`attenuation`](corrct.html#module-corrct.physics.attenuation) sub-module of the
+[`physics`](corrct.html#module-corrct.physics) module.
 This class is used internally in the projector
 [`ProjectorAttenuationXRF`](corrct.html#corrct.projectors.ProjectorAttenuationXRF),
 and it can be used particularly in conjunction with the class
 [`VolumeMaterial`](corrct.html#corrct.physics.VolumeMaterial) from the
 [`physics`](corrct.html#module-corrct.physics) module.
 
+For a more in-depth walk-through on attenuation correction, we refer to the dedicated
+[attenuation tutorial](attenuation_tutorial.md).
 For a dedicated description of the projection and attenuation correction geometry,
 the reader can have a look at the dedicated [geometry page](geometry.md).
 For a in-depth description of the functionality available in the physics module,

@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -105,6 +106,7 @@
     <span class="n">vol_shape_zxy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">],</span>
     <span class="n">radius_offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">coords_ball</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ball_norm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
     <span class="n">vol_origin_zxy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">taper_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">taper_target</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
@@ -123,6 +125,8 @@
 <span class="sd">        The offset with respect to the volume edge. The default is 0.</span>
 <span class="sd">    coords_ball : Sequence[int] | NDArrayInt | None, optional</span>
 <span class="sd">        The coordinates to consider for the non-masked region. The default is None.</span>
+<span class="sd">    ball_norm : float, optional</span>
+<span class="sd">        The norm of the ball. The default is 2.</span>
 <span class="sd">    vol_origin_zxy : Optional[Sequence[float]], optional</span>
 <span class="sd">        The origin of the coordinates in voxels. The default is None.</span>
 <span class="sd">    taper_func : str, optional</span>
@@ -168,7 +172,7 @@
     <span class="k">if</span> <span class="n">coords_ball</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">coords_ball</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">coords_ball</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">coords_ball</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">ball_norm</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">taper_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">dists</span> <span class="o">&lt;=</span> <span class="n">max_radius</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>

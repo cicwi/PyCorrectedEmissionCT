@@ -14,6 +14,7 @@ Contents:
    tutorial
    geometry
    physics_model
+   attenuation_tutorial
    alignment_tools
    modules
    changelog

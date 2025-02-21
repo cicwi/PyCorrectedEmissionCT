@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Alignment" href="alignment_tools.html" />
+    <link rel="next" title="Attenuation correction" href="attenuation_tutorial.html" />
     <link rel="prev" title="Reconstruction geometry" href="geometry.html" /> 
 </head>
 
@@ -49,11 +49,14 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Physics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#attenuation">Attenuation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-ray-fluorescence">X-ray Fluorescence</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#material-modeling">Material modeling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-ray-phase-contrast">X-ray Phase Contrast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unit-conversion">Unit conversion</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -94,6 +97,14 @@ In particular, we offer modeling of X-ray fluorescence (XRF) emission and X-ray
 attenuation, and some useful tools for X-ray phase contrast.
 The back-end of this module is the famous X-ray physics package called
 <a class="reference external" href="https://github.com/tschoonj/xraylib">xraylib</a>.</p>
+<section id="attenuation">
+<h2>Attenuation<a class="headerlink" href="#attenuation" title="Link to this heading"></a></h2>
+<p>The <a class="reference external" href="corrct.html#module-corrct.physics.attenuation"><code class="docutils literal notranslate"><span class="pre">physics.attenuation</span></code></a> sub-module
+offers support for attenuation correction in tomographic reconstructions, as well
+as some plotting functions of the different attenuation effects.
+For a dedicated walk-through on attenuation correction, we refer to the
+<a class="reference internal" href="attenuation_tutorial.html"><span class="doc">attenuation tutorial</span></a>.</p>
+</section>
 <section id="x-ray-fluorescence">
 <h2>X-ray Fluorescence<a class="headerlink" href="#x-ray-fluorescence" title="Link to this heading"></a></h2>
 <p>The <a class="reference external" href="corrct.html#module-corrct.physics.xrf"><code class="docutils literal notranslate"><span class="pre">physics.xrf</span></code></a> sub-module offers
@@ -142,6 +153,25 @@ compositions in the reconstruction volume, with the aim of generating:</p>
 functions to model the delta-over-beta value and transfer functions encountered
 in phase contrast problems.</p>
 </section>
+<section id="unit-conversion">
+<h2>Unit conversion<a class="headerlink" href="#unit-conversion" title="Link to this heading"></a></h2>
+<p>The <a class="reference external" href="corrct.html#module-corrct.physics.units"><code class="docutils literal notranslate"><span class="pre">physics.units</span></code></a> sub-module provides
+a small list of conversion functions to deal with conversions between different
+scales (e.g. converting between <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">nm</span></code>) and different units of the electromagnetic
+radiation (e.g. converting from energy to wavelength and vice versa).
+In particular, we find the classes <code class="docutils literal notranslate"><span class="pre">ConversionMetric</span></code> and <code class="docutils literal notranslate"><span class="pre">ConversionEnergy</span></code>, which
+provide the following functionality:</p>
+<ol class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ConversionMetric</span></code>: This class defines conversion factors between orders of
+magnitude of metric units such as kilometers, meters, centimeters, etc.
+It includes a <code class="docutils literal notranslate"><span class="pre">convert</span></code> method to convert numbers from a source unit to a destination unit.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ConversionEnergy</span></code>: Similar to <code class="docutils literal notranslate"><span class="pre">ConversionMetric</span></code>, this class handles conversion
+factors between orders of magnitude of energy units like GeV, MeV, keV, eV, etc.
+It also provides a <code class="docutils literal notranslate"><span class="pre">convert</span></code> method for converting energy from a source unit to a destination unit.</p></li>
+</ol>
+<p>The two functions <code class="docutils literal notranslate"><span class="pre">energy_to_wlength</span></code> and <code class="docutils literal notranslate"><span class="pre">wlength_to_energy</span></code> converts energy to
+wavelength and wavelength to energy, respectively.</p>
+</section>
 </section>
 
 
@@ -149,7 +179,7 @@ in phase contrast problems.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="geometry.html" class="btn btn-neutral float-left" title="Reconstruction geometry" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="alignment_tools.html" class="btn btn-neutral float-right" title="Alignment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="attenuation_tutorial.html" class="btn btn-neutral float-right" title="Attenuation correction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

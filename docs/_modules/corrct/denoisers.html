@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
@@ -94,26 +95,57 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">solvers</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">param_tuning</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">overload</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span>
 
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
 
 
 <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+
+
+<span class="k">def</span> <span class="nf">_default_regularizer_l1dwl</span><span class="p">(</span><span class="n">r_w</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">Regularizer_l1dwl</span><span class="p">(</span><span class="n">r_w</span><span class="p">,</span> <span class="s2">&quot;bior4.4&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">denoise_image</span><span class="p">(</span>
+    <span class="n">img</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">reg_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span>
+    <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pix_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
+    <span class="n">regularizer</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">_default_regularizer_l1dwl</span><span class="p">,</span>
+    <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span> <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">denoise_image</span><span class="p">(</span>
+    <span class="n">img</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">reg_weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pix_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
+    <span class="n">regularizer</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">_default_regularizer_l1dwl</span><span class="p">,</span>
+    <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span> <span class="o">...</span>
 
 
 <div class="viewcode-block" id="denoise_image">
 <a class="viewcode-back" href="../../corrct.html#corrct.denoisers.denoise_image">[docs]</a>
 <span class="k">def</span> <span class="nf">denoise_image</span><span class="p">(</span>
     <span class="n">img</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
-    <span class="n">reg_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
-    <span class="n">psf</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reg_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
+    <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">pix_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
-    <span class="n">regularizer</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">rw</span><span class="p">:</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">Regularizer_l1dwl</span><span class="p">(</span><span class="n">rw</span><span class="p">,</span> <span class="s2">&quot;bior4.4&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="n">regularizer</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">_default_regularizer_l1dwl</span><span class="p">,</span>
     <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Denoise an image.</span>
 
@@ -124,7 +156,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    img : NDArray</span>
-<span class="sd">        The image or sinogram to denoise.</span>
+<span class="sd">        The image to denoise.</span>
 <span class="sd">    reg_weight : Union[float, ArrayLike, NDArray], optional</span>
 <span class="sd">        Weight of the regularization term. The default is 1e-2.</span>
 <span class="sd">        If a sequence / array is passed, all the different values will be tested.</span>
@@ -139,12 +171,12 @@
 <span class="sd">    lower_limit : Optional[float], optional</span>
 <span class="sd">        Lower clipping limit of the image. The default is None.</span>
 <span class="sd">    verbose : bool, optional</span>
-<span class="sd">        Turn verbosity on. The default is False.</span>
+<span class="sd">        Turn verbosity on. The default is True.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    NDArray</span>
-<span class="sd">        Denoised image or sinogram.</span>
+<span class="sd">        Denoised image.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">psf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -159,7 +191,9 @@
     <span class="k">def</span> <span class="nf">solver_spawn</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">):</span>
         <span class="c1"># Using the PDHG solver from Chambolle and Pock</span>
         <span class="n">reg</span> <span class="o">=</span> <span class="n">regularizer</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg</span><span class="p">,</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg</span><span class="p">,</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">leave_progress</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">:</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Solver</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">solvers</span><span class="o">.</span><span class="n">SolutionInfo</span><span class="p">]:</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -173,19 +207,23 @@
 
     <span class="n">reg_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">reg_weight</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">reg_help_cv</span> <span class="o">=</span> <span class="n">param_tuning</span><span class="o">.</span><span class="n">CrossValidation</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_averages</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">reg_help_cv</span> <span class="o">=</span> <span class="n">param_tuning</span><span class="o">.</span><span class="n">CrossValidation</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">num_averages</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">solver_spawning_function</span> <span class="o">=</span> <span class="n">solver_spawn</span>
         <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">solver_calling_function</span> <span class="o">=</span> <span class="n">solver_call</span>
 
-        <span class="n">f_avgs</span><span class="p">,</span> <span class="n">f_stds</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">compute_loss_values</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
+        <span class="n">f_avgs</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">compute_loss_values</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
 
-        <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">plot_result</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">reg_weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">fit_loss_min</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">,</span> <span class="n">f_avgs</span><span class="p">,</span> <span class="n">f_stds</span><span class="o">=</span><span class="n">f_stds</span><span class="p">)</span>
+        <span class="n">min_reg_weight</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reg_help_cv</span><span class="o">.</span><span class="n">fit_loss_min</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">,</span> <span class="n">f_avgs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">min_reg_weight</span> <span class="o">=</span> <span class="n">reg_weight</span>
 
-    <span class="n">solver</span> <span class="o">=</span> <span class="n">solver_spawn</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
-    <span class="p">(</span><span class="n">denoised_img</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">solver_spawn</span><span class="p">(</span><span class="n">min_reg_weight</span><span class="p">)</span>
+    <span class="n">denoised_img</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">denoised_img</span></div>
+    <span class="k">if</span> <span class="n">reg_weight</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">denoised_img</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">denoised_img</span><span class="p">,</span> <span class="n">min_reg_weight</span></div>
 
 </pre></div>
 

@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -294,10 +295,11 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid filter type: </span><span class="si">{</span><span class="n">filter_type</span><span class="si">}</span><span class="s2">. Possible choices: &#39;ctf&#39; | &#39;tie&#39;&quot;</span><span class="p">)</span>
 
+    <span class="n">fft_axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">img_shape</span><span class="p">),</span> <span class="mi">0</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">use_rfft</span><span class="p">:</span>
-        <span class="n">filt_direct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">irfft2</span><span class="p">(</span><span class="n">filt_fourier</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">img_shape</span><span class="p">))</span>
+        <span class="n">filt_direct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">irfftn</span><span class="p">(</span><span class="n">filt_fourier</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">img_shape</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">fft_axes</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">filt_direct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft2</span><span class="p">(</span><span class="n">filt_fourier</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">img_shape</span><span class="p">))</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">filt_direct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftn</span><span class="p">(</span><span class="n">filt_fourier</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">img_shape</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">fft_axes</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
 
     <span class="k">if</span> <span class="n">plot_result</span><span class="p">:</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>

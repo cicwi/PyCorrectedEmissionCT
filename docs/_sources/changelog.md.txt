@@ -6,25 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.9.1...develop
 
-## 1.0.0rc3 - 2025-02-01
+## 1.0.0rc1-4 - 2025-02-21
 ### Added
-- Cleanup of physics API, by merging attenuation correction support
-### Fixed
-- GI mask resolution computation
-
-## 1.0.0rc2 - 2024-11-13
-### Added
+- Overhauling of `physics` module:
+  - Cleanup of physics API
+  - Merged attenuation correction support
+  - Added/improved attenuation plotting functions
+  - Added `units` submodule for conversions
+- Optional PyTorch backend for structured illumination (GI) projections
+- Super-sampling support in `VolumeGeometry` from `models`
 - Cleanup progress support in solvers
 - Cleanup of legacy API
 - Modern multi-threading code
-### Fixed
-- Building documentation
-
-## 1.0.0rc1 - 2024-10-03
-### Added
 - Moved to a src/ directory structure
-- Moved to pyproject.toml instead of setup.cfg
+- Moved to `pyproject.toml` instead of `setup.cfg`
 ### Fixed
+- GI mask resolution computation
+- Building documentation
 - NumPy 2.0 compatibility
 
 ## 0.9.1 - 2024-03-20

@@ -49,6 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">corrct</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="corrct.html">corrct package</a><ul class="current">
@@ -262,7 +263,7 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="corrct.physics.attenuation.plot_emission_line_attenuation">
-<span class="sig-prename descclassname"><span class="pre">corrct.physics.attenuation.</span></span><span class="sig-name descname"><span class="pre">plot_emission_line_attenuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'lorentzian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">201</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/corrct/physics/attenuation.html#plot_emission_line_attenuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.plot_emission_line_attenuation" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.attenuation.</span></span><span class="sig-name descname"><span class="pre">plot_emission_line_attenuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'lorentzian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">201</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_lines_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/corrct/physics/attenuation.html#plot_emission_line_attenuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.plot_emission_line_attenuation" title="Link to this definition"></a></dt>
 <dd><p>Plot spectral attenuation of a given line.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -274,6 +275,7 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <li><p><strong>line_shape</strong> (<em>str</em><em>, </em><em>optional</em>) – Shape of the line, by default “lorentzian”.
 Options are: “gaussian” | “lorentzian” | “sech**2”.</p></li>
 <li><p><strong>num_points</strong> (<em>int</em><em>, </em><em>optional</em>) – number of discretization points, by default 201</p></li>
+<li><p><strong>plot_lines_mean</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the line mean and the effective line mean, by default True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -386,10 +388,8 @@ and CEA-IRIG, Grenoble, France</p>
 <span class="sig-name descname"><span class="pre">get_fluo_production</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_in_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluo_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">FluoLine</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">FluoLine</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#corrct.physics.xrf.DetectorXRF" title="corrct.physics.xrf.DetectorXRF"><span class="pre">DetectorXRF</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics/materials.html#VolumeMaterial.get_fluo_production"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.materials.VolumeMaterial.get_fluo_production" title="Link to this definition"></a></dt>
 <dd><p>Compute the local fluorescence production, for the given line of the given element.</p>
 <p>Using Eq. (1) from:
-- T. Schoonjans et al., “The xraylib library for X-ray-matter interactions. Recent developments,” Spectrochim. Acta</p>
-<blockquote>
-<div><p>Part B At. Spectrosc., vol. 66, no. 11-12, pp. 776-784, Nov. 2011, doi: 10.1016/j.sab.2011.09.011.</p>
-</div></blockquote>
+- T. Schoonjans et al., “The xraylib library for X-ray-matter interactions. Recent developments,” Spectrochim. Acta
+Part B At. Spectrosc., vol. 66, no. 11-12, pp. 776-784, Nov. 2011, doi: 10.1016/j.sab.2011.09.011.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -534,6 +534,130 @@ Options: “ctf” (Contrast Transfer Function) | “tie” (Transport of Intens
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-corrct.physics.units">
+<span id="corrct-physics-units-module"></span><h2>corrct.physics.units module<a class="headerlink" href="#module-corrct.physics.units" title="Link to this heading"></a></h2>
+<p>Units and conversion.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.physics.units.ConversionEnergy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.physics.units.</span></span><span class="sig-name descname"><span class="pre">ConversionEnergy</span></span><a class="reference internal" href="_modules/corrct/physics/units.html#ConversionEnergy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.units.ConversionEnergy" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Conversion factors between orders of magnitude of the energy units.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.units.ConversionEnergy.convert">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/corrct/physics/units.html#ConversionEnergy.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.units.ConversionEnergy.convert" title="Link to this definition"></a></dt>
+<dd><p>Convert numbers from the source unit to the destination unit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>from_unit</strong> (<em>str</em>) – The source unit</p></li>
+<li><p><strong>to_unit</strong> (<em>str</em>) – The destination unit</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The conversion factor</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.units.ConversionEnergy.order_to_str">
+<span class="sig-name descname"><span class="pre">order_to_str</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{1e-09:</span> <span class="pre">'GeV',</span> <span class="pre">1e-06:</span> <span class="pre">'MeV',</span> <span class="pre">0.001:</span> <span class="pre">'keV',</span> <span class="pre">1.0:</span> <span class="pre">'eV',</span> <span class="pre">1000.0:</span> <span class="pre">'meV',</span> <span class="pre">1000000.0:</span> <span class="pre">'ueV'}</span></em><a class="headerlink" href="#corrct.physics.units.ConversionEnergy.order_to_str" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.units.ConversionEnergy.str_to_order">
+<span class="sig-name descname"><span class="pre">str_to_order</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GeV':</span> <span class="pre">1e-09,</span> <span class="pre">'MeV':</span> <span class="pre">1e-06,</span> <span class="pre">'eV':</span> <span class="pre">1.0,</span> <span class="pre">'keV':</span> <span class="pre">0.001,</span> <span class="pre">'meV':</span> <span class="pre">1000.0,</span> <span class="pre">'ueV':</span> <span class="pre">1000000.0}</span></em><a class="headerlink" href="#corrct.physics.units.ConversionEnergy.str_to_order" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.physics.units.ConversionMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.physics.units.</span></span><span class="sig-name descname"><span class="pre">ConversionMetric</span></span><a class="reference internal" href="_modules/corrct/physics/units.html#ConversionMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.units.ConversionMetric" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Conversion factors between orders of magnitude of the metric units.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.units.ConversionMetric.convert">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/corrct/physics/units.html#ConversionMetric.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.units.ConversionMetric.convert" title="Link to this definition"></a></dt>
+<dd><p>Convert numbers from the source unit to the destination unit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>from_unit</strong> (<em>str</em>) – The source unit</p></li>
+<li><p><strong>to_unit</strong> (<em>str</em>) – The destination unit</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The conversion factor</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.units.ConversionMetric.order_to_str">
+<span class="sig-name descname"><span class="pre">order_to_str</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{0.001:</span> <span class="pre">'km',</span> <span class="pre">1.0:</span> <span class="pre">'m',</span> <span class="pre">100.0:</span> <span class="pre">'cm',</span> <span class="pre">1000.0:</span> <span class="pre">'mm',</span> <span class="pre">1000000.0:</span> <span class="pre">'um',</span> <span class="pre">1000000000.0:</span> <span class="pre">'nm',</span> <span class="pre">10000000000.0:</span> <span class="pre">'a'}</span></em><a class="headerlink" href="#corrct.physics.units.ConversionMetric.order_to_str" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.units.ConversionMetric.str_to_order">
+<span class="sig-name descname"><span class="pre">str_to_order</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'a':</span> <span class="pre">10000000000.0,</span> <span class="pre">'cm':</span> <span class="pre">100.0,</span> <span class="pre">'km':</span> <span class="pre">0.001,</span> <span class="pre">'m':</span> <span class="pre">1.0,</span> <span class="pre">'mm':</span> <span class="pre">1000.0,</span> <span class="pre">'nm':</span> <span class="pre">1000000000.0,</span> <span class="pre">'um':</span> <span class="pre">1000000.0}</span></em><a class="headerlink" href="#corrct.physics.units.ConversionMetric.str_to_order" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.units.energy_to_wlength">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.units.</span></span><span class="sig-name descname"><span class="pre">energy_to_wlength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_wl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_en</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'keV'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/corrct/physics/units.html#energy_to_wlength"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.units.energy_to_wlength" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.units.</span></span><span class="sig-name descname"><span class="pre">energy_to_wlength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_wl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_en</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'keV'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Convert from energy to wavelength.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>energy</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The energy</p></li>
+<li><p><strong>unit_wl</strong> (<em>str</em><em>, </em><em>optional</em>) – The chosen unit for the output wavelength. The default is “m”</p></li>
+<li><p><strong>unit_en</strong> (<em>str</em><em>, </em><em>optional</em>) – The chosen unit for the input energy. The default is “keV”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The wavelength in the chosen unit</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float | NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.units.wlength_to_energy">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.units.</span></span><span class="sig-name descname"><span class="pre">wlength_to_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_wl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_en</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'keV'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/corrct/physics/units.html#wlength_to_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.units.wlength_to_energy" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.units.</span></span><span class="sig-name descname"><span class="pre">wlength_to_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_wl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_en</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'keV'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Convert wavelength to energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w_length</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The wavelength in the chosen unit</p></li>
+<li><p><strong>unit</strong> (<em>str</em><em>, </em><em>optional</em>) – The chosen unit for the input wavelength. The default is “m”</p></li>
+<li><p><strong>unit_en</strong> (<em>str</em><em>, </em><em>optional</em>) – The chosen unit for the output energy. The default is “keV”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The energy in the chosen unit</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float | NDArray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -757,40 +881,6 @@ or sub-shells.</p></li>
 <section id="module-corrct.physics">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-corrct.physics" title="Link to this heading"></a></h2>
 <p>Physics module.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="corrct.physics.convert_energy_to_wlength">
-<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">convert_energy_to_wlength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics.html#convert_energy_to_wlength"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.convert_energy_to_wlength" title="Link to this definition"></a></dt>
-<dd><p>Convert from energy in keV to wavelength in meters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>energy_keV</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The energy in keV</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The wavelength in m</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float | NDArray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="corrct.physics.convert_wlength_to_energy">
-<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">convert_wlength_to_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wlength_m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics.html#convert_wlength_to_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.convert_wlength_to_energy" title="Link to this definition"></a></dt>
-<dd><p>Convert wavelength in meters to energy in keV.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>wlength_m</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The wavelength in meter</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The energy in keV</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float | NDArray</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="corrct.physics.pencil_beam_profile">
 <span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">pencil_beam_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voxel_size_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_fwhm_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/corrct/physics.html#pencil_beam_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.pencil_beam_profile" title="Link to this definition"></a></dt>

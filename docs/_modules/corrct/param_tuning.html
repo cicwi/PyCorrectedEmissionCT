@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
@@ -756,6 +757,8 @@
             <span class="n">axs</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cross-validation loss values (avgs: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_averages</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
             <span class="n">axs</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="n">nonpositive</span><span class="o">=</span><span class="s2">&quot;clip&quot;</span><span class="p">)</span>
             <span class="n">axs</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">hp_vals</span><span class="p">,</span> <span class="n">f_avgs</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">f_stds</span><span class="p">,</span> <span class="n">ecolor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">elinewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">f_vals</span><span class="o">.</span><span class="n">T</span><span class="p">:</span>
+                <span class="n">axs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">hp_vals</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
             <span class="n">axs</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>

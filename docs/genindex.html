@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -369,10 +370,16 @@
 </li>
       <li><a href="corrct.html#corrct.regularizers.Constraint_UpperLimit">Constraint_UpperLimit (class in corrct.regularizers)</a>
 </li>
-      <li><a href="corrct.physics.html#corrct.physics.convert_energy_to_wlength">convert_energy_to_wlength() (in module corrct.physics)</a>
+      <li><a href="corrct.physics.html#corrct.physics.units.ConversionEnergy">ConversionEnergy (class in corrct.physics.units)</a>
 </li>
-      <li><a href="corrct.physics.html#corrct.physics.convert_wlength_to_energy">convert_wlength_to_energy() (in module corrct.physics)</a>
+      <li><a href="corrct.physics.html#corrct.physics.units.ConversionMetric">ConversionMetric (class in corrct.physics.units)</a>
 </li>
+      <li><a href="corrct.physics.html#corrct.physics.units.ConversionEnergy.convert">convert() (corrct.physics.units.ConversionEnergy static method)</a>
+
+      <ul>
+        <li><a href="corrct.physics.html#corrct.physics.units.ConversionMetric.convert">(corrct.physics.units.ConversionMetric static method)</a>
+</li>
+      </ul></li>
       <li><a href="corrct.html#corrct.models.ProjectionGeometry.copy">copy() (corrct.models.ProjectionGeometry method)</a>
 </li>
       <li>
@@ -480,6 +487,13 @@
 
       <ul>
         <li><a href="corrct.physics.html#module-corrct.physics.phase">module</a>
+</li>
+      </ul></li>
+      <li>
+    corrct.physics.units
+
+      <ul>
+        <li><a href="corrct.physics.html#module-corrct.physics.units">module</a>
 </li>
       </ul></li>
       <li>
@@ -666,16 +680,18 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.physics.html#corrct.physics.attenuation.AttenuationVolume.emitted_local">emitted_local (corrct.physics.attenuation.AttenuationVolume attribute)</a>
 </li>
+      <li><a href="corrct.physics.html#corrct.physics.units.energy_to_wlength">energy_to_wlength() (in module corrct.physics.units)</a>
+</li>
       <li><a href="corrct.processing.html#corrct.processing.post.estimate_resolution">estimate_resolution() (in module corrct.processing.post)</a>
 
       <ul>
         <li><a href="corrct.html#corrct.struct_illum.estimate_resolution">(in module corrct.struct_illum)</a>
 </li>
       </ul></li>
-      <li><a href="corrct.html#corrct.projectors.ProjectorAttenuationXRF.executor">executor (corrct.projectors.ProjectorAttenuationXRF attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="corrct.html#corrct.projectors.ProjectorAttenuationXRF.executor">executor (corrct.projectors.ProjectorAttenuationXRF attribute)</a>
+</li>
       <li><a href="corrct.html#corrct.operators.BaseTransform.explicit">explicit() (corrct.operators.BaseTransform method)</a>
 </li>
       <li><a href="corrct.html#corrct.models.VolumeGeometry.extent">extent (corrct.models.VolumeGeometry property)</a>
@@ -1108,6 +1124,8 @@
 </li>
         <li><a href="corrct.physics.html#module-corrct.physics.phase">corrct.physics.phase</a>
 </li>
+        <li><a href="corrct.physics.html#module-corrct.physics.units">corrct.physics.units</a>
+</li>
         <li><a href="corrct.physics.html#module-corrct.physics.xraylib_helper">corrct.physics.xraylib_helper</a>
 </li>
         <li><a href="corrct.physics.html#module-corrct.physics.xrf">corrct.physics.xrf</a>
@@ -1169,10 +1187,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.regularizers.BaseRegularizer.op">op (corrct.regularizers.BaseRegularizer attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.filters.BasisOptionsBlocks.order">order (corrct.filters.BasisOptionsBlocks attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="corrct.physics.html#corrct.physics.units.ConversionEnergy.order_to_str">order_to_str (corrct.physics.units.ConversionEnergy attribute)</a>
+
+      <ul>
+        <li><a href="corrct.physics.html#corrct.physics.units.ConversionMetric.order_to_str">(corrct.physics.units.ConversionMetric attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1373,10 +1397,10 @@
 </li>
       <li><a href="corrct.html#corrct.models.VolumeGeometry.shape_zxy">shape_zxy (corrct.models.VolumeGeometry property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.processing.html#corrct.processing.pre.shift_proj_stack">shift_proj_stack() (in module corrct.processing.pre)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.data_terms.DataFidelityBase.sigma">sigma (corrct.data_terms.DataFidelityBase attribute)</a>
 
       <ul>
@@ -1401,6 +1425,12 @@
 </li>
       <li><a href="corrct.html#corrct.models.ProjectionGeometry.src_pos_xyz">src_pos_xyz (corrct.models.ProjectionGeometry attribute)</a>
 </li>
+      <li><a href="corrct.physics.html#corrct.physics.units.ConversionEnergy.str_to_order">str_to_order (corrct.physics.units.ConversionEnergy attribute)</a>
+
+      <ul>
+        <li><a href="corrct.physics.html#corrct.physics.units.ConversionMetric.str_to_order">(corrct.physics.units.ConversionMetric attribute)</a>
+</li>
+      </ul></li>
       <li><a href="corrct.physics.html#corrct.physics.xrf.DetectorXRF.surface_mm2">surface_mm2 (corrct.physics.xrf.DetectorXRF attribute)</a>
 </li>
   </ul></td>
@@ -1520,6 +1550,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="corrct.html#corrct.regularizers.BaseRegularizer.weight">weight (corrct.regularizers.BaseRegularizer attribute)</a>
+</li>
+      <li><a href="corrct.physics.html#corrct.physics.units.wlength_to_energy">wlength_to_energy() (in module corrct.physics.units)</a>
 </li>
   </ul></td>
 </tr></table>

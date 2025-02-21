@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
@@ -879,7 +880,7 @@
 <div class="viewcode-block" id="get_vol_geom_from_data">
 <a class="viewcode-back" href="../../corrct.html#corrct.models.get_vol_geom_from_data">[docs]</a>
 <span class="k">def</span> <span class="nf">get_vol_geom_from_data</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">padding_u</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">padding_u</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">,</span> <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VolumeGeometry</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a default volume geometry from the data shape.</span>
@@ -891,6 +892,8 @@
 <span class="sd">    padding_u : int | Sequence[int]</span>
 <span class="sd">    data_format : str, optional</span>
 <span class="sd">        The ordering and meaning of the dimensions in the data. The default is &quot;dvwu&quot;.</span>
+<span class="sd">    super_sampling: int, optional</span>
+<span class="sd">        The super-sampling size of the voxels. The default is 1.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -913,10 +916,11 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">data_dims</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">]</span> <span class="o">-=</span> <span class="n">padding_u</span> <span class="o">*</span> <span class="mi">2</span>
 
-    <span class="k">if</span> <span class="n">data_dims</span><span class="p">[</span><span class="s2">&quot;v&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">VolumeGeometry</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data_dims</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">VolumeGeometry</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="p">([</span><span class="n">data_dims</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">data_dims</span><span class="p">[</span><span class="s2">&quot;v&quot;</span><span class="p">]]))</span></div>
+    <span class="n">dims_xyz</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_dims</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="n">data_dims</span><span class="p">[</span><span class="s2">&quot;v&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dims_xyz</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_dims</span><span class="p">[</span><span class="s2">&quot;v&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">VolumeGeometry</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims_xyz</span><span class="p">)</span> <span class="o">*</span> <span class="n">super_sampling</span><span class="p">,</span> <span class="n">vox_size</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="n">super_sampling</span><span class="p">)</span></div>
 
 
 

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attenuation correction &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Alignment" href="alignment_tools.html" />
+    <link rel="prev" title="Physics" href="physics_model.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physics_model.html">Physics</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Attenuation correction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#synthetic-data-creation">Synthetic data creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reconstruction">Reconstruction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-happens-behind-the-scenes">What happens behind the scenes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Attenuation correction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/attenuation_tutorial.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="attenuation-correction">
+<h1>Attenuation correction<a class="headerlink" href="#attenuation-correction" title="Link to this heading"></a></h1>
+<p>In this tutorial, we show how to use <code class="docutils literal notranslate"><span class="pre">corrct</span></code>’s attenuation correction functions.
+We first create a synthetic test case, as the one presented in:</p>
+<ul class="simple">
+<li><p>N. Viganò and V. A. Solé, “Physically corrected forward operators for
+induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
+Advanced X-Ray Tomography, pp. 1-26, Nov. 2017.</p></li>
+</ul>
+<section id="synthetic-data-creation">
+<h2>Synthetic data creation<a class="headerlink" href="#synthetic-data-creation" title="Link to this heading"></a></h2>
+<p>We can create the phantom and the local attenuation coefficient maps for the
+incoming beam and emitted photon energies with the following code:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">phantom</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">cct</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">download_phantom</span><span class="p">()</span>
+    <span class="kn">import</span> <span class="nn">phantom</span>
+
+<span class="n">vol_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+<span class="n">ph_or</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">phantom</span><span class="o">.</span><span class="n">modified_shepp_logan</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+<span class="n">ph_or</span> <span class="o">=</span> <span class="n">ph_or</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">ph</span><span class="p">,</span> <span class="n">vol_att_in</span><span class="p">,</span> <span class="n">vol_att_out</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">phantom_assign_concentration</span><span class="p">(</span><span class="n">ph_or</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These are the resulting images:
+<img alt="Phantoms" src="_images/attenuation-phantoms.png" /></p>
+<p>We then create a sinogram with the following function:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">sino</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">expected_ph</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">create_sino</span><span class="p">(</span><span class="n">ph</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">vol_att_in</span><span class="o">=</span><span class="n">vol_att_in</span><span class="p">,</span> <span class="n">vol_att_out</span><span class="o">=</span><span class="n">vol_att_out</span><span class="p">,</span> <span class="n">psf</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The resulting sinogram will show strong attenuation effects on the side that is
+the most far away from the XRF detector. Here below is a comparison against a
+non-attenuated sinogram.
+<img alt="Comparison between sinograms with and without attenuation" src="_images/attenuation-sinograms.png" /></p>
+</section>
+<section id="reconstruction">
+<h2>Reconstruction<a class="headerlink" href="#reconstruction" title="Link to this heading"></a></h2>
+<p>When proceeding to reconstruct with an uncorrected project as the following:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">solver_sirt</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">SIRT</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">vol_geom</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">get_vol_geom_from_data</span><span class="p">(</span><span class="n">sino</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">vol_geom</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+    <span class="n">rec_sirt_uncorr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver_sirt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We obtain the following reconstruction:</p>
+<p><img alt="uncorrected reconstruction" src="_images/attenuation-uncorrected-rec.png" /></p>
+<p>If instead we use a corrected projector with the following code:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorAttenuationXRF</span><span class="p">(</span><span class="n">vol_geom</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">att_in</span><span class="o">=</span><span class="n">vol_att_in</span><span class="p">,</span> <span class="n">att_out</span><span class="o">=</span><span class="n">vol_att_out</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+    <span class="n">rec_sirt_corr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver_sirt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We obtain a corrected reconstruction:</p>
+<p><img alt="corrected reconstruction" src="_images/attenuation-corrected-rec.png" /></p>
+<p>The resulting reconstruction still shows some imperfections, but most of the
+aberrations have been corrected.</p>
+</section>
+<section id="what-happens-behind-the-scenes">
+<h2>What happens behind the scenes<a class="headerlink" href="#what-happens-behind-the-scenes" title="Link to this heading"></a></h2>
+<p>What the project <code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code> actually does is to compute local
+attenuation maps for the pixels at each reconstruction angle.
+This can be seen if we use the <code class="docutils literal notranslate"><span class="pre">AttenuationVolume</span></code> directly, instead of letting
+the projector call it for us:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">att</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">attenuation</span><span class="o">.</span><span class="n">AttenuationVolume</span><span class="p">(</span>
+    <span class="n">incident_local</span><span class="o">=</span><span class="n">vol_att_in</span><span class="p">,</span> <span class="n">emitted_local</span><span class="o">=</span><span class="n">vol_att_out</span><span class="p">,</span> <span class="n">angles_rot_rad</span><span class="o">=</span><span class="n">angles_rad</span>
+<span class="p">)</span>
+<span class="n">att</span><span class="o">.</span><span class="n">compute_maps</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Two of the maps computed with the <code class="docutils literal notranslate"><span class="pre">compute_maps</span></code> method are shown here below:
+<img alt="Attenuation maps" src="_images/attenuation-maps.png" />
+The red arrow indicates the incoming beam direction, while the black arrow
+indicates the XRF detector position with respect to the sample.</p>
+<p>These maps can then be passed to the projector with the <code class="docutils literal notranslate"><span class="pre">**att.get_projector_args()</span></code> API:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorAttenuationXRF</span><span class="p">(</span><span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="o">**</span><span class="n">att</span><span class="o">.</span><span class="n">get_projector_args</span><span class="p">())</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+    <span class="n">rec_sirt_corr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver_sirt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="physics_model.html" class="btn btn-neutral float-left" title="Physics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="alignment_tools.html" class="btn btn-neutral float-right" title="Alignment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

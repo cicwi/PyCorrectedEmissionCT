@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -93,6 +94,7 @@
 <span class="kn">import</span> <span class="nn">skimage.transform</span> <span class="k">as</span> <span class="nn">skt</span>
 <span class="kn">from</span> <span class="nn">numpy.polynomial</span> <span class="kn">import</span> <span class="n">Polynomial</span>
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span> <span class="nn">skimage.measure</span> <span class="kn">import</span> <span class="n">block_reduce</span>
 
 
 <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
@@ -139,7 +141,8 @@
     <span class="n">projs_wvu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">flats_wvu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">darks_wvu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">crop</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crop</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cap_intensity</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -155,13 +158,15 @@
 <span class="sd">        Dark noise. The default is None.</span>
 <span class="sd">    crop : Optional[Sequence[int]], optional</span>
 <span class="sd">        Crop region. The default is None.</span>
+<span class="sd">    cap_intensity: float | None, optional</span>
+<span class="sd">        Cap the intensity to a given value. The default is None.</span>
 <span class="sd">    dtype : DTypeLike, optional</span>
 <span class="sd">        Data type of the processed data. The default is np.float32.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    NDArray</span>
-<span class="sd">        Falt-field corrected and linearized projections.</span>
+<span class="sd">        Flat-field corrected and linearized projections.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">projs_wvu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">projs_wvu</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
     <span class="n">flats_wvu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">flats_wvu</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
@@ -180,7 +185,12 @@
     <span class="k">if</span> <span class="n">flats_wvu</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
         <span class="n">flats_wvu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">flats_wvu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">projs_wvu</span> <span class="o">/</span> <span class="n">flats_wvu</span></div>
+    <span class="n">projs_wvu</span> <span class="o">=</span> <span class="n">projs_wvu</span> <span class="o">/</span> <span class="n">flats_wvu</span>
+
+    <span class="k">if</span> <span class="n">cap_intensity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">projs_wvu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="n">projs_wvu</span><span class="p">,</span> <span class="n">cap_intensity</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">projs_wvu</span></div>
 
 
 
@@ -264,7 +274,9 @@
 
 <div class="viewcode-block" id="bin_imgs">
 <a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.bin_imgs">[docs]</a>
-<span class="k">def</span> <span class="nf">bin_imgs</span><span class="p">(</span><span class="n">imgs</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">binning</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">auto_crop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">bin_imgs</span><span class="p">(</span>
+    <span class="n">imgs</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">binning</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">auto_crop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bin a stack of images.</span>
 
 <span class="sd">    Parameters</span>
@@ -284,10 +296,14 @@
 <span class="sd">        The binned images</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">auto_crop</span><span class="p">:</span>
-        <span class="n">imgs_shape</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">excess_pixels_vu</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">imgs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])</span> <span class="o">%</span> <span class="n">binning</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">crop_vu</span> <span class="o">=</span> <span class="p">(</span><span class="n">excess_pixels_vu</span> <span class="o">-</span> <span class="n">excess_pixels_vu</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">imgs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])</span> <span class="o">-</span> <span class="n">excess_pixels_vu</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">crop_vu</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop_vu</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">crop_vu</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="n">crop_vu</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">imgs_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">imgs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">excess_pixels</span> <span class="o">=</span> <span class="p">(</span><span class="n">imgs_shape</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]</span> <span class="o">%</span> <span class="n">binning</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">crop_vu</span> <span class="o">=</span> <span class="p">(</span><span class="n">excess_pixels</span> <span class="o">-</span> <span class="n">excess_pixels</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">imgs_shape</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">)]</span> <span class="o">-</span> <span class="n">excess_pixels</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">slicing</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgs_shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">excess_pixels</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">slicing</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">crop_vu</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ii</span><span class="p">],</span> <span class="n">crop_vu</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ii</span><span class="p">])</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slicing</span><span class="p">)]</span>
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Auto-cropping </span><span class="si">{</span><span class="n">crop_vu</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">imgs_shape</span><span class="si">}</span><span class="s2"> =&gt; </span><span class="si">{</span><span class="n">imgs</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -295,12 +311,14 @@
     <span class="n">imgs_shape</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">binning</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="n">binned_shape</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">imgs_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">imgs_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="n">binning</span><span class="p">,</span> <span class="n">imgs_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">binning</span><span class="p">)</span>
-        <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">*</span><span class="n">binned_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">binning</span><span class="p">,</span> <span class="n">binned_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">binning</span><span class="p">])</span>
-        <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">binning_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">imgs_shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+            <span class="n">binning_shape</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="o">=</span> <span class="n">binning</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">block_reduce</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">binning_shape</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+        <span class="n">binned_shape</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">shape</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">imgs_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]])</span>
-        <span class="n">imgs</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rescale</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">binning</span><span class="p">,</span> <span class="n">channel_axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">skt</span><span class="o">.</span><span class="n">rescale</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">binning</span><span class="p">,</span> <span class="n">channel_axis</span><span class="o">=</span><span class="mi">0</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgs_shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">binned_shape</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">imgs_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="o">*</span><span class="n">imgs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]]</span>
         <span class="n">imgs</span> <span class="o">=</span> <span class="n">imgs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">binned_shape</span><span class="p">)</span>
 
