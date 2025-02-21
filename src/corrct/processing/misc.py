@@ -24,6 +24,7 @@ def circular_mask(
     vol_shape_zxy: Union[Sequence[int], NDArrayInt],
     radius_offset: float = 0,
     coords_ball: Union[Sequence[int], NDArrayInt, None] = None,
+    ball_norm: float = 2,
     vol_origin_zxy: Union[Sequence[float], NDArray, None] = None,
     taper_func: Optional[str] = None,
     taper_target: Union[str, float] = "edge",
@@ -42,6 +43,8 @@ def circular_mask(
         The offset with respect to the volume edge. The default is 0.
     coords_ball : Sequence[int] | NDArrayInt | None, optional
         The coordinates to consider for the non-masked region. The default is None.
+    ball_norm : float, optional
+        The norm of the ball. The default is 2.
     vol_origin_zxy : Optional[Sequence[float]], optional
         The origin of the coordinates in voxels. The default is None.
     taper_func : str, optional
@@ -87,7 +90,7 @@ def circular_mask(
     if coords_ball.size == 1:
         dists = np.abs(coords[coords_ball, ...])
     else:
-        dists = np.sqrt(np.sum(coords[coords_ball, ...] ** 2, axis=0))
+        dists = np.linalg.norm(coords[coords_ball, ...], axis=0, ord=ball_norm)
 
     if taper_func is None:
         mask = (dists <= max_radius).astype(dtype)
