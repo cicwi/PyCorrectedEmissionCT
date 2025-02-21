@@ -219,7 +219,7 @@ class VolumeMaterial:
 
         Using Eq. (1) from:
         - T. Schoonjans et al., "The xraylib library for X-ray-matter interactions. Recent developments," Spectrochim. Acta
-          Part B At. Spectrosc., vol. 66, no. 11-12, pp. 776-784, Nov. 2011, doi: 10.1016/j.sab.2011.09.011.
+        Part B At. Spectrosc., vol. 66, no. 11-12, pp. 776-784, Nov. 2011, doi: 10.1016/j.sab.2011.09.011.
 
         Parameters
         ----------

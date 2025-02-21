@@ -28,6 +28,14 @@ corrct.physics.phase module
    :undoc-members:
    :show-inheritance:
 
+corrct.physics.units module
+---------------------------
+
+.. automodule:: corrct.physics.units
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 corrct.physics.xraylib\_helper module
 -------------------------------------
 

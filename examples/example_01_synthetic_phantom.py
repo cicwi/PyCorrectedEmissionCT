@@ -3,7 +3,7 @@ This example reproduces the phantom used in:
 
 - N. Viganò and V. A. Solé, “Physically corrected forward operators for
 induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
-Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.
+Advanced X-Ray Tomography, pp. 1-26, Nov. 2017.
 
 @author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands
 """

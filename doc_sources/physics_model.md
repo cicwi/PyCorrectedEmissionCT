@@ -12,6 +12,14 @@ attenuation, and some useful tools for X-ray phase contrast.
 The back-end of this module is the famous X-ray physics package called
 [xraylib](https://github.com/tschoonj/xraylib).
 
+## Attenuation
+
+The [`physics.attenuation`](corrct.html#module-corrct.physics.attenuation) sub-module
+offers support for attenuation correction in tomographic reconstructions, as well
+as some plotting functions of the different attenuation effects.
+For a dedicated walk-through on attenuation correction, we refer to the
+[attenuation tutorial](attenuation_tutorial.md).
+
 ## X-ray Fluorescence
 
 The [`physics.xrf`](corrct.html#module-corrct.physics.xrf) sub-module offers
