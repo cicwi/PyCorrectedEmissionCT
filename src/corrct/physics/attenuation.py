@@ -325,6 +325,7 @@ def plot_emission_line_attenuation(
     fwhm_keV: float,
     line_shape: str = "lorentzian",
     num_points: int = 201,
+    plot_lines_mean: bool = True,
 ) -> None:
     """Plot spectral attenuation of a given line.
 
@@ -378,23 +379,29 @@ def plot_emission_line_attenuation(
         atts[ii] = np.exp(-thickness_um * CONVERT_UM_TO_CM * compound["density"] * cmp_cs)
 
     yg = yg / np.max(yg)
+    mean_effective_energy_keV = float(nrgs_keV.dot(yg * atts) / yg.dot(atts))
 
     fig, axs_line = plt.subplots(1, 1)
     pl_line = axs_line.plot(nrgs_keV, yg, label="$I_0$", color="C0")
-    axs_line.tick_params(axis="y", labelcolor="C0")
+    axs_line.axvline(mean_energy_keV, linestyle="--", color="C0")
+    axs_line.tick_params(axis="y", labelcolor="C0", labelsize=14)
+    axs_line.tick_params(axis="x", labelsize=14)
+    axs_line.set_ylabel("Intensity", color="C0", fontsize=14)
     axs_atts = axs_line.twinx()
-    pl_atts = axs_atts.plot(nrgs_keV, atts, label="$\\mu (E)$", color="C1")
-    pl_line_att = axs_atts.plot(nrgs_keV, yg * atts, label="$I_m$", color="C2")
-    axs_atts.tick_params(axis="y", labelcolor="C1")
+    pl_atts = axs_atts.plot(nrgs_keV, atts, label="exp(-$\\mu (E) x)$", color="C1")
+    pl_line_att = axs_atts.plot(nrgs_keV, yg * atts, label=r"$I_{measured}$", color="C2")
+    axs_atts.axvline(mean_effective_energy_keV, linestyle="--", color="C2")
+    axs_atts.tick_params(axis="y", labelcolor="C1", labelsize=14)
+    axs_atts.set_ylabel("Transmittance", color="C1", fontsize=14)
     all_pls = pl_line + pl_atts + pl_line_att
-    axs_atts.legend(all_pls, [str(pl.get_label()) for pl in all_pls])
+    axs_atts.legend(all_pls, [str(pl.get_label()) for pl in all_pls], fontsize=13)
     axs_line.grid()
     fig.tight_layout()
 
     I_lin = np.sum(yg * atts[num_points // 2])
     I_meas = yg.dot(atts)
     print(f"Expected intensity: {I_lin}, measured: {I_meas} ({I_meas / I_lin:%})")
-    print(f"Mean energy {nrgs_keV.dot(yg / np.sum(yg) * (atts / atts[len(atts) // 2]))}, {nrgs_keV.dot(yg / np.sum(yg))}")
+    print(f"Expected mean energy: {nrgs_keV.dot(yg / np.sum(yg)):.5}, effective: {mean_effective_energy_keV:.5}")
 
 
 def plot_transmittance_decay(
