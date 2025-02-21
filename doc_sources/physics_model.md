@@ -58,3 +58,22 @@ compositions in the reconstruction volume, with the aim of generating:
 The [`physics.phase`](corrct.html#module-corrct.physics.phase) sub-module contains
 functions to model the delta-over-beta value and transfer functions encountered
 in phase contrast problems.
+
+## Unit conversion
+
+The [`physics.units`](corrct.html#module-corrct.physics.units) sub-module provides
+a small list of conversion functions to deal with conversions between different
+scales (e.g. converting between `m` and `nm`) and different units of the electromagnetic
+radiation (e.g. converting from energy to wavelength and vice versa).
+In particular, we find the classes `ConversionMetric` and `ConversionEnergy`, which
+provide the following functionality:
+
+1. `ConversionMetric`: This class defines conversion factors between orders of
+magnitude of metric units such as kilometers, meters, centimeters, etc.
+It includes a `convert` method to convert numbers from a source unit to a destination unit.
+2. `ConversionEnergy`: Similar to `ConversionMetric`, this class handles conversion
+factors between orders of magnitude of energy units like GeV, MeV, keV, eV, etc.
+It also provides a `convert` method for converting energy from a source unit to a destination unit.
+
+The two functions `energy_to_wlength` and `wlength_to_energy` converts energy to
+wavelength and wavelength to energy, respectively.
