@@ -15,24 +15,55 @@ from . import regularizers
 from . import solvers
 from . import param_tuning
 
-from typing import Optional, Tuple, Union, Callable
+from collections.abc import Sequence
+from typing import overload, Optional, Tuple, Union, Callable
 
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 
 eps = np.finfo(np.float32).eps
 
 
+def _default_regularizer_l1dwl(r_w: Union[float, NDArray]) -> regularizers.BaseRegularizer:
+    return regularizers.Regularizer_l1dwl(r_w, "bior4.4", 3)
+
+
+@overload
 def denoise_image(
     img: NDArray,
-    reg_weight: Union[float, ArrayLike, NDArray] = 1e-2,
-    psf: Union[ArrayLike, NDArray, None] = None,
+    reg_weight: Union[Sequence[float], NDArray],
+    psf: Optional[NDArray] = None,
     pix_weights: Optional[NDArray] = None,
     iterations: int = 250,
-    regularizer: Callable = lambda rw: regularizers.Regularizer_l1dwl(rw, "bior4.4", 3),
+    regularizer: Callable = _default_regularizer_l1dwl,
     lower_limit: Optional[float] = None,
-    verbose: bool = False,
-) -> NDArray:
+    verbose: bool = True,
+) -> tuple[NDArray, float]: ...
+
+
+@overload
+def denoise_image(
+    img: NDArray,
+    reg_weight: float,
+    psf: Optional[NDArray] = None,
+    pix_weights: Optional[NDArray] = None,
+    iterations: int = 250,
+    regularizer: Callable = _default_regularizer_l1dwl,
+    lower_limit: Optional[float] = None,
+    verbose: bool = True,
+) -> NDArray: ...
+
+
+def denoise_image(
+    img: NDArray,
+    reg_weight: Union[float, Sequence[float], NDArray] = 1e-2,
+    psf: Optional[NDArray] = None,
+    pix_weights: Optional[NDArray] = None,
+    iterations: int = 250,
+    regularizer: Callable = _default_regularizer_l1dwl,
+    lower_limit: Optional[float] = None,
+    verbose: bool = True,
+) -> Union[NDArray, tuple[NDArray, float]]:
     """
     Denoise an image.
 
@@ -43,7 +74,7 @@ def denoise_image(
     Parameters
     ----------
     img : NDArray
-        The image or sinogram to denoise.
+        The image to denoise.
     reg_weight : Union[float, ArrayLike, NDArray], optional
         Weight of the regularization term. The default is 1e-2.
         If a sequence / array is passed, all the different values will be tested.
@@ -58,12 +89,12 @@ def denoise_image(
     lower_limit : Optional[float], optional
         Lower clipping limit of the image. The default is None.
     verbose : bool, optional
-        Turn verbosity on. The default is False.
+        Turn verbosity on. The default is True.
 
     Returns
     -------
     NDArray
-        Denoised image or sinogram.
+        Denoised image.
     """
     if psf is None:
         op = operators.TransformIdentity(img.shape)
@@ -78,7 +109,9 @@ def denoise_image(
     def solver_spawn(lam_reg):
         # Using the PDHG solver from Chambolle and Pock
         reg = regularizer(lam_reg)
-        return solvers.PDHG(verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term)
+        return solvers.PDHG(
+            verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term, leave_progress=False
+        )
 
     def solver_call(solver: solvers.Solver, b_test_mask: Optional[NDArray] = None) -> Tuple[NDArray, solvers.SolutionInfo]:
         x0 = img.copy()
@@ -92,16 +125,20 @@ def denoise_image(
 
     reg_weight = np.array(reg_weight)
     if reg_weight.size > 1:
-        reg_help_cv = param_tuning.CrossValidation(img.shape, verbose=True, num_averages=5, plot_result=False)
+        reg_help_cv = param_tuning.CrossValidation(img.shape, verbose=verbose, num_averages=3, plot_result=verbose)
         reg_help_cv.solver_spawning_function = solver_spawn
         reg_help_cv.solver_calling_function = solver_call
 
-        f_avgs, f_stds, _ = reg_help_cv.compute_loss_values(reg_weight)
+        f_avgs, _, _ = reg_help_cv.compute_loss_values(reg_weight)
 
-        reg_help_cv.plot_result = True
-        reg_weight, _ = reg_help_cv.fit_loss_min(reg_weight, f_avgs, f_stds=f_stds)
+        min_reg_weight, _ = reg_help_cv.fit_loss_min(reg_weight, f_avgs)
+    else:
+        min_reg_weight = reg_weight
 
-    solver = solver_spawn(reg_weight)
-    (denoised_img, _) = solver_call(solver, None)
+    solver = solver_spawn(min_reg_weight)
+    denoised_img, _ = solver_call(solver, None)
 
-    return denoised_img
+    if reg_weight.size == 1:
+        return denoised_img
+    else:
+        return denoised_img, min_reg_weight
