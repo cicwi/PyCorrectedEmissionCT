@@ -56,7 +56,7 @@ def apply_flat_field(
     projs_wvu: NDArray,
     flats_wvu: NDArray,
     darks_wvu: Optional[NDArray] = None,
-    crop: Optional[Sequence[int]] = None,
+    crop: Union[NDArray, Sequence[int], None] = None,
     cap_intensity: Optional[float] = None,
     dtype: DTypeLike = np.float32,
 ) -> NDArray:

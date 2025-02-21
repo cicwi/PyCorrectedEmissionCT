@@ -600,7 +600,7 @@ def refine_max_position_1d(
 
 
 def extract_peak_region_nd(
-    cc: NDArrayFloat, peak_radius: int = 1, cc_coords: Union[tuple[Union[Sequence, NDArray]], None] = None
+    cc: NDArrayFloat, peak_radius: int = 1, cc_coords: Optional[Sequence[Union[Sequence, NDArray]]] = None
 ) -> tuple[NDArray, Optional[Sequence[NDArray]]]:
     """
     Extract a region around the maximum value.
@@ -618,7 +618,7 @@ def extract_peak_region_nd(
     -------
     f_vals: NDArrayFloat
         The extracted function values.
-    f_coords: Tuple[NDArrayFloat]
+    f_coords: Sequence[NDArrayFloat] | None
         The coordinates of the extracted values.
     """
     img_shape = np.array(cc.shape)
