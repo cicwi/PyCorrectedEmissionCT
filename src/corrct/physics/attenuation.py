@@ -344,6 +344,8 @@ def plot_emission_line_attenuation(
         Options are: "gaussian" | "lorentzian" | "sech**2".
     num_points : int, optional
         number of discretization points, by default 201
+    plot_lines_mean : bool, optional
+        Whether to plot the line mean and the effective line mean, by default True
 
     Raises
     ------
@@ -383,14 +385,16 @@ def plot_emission_line_attenuation(
 
     fig, axs_line = plt.subplots(1, 1)
     pl_line = axs_line.plot(nrgs_keV, yg, label="$I_0$", color="C0")
-    axs_line.axvline(mean_energy_keV, linestyle="--", color="C0")
+    if plot_lines_mean:
+        axs_line.axvline(mean_energy_keV, linestyle="--", color="C0")
     axs_line.tick_params(axis="y", labelcolor="C0", labelsize=14)
     axs_line.tick_params(axis="x", labelsize=14)
     axs_line.set_ylabel("Intensity", color="C0", fontsize=14)
     axs_atts = axs_line.twinx()
     pl_atts = axs_atts.plot(nrgs_keV, atts, label="exp(-$\\mu (E) x)$", color="C1")
     pl_line_att = axs_atts.plot(nrgs_keV, yg * atts, label=r"$I_{measured}$", color="C2")
-    axs_atts.axvline(mean_effective_energy_keV, linestyle="--", color="C2")
+    if plot_lines_mean:
+        axs_atts.axvline(mean_effective_energy_keV, linestyle="--", color="C2")
     axs_atts.tick_params(axis="y", labelcolor="C1", labelsize=14)
     axs_atts.set_ylabel("Transmittance", color="C1", fontsize=14)
     all_pls = pl_line + pl_atts + pl_line_att
