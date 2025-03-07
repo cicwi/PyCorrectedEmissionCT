@@ -1,10 +1,11 @@
-# Tutorial
+# Tutorial (basics)
 
 In this tutorial, we will first learn the basics of how to reconstruct
-projection data.
-We will then introduce attenuation correction, data terms, and regularizers.
-Finally, we will see the more advanced topics like guided regularization
-parameter selection.
+projection data with `corrct`.
+We will then describe how to use data terms and regularizers.
+Finally, we will introduce more advanced topics like attenuation correction and
+guided regularization hyper-parameter selection, which will be covered in
+dedicated tutorials.
 
 ## Reconstructing projection data
 
@@ -68,8 +69,10 @@ with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:
     vol = p.T(np.ones((16, 10)))
 ```
 
-Creating attenuation correction projectors is a bit more involved, and we will
-see it later in the [attenuation correction](#attenuation-correction) section.
+Creating attenuation correction projectors is a bit more involved, and it
+requires knowledge about the sample, regarding composition and morphology.
+It is briefly introduce in the [attenuation section](#attenuation-correction),
+and described in the [attenuation correction tutorial](attenuation_tutorial.md).
 
 Projectors can use different backends, depending on the available packages,
 system resources, and user requests. The included projector backends are based
@@ -155,6 +158,30 @@ with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:
 The same goes for the parameter `upper_limit`.
 The MLEM algorithm assumes a `lower_limit` of 0.
 
+## Data terms and regularization
+
+Iterative methods support regularizers, and data fidelity terms. The former can
+be used to impose prior knowledge on the reconstructed solution, while the
+latter impose prior knowledge on the weight given to the data points.
+
+### Regularizers
+
+Famous regularizers are the TV-min and wavelet l1-min. They can be found in the
+[](#regularizers) module.
+
+### Data fidelity terms
+
+The PDHG algorithm supports various data fidelity terms. They can be found in
+the [](#data_terms) module, and they include:
+* l2 norm - least squares reconstruction - default:
+[`DataFidelity_l2`](#data_terms.DataFidelity_l2)
+* weighted l2 norm - when the variance of the sinogram points is known:
+[`DataFidelity_wl2`](#data_terms.DataFidelity_wl2)
+* l1 norm - when the sinogram noise is mostly sparse:
+[`DataFidelity_l1`](#data_terms.DataFidelity_l1)
+* Kullback-Leibler - when dealing with Poisson noise:
+[`DataFidelity_KL`](#data_terms.DataFidelity_KL)
+
 ## Attenuation correction
 
 This package implements the attenuation correction method described in [2].
@@ -190,30 +217,6 @@ For a dedicated description of the projection and attenuation correction geometr
 the reader can have a look at the dedicated [geometry page](geometry.md).
 For a in-depth description of the functionality available in the physics module,
 instead, the reader can have a look at the dedicated [physics page](physics_model.md).
-
-## Data terms and regularization
-
-Iterative methods support regularizers, and data fidelity terms. The former can
-be used to impose prior knowledge on the reconstructed solution, while the
-latter impose prior knowledge on the weight given to the data points.
-
-### Regularizers
-
-Famous regularizers are the TV-min and wavelet l1-min. They can be found in the
-[](#regularizers) module.
-
-### Data fidelity terms
-
-The PDHG algorithm supports various data fidelity terms. They can be found in
-the [](#data_terms) module, and they include:
-* l2 norm - least squares reconstruction - default:
-[`DataFidelity_l2`](#data_terms.DataFidelity_l2)
-* weighted l2 norm - when the variance of the sinogram points is known:
-[`DataFidelity_wl2`](#data_terms.DataFidelity_wl2)
-* l1 norm - when the sinogram noise is mostly sparse:
-[`DataFidelity_l1`](#data_terms.DataFidelity_l1)
-* Kullback-Leibler - when dealing with Poisson noise:
-[`DataFidelity_KL`](#data_terms.DataFidelity_KL)
 
 ## Guided regularization parameter selection
 
