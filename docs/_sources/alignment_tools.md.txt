@@ -42,6 +42,30 @@ sinusoid that interpolates the chosen value of interest across all the rotation
 angles. The value of interest can include the center-of-mass (CoM) or the position
 of the highest intensity peak of the projections.
 
+We present here an example of how to use the `fit_u` method to compute the horizontal shifts.
+```Python
+import corrct as cct
+
+align_pre = cct.alignment.DetectorShiftsPRE(data_vwu, angles_rad)
+
+diffs_u_pre, cor = align_pre.fit_u()
+```
+where the projection data is passed to the `DetectorShiftsPRE` class with the
+following axes order: [V], W, U, which means that V is the slowest varying axis,
+but also optional (in case of 2D data).
+
+These shifts can be used to create a `ProjectionGeometry` object, which can be
+used to correct the projection data, when passed to projection operators as follows:
+```Python
+prj_geom = cct.models.get_prj_geom_parallel(geom_type="2d")
+prj_geom.set_detector_shifts_vu(diffs_u_pre, cor)
+vol_geom = cct.models.get_vol_geom_from_data(data_vwu)
+
+solver = cct.solvers.SIRT()
+with cct.projectors.ProjectorUncorrected(vol_geom, angles_rad, prj_geom=prj_geom) as A:
+    rec_pre, _ = solver(A, data_test, iterations=100)
+```
+
 ## Image stack alignment
 
 The [](#alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts) function calculates the

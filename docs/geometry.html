@@ -27,7 +27,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Physics" href="physics_model.html" />
-    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+    <link rel="prev" title="Tutorial (basics)" href="tutorial.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,11 +51,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">PyCorrectedEmissionCT (corrct)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial (basics)</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Reconstruction geometry</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#rotation-direction-and-sinogram-flip">Rotation direction and sinogram flip</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#incoming-beam-direction">Incoming beam direction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#detector-position">Detector position</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#incoming-beam-attenuation-direction">Incoming beam attenuation direction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#detector-position-for-self-attenuation">Detector position (for self-attenuation)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="physics_model.html">Physics</a></li>
@@ -99,8 +99,10 @@
 <li><p>The excitation beam direction: <code class="docutils literal notranslate"><span class="pre">bottom-up</span></code>, <code class="docutils literal notranslate"><span class="pre">top-down</span></code>, <code class="docutils literal notranslate"><span class="pre">left-rightwards</span></code>, <code class="docutils literal notranslate"><span class="pre">right-leftwards</span></code></p></li>
 <li><p>The position of the XRF detector with respect to the excitation beam: <code class="docutils literal notranslate"><span class="pre">right</span></code> vs <code class="docutils literal notranslate"><span class="pre">left</span></code></p></li>
 </ol>
+<section id="rotation-direction-and-sinogram-flip">
+<h2>Rotation direction and sinogram flip<a class="headerlink" href="#rotation-direction-and-sinogram-flip" title="Link to this heading"></a></h2>
 <p>To produce the relevant figures, we use the following code:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="kn">import</span> <span class="nn">corrct</span> <span class="k">as</span> <span class="nn">cct</span>
 
@@ -123,22 +125,68 @@
 
 <span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">,</span> <span class="n">test_angles</span><span class="p">)</span> <span class="k">as</span> <span class="n">A</span><span class="p">:</span>
     <span class="n">bp_angles_3</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">sino_wu</span><span class="p">)</span>
-
-<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The following sinogram will produce a specific type of structure that allows us
+to determine the rotation direction and the sinogram flip.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Image</label><div class="sd-tab-content docutils">
+<p><img alt="geometry-projectors-sinogram" src="_images/geometry-projectors-sinogram.png" /></p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Code</label><div class="sd-tab-content docutils">
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">axs</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">sino_wu</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">axs</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Sinogram&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">axs</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the following reconstructions, we can see that the incoming beam comes from
+the top of the image, and the rotation direction is <code class="docutils literal notranslate"><span class="pre">counter-clockwise</span></code>.
+The sinogram <code class="docutils literal notranslate"><span class="pre">U</span></code> axis goes from left to right in the reconstruction volume.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Image</label><div class="sd-tab-content docutils">
+<p><img alt="geometry-projectors-coherence" src="_images/geometry-projectors-comparison.png" /></p>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Code</label><div class="sd-tab-content docutils">
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mf">3.625</span><span class="p">])</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Projector consistency, and sinogram horizontal (U) flip&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
 <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">bp_angles_s</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Scikit-image&quot;</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Scikit-image&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
 <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">bp_angles_a</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Astra 2D&quot;</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Astra 2D&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
 <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">bp_angles_3</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Astra 3D&quot;</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Astra 3D&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-
-<span class="n">vol_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="incoming-beam-attenuation-direction">
+<h2>Incoming beam attenuation direction<a class="headerlink" href="#incoming-beam-attenuation-direction" title="Link to this heading"></a></h2>
+<p>For a correct attenuation correction of the incoming beam intensity, the
+acquisition geometry used for computing the attenuation map needs to match the
+reconstruction geometry from the previous section. The following code can be used
+to compute and visualize the attenuation maps for the incoming beam intensity at
+the same angles as for the reconstruction geometry seen above:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">vol_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">]</span>
 <span class="n">vol_att_test</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">processing</span><span class="o">.</span><span class="n">circular_mask</span><span class="p">(</span><span class="n">vol_shape</span><span class="p">,</span> <span class="n">radius_offset</span><span class="o">=-</span><span class="mi">80</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <span class="n">det_angle_rad</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
 
-<span class="n">att_vol</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">attenuation</span><span class="o">.</span><span class="n">AttenuationVolume</span><span class="p">(</span>
+<span class="n">att_vol</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">attenuation</span><span class="o">.</span><span class="n">AttenuationVolume</span><span class="p">(</span>
     <span class="n">incident_local</span><span class="o">=</span><span class="n">vol_att_test</span><span class="p">,</span> <span class="n">emitted_local</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angles_rot_rad</span><span class="o">=</span><span class="n">test_angles</span><span class="p">,</span> <span class="n">angles_det_rad</span><span class="o">=</span><span class="n">det_angle_rad</span>
 <span class="p">)</span>
 <span class="n">att_vol</span><span class="o">.</span><span class="n">compute_maps</span><span class="p">()</span>
@@ -149,8 +197,19 @@
     <span class="n">att_vol</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="n">ii_a</span><span class="p">],</span> <span class="n">ii_a</span><span class="p">)</span>
     <span class="n">ax</span><span class="p">[</span><span class="n">ii_a</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-
-<span class="n">att_vol</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">attenuation</span><span class="o">.</span><span class="n">AttenuationVolume</span><span class="p">(</span>
+</pre></div>
+</div>
+<p><img alt="geometry-attenuation-in" src="_images/geometry-attenuation-incoming-beam.png" /></p>
+<p>The red arrow indicates the incoming beam direction, which matches with the
+geometry of the previous figure.</p>
+</section>
+<section id="detector-position-for-self-attenuation">
+<h2>Detector position (for self-attenuation)<a class="headerlink" href="#detector-position-for-self-attenuation" title="Link to this heading"></a></h2>
+<p>A similar type of technique can be used for determining the geometry of the
+self-attenuation correction. With the following code, we can compute and
+visualize the attenuation maps for the emitted photons at the same angles as the
+reconstruction geometry:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">att_vol</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">attenuation</span><span class="o">.</span><span class="n">AttenuationVolume</span><span class="p">(</span>
     <span class="n">incident_local</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">emitted_local</span><span class="o">=</span><span class="n">vol_att_test</span><span class="p">,</span> <span class="n">angles_rot_rad</span><span class="o">=</span><span class="n">test_angles</span><span class="p">,</span> <span class="n">angles_det_rad</span><span class="o">=</span><span class="n">det_angle_rad</span>
 <span class="p">)</span>
 <span class="n">att_vol</span><span class="o">.</span><span class="n">compute_maps</span><span class="p">()</span>
@@ -163,17 +222,12 @@
 <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
-<section id="rotation-direction-and-sinogram-flip">
-<h2>Rotation direction and sinogram flip<a class="headerlink" href="#rotation-direction-and-sinogram-flip" title="Link to this heading"></a></h2>
-<p><img alt="geometry-projectors-coherence" src="_images/geometry-projectors-comparison.png" /></p>
-</section>
-<section id="incoming-beam-direction">
-<h2>Incoming beam direction<a class="headerlink" href="#incoming-beam-direction" title="Link to this heading"></a></h2>
-<p><img alt="geometry-attenuation-in" src="_images/geometry-attenuation-incoming-beam.png" /></p>
-</section>
-<section id="detector-position">
-<h2>Detector position<a class="headerlink" href="#detector-position" title="Link to this heading"></a></h2>
 <p><img alt="geometry-attenuation-out" src="_images/geometry-attenuation-emitted-photons.png" /></p>
+<p>The black arrow indicates the detector position, which for the purpose of
+self-attenuation correction also coincides with what we call (with an abuse of
+terminology) the emitted photon direction.
+From this figure, we conclude that the detector sits on the <code class="docutils literal notranslate"><span class="pre">right</span></code> of the sample,
+from the incoming beam perspective.</p>
 </section>
 </section>
 
@@ -181,7 +235,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="tutorial.html" class="btn btn-neutral float-left" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial.html" class="btn btn-neutral float-left" title="Tutorial (basics)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="physics_model.html" class="btn btn-neutral float-right" title="Physics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

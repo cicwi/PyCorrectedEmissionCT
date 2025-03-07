@@ -51,7 +51,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">PyCorrectedEmissionCT (corrct)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial (basics)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="attenuation_tutorial.html">Attenuation correction</a></li>
@@ -129,6 +129,28 @@ along the V axis.</p>
 sinusoid that interpolates the chosen value of interest across all the rotation
 angles. The value of interest can include the center-of-mass (CoM) or the position
 of the highest intensity peak of the projections.</p>
+<p>We present here an example of how to use the <code class="docutils literal notranslate"><span class="pre">fit_u</span></code> method to compute the horizontal shifts.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">corrct</span> <span class="k">as</span> <span class="nn">cct</span>
+
+<span class="n">align_pre</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">alignment</span><span class="o">.</span><span class="n">DetectorShiftsPRE</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">)</span>
+
+<span class="n">diffs_u_pre</span><span class="p">,</span> <span class="n">cor</span> <span class="o">=</span> <span class="n">align_pre</span><span class="o">.</span><span class="n">fit_u</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>where the projection data is passed to the <code class="docutils literal notranslate"><span class="pre">DetectorShiftsPRE</span></code> class with the
+following axes order: [V], W, U, which means that V is the slowest varying axis,
+but also optional (in case of 2D data).</p>
+<p>These shifts can be used to create a <code class="docutils literal notranslate"><span class="pre">ProjectionGeometry</span></code> object, which can be
+used to correct the projection data, when passed to projection operators as follows:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">prj_geom</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">get_prj_geom_parallel</span><span class="p">(</span><span class="n">geom_type</span><span class="o">=</span><span class="s2">&quot;2d&quot;</span><span class="p">)</span>
+<span class="n">prj_geom</span><span class="o">.</span><span class="n">set_detector_shifts_vu</span><span class="p">(</span><span class="n">diffs_u_pre</span><span class="p">,</span> <span class="n">cor</span><span class="p">)</span>
+<span class="n">vol_geom</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">get_vol_geom_from_data</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">)</span>
+
+<span class="n">solver</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">SIRT</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">vol_geom</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">,</span> <span class="n">prj_geom</span><span class="o">=</span><span class="n">prj_geom</span><span class="p">)</span> <span class="k">as</span> <span class="n">A</span><span class="p">:</span>
+    <span class="n">rec_pre</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">data_test</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 <section id="image-stack-alignment">
 <h2>Image stack alignment<a class="headerlink" href="#image-stack-alignment" title="Link to this heading"></a></h2>
