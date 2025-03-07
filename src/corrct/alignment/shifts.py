@@ -253,15 +253,15 @@ class DetectorShiftsPRE(DetectorShiftsBase):
 
         data_vwu = self.data_vwu[self.slicing]
 
-        if background is not None:
-            data_vwu = data_vwu - background
-        data_vwu = np.fmax(data_vwu, 0.0)
-
         if self.num_dets > 1:
             data_vwu = np.mean(data_vwu, axis=0)
 
         if is_3d:
             data_vwu = np.mean(data_vwu, axis=-3)
+
+        if background is not None:
+            data_vwu = data_vwu - background
+        data_vwu = np.fmax(data_vwu, 0.0)
 
         fx_half_size = (data_vwu.shape[-1] - 1) / 2
 
@@ -271,7 +271,7 @@ class DetectorShiftsPRE(DetectorShiftsBase):
         elif method.lower() == "max":
             ref_points = fx_half_size - np.argmax(data_vwu, axis=-1)
         else:
-            raise ValueError(f"Unkown selected method {method}. Please choose one among: 'com' | 'max'")
+            raise ValueError(f"Unknown selected method {method}. Please choose one among: 'com' | 'max'")
 
         a, p, b = fitting.fit_sinusoid(self.angles_rad, ref_points, fit_l1=fit_l1)
 

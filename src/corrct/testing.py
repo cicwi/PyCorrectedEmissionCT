@@ -122,7 +122,7 @@ def create_phantom_nuclei3d(
 
     ph_seg = seg_nuclei.copy() * 2
     ph_seg[seg_precip] = 3
-    ph_seg[skm.dilation(seg_nuclei_out == 2, footprint=skm.ball(1.5))] = 1
+    ph_seg[skm.dilation(seg_nuclei_out == 2, footprint=skm.ball(2.25))] = 1
 
     background = nuclei * (ph_seg == 0)
     for _ in range(15):
@@ -132,7 +132,10 @@ def create_phantom_nuclei3d(
         background[background == 0] = dil_back[background == 0]
     background = skf.gaussian(background, sigma=9)
 
-    return nuclei * (ph_seg == 2) + (ph_seg != 2) * background, background, pixel_size_um
+    foreground = nuclei * (ph_seg == 2) + (ph_seg != 2) * background
+    foreground = skf.gaussian(foreground, sigma=0.75)
+
+    return foreground, background, pixel_size_um
 
 
 def phantom_assign_concentration(

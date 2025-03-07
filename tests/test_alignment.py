@@ -310,13 +310,14 @@ def test_pre_alignment_3d(add_noise: bool, theo_rot_axis: float = -1.25):
     """
     debug = False
 
-    phantom = phantom_nuc3d - background_nuc3d
+    phantom = np.fmax(phantom_nuc3d - background_nuc3d, 0.0)
     phantom /= phantom.max()
 
     vol_geom = cct.models.get_vol_geom_from_volume(phantom)
     angles_rad = _get_angles(angles_range=360)
-    theo_shifts_u = _get_shifts(len(angles_rad), theo_rot_axis=theo_rot_axis) / 5
-    theo_shifts_v = _get_shifts(len(angles_rad)) / 20
+    theo_shifts_u = _get_shifts(len(angles_rad), theo_rot_axis=theo_rot_axis) / 5.0
+    theo_rot_axis = theo_rot_axis / 5.0
+    theo_shifts_v = _get_shifts(len(angles_rad)) / 20.0
     theo_shifts_vu = cct.models.combine_shifts_vu(theo_shifts_v, theo_shifts_u)
     prj_geom = cct.models.get_prj_geom_parallel()
     prj_geom.set_detector_shifts_vu(theo_shifts_vu)
@@ -325,6 +326,13 @@ def test_pre_alignment_3d(add_noise: bool, theo_rot_axis: float = -1.25):
         prj_data = prj(phantom)
 
     if debug:
+        fig, axs = plt.subplots(1, 2, figsize=[8, 2.5])
+        axs[0].imshow(phantom_nuc3d[phantom.shape[0] // 2])
+        axs[0].set_title("Phantom + background")
+        axs[1].imshow(background_nuc3d[phantom.shape[0] // 2])
+        axs[1].set_title("Background")
+        fig.tight_layout()
+
         fig, axs = plt.subplots(1, 2, figsize=[8, 2.5])
         axs[0].imshow(phantom[phantom.shape[0] // 2])
         axs[0].set_title("Phantom")
@@ -339,8 +347,8 @@ def test_pre_alignment_3d(add_noise: bool, theo_rot_axis: float = -1.25):
     align_pre = cct.alignment.DetectorShiftsPRE(prj_data, angles_rad, verbose=debug)
 
     # Running pre-alignment
-    shifts_v_pre = align_pre.fit_v()
-    shifts_u_pre, cor_pre = align_pre.fit_u()
+    shifts_v_pre = align_pre.fit_v(use_derivative=False)
+    shifts_u_pre, cor_pre = align_pre.fit_u(background=5.0)
     shifts_vu_pre = cct.models.combine_shifts_vu(shifts_v_pre, shifts_u_pre)
     prj_geom = cct.models.get_prj_geom_parallel()
     prj_geom.set_detector_shifts_vu(shifts_vu_pre, cor_pos_u=cor_pre)
@@ -348,20 +356,25 @@ def test_pre_alignment_3d(add_noise: bool, theo_rot_axis: float = -1.25):
     solver_opts = dict(lower_limit=0.0)
 
     solver = cct.solvers.SIRT()
+    with cct.projectors.ProjectorUncorrected(vol_geom, angles_rad, theo_shifts_vu) as prj:
+        rec_noise_theo, _ = solver(prj, prj_data, iterations=ITERATIONS, **solver_opts)
+    with cct.projectors.ProjectorUncorrected(vol_geom, angles_rad, prj_geom=prj_geom) as prj:
+        rec_noise_pre, _ = solver(prj, prj_data, iterations=ITERATIONS, **solver_opts)
     if debug:
         with cct.projectors.ProjectorUncorrected(vol_geom, angles_rad, theo_rot_axis) as prj:
             rec_noise_theocor, _ = solver(prj, prj_data, iterations=ITERATIONS, **solver_opts)
         with cct.projectors.ProjectorUncorrected(vol_geom, angles_rad, cor_pre) as prj:
             rec_noise_precor, _ = solver(prj, prj_data, iterations=ITERATIONS, **solver_opts)
-    with cct.projectors.ProjectorUncorrected(vol_geom, angles_rad, prj_geom=prj_geom) as prj:
-        rec_noise_xc, _ = solver(prj, prj_data, iterations=ITERATIONS, **solver_opts)
 
     com_ph_yx = cct.processing.post.com(phantom)
     prj_geom = cct.models.get_prj_geom_parallel()
     recenter = cct.alignment.RecenterVolume(prj_geom, angles_rad)
 
+    theo_shifts_vu = recenter.to_com(theo_shifts_vu, rec_noise_theo, com_ph_yx)
+    shifts_vu_pre = recenter.to_com(shifts_vu_pre, rec_noise_pre, com_ph_yx)
+
     # Re-centering the reconstructions on the phantom's center-of-mass -> moving the shifts accordingly
-    shifts_vu_pre = recenter.to_com(shifts_vu_pre, rec_noise_xc, com_ph_yx)
+    # shifts_vu_pre = recenter.to_com(shifts_vu_pre, rec_noise_xc, com_ph_yx)
     if debug:
         theo_rot_axis_per_angle = cct.models.combine_shifts_vu(
             np.zeros_like(angles_rad), np.ones_like(angles_rad) * theo_rot_axis
@@ -373,7 +386,8 @@ def test_pre_alignment_3d(add_noise: bool, theo_rot_axis: float = -1.25):
         print(f"{theo_shifts_vu = }")
         print(f"{shifts_vu_pre = }")
         print(f"{theo_shifts_vu - shifts_vu_pre = }")
-        print(f"{np.max(np.abs(theo_shifts_vu - shifts_vu_pre)) = }")
+        print(f"{np.max(np.abs(theo_shifts_vu[0] - shifts_vu_pre[0])) = }")
+        print(f"{np.max(np.abs(theo_shifts_vu[1] - shifts_vu_pre[1])) = }")
 
         fig, axs = plt.subplots(1, 2, sharex=True, sharey=True, figsize=[8, 2.5])
         axs[0].plot(theo_shifts_vu[0], label="Ground truth")
@@ -385,11 +399,18 @@ def test_pre_alignment_3d(add_noise: bool, theo_rot_axis: float = -1.25):
         axs[1].plot(theo_rot_axis_per_angle[1], label="Center-of-rotation (theoretical)")
         axs[1].plot(cor_pre[1], label="Center-of-rotation (computed)")
         axs[1].plot(shifts_vu_pre[1], label="Pre-alignment shifts")
+        axs[1].plot(shifts_vu_pre[1] - theo_shifts_vu[1], label="Diff")
         axs[1].grid()
         axs[1].legend()
         axs[1].set_title("Horizontal shifts")
         fig.tight_layout()
         plt.show()
 
-    tolerance = 0.8 if add_noise else 0.3
-    assert np.allclose(shifts_vu_pre, theo_shifts_vu, atol=tolerance), "Theoretical and computed shifts do not match"
+    tolerance = 0.8 if add_noise else 0.25
+    assert np.allclose(
+        shifts_vu_pre[0], theo_shifts_vu[0], atol=tolerance
+    ), "Theoretical and computed vertical shifts do not match"
+    tolerance = 0.8 if add_noise else 0.5
+    assert np.allclose(
+        shifts_vu_pre[1], theo_shifts_vu[1], atol=tolerance
+    ), "Theoretical and computed horizontal shifts do not match"

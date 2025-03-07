@@ -84,7 +84,7 @@ data_test = data_noise - background
 # Setting up the pre-alignment routine
 align_pre = cct.alignment.DetectorShiftsPRE(data_test, angles_rad)
 
-# Runnning pre-alignment
+# Running pre-alignment
 diffs_u_pre, cor = align_pre.fit_u()
 shifts_u_pre = cor + diffs_u_pre
 
