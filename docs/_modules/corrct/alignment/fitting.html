@@ -6,6 +6,8 @@
   <title>corrct.alignment.fitting &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,9 @@
         <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -48,7 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -107,7 +112,7 @@
 
 
 <div class="viewcode-block" id="fit_shifts_u_sad">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.fit_shifts_u_sad">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_shifts_u_sad">[docs]</a>
 <span class="k">def</span> <span class="nf">fit_shifts_u_sad</span><span class="p">(</span>
     <span class="n">data_wu</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
     <span class="n">proj_wu</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
@@ -164,7 +169,7 @@
 
 
 <div class="viewcode-block" id="fit_shifts_vu_xc">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.fit_shifts_vu_xc">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_shifts_vu_xc">[docs]</a>
 <span class="k">def</span> <span class="nf">fit_shifts_vu_xc</span><span class="p">(</span>
     <span class="n">data_vwu</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
     <span class="n">proj_vwu</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
@@ -285,7 +290,7 @@
 
 
 <div class="viewcode-block" id="fit_shifts_zyx_xc">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.fit_shifts_zyx_xc">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_shifts_zyx_xc">[docs]</a>
 <span class="k">def</span> <span class="nf">fit_shifts_zyx_xc</span><span class="p">(</span>
     <span class="n">ref_vol_zyx</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
     <span class="n">rec_vol_zyx</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
@@ -357,7 +362,7 @@
 
 
 <div class="viewcode-block" id="fit_image_rotation_and_scale">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.fit_image_rotation_and_scale">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_image_rotation_and_scale">[docs]</a>
 <span class="k">def</span> <span class="nf">fit_image_rotation_and_scale</span><span class="p">(</span>
     <span class="n">img_1_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">img_2_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">window_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;hann&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
@@ -434,7 +439,7 @@
 
 
 <div class="viewcode-block" id="fit_camera_tilt_angle">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.fit_camera_tilt_angle">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_camera_tilt_angle">[docs]</a>
 <span class="k">def</span> <span class="nf">fit_camera_tilt_angle</span><span class="p">(</span><span class="n">img_1</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">img_2</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">pad_u</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fit_l1</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Estimate the camera tilt angle based on correlation peak values between two images.</span>
@@ -499,7 +504,7 @@
 
 
 <div class="viewcode-block" id="sinusoid">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.sinusoid">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.sinusoid">[docs]</a>
 <span class="k">def</span> <span class="nf">sinusoid</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">a</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">p</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">b</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
@@ -526,7 +531,7 @@
 
 
 <div class="viewcode-block" id="fit_sinusoid">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.fit_sinusoid">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_sinusoid">[docs]</a>
 <span class="k">def</span> <span class="nf">fit_sinusoid</span><span class="p">(</span><span class="n">angles</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">fit_l1</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fits a sinusoid to the given values.</span>
 
@@ -565,7 +570,7 @@
 
 
 <div class="viewcode-block" id="extract_peak_regions_1d">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.extract_peak_regions_1d">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.extract_peak_regions_1d">[docs]</a>
 <span class="k">def</span> <span class="nf">extract_peak_regions_1d</span><span class="p">(</span>
     <span class="n">cc</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">peak_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cc_coords</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]]:</span>
@@ -623,7 +628,7 @@
 
 
 <div class="viewcode-block" id="refine_max_position_1d">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.refine_max_position_1d">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.refine_max_position_1d">[docs]</a>
 <span class="k">def</span> <span class="nf">refine_max_position_1d</span><span class="p">(</span>
     <span class="n">f_vals</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">f_x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">return_vertex_val</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">decimals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]]:</span>
@@ -707,7 +712,7 @@
 
 
 <div class="viewcode-block" id="extract_peak_region_nd">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.extract_peak_region_nd">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.extract_peak_region_nd">[docs]</a>
 <span class="k">def</span> <span class="nf">extract_peak_region_nd</span><span class="p">(</span>
     <span class="n">cc</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">peak_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cc_coords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]]]:</span>
@@ -753,7 +758,7 @@
 
 
 <div class="viewcode-block" id="refine_max_position_2d">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.fitting.refine_max_position_2d">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.refine_max_position_2d">[docs]</a>
 <span class="k">def</span> <span class="nf">refine_max_position_2d</span><span class="p">(</span>
     <span class="n">f_vals</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">fy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>

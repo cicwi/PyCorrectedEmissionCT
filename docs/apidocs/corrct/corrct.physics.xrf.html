@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.physics.xrf &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.physics.attenuation" href="corrct.physics.attenuation.html" />
+    <link rel="prev" title="corrct.physics.xraylib_helper" href="corrct.physics.xraylib_helper.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.processing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.processing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.alignment.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="corrct.physics.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+          <li class="breadcrumb-item"><a href="corrct.physics.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.xrf</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.physics.xrf.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.physics.xrf">
+<span id="corrct-physics-xrf"></span><h1><a class="reference internal" href="#module-corrct.physics.xrf" title="corrct.physics.xrf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.xrf</span></code></a><a class="headerlink" href="#module-corrct.physics.xrf" title="Link to this heading"></a></h1>
+<p>XRF support functions.</p>
+<p>&#64;author: Nicola VIGANÒ, ESRF - The European Synchrotron, Grenoble, France,
+and CEA-IRIG, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FluoLine</span></code></a></p></td>
+<td><p>Fluorescence line description class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.xrf.LinesSiegbahn" title="corrct.physics.xrf.LinesSiegbahn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinesSiegbahn</span></code></a></p></td>
+<td><p>Siegbahn fluorescence lines collection class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.xrf.DetectorXRF" title="corrct.physics.xrf.DetectorXRF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DetectorXRF</span></code></a></p></td>
+<td><p>Simple XRF detector model.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.xrf._get_lines_list" title="corrct.physics.xrf._get_lines_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_lines_list</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.xrf.get_radiation_rate" title="corrct.physics.xrf.get_radiation_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_radiation_rate</span></code></a></p></td>
+<td><p>Return the radiation rates of the requested lines for the given element.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.xrf.get_energy" title="corrct.physics.xrf.get_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_energy</span></code></a></p></td>
+<td><p>Return the energy(ies) of the requested line for the given element.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.physics.xrf.FluoLine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.physics.xrf.</span></span><span class="sig-name descname"><span class="pre">FluoLine</span></span><a class="reference internal" href="../../_modules/corrct/physics/xrf.html#FluoLine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.FluoLine" title="Link to this definition"></a></dt>
+<dd><p>Fluorescence line description class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.FluoLine.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#corrct.physics.xrf.FluoLine.name" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.FluoLine.indx">
+<span class="sig-name descname"><span class="pre">indx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corrct.physics.xrf.FluoLine.indx" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.physics.xrf.LinesSiegbahn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.physics.xrf.</span></span><span class="sig-name descname"><span class="pre">LinesSiegbahn</span></span><a class="reference internal" href="../../_modules/corrct/physics/xrf.html#LinesSiegbahn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.LinesSiegbahn" title="Link to this definition"></a></dt>
+<dd><p>Siegbahn fluorescence lines collection class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.LinesSiegbahn.lines">
+<span class="sig-name descname"><span class="pre">lines</span></span><a class="headerlink" href="#corrct.physics.xrf.LinesSiegbahn.lines" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.xrf.LinesSiegbahn.get_lines">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">corrct.physics.xrf.FluoLine</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/physics/xrf.html#LinesSiegbahn.get_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.LinesSiegbahn.get_lines" title="Link to this definition"></a></dt>
+<dd><p>Return the list of xraylib line macro definitions for the requested family.</p>
+<p class="rubric" id="id3">Parameters</p>
+<p>line : str
+The requested line. It can be a whole shell (transition to that shell),
+or sub-shells.</p>
+<p class="rubric" id="id4">Returns</p>
+<p>Sequence
+List of corresponding lines.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.xrf._get_lines_list">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.xrf.</span></span><span class="sig-name descname"><span class="pre">_get_lines_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">corrct.physics.xrf.FluoLine</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/physics/xrf.html#_get_lines_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf._get_lines_list" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.xrf.get_radiation_rate">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.xrf.</span></span><span class="sig-name descname"><span class="pre">get_radiation_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">corrct.physics.xrf.FluoLine</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">corrct.physics.xrf.FluoLine</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/xrf.html#get_radiation_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.get_radiation_rate" title="Link to this definition"></a></dt>
+<dd><p>Return the radiation rates of the requested lines for the given element.</p>
+<p class="rubric" id="id5">Parameters</p>
+<p>element : Union[str, int]
+The requested element
+lines : Union[str, FluoLine, Sequence[FluoLine]]
+The requested line. It can be a whole shell (transition to that shell),
+or sub-shells.
+verbose : bool, optional
+Whether to produce verbose output in case of errors, by default False</p>
+<p class="rubric" id="id6">Returns</p>
+<p>NDArray
+The list of radiation rates</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.xrf.get_energy">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.xrf.</span></span><span class="sig-name descname"><span class="pre">get_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">corrct.physics.xrf.FluoLine</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.physics.xrf.FluoLine" title="corrct.physics.xrf.FluoLine"><span class="pre">corrct.physics.xrf.FluoLine</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_average</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/physics/xrf.html#get_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.get_energy" title="Link to this definition"></a></dt>
+<dd><p>Return the energy(ies) of the requested line for the given element.</p>
+<p class="rubric" id="id7">Parameters</p>
+<p>element : Union[str, int]
+The requested element.
+line : str
+The requested line. It can be a whole shell (transition to that shell),
+or sub-shells.
+compute_average : bool, optional
+Weighted averaging the lines, using the radiation rate. The default is False.</p>
+<p class="rubric" id="id8">Returns</p>
+<p>energy_keV : Union[float, NDArray]
+Either the average energy or the list of different energies.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.physics.xrf.DetectorXRF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.physics.xrf.</span></span><span class="sig-name descname"><span class="pre">DetectorXRF</span></span><a class="reference internal" href="../../_modules/corrct/physics/xrf.html#DetectorXRF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xrf.DetectorXRF" title="Link to this definition"></a></dt>
+<dd><p>Simple XRF detector model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.DetectorXRF.surface_mm2">
+<span class="sig-name descname"><span class="pre">surface_mm2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.physics.xrf.DetectorXRF.surface_mm2" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.DetectorXRF.distance_mm">
+<span class="sig-name descname"><span class="pre">distance_mm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.physics.xrf.DetectorXRF.distance_mm" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.xrf.DetectorXRF.angle_rad">
+<span class="sig-name descname"><span class="pre">angle_rad</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.physics.xrf.DetectorXRF.angle_rad" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.physics.xrf.DetectorXRF.solid_angle_sr">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solid_angle_sr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.physics.xrf.DetectorXRF.solid_angle_sr" title="Link to this definition"></a></dt>
+<dd><p>Compute the solid angle covered by the detector.</p>
+<p class="rubric" id="id9">Returns</p>
+<p>float | NDArray
+The computed solid angle of the detector geometry.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.physics.xraylib_helper.html" class="btn btn-neutral float-left" title="corrct.physics.xraylib_helper" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.physics.attenuation.html" class="btn btn-neutral float-right" title="corrct.physics.attenuation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -6,6 +6,8 @@
   <title>corrct.alignment.shifts &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,9 @@
         <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -48,7 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -101,6 +106,8 @@
 <span class="n">NDArrayFloat</span> <span class="o">=</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
 
 
+<div class="viewcode-block" id="_filter_shifts">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment._filter_shifts">[docs]</a>
 <span class="k">def</span> <span class="nf">_filter_shifts</span><span class="p">(</span><span class="n">shifts_vu</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">max_shifts</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
     <span class="n">invalid_shifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">shifts_vu</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_shifts</span>
 
@@ -109,11 +116,12 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING - Some shifts exceeded the maximum allowed magnitude (max: </span><span class="si">{</span><span class="n">max_shifts</span><span class="si">}</span><span class="s2">). Setting them to 0.&quot;</span><span class="p">)</span>
         <span class="n">shifts_vu_filt</span><span class="p">[</span><span class="n">invalid_shifts</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">return</span> <span class="n">shifts_vu_filt</span>
+    <span class="k">return</span> <span class="n">shifts_vu_filt</span></div>
+
 
 
 <div class="viewcode-block" id="DetectorShiftsBase">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsBase">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsBase">[docs]</a>
 <span class="k">class</span> <span class="nc">DetectorShiftsBase</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the detector shifts for a given dataset.&quot;&quot;&quot;</span>
 
@@ -196,12 +204,12 @@
 
 
 <div class="viewcode-block" id="DetectorShiftsPRE">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsPRE">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsPRE">[docs]</a>
 <span class="k">class</span> <span class="nc">DetectorShiftsPRE</span><span class="p">(</span><span class="n">DetectorShiftsBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the pre-alignment detector shifts for a given dataset.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="DetectorShiftsPRE.fit_v">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsPRE.fit_v">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsPRE.fit_v">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_v</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">use_derivative</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -310,7 +318,7 @@
 
 
 <div class="viewcode-block" id="DetectorShiftsPRE.fit_u">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsPRE.fit_u">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsPRE.fit_u">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_u</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fit_l1</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -404,12 +412,12 @@
 
 
 <div class="viewcode-block" id="DetectorShiftsXC">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsXC">[docs]</a>
 <span class="k">class</span> <span class="nc">DetectorShiftsXC</span><span class="p">(</span><span class="n">DetectorShiftsBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the center-of-rotation for a given dataset, by cross correlation.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="DetectorShiftsXC.fit_vu_accum_drifts">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsXC.fit_vu_accum_drifts">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_vu_accum_drifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_data_dvwu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit static image drifts.</span>
 
@@ -453,7 +461,7 @@
 
 
 <div class="viewcode-block" id="DetectorShiftsXC.fit_vu">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.fit_vu">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsXC.fit_vu">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fit_l1</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the pre-alignment vertical and horizontal shifts, using cross-correlation.</span>
 
@@ -514,7 +522,7 @@
 
 
 <div class="viewcode-block" id="DetectorShiftsXC.fit_u_180">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.fit_u_180">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsXC.fit_u_180">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_u_180</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find the center-of-rotation, using the 0 and 180 degrees projections.</span>
 
@@ -542,7 +550,7 @@
 
 
 <div class="viewcode-block" id="DetectorShiftsXC.fit_u_360">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.fit_u_360">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsXC.fit_u_360">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_u_360</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find the center of rotation over a 360 degrees scan, by taking the average of the 0-180 over all pairs of angles.</span>
 
@@ -598,7 +606,7 @@
 
 
 <div class="viewcode-block" id="DetectorShiftsXC.find_shifts_vu">
-<a class="viewcode-back" href="../../../corrct.alignment.html#corrct.alignment.shifts.DetectorShiftsXC.find_shifts_vu">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsXC.find_shifts_vu">[docs]</a>
     <span class="k">def</span> <span class="nf">find_shifts_vu</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_dvwu</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.physics.attenuation &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.physics.units" href="corrct.physics.units.html" />
+    <link rel="prev" title="corrct.physics.xrf" href="corrct.physics.xrf.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.processing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.processing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.alignment.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="corrct.physics.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+          <li class="breadcrumb-item"><a href="corrct.physics.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.attenuation</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.physics.attenuation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.physics.attenuation">
+<span id="corrct-physics-attenuation"></span><h1><a class="reference internal" href="#module-corrct.physics.attenuation" title="corrct.physics.attenuation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.attenuation</span></code></a><a class="headerlink" href="#module-corrct.physics.attenuation" title="Link to this heading"></a></h1>
+<p>Incident beam and emidded radiation attenuation support.</p>
+<p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.attenuation.AttenuationVolume" title="corrct.physics.attenuation.AttenuationVolume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttenuationVolume</span></code></a></p></td>
+<td><p>Attenuation volume computation class.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.attenuation.get_linear_attenuation_coefficient" title="corrct.physics.attenuation.get_linear_attenuation_coefficient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_linear_attenuation_coefficient</span></code></a></p></td>
+<td><p>Compute the linear attenuation coefficient for given compound, energy, and pixel size.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.attenuation.plot_emission_line_attenuation" title="corrct.physics.attenuation.plot_emission_line_attenuation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_emission_line_attenuation</span></code></a></p></td>
+<td><p>Plot spectral attenuation of a given line.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.attenuation.plot_transmittance_decay" title="corrct.physics.attenuation.plot_transmittance_decay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_transmittance_decay</span></code></a></p></td>
+<td><p>Plot transmittance decay curve(s) for the given compound(s) at a given energy and thickness range.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.attenuation.num_threads" title="corrct.physics.attenuation.num_threads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_threads</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.attenuation.NDArrayFloat" title="corrct.physics.attenuation.NDArrayFloat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDArrayFloat</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.attenuation.NDArrayInt" title="corrct.physics.attenuation.NDArrayInt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDArrayInt</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.attenuation.CONVERT_UM_TO_CM" title="corrct.physics.attenuation.CONVERT_UM_TO_CM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONVERT_UM_TO_CM</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.num_threads">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.attenuation.</span></span><span class="sig-name descname"><span class="pre">num_threads</span></span><a class="headerlink" href="#corrct.physics.attenuation.num_threads" title="Link to this definition"></a></dt>
+<dd><p>‘round(…)’</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.NDArrayFloat">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.attenuation.</span></span><span class="sig-name descname"><span class="pre">NDArrayFloat</span></span><a class="headerlink" href="#corrct.physics.attenuation.NDArrayFloat" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.NDArrayInt">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.attenuation.</span></span><span class="sig-name descname"><span class="pre">NDArrayInt</span></span><a class="headerlink" href="#corrct.physics.attenuation.NDArrayInt" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.CONVERT_UM_TO_CM">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.attenuation.</span></span><span class="sig-name descname"><span class="pre">CONVERT_UM_TO_CM</span></span><a class="headerlink" href="#corrct.physics.attenuation.CONVERT_UM_TO_CM" title="Link to this definition"></a></dt>
+<dd><p>0.0001</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.physics.attenuation.</span></span><span class="sig-name descname"><span class="pre">AttenuationVolume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_local</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.physics.attenuation.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emitted_local</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.physics.attenuation.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angles_rot_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angles_det_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.physics.attenuation.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.pi</span> <span class="pre">/</span> <span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/physics/attenuation.html#AttenuationVolume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume" title="Link to this definition"></a></dt>
+<dd><p>Attenuation volume computation class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the AttenuationVolume class.</p>
+<p class="rubric" id="id3">Raises</p>
+<p>ValueError
+In case no volumes were passed, or if they differed in shape.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.incident_local">
+<span class="sig-name descname"><span class="pre">incident_local</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.physics.attenuation.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.incident_local" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.emitted_local">
+<span class="sig-name descname"><span class="pre">emitted_local</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.physics.attenuation.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.emitted_local" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.angles_rot_rad">
+<span class="sig-name descname"><span class="pre">angles_rot_rad</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.physics.attenuation.NDArrayFloat</span></em><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.angles_rot_rad" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.angles_det_rad">
+<span class="sig-name descname"><span class="pre">angles_det_rad</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.physics.attenuation.NDArrayFloat</span></em><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.angles_det_rad" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.dtype">
+<span class="sig-name descname"><span class="pre">dtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.DTypeLike</span></em><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.dtype" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.vol_shape_zyx">
+<span class="sig-name descname"><span class="pre">vol_shape_zyx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></em><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.vol_shape_zyx" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.maps">
+<span class="sig-name descname"><span class="pre">maps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></em><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.maps" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume._compute_attenuation_angle_in">
+<span class="sig-name descname"><span class="pre">_compute_attenuation_angle_in</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_att</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.physics.attenuation.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/attenuation.html#AttenuationVolume._compute_attenuation_angle_in"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume._compute_attenuation_angle_in" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume._compute_attenuation_angle_out">
+<span class="sig-name descname"><span class="pre">_compute_attenuation_angle_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_att</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.physics.attenuation.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/attenuation.html#AttenuationVolume._compute_attenuation_angle_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume._compute_attenuation_angle_out" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.compute_maps">
+<span class="sig-name descname"><span class="pre">compute_maps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_multithreading</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/attenuation.html#AttenuationVolume.compute_maps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.compute_maps" title="Link to this definition"></a></dt>
+<dd><p>Compute the correction maps for each angle.</p>
+<p class="rubric" id="id4">Parameters</p>
+<p>use_multithreading : bool, optional
+Use multi-threading for computing the attenuation maps. The default is True.
+verbose : bool, optional
+Show verbose output. The default is True.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.plot_map">
+<span class="sig-name descname"><span class="pre">plot_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">matplotlib.axes._axes.Axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">det_ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.physics.attenuation.NDArrayInt</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-2,</span> <span class="pre">-1)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/physics/attenuation.html#AttenuationVolume.plot_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.plot_map" title="Link to this definition"></a></dt>
+<dd><p>Plot the requested attenuation map.</p>
+<p class="rubric" id="id5">Parameters</p>
+<p>ax : matplotlib axes
+The axes where to plot.
+rot_ind : int
+Rotation angle index.
+det_ind : int, optional
+Detector angle index. The default is 0.
+slice_ind : Optional[int], optional
+Volume slice index (for 3D volumes). The default is None.
+axes : Sequence[int] | NDArray, optional
+Axes of the slice. The default is (-2, -1).</p>
+<p class="rubric" id="id6">Returns</p>
+<p>Sequence[float]
+The extent of the axes plot (min-max coords).</p>
+<p class="rubric" id="id7">Raises</p>
+<p>ValueError
+In case a slice index is not passed for a 3D volume.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.get_maps">
+<span class="sig-name descname"><span class="pre">get_maps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">slice</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.physics.attenuation.NDArrayInt</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">det_ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">slice</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.physics.attenuation.NDArrayInt</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/attenuation.html#AttenuationVolume.get_maps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.get_maps" title="Link to this definition"></a></dt>
+<dd><p>Return the attenuation maps.</p>
+<p class="rubric" id="id8">Parameters</p>
+<p>roi : ArrayLike, optional
+The region-of-interest to select. The default is None.
+rot_ind : int, optional
+A specific rotation index, if only one is to be desired. The default is None.
+det_ind : int, optional
+A specific detector index, if only one is to be desired. The default is None.</p>
+<p class="rubric" id="id9">Returns</p>
+<p>NDArray
+The attenuation maps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.AttenuationVolume.get_projector_args">
+<span class="sig-name descname"><span class="pre">get_projector_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">slice</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.physics.attenuation.NDArrayInt</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">det_ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">slice</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.physics.attenuation.NDArrayInt</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/physics/attenuation.html#AttenuationVolume.get_projector_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.AttenuationVolume.get_projector_args" title="Link to this definition"></a></dt>
+<dd><p>Return the projector arguments.</p>
+<p class="rubric" id="id10">Parameters</p>
+<p>roi : ArrayLike, optional
+The region-of-interest to select. The default is None.
+rot_ind : int, optional
+A specific rotation index, if only one is to be desired. The default is None.
+det_ind : int, optional
+A specific detector index, if only one is to be desired. The default is None.</p>
+<p class="rubric" id="id11">Returns</p>
+<p>dict[str, NDArray]
+A dictionary containing the attenuation maps and the detector angle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.get_linear_attenuation_coefficient">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.attenuation.</span></span><span class="sig-name descname"><span class="pre">get_linear_attenuation_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/attenuation.html#get_linear_attenuation_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.get_linear_attenuation_coefficient" title="Link to this definition"></a></dt>
+<dd><p>Compute the linear attenuation coefficient for given compound, energy, and pixel size.</p>
+<p class="rubric" id="id12">Parameters</p>
+<p>compound : Union[str, dict]
+The compound for which we compute the linear attenuation coefficient
+energy_keV : float
+The energy of the photons
+pixel_size_um : float
+The pixel size in microns
+density : Union[float, None], optional
+The density of the compound (if different from the default value), by default None</p>
+<p class="rubric" id="id13">Returns</p>
+<p>float
+The linear attenuation coefficient</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.plot_emission_line_attenuation">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.attenuation.</span></span><span class="sig-name descname"><span class="pre">plot_emission_line_attenuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'lorentzian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">201</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_lines_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/attenuation.html#plot_emission_line_attenuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.plot_emission_line_attenuation" title="Link to this definition"></a></dt>
+<dd><p>Plot spectral attenuation of a given line.</p>
+<p class="rubric" id="id14">Parameters</p>
+<p>compound : Union[str, dict]
+Compound to consider
+thickness_um : float
+Thickness of the compound (in microns)
+mean_energy_keV : float
+Average energy of the line
+fwhm_keV : float
+Full-width half-maximum of the line
+line_shape : str, optional
+Shape of the line, by default “lorentzian”.
+Options are: “gaussian” | “lorentzian” | “sech**2”.
+num_points : int, optional
+number of discretization points, by default 201
+plot_lines_mean : bool, optional
+Whether to plot the line mean and the effective line mean, by default True</p>
+<p class="rubric" id="id15">Raises</p>
+<p>ValueError
+When an unsupported line is chosen.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.attenuation.plot_transmittance_decay">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.attenuation.</span></span><span class="sig-name descname"><span class="pre">plot_transmittance_decay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness_range_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">10.0,</span> <span class="pre">101)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/attenuation.html#plot_transmittance_decay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.attenuation.plot_transmittance_decay" title="Link to this definition"></a></dt>
+<dd><p>Plot transmittance decay curve(s) for the given compound(s) at a given energy and thickness range.</p>
+<p class="rubric" id="id16">Parameters</p>
+<p>compounds : str | dict | Sequence[str | dict]
+The compound(s) description
+mean_energy_keV : float
+The mean photon energy
+thickness_range_um : tuple[float, float, int], optional
+The thickness range as (start, end, num_points), by default (0.0, 10.0, 101)</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.physics.xrf.html" class="btn btn-neutral float-left" title="corrct.physics.xrf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.physics.units.html" class="btn btn-neutral float-right" title="corrct.physics.units" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

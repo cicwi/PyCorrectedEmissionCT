@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.alignment.fitting &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.alignment.shifts" href="corrct.alignment.shifts.html" />
+    <link rel="prev" title="corrct.alignment.centering" href="corrct.alignment.centering.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.processing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.processing</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="corrct.alignment.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.physics.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+          <li class="breadcrumb-item"><a href="corrct.alignment.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment.fitting</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.alignment.fitting.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.alignment.fitting">
+<span id="corrct-alignment-fitting"></span><h1><a class="reference internal" href="#module-corrct.alignment.fitting" title="corrct.alignment.fitting"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment.fitting</span></code></a><a class="headerlink" href="#module-corrct.alignment.fitting" title="Link to this heading"></a></h1>
+<p>Fitting routines.</p>
+<p>Created on Tue May 17 12:11:58 2022</p>
+<p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.fit_shifts_u_sad" title="corrct.alignment.fitting.fit_shifts_u_sad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_shifts_u_sad</span></code></a></p></td>
+<td><p>Find the U shifts between two sets of lines, by means of the sum-of-absolute-difference (SAD).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.fitting.fit_shifts_vu_xc" title="corrct.alignment.fitting.fit_shifts_vu_xc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_shifts_vu_xc</span></code></a></p></td>
+<td><p>Find the VU shifts of the projected data, through cross-correlation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.fit_shifts_zyx_xc" title="corrct.alignment.fitting.fit_shifts_zyx_xc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_shifts_zyx_xc</span></code></a></p></td>
+<td><p>Find the ZYX shifts of the volume, through cross-correlation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.fitting.fit_image_rotation_and_scale" title="corrct.alignment.fitting.fit_image_rotation_and_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_image_rotation_and_scale</span></code></a></p></td>
+<td><p>Fit the rotation and scaling of an image against a reference image. This works best for larger rotation angles.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.fit_camera_tilt_angle" title="corrct.alignment.fitting.fit_camera_tilt_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_camera_tilt_angle</span></code></a></p></td>
+<td><p>Estimate the camera tilt angle based on correlation peak values between two images.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.fitting.sinusoid" title="corrct.alignment.fitting.sinusoid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sinusoid</span></code></a></p></td>
+<td><p>Compute the values of a sine function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.fit_sinusoid" title="corrct.alignment.fitting.fit_sinusoid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_sinusoid</span></code></a></p></td>
+<td><p>Fits a sinusoid to the given values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.fitting.extract_peak_regions_1d" title="corrct.alignment.fitting.extract_peak_regions_1d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_peak_regions_1d</span></code></a></p></td>
+<td><p>Extract a region around the maximum value.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.refine_max_position_1d" title="corrct.alignment.fitting.refine_max_position_1d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_max_position_1d</span></code></a></p></td>
+<td><p>Compute the sub-pixel max position of the given function sampling.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.fitting.extract_peak_region_nd" title="corrct.alignment.fitting.extract_peak_region_nd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_peak_region_nd</span></code></a></p></td>
+<td><p>Extract a region around the maximum value.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.refine_max_position_2d" title="corrct.alignment.fitting.refine_max_position_2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_max_position_2d</span></code></a></p></td>
+<td><p>Compute the sub-pixel max position of the given function sampling.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.NDArrayFloat" title="corrct.alignment.fitting.NDArrayFloat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDArrayFloat</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.fitting.eps" title="corrct.alignment.fitting.eps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eps</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.NDArrayFloat">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">NDArrayFloat</span></span><a class="headerlink" href="#corrct.alignment.fitting.NDArrayFloat" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.eps">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">eps</span></span><a class="headerlink" href="#corrct.alignment.fitting.eps" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.fit_shifts_u_sad">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_shifts_u_sad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_wu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_wu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_shifts_u_sad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_shifts_u_sad" title="Link to this definition"></a></dt>
+<dd><p>Find the U shifts between two sets of lines, by means of the sum-of-absolute-difference (SAD).</p>
+<p class="rubric" id="id23">Parameters</p>
+<p>data_wu : NDArrayFloat
+The reference data.
+proj_wu : NDArrayFloat
+The other data.
+search_rage : int, optional
+The range in pixels of the search, by default 16
+error_norm : int, optional
+The error norm to use, by default 1
+decimals : int, optional
+The precision of the result, by default 2</p>
+<p class="rubric" id="id24">Returns</p>
+<p>NDArrayFloat
+A list of one shift for each row.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.fit_shifts_vu_xc">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_shifts_vu_xc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_vwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_vwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_fourier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_rfft</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_shifts_vu_xc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_shifts_vu_xc" title="Link to this definition"></a></dt>
+<dd><p>Find the VU shifts of the projected data, through cross-correlation.</p>
+<p class="rubric" id="id25">Parameters</p>
+<p>data_vwu : NDArrayFloat
+The collected projection data.
+proj_vwu : NDArrayFloat
+The forward-projected images from the reconstruction.
+pad_u : bool, optional
+Pad the u coordinate. The default is False.
+normalize_fourier : bool, optional
+Whether to normalize the Fourier representation of the cross-correlation. The default is False.
+margin : int, optional
+The margin of the region to compare, the default is 0.
+use_rfft : bool, optional
+Whether to use the <code class="docutils literal notranslate"><span class="pre">rfft</span></code> transform in place of the complex <code class="docutils literal notranslate"><span class="pre">fft</span></code> transform. The default is True.
+stack_axis : int, optional
+The axis along which the VU images are stacked. The default is -2.
+decimals : int, optional
+Decimals for the truncation of the sub-pixel  The default is 2.</p>
+<p class="rubric" id="id26">Returns</p>
+<p>NDArrayFloat
+The VU shifts.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.fit_shifts_zyx_xc">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_shifts_zyx_xc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_vol_zyx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rec_vol_zyx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_zyx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_fourier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_rfft</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_shifts_zyx_xc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_shifts_zyx_xc" title="Link to this definition"></a></dt>
+<dd><p>Find the ZYX shifts of the volume, through cross-correlation.</p>
+<p class="rubric" id="id27">Parameters</p>
+<p>ref_vol_zyx : NDArrayFloat
+The reference volume.
+rec_vol_zyx : NDArrayFloat
+The reconstructed volume to register.
+pad_zyx : bool, optional
+Pad the ZYX coordinates. The default is False.
+normalize_fourier : bool, optional
+Whether to normalize the Fourier representation of the cross-correlation. The default is True.
+use_rfft : bool, optional
+Whether to use the <code class="docutils literal notranslate"><span class="pre">rfft</span></code> transform in place of the complex <code class="docutils literal notranslate"><span class="pre">fft</span></code> transform. The default is True.
+decimals : int, optional
+Decimals for the truncation of the sub-pixel  The default is 2.</p>
+<p class="rubric" id="id28">Returns</p>
+<p>NDArrayFloat
+The ZYX shifts.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.fit_image_rotation_and_scale">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_image_rotation_and_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_1_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_2_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'hann'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_image_rotation_and_scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_image_rotation_and_scale" title="Link to this definition"></a></dt>
+<dd><p>Fit the rotation and scaling of an image against a reference image. This works best for larger rotation angles.</p>
+<p class="rubric" id="id29">Parameters</p>
+<p>img_1_vu : NDArray
+Reference image
+img_2_vu : NDArray
+Rotated and scaled image
+pad_mode : Union[str, None], optional
+Padding mode, by default None
+window_type : str, optional
+Windowing type (to cud the high frequency aliasing), by default “hann”
+verbose : bool, optional
+Whether to give verbose output, by default False</p>
+<p class="rubric" id="id30">Returns</p>
+<p>tuple[float, float]
+The rotation (in degrees) and scale of the second image with respect to the first</p>
+<p class="rubric" id="id31">Raises</p>
+<p>ValueError
+In case of mismatching shape of the two images.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.fit_camera_tilt_angle">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_camera_tilt_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_camera_tilt_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_camera_tilt_angle" title="Link to this definition"></a></dt>
+<dd><p>Estimate the camera tilt angle based on correlation peak values between two images.</p>
+<p class="rubric" id="id32">Parameters</p>
+<p>img_1: NDArray
+The first image.
+img_2: NDArray
+The second image.
+pad_u: bool, optional
+Enable zero padding. Default is False.
+fit_l1: bool, optional
+Perform L1 norm fitting if True. Default is True.
+verbose: bool, optional
+Enable verbose output. Default is False.</p>
+<p class="rubric" id="id33">Returns</p>
+<p>tuple[float, float]
+Tuple containing the estimated center of rotation offset (pixels) and camera tilt angle (degrees).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.sinusoid">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">sinusoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#sinusoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.sinusoid" title="Link to this definition"></a></dt>
+<dd><p>Compute the values of a sine function.</p>
+<p class="rubric" id="id34">Parameters</p>
+<p>x : NDArrayFloat | float
+The independent variable.
+a : NDArrayFloat | float
+The amplitude of the sine.
+p : NDArrayFloat | float
+The phase of the sine.
+b : NDArrayFloat | float
+The bias of the sine.</p>
+<p class="rubric" id="id35">Returns</p>
+<p>NDArrayFloat
+The computed values.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.fit_sinusoid">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_sinusoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_sinusoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_sinusoid" title="Link to this definition"></a></dt>
+<dd><p>Fits a sinusoid to the given values.</p>
+<p class="rubric" id="id36">Parameters</p>
+<p>angles : NDArrayFloat
+Angles where to evaluate the sinusoid.
+values : NDArrayFloat
+Values of the sinusoid.
+fit_l1 : bool, optional
+Whether to use l1 fit instead of the l2 fit, by default False</p>
+<p class="rubric" id="id37">Returns</p>
+<p>Tuple[float, float, float]
+The amplitude, phase and bias of the sinusoid.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.extract_peak_regions_1d">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">extract_peak_regions_1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cc_coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#extract_peak_regions_1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.extract_peak_regions_1d" title="Link to this definition"></a></dt>
+<dd><p>Extract a region around the maximum value.</p>
+<p class="rubric" id="id38">Parameters</p>
+<p>cc: NDArrayFloat
+Correlation image.
+axis: int, optional
+Find the max values along the specified direction. The default is -1.
+peak_radius: int, optional
+The l_inf radius of the area to extract around the peak. The default is 1.
+cc_coords: ArrayLike, optional
+The coordinates of <code class="docutils literal notranslate"><span class="pre">cc</span></code> along the selected axis. The default is None.</p>
+<p class="rubric" id="id39">Returns</p>
+<p>f_vals: NDArrayFloat
+The extracted function values.
+fc_ax: NDArrayFloat
+The coordinates of the extracted values, along the selected axis.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.refine_max_position_1d">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">refine_max_position_1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_vertex_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#refine_max_position_1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.refine_max_position_1d" title="Link to this definition"></a></dt>
+<dd><p>Compute the sub-pixel max position of the given function sampling.</p>
+<p class="rubric" id="id40">Parameters</p>
+<p>f_vals: NDArrayFloat
+Function values of the sampled points
+fx: ArrayLike, optional
+Coordinates of the sampled points
+return_vertex_val: boolean, option
+Enables returning the vertex values. Defaults to False.</p>
+<p class="rubric" id="id41">Raises</p>
+<p>ValueError
+In case position and values do not have the same size, or in case
+the fitted maximum is outside the fitting region.</p>
+<p class="rubric" id="id42">Returns</p>
+<p>float
+Estimated function max, according to the coordinates in fx.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.extract_peak_region_nd">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">extract_peak_region_nd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cc_coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#extract_peak_region_nd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.extract_peak_region_nd" title="Link to this definition"></a></dt>
+<dd><p>Extract a region around the maximum value.</p>
+<p class="rubric" id="id43">Parameters</p>
+<p>cc: NDArrayFloat
+Correlation image.
+peak_radius: int, optional
+The l_inf radius of the area to extract around the peak. The default is 1.
+cc_coords: ArrayLike, optional
+The coordinates of <code class="docutils literal notranslate"><span class="pre">cc</span></code>. The default is None.</p>
+<p class="rubric" id="id44">Returns</p>
+<p>f_vals: NDArrayFloat
+The extracted function values.
+f_coords: Sequence[NDArrayFloat] | None
+The coordinates of the extracted values.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.refine_max_position_2d">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">refine_max_position_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#refine_max_position_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.refine_max_position_2d" title="Link to this definition"></a></dt>
+<dd><p>Compute the sub-pixel max position of the given function sampling.</p>
+<p class="rubric" id="id45">Parameters</p>
+<p>f_vals: NDArrayFloat
+Function values of the sampled points
+fy: ArrayLike, optional
+Vertical coordinates of the sampled points
+fx: ArrayLike, optional
+Horizontal coordinates of the sampled points</p>
+<p class="rubric" id="id46">Raises</p>
+<p>ValueError
+In case position and values do not have the same size, or in case
+the fitted maximum is outside the fitting region.</p>
+<p class="rubric" id="id47">Returns</p>
+<p>tuple(float, float)
+Estimated (vertical, horizontal) function max, according to the
+coordinates in fy and fx.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.alignment.centering.html" class="btn btn-neutral float-left" title="corrct.alignment.centering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.alignment.shifts.html" class="btn btn-neutral float-right" title="corrct.alignment.shifts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

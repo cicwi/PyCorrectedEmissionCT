@@ -6,6 +6,8 @@
   <title>corrct.data_terms &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,9 @@
         <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -48,7 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -105,6 +110,8 @@
 <span class="n">NDArrayFloat</span> <span class="o">=</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
 
 
+<div class="viewcode-block" id="_soft_threshold">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms._soft_threshold">[docs]</a>
 <span class="k">def</span> <span class="nf">_soft_threshold</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">abs_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
     <span class="n">valid_values</span> <span class="o">=</span> <span class="n">abs_values</span> <span class="o">&gt;</span> <span class="mi">0</span>
@@ -112,11 +119,12 @@
         <span class="n">local_threshold</span> <span class="o">=</span> <span class="n">threshold</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">local_threshold</span> <span class="o">=</span> <span class="n">threshold</span><span class="p">[</span><span class="n">valid_values</span><span class="p">]</span>
-    <span class="n">values</span><span class="p">[</span><span class="n">valid_values</span><span class="p">]</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">((</span><span class="n">abs_values</span><span class="p">[</span><span class="n">valid_values</span><span class="p">]</span> <span class="o">-</span> <span class="n">local_threshold</span><span class="p">)</span> <span class="o">/</span> <span class="n">abs_values</span><span class="p">[</span><span class="n">valid_values</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">values</span><span class="p">[</span><span class="n">valid_values</span><span class="p">]</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">((</span><span class="n">abs_values</span><span class="p">[</span><span class="n">valid_values</span><span class="p">]</span> <span class="o">-</span> <span class="n">local_threshold</span><span class="p">)</span> <span class="o">/</span> <span class="n">abs_values</span><span class="p">[</span><span class="n">valid_values</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="DataFidelityBase">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase">[docs]</a>
 <span class="k">class</span> <span class="nc">DataFidelityBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the DataFidelity classes interface.&quot;&quot;&quot;</span>
 
@@ -142,11 +150,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="mf">1.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span> <span class="o">=</span> <span class="kc">None</span>
 
+<div class="viewcode-block" id="DataFidelityBase._slice_attr">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase._slice_attr">[docs]</a>
     <span class="k">def</span> <span class="nf">_slice_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ind</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">attr_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">attr_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr_val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">attr_val</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">attr_val</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">attr_val</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span></div>
 
+
+<div class="viewcode-block" id="DataFidelityBase.__getitem__">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.__getitem__">[docs]</a>
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataFidelityBase&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Slice the norm and all its attributes.</span>
@@ -164,10 +177,11 @@
         <span class="n">new_self</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_slice_attr</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">new_self</span>
+        <span class="k">return</span> <span class="n">new_self</span></div>
+
 
 <div class="viewcode-block" id="DataFidelityBase.info">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.info">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.info">[docs]</a>
     <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the data-fidelity info.</span>
@@ -188,7 +202,7 @@
 
 
 <div class="viewcode-block" id="DataFidelityBase.upper">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.upper">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.upper">[docs]</a>
     <span class="k">def</span> <span class="nf">upper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the upper case name of the data-fidelity.</span>
@@ -202,7 +216,7 @@
 
 
 <div class="viewcode-block" id="DataFidelityBase.lower">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.lower">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.lower">[docs]</a>
     <span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the lower case name of the data-fidelity.</span>
@@ -216,7 +230,7 @@
 
 
 <div class="viewcode-block" id="DataFidelityBase.assign_data">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.assign_data">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.assign_data">[docs]</a>
     <span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the data bias, and sigma of the data term.</span>
 
@@ -233,7 +247,7 @@
 
 
 <div class="viewcode-block" id="DataFidelityBase.compute_residual">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.compute_residual">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.compute_residual">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the residual in the dual domain.</span>
 
@@ -263,7 +277,7 @@
 
 
 <div class="viewcode-block" id="DataFidelityBase.compute_residual_norm">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.compute_residual_norm">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.compute_residual_norm">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">compute_residual_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the norm of the residual.</span>
@@ -280,14 +294,17 @@
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 
+<div class="viewcode-block" id="DataFidelityBase._compute_sigma_data">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase._compute_sigma_data">[docs]</a>
     <span class="k">def</span> <span class="nf">_compute_sigma_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span></div>
+
 
 <div class="viewcode-block" id="DataFidelityBase.compute_data_dual_dot">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.compute_data_dual_dot">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.compute_data_dual_dot">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_data_dual_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the dot product of the data bias and the dual solution.</span>
 
@@ -313,7 +330,7 @@
 
 
 <div class="viewcode-block" id="DataFidelityBase.initialize_dual">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.initialize_dual">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.initialize_dual">[docs]</a>
     <span class="k">def</span> <span class="nf">initialize_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the dual domain solution.</span>
 
@@ -326,7 +343,7 @@
 
 
 <div class="viewcode-block" id="DataFidelityBase.update_dual">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.update_dual">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.update_dual">[docs]</a>
     <span class="k">def</span> <span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the dual solution.</span>
 
@@ -344,7 +361,7 @@
 
 
 <div class="viewcode-block" id="DataFidelityBase.apply_proximal">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.apply_proximal">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.apply_proximal">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the proximal in the dual domain.</span>
@@ -357,7 +374,7 @@
 
 
 <div class="viewcode-block" id="DataFidelityBase.compute_primal_dual_gap">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelityBase.compute_primal_dual_gap">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.compute_primal_dual_gap">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">compute_primal_dual_gap</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -383,7 +400,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_l2">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l2">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2">[docs]</a>
 <span class="k">class</span> <span class="nc">DataFidelity_l2</span><span class="p">(</span><span class="n">DataFidelityBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;l2-norm data-fidelity class.&quot;&quot;&quot;</span>
 
@@ -393,20 +410,20 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">background</span><span class="o">=</span><span class="n">background</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DataFidelity_l2.assign_data">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l2.assign_data">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2.assign_data">[docs]</a>
     <span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma1</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sigma</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DataFidelity_l2.compute_residual_norm">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l2.compute_residual_norm">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2.compute_residual_norm">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dual</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DataFidelity_l2.apply_proximal">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l2.apply_proximal">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2.apply_proximal">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dual</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span>
@@ -414,7 +431,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_l2.compute_primal_dual_gap">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l2.compute_primal_dual_gap">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2.compute_primal_dual_gap">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_primal_dual_gap</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -426,7 +443,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_wl2">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_wl2">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2">[docs]</a>
 <span class="k">class</span> <span class="nc">DataFidelity_wl2</span><span class="p">(</span><span class="n">DataFidelity_l2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Weighted l2-norm data-fidelity class.&quot;&quot;&quot;</span>
 
@@ -437,7 +454,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DataFidelity_wl2.assign_data">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_wl2.assign_data">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2.assign_data">[docs]</a>
     <span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">sigma</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -449,7 +466,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_wl2.compute_residual">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_wl2.compute_residual">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2.compute_residual">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">proj_primal</span> <span class="o">=</span> <span class="n">proj_primal</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span>
@@ -463,7 +480,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_wl2.compute_residual_norm">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_wl2.compute_residual_norm">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2.compute_residual_norm">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="n">valid_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">!=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dual</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -475,7 +492,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_l2b">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l2b">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b">[docs]</a>
 <span class="k">class</span> <span class="nc">DataFidelity_l2b</span><span class="p">(</span><span class="n">DataFidelity_l2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;l2-norm ball data-fidelity class.&quot;&quot;&quot;</span>
 
@@ -486,7 +503,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">local_error</span> <span class="o">=</span> <span class="n">local_error</span>
 
 <div class="viewcode-block" id="DataFidelity_l2b.assign_data">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l2b.assign_data">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.assign_data">[docs]</a>
     <span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">sigma</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma_error</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_error</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma_sqrt_error</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_error</span><span class="p">)</span>
@@ -495,7 +512,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_l2b.compute_residual">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l2b.compute_residual">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.compute_residual">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
         <span class="n">residual</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">compute_residual</span><span class="p">(</span><span class="n">proj_primal</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
         <span class="n">_soft_threshold</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_sqrt_error</span><span class="p">)</span>
@@ -503,7 +520,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_l2b.apply_proximal">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l2b.apply_proximal">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.apply_proximal">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dual</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span>
@@ -512,7 +529,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_l2b.compute_primal_dual_gap">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l2b.compute_primal_dual_gap">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.compute_primal_dual_gap">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_primal_dual_gap</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -525,7 +542,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_Huber">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_Huber">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_Huber">[docs]</a>
 <span class="k">class</span> <span class="nc">DataFidelity_Huber</span><span class="p">(</span><span class="n">DataFidelityBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Huber-norm data-fidelity class. Given a parameter a: l2-norm for x &lt; a, and l1-norm for x &gt; a.&quot;&quot;&quot;</span>
 
@@ -537,14 +554,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">l2_axis</span> <span class="o">=</span> <span class="n">l2_axis</span>
 
 <div class="viewcode-block" id="DataFidelity_Huber.assign_data">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_Huber.assign_data">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_Huber.assign_data">[docs]</a>
     <span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">one_sigma_error</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_error</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DataFidelity_Huber.compute_residual_norm">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_Huber.compute_residual_norm">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_Huber.compute_residual_norm">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
         <span class="n">l2_points</span> <span class="o">=</span> <span class="n">dual</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_error</span>
         <span class="n">l1_points</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">l2_points</span>
@@ -552,7 +569,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_Huber.apply_proximal">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_Huber.apply_proximal">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_Huber.apply_proximal">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dual</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span>
@@ -567,7 +584,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_Huber.compute_primal_dual_gap">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_Huber.compute_primal_dual_gap">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_Huber.compute_primal_dual_gap">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_primal_dual_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">proj_primal</span> <span class="o">=</span> <span class="n">proj_primal</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span>
@@ -581,7 +598,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_l1">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l1">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1">[docs]</a>
 <span class="k">class</span> <span class="nc">DataFidelity_l1</span><span class="p">(</span><span class="n">DataFidelityBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;l1-norm data-fidelity class.&quot;&quot;&quot;</span>
 
@@ -590,14 +607,20 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">background</span><span class="o">=</span><span class="n">background</span><span class="p">)</span>
 
+<div class="viewcode-block" id="DataFidelity_l1._get_inner_norm">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1._get_inner_norm">[docs]</a>
     <span class="k">def</span> <span class="nf">_get_inner_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="DataFidelity_l1._apply_threshold">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1._apply_threshold">[docs]</a>
     <span class="k">def</span> <span class="nf">_apply_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
-        <span class="k">pass</span>
+        <span class="k">pass</span></div>
+
 
 <div class="viewcode-block" id="DataFidelity_l1.apply_proximal">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l1.apply_proximal">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1.apply_proximal">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dual</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span>
@@ -608,7 +631,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_l1.compute_residual_norm">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l1.compute_residual_norm">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1.compute_residual_norm">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
         <span class="n">dual</span> <span class="o">=</span> <span class="n">dual</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_threshold</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span>
@@ -617,7 +640,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_l1.compute_primal_dual_gap">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l1.compute_primal_dual_gap">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1.compute_primal_dual_gap">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_primal_dual_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">proj_primal</span> <span class="o">=</span> <span class="n">proj_primal</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span>
@@ -631,7 +654,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_l12">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l12">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l12">[docs]</a>
 <span class="k">class</span> <span class="nc">DataFidelity_l12</span><span class="p">(</span><span class="n">DataFidelity_l1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;l12-norm data-fidelity class.&quot;&quot;&quot;</span>
 
@@ -641,13 +664,16 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">background</span><span class="o">=</span><span class="n">background</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">l2_axis</span> <span class="o">=</span> <span class="n">l2_axis</span>
 
+<div class="viewcode-block" id="DataFidelity_l12._get_inner_norm">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l12._get_inner_norm">[docs]</a>
     <span class="k">def</span> <span class="nf">_get_inner_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dual</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">l2_axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="DataFidelity_l1b">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l1b">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1b">[docs]</a>
 <span class="k">class</span> <span class="nc">DataFidelity_l1b</span><span class="p">(</span><span class="n">DataFidelity_l1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;l1-norm ball data-fidelity class.&quot;&quot;&quot;</span>
 
@@ -658,32 +684,38 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">local_error</span> <span class="o">=</span> <span class="n">local_error</span>
 
 <div class="viewcode-block" id="DataFidelity_l1b.assign_data">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_l1b.assign_data">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1b.assign_data">[docs]</a>
     <span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma_error</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_error</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="DataFidelity_l1b._apply_threshold">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1b._apply_threshold">[docs]</a>
     <span class="k">def</span> <span class="nf">_apply_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
         <span class="n">_soft_threshold</span><span class="p">(</span><span class="n">dual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_error</span><span class="p">)</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="DataFidelity_KL">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_KL">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL">[docs]</a>
 <span class="k">class</span> <span class="nc">DataFidelity_KL</span><span class="p">(</span><span class="n">DataFidelityBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;KullbackLeibler data-fidelity class.&quot;&quot;&quot;</span>
 
     <span class="n">__data_fidelity_name__</span> <span class="o">=</span> <span class="s2">&quot;KL&quot;</span>
 
+<div class="viewcode-block" id="DataFidelity_KL._compute_sigma_data">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL._compute_sigma_data">[docs]</a>
     <span class="k">def</span> <span class="nf">_compute_sigma_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="DataFidelity_KL.apply_proximal">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_KL.apply_proximal">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL.apply_proximal">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dual</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">dual</span><span class="p">[:]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">dual</span><span class="p">[:]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_data</span><span class="p">[:]))</span> <span class="o">/</span> <span class="mi">2</span>
@@ -692,7 +724,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_KL.compute_residual">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_KL.compute_residual">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL.compute_residual">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">proj_primal</span> <span class="o">=</span> <span class="n">proj_primal</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span>
@@ -707,13 +739,13 @@
 
 
 <div class="viewcode-block" id="DataFidelity_KL.compute_residual_norm">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_KL.compute_residual_norm">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL.compute_residual_norm">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dual</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DataFidelity_KL.compute_primal_dual_gap">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_KL.compute_primal_dual_gap">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL.compute_primal_dual_gap">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_primal_dual_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">proj_primal</span> <span class="o">=</span> <span class="n">proj_primal</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span>
@@ -733,7 +765,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_ln">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_ln">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln">[docs]</a>
 <span class="k">class</span> <span class="nc">DataFidelity_ln</span><span class="p">(</span><span class="n">DataFidelityBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;nuclear-norm data-fidelity class.&quot;&quot;&quot;</span>
 
@@ -746,7 +778,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">use_fallback</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="DataFidelity_ln.apply_proximal">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_ln.apply_proximal">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.apply_proximal">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
         <span class="n">dual_tmp</span> <span class="o">=</span> <span class="n">dual</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -784,7 +816,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_ln.compute_residual_norm">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_ln.compute_residual_norm">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.compute_residual_norm">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">):</span>
         <span class="n">op_svd</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformSVD</span><span class="p">(</span><span class="n">dual</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">axes_rows</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ln_axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axes_cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ln_axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">s_p</span> <span class="o">=</span> <span class="n">op_svd</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span>
@@ -792,7 +824,7 @@
 
 
 <div class="viewcode-block" id="DataFidelity_ln.compute_primal_dual_gap">
-<a class="viewcode-back" href="../../corrct.html#corrct.data_terms.DataFidelity_ln.compute_primal_dual_gap">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.compute_primal_dual_gap">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_primal_dual_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proj_primal</span><span class="p">,</span> <span class="n">dual</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">proj_primal</span> <span class="o">=</span> <span class="n">proj_primal</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">background</span>

@@ -6,6 +6,8 @@
   <title>corrct.processing.pre &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,9 @@
         <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -48,7 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -101,7 +106,7 @@
 
 
 <div class="viewcode-block" id="pad_sinogram">
-<a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.pad_sinogram">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.pad_sinogram">[docs]</a>
 <span class="k">def</span> <span class="nf">pad_sinogram</span><span class="p">(</span>
     <span class="n">sinogram</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">pad_axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
@@ -136,7 +141,7 @@
 
 
 <div class="viewcode-block" id="apply_flat_field">
-<a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.apply_flat_field">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.apply_flat_field">[docs]</a>
 <span class="k">def</span> <span class="nf">apply_flat_field</span><span class="p">(</span>
     <span class="n">projs_wvu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">flats_wvu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
@@ -195,7 +200,7 @@
 
 
 <div class="viewcode-block" id="apply_minus_log">
-<a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.apply_minus_log">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.apply_minus_log">[docs]</a>
 <span class="k">def</span> <span class="nf">apply_minus_log</span><span class="p">(</span><span class="n">projs</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply -log.</span>
@@ -215,7 +220,7 @@
 
 
 <div class="viewcode-block" id="rotate_proj_stack">
-<a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.rotate_proj_stack">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.rotate_proj_stack">[docs]</a>
 <span class="k">def</span> <span class="nf">rotate_proj_stack</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">rot_angle_deg</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rotate the projection stack.</span>
@@ -240,7 +245,7 @@
 
 
 <div class="viewcode-block" id="shift_proj_stack">
-<a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.shift_proj_stack">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.shift_proj_stack">[docs]</a>
 <span class="k">def</span> <span class="nf">shift_proj_stack</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shifts</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">use_fft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Shift each projection in a stack of projections, by projection dependent shifts.</span>
 
@@ -273,7 +278,7 @@
 
 
 <div class="viewcode-block" id="bin_imgs">
-<a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.bin_imgs">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.bin_imgs">[docs]</a>
 <span class="k">def</span> <span class="nf">bin_imgs</span><span class="p">(</span>
     <span class="n">imgs</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">binning</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">auto_crop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
@@ -330,7 +335,7 @@
 
 
 <div class="viewcode-block" id="background_from_margin">
-<a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.background_from_margin">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.background_from_margin">[docs]</a>
 <span class="k">def</span> <span class="nf">background_from_margin</span><span class="p">(</span>
     <span class="n">data_vwu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">margin</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">poly_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
@@ -406,7 +411,7 @@
 
 
 <div class="viewcode-block" id="destripe_wlf_vwu">
-<a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.destripe_wlf_vwu">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.destripe_wlf_vwu">[docs]</a>
 <span class="k">def</span> <span class="nf">destripe_wlf_vwu</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span><span class="p">,</span>
@@ -472,7 +477,7 @@
 
 
 <div class="viewcode-block" id="compute_eigen_flats">
-<a class="viewcode-back" href="../../../corrct.processing.html#corrct.processing.pre.compute_eigen_flats">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.compute_eigen_flats">[docs]</a>
 <span class="k">def</span> <span class="nf">compute_eigen_flats</span><span class="p">(</span>
     <span class="n">trans_wvu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">flats_wvu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

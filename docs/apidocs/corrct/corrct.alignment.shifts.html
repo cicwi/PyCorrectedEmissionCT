@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.alignment.shifts &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.physics" href="corrct.physics.html" />
+    <link rel="prev" title="corrct.alignment.fitting" href="corrct.alignment.fitting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.processing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.processing</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="corrct.alignment.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.physics.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+          <li class="breadcrumb-item"><a href="corrct.alignment.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment.shifts</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.alignment.shifts.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.alignment.shifts">
+<span id="corrct-alignment-shifts"></span><h1><a class="reference internal" href="#module-corrct.alignment.shifts" title="corrct.alignment.shifts"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment.shifts</span></code></a><a class="headerlink" href="#module-corrct.alignment.shifts" title="Link to this heading"></a></h1>
+<p>Detector shifts finding classes.</p>
+<p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.shifts.DetectorShiftsBase" title="corrct.alignment.shifts.DetectorShiftsBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DetectorShiftsBase</span></code></a></p></td>
+<td><p>Compute the detector shifts for a given dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.shifts.DetectorShiftsPRE" title="corrct.alignment.shifts.DetectorShiftsPRE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DetectorShiftsPRE</span></code></a></p></td>
+<td><p>Compute the pre-alignment detector shifts for a given dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.shifts.DetectorShiftsXC" title="corrct.alignment.shifts.DetectorShiftsXC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DetectorShiftsXC</span></code></a></p></td>
+<td><p>Compute the center-of-rotation for a given dataset, by cross correlation.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.shifts._filter_shifts" title="corrct.alignment.shifts._filter_shifts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_filter_shifts</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.shifts.eps" title="corrct.alignment.shifts.eps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eps</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.shifts.NDArrayFloat" title="corrct.alignment.shifts.NDArrayFloat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDArrayFloat</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.eps">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.shifts.</span></span><span class="sig-name descname"><span class="pre">eps</span></span><a class="headerlink" href="#corrct.alignment.shifts.eps" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.NDArrayFloat">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.shifts.</span></span><span class="sig-name descname"><span class="pre">NDArrayFloat</span></span><a class="headerlink" href="#corrct.alignment.shifts.NDArrayFloat" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.shifts._filter_shifts">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.shifts.</span></span><span class="sig-name descname"><span class="pre">_filter_shifts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shifts_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_shifts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#_filter_shifts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts._filter_shifts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.alignment.shifts.</span></span><span class="sig-name descname"><span class="pre">DetectorShiftsBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_angle_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.alignment.shifts.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'dvwu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_mask_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">borders_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'d':</span> <span class="pre">None,</span> <span class="pre">'v':</span> <span class="pre">None,</span> <span class="pre">'w':</span> <span class="pre">None,</span> <span class="pre">'u':</span> <span class="pre">None}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_shifts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.alignment.shifts.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#DetectorShiftsBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsBase" title="Link to this definition"></a></dt>
+<dd><p>Compute the detector shifts for a given dataset.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base class for detector shifts.</p>
+<p class="rubric" id="parameters">Parameters</p>
+<p>data_dvwu : NDArrayFloat
+The tomographic data.
+rot_angle_rad : ArrayLike | NDArrayFloat
+The rotation angles in radians.
+data_format : str, optional
+The data organization, by default “dvwu”
+data_mask_dvwu : NDArray | None, optional
+The mask of the tomographic data, by default None
+borders_dvwu : dict, optional
+The borders of the tomographic data, by default {“d”: None, “v”: None, “w”: None, “u”: None}
+max_shifts : float | NDArrayFloat | None, optional
+Maximum shifts allowed, by default None
+precision_decimals : int, optional
+The precision of the results, by default 2
+verbose : bool, optional
+Whether to be verbose, by default True</p>
+<p class="rubric" id="raises">Raises</p>
+<p>ValueError
+Raised when passing incoherent data and angles.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsBase.data_vwu">
+<span class="sig-name descname"><span class="pre">data_vwu</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></em><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsBase.data_vwu" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsBase.angles_rad">
+<span class="sig-name descname"><span class="pre">angles_rad</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></em><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsBase.angles_rad" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsPRE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.alignment.shifts.</span></span><span class="sig-name descname"><span class="pre">DetectorShiftsPRE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_angle_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.alignment.shifts.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'dvwu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_mask_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">borders_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'d':</span> <span class="pre">None,</span> <span class="pre">'v':</span> <span class="pre">None,</span> <span class="pre">'w':</span> <span class="pre">None,</span> <span class="pre">'u':</span> <span class="pre">None}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_shifts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.alignment.shifts.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#DetectorShiftsPRE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsPRE" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.alignment.shifts.DetectorShiftsBase" title="corrct.alignment.shifts.DetectorShiftsBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.alignment.shifts.DetectorShiftsBase</span></code></a></p>
+<p>Compute the pre-alignment detector shifts for a given dataset.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base class for detector shifts.</p>
+<p class="rubric" id="id1">Parameters</p>
+<p>data_dvwu : NDArrayFloat
+The tomographic data.
+rot_angle_rad : ArrayLike | NDArrayFloat
+The rotation angles in radians.
+data_format : str, optional
+The data organization, by default “dvwu”
+data_mask_dvwu : NDArray | None, optional
+The mask of the tomographic data, by default None
+borders_dvwu : dict, optional
+The borders of the tomographic data, by default {“d”: None, “v”: None, “w”: None, “u”: None}
+max_shifts : float | NDArrayFloat | None, optional
+Maximum shifts allowed, by default None
+precision_decimals : int, optional
+The precision of the results, by default 2
+verbose : bool, optional
+Whether to be verbose, by default True</p>
+<p class="rubric" id="id2">Raises</p>
+<p>ValueError
+Raised when passing incoherent data and angles.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsPRE.fit_v">
+<span class="sig-name descname"><span class="pre">fit_v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_derivative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_rfft</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_fourier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#DetectorShiftsPRE.fit_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsPRE.fit_v" title="Link to this definition"></a></dt>
+<dd><p>Compute the pre-alignment vertical shifts of a 3D dataset.</p>
+<p>The pre-alignment shifts are computed by cross-correlation of one
+projection against the others.
+The projections are integrated in the horizontal direction.</p>
+<p>In the vertical direction, it is suggested to use some high pass filter.
+The default option is to use the derivates of the intensity profiles.</p>
+<p class="rubric" id="id3">Parameters</p>
+<p>use_derivative : bool, optional
+Whether to use the derivate of the vertical profile, by default True
+use_rfft : bool, optional
+Whether to use the <code class="docutils literal notranslate"><span class="pre">rfft</span></code> transform for the cross-correlation, by default True
+normalize_fourier : bool, optional
+Whether to normalize the cross-correlation in Fourier space, by default True</p>
+<p class="rubric" id="returns">Returns</p>
+<p>NDArrayFloat
+The vertical shifts.</p>
+<p class="rubric" id="id4">Raises</p>
+<p>ValueError
+If the dataset is 2D.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsPRE.fit_u">
+<span class="sig-name descname"><span class="pre">fit_u</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit_l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'com'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.shifts.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#DetectorShiftsPRE.fit_u"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsPRE.fit_u" title="Link to this definition"></a></dt>
+<dd><p>Compute the pre-alignment shifts for the horizontal dimension.</p>
+<p>The pre-alignment shifts, and center-of-rotation (CoR) are computed by
+fitting a sinusoid to the centers of mass of each angle in the sinogram.
+The bias of the sinusoid corresponds to the CoR, while the deviations
+from the fitted curve correspond to the shifts.</p>
+<p class="rubric" id="id5">Parameters</p>
+<p>fit_l1 : bool, optional
+Computes the l1-min fit of the sinusoid, by default False.
+background : float | NDArray | None, optional
+Removes the given background, by default None.
+method : str, optional
+The method used for the identification of the fiducial marker position.
+Options are “com” (center-of-mass) | “max” (maximum value), by default “com”.</p>
+<p class="rubric" id="id6">Returns</p>
+<p>Tuple[NDArrayFloat, float]
+The shifts and the CoR.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsXC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.alignment.shifts.</span></span><span class="sig-name descname"><span class="pre">DetectorShiftsXC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_angle_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.alignment.shifts.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'dvwu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_mask_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">borders_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'d':</span> <span class="pre">None,</span> <span class="pre">'v':</span> <span class="pre">None,</span> <span class="pre">'w':</span> <span class="pre">None,</span> <span class="pre">'u':</span> <span class="pre">None}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_shifts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.alignment.shifts.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#DetectorShiftsXC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsXC" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.alignment.shifts.DetectorShiftsBase" title="corrct.alignment.shifts.DetectorShiftsBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.alignment.shifts.DetectorShiftsBase</span></code></a></p>
+<p>Compute the center-of-rotation for a given dataset, by cross correlation.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base class for detector shifts.</p>
+<p class="rubric" id="id7">Parameters</p>
+<p>data_dvwu : NDArrayFloat
+The tomographic data.
+rot_angle_rad : ArrayLike | NDArrayFloat
+The rotation angles in radians.
+data_format : str, optional
+The data organization, by default “dvwu”
+data_mask_dvwu : NDArray | None, optional
+The mask of the tomographic data, by default None
+borders_dvwu : dict, optional
+The borders of the tomographic data, by default {“d”: None, “v”: None, “w”: None, “u”: None}
+max_shifts : float | NDArrayFloat | None, optional
+Maximum shifts allowed, by default None
+precision_decimals : int, optional
+The precision of the results, by default 2
+verbose : bool, optional
+Whether to be verbose, by default True</p>
+<p class="rubric" id="id8">Raises</p>
+<p>ValueError
+Raised when passing incoherent data and angles.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts">
+<span class="sig-name descname"><span class="pre">fit_vu_accum_drifts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_data_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.shifts.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#DetectorShiftsXC.fit_vu_accum_drifts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts" title="Link to this definition"></a></dt>
+<dd><p>Fit static image drifts.</p>
+<p class="rubric" id="id9">Parameters</p>
+<p>ref_data_dvwu : Optional[NDArrayFloat], optional
+Reference image, by default None. If None, the first image in the
+data stack will be used.</p>
+<p class="rubric" id="id10">Returns</p>
+<p>NDArray
+The shifts of the image stack.</p>
+<p class="rubric" id="id11">Raises</p>
+<p>ValueError
+When the number of reference images is either too many or not enough.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsXC.fit_vu">
+<span class="sig-name descname"><span class="pre">fit_vu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit_l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#DetectorShiftsXC.fit_vu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsXC.fit_vu" title="Link to this definition"></a></dt>
+<dd><p>Compute the pre-alignment vertical and horizontal shifts, using cross-correlation.</p>
+<p class="rubric" id="id12">Parameters</p>
+<p>fit_l1 : bool, optional
+Computes the l1-min fit of the sinusoid, by default False.</p>
+<p class="rubric" id="id13">Returns</p>
+<p>NDArray
+Pre-alignment shifts in VU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsXC.fit_u_180">
+<span class="sig-name descname"><span class="pre">fit_u_180</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#DetectorShiftsXC.fit_u_180"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsXC.fit_u_180" title="Link to this definition"></a></dt>
+<dd><p>Find the center-of-rotation, using the 0 and 180 degrees projections.</p>
+<p class="rubric" id="id14">Returns</p>
+<p>float
+The center-of-rotation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsXC.fit_u_360">
+<span class="sig-name descname"><span class="pre">fit_u_360</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#DetectorShiftsXC.fit_u_360"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsXC.fit_u_360" title="Link to this definition"></a></dt>
+<dd><p>Find the center of rotation over a 360 degrees scan, by taking the average of the 0-180 over all pairs of angles.</p>
+<p class="rubric" id="id15">Returns</p>
+<p>float
+The center-of-rotation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.shifts.DetectorShiftsXC.find_shifts_vu">
+<span class="sig-name descname"><span class="pre">find_shifts_vu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_dvwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_derivative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xc_opts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Mapping</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">dict(normalize_fourier=False)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.shifts.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/shifts.html#DetectorShiftsXC.find_shifts_vu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.shifts.DetectorShiftsXC.find_shifts_vu" title="Link to this definition"></a></dt>
+<dd><p>Find shifts between two images or sets of lines.</p>
+<p class="rubric" id="id16">Parameters</p>
+<p>data_dvwu : NDArrayFloat
+The reference data.
+proj_dvwu : NDArrayFloat
+The other data.
+use_derivative : bool, optional
+Whether to use derivatives over the horizontal (U) coordinate, by default False.</p>
+<p class="rubric" id="id17">Returns</p>
+<p>NDArrayFloat
+The shifts in vertical (optional) and horizontal coordinates ([V]U).</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.alignment.fitting.html" class="btn btn-neutral float-left" title="corrct.alignment.fitting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.physics.html" class="btn btn-neutral float-right" title="corrct.physics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.data_terms &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.denoisers" href="corrct.denoisers.html" />
+    <link rel="prev" title="corrct.param_tuning" href="corrct.param_tuning.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.regularizers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.regularizers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.projectors.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.projectors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct._projector_backends.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct._projector_backends</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.param_tuning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.data_terms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.denoisers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.denoisers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.filters.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.models.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.operators.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.operators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.solvers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.solvers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.testing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.struct_illum.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.struct_illum</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.data_terms</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.data_terms.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.data_terms">
+<span id="corrct-data-terms"></span><h1><a class="reference internal" href="#module-corrct.data_terms" title="corrct.data_terms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.data_terms</span></code></a><a class="headerlink" href="#module-corrct.data_terms" title="Link to this heading"></a></h1>
+<p>Data fidelity classes.</p>
+<p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.data_terms.DataFidelityBase" title="corrct.data_terms.DataFidelityBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFidelityBase</span></code></a></p></td>
+<td><p>Define the DataFidelity classes interface.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.data_terms.DataFidelity_l2" title="corrct.data_terms.DataFidelity_l2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFidelity_l2</span></code></a></p></td>
+<td><p>l2-norm data-fidelity class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.data_terms.DataFidelity_wl2" title="corrct.data_terms.DataFidelity_wl2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFidelity_wl2</span></code></a></p></td>
+<td><p>Weighted l2-norm data-fidelity class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.data_terms.DataFidelity_l2b" title="corrct.data_terms.DataFidelity_l2b"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFidelity_l2b</span></code></a></p></td>
+<td><p>l2-norm ball data-fidelity class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.data_terms.DataFidelity_Huber" title="corrct.data_terms.DataFidelity_Huber"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFidelity_Huber</span></code></a></p></td>
+<td><p>Huber-norm data-fidelity class. Given a parameter a: l2-norm for x &lt; a, and l1-norm for x &gt; a.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.data_terms.DataFidelity_l1" title="corrct.data_terms.DataFidelity_l1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFidelity_l1</span></code></a></p></td>
+<td><p>l1-norm data-fidelity class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.data_terms.DataFidelity_l12" title="corrct.data_terms.DataFidelity_l12"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFidelity_l12</span></code></a></p></td>
+<td><p>l12-norm data-fidelity class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.data_terms.DataFidelity_l1b" title="corrct.data_terms.DataFidelity_l1b"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFidelity_l1b</span></code></a></p></td>
+<td><p>l1-norm ball data-fidelity class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.data_terms.DataFidelity_KL" title="corrct.data_terms.DataFidelity_KL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFidelity_KL</span></code></a></p></td>
+<td><p>KullbackLeibler data-fidelity class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.data_terms.DataFidelity_ln" title="corrct.data_terms.DataFidelity_ln"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFidelity_ln</span></code></a></p></td>
+<td><p>nuclear-norm data-fidelity class.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.data_terms._soft_threshold" title="corrct.data_terms._soft_threshold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_soft_threshold</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.data_terms.eps" title="corrct.data_terms.eps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eps</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.data_terms.NDArrayFloat" title="corrct.data_terms.NDArrayFloat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDArrayFloat</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.data_terms.eps">
+<span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">eps</span></span><a class="headerlink" href="#corrct.data_terms.eps" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.data_terms.NDArrayFloat">
+<span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">NDArrayFloat</span></span><a class="headerlink" href="#corrct.data_terms.NDArrayFloat" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.data_terms._soft_threshold">
+<span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">_soft_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#_soft_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms._soft_threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">DataFidelityBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Define the DataFidelity classes interface.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base data-fidelity class.</p>
+<p class="rubric" id="parameters">Parameters</p>
+<p>background : float | NDArrayFloat | None, optional
+The data background. The default is None.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.data" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.sigma">
+<span class="sig-name descname"><span class="pre">sigma</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.sigma" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.background">
+<span class="sig-name descname"><span class="pre">background</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.background" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.sigma_data">
+<span class="sig-name descname"><span class="pre">sigma_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.sigma_data" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.__data_fidelity_name__">
+<span class="sig-name descname"><span class="pre">__data_fidelity_name__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Multiline-String&gt;</span></em><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.__data_fidelity_name__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase._slice_attr">
+<span class="sig-name descname"><span class="pre">_slice_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase._slice_attr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase._slice_attr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.data_terms.DataFidelityBase" title="corrct.data_terms.DataFidelityBase"><span class="pre">corrct.data_terms.DataFidelityBase</span></a></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.__getitem__" title="Link to this definition"></a></dt>
+<dd><p>Slice the norm and all its attributes.</p>
+<p class="rubric" id="id1">Parameters</p>
+<p>ind : Any
+Slicing indices.</p>
+<p class="rubric" id="returns">Returns</p>
+<p>DataFidelityBase
+The sliced norm.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.info">
+<span class="sig-name descname"><span class="pre">info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.info" title="Link to this definition"></a></dt>
+<dd><p>Return the data-fidelity info.</p>
+<p class="rubric" id="id2">Returns</p>
+<p>str
+Data fidelity info string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.upper">
+<span class="sig-name descname"><span class="pre">upper</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.upper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.upper" title="Link to this definition"></a></dt>
+<dd><p>Return the upper case name of the data-fidelity.</p>
+<p class="rubric" id="id3">Returns</p>
+<p>str
+Upper case string name of the data-fidelity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.lower">
+<span class="sig-name descname"><span class="pre">lower</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.lower"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.lower" title="Link to this definition"></a></dt>
+<dd><p>Return the lower case name of the data-fidelity.</p>
+<p class="rubric" id="id4">Returns</p>
+<p>str
+Lower case string name of the data-fidelity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.assign_data">
+<span class="sig-name descname"><span class="pre">assign_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.assign_data" title="Link to this definition"></a></dt>
+<dd><p>Initialize the data bias, and sigma of the data term.</p>
+<p class="rubric" id="id5">Parameters</p>
+<p>data : Union[float, NDArrayFloat, None], optional
+The data bias, by default None
+sigma : Union[float, NDArrayFloat], optional
+The sigma, by default 1.0</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.compute_residual">
+<span class="sig-name descname"><span class="pre">compute_residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.compute_residual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.compute_residual" title="Link to this definition"></a></dt>
+<dd><p>Compute the residual in the dual domain.</p>
+<p class="rubric" id="id6">Parameters</p>
+<p>proj_primal : NDArrayFloat
+Projection of the primal solution
+mask : Union[NDArrayFloat, None], optional
+Mask of the dual domain, by default None</p>
+<p class="rubric" id="id7">Returns</p>
+<p>NDArrayFloat
+The residual</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.compute_residual_norm">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_residual_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.compute_residual_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.compute_residual_norm" title="Link to this definition"></a></dt>
+<dd><p>Compute the norm of the residual.</p>
+<p class="rubric" id="id8">Parameters</p>
+<p>dual : NDArrayFloat
+The residual in the dual domain.</p>
+<p class="rubric" id="id9">Returns</p>
+<p>float
+The residual norm.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase._compute_sigma_data">
+<span class="sig-name descname"><span class="pre">_compute_sigma_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase._compute_sigma_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase._compute_sigma_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.compute_data_dual_dot">
+<span class="sig-name descname"><span class="pre">compute_data_dual_dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.compute_data_dual_dot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.compute_data_dual_dot" title="Link to this definition"></a></dt>
+<dd><p>Compute the dot product of the data bias and the dual solution.</p>
+<p class="rubric" id="id10">Parameters</p>
+<p>dual : NDArrayFloat
+The dual solution.
+mask : Union[NDArrayFloat, None], optional
+Mask of the dual domain, by default None</p>
+<p class="rubric" id="id11">Returns</p>
+<p>float
+The dot product between the data bias and the dual solution</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.initialize_dual">
+<span class="sig-name descname"><span class="pre">initialize_dual</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.initialize_dual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.initialize_dual" title="Link to this definition"></a></dt>
+<dd><p>Initialize the dual domain solution.</p>
+<p class="rubric" id="id12">Returns</p>
+<p>NDArrayFloat
+A zero array with the dimensions of the dual domain.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.update_dual">
+<span class="sig-name descname"><span class="pre">update_dual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.update_dual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.update_dual" title="Link to this definition"></a></dt>
+<dd><p>Update the dual solution.</p>
+<p class="rubric" id="id13">Parameters</p>
+<p>dual : NDArrayFloat
+The current dual solution
+proj_primal : NDArrayFloat
+The projected primal solution</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.apply_proximal">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply_proximal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.apply_proximal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.apply_proximal" title="Link to this definition"></a></dt>
+<dd><p>Apply the proximal in the dual domain.</p>
+<p class="rubric" id="id14">Parameters</p>
+<p>dual : NDArrayFloat
+The dual solution</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelityBase.compute_primal_dual_gap">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_primal_dual_gap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelityBase.compute_primal_dual_gap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelityBase.compute_primal_dual_gap" title="Link to this definition"></a></dt>
+<dd><p>Compute the primal-dual gap of the current solution.</p>
+<p class="rubric" id="id15">Parameters</p>
+<p>proj_primal : NDArrayFloat
+The projected primal solution (in the dual domain)
+dual : NDArrayFloat
+The dual solution
+mask : Union[NDArrayFloat, None], optional
+Mask in the dual domain, by default None</p>
+<p class="rubric" id="id16">Returns</p>
+<p>float
+The primal-dual gap</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">DataFidelity_l2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.data_terms.DataFidelityBase" title="corrct.data_terms.DataFidelityBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.data_terms.DataFidelityBase</span></code></a></p>
+<p>l2-norm data-fidelity class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base data-fidelity class.</p>
+<p class="rubric" id="id17">Parameters</p>
+<p>background : float | NDArrayFloat | None, optional
+The data background. The default is None.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2.__data_fidelity_name__">
+<span class="sig-name descname"><span class="pre">__data_fidelity_name__</span></span><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2.__data_fidelity_name__" title="Link to this definition"></a></dt>
+<dd><p>‘l2’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2.assign_data">
+<span class="sig-name descname"><span class="pre">assign_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l2.assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2.assign_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2.compute_residual_norm">
+<span class="sig-name descname"><span class="pre">compute_residual_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l2.compute_residual_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2.compute_residual_norm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2.apply_proximal">
+<span class="sig-name descname"><span class="pre">apply_proximal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l2.apply_proximal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2.apply_proximal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2.compute_primal_dual_gap">
+<span class="sig-name descname"><span class="pre">compute_primal_dual_gap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l2.compute_primal_dual_gap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2.compute_primal_dual_gap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_wl2">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">DataFidelity_wl2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_wl2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_wl2" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.data_terms.DataFidelity_l2" title="corrct.data_terms.DataFidelity_l2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.data_terms.DataFidelity_l2</span></code></a></p>
+<p>Weighted l2-norm data-fidelity class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base data-fidelity class.</p>
+<p class="rubric" id="id18">Parameters</p>
+<p>background : float | NDArrayFloat | None, optional
+The data background. The default is None.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_wl2.__data_fidelity_name__">
+<span class="sig-name descname"><span class="pre">__data_fidelity_name__</span></span><a class="headerlink" href="#corrct.data_terms.DataFidelity_wl2.__data_fidelity_name__" title="Link to this definition"></a></dt>
+<dd><p>‘wl2’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_wl2.assign_data">
+<span class="sig-name descname"><span class="pre">assign_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_wl2.assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_wl2.assign_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_wl2.compute_residual">
+<span class="sig-name descname"><span class="pre">compute_residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_wl2.compute_residual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_wl2.compute_residual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_wl2.compute_residual_norm">
+<span class="sig-name descname"><span class="pre">compute_residual_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_wl2.compute_residual_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_wl2.compute_residual_norm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2b">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">DataFidelity_l2b</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l2b"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2b" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.data_terms.DataFidelity_l2" title="corrct.data_terms.DataFidelity_l2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.data_terms.DataFidelity_l2</span></code></a></p>
+<p>l2-norm ball data-fidelity class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base data-fidelity class.</p>
+<p class="rubric" id="id19">Parameters</p>
+<p>background : float | NDArrayFloat | None, optional
+The data background. The default is None.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2b.__data_fidelity_name__">
+<span class="sig-name descname"><span class="pre">__data_fidelity_name__</span></span><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2b.__data_fidelity_name__" title="Link to this definition"></a></dt>
+<dd><p>‘l2b’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2b.assign_data">
+<span class="sig-name descname"><span class="pre">assign_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l2b.assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2b.assign_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2b.compute_residual">
+<span class="sig-name descname"><span class="pre">compute_residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l2b.compute_residual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2b.compute_residual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2b.apply_proximal">
+<span class="sig-name descname"><span class="pre">apply_proximal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l2b.apply_proximal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2b.apply_proximal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l2b.compute_primal_dual_gap">
+<span class="sig-name descname"><span class="pre">compute_primal_dual_gap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.data_terms.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l2b.compute_primal_dual_gap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l2b.compute_primal_dual_gap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_Huber">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">DataFidelity_Huber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_Huber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_Huber" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.data_terms.DataFidelityBase" title="corrct.data_terms.DataFidelityBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.data_terms.DataFidelityBase</span></code></a></p>
+<p>Huber-norm data-fidelity class. Given a parameter a: l2-norm for x &lt; a, and l1-norm for x &gt; a.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base data-fidelity class.</p>
+<p class="rubric" id="id20">Parameters</p>
+<p>background : float | NDArrayFloat | None, optional
+The data background. The default is None.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_Huber.__data_fidelity_name__">
+<span class="sig-name descname"><span class="pre">__data_fidelity_name__</span></span><a class="headerlink" href="#corrct.data_terms.DataFidelity_Huber.__data_fidelity_name__" title="Link to this definition"></a></dt>
+<dd><p>‘Hub’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_Huber.assign_data">
+<span class="sig-name descname"><span class="pre">assign_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_Huber.assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_Huber.assign_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_Huber.compute_residual_norm">
+<span class="sig-name descname"><span class="pre">compute_residual_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_Huber.compute_residual_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_Huber.compute_residual_norm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_Huber.apply_proximal">
+<span class="sig-name descname"><span class="pre">apply_proximal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_Huber.apply_proximal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_Huber.apply_proximal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_Huber.compute_primal_dual_gap">
+<span class="sig-name descname"><span class="pre">compute_primal_dual_gap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_Huber.compute_primal_dual_gap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_Huber.compute_primal_dual_gap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">DataFidelity_l1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.data_terms.DataFidelityBase" title="corrct.data_terms.DataFidelityBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.data_terms.DataFidelityBase</span></code></a></p>
+<p>l1-norm data-fidelity class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base data-fidelity class.</p>
+<p class="rubric" id="id21">Parameters</p>
+<p>background : float | NDArrayFloat | None, optional
+The data background. The default is None.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1.__data_fidelity_name__">
+<span class="sig-name descname"><span class="pre">__data_fidelity_name__</span></span><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1.__data_fidelity_name__" title="Link to this definition"></a></dt>
+<dd><p>‘l1’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1._get_inner_norm">
+<span class="sig-name descname"><span class="pre">_get_inner_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l1._get_inner_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1._get_inner_norm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1._apply_threshold">
+<span class="sig-name descname"><span class="pre">_apply_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l1._apply_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1._apply_threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1.apply_proximal">
+<span class="sig-name descname"><span class="pre">apply_proximal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l1.apply_proximal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1.apply_proximal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1.compute_residual_norm">
+<span class="sig-name descname"><span class="pre">compute_residual_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l1.compute_residual_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1.compute_residual_norm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1.compute_primal_dual_gap">
+<span class="sig-name descname"><span class="pre">compute_primal_dual_gap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l1.compute_primal_dual_gap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1.compute_primal_dual_gap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l12">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">DataFidelity_l12</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l2_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l12"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l12" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.data_terms.DataFidelity_l1" title="corrct.data_terms.DataFidelity_l1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.data_terms.DataFidelity_l1</span></code></a></p>
+<p>l12-norm data-fidelity class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base data-fidelity class.</p>
+<p class="rubric" id="id22">Parameters</p>
+<p>background : float | NDArrayFloat | None, optional
+The data background. The default is None.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l12.__data_fidelity_name__">
+<span class="sig-name descname"><span class="pre">__data_fidelity_name__</span></span><a class="headerlink" href="#corrct.data_terms.DataFidelity_l12.__data_fidelity_name__" title="Link to this definition"></a></dt>
+<dd><p>‘l12’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l12._get_inner_norm">
+<span class="sig-name descname"><span class="pre">_get_inner_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l12._get_inner_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l12._get_inner_norm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1b">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">DataFidelity_l1b</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l1b"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1b" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.data_terms.DataFidelity_l1" title="corrct.data_terms.DataFidelity_l1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.data_terms.DataFidelity_l1</span></code></a></p>
+<p>l1-norm ball data-fidelity class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base data-fidelity class.</p>
+<p class="rubric" id="id23">Parameters</p>
+<p>background : float | NDArrayFloat | None, optional
+The data background. The default is None.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1b.__data_fidelity_name__">
+<span class="sig-name descname"><span class="pre">__data_fidelity_name__</span></span><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1b.__data_fidelity_name__" title="Link to this definition"></a></dt>
+<dd><p>‘l1b’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1b.assign_data">
+<span class="sig-name descname"><span class="pre">assign_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l1b.assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1b.assign_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_l1b._apply_threshold">
+<span class="sig-name descname"><span class="pre">_apply_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_l1b._apply_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_l1b._apply_threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_KL">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">DataFidelity_KL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.data_terms.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_KL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_KL" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.data_terms.DataFidelityBase" title="corrct.data_terms.DataFidelityBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.data_terms.DataFidelityBase</span></code></a></p>
+<p>KullbackLeibler data-fidelity class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base data-fidelity class.</p>
+<p class="rubric" id="id24">Parameters</p>
+<p>background : float | NDArrayFloat | None, optional
+The data background. The default is None.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_KL.__data_fidelity_name__">
+<span class="sig-name descname"><span class="pre">__data_fidelity_name__</span></span><a class="headerlink" href="#corrct.data_terms.DataFidelity_KL.__data_fidelity_name__" title="Link to this definition"></a></dt>
+<dd><p>‘KL’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_KL._compute_sigma_data">
+<span class="sig-name descname"><span class="pre">_compute_sigma_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_KL._compute_sigma_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_KL._compute_sigma_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_KL.apply_proximal">
+<span class="sig-name descname"><span class="pre">apply_proximal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_KL.apply_proximal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_KL.apply_proximal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_KL.compute_residual">
+<span class="sig-name descname"><span class="pre">compute_residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_KL.compute_residual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_KL.compute_residual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_KL.compute_residual_norm">
+<span class="sig-name descname"><span class="pre">compute_residual_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_KL.compute_residual_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_KL.compute_residual_norm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_KL.compute_primal_dual_gap">
+<span class="sig-name descname"><span class="pre">compute_primal_dual_gap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_KL.compute_primal_dual_gap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_KL.compute_primal_dual_gap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_ln">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.data_terms.</span></span><span class="sig-name descname"><span class="pre">DataFidelity_ln</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ln_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(1,</span> <span class="pre">-1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#corrct.data_terms.DataFidelityBase" title="corrct.data_terms.DataFidelityBase"><span class="pre">corrct.data_terms.DataFidelityBase</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DataFidelity_l1()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_ln"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_ln" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.data_terms.DataFidelityBase" title="corrct.data_terms.DataFidelityBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.data_terms.DataFidelityBase</span></code></a></p>
+<p>nuclear-norm data-fidelity class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base data-fidelity class.</p>
+<p class="rubric" id="id25">Parameters</p>
+<p>background : float | NDArrayFloat | None, optional
+The data background. The default is None.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_ln.__data_fidelity_name__">
+<span class="sig-name descname"><span class="pre">__data_fidelity_name__</span></span><a class="headerlink" href="#corrct.data_terms.DataFidelity_ln.__data_fidelity_name__" title="Link to this definition"></a></dt>
+<dd><p>‘ln’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_ln.apply_proximal">
+<span class="sig-name descname"><span class="pre">apply_proximal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_ln.apply_proximal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_ln.apply_proximal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_ln.compute_residual_norm">
+<span class="sig-name descname"><span class="pre">compute_residual_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_ln.compute_residual_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_ln.compute_residual_norm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.data_terms.DataFidelity_ln.compute_primal_dual_gap">
+<span class="sig-name descname"><span class="pre">compute_primal_dual_gap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_primal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/data_terms.html#DataFidelity_ln.compute_primal_dual_gap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.data_terms.DataFidelity_ln.compute_primal_dual_gap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.param_tuning.html" class="btn btn-neutral float-left" title="corrct.param_tuning" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.denoisers.html" class="btn btn-neutral float-right" title="corrct.denoisers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

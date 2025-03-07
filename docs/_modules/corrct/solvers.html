@@ -6,6 +6,8 @@
   <title>corrct.solvers &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,9 @@
         <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -48,7 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -104,7 +109,7 @@
 
 
 <div class="viewcode-block" id="SolutionInfo">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.SolutionInfo">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo">[docs]</a>
 <span class="k">class</span> <span class="nc">SolutionInfo</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reconstruction info.&quot;&quot;&quot;</span>
 
@@ -150,7 +155,7 @@
 
 
 <div class="viewcode-block" id="Solver">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver">[docs]</a>
 <span class="k">class</span> <span class="nc">Solver</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize the base solver class.</span>
@@ -194,7 +199,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data_term_test</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_term_test</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Solver.info">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver.info">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.info">[docs]</a>
     <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the solver info.</span>
@@ -208,7 +213,7 @@
 
 
 <div class="viewcode-block" id="Solver.upper">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver.upper">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.upper">[docs]</a>
     <span class="k">def</span> <span class="nf">upper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the upper case name of the solver.</span>
@@ -222,7 +227,7 @@
 
 
 <div class="viewcode-block" id="Solver.lower">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.Solver.lower">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.lower">[docs]</a>
     <span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the lower case name of the solver.</span>
@@ -235,6 +240,8 @@
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
 
 
+<div class="viewcode-block" id="Solver.__call__">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.__call__">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="n">Any</span>
@@ -252,8 +259,11 @@
 <span class="sd">        -------</span>
 <span class="sd">        Tuple[NDArrayFloat, SolutionInfo]</span>
 <span class="sd">            The reconstruction and related information.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
+
+<div class="viewcode-block" id="Solver._initialize_data_fidelity_function">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._initialize_data_fidelity_function">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_initialize_data_fidelity_function</span><span class="p">(</span><span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_term</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -266,8 +276,11 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_term</span><span class="p">,</span> <span class="p">(</span><span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_KL</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_term</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported data term: &#39;</span><span class="si">{</span><span class="n">data_term</span><span class="o">.</span><span class="n">info</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;, only accepted terms are &#39;kl&#39; and &#39;l2&#39;-based.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported data term: &#39;</span><span class="si">{</span><span class="n">data_term</span><span class="o">.</span><span class="n">info</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;, only accepted terms are &#39;kl&#39; and &#39;l2&#39;-based.&quot;</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Solver._initialize_regularizer">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._initialize_regularizer">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_initialize_regularizer</span><span class="p">(</span>
         <span class="n">regularizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">]]</span>
@@ -286,8 +299,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">regularizer</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown regularizer type.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown regularizer type.&quot;</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Solver._initialize_b_masks">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._initialize_b_masks">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_initialize_b_masks</span><span class="p">(</span>
         <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">],</span> <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span>
@@ -300,11 +316,12 @@
             <span class="c1"># At the same time, we need to remove any masked pixel from the test count.</span>
             <span class="n">b_mask</span><span class="p">,</span> <span class="n">b_test_mask</span> <span class="o">=</span> <span class="n">b_mask</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">b_test_mask</span><span class="p">),</span> <span class="n">b_test_mask</span> <span class="o">*</span> <span class="n">b_mask</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">b_mask</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">)</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="FBP">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.FBP">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.FBP">[docs]</a>
 <span class="k">class</span> <span class="nc">FBP</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of the Filtered Back-Projection (FBP) algorithm.&quot;&quot;&quot;</span>
 
@@ -341,7 +358,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pad_mode</span> <span class="o">=</span> <span class="n">pad_mode</span>
 
 <div class="viewcode-block" id="FBP.info">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.FBP.info">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.FBP.info">[docs]</a>
     <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the solver info.</span>
@@ -359,6 +376,8 @@
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;(F:&quot;</span> <span class="o">+</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fbp_filter</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
 
 
+<div class="viewcode-block" id="FBP.__call__">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.FBP.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span>
@@ -433,16 +452,17 @@
             <span class="n">x</span> <span class="o">*=</span> <span class="n">x_mask</span>
 
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">info</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="SART">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.SART">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.SART">[docs]</a>
 <span class="k">class</span> <span class="nc">SART</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Solver class implementing the Simultaneous Algebraic Reconstruction Technique (SART) algorithm.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SART.compute_residual">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.SART.compute_residual">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.SART.compute_residual">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_residual</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">A</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
@@ -479,6 +499,8 @@
         <span class="k">return</span> <span class="n">res</span></div>
 
 
+<div class="viewcode-block" id="SART.__call__">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.SART.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">A</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">],</span>
@@ -600,11 +622,12 @@
                     <span class="k">break</span>
 
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">info</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="MLEM">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.MLEM">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.MLEM">[docs]</a>
 <span class="k">class</span> <span class="nc">MLEM</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize the MLEM solver class.</span>
@@ -649,7 +672,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_regularizer</span><span class="p">(</span><span class="n">regularizer</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MLEM.info">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.MLEM.info">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.MLEM.info">[docs]</a>
     <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the MLEM info.</span>
@@ -662,6 +685,8 @@
         <span class="k">return</span> <span class="n">Solver</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;(B:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">background</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">background</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span></div>
 
 
+<div class="viewcode-block" id="MLEM.__call__">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.MLEM.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span>
@@ -780,11 +805,12 @@
                 <span class="n">x</span> <span class="o">*=</span> <span class="n">x_mask</span>
 
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">info</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="SIRT">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.SIRT">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.SIRT">[docs]</a>
 <span class="k">class</span> <span class="nc">SIRT</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize the SIRT solver class.</span>
@@ -833,7 +859,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_regularizer</span><span class="p">(</span><span class="n">regularizer</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SIRT.info">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.SIRT.info">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.SIRT.info">[docs]</a>
     <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the SIRT info.</span>
@@ -847,6 +873,8 @@
         <span class="k">return</span> <span class="n">Solver</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="o">+</span> <span class="n">reg_info</span></div>
 
 
+<div class="viewcode-block" id="SIRT.__call__">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.SIRT.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span>
@@ -971,11 +999,12 @@
                 <span class="n">x</span> <span class="o">*=</span> <span class="n">x_mask</span>
 
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">info</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="PDHG">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.PDHG">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG">[docs]</a>
 <span class="k">class</span> <span class="nc">PDHG</span><span class="p">(</span><span class="n">Solver</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize the PDHG solver class.</span>
@@ -1024,7 +1053,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">regularizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_regularizer</span><span class="p">(</span><span class="n">regularizer</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PDHG.info">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.PDHG.info">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG.info">[docs]</a>
     <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the PDHG info.</span>
@@ -1038,6 +1067,8 @@
         <span class="k">return</span> <span class="n">Solver</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_term</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="o">+</span> <span class="n">reg_info</span></div>
 
 
+<div class="viewcode-block" id="PDHG._initialize_data_fidelity_function">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG._initialize_data_fidelity_function">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_initialize_data_fidelity_function</span><span class="p">(</span><span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">]):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_term</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -1050,10 +1081,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown data term: &quot;</span><span class="si">{</span><span class="n">data_term</span><span class="si">}</span><span class="s1">&quot;, accepted terms are: &quot;l2&quot; | &quot;l1&quot; | &quot;kl&quot;.&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_term</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_term</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="PDHG.power_method">
-<a class="viewcode-back" href="../../corrct.html#corrct.solvers.PDHG.power_method">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG.power_method">[docs]</a>
     <span class="k">def</span> <span class="nf">power_method</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">DTypeLike</span><span class="p">]:</span>
@@ -1092,6 +1124,8 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="PDHG._get_data_sigma_tau_unpreconditioned">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG._get_data_sigma_tau_unpreconditioned">[docs]</a>
     <span class="k">def</span> <span class="nf">_get_data_sigma_tau_unpreconditioned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">):</span>
         <span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">,</span> <span class="n">x_dtype</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_method</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
         <span class="n">tau</span> <span class="o">=</span> <span class="n">L</span>
@@ -1102,8 +1136,11 @@
 
         <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">/</span> <span class="n">tau</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxation</span> <span class="o">/</span> <span class="n">L</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">x_dtype</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">x_dtype</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="PDHG.__call__">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span>
@@ -1257,6 +1294,7 @@
                     <span class="k">break</span>
 
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">info</span></div>
+</div>
 
 </pre></div>
 

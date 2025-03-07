@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.physics.xraylib_helper &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.physics.xrf" href="corrct.physics.xrf.html" />
+    <link rel="prev" title="corrct.physics.phase" href="corrct.physics.phase.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.processing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.processing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.alignment.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="corrct.physics.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+          <li class="breadcrumb-item"><a href="corrct.physics.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.xraylib_helper</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.physics.xraylib_helper.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.physics.xraylib_helper">
+<span id="corrct-physics-xraylib-helper"></span><h1><a class="reference internal" href="#module-corrct.physics.xraylib_helper" title="corrct.physics.xraylib_helper"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.xraylib_helper</span></code></a><a class="headerlink" href="#module-corrct.physics.xraylib_helper" title="Link to this heading"></a></h1>
+<p>xraylib handling functions.</p>
+<p>&#64;author: Nicola VIGANÒ, CEA-IRIG, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.xraylib_helper.get_element_number" title="corrct.physics.xraylib_helper.get_element_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_element_number</span></code></a></p></td>
+<td><p>Return the element number from the symbol.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.xraylib_helper.get_element_number_and_symbol" title="corrct.physics.xraylib_helper.get_element_number_and_symbol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_element_number_and_symbol</span></code></a></p></td>
+<td><p>Return both the element symbol and number from either the symbol or the number.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.xraylib_helper.get_compound" title="corrct.physics.xraylib_helper.get_compound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_compound</span></code></a></p></td>
+<td><p>Build a compound from the compound composition string.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.xraylib_helper.get_compound_cross_section" title="corrct.physics.xraylib_helper.get_compound_cross_section"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_compound_cross_section</span></code></a></p></td>
+<td><p>Compute a compound cross section for the given incoming photon energy.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.xraylib_helper.get_element_number">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.xraylib_helper.</span></span><span class="sig-name descname"><span class="pre">get_element_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/xraylib_helper.html#get_element_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xraylib_helper.get_element_number" title="Link to this definition"></a></dt>
+<dd><p>Return the element number from the symbol.</p>
+<p class="rubric" id="id7">Parameters</p>
+<p>element : str | int
+The element symbol (or number, which won’t be converted).</p>
+<p class="rubric" id="id8">Returns</p>
+<p>int
+The corresponding element number.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.xraylib_helper.get_element_number_and_symbol">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.xraylib_helper.</span></span><span class="sig-name descname"><span class="pre">get_element_number_and_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/physics/xraylib_helper.html#get_element_number_and_symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xraylib_helper.get_element_number_and_symbol" title="Link to this definition"></a></dt>
+<dd><p>Return both the element symbol and number from either the symbol or the number.</p>
+<p class="rubric" id="id9">Parameters</p>
+<p>element : str | int
+The element symbol (or number, which won’t be converted).</p>
+<p class="rubric" id="id10">Returns</p>
+<p>tuple[str, int]
+The element symbol and number.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.xraylib_helper.get_compound">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.xraylib_helper.</span></span><span class="sig-name descname"><span class="pre">get_compound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmp_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/xraylib_helper.html#get_compound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xraylib_helper.get_compound" title="Link to this definition"></a></dt>
+<dd><p>Build a compound from the compound composition string.</p>
+<p class="rubric" id="id11">Parameters</p>
+<p>cmp_name : str
+Compund name / composition.
+density : float, optional
+The density of the compound. If not provided it will be approximated from the composing elements.
+The default is None.</p>
+<p class="rubric" id="id12">Returns</p>
+<p>cmp : dict
+The compound structure.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.xraylib_helper.get_compound_cross_section">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.xraylib_helper.</span></span><span class="sig-name descname"><span class="pre">get_compound_cross_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/physics/xraylib_helper.html#get_compound_cross_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.xraylib_helper.get_compound_cross_section" title="Link to this definition"></a></dt>
+<dd><p>Compute a compound cross section for the given incoming photon energy.</p>
+<p class="rubric" id="id13">Parameters</p>
+<p>compound : dict
+The compound structure (as returned by <code class="docutils literal notranslate"><span class="pre">get_compound</span></code>)
+mean_energy_keV : float
+The average photon energy</p>
+<p class="rubric" id="id14">Returns</p>
+<p>float
+The computed cross-section</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.physics.phase.html" class="btn btn-neutral float-left" title="corrct.physics.phase" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.physics.xrf.html" class="btn btn-neutral float-right" title="corrct.physics.xrf" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.param_tuning &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.data_terms" href="corrct.data_terms.html" />
+    <link rel="prev" title="corrct._projector_backends" href="corrct._projector_backends.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.regularizers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.regularizers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.projectors.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.projectors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct._projector_backends.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct._projector_backends</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.data_terms.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.data_terms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.denoisers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.denoisers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.filters.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.models.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.operators.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.operators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.solvers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.solvers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.testing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.struct_illum.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.struct_illum</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.param_tuning.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.param_tuning">
+<span id="corrct-param-tuning"></span><h1><a class="reference internal" href="#module-corrct.param_tuning" title="corrct.param_tuning"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></a><a class="headerlink" href="#module-corrct.param_tuning" title="Link to this heading"></a></h1>
+<p>Aided regularization parameter estimation.</p>
+<p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.param_tuning.BaseParameterTuning" title="corrct.param_tuning.BaseParameterTuning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseParameterTuning</span></code></a></p></td>
+<td><p>Base class for parameter tuning classes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.param_tuning.LCurve" title="corrct.param_tuning.LCurve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LCurve</span></code></a></p></td>
+<td><p>L-curve regularization parameter estimation helper.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.param_tuning.CrossValidation" title="corrct.param_tuning.CrossValidation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CrossValidation</span></code></a></p></td>
+<td><p>Cross-validation hyper-parameter estimation class.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.param_tuning.create_random_test_mask" title="corrct.param_tuning.create_random_test_mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_random_test_mask</span></code></a></p></td>
+<td><p>Create a random mask for cross-validation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.param_tuning.get_lambda_range" title="corrct.param_tuning.get_lambda_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_lambda_range</span></code></a></p></td>
+<td><p>Compute hyper-parameter values within an interval.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.param_tuning.fit_func_min" title="corrct.param_tuning.fit_func_min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_func_min</span></code></a></p></td>
+<td><p>Parabolic fit of objective function costs for the different hyper-parameter values.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.param_tuning.num_threads" title="corrct.param_tuning.num_threads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_threads</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.param_tuning.NDArrayFloat" title="corrct.param_tuning.NDArrayFloat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDArrayFloat</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.param_tuning.num_threads">
+<span class="sig-prename descclassname"><span class="pre">corrct.param_tuning.</span></span><span class="sig-name descname"><span class="pre">num_threads</span></span><a class="headerlink" href="#corrct.param_tuning.num_threads" title="Link to this definition"></a></dt>
+<dd><p>‘round(…)’</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.param_tuning.NDArrayFloat">
+<span class="sig-prename descclassname"><span class="pre">corrct.param_tuning.</span></span><span class="sig-name descname"><span class="pre">NDArrayFloat</span></span><a class="headerlink" href="#corrct.param_tuning.NDArrayFloat" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.param_tuning.create_random_test_mask">
+<span class="sig-prename descclassname"><span class="pre">corrct.param_tuning.</span></span><span class="sig-name descname"><span class="pre">create_random_test_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.param_tuning.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#create_random_test_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.create_random_test_mask" title="Link to this definition"></a></dt>
+<dd><p>Create a random mask for cross-validation.</p>
+<p class="rubric" id="id5">Parameters</p>
+<p>data_shape : Sequence[int]
+The shape of the data.
+test_fraction : float, optional
+The fraction of pixels to mask. The default is 0.05.
+data_dtype : DTypeLike, optional
+The data type of the mask. The default is np.float32.</p>
+<p class="rubric" id="id6">Returns</p>
+<p>data_test_mask : NDArrayFloat
+The pixel mask.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.param_tuning.get_lambda_range">
+<span class="sig-prename descclassname"><span class="pre">corrct.param_tuning.</span></span><span class="sig-name descname"><span class="pre">get_lambda_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_per_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aligned_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.param_tuning.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#get_lambda_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.get_lambda_range" title="Link to this definition"></a></dt>
+<dd><p>Compute hyper-parameter values within an interval.</p>
+<p class="rubric" id="id7">Parameters</p>
+<p>start : float
+First hyper-parameter value.
+end : float
+Last hyper-parameter value.
+num_per_order : int, optional
+Number of steps per order of magnitude. The default is 4.
+aligned_order : bool, optional
+Whether to align the 1 of each order of magnitude or to the given start value. The default is True.</p>
+<p class="rubric" id="id8">Returns</p>
+<p>NDArrayFloat
+List of hyper-parameter values.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.param_tuning.fit_func_min">
+<span class="sig-prename descclassname"><span class="pre">corrct.param_tuning.</span></span><span class="sig-name descname"><span class="pre">fit_func_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hp_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.param_tuning.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_stds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">linear</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">log</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#fit_func_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.fit_func_min" title="Link to this definition"></a></dt>
+<dd><p>Parabolic fit of objective function costs for the different hyper-parameter values.</p>
+<p class="rubric" id="id9">Parameters</p>
+<p>hp_vals : Union[ArrayLike, NDArrayFloat]
+Hyper-parameter values.
+f_vals : NDArrayFloat
+Objective function costs of each hyper-parameter value.
+f_stds : NDArrayFloat, optional
+Objective function cost standard deviations of each hyper-parameter value.
+It is only used for plotting purposes. The default is None.
+scale : str, optional
+Scale of the fit. Options are: “log” | “linear”. The default is “log”.
+verbose : bool, optional
+Whether to produce verbose output, by default False
+plot_result : bool, optional
+Whether to plot the result, by default False</p>
+<p class="rubric" id="id10">Returns</p>
+<p>min_hp_val : float
+Expected hyper-parameter value of the fitted minimum.
+min_f_val : float
+Expected objective function cost of the fitted minimum.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.param_tuning.BaseParameterTuning">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.param_tuning.</span></span><span class="sig-name descname"><span class="pre">BaseParameterTuning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel_eval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#BaseParameterTuning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.BaseParameterTuning" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Base class for parameter tuning classes.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize a base helper class.</p>
+<p class="rubric" id="id11">Parameters</p>
+<p>dtype : DTypeLike, optional
+Type of the data, by default np.float32
+parallel_eval : bool, optional
+Whether to evaluate results in parallel, by default True
+verbose : bool, optional
+Whether to produce verbose output, by default False
+plot_result : bool, optional
+Whether to plot the results, by default False</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.param_tuning.BaseParameterTuning._solver_spawning_functionls">
+<span class="sig-name descname"><span class="pre">_solver_spawning_functionls</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.param_tuning.BaseParameterTuning._solver_spawning_functionls" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.param_tuning.BaseParameterTuning._solver_calling_function">
+<span class="sig-name descname"><span class="pre">_solver_calling_function</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="corrct.solvers.html#corrct.solvers.SolutionInfo" title="corrct.solvers.SolutionInfo"><span class="pre">corrct.solvers.SolutionInfo</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.param_tuning.BaseParameterTuning._solver_calling_function" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.param_tuning.BaseParameterTuning.solver_spawning_function">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solver_spawning_function</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#corrct.param_tuning.BaseParameterTuning.solver_spawning_function" title="Link to this definition"></a></dt>
+<dd><p>Return the locally stored solver spawning function.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.param_tuning.BaseParameterTuning.solver_calling_function">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solver_calling_function</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="corrct.solvers.html#corrct.solvers.SolutionInfo" title="corrct.solvers.SolutionInfo"><span class="pre">corrct.solvers.SolutionInfo</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.param_tuning.BaseParameterTuning.solver_calling_function" title="Link to this definition"></a></dt>
+<dd><p>Return the locally stored solver calling function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.param_tuning.BaseParameterTuning.get_lambda_range">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_lambda_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_per_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.param_tuning.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#BaseParameterTuning.get_lambda_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.BaseParameterTuning.get_lambda_range" title="Link to this definition"></a></dt>
+<dd><p>Compute regularization weights within an interval.</p>
+<p class="rubric" id="id12">Parameters</p>
+<p>start : float
+First regularization weight.
+end : float
+Last regularization weight.
+num_per_order : int, optional
+Number of steps per order of magnitude. The default is 4.</p>
+<p class="rubric" id="id13">Returns</p>
+<p>NDArrayFloat
+List of regularization weights.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.param_tuning.BaseParameterTuning.compute_reconstruction_and_loss">
+<span class="sig-name descname"><span class="pre">compute_reconstruction_and_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hp_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#BaseParameterTuning.compute_reconstruction_and_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.BaseParameterTuning.compute_reconstruction_and_loss" title="Link to this definition"></a></dt>
+<dd><p>Compute objective function cost for the given hyper-parameter value.</p>
+<p class="rubric" id="id14">Parameters</p>
+<p>hp_val : float
+hyper-parameter value.
+*args : Any
+Optional positional arguments for the reconstruction.
+**kwds : Any
+Optional keyword arguments for the reconstruction.</p>
+<p class="rubric" id="id15">Returns</p>
+<p>cost : float
+Cost of the given regularization weight.
+rec : NDArray
+Reconstruction at the given weight.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.param_tuning.BaseParameterTuning.compute_reconstruction_error">
+<span class="sig-name descname"><span class="pre">compute_reconstruction_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hp_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gnd_truth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.param_tuning.NDArrayFloat</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#BaseParameterTuning.compute_reconstruction_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.BaseParameterTuning.compute_reconstruction_error" title="Link to this definition"></a></dt>
+<dd><p>Compute the reconstruction errors for each hyper-parameter values against the ground truth.</p>
+<p class="rubric" id="id16">Parameters</p>
+<p>hp_vals : Union[ArrayLike, NDArrayFloat]
+List of hyper-parameter values.
+gnd_truth : NDArrayFloat
+Expected reconstruction.</p>
+<p class="rubric" id="id17">Returns</p>
+<p>err_l1 : NDArrayFloat
+l1-norm errors for each reconstruction.
+err_l2 : NDArrayFloat
+l2-norm errors for each reconstruction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.param_tuning.BaseParameterTuning.compute_loss_values">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_loss_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hp_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.param_tuning.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#BaseParameterTuning.compute_loss_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.BaseParameterTuning.compute_loss_values" title="Link to this definition"></a></dt>
+<dd><p>Compute the objective function costs for a list of hyper-parameter values.</p>
+<p class="rubric" id="id18">Parameters</p>
+<p>hp_vals : Union[ArrayLike, NDArrayFloat]
+List of hyper-parameter values.</p>
+<p class="rubric" id="id19">Returns</p>
+<p>NDArrayFloat
+Objective function cost for each hyper-parameter value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.param_tuning.LCurve">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.param_tuning.</span></span><span class="sig-name descname"><span class="pre">LCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel_eval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#LCurve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.LCurve" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.param_tuning.BaseParameterTuning" title="corrct.param_tuning.BaseParameterTuning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.param_tuning.BaseParameterTuning</span></code></a></p>
+<p>L-curve regularization parameter estimation helper.</p>
+<p class="rubric">Initialization</p>
+<p>Create an L-curve regularization parameter estimation helper.</p>
+<p class="rubric" id="id20">Parameters</p>
+<p>loss_function : Callable
+The loss function for the computation of the L-curve values.
+data_dtype : DTypeLike, optional
+Type of the input data. The default is np.float32.
+parallel_eval : bool, optional
+Compute loss and error values in parallel. The default is False.
+verbose : bool, optional
+Print verbose output. The default is False.
+plot_result : bool, optional
+Plot results. The default is False.</p>
+<p class="rubric" id="raises">Raises</p>
+<p>ValueError
+In case ‘loss_function’ is not callable or does not expose at least one argument.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.param_tuning.LCurve.compute_loss_values">
+<span class="sig-name descname"><span class="pre">compute_loss_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hp_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.param_tuning.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#LCurve.compute_loss_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.LCurve.compute_loss_values" title="Link to this definition"></a></dt>
+<dd><p>Compute objective function values for all hyper-parameter values.</p>
+<p class="rubric" id="id21">Parameters</p>
+<p>hp_vals : Union[ArrayLike, NDArrayFloat]
+Hyper-parameter values to use for computing the different objective function values.</p>
+<p class="rubric" id="id22">Returns</p>
+<p>f_vals : NDArrayFloat
+Objective function cost for each hyper-parameter value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.param_tuning.CrossValidation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.param_tuning.</span></span><span class="sig-name descname"><span class="pre">CrossValidation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_averages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel_eval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#CrossValidation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.CrossValidation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.param_tuning.BaseParameterTuning" title="corrct.param_tuning.BaseParameterTuning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.param_tuning.BaseParameterTuning</span></code></a></p>
+<p>Cross-validation hyper-parameter estimation class.</p>
+<p class="rubric">Initialization</p>
+<p>Create a cross-validation hyper-parameter estimation helper.</p>
+<p class="rubric" id="id23">Parameters</p>
+<p>data_shape : Sequence[int]
+Shape of the projection data.
+data_dtype : DTypeLike, optional
+Type of the input data. The default is np.float32.
+cv_fraction : float, optional
+Fraction of detector points to use for the leave-out set. The default is 0.1.
+num_averages : int, optional
+Number of averages random leave-out sets to use. The default is 7.
+parallel_eval : bool, optional
+Compute loss and error values in parallel. The default is False.
+verbose : bool, optional
+Print verbose output. The default is False.
+plot_result : bool, optional
+Plot results. The default is False.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.param_tuning.CrossValidation._create_random_test_mask">
+<span class="sig-name descname"><span class="pre">_create_random_test_mask</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.param_tuning.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#CrossValidation._create_random_test_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.CrossValidation._create_random_test_mask" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.param_tuning.CrossValidation.compute_loss_values">
+<span class="sig-name descname"><span class="pre">compute_loss_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hp_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#CrossValidation.compute_loss_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.CrossValidation.compute_loss_values" title="Link to this definition"></a></dt>
+<dd><p>Compute objective function values for all requested hyper-parameter values…</p>
+<p class="rubric" id="id24">Parameters</p>
+<p>params : Union[ArrayLike, NDArrayFloat]
+Hyper-parameter values (e.g. regularization weight) to evaluate.</p>
+<p class="rubric" id="id25">Returns</p>
+<p>f_avgs : NDArrayFloat
+Average objective function costs for each regularization weight.
+f_stds : NDArrayFloat
+Standard deviation of objective function costs for each regularization weight.
+f_vals : NDArrayFloat
+Objective function costs for each regularization weight.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.param_tuning.CrossValidation.fit_loss_min">
+<span class="sig-name descname"><span class="pre">fit_loss_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hp_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.param_tuning.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_stds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.param_tuning.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">linear</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">log</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'log'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/param_tuning.html#CrossValidation.fit_loss_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.param_tuning.CrossValidation.fit_loss_min" title="Link to this definition"></a></dt>
+<dd><p>Parabolic fit of objective function costs for the different hyper-parameter values.</p>
+<p class="rubric" id="id26">Parameters</p>
+<p>hp_vals : Union[ArrayLike, NDArrayFloat]
+Hyper-parameter values.
+f_vals : NDArrayFloat
+Objective function costs of each hyper-parameter value.
+f_stds : NDArrayFloat, optional
+Objective function cost standard deviations of each hyper-parameter value.
+It is only used for plotting purposes. The default is None.
+scale : str, optional
+Scale of the fit. Options are: “log” | “linear”. The default is “log”.</p>
+<p class="rubric" id="id27">Returns</p>
+<p>min_hp_val : float
+Expected hyper-parameter value of the fitted minimum.
+min_f_val : float
+Expected objective function cost of the fitted minimum.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct._projector_backends.html" class="btn btn-neutral float-left" title="corrct._projector_backends" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.data_terms.html" class="btn btn-neutral float-right" title="corrct.data_terms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

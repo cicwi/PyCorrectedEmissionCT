@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.testing &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.struct_illum" href="corrct.struct_illum.html" />
+    <link rel="prev" title="corrct.solvers" href="corrct.solvers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.regularizers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.regularizers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.projectors.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.projectors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct._projector_backends.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct._projector_backends</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.param_tuning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.data_terms.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.data_terms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.denoisers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.denoisers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.filters.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.models.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.operators.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.operators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.solvers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.solvers</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.struct_illum.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.struct_illum</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.testing.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.testing">
+<span id="corrct-testing"></span><h1><a class="reference internal" href="#module-corrct.testing" title="corrct.testing"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></a><a class="headerlink" href="#module-corrct.testing" title="Link to this heading"></a></h1>
+<p>Provide utility functions for testing.</p>
+<p>Created on Thu Jun  4 12:28:21 2020</p>
+<p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.testing.roundup_to_pow2" title="corrct.testing.roundup_to_pow2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">roundup_to_pow2</span></code></a></p></td>
+<td><p>Round first argument to the power of 2 indicated by second argument.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.testing.download_phantom" title="corrct.testing.download_phantom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_phantom</span></code></a></p></td>
+<td><p>Download the phantom generation module from Nicolas Barbey’s repository on github.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.testing.create_phantom_nuclei3d" title="corrct.testing.create_phantom_nuclei3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_phantom_nuclei3d</span></code></a></p></td>
+<td><p>Create a 3D phantom of cell nuclei.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.testing.phantom_assign_concentration" title="corrct.testing.phantom_assign_concentration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">phantom_assign_concentration</span></code></a></p></td>
+<td><p>Build an XRF phantom.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.testing.phantom_assign_concentration_multi" title="corrct.testing.phantom_assign_concentration_multi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">phantom_assign_concentration_multi</span></code></a></p></td>
+<td><p>Build an XRF phantom.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.testing.add_noise" title="corrct.testing.add_noise"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_noise</span></code></a></p></td>
+<td><p>Add noise to an image (sinogram).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.testing.create_sino" title="corrct.testing.create_sino"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_sino</span></code></a></p></td>
+<td><p>Compute the sinogram from a given phantom.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.testing.create_sino_transmission" title="corrct.testing.create_sino_transmission"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_sino_transmission</span></code></a></p></td>
+<td><p>Compute the sinogram from a given phantom.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.testing.compute_error_power" title="corrct.testing.compute_error_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_error_power</span></code></a></p></td>
+<td><p>Compute the expected volume signal power, and computed volume error power.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.testing.NDArrayFloat" title="corrct.testing.NDArrayFloat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDArrayFloat</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.testing.NDArrayFloat">
+<span class="sig-prename descclassname"><span class="pre">corrct.testing.</span></span><span class="sig-name descname"><span class="pre">NDArrayFloat</span></span><a class="headerlink" href="#corrct.testing.NDArrayFloat" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.testing.roundup_to_pow2">
+<span class="sig-prename descclassname"><span class="pre">corrct.testing.</span></span><span class="sig-name descname"><span class="pre">roundup_to_pow2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/testing.html#roundup_to_pow2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.testing.roundup_to_pow2" title="Link to this definition"></a></dt>
+<dd><p>Round first argument to the power of 2 indicated by second argument.</p>
+<p class="rubric" id="id15">Parameters</p>
+<p>x : int | float | NDArrayFloat
+Number to round up.
+p : int
+Power of 2.
+dtype : DTypeLike, optional
+data type of the output. The default is int.</p>
+<p class="rubric" id="id16">Returns</p>
+<p>int | float | NDArrayFloat
+Rounding up of input.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.testing.download_phantom">
+<span class="sig-prename descclassname"><span class="pre">corrct.testing.</span></span><span class="sig-name descname"><span class="pre">download_phantom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/testing.html#download_phantom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.testing.download_phantom" title="Link to this definition"></a></dt>
+<dd><p>Download the phantom generation module from Nicolas Barbey’s repository on github.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.testing.create_phantom_nuclei3d">
+<span class="sig-prename descclassname"><span class="pre">corrct.testing.</span></span><span class="sig-name descname"><span class="pre">create_phantom_nuclei3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">FoV_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/testing.html#create_phantom_nuclei3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.testing.create_phantom_nuclei3d" title="Link to this definition"></a></dt>
+<dd><p>Create a 3D phantom of cell nuclei.</p>
+<p class="rubric" id="id17">Parameters</p>
+<p>FoV_size : int | None
+Size of the field-of-view in pixels, per edge, by default None
+dtype : DTypeLike, optional
+The dtype of the produced data, by default np.float32</p>
+<p class="rubric" id="id18">Returns</p>
+<p>tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]
+The nuclei 3D phantom, the background, and the pixel sizes along each axis</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.testing.phantom_assign_concentration">
+<span class="sig-prename descclassname"><span class="pre">corrct.testing.</span></span><span class="sig-name descname"><span class="pre">phantom_assign_concentration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ph_or</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.testing.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Ca'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">em_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'KA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_size_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/testing.html#phantom_assign_concentration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.testing.phantom_assign_concentration" title="Link to this definition"></a></dt>
+<dd><p>Build an XRF phantom.</p>
+<p>The created phantom has been used in:</p>
+<ul class="simple">
+<li><p>N. Viganò and V. A. Solé, “Physically corrected forward operators for
+induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
+Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.</p></li>
+</ul>
+<p class="rubric" id="id19">Parameters</p>
+<p>ph_or : NDArrayFloat
+The phases phantom map.
+element : str, optional
+Element symbol. The default is “Ca”.
+em_line : str, optional
+Emission line. The default is “KA” (corresponding to K-alpha).
+in_energy_keV : float, optional
+Incoming beam energy in keV. The default is 20.0.</p>
+<p class="rubric" id="id20">Returns</p>
+<p>vol_fluo_yield : NDArrayFloat
+Voxel-wise fluorescence yields.
+vol_att_in : NDArrayFloat
+Voxel-wise attenuation at the incoming beam energy.
+vol_att_out : NDArrayFloat
+Voxel-wise attenuation at the emitted energy.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.testing.phantom_assign_concentration_multi">
+<span class="sig-prename descclassname"><span class="pre">corrct.testing.</span></span><span class="sig-name descname"><span class="pre">phantom_assign_concentration_multi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ph_or</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.testing.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('Ca',</span> <span class="pre">'Fe')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">em_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'KA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_energy_keV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detectors_pos_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/testing.html#phantom_assign_concentration_multi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.testing.phantom_assign_concentration_multi" title="Link to this definition"></a></dt>
+<dd><p>Build an XRF phantom.</p>
+<p>The created phantom has been used in:</p>
+<ul class="simple">
+<li><p>N. Viganò and V. A. Solé, “Physically corrected forward operators for
+induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
+Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.</p></li>
+</ul>
+<p class="rubric" id="id21">Parameters</p>
+<p>ph_or : NDArrayFloat
+The phases phantom map.
+elements : Sequence[str], optional
+Element symbols. The default is [“Ca”, “Fe”].
+em_lines : str | Sequence[str], optional
+Emission lines. The default is “KA” (corresponding to K-alpha).
+in_energy_keV : float, optional
+Incoming beam energy in keV. The default is 20.0.
+detectors_pos_rad : float | tuple | list | NDArrayFloat, optional
+Detector(s) positions in radians, with respect to incoming beam.
+If None, Compton is not produced. The default is None.</p>
+<p class="rubric" id="id22">Returns</p>
+<p>vol_yield : List[NDArrayFloat]
+Voxel-wise fluorescence and Compton yields.
+vol_att_in : NDArrayFloat
+Voxel-wise attenuation at the incoming beam energy.
+vol_att_out : List[NDArrayFloat]
+Voxel-wise attenuation at the emitted energy.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.testing.add_noise">
+<span class="sig-prename descclassname"><span class="pre">corrct.testing.</span></span><span class="sig-name descname"><span class="pre">add_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_clean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_photons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_poisson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readout_noise_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_avg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detection_efficiency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/testing.html#add_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.testing.add_noise" title="Link to this definition"></a></dt>
+<dd><p>Add noise to an image (sinogram).</p>
+<p class="rubric" id="id23">Parameters</p>
+<p>img_clean : NDArray
+The clean input image.
+num_photons : Union[int, float]
+Number of photons corresponding to the value 1.0 in the image.
+add_poisson : bool, optional
+Whether to add Poisson noise, by default False.
+readout_noise_std : Optional[float], optional
+Standard deviation of the readout noise, by default None.
+background_avg : Optional[float], optional
+Average value of the background, by default None.
+background_std : Optional[float], optional
+Standard deviation of the background, by default None.
+detection_efficiency : float, optional
+Efficiency of the detection (e.g. detector solid angle, inclination, etc), by default 1.0.
+dtype : DTypeLike, optional
+Data type of the volumes, by default np.float32.</p>
+<p class="rubric" id="id24">Returns</p>
+<p>Tuple[NDArray, NDArray, float]
+The noised and clean images (scaled by the photons and efficiency), and the background.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.testing.create_sino">
+<span class="sig-prename descclassname"><span class="pre">corrct.testing.</span></span><span class="sig-name descname"><span class="pre">create_sino</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.testing.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_angles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_angle_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_angle_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">180.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dwell_time_s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">photon_flux</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detectors_pos_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.pi</span> <span class="pre">/</span> <span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol_att_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol_att_out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_avg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_poisson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readout_noise_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/testing.html#create_sino"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.testing.create_sino" title="Link to this definition"></a></dt>
+<dd><p>Compute the sinogram from a given phantom.</p>
+<p class="rubric" id="id25">Parameters</p>
+<p>ph : NDArrayFloat
+The phantom volume, with the expected average photon production per voxel per impinging photon.
+num_angles : int
+The number of angles.
+start_angle_deg : float, optional
+Initial scan angle in degrees. The default is 0.
+end_angle_deg : float, optional
+Final scan angle in degrees. The default is 180.
+dwell_time_s : float, optional
+The acquisition time per sinogram point. The default is 1.
+photon_flux : float, optional
+The impinging photon flux per unit time (second). The default is 1e9.
+detectors_pos_rad : float | Sequence[float] | NDArrayFloat, optional
+Detector(s) positions in radians, with respect to incoming beam. The default is (np.pi / 2).
+vol_att_in : NDArrayFloat, optional
+Attenuation volume for the incoming beam. The default is None.
+vol_att_out : NDArrayFloat, optional
+Attenuation volume for the outgoing beam. The default is None.
+psf : NDArrayFloat, optional
+Point spread function or probing beam profile. The default is None.
+background_avg : float, optional
+Background average value. The default is None.
+background_std : float, optional
+Background standard deviation. The default is None.
+add_poisson : bool, optional
+Switch to turn on Poisson noise. The default is False.
+readout_noise_std : float, optional
+Read-out noise standard deviation. The default is None.
+dtype : numpy.dtype, optional
+Output datatype. The default is np.float32.</p>
+<p class="rubric" id="id26">Returns</p>
+<p>Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, float]
+The sinogram (detector readings), the angular positions, and the expected average phton production per voxel.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.testing.create_sino_transmission">
+<span class="sig-prename descclassname"><span class="pre">corrct.testing.</span></span><span class="sig-name descname"><span class="pre">create_sino_transmission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.testing.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_angles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_angle_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_angle_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dwell_time_s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">photon_flux</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_poisson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readout_noise_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.testing.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/testing.html#create_sino_transmission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.testing.create_sino_transmission" title="Link to this definition"></a></dt>
+<dd><p>Compute the sinogram from a given phantom.</p>
+<p class="rubric" id="id27">Parameters</p>
+<p>ph : NDArrayFloat
+The phantom volume, with the expected average photon production per voxel per impinging photon.
+num_angles : int
+The number of angles.
+start_angle_deg : float, optional
+Initial scan angle in degrees. The default is 0.
+end_angle_deg : float, optional
+Final scan angle in degrees. The default is 180.
+dwell_time_s : float, optional
+The acquisition time per sinogram point. The default is 1.
+photon_flux : float, optional
+The impinging photon flux per unit time (second). The default is 1e9.
+psf : NDArrayFloat, optional
+Point spread function or probing beam profile. The default is None.
+add_poisson : bool, optional
+Switch to turn on Poisson noise. The default is False.
+readout_noise_std : float, optional
+Read-out noise standard deviation. The default is None.
+dtype : numpy.dtype, optional
+Output datatype. The default is np.float32.</p>
+<p class="rubric" id="id28">Returns</p>
+<p>Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat, float]
+The sinogram (detector readings), the flat-field, and the angular positions.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.testing.compute_error_power">
+<span class="sig-prename descclassname"><span class="pre">corrct.testing.</span></span><span class="sig-name descname"><span class="pre">compute_error_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_vol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.testing.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">computed_vol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.testing.NDArrayFloat</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/testing.html#compute_error_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.testing.compute_error_power" title="Link to this definition"></a></dt>
+<dd><p>Compute the expected volume signal power, and computed volume error power.</p>
+<p class="rubric" id="id29">Parameters</p>
+<p>expected_vol : NDArrayFloat
+The expected volume.
+computed_vol : NDArrayFloat
+The computed volume.</p>
+<p class="rubric" id="id30">Returns</p>
+<p>Tuple[float, float]
+The expected volume signal power, and the computed volume.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.solvers.html" class="btn btn-neutral float-left" title="corrct.solvers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.struct_illum.html" class="btn btn-neutral float-right" title="corrct.struct_illum" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

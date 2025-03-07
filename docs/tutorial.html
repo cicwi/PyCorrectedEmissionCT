@@ -7,6 +7,8 @@
   <title>Tutorial &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -18,6 +20,9 @@
         <script src="_static/documentation_options.js?v=5929fcd5"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+        <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -72,7 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
@@ -100,7 +105,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="tutorial">
+  <section class="tex2jax_ignore mathjax_ignore" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Link to this heading"></a></h1>
 <p>In this tutorial, we will first learn the basics of how to reconstruct
 projection data.
@@ -136,13 +141,13 @@ detector shifts with respect to the origin.</p>
 <section id="the-projectors">
 <h3>The projectors<a class="headerlink" href="#the-projectors" title="Link to this heading"></a></h3>
 <p>The projection geometry is specified through the creation of <em>projectors</em> from
-the <a class="reference external" href="corrct.html#module-corrct.projectors"><code class="docutils literal notranslate"><span class="pre">projectors</span></code></a> module.
+the <a class="reference internal" href="apidocs/corrct/corrct.projectors.html#module-corrct.projectors" title="corrct.projectors"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">projectors</span></code></a> module.
 The simplest projector is called
-<a class="reference external" href="corrct.html#corrct.projectors.ProjectorUncorrected"><code class="docutils literal notranslate"><span class="pre">ProjectorUncorrected</span></code></a>,
+<a class="reference internal" href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorUncorrected" title="corrct.projectors.ProjectorUncorrected"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">ProjectorUncorrected</span></code></span></a>,
 and it serves as basis for more complex projectors. The projector
-<a class="reference external" href="corrct.html#corrct.projectors.ProjectorAttenuationXRF"><code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code></a>
+<a class="reference internal" href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorAttenuationXRF" title="corrct.projectors.ProjectorAttenuationXRF"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code></span></a>
 derives from the
-<a class="reference external" href="corrct.html#corrct.projectors.ProjectorUncorrected"><code class="docutils literal notranslate"><span class="pre">ProjectorUncorrected</span></code></a>,
+<a class="reference internal" href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorUncorrected" title="corrct.projectors.ProjectorUncorrected"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">ProjectorUncorrected</span></code></span></a>,
 and it implements the XRF specific bits, with respect to multi-detector /
 multi-element handling and attenuation correction.</p>
 <p>Projectors are usually used through the <code class="docutils literal notranslate"><span class="pre">with</span></code> statement. This takes care of
@@ -167,26 +172,25 @@ of a volume of all ones.</p>
 </pre></div>
 </div>
 <p>Creating attenuation correction projectors is a bit more involved, and we will
-see it later in the <a class="reference external" href="#attenuation-correction">attenuation correction</a> section.</p>
+see it later in the <a class="reference internal" href="#attenuation-correction"><span class="xref myst">attenuation correction</span></a> section.</p>
 <p>Projectors can use different backends, depending on the available packages,
 system resources, and user requests. The included projector backends are based
 on the <code class="docutils literal notranslate"><span class="pre">scikit-image</span></code> and <code class="docutils literal notranslate"><span class="pre">astra-toolbox</span></code> packages.
 They can be selected by passing the strings <code class="docutils literal notranslate"><span class="pre">&quot;astra&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;skimage&quot;</span></code> to the
 parameter <code class="docutils literal notranslate"><span class="pre">backend</span></code>.
 Advanced users can create custom backends, by deriving the base class
-<code class="docutils literal notranslate"><span class="pre">ProjectorBackend</span></code> from the module <code class="docutils literal notranslate"><span class="pre">_projector_backends</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">ProjectorBackend</span></code> from the module <a class="reference internal" href="apidocs/corrct/corrct._projector_backends.html#module-corrct._projector_backends" title="corrct._projector_backends"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">_projector_backends</span></code></a>.</p>
 </section>
 <section id="the-solvers">
 <h3>The solvers<a class="headerlink" href="#the-solvers" title="Link to this heading"></a></h3>
 <p>Tomographic reconstructions can be achieved using either the included solvers
-from <a class="reference external" href="corrct.html#module-corrct.solvers"><code class="docutils literal notranslate"><span class="pre">solvers</span></code></a> module, or with <code class="docutils literal notranslate"><span class="pre">scipy</span></code>’s
-solvers.
+from <a class="reference internal" href="apidocs/corrct/corrct.solvers.html#module-corrct.solvers" title="corrct.solvers"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">solvers</span></code></a> module, or with <code class="docutils literal notranslate"><span class="pre">scipy</span></code>’s solvers.
 The included solvers are:</p>
 <ul class="simple">
-<li><p>Filtered Back-Projection: <a class="reference external" href="corrct.html#corrct.solvers.FBP"><strong>FBP</strong></a>.</p></li>
-<li><p>Simultaneous Algebraic Reconstruction Technique <a class="reference external" href="corrct.html#corrct.solvers.SART"><strong>SART</strong></a>.</p></li>
-<li><p>Simultaneous Iterative Reconstruction Technique <a class="reference external" href="corrct.html#corrct.solvers.SIRT"><strong>SIRT</strong></a>.</p></li>
-<li><p>Primal-Dual Hybrid Gradient <a class="reference external" href="corrct.html#corrct.solvers.PDHG"><strong>PDHG</strong></a>, from Chambolle and Pock.</p></li>
+<li><p>Filtered Back-Projection: <a class="reference internal" href="apidocs/corrct/corrct.solvers.html#corrct.solvers.FBP" title="corrct.solvers.FBP"><span class="xref myst py py-class"><strong>FBP</strong></span></a>.</p></li>
+<li><p>Simultaneous Algebraic Reconstruction Technique <a class="reference internal" href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SART" title="corrct.solvers.SART"><span class="xref myst py py-class"><strong>SART</strong></span></a>.</p></li>
+<li><p>Simultaneous Iterative Reconstruction Technique <a class="reference internal" href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SIRT" title="corrct.solvers.SIRT"><span class="xref myst py py-class"><strong>SIRT</strong></span></a>.</p></li>
+<li><p>Primal-Dual Hybrid Gradient <a class="reference internal" href="apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG" title="corrct.solvers.PDHG"><span class="xref myst py py-class"><strong>PDHG</strong></span></a>, from Chambolle and Pock.</p></li>
 </ul>
 <section id="fbp">
 <h4>FBP<a class="headerlink" href="#fbp" title="Link to this heading"></a></h4>
@@ -263,31 +267,28 @@ attenuation map for the following experimental conditions:</p>
 <li><p>Sample morphology and local average composition</p></li>
 </ul>
 <p>This is usually achieved in two ways. The simplest way is to provide the projector
-<a class="reference external" href="corrct.html#corrct.projectors.ProjectorAttenuationXRF"><code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code></a>
+<a class="reference internal" href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorAttenuationXRF" title="corrct.projectors.ProjectorAttenuationXRF"><code class="xref myst py py-class docutils literal notranslate"><span class="pre">projectors.ProjectorAttenuationXRF</span></code></a>
 with the corresponding attenuation maps for the excitation beam and emitted photons.
 The respective parameters are: <code class="docutils literal notranslate"><span class="pre">att_in</span></code> and <code class="docutils literal notranslate"><span class="pre">att_out</span></code>. This also requires to
 provide the angle(s) of the detector(s) with respect to the incoming beam
 direction, through the parameter <code class="docutils literal notranslate"><span class="pre">angles_detectors_rad</span></code>.
 The values in <code class="docutils literal notranslate"><span class="pre">att_in</span></code> and <code class="docutils literal notranslate"><span class="pre">att_out</span></code> should be in “linear attenuation” per pixel
 length. The values in <code class="docutils literal notranslate"><span class="pre">angles_detectors_rad</span></code> should be in radians, as suggested
-by the name of the parameter.<br />The drawback of the simple way is that the computed local attenuation per angle
+by the name of the parameter.<br />
+The drawback of the simple way is that the computed local attenuation per angle
 cannot be re-used with other projectors, and the computation / scaling of the
 maps is delegated entirely to the user.</p>
-<p>The user can also choose to use the class
-<a class="reference external" href="corrct.html#corrct.physics.attenuation.AttenuationVolume"><code class="docutils literal notranslate"><span class="pre">AttenuationVolume</span></code></a> from the
-<a class="reference external" href="corrct.html#module-corrct.physics.attenuation"><code class="docutils literal notranslate"><span class="pre">attenuation</span></code></a> sub-module of the
-<a class="reference external" href="corrct.html#module-corrct.physics"><code class="docutils literal notranslate"><span class="pre">physics</span></code></a> module.
-This class is used internally in the projector
-<a class="reference external" href="corrct.html#corrct.projectors.ProjectorAttenuationXRF"><code class="docutils literal notranslate"><span class="pre">ProjectorAttenuationXRF</span></code></a>,
+<p>The user can also choose to use the class <a class="reference internal" href="apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume" title="corrct.physics.attenuation.AttenuationVolume"><code class="xref myst py py-class docutils literal notranslate"><span class="pre">physics.attenuation.AttenuationVolume</span></code></a>
+from the <a class="reference internal" href="apidocs/corrct/corrct.physics.attenuation.html#module-corrct.physics.attenuation" title="corrct.physics.attenuation"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">physics.attenuation</span></code></a> sub-module of the <a class="reference internal" href="apidocs/corrct/corrct.physics.html#module-corrct.physics" title="corrct.physics"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">physics</span></code></a> module.
+This class is used internally in the projector <a class="reference internal" href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorAttenuationXRF" title="corrct.projectors.ProjectorAttenuationXRF"><code class="xref myst py py-class docutils literal notranslate"><span class="pre">projectors.ProjectorAttenuationXRF</span></code></a>,
 and it can be used particularly in conjunction with the class
-<a class="reference external" href="corrct.html#corrct.physics.VolumeMaterial"><code class="docutils literal notranslate"><span class="pre">VolumeMaterial</span></code></a> from the
-<a class="reference external" href="corrct.html#module-corrct.physics"><code class="docutils literal notranslate"><span class="pre">physics</span></code></a> module.</p>
+<a class="reference internal" href="apidocs/corrct/corrct.physics.materials.html#corrct.physics.materials.VolumeMaterial" title="corrct.physics.materials.VolumeMaterial"><code class="xref myst py py-class docutils literal notranslate"><span class="pre">physics.materials.VolumeMaterial</span></code></a> from the <a class="reference internal" href="apidocs/corrct/corrct.physics.html#module-corrct.physics" title="corrct.physics"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">physics</span></code></a> module.</p>
 <p>For a more in-depth walk-through on attenuation correction, we refer to the dedicated
-<a class="reference internal" href="attenuation_tutorial.html"><span class="doc">attenuation tutorial</span></a>.
+<a class="reference internal" href="attenuation_tutorial.html"><span class="std std-doc">attenuation tutorial</span></a>.
 For a dedicated description of the projection and attenuation correction geometry,
-the reader can have a look at the dedicated <a class="reference internal" href="geometry.html"><span class="doc">geometry page</span></a>.
+the reader can have a look at the dedicated <a class="reference internal" href="geometry.html"><span class="std std-doc">geometry page</span></a>.
 For a in-depth description of the functionality available in the physics module,
-instead, the reader can have a look at the dedicated <a class="reference internal" href="physics_model.html"><span class="doc">physics page</span></a>.</p>
+instead, the reader can have a look at the dedicated <a class="reference internal" href="physics_model.html"><span class="std std-doc">physics page</span></a>.</p>
 </section>
 <section id="data-terms-and-regularization">
 <h2>Data terms and regularization<a class="headerlink" href="#data-terms-and-regularization" title="Link to this heading"></a></h2>
@@ -297,21 +298,21 @@ latter impose prior knowledge on the weight given to the data points.</p>
 <section id="regularizers">
 <h3>Regularizers<a class="headerlink" href="#regularizers" title="Link to this heading"></a></h3>
 <p>Famous regularizers are the TV-min and wavelet l1-min. They can be found in the
-<a class="reference external" href="corrct.html#module-corrct.regularizers"><code class="docutils literal notranslate"><span class="pre">regularizers</span></code></a> module.</p>
+<a class="reference internal" href="apidocs/corrct/corrct.regularizers.html#module-corrct.regularizers" title="corrct.regularizers"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">regularizers</span></code></a> module.</p>
 </section>
 <section id="data-fidelity-terms">
 <h3>Data fidelity terms<a class="headerlink" href="#data-fidelity-terms" title="Link to this heading"></a></h3>
 <p>The PDHG algorithm supports various data fidelity terms. They can be found in
-the <a class="reference external" href="corrct.html#module-corrct.data_terms"><code class="docutils literal notranslate"><span class="pre">data_terms</span></code></a> module, and they include:</p>
+the <a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#module-corrct.data_terms" title="corrct.data_terms"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">data_terms</span></code></a> module, and they include:</p>
 <ul class="simple">
 <li><p>l2 norm - least squares reconstruction - default:
-<a class="reference external" href="corrct.html#corrct.data_terms.DataFidelity_l2"><code class="docutils literal notranslate"><span class="pre">DataFidelity_l2</span></code></a></p></li>
+<a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2" title="corrct.data_terms.DataFidelity_l2"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">DataFidelity_l2</span></code></span></a></p></li>
 <li><p>weighted l2 norm - when the variance of the sinogram points is known:
-<a class="reference external" href="corrct.html#corrct.data_terms.DataFidelity_wl2"><code class="docutils literal notranslate"><span class="pre">DataFidelity_wl2</span></code></a></p></li>
+<a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2" title="corrct.data_terms.DataFidelity_wl2"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">DataFidelity_wl2</span></code></span></a></p></li>
 <li><p>l1 norm - when the sinogram noise is mostly sparse:
-<a class="reference external" href="corrct.html#corrct.data_terms.DataFidelity_l1"><code class="docutils literal notranslate"><span class="pre">DataFidelity_l1</span></code></a></p></li>
+<a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1" title="corrct.data_terms.DataFidelity_l1"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">DataFidelity_l1</span></code></span></a></p></li>
 <li><p>Kullback-Leibler - when dealing with Poisson noise:
-<a class="reference external" href="corrct.html#corrct.data_terms.DataFidelity_KL"><code class="docutils literal notranslate"><span class="pre">DataFidelity_KL</span></code></a></p></li>
+<a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL" title="corrct.data_terms.DataFidelity_KL"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">DataFidelity_KL</span></code></span></a></p></li>
 </ul>
 </section>
 </section>
@@ -324,7 +325,8 @@ cross-validation, or the elbow method.</p>
 <h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
 <p>[1] Pelt, D. M., &amp; Batenburg, K. J. (2014). Improving filtered backprojection
 reconstruction by data-dependent filtering. Image Processing, IEEE
-Transactions on, 23(11), 4750-4762.<br />[2] N. Viganò and V. A. Solé, “Physically corrected forward operators for
+Transactions on, 23(11), 4750-4762.<br />
+[2] N. Viganò and V. A. Solé, “Physically corrected forward operators for
 induced emission tomography: a simulation study,” Meas. Sci. Technol., no.
 Advanced X-Ray Tomography, pp. 1–26, Nov. 2017.</p>
 </section>

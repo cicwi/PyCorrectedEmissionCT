@@ -7,6 +7,8 @@
   <title>Physics &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -18,6 +20,9 @@
         <script src="_static/documentation_options.js?v=5929fcd5"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+        <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -58,7 +63,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
@@ -89,9 +94,10 @@
   <!-- <script
   src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
   type="text/javascript">
-</script> --><section id="physics">
+</script> -->
+<section class="tex2jax_ignore mathjax_ignore" id="physics">
 <h1>Physics<a class="headerlink" href="#physics" title="Link to this heading"></a></h1>
-<p>The <a class="reference external" href="corrct.html#module-corrct.physics"><code class="docutils literal notranslate"><span class="pre">physics</span></code></a> module includes functionality
+<p>The <a class="reference internal" href="apidocs/corrct/corrct.physics.html#module-corrct.physics" title="corrct.physics"><span class="xref myst py py-mod"><code class="docutils literal notranslate"><span class="pre">physics</span></code></span></a> module includes functionality
 for modeling and treating various signal related to X-ray physics.
 In particular, we offer modeling of X-ray fluorescence (XRF) emission and X-ray
 attenuation, and some useful tools for X-ray phase contrast.
@@ -99,21 +105,23 @@ The back-end of this module is the famous X-ray physics package called
 <a class="reference external" href="https://github.com/tschoonj/xraylib">xraylib</a>.</p>
 <section id="attenuation">
 <h2>Attenuation<a class="headerlink" href="#attenuation" title="Link to this heading"></a></h2>
-<p>The <a class="reference external" href="corrct.html#module-corrct.physics.attenuation"><code class="docutils literal notranslate"><span class="pre">physics.attenuation</span></code></a> sub-module
-offers support for attenuation correction in tomographic reconstructions, as well
-as some plotting functions of the different attenuation effects.
+<p>The <a class="reference internal" href="apidocs/corrct/corrct.physics.attenuation.html#module-corrct.physics.attenuation" title="corrct.physics.attenuation"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">physics.attenuation</span></code></a> sub-module offers support for attenuation correction
+in tomographic reconstructions, as well as some plotting functions of the different
+attenuation effects.
 For a dedicated walk-through on attenuation correction, we refer to the
-<a class="reference internal" href="attenuation_tutorial.html"><span class="doc">attenuation tutorial</span></a>.</p>
+<a class="reference internal" href="attenuation_tutorial.html"><span class="std std-doc">attenuation tutorial</span></a>.</p>
 </section>
 <section id="x-ray-fluorescence">
 <h2>X-ray Fluorescence<a class="headerlink" href="#x-ray-fluorescence" title="Link to this heading"></a></h2>
-<p>The <a class="reference external" href="corrct.html#module-corrct.physics.xrf"><code class="docutils literal notranslate"><span class="pre">physics.xrf</span></code></a> sub-module offers
-mainly two classes: <code class="docutils literal notranslate"><span class="pre">LinesSiegbahn</span></code> and <code class="docutils literal notranslate"><span class="pre">DetectorXRF</span></code>.
+<p>The <a class="reference internal" href="apidocs/corrct/corrct.physics.xrf.html#module-corrct.physics.xrf" title="corrct.physics.xrf"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">physics.xrf</span></code></a> sub-module offers support for working with X-ray fluorescence
+(XRF), and contains mainly two classes: <a class="reference internal" href="apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf.LinesSiegbahn" title="corrct.physics.xrf.LinesSiegbahn"><code class="xref myst py py-class docutils literal notranslate"><span class="pre">physics.xrf.LinesSiegbahn</span></code></a> and
+<a class="reference internal" href="apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf.DetectorXRF" title="corrct.physics.xrf.DetectorXRF"><code class="xref myst py py-class docutils literal notranslate"><span class="pre">physics.xrf.DetectorXRF</span></code></a>.
 The former exposes a simplified interface for handling XRF emission lines, using
 the Siegbahn nomenclature. The latter allows one to describe the position and
 geometry of a XRF detector, that is used in the <code class="docutils literal notranslate"><span class="pre">VolumeMaterial</span></code> class of the
-<a class="reference external" href="corrct.html#module-corrct.physics.materials"><code class="docutils literal notranslate"><span class="pre">physics.materials</span></code></a> sub-module.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">LinesSiegbahn</span></code> class, exposes two important static methods:</p>
+<a class="reference internal" href="apidocs/corrct/corrct.physics.materials.html#module-corrct.physics.materials" title="corrct.physics.materials"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">physics.materials</span></code></a> sub-module.</p>
+<p>The module exposes two important functions: a static method of the
+<a class="reference internal" href="apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf.LinesSiegbahn" title="corrct.physics.xrf.LinesSiegbahn"><code class="xref myst py py-class docutils literal notranslate"><span class="pre">physics.xrf.LinesSiegbahn</span></code></a> class, and a function:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LinesSiegbahn</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Siegbahn fluorescence lines collection class.&quot;&quot;&quot;</span>
 
@@ -121,47 +129,59 @@ geometry of a XRF detector, that is used in the <code class="docutils literal no
     <span class="k">def</span> <span class="nf">get_lines</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]:</span>
         <span class="o">...</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span>
-        <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
-        <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
-        <span class="n">compute_average</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
-        <span class="o">...</span>
+<span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span>
+    <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
+    <span class="n">compute_average</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="o">...</span>
 </pre></div>
 </div>
-<p>The method <code class="docutils literal notranslate"><span class="pre">get_lines</span></code> returns the list of available lines for a given line
-family, e.g. the K<sub>α</sub> and K<sub>β</sub> lines for the K line family.
-The method <code class="docutils literal notranslate"><span class="pre">get_energy</span></code>, instead, returns the energy(ies) of the requested line(s)
-for a given element. If the requested expression matches more than one line, it
-can either be the list of all the line energies, or their average.</p>
+<p>The method <a class="reference internal" href="apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf.LinesSiegbahn.get_lines" title="corrct.physics.xrf.LinesSiegbahn.get_lines"><code class="xref myst py py-meth docutils literal notranslate"><span class="pre">corrct.physics.xrf.LinesSiegbahn.get_lines</span></code></a> returns the list of
+available lines for a given line family, e.g. the K<sub>α</sub> and
+K<sub>β</sub> lines for the K line family.
+The function <a class="reference internal" href="apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf.get_energy" title="corrct.physics.xrf.get_energy"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">corrct.physics.xrf.get_energy</span></code></a>, instead, returns
+the energy(ies) of the requested line(s) for a given element. If the requested
+expression matches more than one line, it can either be the list of all the line
+energies, or their average.</p>
 </section>
 <section id="material-modeling">
 <h2>Material modeling<a class="headerlink" href="#material-modeling" title="Link to this heading"></a></h2>
-<p>The main class of the <a class="reference external" href="corrct.html#module-corrct.physics.materials"><code class="docutils literal notranslate"><span class="pre">physics.materials</span></code></a>
-sub-module is <code class="docutils literal notranslate"><span class="pre">VolumeMaterial</span></code>, that allows one to model heterogeneous material
+<p>The main class of the <a class="reference internal" href="apidocs/corrct/corrct.physics.materials.html#module-corrct.physics.materials" title="corrct.physics.materials"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">physics.materials</span></code></a> sub-module is []<code class="docutils literal notranslate"><span class="pre">VolumeMaterial</span></code>, that allows one to model heterogeneous material
 compositions in the reconstruction volume, with the aim of generating:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Attenuation maps (local linear attenuation coefficient).</p></li>
 <li><p>Emission cross-sections maps for XRF and Compton.</p></li>
 </ol>
 </section>
 <section id="x-ray-phase-contrast">
 <h2>X-ray Phase Contrast<a class="headerlink" href="#x-ray-phase-contrast" title="Link to this heading"></a></h2>
-<p>The <a class="reference external" href="corrct.html#module-corrct.physics.phase"><code class="docutils literal notranslate"><span class="pre">physics.phase</span></code></a> sub-module contains
+<p>The <a class="reference internal" href="apidocs/corrct/corrct.physics.phase.html#module-corrct.physics.phase" title="corrct.physics.phase"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">physics.phase</span></code></a> sub-module contains
 functions to model the delta-over-beta value and transfer functions encountered
-in phase contrast problems.</p>
+in phase contrast problems:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="apidocs/corrct/corrct.physics.phase.html#corrct.physics.phase.get_delta_beta" title="corrct.physics.phase.get_delta_beta"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">physics.phase.get_delta_beta</span></code></a>:
+Computes the delta-over-beta parameter for a specific compound given its molar composition, energy, and density.</p></li>
+<li><p><a class="reference internal" href="apidocs/corrct/corrct.physics.phase.html#corrct.physics.phase.get_delta_beta_curves" title="corrct.physics.phase.get_delta_beta_curves"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">physics.phase.get_delta_beta_curves</span></code></a>:
+Computes and optionally plots the delta-over-beta curves for a list of compounds over a specified energy range.</p></li>
+<li><p><a class="reference internal" href="apidocs/corrct/corrct.physics.phase.html#corrct.physics.phase.plot_filter_responses" title="corrct.physics.phase.plot_filter_responses"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">physics.phase.plot_filter_responses</span></code></a>:
+Plots the frequency response of the wave propagation for both TIE and CTF filters in either Fourier or direct space.</p></li>
+<li><p><a class="reference internal" href="apidocs/corrct/corrct.physics.phase.html#corrct.physics.phase.get_propagation_filter" title="corrct.physics.phase.get_propagation_filter"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">physics.phase.get_propagation_filter</span></code></a>:
+Computes the phase contrast propagation filter for given parameters, returning both Fourier-space and real-space filters.</p></li>
+<li><p><a class="reference internal" href="apidocs/corrct/corrct.physics.phase.html#corrct.physics.phase.apply_propagation_filter" title="corrct.physics.phase.apply_propagation_filter"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">physics.phase.apply_propagation_filter</span></code></a>:
+Applies a requested propagation filter (either TIE or CTF) to an image or stack of images.</p></li>
+</ol>
 </section>
 <section id="unit-conversion">
 <h2>Unit conversion<a class="headerlink" href="#unit-conversion" title="Link to this heading"></a></h2>
-<p>The <a class="reference external" href="corrct.html#module-corrct.physics.units"><code class="docutils literal notranslate"><span class="pre">physics.units</span></code></a> sub-module provides
-a small list of conversion functions to deal with conversions between different
-scales (e.g. converting between <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">nm</span></code>) and different units of the electromagnetic
+<p>The <a class="reference internal" href="apidocs/corrct/corrct.physics.units.html#module-corrct.physics.units" title="corrct.physics.units"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">physics.units</span></code></a> sub-module provides a small list of conversion functions
+and classes to deal with conversions between different physical scales (e.g.
+converting between <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">nm</span></code>) and different units of the electromagnetic
 radiation (e.g. converting from energy to wavelength and vice versa).
-In particular, we find the classes <code class="docutils literal notranslate"><span class="pre">ConversionMetric</span></code> and <code class="docutils literal notranslate"><span class="pre">ConversionEnergy</span></code>, which
-provide the following functionality:</p>
-<ol class="simple">
+In particular, here we find the classes <a class="reference internal" href="apidocs/corrct/corrct.physics.units.html#corrct.physics.units.ConversionMetric" title="corrct.physics.units.ConversionMetric"><code class="xref myst py py-class docutils literal notranslate"><span class="pre">physics.units.ConversionMetric</span></code></a> and
+<a class="reference internal" href="apidocs/corrct/corrct.physics.units.html#corrct.physics.units.ConversionEnergy" title="corrct.physics.units.ConversionEnergy"><code class="xref myst py py-class docutils literal notranslate"><span class="pre">physics.units.ConversionEnergy</span></code></a>, which provide the following functionality:</p>
+<ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ConversionMetric</span></code>: This class defines conversion factors between orders of
 magnitude of metric units such as kilometers, meters, centimeters, etc.
 It includes a <code class="docutils literal notranslate"><span class="pre">convert</span></code> method to convert numbers from a source unit to a destination unit.</p></li>
@@ -169,7 +189,8 @@ It includes a <code class="docutils literal notranslate"><span class="pre">conve
 factors between orders of magnitude of energy units like GeV, MeV, keV, eV, etc.
 It also provides a <code class="docutils literal notranslate"><span class="pre">convert</span></code> method for converting energy from a source unit to a destination unit.</p></li>
 </ol>
-<p>The two functions <code class="docutils literal notranslate"><span class="pre">energy_to_wlength</span></code> and <code class="docutils literal notranslate"><span class="pre">wlength_to_energy</span></code> converts energy to
+<p>The two functions <a class="reference internal" href="apidocs/corrct/corrct.physics.units.html#corrct.physics.units.energy_to_wlength" title="corrct.physics.units.energy_to_wlength"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">physics.units.energy_to_wlength</span></code></a> and
+<a class="reference internal" href="apidocs/corrct/corrct.physics.units.html#corrct.physics.units.wlength_to_energy" title="corrct.physics.units.wlength_to_energy"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">physics.units.wlength_to_energy</span></code></a> convert energy to
 wavelength and wavelength to energy, respectively.</p>
 </section>
 </section>

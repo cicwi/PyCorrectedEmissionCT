@@ -6,6 +6,8 @@
   <title>corrct.physics.materials &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,9 @@
         <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -48,7 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -101,7 +106,7 @@
 
 
 <div class="viewcode-block" id="VolumeMaterial">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.materials.VolumeMaterial">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.materials.html#corrct.physics.VolumeMaterial">[docs]</a>
 <span class="k">class</span> <span class="nc">VolumeMaterial</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    VolumeMaterial class, that can be used for predicting fluorescence and Compton productions, attenuation, etc.</span>
@@ -163,7 +168,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
 <div class="viewcode-block" id="VolumeMaterial.get_attenuation">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.materials.VolumeMaterial.get_attenuation">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.materials.html#corrct.physics.VolumeMaterial.get_attenuation">[docs]</a>
     <span class="k">def</span> <span class="nf">get_attenuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the local attenuation for each voxel.</span>
@@ -192,7 +197,7 @@
 
 
 <div class="viewcode-block" id="VolumeMaterial.get_element_mass_fraction">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.materials.VolumeMaterial.get_element_mass_fraction">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.materials.html#corrct.physics.VolumeMaterial.get_element_mass_fraction">[docs]</a>
     <span class="k">def</span> <span class="nf">get_element_mass_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the local element mass fraction through out all the materials.</span>
 
@@ -216,6 +221,8 @@
         <span class="k">return</span> <span class="n">mass_fraction</span></div>
 
 
+<div class="viewcode-block" id="VolumeMaterial._check_parallax_detector">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.materials.html#corrct.physics.VolumeMaterial._check_parallax_detector">[docs]</a>
     <span class="k">def</span> <span class="nf">_check_parallax_detector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detector</span><span class="p">:</span> <span class="n">xrf</span><span class="o">.</span><span class="n">DetectorXRF</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="n">half_sample_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
@@ -229,10 +236,11 @@
 
         <span class="n">solid_angles</span> <span class="o">=</span> <span class="n">dets</span><span class="o">.</span><span class="n">solid_angle_sr</span>
         <span class="n">max_parallax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">solid_angles</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">solid_angles</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">max_parallax</span> <span class="o">&lt;</span> <span class="n">tolerance</span>
+        <span class="k">return</span> <span class="n">max_parallax</span> <span class="o">&lt;</span> <span class="n">tolerance</span></div>
+
 
 <div class="viewcode-block" id="VolumeMaterial.get_compton_scattering">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.materials.VolumeMaterial.get_compton_scattering">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.materials.html#corrct.physics.VolumeMaterial.get_compton_scattering">[docs]</a>
     <span class="k">def</span> <span class="nf">get_compton_scattering</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">energy_in_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">detector</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xrf</span><span class="o">.</span><span class="n">DetectorXRF</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
@@ -301,7 +309,7 @@
 
 
 <div class="viewcode-block" id="VolumeMaterial.get_fluo_production">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.materials.VolumeMaterial.get_fluo_production">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.materials.html#corrct.physics.VolumeMaterial.get_fluo_production">[docs]</a>
     <span class="k">def</span> <span class="nf">get_fluo_production</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>

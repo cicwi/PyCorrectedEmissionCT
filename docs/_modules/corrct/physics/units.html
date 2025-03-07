@@ -6,6 +6,8 @@
   <title>corrct.physics.units &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,9 @@
         <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -48,7 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -88,7 +93,7 @@
 
 
 <div class="viewcode-block" id="ConversionMetric">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.units.ConversionMetric">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.units.html#corrct.physics.units.ConversionMetric">[docs]</a>
 <span class="k">class</span> <span class="nc">ConversionMetric</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Conversion factors between orders of magnitude of the metric units.&quot;&quot;&quot;</span>
 
@@ -113,7 +118,7 @@
     <span class="p">}</span>
 
 <div class="viewcode-block" id="ConversionMetric.convert">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.units.ConversionMetric.convert">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.units.html#corrct.physics.units.ConversionMetric.convert">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">from_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">to_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert numbers from the source unit to the destination unit.</span>
@@ -136,7 +141,7 @@
 
 
 <div class="viewcode-block" id="ConversionEnergy">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.units.ConversionEnergy">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.units.html#corrct.physics.units.ConversionEnergy">[docs]</a>
 <span class="k">class</span> <span class="nc">ConversionEnergy</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Conversion factors between orders of magnitude of the energy units.&quot;&quot;&quot;</span>
 
@@ -159,7 +164,7 @@
     <span class="p">}</span>
 
 <div class="viewcode-block" id="ConversionEnergy.convert">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.units.ConversionEnergy.convert">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.units.html#corrct.physics.units.ConversionEnergy.convert">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">from_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">to_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert numbers from the source unit to the destination unit.</span>
@@ -190,7 +195,7 @@
 
 
 <div class="viewcode-block" id="energy_to_wlength">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.units.energy_to_wlength">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.units.html#corrct.physics.units.energy_to_wlength">[docs]</a>
 <span class="k">def</span> <span class="nf">energy_to_wlength</span><span class="p">(</span><span class="n">energy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">unit_wl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="n">unit_en</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;keV&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert from energy to wavelength.</span>
 
@@ -223,7 +228,7 @@
 
 
 <div class="viewcode-block" id="wlength_to_energy">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.units.wlength_to_energy">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.units.html#corrct.physics.units.wlength_to_energy">[docs]</a>
 <span class="k">def</span> <span class="nf">wlength_to_energy</span><span class="p">(</span><span class="n">w_length</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">unit_wl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="n">unit_en</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;keV&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert wavelength to energy.</span>
 

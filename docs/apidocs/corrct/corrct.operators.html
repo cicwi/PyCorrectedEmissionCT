@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.operators &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.solvers" href="corrct.solvers.html" />
+    <link rel="prev" title="corrct.models" href="corrct.models.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.regularizers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.regularizers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.projectors.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.projectors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct._projector_backends.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct._projector_backends</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.param_tuning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.data_terms.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.data_terms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.denoisers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.denoisers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.filters.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.models.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.models</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.operators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.solvers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.solvers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.testing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.struct_illum.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.struct_illum</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.operators</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.operators.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.operators">
+<span id="corrct-operators"></span><h1><a class="reference internal" href="#module-corrct.operators" title="corrct.operators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.operators</span></code></a><a class="headerlink" href="#module-corrct.operators" title="Link to this heading"></a></h1>
+<p>Operators module.</p>
+<p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTransform</span></code></a></p></td>
+<td><p>Base operator class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.operators.TransformFunctions" title="corrct.operators.TransformFunctions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransformFunctions</span></code></a></p></td>
+<td><p>Transform class that uses callables.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.operators.ProjectorOperator" title="corrct.operators.ProjectorOperator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProjectorOperator</span></code></a></p></td>
+<td><p>Base projector class that fixes the projection interface.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.operators.TransformIdentity" title="corrct.operators.TransformIdentity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransformIdentity</span></code></a></p></td>
+<td><p>Identity operator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.operators.TransformDiagonalScaling" title="corrct.operators.TransformDiagonalScaling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransformDiagonalScaling</span></code></a></p></td>
+<td><p>Diagonal scaling operator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.operators.TransformConvolution" title="corrct.operators.TransformConvolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransformConvolution</span></code></a></p></td>
+<td><p>Convolution operator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.operators.BaseWaveletTransform" title="corrct.operators.BaseWaveletTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseWaveletTransform</span></code></a></p></td>
+<td><p>Base Wavelet transform.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.operators.TransformDecimatedWavelet" title="corrct.operators.TransformDecimatedWavelet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransformDecimatedWavelet</span></code></a></p></td>
+<td><p>Decimated wavelet Transform operator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.operators.TransformStationaryWavelet" title="corrct.operators.TransformStationaryWavelet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransformStationaryWavelet</span></code></a></p></td>
+<td><p>Stationary wavelet Transform operator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.operators.TransformGradient" title="corrct.operators.TransformGradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransformGradient</span></code></a></p></td>
+<td><p>Gradient operator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.operators.TransformFourier" title="corrct.operators.TransformFourier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransformFourier</span></code></a></p></td>
+<td><p>Fourier transform operator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.operators.TransformLaplacian" title="corrct.operators.TransformLaplacian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransformLaplacian</span></code></a></p></td>
+<td><p>Laplacian transform operator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.operators.TransformSVD" title="corrct.operators.TransformSVD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransformSVD</span></code></a></p></td>
+<td><p>Singular value decomposition based decomposition operator.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.operators.NDArrayInt" title="corrct.operators.NDArrayInt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDArrayInt</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.operators.NDArrayInt">
+<span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">NDArrayInt</span></span><a class="headerlink" href="#corrct.operators.NDArrayInt" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">BaseTransform</span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseTransform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">scipy.sparse.linalg.LinearOperator</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Base operator class.</p>
+<p>It implements the linear operator behavior that can be used with the solvers in the <code class="docutils literal notranslate"><span class="pre">.solvers</span></code> module,
+and by the solvers in <code class="docutils literal notranslate"><span class="pre">scipy.sparse.linalg</span></code>.</p>
+<p class="rubric" id="id4">Parameters</p>
+<p>dir_shape : NDArrayInt
+Shape of the direct space.
+adj_shape : NDArrayInt
+Shape of the adjoint space</p>
+<p class="rubric" id="id5">Attributes</p>
+<p>is_dir_operator : bool
+Flag indicating if the operator is a direct operator.</p>
+<p class="rubric" id="id6">Notes</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>It assumes that the fields `dir_shape` and `adj_shape` have been set during the initialization of the derived classes.
+</pre></div>
+</div>
+<p class="rubric">Initialization</p>
+<p>Initialize the base operator class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform.dir_shape">
+<span class="sig-name descname"><span class="pre">dir_shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.operators.NDArrayInt</span></em><a class="headerlink" href="#corrct.operators.BaseTransform.dir_shape" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform.adj_shape">
+<span class="sig-name descname"><span class="pre">adj_shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.operators.NDArrayInt</span></em><a class="headerlink" href="#corrct.operators.BaseTransform.adj_shape" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform._matvec">
+<span class="sig-name descname"><span class="pre">_matvec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseTransform._matvec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseTransform._matvec" title="Link to this definition"></a></dt>
+<dd><p>Implement the direct operator for column vectors from the right.</p>
+<p class="rubric" id="id7">Parameters</p>
+<p>x : NDArray
+Either row from the left or column from the right.</p>
+<p class="rubric" id="returns">Returns</p>
+<p>NDArray
+Result of applying the direct operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform.rmatvec">
+<span class="sig-name descname"><span class="pre">rmatvec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseTransform.rmatvec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseTransform.rmatvec" title="Link to this definition"></a></dt>
+<dd><p>Implement the direct operator for row vectors from the left.</p>
+<p class="rubric" id="id8">Parameters</p>
+<p>x : NDArray
+Either row from the left or column from the right on transpose.</p>
+<p class="rubric" id="id9">Returns</p>
+<p>NDArray
+Result of applying the direct operator for row vectors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform._transpose">
+<span class="sig-name descname"><span class="pre">_transpose</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><span class="pre">corrct.operators.BaseTransform</span></a></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseTransform._transpose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseTransform._transpose" title="Link to this definition"></a></dt>
+<dd><p>Create the transpose operator.</p>
+<p class="rubric" id="id10">Returns</p>
+<p>BaseTransform
+The transpose operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform._adjoint">
+<span class="sig-name descname"><span class="pre">_adjoint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><span class="pre">corrct.operators.BaseTransform</span></a></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseTransform._adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseTransform._adjoint" title="Link to this definition"></a></dt>
+<dd><p>Create the adjoint operator.</p>
+<p class="rubric" id="id11">Returns</p>
+<p>BaseTransform
+The adjoint operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform.absolute">
+<span class="sig-name descname"><span class="pre">absolute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><span class="pre">corrct.operators.BaseTransform</span></a></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseTransform.absolute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseTransform.absolute" title="Link to this definition"></a></dt>
+<dd><p>Return the absolute value of the operator.</p>
+<p class="rubric" id="id12">Returns</p>
+<p>BaseTransform
+The absolute value operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform.explicit">
+<span class="sig-name descname"><span class="pre">explicit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseTransform.explicit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseTransform.explicit" title="Link to this definition"></a></dt>
+<dd><p>Return the explicit transformation matrix associated with the operator.</p>
+<p class="rubric" id="id13">Returns</p>
+<p>NDArray
+The explicit transformation matrix, as a NumPy array.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseTransform.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseTransform.__call__" title="Link to this definition"></a></dt>
+<dd><p>Apply the operator to the input vector <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<p class="rubric" id="id14">Parameters</p>
+<p>x : NDArray
+Input vector.</p>
+<p class="rubric" id="id15">Returns</p>
+<p>result : NDArray
+The result of applying the operator to <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform._op_direct">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseTransform._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseTransform._op_direct" title="Link to this definition"></a></dt>
+<dd><p>Apply the operator to the data.</p>
+<p class="rubric" id="id16">Parameters</p>
+<p>x : NDArray
+Data to process.</p>
+<p class="rubric" id="id17">Returns</p>
+<p>NDArray
+The processed data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.BaseTransform._op_adjoint">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseTransform._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseTransform._op_adjoint" title="Link to this definition"></a></dt>
+<dd><p>Apply the adjoint operator to the data.</p>
+<p class="rubric" id="id18">Parameters</p>
+<p>x : NDArray
+Data to process.</p>
+<p class="rubric" id="id19">Returns</p>
+<p>NDArray
+The processed data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.TransformFunctions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">TransformFunctions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adj_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">At</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformFunctions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformFunctions" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Transform class that uses callables.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the callable transform.</p>
+<p>If the adjoint of the function is not given, the function is considered symmetric.</p>
+<p class="rubric" id="id20">Parameters</p>
+<p>dir_shape : ArrayLike
+Shape of the direct space.
+adj_shape : ArrayLike
+Shape of the adjoint space.
+A : Callable[[NDArray], NDArray]
+The transform function.
+At : Optional[Callable[[NDArray], NDArray]], optional
+The adjoint transform function, by default None</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformFunctions._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformFunctions._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformFunctions._op_direct" title="Link to this definition"></a></dt>
+<dd><p>Apply the operator to the data.</p>
+<p class="rubric" id="id21">Parameters</p>
+<p>x : NDArray
+Data to process.</p>
+<p class="rubric" id="id22">Returns</p>
+<p>NDArray
+The processed data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformFunctions._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformFunctions._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformFunctions._op_adjoint" title="Link to this definition"></a></dt>
+<dd><p>Apply the adjoint operator to the data.</p>
+<p class="rubric" id="id23">Parameters</p>
+<p>x : NDArray
+Data to process.</p>
+<p class="rubric" id="id24">Returns</p>
+<p>NDArray
+The processed data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformFunctions.absolute">
+<span class="sig-name descname"><span class="pre">absolute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.operators.TransformFunctions" title="corrct.operators.TransformFunctions"><span class="pre">corrct.operators.TransformFunctions</span></a></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformFunctions.absolute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformFunctions.absolute" title="Link to this definition"></a></dt>
+<dd><p>Compute the absolute value of the operator. Raise an error, because not supported.</p>
+<p class="rubric" id="raises">Raises</p>
+<p>AttributeError
+Not supported operation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.ProjectorOperator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">ProjectorOperator</span></span><a class="reference internal" href="../../_modules/corrct/operators.html#ProjectorOperator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.ProjectorOperator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Base projector class that fixes the projection interface.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base operator class.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.operators.ProjectorOperator.vol_shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vol_shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.operators.NDArrayInt</span></em><a class="headerlink" href="#corrct.operators.ProjectorOperator.vol_shape" title="Link to this definition"></a></dt>
+<dd><p>Expose the direct space shape as volume shape.</p>
+<p class="rubric" id="id25">Returns</p>
+<p>NDArray
+The volume shape.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.operators.ProjectorOperator.prj_shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prj_shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.operators.NDArrayInt</span></em><a class="headerlink" href="#corrct.operators.ProjectorOperator.prj_shape" title="Link to this definition"></a></dt>
+<dd><p>Expose the adjoint space shape as projection shape.</p>
+<p class="rubric" id="id26">Returns</p>
+<p>NDArray
+The projection shape.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.ProjectorOperator.fp">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#ProjectorOperator.fp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.ProjectorOperator.fp" title="Link to this definition"></a></dt>
+<dd><p>Define the interface of the forward-projection.</p>
+<p class="rubric" id="id27">Parameters</p>
+<p>x : NDArray
+Input volume.</p>
+<p class="rubric" id="id28">Returns</p>
+<p>NDArray
+The projection data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.ProjectorOperator.bp">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#ProjectorOperator.bp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.ProjectorOperator.bp" title="Link to this definition"></a></dt>
+<dd><p>Define the interface for the back-projection.</p>
+<p class="rubric" id="id29">Parameters</p>
+<p>x : NDArray
+Input projection data.</p>
+<p class="rubric" id="id30">Returns</p>
+<p>NDArray
+The back-projected volume.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.ProjectorOperator._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#ProjectorOperator._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.ProjectorOperator._op_direct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.ProjectorOperator._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#ProjectorOperator._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.ProjectorOperator._op_adjoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.ProjectorOperator.get_pre_weights">
+<span class="sig-name descname"><span class="pre">get_pre_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#ProjectorOperator.get_pre_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.ProjectorOperator.get_pre_weights" title="Link to this definition"></a></dt>
+<dd><p>Compute the pre-weights of the projector geometry (notably for cone-beam geometries).</p>
+<p class="rubric" id="id31">Returns</p>
+<p>Union[NDArray, None]
+The computed detector weights</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.TransformIdentity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">TransformIdentity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformIdentity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformIdentity" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Identity operator.</p>
+<p class="rubric">Initialization</p>
+<p>Identity operator.</p>
+<p class="rubric" id="id32">Parameters</p>
+<p>x_shape : ArrayLike | NDArray
+Shape of the data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformIdentity._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformIdentity._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformIdentity._op_direct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformIdentity._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformIdentity._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformIdentity._op_adjoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.TransformDiagonalScaling">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">TransformDiagonalScaling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformDiagonalScaling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformDiagonalScaling" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Diagonal scaling operator.</p>
+<p class="rubric">Initialization</p>
+<p>Diagonal scaling operator.</p>
+<p class="rubric" id="id33">Parameters</p>
+<p>x_shape : ArrayLike
+Shape of the data.
+scale : float or ArrayLike
+Operator diagonal.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.TransformDiagonalScaling.scale">
+<span class="sig-name descname"><span class="pre">scale</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></em><a class="headerlink" href="#corrct.operators.TransformDiagonalScaling.scale" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformDiagonalScaling.absolute">
+<span class="sig-name descname"><span class="pre">absolute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.operators.TransformDiagonalScaling" title="corrct.operators.TransformDiagonalScaling"><span class="pre">corrct.operators.TransformDiagonalScaling</span></a></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformDiagonalScaling.absolute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformDiagonalScaling.absolute" title="Link to this definition"></a></dt>
+<dd><p>Return the projection operator using the absolute value of the projection coefficients.</p>
+<p class="rubric" id="id34">Returns</p>
+<p>TransformDiagonalScaling
+The absolute value operator</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformDiagonalScaling._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformDiagonalScaling._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformDiagonalScaling._op_direct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformDiagonalScaling._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformDiagonalScaling._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformDiagonalScaling._op_adjoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.TransformConvolution">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">TransformConvolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'edge'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip_adjoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformConvolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformConvolution" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Convolution operator.</p>
+<p class="rubric" id="id35">Parameters</p>
+<p>x_shape : ArrayLike
+Shape of the direct space.
+kernel : ArrayLike
+The convolution kernel.
+pad_mode: str, optional
+The padding mode to use for the linear convolution. The default is “edge”.
+is_symm : bool, optional
+Whether the operator is symmetric or not. The default is True.
+flip_adjoint : bool, optional
+Whether the adjoint kernel should be flipped. The default is False.
+This is useful when the kernel is not symmetric.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base operator class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.TransformConvolution.kernel">
+<span class="sig-name descname"><span class="pre">kernel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></em><a class="headerlink" href="#corrct.operators.TransformConvolution.kernel" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.TransformConvolution.pad_mode">
+<span class="sig-name descname"><span class="pre">pad_mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#corrct.operators.TransformConvolution.pad_mode" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.TransformConvolution.is_symm">
+<span class="sig-name descname"><span class="pre">is_symm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#corrct.operators.TransformConvolution.is_symm" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.TransformConvolution.flip_adjoint">
+<span class="sig-name descname"><span class="pre">flip_adjoint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#corrct.operators.TransformConvolution.flip_adjoint" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformConvolution.absolute">
+<span class="sig-name descname"><span class="pre">absolute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.operators.TransformConvolution" title="corrct.operators.TransformConvolution"><span class="pre">corrct.operators.TransformConvolution</span></a></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformConvolution.absolute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformConvolution.absolute" title="Link to this definition"></a></dt>
+<dd><p>Return the convolution operator using the absolute value of the kernel coefficients.</p>
+<p class="rubric" id="id36">Returns</p>
+<p>TransformConvolution
+The absolute value of the convolution operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformConvolution._pad_valid">
+<span class="sig-name descname"><span class="pre">_pad_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformConvolution._pad_valid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformConvolution._pad_valid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformConvolution._crop_valid">
+<span class="sig-name descname"><span class="pre">_crop_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformConvolution._crop_valid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformConvolution._crop_valid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformConvolution._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformConvolution._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformConvolution._op_direct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformConvolution._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformConvolution._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformConvolution._op_adjoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.BaseWaveletTransform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">BaseWaveletTransform</span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseWaveletTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseWaveletTransform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Base Wavelet transform.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base operator class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.BaseWaveletTransform.axes">
+<span class="sig-name descname"><span class="pre">axes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.operators.NDArrayInt</span></em><a class="headerlink" href="#corrct.operators.BaseWaveletTransform.axes" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.BaseWaveletTransform.wavelet">
+<span class="sig-name descname"><span class="pre">wavelet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#corrct.operators.BaseWaveletTransform.wavelet" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.BaseWaveletTransform.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.operators.BaseWaveletTransform.labels" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.BaseWaveletTransform._initialize_filter_bank">
+<span class="sig-name descname"><span class="pre">_initialize_filter_bank</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#BaseWaveletTransform._initialize_filter_bank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.BaseWaveletTransform._initialize_filter_bank" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.TransformDecimatedWavelet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">TransformDecimatedWavelet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_on_demand</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'edge'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformDecimatedWavelet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformDecimatedWavelet" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseWaveletTransform" title="corrct.operators.BaseWaveletTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseWaveletTransform</span></code></a></p>
+<p>Decimated wavelet Transform operator.</p>
+<p class="rubric">Initialization</p>
+<p>Decimated wavelet Transform operator.</p>
+<p class="rubric" id="id37">Parameters</p>
+<p>x_shape : ArrayLike
+Shape of the data to be wavelet transformed.
+wavelet : str
+Wavelet type.
+level : int
+Number of wavelet decomposition levels.
+axes : int or tuple of int, optional
+Axes along which to do the transform. Defaults to None.
+pad_on_demand : str, optional
+Padding type to fit the <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">level</span></code> shape requirements. Defaults to ‘edge’.
+Options are all the <code class="docutils literal notranslate"><span class="pre">numpy.pad</span></code> padding modes.</p>
+<p class="rubric" id="id38">Raises</p>
+<p>ValueError
+If the pywavelets package is not available or its version is not adequate.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformDecimatedWavelet.direct_dwt">
+<span class="sig-name descname"><span class="pre">direct_dwt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformDecimatedWavelet.direct_dwt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformDecimatedWavelet.direct_dwt" title="Link to this definition"></a></dt>
+<dd><p>Perform the direct wavelet transform.</p>
+<p class="rubric" id="id39">Parameters</p>
+<p>x : NDArray
+Data to transform.</p>
+<p class="rubric" id="id40">Returns</p>
+<p>list
+Transformed data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformDecimatedWavelet.inverse_dwt">
+<span class="sig-name descname"><span class="pre">inverse_dwt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformDecimatedWavelet.inverse_dwt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformDecimatedWavelet.inverse_dwt" title="Link to this definition"></a></dt>
+<dd><p>Perform the inverse wavelet transform.</p>
+<p class="rubric" id="id41">Parameters</p>
+<p>y : list
+Data to anti-transform.</p>
+<p class="rubric" id="id42">Returns</p>
+<p>NDArray
+Anti-transformed data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformDecimatedWavelet._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformDecimatedWavelet._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformDecimatedWavelet._op_direct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformDecimatedWavelet._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformDecimatedWavelet._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformDecimatedWavelet._op_adjoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.TransformStationaryWavelet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">TransformStationaryWavelet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_on_demand</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'edge'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalized</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformStationaryWavelet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformStationaryWavelet" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseWaveletTransform" title="corrct.operators.BaseWaveletTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseWaveletTransform</span></code></a></p>
+<p>Stationary wavelet Transform operator.</p>
+<p class="rubric">Initialization</p>
+<p>Stationary wavelet Transform operator.</p>
+<p class="rubric" id="id43">Parameters</p>
+<p>x_shape : ArrayLike
+The shape of the data to be wavelet transformed.
+wavelet : str
+The type of wavelet to use.
+level : int
+Number of wavelet decomposition levels.
+axes : int or tuple of int, optional
+Axes along which to perform the transform. Default is None.
+pad_on_demand : str, optional
+The padding type to fit the <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">level</span></code> shape requirements.
+Default is ‘constant’. Options are all the <code class="docutils literal notranslate"><span class="pre">numpy.pad</span></code> padding modes.
+normalized : bool, optional
+Whether to use a normalized transform. Default is True.</p>
+<p class="rubric" id="id44">Raises</p>
+<p>ValueError
+If the pywavelets package is not available or its version is not adequate.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformStationaryWavelet.direct_swt">
+<span class="sig-name descname"><span class="pre">direct_swt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformStationaryWavelet.direct_swt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformStationaryWavelet.direct_swt" title="Link to this definition"></a></dt>
+<dd><p>Perform the direct wavelet transform.</p>
+<p class="rubric" id="id45">Parameters</p>
+<p>x : NDArray
+Data to transform.</p>
+<p class="rubric" id="id46">Returns</p>
+<p>list
+Transformed data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformStationaryWavelet.inverse_swt">
+<span class="sig-name descname"><span class="pre">inverse_swt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformStationaryWavelet.inverse_swt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformStationaryWavelet.inverse_swt" title="Link to this definition"></a></dt>
+<dd><p>Perform the inverse wavelet transform.</p>
+<p class="rubric" id="id47">Parameters</p>
+<p>y : list
+Data to anti-transform.</p>
+<p class="rubric" id="id48">Returns</p>
+<p>NDArray
+Anti-transformed data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformStationaryWavelet._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformStationaryWavelet._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformStationaryWavelet._op_direct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformStationaryWavelet._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformStationaryWavelet._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformStationaryWavelet._op_adjoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.TransformGradient">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">TransformGradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'edge'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformGradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformGradient" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Gradient operator.</p>
+<p class="rubric" id="id49">Parameters</p>
+<p>x_shape : ArrayLike
+Shape of the data to be transformed.
+axes : Optional[ArrayLike], optional
+Axes along which to do the gradient. The default is None.
+pad_mode : str, optional
+Padding mode of the gradient. The default is “edge”.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base operator class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformGradient.gradient">
+<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformGradient.gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformGradient.gradient" title="Link to this definition"></a></dt>
+<dd><p>Compute the gradient.</p>
+<p class="rubric" id="id50">Parameters</p>
+<p>x : NDArray
+Input data.</p>
+<p class="rubric" id="id51">Returns</p>
+<p>NDArray
+Gradient of data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformGradient.divergence">
+<span class="sig-name descname"><span class="pre">divergence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformGradient.divergence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformGradient.divergence" title="Link to this definition"></a></dt>
+<dd><p>Compute the divergence - transpose of gradient.</p>
+<p class="rubric" id="id52">Parameters</p>
+<p>x : NDArray
+Input data.</p>
+<p class="rubric" id="id53">Returns</p>
+<p>NDArray
+Divergence of data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformGradient._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformGradient._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformGradient._op_direct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformGradient._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformGradient._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformGradient._op_adjoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.TransformFourier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">TransformFourier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformFourier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformFourier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Fourier transform operator.</p>
+<p class="rubric">Initialization</p>
+<p>Fourier transform.</p>
+<p class="rubric" id="id54">Parameters</p>
+<p>x_shape : ArrayLike
+Shape of the data to be Fourier transformed.
+axes : Optional[ArrayLike], optional
+Axes along which to do the Fourier transform.</p>
+<p class="rubric" id="id55">Returns</p>
+<p>None</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformFourier.fft">
+<span class="sig-name descname"><span class="pre">fft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformFourier.fft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformFourier.fft" title="Link to this definition"></a></dt>
+<dd><p>Compute the fft.</p>
+<p class="rubric" id="id56">Parameters</p>
+<p>x : NDArray
+Input data.</p>
+<p class="rubric" id="id57">Returns</p>
+<p>NDArray
+FFT of data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformFourier.ifft">
+<span class="sig-name descname"><span class="pre">ifft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformFourier.ifft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformFourier.ifft" title="Link to this definition"></a></dt>
+<dd><p>Compute the inverse of the fft.</p>
+<p class="rubric" id="id58">Parameters</p>
+<p>x : NDArray
+Input data.</p>
+<p class="rubric" id="id59">Returns</p>
+<p>NDArray
+iFFT of data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformFourier._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformFourier._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformFourier._op_direct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformFourier._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformFourier._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformFourier._op_adjoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.TransformLaplacian">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">TransformLaplacian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.ArrayLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'edge'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformLaplacian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformLaplacian" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Laplacian transform operator.</p>
+<p class="rubric" id="id60">Parameters</p>
+<p>x_shape : ArrayLike
+Shape of the data to be transformed.
+axes : ArrayLike, optional
+Axes along which to do the Laplacian. The default is None.
+pad_mode : str, optional
+Padding mode of the Laplacian. The default is “edge”.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the base operator class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformLaplacian.laplacian">
+<span class="sig-name descname"><span class="pre">laplacian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformLaplacian.laplacian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformLaplacian.laplacian" title="Link to this definition"></a></dt>
+<dd><p>Compute the laplacian.</p>
+<p class="rubric" id="id61">Parameters</p>
+<p>x : NDArray
+Input data.</p>
+<p class="rubric" id="id62">Returns</p>
+<p>NDArray
+Laplacian of the input data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformLaplacian._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformLaplacian._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformLaplacian._op_direct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformLaplacian._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformLaplacian._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformLaplacian._op_adjoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.operators.TransformSVD">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.operators.</span></span><span class="sig-name descname"><span class="pre">TransformSVD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-1,)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformSVD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformSVD" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.operators.BaseTransform" title="corrct.operators.BaseTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.BaseTransform</span></code></a></p>
+<p>Singular value decomposition based decomposition operator.</p>
+<p class="rubric">Initialization</p>
+<p>Singular value decomposition operator.</p>
+<p>The SVD decomposition will be done over the flattened rows vs flatted cols.
+This means that the channels should always be the rows (expected to be only
+one dimension, usually), while the volume dimensions should always be the
+columns (expected to be the last two or three dimensions).</p>
+<p class="rubric" id="id63">Parameters</p>
+<p>x_shape : numpy.array_like
+Shape of the data to be wavelet transformed.
+axes_rows : tuple of int, optional
+Axes expanded in rows of the SVD. Defaults to (0, ).
+axes_cols : tuple of int, optional
+Axes expanded in cols of the SVD. Defaults to (-1, ).</p>
+<p class="rubric" id="id64">Raises</p>
+<p>IndexError
+In case the axes are outside the range.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.TransformSVD.U">
+<span class="sig-name descname"><span class="pre">U</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.operators.TransformSVD.U" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.operators.TransformSVD.Vt">
+<span class="sig-name descname"><span class="pre">Vt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.operators.TransformSVD.Vt" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformSVD.direct_svd">
+<span class="sig-name descname"><span class="pre">direct_svd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformSVD.direct_svd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformSVD.direct_svd" title="Link to this definition"></a></dt>
+<dd><p>Performs the SVD decomposition.</p>
+<p class="rubric" id="id65">Parameters</p>
+<p>x : <code class="docutils literal notranslate"><span class="pre">numpy.array_like</span></code>
+Data to transform.</p>
+<p class="rubric" id="id66">Returns</p>
+<p>tuple(U, s, Vt)
+Transformed data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformSVD.inverse_svd">
+<span class="sig-name descname"><span class="pre">inverse_svd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">U</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Vt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformSVD.inverse_svd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformSVD.inverse_svd" title="Link to this definition"></a></dt>
+<dd><p>Performs the inverse SVD decomposition.</p>
+<p class="rubric" id="id67">Parameters</p>
+<p>U : <code class="docutils literal notranslate"><span class="pre">numpy.array_like</span></code>
+Rows of the SVD decomposition.
+s : <code class="docutils literal notranslate"><span class="pre">numpy.array_like</span></code>
+Singular values.
+Vt : <code class="docutils literal notranslate"><span class="pre">numpy.array_like</span></code>
+Columns of the SVD decomposition.</p>
+<p class="rubric" id="id68">Returns</p>
+<p><code class="docutils literal notranslate"><span class="pre">numpy.array_like</span></code>
+Anti-transformed data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformSVD._op_direct">
+<span class="sig-name descname"><span class="pre">_op_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformSVD._op_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformSVD._op_direct" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.operators.TransformSVD._op_adjoint">
+<span class="sig-name descname"><span class="pre">_op_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/operators.html#TransformSVD._op_adjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.operators.TransformSVD._op_adjoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.models.html" class="btn btn-neutral float-left" title="corrct.models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.solvers.html" class="btn btn-neutral float-right" title="corrct.solvers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.physics &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.physics.materials" href="corrct.physics.materials.html" />
+    <link rel="prev" title="corrct.alignment.shifts" href="corrct.alignment.shifts.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.processing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.processing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.alignment.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.physics.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.physics">
+<span id="corrct-physics"></span><h1><a class="reference internal" href="#module-corrct.physics" title="corrct.physics"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a><a class="headerlink" href="#module-corrct.physics" title="Link to this heading"></a></h1>
+<p>Physics module.</p>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="corrct.physics.materials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.materials</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="corrct.physics.phase.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.phase</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="corrct.physics.xraylib_helper.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.xraylib_helper</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="corrct.physics.xrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.xrf</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="corrct.physics.attenuation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.attenuation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="corrct.physics.units.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics.units</span></code></a></li>
+</ul>
+</div>
+</section>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading"></a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.pencil_beam_profile" title="corrct.physics.pencil_beam_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pencil_beam_profile</span></code></a></p></td>
+<td><p>Compute the pencil beam integration point spread function.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.__author__" title="corrct.physics.__author__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__author__</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.__email__" title="corrct.physics.__email__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__email__</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.xraylib" title="corrct.physics.xraylib"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xraylib</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.get_compound" title="corrct.physics.get_compound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_compound</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.get_element_number" title="corrct.physics.get_element_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_element_number</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.FluoLinesSiegbahn" title="corrct.physics.FluoLinesSiegbahn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FluoLinesSiegbahn</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.VolumeMaterial" title="corrct.physics.VolumeMaterial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VolumeMaterial</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.physics.convert_energy_to_wlength" title="corrct.physics.convert_energy_to_wlength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_energy_to_wlength</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.physics.convert_wlength_to_energy" title="corrct.physics.convert_wlength_to_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_wlength_to_energy</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.__author__">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">__author__</span></span><a class="headerlink" href="#corrct.physics.__author__" title="Link to this definition"></a></dt>
+<dd><p>‘Nicola VIGANÒ’</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.__email__">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">__email__</span></span><a class="headerlink" href="#corrct.physics.__email__" title="Link to this definition"></a></dt>
+<dd><p>‘N.R.Vigano&#64;cwi.nl’</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.xraylib">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">xraylib</span></span><a class="headerlink" href="#corrct.physics.xraylib" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.get_compound">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">get_compound</span></span><a class="reference internal" href="../../_modules/corrct/physics/xraylib_helper.html#get_compound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.get_compound" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.get_element_number">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">get_element_number</span></span><a class="reference internal" href="../../_modules/corrct/physics/xraylib_helper.html#get_element_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.get_element_number" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.FluoLinesSiegbahn">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">FluoLinesSiegbahn</span></span><a class="headerlink" href="#corrct.physics.FluoLinesSiegbahn" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.VolumeMaterial">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">VolumeMaterial</span></span><a class="reference internal" href="../../_modules/corrct/physics/materials.html#VolumeMaterial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.VolumeMaterial" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.convert_energy_to_wlength">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">convert_energy_to_wlength</span></span><a class="headerlink" href="#corrct.physics.convert_energy_to_wlength" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.physics.convert_wlength_to_energy">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">convert_wlength_to_energy</span></span><a class="headerlink" href="#corrct.physics.convert_wlength_to_energy" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.physics.pencil_beam_profile">
+<span class="sig-prename descclassname"><span class="pre">corrct.physics.</span></span><span class="sig-name descname"><span class="pre">pencil_beam_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voxel_size_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_fwhm_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/physics.html#pencil_beam_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.physics.pencil_beam_profile" title="Link to this definition"></a></dt>
+<dd><p>Compute the pencil beam integration point spread function.</p>
+<p class="rubric" id="id1">Parameters</p>
+<p>voxel_size_um : float
+The integration length.
+beam_fwhm_um : float
+The beam FWHM.
+profile_size : int, optional
+The number of pixels of the PSF. The default is 1.
+verbose : bool, optional
+Whether to print verbose information. The default is False.</p>
+<p class="rubric" id="id2">Returns</p>
+<p>NDArray
+The beam PSF.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.alignment.shifts.html" class="btn btn-neutral float-left" title="corrct.alignment.shifts" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.physics.materials.html" class="btn btn-neutral float-right" title="corrct.physics.materials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -7,6 +7,8 @@
   <title>Alignment &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -18,10 +20,13 @@
         <script src="_static/documentation_options.js?v=5929fcd5"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+        <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="corrct" href="modules.html" />
+    <link rel="next" title="API Reference" href="apidocs/index.html" />
     <link rel="prev" title="Attenuation correction" href="attenuation_tutorial.html" /> 
 </head>
 
@@ -52,9 +57,10 @@
 <li class="toctree-l1"><a class="reference internal" href="attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Alignment</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pre-alignment">Pre-alignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#image-stack-alignment">Image stack alignment</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
@@ -82,21 +88,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="alignment">
+  <section class="tex2jax_ignore mathjax_ignore" id="alignment">
 <h1>Alignment<a class="headerlink" href="#alignment" title="Link to this heading"></a></h1>
-<p>The <a class="reference external" href="corrct.html#module-corrct.alignment"><code class="docutils literal notranslate"><span class="pre">alignment</span></code></a> module includes support
-for aligning projection data.
+<p>The <a class="reference internal" href="apidocs/corrct/corrct.alignment.html#module-corrct.alignment" title="corrct.alignment"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">alignment</span></code></a> module includes support for aligning projection data.
 The provided tools are:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Pre-alignment routines for tomographic data</p></li>
 <li><p>Image stack shift finding</p></li>
 </ol>
 <section id="pre-alignment">
 <h2>Pre-alignment<a class="headerlink" href="#pre-alignment" title="Link to this heading"></a></h2>
-<p>The class <code class="docutils literal notranslate"><span class="pre">DetectorShiftsPRE</span></code> offers support for both finding the vertical and
-horizontal shifts of tomographic projection data. They are exposed through the
-methods <code class="docutils literal notranslate"><span class="pre">fit_v</span></code> and <code class="docutils literal notranslate"><span class="pre">fit_u</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DetectorShiftsPRE</span><span class="p">(</span><span class="n">DetectorShiftsBase</span><span class="p">):</span>
+<p>The class <a class="reference internal" href="apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.shifts.DetectorShiftsPRE" title="corrct.alignment.shifts.DetectorShiftsPRE"><code class="xref myst py py-class docutils literal notranslate"><span class="pre">alignment.shifts.DetectorShiftsPRE</span></code></a> offers support for both finding the
+vertical and horizontal shifts of tomographic projection data.
+They are exposed through the methods <code class="docutils literal notranslate"><span class="pre">fit_v</span></code> and <code class="docutils literal notranslate"><span class="pre">fit_u</span></code>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DetectorShiftsPRE</span><span class="p">(</span><span class="n">DetectorShiftsBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the pre-alignment detector shifts for a given dataset.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">fit_v</span><span class="p">(</span>
@@ -125,6 +130,14 @@ sinusoid that interpolates the chosen value of interest across all the rotation
 angles. The value of interest can include the center-of-mass (CoM) or the position
 of the highest intensity peak of the projections.</p>
 </section>
+<section id="image-stack-alignment">
+<h2>Image stack alignment<a class="headerlink" href="#image-stack-alignment" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts" title="corrct.alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts"><code class="xref myst py py-meth docutils literal notranslate"><span class="pre">alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts</span></code></a> function calculates the
+shifts in the vertical and possibly horizontal directions of each image in a stack
+relative to a reference image or images.
+It ensures that the number of reference images matches the number of data images,
+and returns an array containing these shifts.</p>
+</section>
 </section>
 
 
@@ -132,7 +145,7 @@ of the highest intensity peak of the projections.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="attenuation_tutorial.html" class="btn btn-neutral float-left" title="Attenuation correction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modules.html" class="btn btn-neutral float-right" title="corrct" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="apidocs/index.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -6,6 +6,8 @@
   <title>corrct.physics.xraylib_helper &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,9 @@
         <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -48,7 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -96,7 +101,7 @@
 
 
 <div class="viewcode-block" id="get_element_number">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.xraylib_helper.get_element_number">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.xraylib_helper.html#corrct.physics.get_element_number">[docs]</a>
 <span class="k">def</span> <span class="nf">get_element_number</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the element number from the symbol.</span>
 
@@ -118,7 +123,7 @@
 
 
 <div class="viewcode-block" id="get_element_number_and_symbol">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.xraylib_helper.get_element_number_and_symbol">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.xraylib_helper.html#corrct.physics.get_element_number_and_symbol">[docs]</a>
 <span class="k">def</span> <span class="nf">get_element_number_and_symbol</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return both the element symbol and number from either the symbol or the number.</span>
 
@@ -144,7 +149,7 @@
 
 
 <div class="viewcode-block" id="get_compound">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.xraylib_helper.get_compound">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.xraylib_helper.html#corrct.physics.get_compound">[docs]</a>
 <span class="k">def</span> <span class="nf">get_compound</span><span class="p">(</span><span class="n">cmp_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build a compound from the compound composition string.</span>
@@ -178,7 +183,7 @@
 
 
 <div class="viewcode-block" id="get_compound_cross_section">
-<a class="viewcode-back" href="../../../corrct.physics.html#corrct.physics.xraylib_helper.get_compound_cross_section">[docs]</a>
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.xraylib_helper.html#corrct.physics.get_compound_cross_section">[docs]</a>
 <span class="k">def</span> <span class="nf">get_compound_cross_section</span><span class="p">(</span><span class="n">compound</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">mean_energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a compound cross section for the given incoming photon energy.</span>
 

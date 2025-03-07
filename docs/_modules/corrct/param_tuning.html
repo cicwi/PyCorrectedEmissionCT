@@ -6,6 +6,8 @@
   <title>corrct.param_tuning &mdash; PyCorrectedEmissionCT  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,9 @@
         <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -48,7 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">corrct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -110,7 +115,7 @@
 
 
 <div class="viewcode-block" id="create_random_test_mask">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.create_random_test_mask">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.create_random_test_mask">[docs]</a>
 <span class="k">def</span> <span class="nf">create_random_test_mask</span><span class="p">(</span>
     <span class="n">data_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">test_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
@@ -141,7 +146,7 @@
 
 
 <div class="viewcode-block" id="get_lambda_range">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.get_lambda_range">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.get_lambda_range">[docs]</a>
 <span class="k">def</span> <span class="nf">get_lambda_range</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num_per_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">aligned_order</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute hyper-parameter values within an interval.</span>
 
@@ -175,7 +180,7 @@
 
 
 <div class="viewcode-block" id="fit_func_min">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.fit_func_min">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.fit_func_min">[docs]</a>
 <span class="k">def</span> <span class="nf">fit_func_min</span><span class="p">(</span>
     <span class="n">hp_vals</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">],</span>
     <span class="n">f_vals</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
@@ -300,7 +305,7 @@
 
 
 <div class="viewcode-block" id="BaseParameterTuning">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseParameterTuning">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning">[docs]</a>
 <span class="k">class</span> <span class="nc">BaseParameterTuning</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for parameter tuning classes.&quot;&quot;&quot;</span>
 
@@ -365,7 +370,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_calling_function</span> <span class="o">=</span> <span class="n">solver_call</span>
 
 <div class="viewcode-block" id="BaseParameterTuning.get_lambda_range">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseParameterTuning.get_lambda_range">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.get_lambda_range">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_lambda_range</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num_per_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute regularization weights within an interval.</span>
@@ -388,7 +393,7 @@
 
 
 <div class="viewcode-block" id="BaseParameterTuning.compute_reconstruction_and_loss">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseParameterTuning.compute_reconstruction_and_loss">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.compute_reconstruction_and_loss">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_reconstruction_and_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hp_val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute objective function cost for the given hyper-parameter value.</span>
 
@@ -416,7 +421,7 @@
 
 
 <div class="viewcode-block" id="BaseParameterTuning.compute_reconstruction_error">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseParameterTuning.compute_reconstruction_error">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.compute_reconstruction_error">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_reconstruction_error</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">hp_vals</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">],</span> <span class="n">gnd_truth</span><span class="p">:</span> <span class="n">NDArrayFloat</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
@@ -497,7 +502,7 @@
 
 
 <div class="viewcode-block" id="BaseParameterTuning.compute_loss_values">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.BaseParameterTuning.compute_loss_values">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.compute_loss_values">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hp_vals</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the objective function costs for a list of hyper-parameter values.</span>
@@ -517,7 +522,7 @@
 
 
 <div class="viewcode-block" id="LCurve">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.LCurve">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.LCurve">[docs]</a>
 <span class="k">class</span> <span class="nc">LCurve</span><span class="p">(</span><span class="n">BaseParameterTuning</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;L-curve regularization parameter estimation helper.&quot;&quot;&quot;</span>
 
@@ -561,7 +566,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">loss_function</span>
 
 <div class="viewcode-block" id="LCurve.compute_loss_values">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.LCurve.compute_loss_values">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.LCurve.compute_loss_values">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hp_vals</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute objective function values for all hyper-parameter values.</span>
 
@@ -635,7 +640,7 @@
 
 
 <div class="viewcode-block" id="CrossValidation">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.CrossValidation">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.CrossValidation">[docs]</a>
 <span class="k">class</span> <span class="nc">CrossValidation</span><span class="p">(</span><span class="n">BaseParameterTuning</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Cross-validation hyper-parameter estimation class.&quot;&quot;&quot;</span>
 
@@ -675,11 +680,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data_test_masks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_random_test_mask</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_averages</span><span class="p">)]</span>
 
+<div class="viewcode-block" id="CrossValidation._create_random_test_mask">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.CrossValidation._create_random_test_mask">[docs]</a>
     <span class="k">def</span> <span class="nf">_create_random_test_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">create_random_test_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cv_fraction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">create_random_test_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cv_fraction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="CrossValidation.compute_loss_values">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.CrossValidation.compute_loss_values">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.CrossValidation.compute_loss_values">[docs]</a>
     <span class="k">def</span> <span class="nf">compute_loss_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hp_vals</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute objective function values for all requested hyper-parameter values..</span>
 
@@ -767,7 +775,7 @@
 
 
 <div class="viewcode-block" id="CrossValidation.fit_loss_min">
-<a class="viewcode-back" href="../../corrct.html#corrct.param_tuning.CrossValidation.fit_loss_min">[docs]</a>
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.CrossValidation.fit_loss_min">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_loss_min</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">hp_vals</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">],</span>

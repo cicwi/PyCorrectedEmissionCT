@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.struct_illum &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Changelog" href="../../changelog.html" />
+    <link rel="prev" title="corrct.testing" href="corrct.testing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.regularizers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.regularizers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.projectors.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.projectors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct._projector_backends.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct._projector_backends</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.param_tuning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.data_terms.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.data_terms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.denoisers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.denoisers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.filters.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.models.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.operators.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.operators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.solvers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.solvers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.testing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.struct_illum</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.struct_illum</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.struct_illum.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.struct_illum">
+<span id="corrct-struct-illum"></span><h1><a class="reference internal" href="#module-corrct.struct_illum" title="corrct.struct_illum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.struct_illum</span></code></a><a class="headerlink" href="#module-corrct.struct_illum" title="Link to this heading"></a></h1>
+<p>Provide structured illumination support.</p>
+<p>Created on Sun Jan  9 17:39:02 2022</p>
+<p>&#64;author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
+and ESRF - The European Synchrotron, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.struct_illum.MaskCollection" title="corrct.struct_illum.MaskCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MaskCollection</span></code></a></p></td>
+<td><p>Define mask collection class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.struct_illum.MaskGenerator" title="corrct.struct_illum.MaskGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MaskGenerator</span></code></a></p></td>
+<td><p>Define mask generation interface.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.struct_illum.MaskGeneratorPoint" title="corrct.struct_illum.MaskGeneratorPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MaskGeneratorPoint</span></code></a></p></td>
+<td><p>Pencil beam masks generator class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.struct_illum.MaskGeneratorBernoulli" title="corrct.struct_illum.MaskGeneratorBernoulli"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MaskGeneratorBernoulli</span></code></a></p></td>
+<td><p>Bernoulli mask generator class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.struct_illum.MaskGeneratorHalfGaussian" title="corrct.struct_illum.MaskGeneratorHalfGaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MaskGeneratorHalfGaussian</span></code></a></p></td>
+<td><p>Half-Gaussian mask generator class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.struct_illum.MaskGeneratorMURA" title="corrct.struct_illum.MaskGeneratorMURA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MaskGeneratorMURA</span></code></a></p></td>
+<td><p>MURA mask generator class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.struct_illum.ProjectorGhostImaging" title="corrct.struct_illum.ProjectorGhostImaging"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProjectorGhostImaging</span></code></a></p></td>
+<td><p>Projector class for the ghost imaging reconstructions.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.struct_illum.reorder_masks" title="corrct.struct_illum.reorder_masks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reorder_masks</span></code></a></p></td>
+<td><p>Reorder masks, with a simple rot-n algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.struct_illum.decompose_qr_masks" title="corrct.struct_illum.decompose_qr_masks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decompose_qr_masks</span></code></a></p></td>
+<td><p>Compute QR decomposition of the given masks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.struct_illum.estimate_resolution" title="corrct.struct_illum.estimate_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimate_resolution</span></code></a></p></td>
+<td><p>Estimate the mask collection resolution through auto-correlation.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.struct_illum.NDArrayInt" title="corrct.struct_illum.NDArrayInt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDArrayInt</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="corrct.struct_illum.NDArrayInt">
+<span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">NDArrayInt</span></span><a class="headerlink" href="#corrct.struct_illum.NDArrayInt" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.struct_illum.reorder_masks">
+<span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">reorder_masks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buckets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#reorder_masks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.reorder_masks" title="Link to this definition"></a></dt>
+<dd><p>Reorder masks, with a simple rot-n algorithm.</p>
+<p class="rubric" id="id5">Parameters</p>
+<p>masks : NDArray
+The masks to re-order.
+buckets : NDArray
+The corresponding buckets.
+shift : int
+The length of the shift.</p>
+<p class="rubric" id="id6">Returns</p>
+<p>Tuple[NDArray, NDArray]
+The reordered masks and buckets.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.struct_illum.decompose_qr_masks">
+<span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">decompose_qr_masks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#decompose_qr_masks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.decompose_qr_masks" title="Link to this definition"></a></dt>
+<dd><p>Compute QR decomposition of the given masks.</p>
+<p class="rubric" id="id7">Parameters</p>
+<p>masks : NDArray
+The masks to decompose
+verbose : bool, optional
+Whether to emite verbose output, by default False</p>
+<p class="rubric" id="id8">Returns</p>
+<p>Tuple[NDArray, NDArray]
+The Q and R components.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.struct_illum.estimate_resolution">
+<span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">estimate_resolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#estimate_resolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.estimate_resolution" title="Link to this definition"></a></dt>
+<dd><p>Estimate the mask collection resolution through auto-correlation.</p>
+<p class="rubric" id="id9">Parameters</p>
+<p>masks : NDArray
+The list of encoding masks
+verbose : bool, optional
+Whether to produce verbose output, by default True
+plot_result : bool, optional
+Whether to plot the results, by default True</p>
+<p class="rubric" id="id10">Returns</p>
+<p>tuple[float, float]
+The mean and minimum HWHM of the auto-correlation functions for all the masks.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">MaskCollection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masks_enc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masks_dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_dims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'measured'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_support</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.struct_illum.NDArrayInt</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskCollection" title="Link to this definition"></a></dt>
+<dd><p>Define mask collection class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize mask collection.</p>
+<p class="rubric" id="id11">Parameters</p>
+<p>masks_enc : NDArray
+The encoding masks.
+masks_dec : NDArray | None, optional
+The decoding masks. The default (None) will assume them identical to the encoding masks.
+mask_dims : int, optional
+The dimensions of a single mask. The default is 2.
+mask_type : str, optional
+The type of masks. The default is “measured”.
+mask_support : Sequence[int] | NDArray[np.integer] | None, optional
+The extent of the mask support in pixels. The default (None) will consider it equal to the FoV.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.masks_enc">
+<span class="sig-name descname"><span class="pre">masks_enc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></em><a class="headerlink" href="#corrct.struct_illum.MaskCollection.masks_enc" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.masks_dec">
+<span class="sig-name descname"><span class="pre">masks_dec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></em><a class="headerlink" href="#corrct.struct_illum.MaskCollection.masks_dec" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.mask_dims">
+<span class="sig-name descname"><span class="pre">mask_dims</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corrct.struct_illum.MaskCollection.mask_dims" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.mask_support">
+<span class="sig-name descname"><span class="pre">mask_support</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.struct_illum.NDArrayInt</span></em><a class="headerlink" href="#corrct.struct_illum.MaskCollection.mask_support" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.mask_type">
+<span class="sig-name descname"><span class="pre">mask_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#corrct.struct_illum.MaskCollection.mask_type" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.shape_fov">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape_fov</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.struct_illum.MaskCollection.shape_fov" title="Link to this definition"></a></dt>
+<dd><p>Return the mask shape.</p>
+<p class="rubric" id="id12">Returns</p>
+<p>Sequence[int]
+The mask shape.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.shape_shifts">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape_shifts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.struct_illum.MaskCollection.shape_shifts" title="Link to this definition"></a></dt>
+<dd><p>Compute the shape of the available shifts.</p>
+<p class="rubric" id="id13">Returns</p>
+<p>Sequence[int]
+The shape of the available shifts.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.num_buckets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_buckets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corrct.struct_illum.MaskCollection.num_buckets" title="Link to this definition"></a></dt>
+<dd><p>Compute the total number of available buckets.</p>
+<p class="rubric" id="id14">Returns</p>
+<p>int
+The total number of buckets.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.num_pixels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_pixels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corrct.struct_illum.MaskCollection.num_pixels" title="Link to this definition"></a></dt>
+<dd><p>Compute the number of pixels in the image.</p>
+<p class="rubric" id="id15">Returns</p>
+<p>int
+The number of pixels in the image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.info">
+<span class="sig-name descname"><span class="pre">info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskCollection.info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskCollection.info" title="Link to this definition"></a></dt>
+<dd><p>Return the mask info.</p>
+<p class="rubric" id="id16">Returns</p>
+<p>str
+Mask info string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.upper">
+<span class="sig-name descname"><span class="pre">upper</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskCollection.upper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskCollection.upper" title="Link to this definition"></a></dt>
+<dd><p>Return the upper case name of the mask.</p>
+<p class="rubric" id="id17">Returns</p>
+<p>str
+Upper case string name of the mask.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.lower">
+<span class="sig-name descname"><span class="pre">lower</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskCollection.lower"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskCollection.lower" title="Link to this definition"></a></dt>
+<dd><p>Return the lower case name of the mask.</p>
+<p class="rubric" id="id18">Returns</p>
+<p>str
+Lower case string name of the mask.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.get_mask">
+<span class="sig-name descname"><span class="pre">get_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask_inds_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskCollection.get_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskCollection.get_mask" title="Link to this definition"></a></dt>
+<dd><p>Return the requested mask.</p>
+<p class="rubric" id="id19">Parameters</p>
+<p>mask_inds_vu : Union[Sequence, NDArray]
+The mask position.
+mask_encoding : bool, optional
+Whether it is an encoding or decoding mask, by default True</p>
+<p class="rubric" id="id20">Returns</p>
+<p>NDArray
+The requested mask.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.get_QR_decomposition">
+<span class="sig-name descname"><span class="pre">get_QR_decomposition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buckets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.struct_illum.MaskCollection" title="corrct.struct_illum.MaskCollection"><span class="pre">corrct.struct_illum.MaskCollection</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskCollection.get_QR_decomposition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskCollection.get_QR_decomposition" title="Link to this definition"></a></dt>
+<dd><p>Compute and return the QR decomposition of the masks.</p>
+<p class="rubric" id="id21">Parameters</p>
+<p>buckets : NDArray
+The buckets corresponding to the masks.
+shift : int, optional
+Index of the first mask, by default 0.</p>
+<p class="rubric" id="id22">Returns</p>
+<p>Tuple[MaskCollection, NDArray]
+The new mask collection and the matrix for modifying buckets accordingly.</p>
+<p class="rubric" id="raises">Raises</p>
+<p>ValueError
+In case the masks have encoding-decoding form.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.bin_masks">
+<span class="sig-name descname"><span class="pre">bin_masks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.struct_illum.MaskCollection" title="corrct.struct_illum.MaskCollection"><span class="pre">corrct.struct_illum.MaskCollection</span></a></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskCollection.bin_masks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskCollection.bin_masks" title="Link to this definition"></a></dt>
+<dd><p>Bin the masks.</p>
+<p class="rubric" id="id23">Parameters</p>
+<p>binning : float
+The binning size.</p>
+<p class="rubric" id="id24">Returns</p>
+<p>MaskCollection
+A new collection of binned masks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.inspect_masks">
+<span class="sig-name descname"><span class="pre">inspect_masks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask_inds_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.struct_illum.NDArrayInt</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskCollection.inspect_masks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskCollection.inspect_masks" title="Link to this definition"></a></dt>
+<dd><p>Inspect the encoding and decoding masks at the requested shifts.</p>
+<p class="rubric" id="id25">Parameters</p>
+<p>mask_inds_vu : Sequence[int] | NDArray[np.integer] | None, optional
+The requested axes shifts. The default (None) is the first mask.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">MaskGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape_fov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.struct_illum.NDArrayInt</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.struct_illum.NDArrayInt</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape_shifts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.struct_illum.NDArrayInt</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmittance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Define mask generation interface.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize mask collection.</p>
+<p class="rubric" id="id26">Parameters</p>
+<p>shape_fov : Sequence[int] | NDArray[np.integer]
+The shape of the field-of-view.
+shape_mask : Sequence[int] | NDArray[np.integer]
+The shape of the masks.
+shape_shifts : Sequence[int] | NDArray[np.integer]
+The shape of the shifts to generate.
+transmittance : float
+The maximum transmittance of the structuring elements.
+dtype : DTypeLike
+The dtype of the created masks.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.shape_fov">
+<span class="sig-name descname"><span class="pre">shape_fov</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.struct_illum.NDArrayInt</span></em><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.shape_fov" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.shape_mask">
+<span class="sig-name descname"><span class="pre">shape_mask</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.struct_illum.NDArrayInt</span></em><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.shape_mask" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.shape_shifts">
+<span class="sig-name descname"><span class="pre">shape_shifts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.struct_illum.NDArrayInt</span></em><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.shape_shifts" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.transmittance">
+<span class="sig-name descname"><span class="pre">transmittance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.transmittance" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.dtype">
+<span class="sig-name descname"><span class="pre">dtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.DTypeLike</span></em><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.dtype" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator._enc_dec_mismatch">
+<span class="sig-name descname"><span class="pre">_enc_dec_mismatch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#corrct.struct_illum.MaskGenerator._enc_dec_mismatch" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.__mask_name__">
+<span class="sig-name descname"><span class="pre">__mask_name__</span></span><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.__mask_name__" title="Link to this definition"></a></dt>
+<dd><p>‘generated’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.info">
+<span class="sig-name descname"><span class="pre">info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator.info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.info" title="Link to this definition"></a></dt>
+<dd><p>Return the mask info.</p>
+<p class="rubric" id="id27">Returns</p>
+<p>str
+Mask info string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Produce the string representation of the object.</p>
+<p class="rubric" id="id28">Returns</p>
+<p>str
+The string representation.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.max_buckets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_buckets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.max_buckets" title="Link to this definition"></a></dt>
+<dd><p>Compute the maximum number of buckets.</p>
+<p class="rubric" id="id29">Returns</p>
+<p>int
+The maximum number of buckets.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.num_pixels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_pixels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.num_pixels" title="Link to this definition"></a></dt>
+<dd><p>Compute the number of pixels in the image.</p>
+<p class="rubric" id="id30">Returns</p>
+<p>int
+The number of pixels in the image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator._init_fov_mm">
+<span class="sig-name descname"><span class="pre">_init_fov_mm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fov_size_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req_res_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.struct_illum.NDArrayInt</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator._init_fov_mm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator._init_fov_mm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.generate_collection">
+<span class="sig-name descname"><span class="pre">generate_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buckets_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sequential'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.struct_illum.MaskCollection" title="corrct.struct_illum.MaskCollection"><span class="pre">corrct.struct_illum.MaskCollection</span></a></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator.generate_collection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.generate_collection" title="Link to this definition"></a></dt>
+<dd><p>Generate the mask collection.</p>
+<p class="rubric" id="id31">Parameters</p>
+<p>buckets_fraction : float, optional
+The fraction of buckets to generate, by default 1
+shift_type : str, optional
+The type of shift to implement, by default “sequential”
+abs_fraction : float, optional
+The attenuation fraction of the pixels</p>
+<p class="rubric" id="id32">Returns</p>
+<p>MaskCollection
+The generated mask collection.</p>
+<p class="rubric" id="id33">Raises</p>
+<p>ValueError
+In case of wrong shift type.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator._apply_transmission">
+<span class="sig-name descname"><span class="pre">_apply_transmission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator._apply_transmission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator._apply_transmission" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.generate_shifted_mask">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_shifted_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask_inds_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator.generate_shifted_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.generate_shifted_mask" title="Link to this definition"></a></dt>
+<dd><p>Produce the shifted masks.</p>
+<p class="rubric" id="id34">Parameters</p>
+<p>mask_inds_vu : tuple | list | NDArray
+The vertical and horizontal shifts.
+mask_encoding : bool, optional
+Is the mask encoding (False = decoding). The default is True.</p>
+<p class="rubric" id="id35">Returns</p>
+<p>NDArray
+The shifted mask.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator._generate_mask_shifts">
+<span class="sig-name descname"><span class="pre">_generate_mask_shifts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shifts_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shifts_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator._generate_mask_shifts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator._generate_mask_shifts" title="Link to this definition"></a></dt>
+<dd><p>Produce all the masks.</p>
+<p class="rubric" id="id36">Parameters</p>
+<p>shifts_v : tuple | list | NDArray
+List of all the vertical shifts.
+shifts_u : tuple | list | NDArray
+List of all the horizontal shifts.
+mask_encoding : bool, optional
+Are the masks encoding (False = decoding). The default is True.
+abs_fraction : float, optional
+Absorption fraction of the mask elements. The default is 1.</p>
+<p class="rubric" id="id37">Returns</p>
+<p>NDArray
+The collection of all the shifted masks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.get_interval_shifts">
+<span class="sig-name descname"><span class="pre">get_interval_shifts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-2,</span> <span class="pre">-1)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator.get_interval_shifts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.get_interval_shifts" title="Link to this definition"></a></dt>
+<dd><p>Produce shifts for the “interval” shift type.</p>
+<p class="rubric" id="id38">Parameters</p>
+<p>interval : int | tuple(int, int) | list(int, int)
+The shift interval.
+axes_order : int | tuple | list, optional
+Order of the axes to shift. The default is (-2, -1).</p>
+<p class="rubric" id="id39">Returns</p>
+<p>tuple
+The collection of shifts.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.get_random_shifts">
+<span class="sig-name descname"><span class="pre">get_random_shifts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_shifts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-2,</span> <span class="pre">-1)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator.get_random_shifts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.get_random_shifts" title="Link to this definition"></a></dt>
+<dd><p>Produce shifts for the “random” shift type.</p>
+<p class="rubric" id="id40">Parameters</p>
+<p>num_shifts : int
+Number of shifts.</p>
+<p class="rubric" id="id41">Returns</p>
+<p>NDArray
+The collection of shifts.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGenerator.get_sequential_shifts">
+<span class="sig-name descname"><span class="pre">get_sequential_shifts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_shifts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-2,</span> <span class="pre">-1)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGenerator.get_sequential_shifts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGenerator.get_sequential_shifts" title="Link to this definition"></a></dt>
+<dd><p>Produce shifts for the “sequential” shift type.</p>
+<p class="rubric" id="id42">Parameters</p>
+<p>num_shifts : int, optional
+Number of shifts. The default is None.
+axes_order : tuple | list | NDArray, optional
+Order of the axes to shift. The default is (-2, -1).</p>
+<p class="rubric" id="id43">Returns</p>
+<p>NDArray
+The collection of shifts.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorPoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">MaskGeneratorPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fov_size_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req_res_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGeneratorPoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorPoint" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.struct_illum.MaskGenerator" title="corrct.struct_illum.MaskGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.struct_illum.MaskGenerator</span></code></a></p>
+<p>Pencil beam masks generator class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the pencil beam mask collection.</p>
+<p class="rubric" id="id44">Parameters</p>
+<p>fov_size_mm : float
+Size of the Field-of-View in millimiters.
+req_res_mm : float
+Requested resolution in millimiters.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorPoint.__mask_name__">
+<span class="sig-name descname"><span class="pre">__mask_name__</span></span><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorPoint.__mask_name__" title="Link to this definition"></a></dt>
+<dd><p>‘pencil’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorPoint.generate_shifted_mask">
+<span class="sig-name descname"><span class="pre">generate_shifted_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask_inds_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGeneratorPoint.generate_shifted_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorPoint.generate_shifted_mask" title="Link to this definition"></a></dt>
+<dd><p>Produce the shifted masks.</p>
+<p class="rubric" id="id45">Parameters</p>
+<p>mask_inds_vu : tuple | list | NDArray
+The vertical and horizontal shifts.
+mask_encoding : bool, optional
+Is the mask encoding (False = decoding). The default is True.</p>
+<p class="rubric" id="id46">Returns</p>
+<p>NDArray
+The shifted mask.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorBernoulli">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">MaskGeneratorBernoulli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fov_size_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req_res_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_masks_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGeneratorBernoulli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorBernoulli" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.struct_illum.MaskGenerator" title="corrct.struct_illum.MaskGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.struct_illum.MaskGenerator</span></code></a></p>
+<p>Bernoulli mask generator class.</p>
+<p class="rubric">Initialization</p>
+<p>Bernulli masks collection class.</p>
+<p>It computes and stores the original mask pattern for a given resolution and Field-ofView.</p>
+<p class="rubric" id="id47">Parameters</p>
+<p>fov_size_mm : float
+Size of the Field-of-View in mm.
+req_res_mm : float
+The required pixel size in mm.
+max_masks_ratio : float
+The ratio of maximum available masks per pixels in each direction, by default 1.2.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorBernoulli.__mask_name__">
+<span class="sig-name descname"><span class="pre">__mask_name__</span></span><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorBernoulli.__mask_name__" title="Link to this definition"></a></dt>
+<dd><p>‘bernoulli’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorBernoulli.generate_shifted_mask">
+<span class="sig-name descname"><span class="pre">generate_shifted_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask_inds_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGeneratorBernoulli.generate_shifted_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorBernoulli.generate_shifted_mask" title="Link to this definition"></a></dt>
+<dd><p>Produce the shifted masks.</p>
+<p class="rubric" id="id48">Parameters</p>
+<p>mask_inds_vu : tuple | list | NDArray
+The vertical and horizontal shifts.
+mask_encoding : bool, optional
+Is the mask encoding (False = decoding). The default is True.</p>
+<p class="rubric" id="id49">Returns</p>
+<p>NDArray
+The shifted mask.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorHalfGaussian">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">MaskGeneratorHalfGaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fov_size_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req_res_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_masks_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGeneratorHalfGaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorHalfGaussian" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.struct_illum.MaskGenerator" title="corrct.struct_illum.MaskGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.struct_illum.MaskGenerator</span></code></a></p>
+<p>Half-Gaussian mask generator class.</p>
+<p class="rubric">Initialization</p>
+<p>Half Gaussian masks collection class.</p>
+<p>It computes and stores the original mask pattern for a given resolution and Field-ofView.</p>
+<p class="rubric" id="id50">Parameters</p>
+<p>fov_size_mm : float
+Size of the Field-of-View in mm.
+req_res_mm : float
+The required pixel size in mm.
+max_masks_ratio : float
+The ratio of maximum available masks per pixels in each direction, by default 1.2.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorHalfGaussian.__mask_name__">
+<span class="sig-name descname"><span class="pre">__mask_name__</span></span><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorHalfGaussian.__mask_name__" title="Link to this definition"></a></dt>
+<dd><p>‘half-gaussian’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorHalfGaussian.generate_shifted_mask">
+<span class="sig-name descname"><span class="pre">generate_shifted_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask_inds_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGeneratorHalfGaussian.generate_shifted_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorHalfGaussian.generate_shifted_mask" title="Link to this definition"></a></dt>
+<dd><p>Produce the shifted masks.</p>
+<p class="rubric" id="id51">Parameters</p>
+<p>mask_inds_vu : tuple | list | NDArray
+The vertical and horizontal shifts.
+mask_encoding : bool, optional
+Is the mask encoding (False = decoding). The default is True.</p>
+<p class="rubric" id="id52">Returns</p>
+<p>NDArray
+The shifted mask.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorMURA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">MaskGeneratorMURA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fov_size_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req_res_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGeneratorMURA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorMURA" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.struct_illum.MaskGenerator" title="corrct.struct_illum.MaskGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.struct_illum.MaskGenerator</span></code></a></p>
+<p>MURA mask generator class.</p>
+<p class="rubric">Initialization</p>
+<p>MURA masks collection class.</p>
+<p class="rubric" id="id53">Parameters</p>
+<p>fov_size_mm : float
+Size of the Field-of-View in mm.
+req_res_mm : float
+The required pixel size in mm.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorMURA.__mask_name__">
+<span class="sig-name descname"><span class="pre">__mask_name__</span></span><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorMURA.__mask_name__" title="Link to this definition"></a></dt>
+<dd><p>‘mura’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorMURA.generate_shifted_mask">
+<span class="sig-name descname"><span class="pre">generate_shifted_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask_inds_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGeneratorMURA.generate_shifted_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorMURA.generate_shifted_mask" title="Link to this definition"></a></dt>
+<dd><p>Produce the shifted masks.</p>
+<p class="rubric" id="id54">Parameters</p>
+<p>mask_inds_vu : tuple | list | NDArray
+The vertical and horizontal shifts.
+mask_encoding : bool, optional
+Is the mask encoding (False = decoding). The default is True.</p>
+<p class="rubric" id="id55">Returns</p>
+<p>NDArray
+The shifted mask.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskGeneratorMURA.compute_possible_mask_sizes">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_possible_mask_sizes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fov_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskGeneratorMURA.compute_possible_mask_sizes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskGeneratorMURA.compute_possible_mask_sizes" title="Link to this definition"></a></dt>
+<dd><p>Compute MURA masks sizes.</p>
+<p>MURA masks require specific edge sizes: prime numbers <em>x</em> that also
+satisfy the rule: <em>x</em> = 4 * <em>l</em> + 1, where <em>l</em> is integer.</p>
+<p class="rubric" id="id56">Parameters</p>
+<p>fov_size : int
+Edge size of the fov in pixels.</p>
+<p class="rubric" id="id57">Returns</p>
+<p>NDArray
+Array of all possible MURA mask sizes in that range.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostImaging">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">ProjectorGhostImaging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.struct_illum.MaskCollection" title="corrct.struct_illum.MaskCollection"><span class="pre">corrct.struct_illum.MaskCollection</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'torch'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostImaging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostImaging" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="corrct.operators.html#corrct.operators.ProjectorOperator" title="corrct.operators.ProjectorOperator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.operators.ProjectorOperator</span></code></a></p>
+<p>Projector class for the ghost imaging reconstructions.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the Ghost Imaging projector class.</p>
+<p class="rubric" id="id58">Parameters</p>
+<p>mask_collection : MaskCollection
+Container of the masks.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostImaging.mc">
+<span class="sig-name descname"><span class="pre">mc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#corrct.struct_illum.MaskCollection" title="corrct.struct_illum.MaskCollection"><span class="pre">corrct.struct_illum.MaskCollection</span></a></em><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostImaging.mc" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostImaging._init_backend">
+<span class="sig-name descname"><span class="pre">_init_backend</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostImaging._init_backend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostImaging._init_backend" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostImaging.fp">
+<span class="sig-name descname"><span class="pre">fp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostImaging.fp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostImaging.fp" title="Link to this definition"></a></dt>
+<dd><p>Compute forward-projection (prediction) of the bucket values.</p>
+<p class="rubric" id="id59">Parameters</p>
+<p>image : NDArray
+The image for which we want to predict the bucket values.</p>
+<p class="rubric" id="id60">Returns</p>
+<p>NDArray
+The predicted bucket values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostImaging.bp">
+<span class="sig-name descname"><span class="pre">bp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostImaging.bp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostImaging.bp" title="Link to this definition"></a></dt>
+<dd><p>Compute back-projection of the bucket values.</p>
+<p class="rubric" id="id61">Parameters</p>
+<p>bucket_vals : NDArray
+The list of bucket values.
+subtract_mean : bool, optional
+Whether to subtract the mean of the values. The default is False.</p>
+<p class="rubric" id="id62">Returns</p>
+<p>NDArray
+Back-projected image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostImaging.adjust_sampling_scaling">
+<span class="sig-name descname"><span class="pre">adjust_sampling_scaling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostImaging.adjust_sampling_scaling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostImaging.adjust_sampling_scaling" title="Link to this definition"></a></dt>
+<dd><p>Adjust reconstruction scaling and bias, due to the undersampling.</p>
+<p class="rubric" id="id63">Parameters</p>
+<p>image : NDArray
+Unscaled image.</p>
+<p class="rubric" id="id64">Returns</p>
+<p>NDArray
+Scaled image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostImaging.fbp">
+<span class="sig-name descname"><span class="pre">fbp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_lstsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjust_scaling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostImaging.fbp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostImaging.fbp" title="Link to this definition"></a></dt>
+<dd><p>Compute cross-correlation reconstruction of the bucket values.</p>
+<p class="rubric" id="id65">Parameters</p>
+<p>bucket_vals : NDArray
+The bucket vales to reconstruct.
+use_lstsq : bool, optional
+If True, uses least squares for reconstruction, by default True.
+adjust_scaling : bool, optional
+If True, adjusts scaling of the reconstructed image, to account for the intensity loss, by default False.</p>
+<p class="rubric" id="id66">Returns</p>
+<p>NDArray
+The reconstructed image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostImaging.absolute">
+<span class="sig-name descname"><span class="pre">absolute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostImaging.absolute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostImaging.absolute" title="Link to this definition"></a></dt>
+<dd><p>Compute the absolute value of the projection operator coefficients.</p>
+<p class="rubric" id="id67">Returns</p>
+<p>Op_a : ProjectorGhostImaging
+The absolute value of the projector.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.testing.html" class="btn btn-neutral float-left" title="corrct.testing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../changelog.html" class="btn btn-neutral float-right" title="Changelog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
