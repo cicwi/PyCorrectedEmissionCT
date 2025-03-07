@@ -34,13 +34,13 @@ detector shifts with respect to the origin.
 ### The projectors
 
 The projection geometry is specified through the creation of *projectors* from
-the [`projectors`](corrct.html#module-corrct.projectors) module.
+the [](#projectors) module.
 The simplest projector is called
-[`ProjectorUncorrected`](corrct.html#corrct.projectors.ProjectorUncorrected),
+[`ProjectorUncorrected`](#projectors.ProjectorUncorrected),
 and it serves as basis for more complex projectors. The projector
-[`ProjectorAttenuationXRF`](corrct.html#corrct.projectors.ProjectorAttenuationXRF)
+[`ProjectorAttenuationXRF`](#projectors.ProjectorAttenuationXRF)
 derives from the
-[`ProjectorUncorrected`](corrct.html#corrct.projectors.ProjectorUncorrected),
+[`ProjectorUncorrected`](#projectors.ProjectorUncorrected),
 and it implements the XRF specific bits, with respect to multi-detector /
 multi-element handling and attenuation correction.
 
@@ -77,19 +77,18 @@ on the `scikit-image` and `astra-toolbox` packages.
 They can be selected by passing the strings `"astra"` or `"skimage"` to the
 parameter `backend`.
 Advanced users can create custom backends, by deriving the base class
-`ProjectorBackend` from the module `_projector_backends`.
+`ProjectorBackend` from the module [](#_projector_backends).
 
 ### The solvers
 
 Tomographic reconstructions can be achieved using either the included solvers
-from [`solvers`](corrct.html#module-corrct.solvers) module, or with `scipy`'s
-solvers.
+from [](#solvers) module, or with `scipy`'s solvers.
 The included solvers are:
 
-* Filtered Back-Projection: [**FBP**](corrct.html#corrct.solvers.FBP).
-* Simultaneous Algebraic Reconstruction Technique [**SART**](corrct.html#corrct.solvers.SART).
-* Simultaneous Iterative Reconstruction Technique [**SIRT**](corrct.html#corrct.solvers.SIRT).
-* Primal-Dual Hybrid Gradient [**PDHG**](corrct.html#corrct.solvers.PDHG), from Chambolle and Pock.
+* Filtered Back-Projection: [**FBP**](#solvers.FBP).
+* Simultaneous Algebraic Reconstruction Technique [**SART**](#solvers.SART).
+* Simultaneous Iterative Reconstruction Technique [**SIRT**](#solvers.SIRT).
+* Primal-Dual Hybrid Gradient [**PDHG**](#solvers.PDHG), from Chambolle and Pock.
 
 #### FBP
 
@@ -167,7 +166,7 @@ attenuation map for the following experimental conditions:
 * Sample morphology and local average composition
 
 This is usually achieved in two ways. The simplest way is to provide the projector
-[`ProjectorAttenuationXRF`](corrct.html#corrct.projectors.ProjectorAttenuationXRF)
+[](#projectors.ProjectorAttenuationXRF)
 with the corresponding attenuation maps for the excitation beam and emitted photons.
 The respective parameters are: `att_in` and `att_out`. This also requires to
 provide the angle(s) of the detector(s) with respect to the incoming beam
@@ -179,15 +178,11 @@ The drawback of the simple way is that the computed local attenuation per angle
 cannot be re-used with other projectors, and the computation / scaling of the
 maps is delegated entirely to the user.
 
-The user can also choose to use the class
-[`AttenuationVolume`](corrct.html#corrct.physics.attenuation.AttenuationVolume) from the
-[`attenuation`](corrct.html#module-corrct.physics.attenuation) sub-module of the
-[`physics`](corrct.html#module-corrct.physics) module.
-This class is used internally in the projector
-[`ProjectorAttenuationXRF`](corrct.html#corrct.projectors.ProjectorAttenuationXRF),
+The user can also choose to use the class [](#physics.attenuation.AttenuationVolume)
+from the [](#physics.attenuation) sub-module of the [](#physics) module.
+This class is used internally in the projector [](#projectors.ProjectorAttenuationXRF),
 and it can be used particularly in conjunction with the class
-[`VolumeMaterial`](corrct.html#corrct.physics.VolumeMaterial) from the
-[`physics`](corrct.html#module-corrct.physics) module.
+[](#physics.materials.VolumeMaterial) from the [](#physics) module.
 
 For a more in-depth walk-through on attenuation correction, we refer to the dedicated
 [attenuation tutorial](attenuation_tutorial.md).
@@ -205,20 +200,20 @@ latter impose prior knowledge on the weight given to the data points.
 ### Regularizers
 
 Famous regularizers are the TV-min and wavelet l1-min. They can be found in the
-[`regularizers`](corrct.html#module-corrct.regularizers) module.
+[](#regularizers) module.
 
 ### Data fidelity terms
 
 The PDHG algorithm supports various data fidelity terms. They can be found in
-the [`data_terms`](corrct.html#module-corrct.data_terms) module, and they include:
+the [](#data_terms) module, and they include:
 * l2 norm - least squares reconstruction - default:
-[`DataFidelity_l2`](corrct.html#corrct.data_terms.DataFidelity_l2)
+[`DataFidelity_l2`](#data_terms.DataFidelity_l2)
 * weighted l2 norm - when the variance of the sinogram points is known:
-[`DataFidelity_wl2`](corrct.html#corrct.data_terms.DataFidelity_wl2)
+[`DataFidelity_wl2`](#data_terms.DataFidelity_wl2)
 * l1 norm - when the sinogram noise is mostly sparse:
-[`DataFidelity_l1`](corrct.html#corrct.data_terms.DataFidelity_l1)
+[`DataFidelity_l1`](#data_terms.DataFidelity_l1)
 * Kullback-Leibler - when dealing with Poisson noise:
-[`DataFidelity_KL`](corrct.html#corrct.data_terms.DataFidelity_KL)
+[`DataFidelity_KL`](#data_terms.DataFidelity_KL)
 
 ## Guided regularization parameter selection
 

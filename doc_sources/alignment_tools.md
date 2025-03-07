@@ -1,18 +1,17 @@
 # Alignment
 
-The [`alignment`](corrct.html#module-corrct.alignment) module includes support
-for aligning projection data.
+The [](#alignment) module includes support for aligning projection data.
 The provided tools are:
 1. Pre-alignment routines for tomographic data
 2. Image stack shift finding
 
 ## Pre-alignment 
 
-The class `DetectorShiftsPRE` offers support for both finding the vertical and
-horizontal shifts of tomographic projection data. They are exposed through the
-methods `fit_v` and `fit_u`.
+The class [](#alignment.shifts.DetectorShiftsPRE) offers support for both finding the
+vertical and horizontal shifts of tomographic projection data.
+They are exposed through the methods `fit_v` and `fit_u`.
 
-```python
+```Python
 class DetectorShiftsPRE(DetectorShiftsBase):
     """Compute the pre-alignment detector shifts for a given dataset."""
 

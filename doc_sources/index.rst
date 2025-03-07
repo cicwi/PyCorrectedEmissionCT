@@ -16,9 +16,8 @@ Contents:
    physics_model
    attenuation_tutorial
    alignment_tools
-   modules
+   apidocs/index
    changelog
-
 
 Indices and tables
 ==================
