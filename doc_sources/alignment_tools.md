@@ -41,3 +41,11 @@ The `fit_u` method computes the horizontal shifts of the stack, by computing the
 sinusoid that interpolates the chosen value of interest across all the rotation
 angles. The value of interest can include the center-of-mass (CoM) or the position
 of the highest intensity peak of the projections.
+
+## Image stack alignment
+
+The [](#alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts) function calculates the
+shifts in the vertical and possibly horizontal directions of each image in a stack
+relative to a reference image or images.
+It ensures that the number of reference images matches the number of data images,
+and returns an array containing these shifts.

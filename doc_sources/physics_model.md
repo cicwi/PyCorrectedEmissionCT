@@ -67,7 +67,17 @@ compositions in the reconstruction volume, with the aim of generating:
 
 The [](#physics.phase) sub-module contains
 functions to model the delta-over-beta value and transfer functions encountered
-in phase contrast problems.
+in phase contrast problems:
+1. [](#physics.phase.get_delta_beta):
+   Computes the delta-over-beta parameter for a specific compound given its molar composition, energy, and density.
+2. [](#physics.phase.get_delta_beta_curves):
+   Computes and optionally plots the delta-over-beta curves for a list of compounds over a specified energy range.
+3. [](#physics.phase.plot_filter_responses):
+   Plots the frequency response of the wave propagation for both TIE and CTF filters in either Fourier or direct space.
+4. [](#physics.phase.get_propagation_filter):
+   Computes the phase contrast propagation filter for given parameters, returning both Fourier-space and real-space filters.
+5. [](#physics.phase.apply_propagation_filter):
+   Applies a requested propagation filter (either TIE or CTF) to an image or stack of images.
 
 ## Unit conversion
 
