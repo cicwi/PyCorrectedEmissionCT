@@ -789,4 +789,4 @@ def get_vol_geom_from_volume(volume: NDArray) -> VolumeGeometry:
     vol_shape_zxy = volume.shape
     if len(vol_shape_zxy) < 2:
         raise ValueError(f"The volume should be at least 2-dimensional, but the following shape was passed: {vol_shape_zxy}")
-    return VolumeGeometry([vol_shape_zxy[-2], vol_shape_zxy[-1], *np.flip(vol_shape_zxy[:-2])])
+    return VolumeGeometry(np.array([vol_shape_zxy[-2], vol_shape_zxy[-1], *np.flip(vol_shape_zxy[:-2])]))
