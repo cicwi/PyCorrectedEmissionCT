@@ -1336,7 +1336,7 @@ class Regularizer_vSVD(BaseRegularizer):
             print("WARNING - Number of axes different from number of dimensions. Updating dimensions accordingly.")
             ndims = len(axes)
         self.ndims = ndims
-        self.axes = axes
+        self.axes = np.array(axes)
         self.axis_channels = axis_channels
 
     def initialize_sigma_tau(self, primal: NDArray) -> Union[float, NDArray]:

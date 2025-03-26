@@ -504,6 +504,9 @@ class BaseWaveletTransform(BaseTransform, ABC):
     wavelet: str
     labels: list[str]
 
+    wlet_dec_filter_mult: NDArray
+    wlet_rec_filter_mult: NDArray
+
     def _initialize_filter_bank(self) -> None:
         num_axes = len(self.axes)
         self.labels = [bin(x)[2:].zfill(num_axes).replace("0", "a").replace("1", "d") for x in range(1, 2**num_axes)]
@@ -624,11 +627,11 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
         y, self.slicing_info = pywt.coeffs_to_array(c, axes=self.axes)
         return y
 
-    def _op_adjoint(self, y: NDArray) -> NDArray:
+    def _op_adjoint(self, x: NDArray) -> NDArray:
         if self.slicing_info is None:
             _ = self._op_direct(np.zeros(self.dir_shape))
 
-        c = pywt.array_to_coeffs(y, self.slicing_info)
+        c = pywt.array_to_coeffs(x, self.slicing_info)
         return self.inverse_dwt(c)
 
 
@@ -752,14 +755,14 @@ class TransformStationaryWavelet(BaseWaveletTransform):
         y = [y[0]] + [y[lvl][x] for lvl in range(1, self.level + 1) for x in self.labels]
         return np.array(y)
 
-    def _op_adjoint(self, y: NDArray) -> NDArray:
+    def _op_adjoint(self, x: NDArray) -> NDArray:
         def get_lvl_pos(lvl):
             return (lvl - 1) * (2 ** len(self.axes) - 1) + 1
 
-        x = [y[0]] + [
-            {k: y[ii_lbl + get_lvl_pos(lvl), ...] for ii_lbl, k in enumerate(self.labels)} for lvl in range(1, self.level + 1)
+        y = [x[0]] + [
+            {k: x[ii_lbl + get_lvl_pos(lvl), ...] for ii_lbl, k in enumerate(self.labels)} for lvl in range(1, self.level + 1)
         ]
-        return self.inverse_swt(x)
+        return self.inverse_swt(y)
 
 
 class TransformGradient(BaseTransform):
@@ -838,8 +841,8 @@ class TransformGradient(BaseTransform):
     def _op_direct(self, x: NDArray) -> NDArray:
         return self.gradient(x)
 
-    def _op_adjoint(self, y: NDArray) -> NDArray:
-        return -self.divergence(y)
+    def _op_adjoint(self, x: NDArray) -> NDArray:
+        return -self.divergence(x)
 
 
 class TransformFourier(BaseTransform):
@@ -911,8 +914,8 @@ class TransformFourier(BaseTransform):
     def _op_direct(self, x: NDArray) -> NDArray:
         return self.fft(x)
 
-    def _op_adjoint(self, y: NDArray) -> NDArray:
-        return self.ifft(y)
+    def _op_adjoint(self, x: NDArray) -> NDArray:
+        return self.ifft(x)
 
 
 class TransformLaplacian(BaseTransform):
@@ -968,8 +971,8 @@ class TransformLaplacian(BaseTransform):
     def _op_direct(self, x: NDArray) -> NDArray:
         return self.laplacian(x)
 
-    def _op_adjoint(self, y: NDArray) -> NDArray:
-        return self.laplacian(y)
+    def _op_adjoint(self, x: NDArray) -> NDArray:
+        return self.laplacian(x)
 
 
 class TransformSVD(BaseTransform):
@@ -978,7 +981,15 @@ class TransformSVD(BaseTransform):
     U: Optional[NDArray]
     Vt: Optional[NDArray]
 
-    def __init__(self, x_shape, axes_rows=(0,), axes_cols=(-1,), rescale: bool = False):
+    rescale: bool
+
+    def __init__(
+        self,
+        x_shape: ArrayLike,
+        axes_rows: Union[Sequence[int], NDArray] = (0,),
+        axes_cols: Union[Sequence[int], NDArray] = (-1,),
+        rescale: bool = False,
+    ):
         """
         Singular value decomposition operator.
 
@@ -1003,8 +1014,8 @@ class TransformSVD(BaseTransform):
         """
         self.dir_shape = np.array(x_shape, ndmin=1, dtype=int)
 
-        self.axes_rows = np.atleast_1d(axes_rows) % len(self.dir_shape)
-        self.axes_cols = np.atleast_1d(axes_cols) % len(self.dir_shape)
+        self.axes_rows = np.array(axes_rows, ndmin=1) % len(self.dir_shape)
+        self.axes_cols = np.array(axes_cols, ndmin=1) % len(self.dir_shape)
 
         # Dimensions to decompose
         self.append_dims = np.concatenate((self.axes_rows, self.axes_cols)).astype(int)
@@ -1037,13 +1048,13 @@ class TransformSVD(BaseTransform):
 
         super().__init__()
 
-    def direct_svd(self, x):
+    def direct_svd(self, x: NDArray):
         """
         Performs the SVD decomposition.
 
         Parameters
         ----------
-        x : `numpy.array_like`
+        x : NDArray
             Data to transform.
 
         Returns
@@ -1051,29 +1062,29 @@ class TransformSVD(BaseTransform):
         tuple(U, s, Vt)
             Transformed data.
         """
-        return np.linalg.svd(x, full_matrices=False)
+        return np.linalg.svd(x, full_matrices=False, compute_uv=True)
 
-    def inverse_svd(self, U, s, Vt):
+    def inverse_svd(self, U: NDArray, s: NDArray, Vt: NDArray) -> NDArray:
         """
         Performs the inverse SVD decomposition.
 
         Parameters
         ----------
-        U : `numpy.array_like`
+        U : NDArray
             Rows of the SVD decomposition.
-        s : `numpy.array_like`
+        s : NDArray
             Singular values.
-        Vt : `numpy.array_like`
+        Vt : NDArray
             Columns of the SVD decomposition.
 
         Returns
         -------
-        `numpy.array_like`
+        NDArray
             Anti-transformed data.
         """
         return np.matmul(U, s[..., None] * Vt)
 
-    def _op_direct(self, x):
+    def _op_direct(self, x: NDArray) -> NDArray:
         x = np.transpose(x, self.fwd_transpose)
         x = np.reshape(x, self.fwd_shape)
 
@@ -1086,14 +1097,14 @@ class TransformSVD(BaseTransform):
 
         return s
 
-    def _op_adjoint(self, y):
+    def _op_adjoint(self, x: NDArray) -> NDArray:
         if self.U is None or self.Vt is None:
             raise ValueError("Operator not initialized!")
 
-        x = self.inverse_svd(self.U, y, self.Vt)
+        y = self.inverse_svd(self.U, x, self.Vt)
 
-        x = np.reshape(x, self.bwd_shape)
-        return np.transpose(x, self.bwd_transpose)
+        y = np.reshape(y, self.bwd_shape)
+        return np.transpose(y, self.bwd_transpose)
 
 
 if __name__ == "__main__":
