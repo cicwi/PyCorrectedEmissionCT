@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Test `corrct.projectors` package.
 
@@ -7,15 +6,15 @@ Test `corrct.projectors` package.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import numpy as np
-import scipy.ndimage as spndi
-
-import skimage.data as skd
-import skimage.transform as skt
+from typing import Callable, Optional
 
 import matplotlib.pyplot as plt
-
+import numpy as np
 import pytest
+import scipy.ndimage as spndi
+import skimage.data as skd
+import skimage.transform as skt
+from numpy.typing import NDArray
 
 import corrct as cct
 from corrct import _projector_backends as backends
@@ -23,7 +22,24 @@ from corrct import _projector_backends as backends
 eps = np.finfo(np.float32).eps
 
 
-def _radon_rot_sk_w(x, angles_rad, shift=None):
+def _radon_rot_sk_w(x: NDArray, angles_rad: NDArray, shift: Optional[float] = None) -> NDArray:
+    """
+    Compute the Radon transform using skimage's warp function.
+
+    Parameters
+    ----------
+    x : NDArray
+        Input image.
+    angles_rad : NDArray
+        Angles in radians.
+    shift : float, optional
+        Shift value. Default is None.
+
+    Returns
+    -------
+    NDArray
+        Radon transform of the input image.
+    """
     prj = np.empty((len(angles_rad), x.shape[-1]), dtype=np.float32)
     c = (np.array(x.shape) - 1) / 2
 
@@ -50,7 +66,22 @@ def _radon_rot_sk_w(x, angles_rad, shift=None):
     return prj
 
 
-def _radon_rot_sp(x, angles_rad):
+def _radon_rot_sp(x: NDArray, angles_rad: NDArray) -> NDArray:
+    """
+    Compute the Radon transform using scipy's rotate function.
+
+    Parameters
+    ----------
+    x : NDArray
+        Input image.
+    angles_rad : NDArray
+        Angles in radians.
+
+    Returns
+    -------
+    NDArray
+        Radon transform of the input image.
+    """
     prj = np.empty((len(angles_rad), x.shape[-1]), dtype=np.float32)
     for ii, a in enumerate(np.rad2deg(angles_rad)):
         prj[ii, ...] = spndi.rotate(x, -a, order=1, reshape=False).sum(axis=0)
@@ -58,7 +89,15 @@ def _radon_rot_sp(x, angles_rad):
 
 
 @pytest.fixture(scope="function")
-def base_test_data():
+def base_test_data() -> tuple[NDArray, NDArray, float]:
+    """
+    Fixture to provide base test data.
+
+    Returns
+    -------
+    tuple[NDArray, NDArray, float]
+        Phantom image, angles in radians, and shift value in pixels.
+    """
     ph = skd.shepp_logan_phantom()
     angles_deg = np.arange(0, 180)
     angles_rad = angles_deg / 180 * np.pi
@@ -66,7 +105,19 @@ def base_test_data():
     return ph, angles_rad, shift
 
 
-def _test_centered_sinogram(ph, angles_rad, ref_function):
+def _test_centered_sinogram(ph: NDArray, angles_rad: NDArray, ref_function: Callable) -> None:
+    """
+    Test the centered sinogram.
+
+    Parameters
+    ----------
+    ph : NDArray
+        Phantom image.
+    angles_rad : NDArray
+        Angles in radians.
+    ref_function : callable
+        Reference function to compute the Radon transform.
+    """
     debug = False
 
     ph_added = ph + 0.1 * cct.processing.circular_mask(ph.shape)
@@ -91,18 +142,51 @@ def _test_centered_sinogram(ph, angles_rad, ref_function):
     assert np.all(np.isclose(rel_diff, 0, atol=0.015)), "Reference radon transform and astra-toolbox do not match"
 
 
-def test_centered_sinogram_sk(base_test_data):
+def test_centered_sinogram_sk(base_test_data: tuple[NDArray, NDArray, float]) -> None:
+    """
+    Test the centered sinogram using skimage's warp function.
+
+    Parameters
+    ----------
+    base_test_data : tuple[NDArray, NDArray, float]
+        Base test data containing:
+        - Phantom image (NDArray)
+        - Angles in radians (NDArray)
+        - Shift value in pixels (float)
+    """
     ph, angles_rad, _ = base_test_data
     _test_centered_sinogram(ph, angles_rad, _radon_rot_sk_w)
 
 
-def test_centered_sinogram_sp(base_test_data):
+def test_centered_sinogram_sp(base_test_data: tuple[NDArray, NDArray, float]) -> None:
+    """
+    Test the centered sinogram using scipy's rotate function.
+
+    Parameters
+    ----------
+    base_test_data : tuple[NDArray, NDArray, float]
+        Base test data containing:
+        - Phantom image (NDArray)
+        - Angles in radians (NDArray)
+        - Shift value in pixels (float)
+    """
     ph, angles_rad, _ = base_test_data
     _test_centered_sinogram(ph, angles_rad, _radon_rot_sp)
 
 
 @pytest.mark.skipif(not cct.projectors.astra_available, reason="astra-toolbox not available")
-def test_shifted_sinogram(base_test_data):
+def test_shifted_sinogram(base_test_data: tuple[NDArray, NDArray, float]) -> None:
+    """
+    Test the shifted sinogram.
+
+    Parameters
+    ----------
+    base_test_data : tuple[NDArray, NDArray, float]
+        Base test data containing:
+        - Phantom image (NDArray)
+        - Angles in radians (NDArray)
+        - Shift value in pixels (float)
+    """
     ph, angles_rad, shift = base_test_data
     debug = False
 
@@ -129,7 +213,18 @@ def test_shifted_sinogram(base_test_data):
 
 
 @pytest.mark.skipif(not cct.projectors.astra_available, reason="astra-toolbox not available")
-def test_astra_backends(base_test_data):
+def test_astra_backends(base_test_data: tuple[NDArray, NDArray, float]) -> None:
+    """
+    Test the astra backends.
+
+    Parameters
+    ----------
+    base_test_data : tuple[NDArray, NDArray, float]
+        Base test data containing:
+        - Phantom image (NDArray)
+        - Angles in radians (NDArray)
+        - Shift value in pixels (float)
+    """
     ph, angles_rad, shift = base_test_data
     debug = False
 
@@ -160,4 +255,4 @@ def test_astra_backends(base_test_data):
         fig.tight_layout()
         plt.show()
 
-    assert np.all(np.isclose(rel_diff, 0, atol=0.0002)), "Legacy and direct astra-toolbox projectors do not match"
+    assert np.allclose(rel_diff, 0.0, atol=0.0002), "Legacy and direct astra-toolbox projectors do not match"
