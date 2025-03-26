@@ -36,7 +36,7 @@ def _fwd_op(M: NDArray, x: NDArray, y_shape: tuple[int, int]) -> NDArray:
 
 
 @pytest.fixture(scope="module")
-def flat_2d_data() -> tuple[NDArray, NDArray, NDArray]:
+def rand_2d_data() -> tuple[NDArray, NDArray, NDArray]:
     vol_rand_2d = np.fmin(np.random.rand(*VOL_SHAPE_2D[:2]) + eps, 1)
     proj_matrix_2d = (np.random.rand(np.prod(PRJ_SHAPE_2D), np.prod(VOL_SHAPE_2D)) > 0.5).astype(np.float32)
     data_rand_2d = _fwd_op(proj_matrix_2d, vol_rand_2d, PRJ_SHAPE_2D)
@@ -53,9 +53,9 @@ def flat_2d_data() -> tuple[NDArray, NDArray, NDArray]:
 
 
 @pytest.mark.parametrize("algo_it", [(solvers.SIRT, 1_000), (solvers.PDHG, 500), (solvers.MLEM, 10_000)])
-def test_algo_rand(flat_2d_data, algo_it: tuple[type[solvers.Solver], int]):
+def test_algo_rand(rand_2d_data, algo_it: tuple[type[solvers.Solver], int]):
     """Test algorithms in 2D on a random image."""
-    proj_matrix_2d, vol_rand_2d, data_rand_2d = flat_2d_data
+    proj_matrix_2d, vol_rand_2d, data_rand_2d = rand_2d_data
     algo_class, iterations = algo_it
 
     prj_mat = projectors.ProjectorMatrix(proj_matrix_2d, VOL_SHAPE_2D, PRJ_SHAPE_2D)
