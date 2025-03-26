@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Advanced denoising methods.
 
@@ -6,20 +5,14 @@ Advanced denoising methods.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+from collections.abc import Sequence
+from typing import Callable, Optional, Union, overload
+
 import numpy as np
 import scipy.signal as spsig
-
-from . import operators
-from . import data_terms
-from . import regularizers
-from . import solvers
-from . import param_tuning
-
-from collections.abc import Sequence
-from typing import overload, Optional, Tuple, Union, Callable
-
 from numpy.typing import NDArray
 
+from . import data_terms, operators, param_tuning, regularizers, solvers
 
 eps = np.finfo(np.float32).eps
 
@@ -113,7 +106,7 @@ def denoise_image(
             verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term, leave_progress=False
         )
 
-    def solver_call(solver: solvers.Solver, b_test_mask: Optional[NDArray] = None) -> Tuple[NDArray, solvers.SolutionInfo]:
+    def solver_call(solver: solvers.Solver, b_test_mask: Optional[NDArray] = None) -> tuple[NDArray, solvers.SolutionInfo]:
         x0 = img.copy()
         if b_test_mask is not None:
             med_img = spsig.medfilt2d(img, kernel_size=11)
