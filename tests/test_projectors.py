@@ -124,8 +124,13 @@ def _test_centered_sinogram(ph: NDArray, angles_rad: NDArray, ref_function: Call
 
     prj_ref = ref_function(ph_added, angles_rad)
 
-    with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, rot_axis_shift_pix=None) as A:
-        prj_cmp = A(ph_added)
+    with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, rot_axis_shift_pix=None) as prj:
+        prj_cmp = prj(ph_added)
+
+        assert prj.projector_backend.__class__.__name__ in [
+            "ProjectorBackendASTRA",
+            "ProjectorBackendDirectASTRA",
+        ], "The projector backend is not Astra's or Direct Astra's. This function will not work as intended"
 
     rel_diff = (prj_ref - prj_cmp) / prj_ref.max()
 
@@ -142,6 +147,7 @@ def _test_centered_sinogram(ph: NDArray, angles_rad: NDArray, ref_function: Call
     assert np.all(np.isclose(rel_diff, 0, atol=0.015)), "Reference radon transform and astra-toolbox do not match"
 
 
+@pytest.mark.skipif(not cct.projectors.astra_available, reason="astra-toolbox not available")
 def test_centered_sinogram_sk(base_test_data: tuple[NDArray, NDArray, float]) -> None:
     """
     Test the centered sinogram using skimage's warp function.
@@ -158,6 +164,7 @@ def test_centered_sinogram_sk(base_test_data: tuple[NDArray, NDArray, float]) ->
     _test_centered_sinogram(ph, angles_rad, _radon_rot_sk_w)
 
 
+@pytest.mark.skipif(not cct.projectors.astra_available, reason="astra-toolbox not available")
 def test_centered_sinogram_sp(base_test_data: tuple[NDArray, NDArray, float]) -> None:
     """
     Test the centered sinogram using scipy's rotate function.
