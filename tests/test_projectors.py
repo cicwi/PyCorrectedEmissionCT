@@ -20,7 +20,6 @@ import pytest
 import corrct as cct
 from corrct import _projector_backends as backends
 
-
 eps = np.finfo(np.float32).eps
 
 
@@ -58,106 +57,107 @@ def _radon_rot_sp(x, angles_rad):
     return prj
 
 
-@pytest.fixture(scope="class")
-def bootstrap_base(request):
-    cls = request.cls
-    cls.ph = skd.shepp_logan_phantom()
+@pytest.fixture(scope="function")
+def base_test_data():
+    ph = skd.shepp_logan_phantom()
+    angles_deg = np.arange(0, 180)
+    angles_rad = angles_deg / 180 * np.pi
+    shift = 20
+    return ph, angles_rad, shift
 
-    cls.angles_deg = np.arange(0, 180)
-    cls.angles_rad = cls.angles_deg / 180 * np.pi
 
-    cls.shift = 20
+def _test_centered_sinogram(ph, angles_rad, ref_function):
+    debug = False
+
+    ph_added = ph + 0.1 * cct.processing.circular_mask(ph.shape)
+
+    prj_ref = ref_function(ph_added, angles_rad)
+
+    with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, rot_axis_shift_pix=None) as A:
+        prj_cmp = A(ph_added)
+
+    rel_diff = (prj_ref - prj_cmp) / prj_ref.max()
+
+    if debug:
+        print(np.max(np.abs(prj_ref - prj_cmp)))
+        print(np.max(np.abs(rel_diff)))
+        fig, axs = plt.subplots(3, 1)
+        axs[0].imshow(prj_ref)
+        axs[1].imshow(prj_cmp)
+        axs[2].imshow(prj_ref - prj_cmp)
+        fig.tight_layout()
+        plt.show()
+
+    assert np.all(np.isclose(rel_diff, 0, atol=0.015)), "Reference radon transform and astra-toolbox do not match"
+
+
+def test_centered_sinogram_sk(base_test_data):
+    ph, angles_rad, _ = base_test_data
+    _test_centered_sinogram(ph, angles_rad, _radon_rot_sk_w)
+
+
+def test_centered_sinogram_sp(base_test_data):
+    ph, angles_rad, _ = base_test_data
+    _test_centered_sinogram(ph, angles_rad, _radon_rot_sp)
 
 
 @pytest.mark.skipif(not cct.projectors.astra_available, reason="astra-toolbox not available")
-@pytest.mark.usefixtures("bootstrap_base")
-class TestProjectors:
-    """Tests for the projectors in `corrct.projectors` package."""
+def test_shifted_sinogram(base_test_data):
+    ph, angles_rad, shift = base_test_data
+    debug = False
 
-    def _test_centered_sinogram(self, ref_function):
-        debug = False
+    ph_added = ph + 0.1 * cct.processing.circular_mask(ph.shape)
 
-        ph_added = self.ph + 0.1 * cct.processing.circular_mask(self.ph.shape)
+    prj_ref = _radon_rot_sk_w(ph_added, angles_rad, shift)
 
-        prj_ref = ref_function(ph_added, self.angles_rad)
+    with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, rot_axis_shift_pix=shift) as A:
+        prj_cmp = A(ph_added)
 
-        with cct.projectors.ProjectorUncorrected(self.ph.shape, self.angles_rad, rot_axis_shift_pix=None) as A:
-            prj_cmp = A(ph_added)
+    rel_diff = (prj_ref - prj_cmp) / prj_ref.max()
 
-        rel_diff = (prj_ref - prj_cmp) / prj_ref.max()
+    if debug:
+        print(np.max(np.abs(prj_ref - prj_cmp)))
+        print(np.max(np.abs(rel_diff)))
+        fig, axs = plt.subplots(3, 1)
+        axs[0].imshow(prj_ref)
+        axs[1].imshow(prj_cmp)
+        axs[2].imshow(prj_ref - prj_cmp)
+        fig.tight_layout()
+        plt.show()
 
-        if debug:
-            print(np.max(np.abs(prj_ref - prj_cmp)))
-            print(np.max(np.abs(rel_diff)))
-            f, ax = plt.subplots(3, 1)
-            ax[0].imshow(prj_ref)
-            ax[1].imshow(prj_cmp)
-            ax[2].imshow(prj_ref - prj_cmp)
-            plt.show()
+    assert np.all(np.isclose(rel_diff, 0, atol=0.015)), "Reference radon transform and astra-toolbox do not match"
 
-        assert np.all(np.isclose(rel_diff, 0, atol=0.015)), "Reference radon transform and astra-toolbox do not match"
 
-    def test_centered_sinogram_sk(self):
-        self._test_centered_sinogram(_radon_rot_sk_w)
+@pytest.mark.skipif(not cct.projectors.astra_available, reason="astra-toolbox not available")
+def test_astra_backends(base_test_data):
+    ph, angles_rad, shift = base_test_data
+    debug = False
 
-    def test_centered_sinogram_sp(self):
-        self._test_centered_sinogram(_radon_rot_sp)
+    projector_legacy = backends.ProjectorBackendASTRA()
+    projector_direct = backends.ProjectorBackendDirectASTRA()
 
-    def test_shifted_sinogram(self):
-        debug = False
+    solver = cct.solvers.SIRT()
+    num_iterations = 25
 
-        ph_added = self.ph + 0.1 * cct.processing.circular_mask(self.ph.shape)
+    prj_ref = _radon_rot_sk_w(ph, angles_rad, shift)
 
-        prj_ref = _radon_rot_sk_w(ph_added, self.angles_rad, self.shift)
+    with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, rot_axis_shift_pix=shift, backend=projector_legacy) as A:
+        rec_vol_leg, _ = solver(A, prj_ref, iterations=num_iterations)
 
-        with cct.projectors.ProjectorUncorrected(self.ph.shape, self.angles_rad, rot_axis_shift_pix=self.shift) as A:
-            prj_cmp = A(ph_added)
+    with cct.projectors.ProjectorUncorrected(ph.shape, angles_rad, rot_axis_shift_pix=shift, backend=projector_direct) as A:
+        rec_vol_dir, _ = solver(A, prj_ref, iterations=num_iterations)
 
-        rel_diff = (prj_ref - prj_cmp) / prj_ref.max()
+    diff_rec = rec_vol_leg - rec_vol_dir
+    rel_diff = diff_rec / rec_vol_leg.max()
 
-        if debug:
-            print(np.max(np.abs(prj_ref - prj_cmp)))
-            print(np.max(np.abs(rel_diff)))
-            f, ax = plt.subplots(3, 1)
-            ax[0].imshow(prj_ref)
-            ax[1].imshow(prj_cmp)
-            ax[2].imshow(prj_ref - prj_cmp)
-            plt.show()
+    if debug:
+        print(np.max(np.abs(diff_rec)))
+        print(np.max(np.abs(rel_diff)))
+        fig, ax = plt.subplots(1, 3, figsize=[9, 3])
+        ax[0].imshow(rec_vol_leg)
+        ax[1].imshow(rec_vol_dir)
+        ax[2].imshow(diff_rec)
+        fig.tight_layout()
+        plt.show()
 
-        assert np.all(np.isclose(rel_diff, 0, atol=0.015)), "Reference radon transform and astra-toolbox do not match"
-
-    def test_astra_backends(self):
-        debug = False
-
-        projector_legacy = backends.ProjectorBackendASTRA()
-        projector_direct = backends.ProjectorBackendDirectASTRA()
-
-        solver = cct.solvers.SIRT()
-        num_iterations = 25
-
-        prj_ref = _radon_rot_sk_w(self.ph, self.angles_rad, self.shift)
-
-        with cct.projectors.ProjectorUncorrected(
-            self.ph.shape, self.angles_rad, rot_axis_shift_pix=self.shift, backend=projector_legacy
-        ) as A:
-            rec_vol_leg, _ = solver(A, prj_ref, iterations=num_iterations)
-
-        with cct.projectors.ProjectorUncorrected(
-            self.ph.shape, self.angles_rad, rot_axis_shift_pix=self.shift, backend=projector_direct
-        ) as A:
-            rec_vol_dir, _ = solver(A, prj_ref, iterations=num_iterations)
-
-        diff_rec = rec_vol_leg - rec_vol_dir
-        rel_diff = diff_rec / rec_vol_leg.max()
-
-        if debug:
-            print(np.max(np.abs(diff_rec)))
-            print(np.max(np.abs(rel_diff)))
-            fig, ax = plt.subplots(1, 3, figsize=[9, 3])
-            ax[0].imshow(rec_vol_leg)
-            ax[1].imshow(rec_vol_dir)
-            ax[2].imshow(diff_rec)
-            fig.tight_layout()
-            plt.show()
-
-        assert np.all(np.isclose(rel_diff, 0, atol=0.0002)), "Legacy and direct astra-toolbox projectors do not match"
+    assert np.all(np.isclose(rel_diff, 0, atol=0.0002)), "Legacy and direct astra-toolbox projectors do not match"
