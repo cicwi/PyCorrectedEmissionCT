@@ -527,6 +527,28 @@ Bases: {py:obj}`corrct.operators.BaseTransform`, {py:obj}`abc.ABC`
 
 ````
 
+````{py:attribute} wlet_dec_filter_mult
+:canonical: corrct.operators.BaseWaveletTransform.wlet_dec_filter_mult
+:type: numpy.typing.NDArray
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.operators.BaseWaveletTransform.wlet_dec_filter_mult
+```
+
+````
+
+````{py:attribute} wlet_rec_filter_mult
+:canonical: corrct.operators.BaseWaveletTransform.wlet_rec_filter_mult
+:type: numpy.typing.NDArray
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.operators.BaseWaveletTransform.wlet_rec_filter_mult
+```
+
+````
+
 ````{py:method} _initialize_filter_bank() -> None
 :canonical: corrct.operators.BaseWaveletTransform._initialize_filter_bank
 
@@ -572,7 +594,7 @@ Bases: {py:obj}`corrct.operators.BaseWaveletTransform`
 
 ````
 
-````{py:method} _op_adjoint(y: numpy.typing.NDArray) -> numpy.typing.NDArray
+````{py:method} _op_adjoint(x: numpy.typing.NDArray) -> numpy.typing.NDArray
 :canonical: corrct.operators.TransformDecimatedWavelet._op_adjoint
 
 ````
@@ -614,7 +636,7 @@ Bases: {py:obj}`corrct.operators.BaseWaveletTransform`
 
 ````
 
-````{py:method} _op_adjoint(y: numpy.typing.NDArray) -> numpy.typing.NDArray
+````{py:method} _op_adjoint(x: numpy.typing.NDArray) -> numpy.typing.NDArray
 :canonical: corrct.operators.TransformStationaryWavelet._op_adjoint
 
 ````
@@ -656,7 +678,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 ````
 
-````{py:method} _op_adjoint(y: numpy.typing.NDArray) -> numpy.typing.NDArray
+````{py:method} _op_adjoint(x: numpy.typing.NDArray) -> numpy.typing.NDArray
 :canonical: corrct.operators.TransformGradient._op_adjoint
 
 ````
@@ -698,7 +720,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 ````
 
-````{py:method} _op_adjoint(y: numpy.typing.NDArray) -> numpy.typing.NDArray
+````{py:method} _op_adjoint(x: numpy.typing.NDArray) -> numpy.typing.NDArray
 :canonical: corrct.operators.TransformFourier._op_adjoint
 
 ````
@@ -732,14 +754,14 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 ````
 
-````{py:method} _op_adjoint(y: numpy.typing.NDArray) -> numpy.typing.NDArray
+````{py:method} _op_adjoint(x: numpy.typing.NDArray) -> numpy.typing.NDArray
 :canonical: corrct.operators.TransformLaplacian._op_adjoint
 
 ````
 
 `````
 
-`````{py:class} TransformSVD(x_shape, axes_rows=(0, ), axes_cols=(-1, ), rescale: bool = False)
+`````{py:class} TransformSVD(x_shape: numpy.typing.ArrayLike, axes_rows: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray] = (0, ), axes_cols: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray] = (-1, ), rescale: bool = False)
 :canonical: corrct.operators.TransformSVD
 
 Bases: {py:obj}`corrct.operators.BaseTransform`
@@ -775,7 +797,18 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 ````
 
-````{py:method} direct_svd(x)
+````{py:attribute} rescale
+:canonical: corrct.operators.TransformSVD.rescale
+:type: bool
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.operators.TransformSVD.rescale
+```
+
+````
+
+````{py:method} direct_svd(x: numpy.typing.NDArray)
 :canonical: corrct.operators.TransformSVD.direct_svd
 
 ```{autodoc2-docstring} corrct.operators.TransformSVD.direct_svd
@@ -783,7 +816,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 ````
 
-````{py:method} inverse_svd(U, s, Vt)
+````{py:method} inverse_svd(U: numpy.typing.NDArray, s: numpy.typing.NDArray, Vt: numpy.typing.NDArray) -> numpy.typing.NDArray
 :canonical: corrct.operators.TransformSVD.inverse_svd
 
 ```{autodoc2-docstring} corrct.operators.TransformSVD.inverse_svd
@@ -791,12 +824,12 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 ````
 
-````{py:method} _op_direct(x)
+````{py:method} _op_direct(x: numpy.typing.NDArray) -> numpy.typing.NDArray
 :canonical: corrct.operators.TransformSVD._op_direct
 
 ````
 
-````{py:method} _op_adjoint(y)
+````{py:method} _op_adjoint(x: numpy.typing.NDArray) -> numpy.typing.NDArray
 :canonical: corrct.operators.TransformSVD._op_adjoint
 
 ````

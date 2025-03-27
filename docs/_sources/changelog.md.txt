@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v0.9.1...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v1.0.0...develop
 
-## 1.0.0rc1-4 - 2025-02-21
+## 1.0.0 - 2025-03-27
 ### Added
 - Overhauling of `physics` module:
   - Cleanup of physics API
@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Modern multi-threading code
 - Moved to a src/ directory structure
 - Moved to `pyproject.toml` instead of `setup.cfg`
+- New documentation including a couple of tutorials
+- New basic tests for `struct_illum` and `models`
 ### Fixed
 - GI mask resolution computation
 - Building documentation
