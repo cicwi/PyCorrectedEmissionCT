@@ -11,13 +11,13 @@ source:
 
 build:
     noarch: python
-    number: '0'
-    script: "{{ PYTHON }} -m pip install --no-deps --ignore-installed . -vv || exit 1"
+    number: 0
+    script: python -m pip install --no-deps --ignore-installed . -vv
 
 requirements:
-    build:
+    host:
         - python
-        - setuptools
+        - pip
 
     run:
         - python
@@ -28,7 +28,7 @@ requirements:
 
 about:
     home: {{ project['urls']['Homepage'] }}
-    license_file: LICENSE.md
+    license: {{ project['license'] }}
     summary: {{ project['description'] }}
     doc_url: {{ project['urls']['Documentation'] }}
 
