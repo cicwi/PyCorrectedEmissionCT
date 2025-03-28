@@ -1,10 +1,10 @@
 
-{% set data = load_setup_py_data() %}
+{%- set pyproject = load_file_data('pyproject.toml') %}
+{%- set project = pyproject.get('project', {}) %}
 
 package:
-    name: corrct
-    
-    version: {{ data['version'] }}
+    name: {{ project['name'] }}
+    version: {{ project['version'] }}
 
 source:
     path: ../
@@ -12,7 +12,6 @@ source:
 build:
     noarch: python
     number: '0'
-    # script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record record.txt || exit 1"
     script: "{{ PYTHON }} -m pip install --no-deps --ignore-installed . -vv || exit 1"
 
 requirements:
@@ -23,15 +22,15 @@ requirements:
     run:
         - python
         # dependencies are defined in setup.py
-        {% for dep in data['install_requires'] %}
+        {% for dep in project['dependencies'] %}
         - {{ dep.lower() }}
         {% endfor %}
 
 about:
-    home: {{ data['url'] }}
+    home: {{ project['urls']['Homepage'] }}
     license_file: LICENSE.md
-    summary: {{ data['description'] }}
-    doc_url: https://cicwi.github.io/PyCorrectedEmissionCT/
+    summary: {{ project['description'] }}
+    doc_url: {{ project['urls']['Documentation'] }}
 
 extra:
     maintainers:
