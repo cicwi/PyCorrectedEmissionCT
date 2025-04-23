@@ -1,6 +1,7 @@
-
 {%- set pyproject = load_file_data('pyproject.toml') %}
 {%- set project = pyproject.get('project', {}) %}
+{%- set py_min_version = project['requires-python'] %}
+{%- set py_build_version = py_min_version | replace('>', '') | replace('=', '') %}
 
 package:
     name: {{ project['name'] }}
@@ -16,11 +17,11 @@ build:
 
 requirements:
     host:
-        - python
+        - python {{ py_build_version }}.*
         - pip
 
     run:
-        - python
+        - python {{ py_min_version }}
         # dependencies are defined in setup.py
         {% for dep in project['dependencies'] %}
         - {{ dep.lower() }}
