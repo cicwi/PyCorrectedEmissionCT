@@ -6,11 +6,11 @@ Aided regularization parameter estimation.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import concurrent.futures as cf
 import inspect
 import multiprocessing as mp
 import time as tm
 from abc import ABC, abstractmethod
+from concurrent.futures import Executor, ThreadPoolExecutor, as_completed
 from typing import Any, Callable, Optional, Sequence, Union, Literal
 from warnings import warn
 
@@ -217,7 +217,11 @@ class BaseParameterTuning(ABC):
     _solver_calling_function: Optional[Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]]]
 
     def __init__(
-        self, dtype: DTypeLike = np.float32, parallel_eval: bool = True, verbose: bool = False, plot_result: bool = False
+        self,
+        dtype: DTypeLike = np.float32,
+        parallel_eval: Union[Executor, bool] = True,
+        verbose: bool = False,
+        plot_result: bool = False,
     ) -> None:
         """Initialize a base helper class.
 
@@ -225,7 +229,7 @@ class BaseParameterTuning(ABC):
         ----------
         dtype : DTypeLike, optional
             Type of the data, by default np.float32
-        parallel_eval : bool, optional
+        parallel_eval : Executor | bool, optional
             Whether to evaluate results in parallel, by default True
         verbose : bool, optional
             Whether to produce verbose output, by default False
@@ -307,16 +311,94 @@ class BaseParameterTuning(ABC):
 
         Returns
         -------
-        cost : float
-            Cost of the given regularization weight.
         rec : NDArray
             Reconstruction at the given weight.
+        cost : float
+            Cost of the given regularization weight.
         """
         solver = self.solver_spawning_function(hp_val)
         rec, rec_info = self.solver_calling_function(solver, *args, **kwds)
 
-        # Output will be: test objective function cost, and reconstruction
-        return float(rec_info.residuals_cv_rel[-1]), rec
+        # Output will be: reconstruction, and cross-validation objective function cost
+        return rec, float(rec_info.residuals_cv_rel[-1])
+
+    def compute_all_reconstructions_and_losses(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], data_mask: Optional[NDArray] = None
+    ) -> tuple[list[NDArray], list[float]]:
+        """
+        Compute reconstructions and losses for all hyperparameter values.
+
+        This method computes the reconstructions and corresponding losses for a
+        given set of hyperparameter values. It supports both parallel and sequential
+        evaluation based on the `parallel_eval` attribute.
+
+        Parameters
+        ----------
+        hp_vals : ArrayLike | NDArrayFloat
+            A list or array of hyperparameter values to evaluate.
+        data_mask : NDArray | None, optional
+            An optional mask to apply to the data during evaluation. By default None.
+
+        Returns
+        -------
+        tuple[list[NDArray], list[float]]
+            A tuple containing:
+            - A list of reconstructions for each hyperparameter value.
+            - A list of loss values corresponding to each reconstruction.
+
+        Raises
+        ------
+        ValueError
+            If `parallel_eval` is neither an Executor nor a boolean.
+        """
+
+        def _parallel_compute(executor: Executor, data_test_mask: Optional[NDArray]) -> tuple[list[NDArray], list[float]]:
+            future_to_lambda = {
+                executor.submit(self.compute_reconstruction_and_loss, l, data_test_mask): (ii, l)
+                for ii, l in enumerate(hp_vals)
+            }
+
+            recs = [np.array([])] * len(hp_vals)
+            f_vals = [0.0] * len(hp_vals)
+            try:
+                for future in tqdm(
+                    as_completed(future_to_lambda),
+                    desc="Hyper-parameter values",
+                    disable=not self.verbose,
+                    total=len(hp_vals),
+                ):
+                    hp_ind, hp_val = future_to_lambda[future]
+                    try:
+                        recs[hp_ind], f_vals[hp_ind] = future.result()
+                    except ValueError as exc:
+                        print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
+                        raise
+            except:
+                print("Shutting down..", end="", flush=True)
+                executor.shutdown(cancel_futures=True)
+                print("\b\b: Done.")
+                raise
+
+            return recs, f_vals
+
+        if isinstance(self.parallel_eval, Executor):
+            recs, f_vals = _parallel_compute(self.parallel_eval, data_mask)
+        elif isinstance(self.parallel_eval, bool):
+            if self.parallel_eval:
+                with ThreadPoolExecutor(max_workers=num_threads) as executor:
+                    recs, f_vals = _parallel_compute(executor, data_mask)
+            else:
+                results = [
+                    self.compute_reconstruction_and_loss(l, data_mask)
+                    for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
+                ]
+                recs, f_vals = zip(*results)
+        else:
+            raise ValueError(
+                f"The variable `parallel_eval` should either be an Executor or a boolean. "
+                f"A `{type(self.parallel_eval)}` was passed instead."
+            )
+        return recs, f_vals
 
     def compute_reconstruction_error(
         self, hp_vals: Union[ArrayLike, NDArrayFloat], gnd_truth: NDArrayFloat
@@ -342,38 +424,12 @@ class BaseParameterTuning(ABC):
         if self.verbose:
             print("Computing reconstruction error:")
             print(f"- Hyper-parameter values range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
-            print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
+            if isinstance(self.parallel_eval, Executor):
+                print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
+            else:
+                print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
 
-        if self.parallel_eval:
-            with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                future_to_lambda = {
-                    executor.submit(self.compute_reconstruction_and_loss, l): (ii, l) for ii, l in enumerate(hp_vals)
-                }
-
-                recs = [np.array([])] * len(hp_vals)
-                try:
-                    for future in tqdm(
-                        cf.as_completed(future_to_lambda),
-                        desc="Hyper-parameter values",
-                        disable=not self.verbose,
-                        total=len(hp_vals),
-                    ):
-                        hp_ind, hp_val = future_to_lambda[future]
-                        try:
-                            recs[hp_ind] = future.result()[1]
-                        except ValueError as exc:
-                            print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
-                            raise
-                except:
-                    print("Shutting down..", end="", flush=True)
-                    executor.shutdown(cancel_futures=True)
-                    print("\b\b: Done.")
-                    raise
-        else:
-            recs = [
-                self.compute_reconstruction_and_loss(l)[1]
-                for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
-            ]
+        recs, _ = self.compute_all_reconstructions_and_losses(hp_vals)
 
         err_l1 = np.zeros((len(hp_vals),), dtype=self.dtype)
         err_l2 = np.zeros((len(hp_vals),), dtype=self.dtype)
@@ -473,39 +529,12 @@ class LCurve(BaseParameterTuning):
         if self.verbose:
             print("Computing L-curve loss values:")
             print(f"- Hyper-parameter values range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
-            print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
+            if isinstance(self.parallel_eval, Executor):
+                print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
+            else:
+                print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
 
-        if self.parallel_eval:
-            with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                future_to_lambda = {
-                    executor.submit(self.compute_reconstruction_and_loss, l): (ii, l) for ii, l in enumerate(hp_vals)
-                }
-
-                recs = [np.array([])] * len(hp_vals)
-                try:
-                    for future in tqdm(
-                        cf.as_completed(future_to_lambda),
-                        desc="Hyper-parameter values",
-                        disable=not self.verbose,
-                        total=len(hp_vals),
-                    ):
-                        hp_ind, hp_val = future_to_lambda[future]
-                        try:
-                            recs[hp_ind] = future.result()[1]
-                        except ValueError as exc:
-                            print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
-                            raise
-                except:
-                    print("Shutting down..", end="", flush=True)
-                    executor.shutdown(cancel_futures=True)
-                    print("\b\b: Done.")
-                    raise
-        else:
-            recs = [
-                self.compute_reconstruction_and_loss(l)[1]
-                for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
-            ]
-
+        recs, _ = self.compute_all_reconstructions_and_losses(hp_vals)
         f_vals = np.array([self.loss_function(rec) for rec in recs], dtype=self.dtype)
 
         if self.verbose:
@@ -591,45 +620,19 @@ class CrossValidation(BaseParameterTuning):
             print(f"- Hyper-parameter range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
             print(f"- Number of averages: {self.num_averages}")
             print(f"- Leave-out pixel fraction: {self.cv_fraction:%}")
-            print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
+            if isinstance(self.parallel_eval, Executor):
+                print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
+            else:
+                print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
 
         f_vals = np.empty((len(hp_vals), self.num_averages), dtype=self.dtype)
         for ii_avg in range(self.num_averages):
             if self.verbose:
                 print(f"\nRound: {ii_avg + 1}/{self.num_averages}")
 
-            if self.parallel_eval:
-                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    future_to_lambda = {
-                        executor.submit(self.compute_reconstruction_and_loss, l, self.data_test_masks[ii_avg]): (ii, l)
-                        for ii, l in enumerate(hp_vals)
-                    }
+            curr_data_test_mask = self.data_test_masks[ii_avg]
 
-                    f_vals_ii = [0.0] * len(hp_vals)
-                    try:
-                        for future in tqdm(
-                            cf.as_completed(future_to_lambda),
-                            desc="Hyper-parameter values",
-                            disable=not self.verbose,
-                            total=len(hp_vals),
-                        ):
-                            hp_ind, hp_val = future_to_lambda[future]
-                            try:
-                                f_vals_ii[hp_ind] = future.result()[0]
-                            except ValueError as exc:
-                                print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
-                                raise
-                    except:
-                        print("Shutting down..", end="", flush=True)
-                        executor.shutdown(cancel_futures=True)
-                        print("\b\b: Done.")
-                        raise
-            else:
-                f_vals_ii = [
-                    self.compute_reconstruction_and_loss(l, self.data_test_masks[ii_avg])[0]
-                    for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
-                ]
-
+            _, f_vals_ii = self.compute_all_reconstructions_and_losses(hp_vals, curr_data_test_mask)
             f_vals[:, ii_avg] = np.array(f_vals_ii)
 
         f_avgs = np.mean(f_vals, axis=1)
