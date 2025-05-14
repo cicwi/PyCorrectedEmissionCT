@@ -8,13 +8,13 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.spatial.transform import Rotation
 import pytest
 import skimage.data as skd
 import skimage.transform as skt
 from numpy.typing import NDArray
-import corrct as cct
+from scipy.spatial.transform import Rotation
 
+import corrct as cct
 
 phantom_sl2d = skd.shepp_logan_phantom()
 phantom_nuc3d, background_nuc3d, _ = cct.testing.create_phantom_nuclei3d(FoV_size=100)

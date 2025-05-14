@@ -10,8 +10,8 @@ and ESRF - The European Synchrotron, Grenoble, France
 import numpy as np
 import pytest
 from numpy.typing import NDArray
-from corrct import processing, projectors, solvers, regularizers
 
+from corrct import processing, projectors, regularizers, solvers
 
 eps = np.finfo(np.float32).eps
 OVERSIZE_DATA = 5

@@ -1,15 +1,16 @@
 import numpy as np
 import pytest
+
 from src.corrct.struct_illum import (
-    reorder_masks,
-    decompose_qr_masks,
-    estimate_resolution,
     MaskCollection,
-    MaskGeneratorPoint,
     MaskGeneratorBernoulli,
     MaskGeneratorHalfGaussian,
     MaskGeneratorMURA,
+    MaskGeneratorPoint,
     ProjectorGhostImaging,
+    decompose_qr_masks,
+    estimate_resolution,
+    reorder_masks,
 )
 
 

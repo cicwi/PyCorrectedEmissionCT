@@ -8,12 +8,9 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
-
 import pytest
 
-from corrct import regularizers
-from corrct import testing
-
+from corrct import regularizers, testing
 
 eps = np.finfo(np.float32).eps
 

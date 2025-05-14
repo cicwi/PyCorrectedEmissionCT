@@ -2,15 +2,16 @@
 
 import numpy as np
 import pytest
+
 from src.corrct.models import (
     ProjectionGeometry,
     VolumeGeometry,
-    get_prj_geom_parallel,
+    combine_shifts_vu,
     get_prj_geom_cone,
+    get_prj_geom_parallel,
+    get_rot_axis_dir,
     get_vol_geom_from_data,
     get_vol_geom_from_volume,
-    combine_shifts_vu,
-    get_rot_axis_dir,
 )
 
 
