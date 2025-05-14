@@ -453,7 +453,7 @@ def create_sino_transmission(
     Tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat, float]
         The sinogram (detector readings), the flat-field, and the angular positions.
     """
-    print(f"Creating attenuation Sino with {num_angles} angles")
+    print(f"Creating transmission sinogram with {num_angles} angles")
     angles_deg = np.linspace(start_angle_deg, end_angle_deg, num_angles, endpoint=False)
     angles_rad = np.deg2rad(angles_deg)
     print(angles_deg)
