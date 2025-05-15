@@ -226,7 +226,7 @@ class BaseParameterTuning(ABC):
     _solver_spawning_functionls: Optional[Callable]
     _solver_calling_function: Optional[Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]]]
 
-    parallel_eval: int | Executor
+    parallel_eval: Union[int, Executor]
 
     def __init__(
         self,
