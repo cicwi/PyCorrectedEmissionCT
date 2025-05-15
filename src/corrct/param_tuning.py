@@ -23,7 +23,7 @@ from tqdm.auto import tqdm
 
 from . import solvers
 
-num_threads = round(np.log2(mp.cpu_count() + 1))
+MAX_THREADS = int(round(np.log2(mp.cpu_count() + 1)))
 
 
 NDArrayFloat = NDArray[np.floating]
@@ -210,16 +210,28 @@ def fit_func_min(
     return res_hp_val, res_f_val
 
 
+def _compute_reconstruction_and_loss(
+    spawn: Callable, call: Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]], hp_val: float, *args: Any, **kwds: Any
+) -> tuple[float, NDArrayFloat]:
+    solver = spawn(hp_val)
+    rec, rec_info = call(solver, *args, **kwds)
+
+    # Output will be: reconstruction, and cross-validation objective function cost
+    return rec, float(rec_info.residuals_cv_rel[-1])
+
+
 class BaseParameterTuning(ABC):
     """Base class for parameter tuning classes."""
 
     _solver_spawning_functionls: Optional[Callable]
     _solver_calling_function: Optional[Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]]]
 
+    parallel_eval: int | Executor
+
     def __init__(
         self,
         dtype: DTypeLike = np.float32,
-        parallel_eval: Union[Executor, bool] = True,
+        parallel_eval: Union[Executor, int, bool] = True,
         verbose: bool = False,
         plot_result: bool = False,
     ) -> None:
@@ -229,7 +241,7 @@ class BaseParameterTuning(ABC):
         ----------
         dtype : DTypeLike, optional
             Type of the data, by default np.float32
-        parallel_eval : Executor | bool, optional
+        parallel_eval : Executor | int | bool, optional
             Whether to evaluate results in parallel, by default True
         verbose : bool, optional
             Whether to produce verbose output, by default False
@@ -238,6 +250,8 @@ class BaseParameterTuning(ABC):
         """
         self.dtype = dtype
 
+        if isinstance(parallel_eval, bool):
+            parallel_eval = MAX_THREADS if parallel_eval else 0
         self.parallel_eval = parallel_eval
         self.verbose = verbose
         self.plot_result = plot_result
@@ -316,11 +330,9 @@ class BaseParameterTuning(ABC):
         cost : float
             Cost of the given regularization weight.
         """
-        solver = self.solver_spawning_function(hp_val)
-        rec, rec_info = self.solver_calling_function(solver, *args, **kwds)
-
-        # Output will be: reconstruction, and cross-validation objective function cost
-        return rec, float(rec_info.residuals_cv_rel[-1])
+        return _compute_reconstruction_and_loss(
+            self.solver_spawning_function, self.solver_calling_function, hp_val, *args, **kwds
+        )
 
     def compute_all_reconstructions_and_losses(
         self, hp_vals: Union[ArrayLike, NDArrayFloat], data_mask: Optional[NDArray] = None
@@ -349,12 +361,18 @@ class BaseParameterTuning(ABC):
         Raises
         ------
         ValueError
-            If `parallel_eval` is neither an Executor nor a boolean.
+            If `parallel_eval` is neither an Executor nor an int.
         """
 
         def _parallel_compute(executor: Executor, data_test_mask: Optional[NDArray]) -> tuple[list[NDArray], list[float]]:
             future_to_lambda = {
-                executor.submit(self.compute_reconstruction_and_loss, l, data_test_mask): (ii, l)
+                executor.submit(
+                    _compute_reconstruction_and_loss,
+                    self.solver_spawning_function,
+                    self.solver_calling_function,
+                    l,
+                    data_test_mask,
+                ): (ii, l)
                 for ii, l in enumerate(hp_vals)
             }
 
@@ -383,19 +401,19 @@ class BaseParameterTuning(ABC):
 
         if isinstance(self.parallel_eval, Executor):
             recs, f_vals = _parallel_compute(self.parallel_eval, data_mask)
-        elif isinstance(self.parallel_eval, bool):
+        elif isinstance(self.parallel_eval, int):
             if self.parallel_eval:
-                with ThreadPoolExecutor(max_workers=num_threads) as executor:
+                with ThreadPoolExecutor(max_workers=self.parallel_eval) as executor:
                     recs, f_vals = _parallel_compute(executor, data_mask)
             else:
                 results = [
-                    self.compute_reconstruction_and_loss(l, data_mask)
+                    _compute_reconstruction_and_loss(self.solver_spawning_function, self.solver_calling_function, l, data_mask)
                     for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
                 ]
                 recs, f_vals = zip(*results)
         else:
             raise ValueError(
-                f"The variable `parallel_eval` should either be an Executor or a boolean. "
+                f"The variable `parallel_eval` should either be an Executor, a boolean, or an int. "
                 f"A `{type(self.parallel_eval)}` was passed instead."
             )
         return recs, f_vals
@@ -427,7 +445,10 @@ class BaseParameterTuning(ABC):
             if isinstance(self.parallel_eval, Executor):
                 print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
             else:
-                print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
+                print(
+                    f"Parallel evaluation: {self.parallel_eval > 0}",
+                    f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
+                )
 
         recs, _ = self.compute_all_reconstructions_and_losses(hp_vals)
 
@@ -475,7 +496,7 @@ class LCurve(BaseParameterTuning):
         self,
         loss_function: Callable,
         data_dtype: DTypeLike = np.float32,
-        parallel_eval: bool = True,
+        parallel_eval: Union[Executor, int, bool] = True,
         verbose: bool = False,
         plot_result: bool = False,
     ):
@@ -487,8 +508,8 @@ class LCurve(BaseParameterTuning):
             The loss function for the computation of the L-curve values.
         data_dtype : DTypeLike, optional
             Type of the input data. The default is np.float32.
-        parallel_eval : bool, optional
-            Compute loss and error values in parallel. The default is False.
+        parallel_eval : Executor | int | bool, optional
+            Compute loss and error values in parallel. The default is True.
         verbose : bool, optional
             Print verbose output. The default is False.
         plot_result : bool, optional
@@ -532,7 +553,10 @@ class LCurve(BaseParameterTuning):
             if isinstance(self.parallel_eval, Executor):
                 print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
             else:
-                print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
+                print(
+                    f"Parallel evaluation: {self.parallel_eval > 0}",
+                    f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
+                )
 
         recs, _ = self.compute_all_reconstructions_and_losses(hp_vals)
         f_vals = np.array([self.loss_function(rec) for rec in recs], dtype=self.dtype)
@@ -562,7 +586,7 @@ class CrossValidation(BaseParameterTuning):
         dtype: DTypeLike = np.float32,
         cv_fraction: float = 0.1,
         num_averages: int = 7,
-        parallel_eval: bool = True,
+        parallel_eval: Union[Executor, int, bool] = True,
         verbose: bool = False,
         plot_result: bool = False,
     ):
@@ -578,8 +602,8 @@ class CrossValidation(BaseParameterTuning):
             Fraction of detector points to use for the leave-out set. The default is 0.1.
         num_averages : int, optional
             Number of averages random leave-out sets to use. The default is 7.
-        parallel_eval : bool, optional
-            Compute loss and error values in parallel. The default is False.
+        parallel_eval : Executor | int | bool, optional
+            Compute loss and error values in parallel. The default is True.
         verbose : bool, optional
             Print verbose output. The default is False.
         plot_result : bool, optional
@@ -623,7 +647,10 @@ class CrossValidation(BaseParameterTuning):
             if isinstance(self.parallel_eval, Executor):
                 print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
             else:
-                print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
+                print(
+                    f"Parallel evaluation: {self.parallel_eval > 0}",
+                    f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
+                )
 
         f_vals = np.empty((len(hp_vals), self.num_averages), dtype=self.dtype)
         for ii_avg in range(self.num_averages):
