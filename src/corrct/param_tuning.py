@@ -706,7 +706,7 @@ class CrossValidation(BaseParameterTuning):
                 )
 
         recs = list()
-        f_vals = np.empty((len(hp_vals), self.num_averages), dtype=self.dtype)
+        f_vals = np.empty((self.num_averages, len(hp_vals)), dtype=self.dtype)
         for ii_avg in range(self.num_averages):
             if self.verbose:
                 print(f"\nRound: {ii_avg + 1}/{self.num_averages}")
@@ -715,10 +715,10 @@ class CrossValidation(BaseParameterTuning):
 
             recs_ii, f_vals_ii = self.compute_all_reconstructions_and_losses(hp_vals, curr_data_test_mask)
             recs.append(recs_ii)
-            f_vals[:, ii_avg] = np.array(f_vals_ii)
+            f_vals[ii_avg, :] = np.array(f_vals_ii)
 
-        f_avgs = np.mean(f_vals, axis=1)
-        f_stds = np.std(f_vals, axis=1)
+        f_avgs = np.mean(f_vals, axis=0)
+        f_stds = np.std(f_vals, axis=0)
 
         if self.verbose:
             print(f"Done in {tm.perf_counter() - counter:g} seconds.\n")
