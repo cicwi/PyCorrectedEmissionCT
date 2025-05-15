@@ -1,3 +1,5 @@
+from os import getenv
+
 import numpy as np
 import pytest
 import skimage.data as skd
@@ -5,6 +7,8 @@ import skimage.transform as skt
 from numpy.typing import NDArray
 
 import corrct as cct
+
+SKIP_TESTS = getenv("GITHUB_ACTIONS") is not None
 
 
 @pytest.fixture
@@ -93,7 +97,8 @@ def generate_solver_call(phantom, angles, sinogram):
     return solver_call
 
 
-@pytest.mark.parametrize("parallel_eval", [True, False])
+@pytest.mark.skipif(SKIP_TESTS, reason="Test is long and heavy, so we skip in a github action.")
+@pytest.mark.parametrize("parallel_eval", [True, False, 2])
 @pytest.mark.parametrize("num_averages", [1, 3])
 def test_cross_validation(phantom, sinogram_data, parallel_eval, num_averages):
     """
@@ -127,7 +132,8 @@ def test_cross_validation(phantom, sinogram_data, parallel_eval, num_averages):
     assert f_stds.shape == (len(lams_reg),)
 
 
-@pytest.mark.parametrize("parallel_eval", [True, False])
+@pytest.mark.skipif(SKIP_TESTS, reason="Test is long and heavy, so we skip in a github action.")
+@pytest.mark.parametrize("parallel_eval", [True, False, 2])
 def test_reconstruction_error(phantom, sinogram_data, parallel_eval):
     """
     Test the reconstruction error functionality.
@@ -159,7 +165,8 @@ def test_reconstruction_error(phantom, sinogram_data, parallel_eval):
     assert err_l2.shape == (len(lams_reg),)
 
 
-@pytest.mark.parametrize("parallel_eval", [True, False])
+@pytest.mark.skipif(SKIP_TESTS, reason="Test is long and heavy, so we skip in a github action.")
+@pytest.mark.parametrize("parallel_eval", [True, False, 2])
 def test_l_curve(phantom, sinogram_data, parallel_eval):
     """
     Test the L-curve functionality.
