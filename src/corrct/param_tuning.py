@@ -6,12 +6,12 @@ Aided regularization parameter estimation.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import concurrent.futures as cf
 import inspect
 import multiprocessing as mp
 import time as tm
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Optional, Sequence, Union, Literal
+from concurrent.futures import Executor, ThreadPoolExecutor, as_completed
+from typing import Any, Callable, Optional, Sequence, Union, Literal, overload
 from warnings import warn
 
 import matplotlib.pyplot as plt
@@ -23,7 +23,7 @@ from tqdm.auto import tqdm
 
 from . import solvers
 
-num_threads = round(np.log2(mp.cpu_count() + 1))
+MAX_THREADS = int(round(np.log2(mp.cpu_count() + 1)))
 
 
 NDArrayFloat = NDArray[np.floating]
@@ -210,14 +210,30 @@ def fit_func_min(
     return res_hp_val, res_f_val
 
 
+def _compute_reconstruction_and_loss(
+    spawn: Callable, call: Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]], hp_val: float, *args: Any, **kwds: Any
+) -> tuple[float, NDArrayFloat]:
+    solver = spawn(hp_val)
+    rec, rec_info = call(solver, *args, **kwds)
+
+    # Output will be: reconstruction, and cross-validation objective function cost
+    return rec, float(rec_info.residuals_cv_rel[-1])
+
+
 class BaseParameterTuning(ABC):
     """Base class for parameter tuning classes."""
 
     _solver_spawning_functionls: Optional[Callable]
     _solver_calling_function: Optional[Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]]]
 
+    parallel_eval: Union[int, Executor]
+
     def __init__(
-        self, dtype: DTypeLike = np.float32, parallel_eval: bool = True, verbose: bool = False, plot_result: bool = False
+        self,
+        dtype: DTypeLike = np.float32,
+        parallel_eval: Union[Executor, int, bool] = True,
+        verbose: bool = False,
+        plot_result: bool = False,
     ) -> None:
         """Initialize a base helper class.
 
@@ -225,7 +241,7 @@ class BaseParameterTuning(ABC):
         ----------
         dtype : DTypeLike, optional
             Type of the data, by default np.float32
-        parallel_eval : bool, optional
+        parallel_eval : Executor | int | bool, optional
             Whether to evaluate results in parallel, by default True
         verbose : bool, optional
             Whether to produce verbose output, by default False
@@ -234,6 +250,8 @@ class BaseParameterTuning(ABC):
         """
         self.dtype = dtype
 
+        if isinstance(parallel_eval, bool):
+            parallel_eval = MAX_THREADS if parallel_eval else 0
         self.parallel_eval = parallel_eval
         self.verbose = verbose
         self.plot_result = plot_result
@@ -307,16 +325,98 @@ class BaseParameterTuning(ABC):
 
         Returns
         -------
-        cost : float
-            Cost of the given regularization weight.
         rec : NDArray
             Reconstruction at the given weight.
+        cost : float
+            Cost of the given regularization weight.
         """
-        solver = self.solver_spawning_function(hp_val)
-        rec, rec_info = self.solver_calling_function(solver, *args, **kwds)
+        return _compute_reconstruction_and_loss(
+            self.solver_spawning_function, self.solver_calling_function, hp_val, *args, **kwds
+        )
 
-        # Output will be: test objective function cost, and reconstruction
-        return float(rec_info.residuals_cv_rel[-1]), rec
+    def compute_all_reconstructions_and_losses(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], data_mask: Optional[NDArray] = None
+    ) -> tuple[list[NDArray], list[float]]:
+        """
+        Compute reconstructions and losses for all hyperparameter values.
+
+        This method computes the reconstructions and corresponding losses for a
+        given set of hyperparameter values. It supports both parallel and sequential
+        evaluation based on the `parallel_eval` attribute.
+
+        Parameters
+        ----------
+        hp_vals : ArrayLike | NDArrayFloat
+            A list or array of hyperparameter values to evaluate.
+        data_mask : NDArray | None, optional
+            An optional mask to apply to the data during evaluation. By default None.
+
+        Returns
+        -------
+        tuple[list[NDArray], list[float]]
+            A tuple containing:
+            - A list of reconstructions for each hyperparameter value.
+            - A list of loss values corresponding to each reconstruction.
+
+        Raises
+        ------
+        ValueError
+            If `parallel_eval` is neither an Executor nor an int.
+        """
+
+        def _parallel_compute(executor: Executor, data_test_mask: Optional[NDArray]) -> tuple[list[NDArray], list[float]]:
+            future_to_lambda = {
+                executor.submit(
+                    _compute_reconstruction_and_loss,
+                    self.solver_spawning_function,
+                    self.solver_calling_function,
+                    l,
+                    data_test_mask,
+                ): (ii, l)
+                for ii, l in enumerate(hp_vals)
+            }
+
+            recs = [np.array([])] * len(hp_vals)
+            f_vals = [0.0] * len(hp_vals)
+            try:
+                for future in tqdm(
+                    as_completed(future_to_lambda),
+                    desc="Hyper-parameter values",
+                    disable=not self.verbose,
+                    total=len(hp_vals),
+                ):
+                    hp_ind, hp_val = future_to_lambda[future]
+                    try:
+                        recs[hp_ind], f_vals[hp_ind] = future.result()
+                    except ValueError as exc:
+                        print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
+                        raise
+            except:
+                print("Shutting down..", end="", flush=True)
+                executor.shutdown(cancel_futures=True)
+                print("\b\b: Done.")
+                raise
+
+            return recs, f_vals
+
+        if isinstance(self.parallel_eval, Executor):
+            recs, f_vals = _parallel_compute(self.parallel_eval, data_mask)
+        elif isinstance(self.parallel_eval, int):
+            if self.parallel_eval:
+                with ThreadPoolExecutor(max_workers=self.parallel_eval) as executor:
+                    recs, f_vals = _parallel_compute(executor, data_mask)
+            else:
+                results = [
+                    _compute_reconstruction_and_loss(self.solver_spawning_function, self.solver_calling_function, l, data_mask)
+                    for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
+                ]
+                recs, f_vals = zip(*results)
+        else:
+            raise ValueError(
+                f"The variable `parallel_eval` should either be an Executor, a boolean, or an int. "
+                f"A `{type(self.parallel_eval)}` was passed instead."
+            )
+        return recs, f_vals
 
     def compute_reconstruction_error(
         self, hp_vals: Union[ArrayLike, NDArrayFloat], gnd_truth: NDArrayFloat
@@ -342,38 +442,15 @@ class BaseParameterTuning(ABC):
         if self.verbose:
             print("Computing reconstruction error:")
             print(f"- Hyper-parameter values range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
-            print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
+            if isinstance(self.parallel_eval, Executor):
+                print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
+            else:
+                print(
+                    f"Parallel evaluation: {self.parallel_eval > 0}",
+                    f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
+                )
 
-        if self.parallel_eval:
-            with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                future_to_lambda = {
-                    executor.submit(self.compute_reconstruction_and_loss, l): (ii, l) for ii, l in enumerate(hp_vals)
-                }
-
-                recs = [np.array([])] * len(hp_vals)
-                try:
-                    for future in tqdm(
-                        cf.as_completed(future_to_lambda),
-                        desc="Hyper-parameter values",
-                        disable=not self.verbose,
-                        total=len(hp_vals),
-                    ):
-                        hp_ind, hp_val = future_to_lambda[future]
-                        try:
-                            recs[hp_ind] = future.result()[1]
-                        except ValueError as exc:
-                            print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
-                            raise
-                except:
-                    print("Shutting down..", end="", flush=True)
-                    executor.shutdown(cancel_futures=True)
-                    print("\b\b: Done.")
-                    raise
-        else:
-            recs = [
-                self.compute_reconstruction_and_loss(l)[1]
-                for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
-            ]
+        recs, _ = self.compute_all_reconstructions_and_losses(hp_vals)
 
         err_l1 = np.zeros((len(hp_vals),), dtype=self.dtype)
         err_l2 = np.zeros((len(hp_vals),), dtype=self.dtype)
@@ -396,19 +473,35 @@ class BaseParameterTuning(ABC):
 
         return err_l1, err_l2
 
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[False] = False
+    ) -> NDArrayFloat: ...
+
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[True] = True
+    ) -> tuple[NDArrayFloat, NDArrayFloat]: ...
+
     @abstractmethod
-    def compute_loss_values(self, hp_vals: Union[ArrayLike, NDArrayFloat]) -> NDArrayFloat:
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: bool = False
+    ) -> Union[NDArrayFloat, tuple[NDArrayFloat, NDArrayFloat]]:
         """Compute the objective function costs for a list of hyper-parameter values.
 
         Parameters
         ----------
         hp_vals : Union[ArrayLike, NDArrayFloat]
             List of hyper-parameter values.
+        return_recs : bool, optional
+            If True, return the reconstructions along with the loss values. Default is False.
 
         Returns
         -------
         NDArrayFloat
             Objective function cost for each hyper-parameter value.
+        recs : NDArrayFloat, optional
+            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
         """
 
 
@@ -419,7 +512,7 @@ class LCurve(BaseParameterTuning):
         self,
         loss_function: Callable,
         data_dtype: DTypeLike = np.float32,
-        parallel_eval: bool = True,
+        parallel_eval: Union[Executor, int, bool] = True,
         verbose: bool = False,
         plot_result: bool = False,
     ):
@@ -431,8 +524,8 @@ class LCurve(BaseParameterTuning):
             The loss function for the computation of the L-curve values.
         data_dtype : DTypeLike, optional
             Type of the input data. The default is np.float32.
-        parallel_eval : bool, optional
-            Compute loss and error values in parallel. The default is False.
+        parallel_eval : Executor | int | bool, optional
+            Compute loss and error values in parallel. The default is True.
         verbose : bool, optional
             Print verbose output. The default is False.
         plot_result : bool, optional
@@ -454,18 +547,34 @@ class LCurve(BaseParameterTuning):
             raise ValueError("The callable 'loss_function', should have one parameter")
         self.loss_function = loss_function
 
-    def compute_loss_values(self, hp_vals: Union[ArrayLike, NDArrayFloat]) -> NDArrayFloat:
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[False] = False
+    ) -> NDArrayFloat: ...
+
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[True] = True
+    ) -> tuple[NDArrayFloat, NDArrayFloat]: ...
+
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: bool = False
+    ) -> Union[NDArrayFloat, tuple[NDArrayFloat, NDArrayFloat]]:
         """Compute objective function values for all hyper-parameter values.
 
         Parameters
         ----------
         hp_vals : Union[ArrayLike, NDArrayFloat]
             Hyper-parameter values to use for computing the different objective function values.
+        return_recs : bool, optional
+            If True, return the reconstructions along with the loss values. Default is False.
 
         Returns
         -------
         f_vals : NDArrayFloat
             Objective function cost for each hyper-parameter value.
+        recs : NDArrayFloat, optional
+            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
         """
         hp_vals = np.array(hp_vals, ndmin=1)
 
@@ -473,39 +582,15 @@ class LCurve(BaseParameterTuning):
         if self.verbose:
             print("Computing L-curve loss values:")
             print(f"- Hyper-parameter values range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
-            print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
+            if isinstance(self.parallel_eval, Executor):
+                print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
+            else:
+                print(
+                    f"Parallel evaluation: {self.parallel_eval > 0}",
+                    f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
+                )
 
-        if self.parallel_eval:
-            with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                future_to_lambda = {
-                    executor.submit(self.compute_reconstruction_and_loss, l): (ii, l) for ii, l in enumerate(hp_vals)
-                }
-
-                recs = [np.array([])] * len(hp_vals)
-                try:
-                    for future in tqdm(
-                        cf.as_completed(future_to_lambda),
-                        desc="Hyper-parameter values",
-                        disable=not self.verbose,
-                        total=len(hp_vals),
-                    ):
-                        hp_ind, hp_val = future_to_lambda[future]
-                        try:
-                            recs[hp_ind] = future.result()[1]
-                        except ValueError as exc:
-                            print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
-                            raise
-                except:
-                    print("Shutting down..", end="", flush=True)
-                    executor.shutdown(cancel_futures=True)
-                    print("\b\b: Done.")
-                    raise
-        else:
-            recs = [
-                self.compute_reconstruction_and_loss(l)[1]
-                for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
-            ]
-
+        recs, _ = self.compute_all_reconstructions_and_losses(hp_vals)
         f_vals = np.array([self.loss_function(rec) for rec in recs], dtype=self.dtype)
 
         if self.verbose:
@@ -521,7 +606,10 @@ class LCurve(BaseParameterTuning):
             fig.tight_layout()
             plt.show(block=False)
 
-        return f_vals
+        if return_recs:
+            return f_vals, recs
+        else:
+            return f_vals
 
 
 class CrossValidation(BaseParameterTuning):
@@ -533,7 +621,7 @@ class CrossValidation(BaseParameterTuning):
         dtype: DTypeLike = np.float32,
         cv_fraction: float = 0.1,
         num_averages: int = 7,
-        parallel_eval: bool = True,
+        parallel_eval: Union[Executor, int, bool] = True,
         verbose: bool = False,
         plot_result: bool = False,
     ):
@@ -549,8 +637,8 @@ class CrossValidation(BaseParameterTuning):
             Fraction of detector points to use for the leave-out set. The default is 0.1.
         num_averages : int, optional
             Number of averages random leave-out sets to use. The default is 7.
-        parallel_eval : bool, optional
-            Compute loss and error values in parallel. The default is False.
+        parallel_eval : Executor | int | bool, optional
+            Compute loss and error values in parallel. The default is True.
         verbose : bool, optional
             Print verbose output. The default is False.
         plot_result : bool, optional
@@ -566,22 +654,40 @@ class CrossValidation(BaseParameterTuning):
     def _create_random_test_mask(self) -> NDArrayFloat:
         return create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype)
 
-    def compute_loss_values(self, hp_vals: Union[ArrayLike, NDArrayFloat]) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
-        """Compute objective function values for all requested hyper-parameter values..
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[False] = False
+    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]: ...
+
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[True] = True
+    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat]: ...
+
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: bool = False
+    ) -> Union[
+        tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat], tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, list[NDArrayFloat]]
+    ]:
+        """Compute objective function values for all requested hyper-parameter values.
 
         Parameters
         ----------
-        params : Union[ArrayLike, NDArrayFloat]
-            Hyper-parameter values (e.g. regularization weight) to evaluate.
+        hp_vals : Union[ArrayLike, NDArrayFloat]
+            Hyper-parameter values (e.g., regularization weight) to evaluate.
+        return_recs : bool, optional
+            If True, return the reconstructions along with the loss values. Default is False.
 
         Returns
         -------
         f_avgs : NDArrayFloat
-            Average objective function costs for each regularization weight.
+            Average objective function costs for each hyper-parameter value.
         f_stds : NDArrayFloat
-            Standard deviation of objective function costs for each regularization weight.
+            Standard deviation of objective function costs for each hyper-parameter value.
         f_vals : NDArrayFloat
-            Objective function costs for each regularization weight.
+            Objective function costs for each hyper-parameter value.
+        recs : list[NDArrayFloat], optional
+            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
         """
         hp_vals = np.array(hp_vals, ndmin=1)
 
@@ -591,49 +697,28 @@ class CrossValidation(BaseParameterTuning):
             print(f"- Hyper-parameter range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
             print(f"- Number of averages: {self.num_averages}")
             print(f"- Leave-out pixel fraction: {self.cv_fraction:%}")
-            print(f"Parallel evaluation: {self.parallel_eval} (n. threads: {num_threads})")
+            if isinstance(self.parallel_eval, Executor):
+                print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
+            else:
+                print(
+                    f"Parallel evaluation: {self.parallel_eval > 0}",
+                    f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
+                )
 
-        f_vals = np.empty((len(hp_vals), self.num_averages), dtype=self.dtype)
+        recs = list()
+        f_vals = np.empty((self.num_averages, len(hp_vals)), dtype=self.dtype)
         for ii_avg in range(self.num_averages):
             if self.verbose:
                 print(f"\nRound: {ii_avg + 1}/{self.num_averages}")
 
-            if self.parallel_eval:
-                with cf.ThreadPoolExecutor(max_workers=num_threads) as executor:
-                    future_to_lambda = {
-                        executor.submit(self.compute_reconstruction_and_loss, l, self.data_test_masks[ii_avg]): (ii, l)
-                        for ii, l in enumerate(hp_vals)
-                    }
+            curr_data_test_mask = self.data_test_masks[ii_avg]
 
-                    f_vals_ii = [0.0] * len(hp_vals)
-                    try:
-                        for future in tqdm(
-                            cf.as_completed(future_to_lambda),
-                            desc="Hyper-parameter values",
-                            disable=not self.verbose,
-                            total=len(hp_vals),
-                        ):
-                            hp_ind, hp_val = future_to_lambda[future]
-                            try:
-                                f_vals_ii[hp_ind] = future.result()[0]
-                            except ValueError as exc:
-                                print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
-                                raise
-                    except:
-                        print("Shutting down..", end="", flush=True)
-                        executor.shutdown(cancel_futures=True)
-                        print("\b\b: Done.")
-                        raise
-            else:
-                f_vals_ii = [
-                    self.compute_reconstruction_and_loss(l, self.data_test_masks[ii_avg])[0]
-                    for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
-                ]
+            recs_ii, f_vals_ii = self.compute_all_reconstructions_and_losses(hp_vals, curr_data_test_mask)
+            recs.append(recs_ii)
+            f_vals[ii_avg, :] = np.array(f_vals_ii)
 
-            f_vals[:, ii_avg] = np.array(f_vals_ii)
-
-        f_avgs = np.mean(f_vals, axis=1)
-        f_stds = np.std(f_vals, axis=1)
+        f_avgs = f_vals.mean(axis=0)
+        f_stds = f_vals.std(axis=0)
 
         if self.verbose:
             print(f"Done in {tm.perf_counter() - counter:g} seconds.\n")
@@ -643,13 +728,16 @@ class CrossValidation(BaseParameterTuning):
             axs.set_title(f"Cross-validation loss values (avgs: {self.num_averages})")
             axs.set_xscale("log", nonpositive="clip")
             axs.errorbar(hp_vals, f_avgs, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
-            for f in f_vals.T:
-                axs.plot(hp_vals, f, linewidth=1, linestyle="--")
+            for f_vals_ii in f_vals:
+                axs.plot(hp_vals, f_vals_ii, linewidth=1, linestyle="--")
             axs.grid()
             fig.tight_layout()
             plt.show(block=False)
 
-        return f_avgs, f_stds, f_vals
+        if return_recs:
+            return f_avgs, f_stds, f_vals, recs
+        else:
+            return f_avgs, f_stds, f_vals
 
     def fit_loss_min(
         self,
