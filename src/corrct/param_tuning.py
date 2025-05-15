@@ -717,8 +717,8 @@ class CrossValidation(BaseParameterTuning):
             recs.append(recs_ii)
             f_vals[ii_avg, :] = np.array(f_vals_ii)
 
-        f_avgs = np.mean(f_vals, axis=0)
-        f_stds = np.std(f_vals, axis=0)
+        f_avgs = f_vals.mean(axis=0)
+        f_stds = f_vals.std(axis=0)
 
         if self.verbose:
             print(f"Done in {tm.perf_counter() - counter:g} seconds.\n")
@@ -728,8 +728,8 @@ class CrossValidation(BaseParameterTuning):
             axs.set_title(f"Cross-validation loss values (avgs: {self.num_averages})")
             axs.set_xscale("log", nonpositive="clip")
             axs.errorbar(hp_vals, f_avgs, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
-            for f in f_vals.T:
-                axs.plot(hp_vals, f, linewidth=1, linestyle="--")
+            for f_vals_ii in f_vals:
+                axs.plot(hp_vals, f_vals_ii, linewidth=1, linestyle="--")
             axs.grid()
             fig.tight_layout()
             plt.show(block=False)
