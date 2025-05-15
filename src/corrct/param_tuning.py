@@ -11,7 +11,7 @@ import multiprocessing as mp
 import time as tm
 from abc import ABC, abstractmethod
 from concurrent.futures import Executor, ThreadPoolExecutor, as_completed
-from typing import Any, Callable, Optional, Sequence, Union, Literal
+from typing import Any, Callable, Optional, Sequence, Union, Literal, overload
 from warnings import warn
 
 import matplotlib.pyplot as plt
@@ -473,19 +473,35 @@ class BaseParameterTuning(ABC):
 
         return err_l1, err_l2
 
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[False] = False
+    ) -> NDArrayFloat: ...
+
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[True] = True
+    ) -> tuple[NDArrayFloat, NDArrayFloat]: ...
+
     @abstractmethod
-    def compute_loss_values(self, hp_vals: Union[ArrayLike, NDArrayFloat]) -> NDArrayFloat:
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: bool = False
+    ) -> Union[NDArrayFloat, tuple[NDArrayFloat, NDArrayFloat]]:
         """Compute the objective function costs for a list of hyper-parameter values.
 
         Parameters
         ----------
         hp_vals : Union[ArrayLike, NDArrayFloat]
             List of hyper-parameter values.
+        return_recs : bool, optional
+            If True, return the reconstructions along with the loss values. Default is False.
 
         Returns
         -------
         NDArrayFloat
             Objective function cost for each hyper-parameter value.
+        recs : NDArrayFloat, optional
+            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
         """
 
 
@@ -531,18 +547,34 @@ class LCurve(BaseParameterTuning):
             raise ValueError("The callable 'loss_function', should have one parameter")
         self.loss_function = loss_function
 
-    def compute_loss_values(self, hp_vals: Union[ArrayLike, NDArrayFloat]) -> NDArrayFloat:
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[False] = False
+    ) -> NDArrayFloat: ...
+
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[True] = True
+    ) -> tuple[NDArrayFloat, NDArrayFloat]: ...
+
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: bool = False
+    ) -> Union[NDArrayFloat, tuple[NDArrayFloat, NDArrayFloat]]:
         """Compute objective function values for all hyper-parameter values.
 
         Parameters
         ----------
         hp_vals : Union[ArrayLike, NDArrayFloat]
             Hyper-parameter values to use for computing the different objective function values.
+        return_recs : bool, optional
+            If True, return the reconstructions along with the loss values. Default is False.
 
         Returns
         -------
         f_vals : NDArrayFloat
             Objective function cost for each hyper-parameter value.
+        recs : NDArrayFloat, optional
+            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
         """
         hp_vals = np.array(hp_vals, ndmin=1)
 
@@ -574,7 +606,10 @@ class LCurve(BaseParameterTuning):
             fig.tight_layout()
             plt.show(block=False)
 
-        return f_vals
+        if return_recs:
+            return f_vals, recs
+        else:
+            return f_vals
 
 
 class CrossValidation(BaseParameterTuning):
@@ -619,22 +654,40 @@ class CrossValidation(BaseParameterTuning):
     def _create_random_test_mask(self) -> NDArrayFloat:
         return create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype)
 
-    def compute_loss_values(self, hp_vals: Union[ArrayLike, NDArrayFloat]) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
-        """Compute objective function values for all requested hyper-parameter values..
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[False] = False
+    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]: ...
+
+    @overload
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: Literal[True] = True
+    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat]: ...
+
+    def compute_loss_values(
+        self, hp_vals: Union[ArrayLike, NDArrayFloat], return_recs: bool = False
+    ) -> Union[
+        tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat], tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, list[NDArrayFloat]]
+    ]:
+        """Compute objective function values for all requested hyper-parameter values.
 
         Parameters
         ----------
-        params : Union[ArrayLike, NDArrayFloat]
-            Hyper-parameter values (e.g. regularization weight) to evaluate.
+        hp_vals : Union[ArrayLike, NDArrayFloat]
+            Hyper-parameter values (e.g., regularization weight) to evaluate.
+        return_recs : bool, optional
+            If True, return the reconstructions along with the loss values. Default is False.
 
         Returns
         -------
         f_avgs : NDArrayFloat
-            Average objective function costs for each regularization weight.
+            Average objective function costs for each hyper-parameter value.
         f_stds : NDArrayFloat
-            Standard deviation of objective function costs for each regularization weight.
+            Standard deviation of objective function costs for each hyper-parameter value.
         f_vals : NDArrayFloat
-            Objective function costs for each regularization weight.
+            Objective function costs for each hyper-parameter value.
+        recs : list[NDArrayFloat], optional
+            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
         """
         hp_vals = np.array(hp_vals, ndmin=1)
 
@@ -652,6 +705,7 @@ class CrossValidation(BaseParameterTuning):
                     f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
                 )
 
+        recs = list()
         f_vals = np.empty((len(hp_vals), self.num_averages), dtype=self.dtype)
         for ii_avg in range(self.num_averages):
             if self.verbose:
@@ -659,7 +713,8 @@ class CrossValidation(BaseParameterTuning):
 
             curr_data_test_mask = self.data_test_masks[ii_avg]
 
-            _, f_vals_ii = self.compute_all_reconstructions_and_losses(hp_vals, curr_data_test_mask)
+            recs_ii, f_vals_ii = self.compute_all_reconstructions_and_losses(hp_vals, curr_data_test_mask)
+            recs.append(recs_ii)
             f_vals[:, ii_avg] = np.array(f_vals_ii)
 
         f_avgs = np.mean(f_vals, axis=1)
@@ -679,7 +734,10 @@ class CrossValidation(BaseParameterTuning):
             fig.tight_layout()
             plt.show(block=False)
 
-        return f_avgs, f_stds, f_vals
+        if return_recs:
+            return f_avgs, f_stds, f_vals, recs
+        else:
+            return f_avgs, f_stds, f_vals
 
     def fit_loss_min(
         self,
