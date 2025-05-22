@@ -69,7 +69,7 @@ def decompose_qr_masks(masks: NDArray, verbose: bool = False) -> tuple[NDArray, 
     masks : NDArray
         The masks to decompose
     verbose : bool, optional
-        Whether to emite verbose output, by default False
+        Whether to emit verbose output, by default False
 
     Returns
     -------

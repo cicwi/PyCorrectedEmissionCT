@@ -271,8 +271,11 @@ class DataFidelity_l2(DataFidelityBase):
 
     __data_fidelity_name__ = "l2"
 
+    sigma1: Union[float, NDArrayFloat]
+
     def __init__(self, background: Union[float, NDArrayFloat, None] = None) -> None:
         super().__init__(background=background)
+        self.sigma1 = 1.0
 
     def assign_data(self, data: Union[float, NDArrayFloat, None] = None, sigma: Union[float, NDArrayFloat] = 1.0) -> None:
         super().assign_data(data=data, sigma=sigma)
@@ -299,8 +302,12 @@ class DataFidelity_wl2(DataFidelity_l2):
 
     __data_fidelity_name__ = "wl2"
 
+    sigma1: Union[float, NDArrayFloat]
+    weights: NDArrayFloat
+
     def __init__(self, weights: Union[float, NDArrayFloat], background: Union[float, NDArrayFloat, None] = None) -> None:
         super().__init__(background=background)
+        self.sigma1 = 1.0
         self.weights = np.array(weights)
 
     def assign_data(self, data: Union[float, NDArrayFloat, None], sigma: Union[float, NDArrayFloat] = 1.0):
@@ -336,9 +343,16 @@ class DataFidelity_l2b(DataFidelity_l2):
 
     __data_fidelity_name__ = "l2b"
 
+    sigma1: Union[float, NDArrayFloat]
+    sigma_error: Union[float, NDArrayFloat]
+    sigma_sqrt_error: Union[float, NDArrayFloat]
+
     def __init__(self, local_error: Union[float, NDArrayFloat], background: Union[float, NDArrayFloat, None] = None):
         super().__init__(background=background)
+        self.sigma1 = 1.0
         self.local_error = local_error
+        self.sigma_error = 1.0 * self.local_error
+        self.sigma_sqrt_error = 1.0 * np.sqrt(self.local_error)
 
     def assign_data(self, data: Union[float, NDArrayFloat, None], sigma: Union[float, NDArrayFloat] = 1.0):
         self.sigma_error = sigma * self.local_error
@@ -371,13 +385,16 @@ class DataFidelity_Huber(DataFidelityBase):
 
     __data_fidelity_name__ = "Hub"
 
+    one_sigma_error: Union[float, NDArrayFloat]
+
     def __init__(self, local_error, background=None, l2_axis=None):
         super().__init__(background=background)
         self.local_error = local_error
         self.l2_axis = l2_axis
+        self.one_sigma_error = 1.0
 
     def assign_data(self, data, sigma=1.0):
-        self.one_sigma_error = 1 / (1 + sigma * self.local_error)
+        self.one_sigma_error = 1.0 / (1.0 + sigma * self.local_error)
         super().assign_data(data=data, sigma=sigma)
 
     def compute_residual_norm(self, dual):
@@ -463,9 +480,12 @@ class DataFidelity_l1b(DataFidelity_l1):
 
     __data_fidelity_name__ = "l1b"
 
+    sigma_error: Union[float, NDArrayFloat]
+
     def __init__(self, local_error, background=None):
         super().__init__(background=background)
         self.local_error = local_error
+        self.sigma_error = 1.0 * self.local_error
 
     def assign_data(self, data, sigma=1.0):
         self.sigma_error = sigma * self.local_error

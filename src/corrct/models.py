@@ -738,7 +738,8 @@ def get_vol_geom_from_data(
     ----------
     data : NDArray
         The data.
-    padding_u : int | Sequence[int]
+    padding_u : int | Sequence[int], optional
+        The amount of padding along the U direction. The default is 0.
     data_format : str, optional
         The ordering and meaning of the dimensions in the data. The default is "dvwu".
     super_sampling: int, optional

@@ -48,7 +48,7 @@ def find_reg_weight(
     lams_reg = reg_help_cv.get_lambda_range(lambda_range[0], lambda_range[1], num_per_order=4)
 
     # Compute the loss function values for all the regularization weights
-    f_avgs, f_stds, _ = reg_help_cv.compute_loss_values(lams_reg)
+    f_avgs, _, _ = reg_help_cv.compute_loss_values(lams_reg, return_recs=False)
 
     # parabolic fit of minimum over the computer curve
     lam_min, _ = reg_help_cv.fit_loss_min(lams_reg, f_avgs)
