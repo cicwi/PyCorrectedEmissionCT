@@ -295,7 +295,7 @@ class MaskCollection:
 
         return mask[tuple(mask_inds_vu)]
 
-    def get_QR_decomposition(self, buckets: NDArray, shift: int = 0) -> tuple["MaskCollection", NDArray]:
+    def get_qr_decomposition(self, buckets: NDArray, shift: int = 0) -> tuple["MaskCollection", NDArray]:
         """Compute and return the QR decomposition of the masks.
 
         Parameters
@@ -325,9 +325,9 @@ class MaskCollection:
 
         new_masks.masks_enc, R1t = decompose_qr_masks(new_masks.masks_enc)
         new_masks.masks_dec = new_masks.masks_enc
-        new_buckets = R1t.dot(new_buckets)
+        new_buckets: NDArray = R1t.dot(new_buckets.T)
 
-        return new_masks, new_buckets
+        return new_masks, new_buckets.T
 
     def bin_masks(self, binning: float) -> "MaskCollection":
         """Bin the masks.
@@ -879,17 +879,26 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         self.prj_shape = np.array(self.mc.num_buckets, ndmin=1)
         super().__init__()
 
-        if backend.lower() == "torch" and not __has_torch_cuda__:
+        if backend.split(":")[0].lower() == "torch" and not __has_torch_cuda__:
             print("WARNING: Requested PyTorch's backend, but CUDA is not available. Reverting back to NumPy.")
             backend = "numpy"
         self.backend = backend.lower()
         self._init_backend()
 
+    def _get_backend_device(self) -> tuple[str, Union[str, None]]:
+        backend, *device = self.backend.split(":")
+        if len(device) == 0:
+            return backend, None
+        return backend, ":".join(device)
+
     def _init_backend(self):
-        if self.backend == "torch":
-            self.masks_enc: pt.Tensor = pt.tensor(self.mc.masks_enc, device="cuda")
-            self.masks_dec: pt.Tensor = pt.tensor(self.mc.masks_dec, device="cuda")
-        elif self.backend == "numpy":
+        backend, device = self._get_backend_device()
+        if backend == "torch":
+            if device is None:
+                device = "cuda"
+            self.masks_enc: pt.Tensor = pt.tensor(self.mc.masks_enc, device=device)
+            self.masks_dec: pt.Tensor = pt.tensor(self.mc.masks_dec, device=device)
+        elif backend == "numpy":
             self.masks_enc: NDArray = self.mc.masks_enc
             self.masks_dec: NDArray = self.mc.masks_dec
         else:
@@ -914,11 +923,14 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         image = image.reshape(image_shape)
         masks = self.masks_enc.reshape(masks_shape).T
 
-        if self.backend == "numpy":
+        backend, device = self._get_backend_device()
+        if backend == "numpy":
             return np.squeeze(image.dot(masks))
             # return np.sum(self.masks_enc * image, axis=(-2, -1))
         else:
-            image: pt.Tensor = pt.tensor(image, device="cuda")
+            if device is None:
+                device = "cuda"
+            image: pt.Tensor = pt.tensor(image, device=device)
             bucket_vals = pt.tensordot(image, masks, ([-1], [0])).to("cpu").numpy()
             return np.squeeze(bucket_vals)
 
@@ -941,10 +953,14 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         out_shape = [*bucket_vals.shape[:-1], *self.mc.shape_fov]
 
         masks_in = self.masks_dec.reshape(masks_shape)
-        if self.backend == "numpy":
+
+        backend, device = self._get_backend_device()
+        if backend == "numpy":
             img_out: NDArray = bucket_vals.dot(masks_in)
         else:
-            buckets: pt.Tensor = pt.tensor(np.array(bucket_vals, ndmin=2), device="cuda")
+            if device is None:
+                device = "cuda"
+            buckets: pt.Tensor = pt.tensor(np.array(bucket_vals, ndmin=2), device=device)
             img_out: NDArray = pt.tensordot(buckets, masks_in, ([-1], [0])).to("cpu").numpy()
 
         return img_out.reshape(out_shape)
