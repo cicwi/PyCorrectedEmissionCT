@@ -1400,10 +1400,10 @@ class Constraint_LowerLimit(BaseRegularizer):
         return tau
 
     def update_dual(self, dual: NDArray, primal: NDArray) -> None:
-        dual += primal
+        dual += primal - self.limit
 
     def apply_proximal(self, dual: NDArray) -> None:
-        dual[dual > self.limit] = self.limit
+        dual[dual > 0.0] = 0.0
         self.norm.apply_proximal(dual)
 
 
@@ -1448,8 +1448,8 @@ class Constraint_UpperLimit(BaseRegularizer):
         return tau
 
     def update_dual(self, dual: NDArray, primal: NDArray) -> None:
-        dual += primal
+        dual += primal - self.limit
 
     def apply_proximal(self, dual: NDArray) -> None:
-        dual[dual < self.limit] = self.limit
+        dual[dual < 0.0] = 0.0
         self.norm.apply_proximal(dual)
