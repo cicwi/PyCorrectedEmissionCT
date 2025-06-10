@@ -205,6 +205,7 @@ ax_sino_lines = fig.add_subplot(gs[2:, 1])
 im_sino_lines = ax_sino_lines.plot(sino_substr[9, :], label="Noisy")
 im_sino_lines = ax_sino_lines.plot(sino_clean[9, :], label="Clean")
 ax_sino_lines.set_title("Sinograms - angle: 10")
+ax_sino_lines.grid()
 ax_sino_lines.legend()
 
 ax_ls = fig.add_subplot(gs[:, 2])
