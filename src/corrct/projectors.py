@@ -172,9 +172,9 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         self.prj_geom = prj_geom
 
         if not len(self.vol_geom.shape_xyz) in (2, 3):
-            raise ValueError("Only 2D or 3D volumes are valid")
+            raise ValueError(f"Only 2D or 3D volumes are valid, following volume geometry passed instead: {self.vol_geom}")
         if not self.vol_geom.is_square():
-            raise ValueError("Only square volumes are valid")
+            raise ValueError(f"Only square volumes are valid, following volume geometry passed instead: {self.vol_geom}")
 
         if isinstance(backend, str):
             if backend == "astra":
