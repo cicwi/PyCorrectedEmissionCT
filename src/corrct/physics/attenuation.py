@@ -19,6 +19,7 @@ from tqdm.auto import tqdm
 from corrct import _projector_backends as prj_backends
 from corrct import models
 from corrct.physics.xraylib_helper import get_compound, get_compound_cross_section
+from corrct.physics.xrf import DetectorXRF
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
@@ -34,7 +35,8 @@ class AttenuationVolume:
     incident_local: Union[NDArrayFloat, None]
     emitted_local: Union[NDArrayFloat, None]
     angles_rot_rad: NDArrayFloat
-    angles_det_rad: NDArrayFloat
+    detectors: Sequence[DetectorXRF]
+    emitted_sub_sampling: int
 
     dtype: DTypeLike
 
@@ -45,8 +47,9 @@ class AttenuationVolume:
         self,
         incident_local: Union[NDArrayFloat, None],
         emitted_local: Union[NDArrayFloat, None],
-        angles_rot_rad: ArrayLike,
-        angles_det_rad: Union[NDArrayFloat, ArrayLike, float] = np.pi / 2,
+        angles_rot_rad: Union[NDArrayFloat, Sequence[float]],
+        angles_det_rad: Union[NDArrayFloat, Sequence[Union[float, DetectorXRF]], float, DetectorXRF] = np.pi / 2,
+        emitted_sub_sampling: int = 1,
         dtype: DTypeLike = np.float32,
     ):
         """
@@ -60,7 +63,18 @@ class AttenuationVolume:
         self.incident_local = incident_local
         self.emitted_local = emitted_local
         self.angles_rot_rad = np.array(angles_rot_rad, ndmin=1)
-        self.angles_det_rad = np.array(angles_det_rad, ndmin=1)
+        self.detectors = []
+        if isinstance(angles_det_rad, (float, DetectorXRF)):
+            angles_det_rad = [angles_det_rad]
+        for a in angles_det_rad:
+            if isinstance(a, DetectorXRF):
+                self.detectors.append(a)
+            elif isinstance(a, float):
+                self.detectors.append(DetectorXRF(surface_mm2=0, distance_mm=1, angle_rad=a))
+            else:
+                raise ValueError(
+                    f"Input parameter {angles_det_rad = } should be one of: float | NDArray | Sequence[float | DetectorXRF]"
+                )
 
         self.dtype = dtype
 
@@ -77,20 +91,32 @@ class AttenuationVolume:
         else:
             raise ValueError("No attenuation volumes were given.")
 
+        self.emitted_sub_sampling = emitted_sub_sampling
+
         self.vol_shape_zyx = np.array(self.vol_shape_zyx, ndmin=1)
 
         num_dims = len(self.vol_shape_zyx)
         if num_dims not in [2, 3]:
             raise ValueError(f"Maps can only be 2D or 3D Arrays. A {num_dims}-dimensional was passed ({self.vol_shape_zyx}).")
 
+    def _get_detector_angles(self) -> NDArray:
+        return np.array([det.angle_rad for det in self.detectors], ndmin=1)
+
     def _compute_attenuation_angle_in(self, local_att: NDArrayFloat, angle_rad: float) -> NDArray:
         return prj_backends.compute_attenuation(local_att, angle_rad, invert=False)[None, ...]
 
     def _compute_attenuation_angle_out(self, local_att: NDArrayFloat, angle_rad: float) -> NDArray:
-        angle_det = angle_rad + self.angles_det_rad
-        atts = np.empty(self.maps.shape[1:], dtype=self.dtype)
+        angle_det = angle_rad + self._get_detector_angles()
+        atts = np.zeros(self.maps.shape[1:], dtype=self.dtype)
         for ii, a in enumerate(angle_det):
-            atts[ii, ...] = prj_backends.compute_attenuation(local_att, a, invert=True)
+            if self.detectors[ii].surface_mm2 > 0.0:
+                sub_angles = np.linspace(*self.detectors[ii].angle_range_rad, self.emitted_sub_sampling + 1)
+                sub_angles = np.convolve(sub_angles, np.ones(2), "valid") / 2
+            else:
+                sub_angles = np.zeros(1)
+            for a_s in sub_angles:
+                atts[ii, ...] += prj_backends.compute_attenuation(local_att, a + a_s, invert=True)
+            atts[ii, ...] /= len(sub_angles)
         return atts
 
     def compute_maps(self, use_multithreading: bool = True, verbose: bool = True) -> None:
@@ -105,7 +131,7 @@ class AttenuationVolume:
             Show verbose output. The default is True.
         """
         num_rot_angles = len(self.angles_rot_rad)
-        self.maps = np.ones([num_rot_angles, len(self.angles_det_rad), *self.vol_shape_zyx], dtype=self.dtype)
+        self.maps = np.ones([num_rot_angles, len(self.detectors), *self.vol_shape_zyx], dtype=self.dtype)
 
         def process_angles(
             func: Callable[[NDArray, float], NDArray], att_vol: NDArrayFloat, angles: NDArrayFloat, description: str
@@ -141,6 +167,13 @@ class AttenuationVolume:
             )
 
         if self.emitted_local is not None:
+            if self.emitted_sub_sampling > 1:
+                for ii, det in enumerate(self.detectors):
+                    sub_angles = np.linspace(*det.angle_range_rad, self.emitted_sub_sampling + 1)
+                    sub_angles = np.convolve(sub_angles, np.ones(2), "valid") / 2
+                    print(
+                        f"Detector #{ii}: Super-sampling outgoing sub-angles: {np.round(np.rad2deg(sub_angles), decimals=3)} deg"
+                    )
             description = "Computing attenuation maps for emitted photons"
             process_angles(
                 self._compute_attenuation_angle_out, self.emitted_local, angles=self.angles_rot_rad, description=description
@@ -205,7 +238,7 @@ class AttenuationVolume:
 
             prj_geom = models.ProjectionGeometry.get_default_parallel()
             beam_i_geom = prj_geom.rotate(-self.angles_rot_rad[rot_ind])
-            beam_e_geom = prj_geom.rotate(-(self.angles_rot_rad[rot_ind] + self.angles_det_rad[det_ind]))
+            beam_e_geom = prj_geom.rotate(-(self.angles_rot_rad[rot_ind] + self.detectors[det_ind].angle_rad))
 
             beam_i_dir = beam_i_geom.src_pos_xyz[0, :2] * arrow_length
             beam_i_orig = -beam_i_dir
@@ -281,9 +314,9 @@ class AttenuationVolume:
             A dictionary containing the attenuation maps and the detector angle.
         """
         if det_ind is None:
-            det_angles = self.angles_det_rad
+            det_angles = self._get_detector_angles()
         else:
-            det_angles = self.angles_det_rad[det_ind]
+            det_angles = self.detectors[det_ind].angle_rad
         return dict(att_maps=self.get_maps(roi=roi, rot_ind=rot_ind, det_ind=det_ind), angles_detectors_rad=det_angles)
 
 

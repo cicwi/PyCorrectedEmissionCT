@@ -215,9 +215,15 @@ def get_energy(
 class DetectorXRF:
     """Simple XRF detector model."""
 
-    surface_mm2: float
-    distance_mm: Union[float, NDArray]
+    surface_mm2: float = 0.0
+    distance_mm: Union[float, NDArray] = 1.0
     angle_rad: float = np.pi / 2
+
+    def __post_init__(self):
+        if self.surface_mm2 < 0.0:
+            raise ValueError(f"Surface cannot be negative, but {self.surface_mm2} was passed")
+        if self.distance_mm <= 0.0:
+            raise ValueError(f"The distance needs to be positive, but {self.distance_mm} was passed")
 
     @property
     def solid_angle_sr(self) -> Union[float, NDArray]:
@@ -229,3 +235,21 @@ class DetectorXRF:
             The computed solid angle of the detector geometry.
         """
         return self.surface_mm2 / (4 * np.pi * self.distance_mm**2)
+
+    @property
+    def angle_range_rad(self) -> tuple[float, float]:
+        """Compute the angular range covered by the detector.
+
+        This property calculates the angular range that the detector can cover
+        based on its surface area and distance from the source. The angular range
+        is determined by the half-angle at the edges of the detector surface.
+
+        Returns
+        -------
+        tuple[float, float]
+            A tuple containing the minimum and maximum angles in radians that the
+            detector can cover.
+        """
+        half_edge = np.sqrt(self.surface_mm2) / 2
+        half_angle = np.arctan2(half_edge, self.distance_mm)
+        return (-half_angle, half_angle)
