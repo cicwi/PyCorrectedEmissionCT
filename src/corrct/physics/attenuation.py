@@ -20,6 +20,7 @@ from corrct import _projector_backends as prj_backends
 from corrct import models
 from corrct.physics.xraylib_helper import get_compound, get_compound_cross_section
 from corrct.physics.xrf import DetectorXRF
+from corrct.processing.pre import bin_imgs
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 
@@ -255,18 +256,21 @@ class AttenuationVolume:
         roi: Optional[ArrayLike] = None,
         rot_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
         det_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
+        binning: int = 1,
     ) -> NDArray:
         """
         Return the attenuation maps.
 
         Parameters
         ----------
-        roi : ArrayLike, optional
-            The region-of-interest to select. The default is None.
-        rot_ind : int, optional
-            A specific rotation index, if only one is to be desired. The default is None.
-        det_ind : int, optional
-            A specific detector index, if only one is to be desired. The default is None.
+        roi : ArrayLike | None, optional
+                The region-of-interest to select. The default is None.
+        rot_ind : int | slice | Sequence[int] | NDArrayInt | None, optional
+            The rotation index or indices to select. The default is None.
+        det_ind : int | slice | Sequence[int] | NDArrayInt | None, optional
+            The detector index or indices to select. The default is None.
+        binning : int, optional
+            The binning factor to apply to the maps. The default is 1.
 
         Returns
         -------
@@ -288,6 +292,9 @@ class AttenuationVolume:
         if roi is not None:
             raise NotImplementedError("Extracting a region of interest is not supported, yet.")
 
+        if binning > 1:
+            maps = bin_imgs(maps, binning=binning, axes=tuple(range(-len(self.vol_shape_zyx), 0)), auto_crop=True)
+
         return maps
 
     def get_projector_args(
@@ -295,18 +302,21 @@ class AttenuationVolume:
         roi: Optional[ArrayLike] = None,
         rot_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
         det_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
+        binning: int = 1,
     ) -> dict[str, NDArray]:
         """
         Return the projector arguments.
 
         Parameters
         ----------
-        roi : ArrayLike, optional
-            The region-of-interest to select. The default is None.
-        rot_ind : int, optional
-            A specific rotation index, if only one is to be desired. The default is None.
-        det_ind : int, optional
-            A specific detector index, if only one is to be desired. The default is None.
+        roi : ArrayLike | None, optional
+                The region-of-interest to select. The default is None.
+        rot_ind : int | slice | Sequence[int] | NDArrayInt | None, optional
+            The rotation index or indices to select. The default is None.
+        det_ind : int | slice | Sequence[int] | NDArrayInt | None, optional
+            The detector index or indices to select. The default is None.
+        binning : int, optional
+            The binning factor to apply to the maps. The default is 1.
 
         Returns
         -------
@@ -317,7 +327,9 @@ class AttenuationVolume:
             det_angles = self._get_detector_angles()
         else:
             det_angles = self.detectors[det_ind].angle_rad
-        return dict(att_maps=self.get_maps(roi=roi, rot_ind=rot_ind, det_ind=det_ind), angles_detectors_rad=det_angles)
+        return dict(
+            att_maps=self.get_maps(roi=roi, rot_ind=rot_ind, det_ind=det_ind, binning=binning), angles_detectors_rad=det_angles
+        )
 
 
 def get_linear_attenuation_coefficient(
