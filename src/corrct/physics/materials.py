@@ -15,6 +15,7 @@ from numpy.typing import DTypeLike, NDArray
 
 from corrct.physics import xrf  # noqa: F401, F402
 from corrct.physics.xraylib_helper import get_compound_cross_section
+from corrct.physics.xraylib_helper import get_compound
 from corrct.physics.xraylib_helper import get_element_number
 from corrct.physics.xraylib_helper import xraylib
 
@@ -72,9 +73,7 @@ class VolumeMaterial:
         for ii, ph in enumerate(self.materials_fractions):
             self.materials_fractions[ii] = ph.astype(self.dtype)
 
-        self.materials_compositions = [
-            xraylib.GetCompoundDataNISTByName(cmp) if isinstance(cmp, str) else cmp for cmp in materials_composition
-        ]
+        self.materials_compositions = [get_compound(cmp) if isinstance(cmp, str) else cmp for cmp in materials_composition]
 
         self.voxel_size_cm = voxel_size_cm
         self.verbose = verbose
