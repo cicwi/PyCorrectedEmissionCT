@@ -65,7 +65,7 @@ class AttenuationVolume:
         self.emitted_local = emitted_local
         self.angles_rot_rad = np.array(angles_rot_rad, ndmin=1)
         self.detectors = []
-        if isinstance(angles_det_rad, (float, DetectorXRF)):
+        if isinstance(angles_det_rad, (int, float, DetectorXRF)):
             angles_det_rad = [angles_det_rad]
         for a in angles_det_rad:
             if isinstance(a, DetectorXRF):
