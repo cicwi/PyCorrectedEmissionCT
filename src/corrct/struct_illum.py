@@ -1034,3 +1034,34 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         Op_a.mc.masks_dec = np.abs(Op_a.mc.masks_dec)
         Op_a._init_backend()
         return Op_a
+
+
+class ProjectorGhostTomography(ProjectorGhostImaging):
+    """Ghost tomography projector."""
+
+    tomo_proj: operators.ProjectorOperator
+
+    def __init__(
+        self, mask_collection: MaskCollection | NDArray, tomo_proj: operators.ProjectorOperator, backend: str = "torch"
+    ):
+        super().__init__(mask_collection, backend)
+
+        tomo_prj_shape = np.array([*tomo_proj.dir_shape[:-2], tomo_proj.dir_shape[-1]])
+        # Special care should be given to support when implemented
+        if len(tomo_prj_shape) != self.mc.mask_dims or any(tomo_prj_shape != self.mc.shape_fov):
+            raise ValueError(
+                f"Tomographic projection shape {tomo_prj_shape} ([V]U, from: {self.tomo_proj.dir_shape} [V]WU)"
+                f" does not match ghost imaging projector shape {self.mc.shape_fov} ([V]U, from: {self.masks_enc.shape} M[V]U)"
+            )
+
+        self.tomo_proj = tomo_proj
+
+    def fp(self, vol_zyx: NDArray) -> NDArray:
+        imgs_vwu = self.tomo_proj.fp(vol_zyx)
+        imgs_wvu = np.squeeze(np.array(imgs_vwu, ndmin=3).swapaxes(-3, -2))
+        return super().fp(imgs_wvu)
+
+    def bp(self, bucket_vals: NDArray) -> NDArray:
+        imgs_wvu = super().bp(bucket_vals)
+        imgs_vwu = np.squeeze(np.array(imgs_wvu, ndmin=3).swapaxes(-3, -2))
+        return self.tomo_proj.bp(imgs_vwu)
