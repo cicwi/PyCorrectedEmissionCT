@@ -7,14 +7,16 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 from collections.abc import Sequence
 from typing import Optional, Union
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pywt
-import scipy.ndimage as spimg
 import skimage.transform as skt
 from numpy.polynomial import Polynomial
 from numpy.typing import DTypeLike, NDArray
+from scipy.ndimage import convolve, fourier_shift, gaussian_filter, shift
 from skimage.measure import block_reduce
+from tqdm.auto import trange
 
 
 eps = np.finfo(np.float32).eps
@@ -169,10 +171,10 @@ def shift_proj_stack(data_vwu: NDArray, shifts: NDArray, use_fft: bool = False) 
         if use_fft:
             img = data_vwu[..., ii, :]
             img_f = np.fft.rfftn(img)
-            img_f = spimg.fourier_shift(img_f, shifts[..., ii], n=img.shape[-1])
+            img_f = fourier_shift(img_f, shifts[..., ii], n=img.shape[-1])
             new_data[..., ii, :] = np.fft.irfftn(img_f)
         else:
-            new_data[..., ii, :] = spimg.shift(data_vwu[..., ii, :], shifts[..., ii], order=1, mode="nearest")
+            new_data[..., ii, :] = shift(data_vwu[..., ii, :], shifts[..., ii], order=1, mode="nearest")
 
     return new_data
 
@@ -302,6 +304,86 @@ def background_from_margin(
             background = background.mean(axis=-2, keepdims=True)
 
         return np.tile(background[..., None], [*np.ones(background.ndim, dtype=int), data_shape_u])
+
+
+def snip(
+    img: NDArray, kernel_dims: Union[int, None] = None, iterations: int = 1000, window: int = 3, verbose: bool = False
+) -> NDArray:
+    """
+    Apply the SNIP algorithm to an image to estimate the background.
+
+    Parameters
+    ----------
+    img : NDArray
+        The input image to process.
+    kernel_dims : Union[int, None], optional
+        The number of dimensions to apply the SNIP algorithm to. If None, it defaults to the number of dimensions of the image.
+    iterations : int, optional
+        The number of iterations to run the SNIP algorithm.
+    window : int, optional
+        The size of the window for the convolution kernel.
+    verbose : bool, optional
+        If True, display a progress bar during the iterations.
+
+    Returns
+    -------
+    NDArray
+        The background-estimated image.
+
+    Raises
+    ------
+    ValueError
+        If `kernel_dims` is not between 1 and the number of dimensions of the image.
+    """
+    if kernel_dims is None:
+        kernel_dims = img.ndim
+    elif kernel_dims > img.ndim or kernel_dims < 1:
+        raise ValueError(f"Kernel dimensions (#{kernel_dims}) should be between [1, {img.ndim}] (number of image dimensions)")
+
+    kernel_shape = [1 if ii < -kernel_dims else window for ii in range(-img.ndim, 0)]
+    kern = np.ones(kernel_shape, dtype=img.dtype)
+    slices = [slice(None) if ii < -kernel_dims else slice(1, -1) for ii in range(-img.ndim, 0)]
+    kern[tuple(slices)] = 0.0
+    kern /= kern.sum()
+
+    bckgnd_img = img.copy()
+    for _ in trange(iterations, disable=not verbose):
+        conv_img = convolve(bckgnd_img, kern, mode="nearest")
+        bckgnd_img = np.fmin(conv_img, bckgnd_img)
+    return bckgnd_img
+
+
+def background_from_snip(data_vwu: NDArray, snip_iterations: int = 6, smooth_std: float = 0.0) -> NDArray:
+    """
+    Fit the background of the projection data using the SNIP algorithm.
+
+    Parameters
+    ----------
+    data_vwu : NDArray
+        The input dataset to process.
+    snip_iterations : int, optional
+        The number of iterations to run the SNIP algorithm.
+    smooth_std : float, optional
+        The standard deviation for Gaussian smoothing. If 0.0, no smoothing is applied.
+
+    Returns
+    -------
+    NDArray
+        The background-fitted dataset.
+    """
+    bg_data_vwu = np.empty_like(data_vwu)
+    for ii_a in trange(data_vwu.shape[-2], desc="Angles"):
+        img = data_vwu[..., ii_a, :]
+        if smooth_std > 0.0:
+            img = gaussian_filter(img, sigma=smooth_std)
+        if img.ndim > 2:
+            for ii_d in range(img.shape[0]):
+                img[ii_d] = snip(img[ii_d], iterations=snip_iterations)
+            bg_data_vwu[..., ii_a, :] = img
+        else:
+            bg_data_vwu[..., ii_a, :] = snip(img, iterations=snip_iterations)
+
+    return bg_data_vwu
 
 
 def destripe_wlf_vwu(
