@@ -1042,7 +1042,7 @@ class ProjectorGhostTomography(ProjectorGhostImaging):
     tomo_proj: operators.ProjectorOperator
 
     def __init__(
-        self, mask_collection: MaskCollection | NDArray, tomo_proj: operators.ProjectorOperator, backend: str = "torch"
+        self, mask_collection: Union[MaskCollection, NDArray], tomo_proj: operators.ProjectorOperator, backend: str = "torch"
     ):
         super().__init__(mask_collection, backend)
 
