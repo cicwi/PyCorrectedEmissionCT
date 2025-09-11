@@ -1057,11 +1057,35 @@ class ProjectorGhostTomography(ProjectorGhostImaging):
         self.tomo_proj = tomo_proj
 
     def fp(self, vol_zyx: NDArray) -> NDArray:
+        """Compute forward-projection (prediction) of the bucket values.
+
+        Parameters
+        ----------
+        vol_zyx : NDArray
+            The volume for which we want to predict the bucket values.
+
+        Returns
+        -------
+        NDArray
+            The predicted bucket values.
+        """
         imgs_vwu = self.tomo_proj.fp(vol_zyx)
         imgs_wvu = np.squeeze(np.array(imgs_vwu, ndmin=3).swapaxes(-3, -2))
         return super().fp(imgs_wvu)
 
     def bp(self, bucket_vals: NDArray) -> NDArray:
+        """Compute back-projection of the bucket values.
+
+        Parameters
+        ----------
+        bucket_vals : NDArray
+            The list of bucket values.
+
+        Returns
+        -------
+        NDArray
+            Back-projected volume.
+        """
         imgs_wvu = super().bp(bucket_vals)
         imgs_vwu = np.squeeze(np.array(imgs_wvu, ndmin=3).swapaxes(-3, -2))
         return self.tomo_proj.bp(imgs_vwu)
