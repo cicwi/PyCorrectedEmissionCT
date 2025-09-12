@@ -4,7 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v1.0.0...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v1.1.0...develop
+
+## 1.1.0 - 2025-09-12
+### Added
+- Support for external executors in parameter tuning
+- Support for non-point-like XRF detectors
+- Support for binning high-resolution attenuation maps
+- Ghost tomography projector and example
+- SNIP background fitting algorithm
+### Fixed
+- GI QR decomposition for stacks of buckets
+- Constraint regularizers
+- `VolumeMaterial` class initialization
 
 ## 1.0.0 - 2025-03-27
 ### Added
