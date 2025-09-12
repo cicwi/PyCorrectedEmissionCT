@@ -1,27 +1,25 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.processing.pre &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../../_static/copybutton.js?v=f281be69"></script>
-        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -90,16 +88,18 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pywt</span>
-<span class="kn">import</span> <span class="nn">scipy.ndimage</span> <span class="k">as</span> <span class="nn">spimg</span>
-<span class="kn">import</span> <span class="nn">skimage.transform</span> <span class="k">as</span> <span class="nn">skt</span>
-<span class="kn">from</span> <span class="nn">numpy.polynomial</span> <span class="kn">import</span> <span class="n">Polynomial</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
-<span class="kn">from</span> <span class="nn">skimage.measure</span> <span class="kn">import</span> <span class="n">block_reduce</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pywt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">skimage.transform</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">skt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.polynomial</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polynomial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">convolve</span><span class="p">,</span> <span class="n">fourier_shift</span><span class="p">,</span> <span class="n">gaussian_filter</span><span class="p">,</span> <span class="n">shift</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">skimage.measure</span><span class="w"> </span><span class="kn">import</span> <span class="n">block_reduce</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">trange</span>
 
 
 <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
@@ -107,7 +107,7 @@
 
 <div class="viewcode-block" id="pad_sinogram">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.pad_sinogram">[docs]</a>
-<span class="k">def</span> <span class="nf">pad_sinogram</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pad_sinogram</span><span class="p">(</span>
     <span class="n">sinogram</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">pad_axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -142,7 +142,7 @@
 
 <div class="viewcode-block" id="apply_flat_field">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.apply_flat_field">[docs]</a>
-<span class="k">def</span> <span class="nf">apply_flat_field</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_flat_field</span><span class="p">(</span>
     <span class="n">projs_wvu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">flats_wvu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">darks_wvu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -201,7 +201,7 @@
 
 <div class="viewcode-block" id="apply_minus_log">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.apply_minus_log">[docs]</a>
-<span class="k">def</span> <span class="nf">apply_minus_log</span><span class="p">(</span><span class="n">projs</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_minus_log</span><span class="p">(</span><span class="n">projs</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply -log.</span>
 
@@ -221,7 +221,7 @@
 
 <div class="viewcode-block" id="rotate_proj_stack">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.rotate_proj_stack">[docs]</a>
-<span class="k">def</span> <span class="nf">rotate_proj_stack</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">rot_angle_deg</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rotate_proj_stack</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">rot_angle_deg</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rotate the projection stack.</span>
 
@@ -246,7 +246,7 @@
 
 <div class="viewcode-block" id="shift_proj_stack">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.shift_proj_stack">[docs]</a>
-<span class="k">def</span> <span class="nf">shift_proj_stack</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shifts</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">use_fft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">shift_proj_stack</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shifts</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">use_fft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Shift each projection in a stack of projections, by projection dependent shifts.</span>
 
 <span class="sd">    Parameters</span>
@@ -268,10 +268,10 @@
         <span class="k">if</span> <span class="n">use_fft</span><span class="p">:</span>
             <span class="n">img</span> <span class="o">=</span> <span class="n">data_vwu</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:]</span>
             <span class="n">img_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftn</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
-            <span class="n">img_f</span> <span class="o">=</span> <span class="n">spimg</span><span class="o">.</span><span class="n">fourier_shift</span><span class="p">(</span><span class="n">img_f</span><span class="p">,</span> <span class="n">shifts</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">],</span> <span class="n">n</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">img_f</span> <span class="o">=</span> <span class="n">fourier_shift</span><span class="p">(</span><span class="n">img_f</span><span class="p">,</span> <span class="n">shifts</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">],</span> <span class="n">n</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">new_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">irfftn</span><span class="p">(</span><span class="n">img_f</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">new_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">spimg</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:],</span> <span class="n">shifts</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
+            <span class="n">new_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">shift</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="p">:],</span> <span class="n">shifts</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">new_data</span></div>
 
@@ -279,7 +279,7 @@
 
 <div class="viewcode-block" id="bin_imgs">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.bin_imgs">[docs]</a>
-<span class="k">def</span> <span class="nf">bin_imgs</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bin_imgs</span><span class="p">(</span>
     <span class="n">imgs</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">binning</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">auto_crop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bin a stack of images.</span>
@@ -336,7 +336,7 @@
 
 <div class="viewcode-block" id="background_from_margin">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.background_from_margin">[docs]</a>
-<span class="k">def</span> <span class="nf">background_from_margin</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">background_from_margin</span><span class="p">(</span>
     <span class="n">data_vwu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">margin</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">poly_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute background of the projection data, from the margins of the projections.</span>
@@ -410,9 +410,95 @@
 
 
 
+<div class="viewcode-block" id="snip">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.snip">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">snip</span><span class="p">(</span>
+    <span class="n">img</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">kernel_dims</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply the SNIP algorithm to an image to estimate the background.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img : NDArray</span>
+<span class="sd">        The input image to process.</span>
+<span class="sd">    kernel_dims : Union[int, None], optional</span>
+<span class="sd">        The number of dimensions to apply the SNIP algorithm to. If None, it defaults to the number of dimensions of the image.</span>
+<span class="sd">    iterations : int, optional</span>
+<span class="sd">        The number of iterations to run the SNIP algorithm.</span>
+<span class="sd">    window : int, optional</span>
+<span class="sd">        The size of the window for the convolution kernel.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        If True, display a progress bar during the iterations.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The background-estimated image.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If `kernel_dims` is not between 1 and the number of dimensions of the image.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">kernel_dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kernel_dims</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">ndim</span>
+    <span class="k">elif</span> <span class="n">kernel_dims</span> <span class="o">&gt;</span> <span class="n">img</span><span class="o">.</span><span class="n">ndim</span> <span class="ow">or</span> <span class="n">kernel_dims</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Kernel dimensions (#</span><span class="si">{</span><span class="n">kernel_dims</span><span class="si">}</span><span class="s2">) should be between [1, </span><span class="si">{</span><span class="n">img</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">] (number of image dimensions)&quot;</span><span class="p">)</span>
+
+    <span class="n">kernel_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">ii</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">kernel_dims</span> <span class="k">else</span> <span class="n">window</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">img</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+    <span class="n">kern</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">kernel_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">ii</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">kernel_dims</span> <span class="k">else</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">img</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+    <span class="n">kern</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">kern</span> <span class="o">/=</span> <span class="n">kern</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="n">bckgnd_img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">iterations</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">verbose</span><span class="p">):</span>
+        <span class="n">conv_img</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">bckgnd_img</span><span class="p">,</span> <span class="n">kern</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
+        <span class="n">bckgnd_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="n">conv_img</span><span class="p">,</span> <span class="n">bckgnd_img</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bckgnd_img</span></div>
+
+
+
+<div class="viewcode-block" id="background_from_snip">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.background_from_snip">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">background_from_snip</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">snip_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">smooth_std</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit the background of the projection data using the SNIP algorithm.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_vwu : NDArray</span>
+<span class="sd">        The input dataset to process.</span>
+<span class="sd">    snip_iterations : int, optional</span>
+<span class="sd">        The number of iterations to run the SNIP algorithm.</span>
+<span class="sd">    smooth_std : float, optional</span>
+<span class="sd">        The standard deviation for Gaussian smoothing. If 0.0, no smoothing is applied.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The background-fitted dataset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bg_data_vwu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">data_vwu</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ii_a</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">data_vwu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Angles&quot;</span><span class="p">):</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">data_vwu</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii_a</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">if</span> <span class="n">smooth_std</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">gaussian_filter</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">smooth_std</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ii_d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">img</span><span class="p">[</span><span class="n">ii_d</span><span class="p">]</span> <span class="o">=</span> <span class="n">snip</span><span class="p">(</span><span class="n">img</span><span class="p">[</span><span class="n">ii_d</span><span class="p">],</span> <span class="n">iterations</span><span class="o">=</span><span class="n">snip_iterations</span><span class="p">)</span>
+            <span class="n">bg_data_vwu</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii_a</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">img</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bg_data_vwu</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ii_a</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">snip</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="n">snip_iterations</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bg_data_vwu</span></div>
+
+
+
 <div class="viewcode-block" id="destripe_wlf_vwu">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.destripe_wlf_vwu">[docs]</a>
-<span class="k">def</span> <span class="nf">destripe_wlf_vwu</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">destripe_wlf_vwu</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span><span class="p">,</span>
     <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -478,7 +564,7 @@
 
 <div class="viewcode-block" id="compute_eigen_flats">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.compute_eigen_flats">[docs]</a>
-<span class="k">def</span> <span class="nf">compute_eigen_flats</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_eigen_flats</span><span class="p">(</span>
     <span class="n">trans_wvu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">flats_wvu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">darks_wvu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

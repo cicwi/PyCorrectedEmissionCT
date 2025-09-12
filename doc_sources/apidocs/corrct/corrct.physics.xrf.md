@@ -139,7 +139,7 @@
 :canonical: corrct.physics.xrf.DetectorXRF.surface_mm2
 :type: float
 :value: >
-   None
+   0.0
 
 ```{autodoc2-docstring} corrct.physics.xrf.DetectorXRF.surface_mm2
 ```
@@ -150,7 +150,7 @@
 :canonical: corrct.physics.xrf.DetectorXRF.distance_mm
 :type: typing.Union[float, numpy.typing.NDArray]
 :value: >
-   None
+   1.0
 
 ```{autodoc2-docstring} corrct.physics.xrf.DetectorXRF.distance_mm
 ```
@@ -168,11 +168,28 @@
 
 ````
 
+````{py:method} __post_init__()
+:canonical: corrct.physics.xrf.DetectorXRF.__post_init__
+
+```{autodoc2-docstring} corrct.physics.xrf.DetectorXRF.__post_init__
+```
+
+````
+
 ````{py:property} solid_angle_sr
 :canonical: corrct.physics.xrf.DetectorXRF.solid_angle_sr
 :type: typing.Union[float, numpy.typing.NDArray]
 
 ```{autodoc2-docstring} corrct.physics.xrf.DetectorXRF.solid_angle_sr
+```
+
+````
+
+````{py:property} angle_range_rad
+:canonical: corrct.physics.xrf.DetectorXRF.angle_range_rad
+:type: tuple[float, float]
+
+```{autodoc2-docstring} corrct.physics.xrf.DetectorXRF.angle_range_rad
 ```
 
 ````

@@ -1,27 +1,25 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.struct_illum &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../_static/copybutton.js?v=f281be69"></script>
-        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -93,24 +91,24 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy.linalg</span> <span class="k">as</span> <span class="nn">spalg</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spalg</span>
 
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
 
-<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">operators</span><span class="p">,</span> <span class="n">processing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">operators</span><span class="p">,</span> <span class="n">processing</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">pt</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pt</span>
 
     <span class="n">__has_torch_cuda__</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -122,7 +120,7 @@
 
 <div class="viewcode-block" id="reorder_masks">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.reorder_masks">[docs]</a>
-<span class="k">def</span> <span class="nf">reorder_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">buckets</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reorder_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">buckets</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reorder masks, with a simple rot-n algorithm.</span>
 
 <span class="sd">    Parameters</span>
@@ -151,7 +149,7 @@
 
 <div class="viewcode-block" id="decompose_qr_masks">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.decompose_qr_masks">[docs]</a>
-<span class="k">def</span> <span class="nf">decompose_qr_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">decompose_qr_masks</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute QR decomposition of the given masks.</span>
 
 <span class="sd">    Parameters</span>
@@ -159,7 +157,7 @@
 <span class="sd">    masks : NDArray</span>
 <span class="sd">        The masks to decompose</span>
 <span class="sd">    verbose : bool, optional</span>
-<span class="sd">        Whether to emite verbose output, by default False</span>
+<span class="sd">        Whether to emit verbose output, by default False</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -185,7 +183,7 @@
 
 <div class="viewcode-block" id="estimate_resolution">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.estimate_resolution">[docs]</a>
-<span class="k">def</span> <span class="nf">estimate_resolution</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">plot_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">estimate_resolution</span><span class="p">(</span><span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">plot_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate the mask collection resolution through auto-correlation.</span>
 
 <span class="sd">    Parameters</span>
@@ -232,7 +230,7 @@
 
 <div class="viewcode-block" id="MaskCollection">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection">[docs]</a>
-<span class="k">class</span> <span class="nc">MaskCollection</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaskCollection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Define mask collection class.&quot;&quot;&quot;</span>
 
     <span class="n">masks_enc</span><span class="p">:</span> <span class="n">NDArray</span>
@@ -243,7 +241,7 @@
 
     <span class="n">mask_type</span><span class="p">:</span> <span class="nb">str</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">masks_enc</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">masks_dec</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -293,7 +291,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mask_support</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape_fov</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape_fov</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shape_fov</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the mask shape.</span>
 
 <span class="sd">        Returns</span>
@@ -304,7 +302,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">masks_enc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_dims</span> <span class="p">:]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape_shifts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shape_shifts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the shape of the available shifts.</span>
 
 <span class="sd">        Returns</span>
@@ -315,7 +313,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">masks_enc</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_dims</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_buckets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_buckets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the total number of available buckets.</span>
 
 <span class="sd">        Returns</span>
@@ -326,7 +324,7 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape_shifts</span><span class="p">))</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the number of pixels in the image.</span>
 
 <span class="sd">        Returns</span>
@@ -338,7 +336,7 @@
 
 <div class="viewcode-block" id="MaskCollection.info">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.info">[docs]</a>
-    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the mask info.</span>
 
@@ -352,7 +350,7 @@
 
 <div class="viewcode-block" id="MaskCollection.upper">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.upper">[docs]</a>
-    <span class="k">def</span> <span class="nf">upper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">upper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the upper case name of the mask.</span>
 
@@ -366,7 +364,7 @@
 
 <div class="viewcode-block" id="MaskCollection.lower">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.lower">[docs]</a>
-    <span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lower</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the lower case name of the mask.</span>
 
@@ -380,7 +378,7 @@
 
 <div class="viewcode-block" id="MaskCollection.get_mask">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.get_mask">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the requested mask.</span>
 
 <span class="sd">        Parameters</span>
@@ -403,9 +401,9 @@
         <span class="k">return</span> <span class="n">mask</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">mask_inds_vu</span><span class="p">)]</span></div>
 
 
-<div class="viewcode-block" id="MaskCollection.get_QR_decomposition">
-<a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.get_QR_decomposition">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_QR_decomposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buckets</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="s2">&quot;MaskCollection&quot;</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<div class="viewcode-block" id="MaskCollection.get_qr_decomposition">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.get_qr_decomposition">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_qr_decomposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buckets</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="s2">&quot;MaskCollection&quot;</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute and return the QR decomposition of the masks.</span>
 
 <span class="sd">        Parameters</span>
@@ -435,14 +433,14 @@
 
         <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">,</span> <span class="n">R1t</span> <span class="o">=</span> <span class="n">decompose_qr_masks</span><span class="p">(</span><span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">)</span>
         <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_dec</span> <span class="o">=</span> <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span>
-        <span class="n">new_buckets</span> <span class="o">=</span> <span class="n">R1t</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">new_buckets</span><span class="p">)</span>
+        <span class="n">new_buckets</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">R1t</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">new_buckets</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">new_masks</span><span class="p">,</span> <span class="n">new_buckets</span></div>
+        <span class="k">return</span> <span class="n">new_masks</span><span class="p">,</span> <span class="n">new_buckets</span><span class="o">.</span><span class="n">T</span></div>
 
 
 <div class="viewcode-block" id="MaskCollection.bin_masks">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.bin_masks">[docs]</a>
-    <span class="k">def</span> <span class="nf">bin_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binning</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;MaskCollection&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bin_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binning</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;MaskCollection&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Bin the masks.</span>
 
 <span class="sd">        Parameters</span>
@@ -465,7 +463,7 @@
 
 <div class="viewcode-block" id="MaskCollection.inspect_masks">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.inspect_masks">[docs]</a>
-    <span class="k">def</span> <span class="nf">inspect_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inspect_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Inspect the encoding and decoding masks at the requested shifts.</span>
 
 <span class="sd">        Parameters</span>
@@ -494,7 +492,7 @@
 
 <div class="viewcode-block" id="MaskGenerator">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator">[docs]</a>
-<span class="k">class</span> <span class="nc">MaskGenerator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaskGenerator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Define mask generation interface.&quot;&quot;&quot;</span>
 
     <span class="n">shape_fov</span><span class="p">:</span> <span class="n">NDArrayInt</span>
@@ -507,7 +505,7 @@
 
     <span class="n">__mask_name__</span> <span class="o">=</span> <span class="s2">&quot;generated&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">shape_fov</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">],</span>
         <span class="n">shape_mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">],</span>
@@ -542,7 +540,7 @@
 
 <div class="viewcode-block" id="MaskGenerator.info">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.info">[docs]</a>
-    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the mask info.</span>
 
@@ -556,7 +554,7 @@
 
 <div class="viewcode-block" id="MaskGenerator.__repr__">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.__repr__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce the string representation of the object.</span>
 
 <span class="sd">        Returns</span>
@@ -568,7 +566,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">max_buckets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_buckets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the maximum number of buckets.</span>
 
 <span class="sd">        Returns</span>
@@ -579,7 +577,7 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape_shifts</span><span class="p">))</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the number of pixels in the image.</span>
 
 <span class="sd">        Returns</span>
@@ -591,7 +589,7 @@
 
 <div class="viewcode-block" id="MaskGenerator._init_fov_mm">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator._init_fov_mm">[docs]</a>
-    <span class="k">def</span> <span class="nf">_init_fov_mm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fov_size_mm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">req_res_mm</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayInt</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_fov_mm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fov_size_mm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">req_res_mm</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayInt</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fov_size_mm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fov_size_mm</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">num_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fov_size_mm</span> <span class="o">/</span> <span class="n">req_res_mm</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_size_mm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fov_size_mm</span> <span class="o">/</span> <span class="n">num_points</span>
@@ -601,7 +599,7 @@
 
 <div class="viewcode-block" id="MaskGenerator.generate_collection">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.generate_collection">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buckets_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">shift_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sequential&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MaskCollection</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buckets_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">shift_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sequential&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MaskCollection</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate the mask collection.</span>
 
 <span class="sd">        Parameters</span>
@@ -654,14 +652,14 @@
 
 <div class="viewcode-block" id="MaskGenerator._apply_transmission">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator._apply_transmission">[docs]</a>
-    <span class="k">def</span> <span class="nf">_apply_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">masks</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">masks</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmittance</span></div>
 
 
 <div class="viewcode-block" id="MaskGenerator.generate_shifted_mask">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.generate_shifted_mask">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">generate_shifted_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_shifted_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce the shifted masks.</span>
 
 <span class="sd">        Parameters</span>
@@ -680,7 +678,7 @@
 
 <div class="viewcode-block" id="MaskGenerator._generate_mask_shifts">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator._generate_mask_shifts">[docs]</a>
-    <span class="k">def</span> <span class="nf">_generate_mask_shifts</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_mask_shifts</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">shifts_v</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">shifts_u</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce all the masks.</span>
@@ -707,7 +705,7 @@
 
 <div class="viewcode-block" id="MaskGenerator.get_interval_shifts">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.get_interval_shifts">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_interval_shifts</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_interval_shifts</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">axes_order</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce shifts for the &quot;interval&quot; shift type.</span>
@@ -735,7 +733,7 @@
 
 <div class="viewcode-block" id="MaskGenerator.get_random_shifts">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.get_random_shifts">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_random_shifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_shifts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">axes_order</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_random_shifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_shifts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">axes_order</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce shifts for the &quot;random&quot; shift type.</span>
 
 <span class="sd">        Parameters</span>
@@ -759,7 +757,7 @@
 
 <div class="viewcode-block" id="MaskGenerator.get_sequential_shifts">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.get_sequential_shifts">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_sequential_shifts</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_sequential_shifts</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">num_shifts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">axes_order</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce shifts for the &quot;sequential&quot; shift type.</span>
@@ -786,12 +784,12 @@
 
 <div class="viewcode-block" id="MaskGeneratorPoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGeneratorPoint">[docs]</a>
-<span class="k">class</span> <span class="nc">MaskGeneratorPoint</span><span class="p">(</span><span class="n">MaskGenerator</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaskGeneratorPoint</span><span class="p">(</span><span class="n">MaskGenerator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Pencil beam masks generator class.&quot;&quot;&quot;</span>
 
     <span class="n">__mask_name__</span> <span class="o">=</span> <span class="s2">&quot;pencil&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fov_size_mm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">req_res_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fov_size_mm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">req_res_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the pencil beam mask collection.</span>
 
 <span class="sd">        Parameters</span>
@@ -806,7 +804,7 @@
 
 <div class="viewcode-block" id="MaskGeneratorPoint.generate_shifted_mask">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGeneratorPoint.generate_shifted_mask">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_shifted_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_shifted_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce the shifted masks.</span>
 
 <span class="sd">        Parameters</span>
@@ -830,12 +828,12 @@
 
 <div class="viewcode-block" id="MaskGeneratorBernoulli">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGeneratorBernoulli">[docs]</a>
-<span class="k">class</span> <span class="nc">MaskGeneratorBernoulli</span><span class="p">(</span><span class="n">MaskGenerator</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaskGeneratorBernoulli</span><span class="p">(</span><span class="n">MaskGenerator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bernoulli mask generator class.&quot;&quot;&quot;</span>
 
     <span class="n">__mask_name__</span> <span class="o">=</span> <span class="s2">&quot;bernoulli&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">fov_size_mm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">req_res_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">max_masks_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.2</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -859,7 +857,7 @@
 
 <div class="viewcode-block" id="MaskGeneratorBernoulli.generate_shifted_mask">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGeneratorBernoulli.generate_shifted_mask">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_shifted_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_shifted_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce the shifted masks.</span>
 
 <span class="sd">        Parameters</span>
@@ -882,12 +880,12 @@
 
 <div class="viewcode-block" id="MaskGeneratorHalfGaussian">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGeneratorHalfGaussian">[docs]</a>
-<span class="k">class</span> <span class="nc">MaskGeneratorHalfGaussian</span><span class="p">(</span><span class="n">MaskGenerator</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaskGeneratorHalfGaussian</span><span class="p">(</span><span class="n">MaskGenerator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Half-Gaussian mask generator class.&quot;&quot;&quot;</span>
 
     <span class="n">__mask_name__</span> <span class="o">=</span> <span class="s2">&quot;half-gaussian&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">fov_size_mm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">req_res_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">max_masks_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.2</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -911,7 +909,7 @@
 
 <div class="viewcode-block" id="MaskGeneratorHalfGaussian.generate_shifted_mask">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGeneratorHalfGaussian.generate_shifted_mask">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_shifted_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_shifted_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce the shifted masks.</span>
 
 <span class="sd">        Parameters</span>
@@ -934,12 +932,12 @@
 
 <div class="viewcode-block" id="MaskGeneratorMURA">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGeneratorMURA">[docs]</a>
-<span class="k">class</span> <span class="nc">MaskGeneratorMURA</span><span class="p">(</span><span class="n">MaskGenerator</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaskGeneratorMURA</span><span class="p">(</span><span class="n">MaskGenerator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;MURA mask generator class.&quot;&quot;&quot;</span>
 
     <span class="n">__mask_name__</span> <span class="o">=</span> <span class="s2">&quot;mura&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fov_size_mm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">req_res_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fov_size_mm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">req_res_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        MURA masks collection class.</span>
 
@@ -972,7 +970,7 @@
 
 <div class="viewcode-block" id="MaskGeneratorMURA.generate_shifted_mask">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGeneratorMURA.generate_shifted_mask">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_shifted_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_shifted_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inds_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">mask_encoding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce the shifted masks.</span>
 
 <span class="sd">        Parameters</span>
@@ -1001,7 +999,7 @@
 <div class="viewcode-block" id="MaskGeneratorMURA.compute_possible_mask_sizes">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGeneratorMURA.compute_possible_mask_sizes">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">compute_possible_mask_sizes</span><span class="p">(</span><span class="n">fov_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_possible_mask_sizes</span><span class="p">(</span><span class="n">fov_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute MURA masks sizes.</span>
 
 <span class="sd">        MURA masks require specific edge sizes: prime numbers _x_ that also</span>
@@ -1018,7 +1016,7 @@
 <span class="sd">            Array of all possible MURA mask sizes in that range.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">test_prime</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">test_prime</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="n">div_val</span> <span class="o">=</span> <span class="n">x</span> <span class="o">%</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
             <span class="k">return</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">div_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 
@@ -1032,12 +1030,12 @@
 
 <div class="viewcode-block" id="ProjectorGhostImaging">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging">[docs]</a>
-<span class="k">class</span> <span class="nc">ProjectorGhostImaging</span><span class="p">(</span><span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProjectorGhostImaging</span><span class="p">(</span><span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Projector class for the ghost imaging reconstructions.&quot;&quot;&quot;</span>
 
     <span class="n">mc</span><span class="p">:</span> <span class="n">MaskCollection</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_collection</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">MaskCollection</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;torch&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_collection</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">MaskCollection</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;torch&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Ghost Imaging projector class.</span>
 
@@ -1059,19 +1057,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">prj_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">num_buckets</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;torch&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">__has_torch_cuda__</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;torch&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">__has_torch_cuda__</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Requested PyTorch&#39;s backend, but CUDA is not available. Reverting back to NumPy.&quot;</span><span class="p">)</span>
             <span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;numpy&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_backend</span><span class="p">()</span>
 
+<div class="viewcode-block" id="ProjectorGhostImaging._get_backend_device">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging._get_backend_device">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_backend_device</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]:</span>
+        <span class="n">backend</span><span class="p">,</span> <span class="o">*</span><span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">backend</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">backend</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">device</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="ProjectorGhostImaging._init_backend">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging._init_backend">[docs]</a>
-    <span class="k">def</span> <span class="nf">_init_backend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;torch&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">:</span> <span class="n">pt</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">:</span> <span class="n">pt</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_backend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">backend</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_backend_device</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;torch&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">:</span> <span class="n">pt</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">:</span> <span class="n">pt</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_enc</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1080,7 +1090,7 @@
 
 <div class="viewcode-block" id="ProjectorGhostImaging.fp">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging.fp">[docs]</a>
-    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute forward-projection (prediction) of the bucket values.</span>
 
 <span class="sd">        Parameters</span>
@@ -1099,18 +1109,21 @@
         <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">image_shape</span><span class="p">)</span>
         <span class="n">masks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">masks_enc</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">masks_shape</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+        <span class="n">backend</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_backend_device</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">masks</span><span class="p">))</span>
             <span class="c1"># return np.sum(self.masks_enc * image, axis=(-2, -1))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">image</span><span class="p">:</span> <span class="n">pt</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span>
+            <span class="n">image</span><span class="p">:</span> <span class="n">pt</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
             <span class="n">bucket_vals</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">masks</span><span class="p">,</span> <span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">bucket_vals</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ProjectorGhostImaging.bp">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging.bp">[docs]</a>
-    <span class="k">def</span> <span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute back-projection of the bucket values.</span>
 
 <span class="sd">        Parameters</span>
@@ -1129,10 +1142,14 @@
         <span class="n">out_shape</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">bucket_vals</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_fov</span><span class="p">]</span>
 
         <span class="n">masks_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">masks_dec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">masks_shape</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+
+        <span class="n">backend</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_backend_device</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
             <span class="n">img_out</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">bucket_vals</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">masks_in</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">buckets</span><span class="p">:</span> <span class="n">pt</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bucket_vals</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span>
+            <span class="n">buckets</span><span class="p">:</span> <span class="n">pt</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bucket_vals</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
             <span class="n">img_out</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">buckets</span><span class="p">,</span> <span class="n">masks_in</span><span class="p">,</span> <span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">img_out</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">out_shape</span><span class="p">)</span></div>
@@ -1141,7 +1158,7 @@
 
 <div class="viewcode-block" id="ProjectorGhostImaging.adjust_sampling_scaling">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging.adjust_sampling_scaling">[docs]</a>
-    <span class="k">def</span> <span class="nf">adjust_sampling_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adjust_sampling_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adjust reconstruction scaling and bias, due to the undersampling.</span>
 
 <span class="sd">        Parameters</span>
@@ -1168,7 +1185,7 @@
 
 <div class="viewcode-block" id="ProjectorGhostImaging.fbp">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging.fbp">[docs]</a>
-    <span class="k">def</span> <span class="nf">fbp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">use_lstsq</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">adjust_scaling</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fbp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">use_lstsq</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">adjust_scaling</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute cross-correlation reconstruction of the bucket values.</span>
 
 <span class="sd">        Parameters</span>
@@ -1202,7 +1219,7 @@
 
 <div class="viewcode-block" id="ProjectorGhostImaging.absolute">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging.absolute">[docs]</a>
-    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the absolute value of the projection operator coefficients.</span>
 
 <span class="sd">        Returns</span>
@@ -1215,6 +1232,70 @@
         <span class="n">Op_a</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Op_a</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">)</span>
         <span class="n">Op_a</span><span class="o">.</span><span class="n">_init_backend</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">Op_a</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ProjectorGhostTomography">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostTomography">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProjectorGhostTomography</span><span class="p">(</span><span class="n">ProjectorGhostImaging</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ghost tomography projector.&quot;&quot;&quot;</span>
+
+    <span class="n">tomo_proj</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mask_collection</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">MaskCollection</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">tomo_proj</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;torch&quot;</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mask_collection</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+
+        <span class="n">tomo_prj_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">tomo_proj</span><span class="o">.</span><span class="n">dir_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">tomo_proj</span><span class="o">.</span><span class="n">dir_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="c1"># Special care should be given to support when implemented</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tomo_prj_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">mask_dims</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">tomo_prj_shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_fov</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Tomographic projection shape </span><span class="si">{</span><span class="n">tomo_prj_shape</span><span class="si">}</span><span class="s2"> ([V]U, from: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tomo_proj</span><span class="o">.</span><span class="n">dir_shape</span><span class="si">}</span><span class="s2"> [V]WU)&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; does not match ghost imaging projector shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mc</span><span class="o">.</span><span class="n">shape_fov</span><span class="si">}</span><span class="s2"> ([V]U, from: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">masks_enc</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> M[V]U)&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tomo_proj</span> <span class="o">=</span> <span class="n">tomo_proj</span>
+
+<div class="viewcode-block" id="ProjectorGhostTomography.fp">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostTomography.fp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol_zyx</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute forward-projection (prediction) of the bucket values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vol_zyx : NDArray</span>
+<span class="sd">            The volume for which we want to predict the bucket values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NDArray</span>
+<span class="sd">            The predicted bucket values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">imgs_vwu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tomo_proj</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">vol_zyx</span><span class="p">)</span>
+        <span class="n">imgs_wvu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">imgs_vwu</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">imgs_wvu</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProjectorGhostTomography.bp">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostTomography.bp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute back-projection of the bucket values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        bucket_vals : NDArray</span>
+<span class="sd">            The list of bucket values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NDArray</span>
+<span class="sd">            Back-projected volume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">imgs_wvu</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">bucket_vals</span><span class="p">)</span>
+        <span class="n">imgs_vwu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">imgs_wvu</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tomo_proj</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">imgs_vwu</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

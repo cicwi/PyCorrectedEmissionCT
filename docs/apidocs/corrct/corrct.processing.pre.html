@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,24 +7,20 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.processing.pre &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../_static/copybutton.js?v=f281be69"></script>
-        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -132,6 +130,12 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#corrct.processing.pre.background_from_margin" title="corrct.processing.pre.background_from_margin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">background_from_margin</span></code></a></p></td>
 <td><p>Compute background of the projection data, from the margins of the projections.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.processing.pre.snip" title="corrct.processing.pre.snip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snip</span></code></a></p></td>
+<td><p>Apply the SNIP algorithm to an image to estimate the background.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.processing.pre.background_from_snip" title="corrct.processing.pre.background_from_snip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">background_from_snip</span></code></a></p></td>
+<td><p>Fit the background of the projection data using the SNIP algorithm.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#corrct.processing.pre.destripe_wlf_vwu" title="corrct.processing.pre.destripe_wlf_vwu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">destripe_wlf_vwu</span></code></a></p></td>
 <td><p>Remove stripes from sinogram, using the Wavelet-Fourier method.</p></td>
 </tr>
@@ -163,7 +167,7 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <dt class="sig sig-object py" id="corrct.processing.pre.pad_sinogram">
 <span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">pad_sinogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sinogram</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'edge'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#pad_sinogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.pad_sinogram" title="Link to this definition"></a></dt>
 <dd><p>Pad the sinogram.</p>
-<p class="rubric" id="id17">Parameters</p>
+<p class="rubric" id="id22">Parameters</p>
 <p>sinogram : NDArray
 The sinogram to pad.
 width : Union[int, Sequence[int]]
@@ -174,7 +178,7 @@ mode : str, optional
 The padding type (from numpy.pad). The default is “edge”.
 **kwds :
 The numpy.pad arguments.</p>
-<p class="rubric" id="id18">Returns</p>
+<p class="rubric" id="id23">Returns</p>
 <p>NDArray
 The padded sinogram.</p>
 </dd></dl>
@@ -183,7 +187,7 @@ The padded sinogram.</p>
 <dt class="sig sig-object py" id="corrct.processing.pre.apply_flat_field">
 <span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">apply_flat_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">projs_wvu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flats_wvu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">darks_wvu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cap_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#apply_flat_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.apply_flat_field" title="Link to this definition"></a></dt>
 <dd><p>Apply flat field.</p>
-<p class="rubric" id="id19">Parameters</p>
+<p class="rubric" id="id24">Parameters</p>
 <p>projs : NDArray
 Projections.
 flats : NDArray
@@ -196,7 +200,7 @@ cap_intensity: float | None, optional
 Cap the intensity to a given value. The default is None.
 dtype : DTypeLike, optional
 Data type of the processed data. The default is np.float32.</p>
-<p class="rubric" id="id20">Returns</p>
+<p class="rubric" id="id25">Returns</p>
 <p>NDArray
 Flat-field corrected and linearized projections.</p>
 </dd></dl>
@@ -205,10 +209,10 @@ Flat-field corrected and linearized projections.</p>
 <dt class="sig sig-object py" id="corrct.processing.pre.apply_minus_log">
 <span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">apply_minus_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">projs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-np.inf</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#apply_minus_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.apply_minus_log" title="Link to this definition"></a></dt>
 <dd><p>Apply -log.</p>
-<p class="rubric" id="id21">Parameters</p>
+<p class="rubric" id="id26">Parameters</p>
 <p>projs : NDArray
 Projections.</p>
-<p class="rubric" id="id22">Returns</p>
+<p class="rubric" id="id27">Returns</p>
 <p>NDArray
 Linearized projections.</p>
 </dd></dl>
@@ -217,12 +221,12 @@ Linearized projections.</p>
 <dt class="sig sig-object py" id="corrct.processing.pre.rotate_proj_stack">
 <span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">rotate_proj_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_vwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_angle_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#rotate_proj_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.rotate_proj_stack" title="Link to this definition"></a></dt>
 <dd><p>Rotate the projection stack.</p>
-<p class="rubric" id="id23">Parameters</p>
+<p class="rubric" id="id28">Parameters</p>
 <p>data_vwu : NDArray
 The projection stack, with dimensions [v, w, u] (vertical, omega / sample rotation, horizontal).
 rot_angle_deg : float
 The rotation angle in degrees.</p>
-<p class="rubric" id="id24">Returns</p>
+<p class="rubric" id="id29">Returns</p>
 <p>NDArray
 The rotated projection stack.</p>
 </dd></dl>
@@ -231,14 +235,14 @@ The rotated projection stack.</p>
 <dt class="sig sig-object py" id="corrct.processing.pre.shift_proj_stack">
 <span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">shift_proj_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_vwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shifts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_fft</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#shift_proj_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.shift_proj_stack" title="Link to this definition"></a></dt>
 <dd><p>Shift each projection in a stack of projections, by projection dependent shifts.</p>
-<p class="rubric" id="id25">Parameters</p>
+<p class="rubric" id="id30">Parameters</p>
 <p>data_vwu : NDArray
 The projection stack
 shifts : NDArray
 The shifts
 use_fft : bool, optional
 Whether to use fft shift or not, by default False</p>
-<p class="rubric" id="id26">Returns</p>
+<p class="rubric" id="id31">Returns</p>
 <p>NDArray
 The shifted stack</p>
 </dd></dl>
@@ -247,7 +251,7 @@ The shifted stack</p>
 <dt class="sig sig-object py" id="corrct.processing.pre.bin_imgs">
 <span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">bin_imgs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-2,</span> <span class="pre">-1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_crop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#bin_imgs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.bin_imgs" title="Link to this definition"></a></dt>
 <dd><p>Bin a stack of images.</p>
-<p class="rubric" id="id27">Parameters</p>
+<p class="rubric" id="id32">Parameters</p>
 <p>imgs : NDArray
 The stack of images.
 binning : int | float
@@ -256,7 +260,7 @@ auto_crop : bool, optional
 Whether to automatically crop the images to match, by default False
 verbose : bool, optional
 Whether to print the image shapes, by default True</p>
-<p class="rubric" id="id28">Returns</p>
+<p class="rubric" id="id33">Returns</p>
 <p>NDArray
 The binned images</p>
 </dd></dl>
@@ -265,17 +269,17 @@ The binned images</p>
 <dt class="sig sig-object py" id="corrct.processing.pre.background_from_margin">
 <span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">background_from_margin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_vwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.integer</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poly_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#background_from_margin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.background_from_margin" title="Link to this definition"></a></dt>
 <dd><p>Compute background of the projection data, from the margins of the projections.</p>
-<p class="rubric" id="id29">Parameters</p>
+<p class="rubric" id="id34">Parameters</p>
 <p>data_vwu : NDArray
 The projection data in the format [V]WU.
 margin : int | Sequence[int] | NDArray[np.integer], optional
 The size of the margin, by default 4
 poly_order : int, optional
 The order of the interpolation polynomial, by default 0</p>
-<p class="rubric" id="id30">Returns</p>
+<p class="rubric" id="id35">Returns</p>
 <p>NDArray
 The computed background.</p>
-<p class="rubric" id="id31">Raises</p>
+<p class="rubric" id="id36">Raises</p>
 <p>NotImplementedError
 Different margins per line are not supported, at the moment.
 ValueError
@@ -283,10 +287,49 @@ In case the margins ar larger than the image size in U.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="corrct.processing.pre.snip">
+<span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">snip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_dims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#snip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.snip" title="Link to this definition"></a></dt>
+<dd><p>Apply the SNIP algorithm to an image to estimate the background.</p>
+<p class="rubric" id="id37">Parameters</p>
+<p>img : NDArray
+The input image to process.
+kernel_dims : Union[int, None], optional
+The number of dimensions to apply the SNIP algorithm to. If None, it defaults to the number of dimensions of the image.
+iterations : int, optional
+The number of iterations to run the SNIP algorithm.
+window : int, optional
+The size of the window for the convolution kernel.
+verbose : bool, optional
+If True, display a progress bar during the iterations.</p>
+<p class="rubric" id="id38">Returns</p>
+<p>NDArray
+The background-estimated image.</p>
+<p class="rubric" id="id39">Raises</p>
+<p>ValueError
+If <code class="docutils literal notranslate"><span class="pre">kernel_dims</span></code> is not between 1 and the number of dimensions of the image.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.processing.pre.background_from_snip">
+<span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">background_from_snip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_vwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snip_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#background_from_snip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.background_from_snip" title="Link to this definition"></a></dt>
+<dd><p>Fit the background of the projection data using the SNIP algorithm.</p>
+<p class="rubric" id="id40">Parameters</p>
+<p>data_vwu : NDArray
+The input dataset to process.
+snip_iterations : int, optional
+The number of iterations to run the SNIP algorithm.
+smooth_std : float, optional
+The standard deviation for Gaussian smoothing. If 0.0, no smoothing is applied.</p>
+<p class="rubric" id="id41">Returns</p>
+<p>NDArray
+The background-fitted dataset.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="corrct.processing.pre.destripe_wlf_vwu">
 <span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">destripe_wlf_vwu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bior2.2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#destripe_wlf_vwu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.destripe_wlf_vwu" title="Link to this definition"></a></dt>
 <dd><p>Remove stripes from sinogram, using the Wavelet-Fourier method.</p>
-<p class="rubric" id="id32">Parameters</p>
+<p class="rubric" id="id42">Parameters</p>
 <p>data : NDArray
 The data to de-stripe
 sigma : float, optional
@@ -299,7 +342,7 @@ angle_axis : int, optional
 The axis of the Fourier transform, by default -2
 other_axes : Union[Sequence[int], NDArray, None], optional
 The axes of the wavelet decomposition, by default None</p>
-<p class="rubric" id="id33">Returns</p>
+<p class="rubric" id="id43">Returns</p>
 <p>NDArray
 The de-striped data.</p>
 </dd></dl>
@@ -308,7 +351,7 @@ The de-striped data.</p>
 <dt class="sig sig-object py" id="corrct.processing.pre.compute_eigen_flats">
 <span class="sig-prename descclassname"><span class="pre">corrct.processing.pre.</span></span><span class="sig-name descname"><span class="pre">compute_eigen_flats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trans_wvu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flats_wvu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">darks_wvu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/processing/pre.html#compute_eigen_flats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.processing.pre.compute_eigen_flats" title="Link to this definition"></a></dt>
 <dd><p>Compute the eigen flats of a stack of transmission images.</p>
-<p class="rubric" id="id34">Parameters</p>
+<p class="rubric" id="id44">Parameters</p>
 <p>trans : NDArray
 The stack of transmission images.
 flats : NDArray
@@ -319,7 +362,7 @@ ndim : int, optional
 The number of dimensions of the images, by default 2
 plot : bool, optional
 Whether to plot the results, by default False</p>
-<p class="rubric" id="id35">Returns</p>
+<p class="rubric" id="id45">Returns</p>
 <p>Tuple[NDArray, NDArray]
 The decomposition of the transmissions of the sample and the flats.</p>
 </dd></dl>

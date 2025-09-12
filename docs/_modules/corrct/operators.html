@@ -1,27 +1,25 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.operators &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../_static/copybutton.js?v=f281be69"></script>
-        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -91,18 +89,18 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">copy</span> <span class="k">as</span> <span class="nn">cp</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">spsig</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
-<span class="kn">from</span> <span class="nn">scipy.sparse.linalg</span> <span class="kn">import</span> <span class="n">LinearOperator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spsig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearOperator</span>
 
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">pywt</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pywt</span>
 
     <span class="n">has_pywt</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">use_swtn</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">version</span> <span class="o">&gt;=</span> <span class="s2">&quot;1.0.2&quot;</span>  <span class="c1"># type: ignore</span>
@@ -119,7 +117,7 @@
 
 <div class="viewcode-block" id="BaseTransform">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseTransform</span><span class="p">(</span><span class="n">LinearOperator</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseTransform</span><span class="p">(</span><span class="n">LinearOperator</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base operator class.</span>
 
 <span class="sd">    It implements the linear operator behavior that can be used with the solvers in the `.solvers` module,</span>
@@ -145,7 +143,7 @@
     <span class="n">dir_shape</span><span class="p">:</span> <span class="n">NDArrayInt</span>
     <span class="n">adj_shape</span><span class="p">:</span> <span class="n">NDArrayInt</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the base operator class.&quot;&quot;&quot;</span>
         <span class="n">num_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir_shape</span><span class="p">)</span>
         <span class="n">num_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adj_shape</span><span class="p">)</span>
@@ -154,7 +152,7 @@
 
 <div class="viewcode-block" id="BaseTransform._matvec">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform._matvec">[docs]</a>
-    <span class="k">def</span> <span class="nf">_matvec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_matvec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Implement the direct operator for column vectors from the right.</span>
 
 <span class="sd">        Parameters</span>
@@ -177,7 +175,7 @@
 
 <div class="viewcode-block" id="BaseTransform.rmatvec">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform.rmatvec">[docs]</a>
-    <span class="k">def</span> <span class="nf">rmatvec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rmatvec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Implement the direct operator for row vectors from the left.</span>
 
 <span class="sd">        Parameters</span>
@@ -200,7 +198,7 @@
 
 <div class="viewcode-block" id="BaseTransform._transpose">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform._transpose">[docs]</a>
-    <span class="k">def</span> <span class="nf">_transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseTransform&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseTransform&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the transpose operator.</span>
 
 <span class="sd">        Returns</span>
@@ -216,7 +214,7 @@
 
 <div class="viewcode-block" id="BaseTransform._adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform._adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseTransform&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseTransform&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the adjoint operator.</span>
 
 <span class="sd">        Returns</span>
@@ -229,7 +227,7 @@
 
 <div class="viewcode-block" id="BaseTransform.absolute">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform.absolute">[docs]</a>
-    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseTransform&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseTransform&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the absolute value of the operator.</span>
 
 <span class="sd">        Returns</span>
@@ -242,7 +240,7 @@
 
 <div class="viewcode-block" id="BaseTransform.explicit">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform.explicit">[docs]</a>
-    <span class="k">def</span> <span class="nf">explicit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">explicit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the explicit transformation matrix associated with the operator.</span>
 
 <span class="sd">        Returns</span>
@@ -264,7 +262,7 @@
 
 <div class="viewcode-block" id="BaseTransform.__call__">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform.__call__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the operator to the input vector `x`.</span>
 
 <span class="sd">        Parameters</span>
@@ -286,7 +284,7 @@
 <div class="viewcode-block" id="BaseTransform._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform._op_direct">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the operator to the data.</span>
 
 <span class="sd">        Parameters</span>
@@ -304,7 +302,7 @@
 <div class="viewcode-block" id="BaseTransform._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform._op_adjoint">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the adjoint operator to the data.</span>
 
 <span class="sd">        Parameters</span>
@@ -323,10 +321,10 @@
 
 <div class="viewcode-block" id="TransformFunctions">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformFunctions">[docs]</a>
-<span class="k">class</span> <span class="nc">TransformFunctions</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformFunctions</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform class that uses callables.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dir_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
         <span class="n">adj_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
@@ -356,7 +354,7 @@
 
 <div class="viewcode-block" id="TransformFunctions._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformFunctions._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the operator to the data.</span>
 
 <span class="sd">        Parameters</span>
@@ -374,7 +372,7 @@
 
 <div class="viewcode-block" id="TransformFunctions._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformFunctions._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the adjoint operator to the data.</span>
 
 <span class="sd">        Parameters</span>
@@ -395,7 +393,7 @@
 
 <div class="viewcode-block" id="TransformFunctions.absolute">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformFunctions.absolute">[docs]</a>
-    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TransformFunctions&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TransformFunctions&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the absolute value of the operator. Raise an error, because not supported.</span>
 
 <span class="sd">        Raises</span>
@@ -410,11 +408,11 @@
 
 <div class="viewcode-block" id="ProjectorOperator">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.ProjectorOperator">[docs]</a>
-<span class="k">class</span> <span class="nc">ProjectorOperator</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProjectorOperator</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base projector class that fixes the projection interface.&quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">vol_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayInt</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vol_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayInt</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Expose the direct space shape as volume shape.</span>
 
 <span class="sd">        Returns</span>
@@ -425,7 +423,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dir_shape</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">prj_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayInt</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prj_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayInt</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Expose the adjoint space shape as projection shape.</span>
 
 <span class="sd">        Returns</span>
@@ -436,17 +434,17 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adj_shape</span>
 
     <span class="nd">@vol_shape</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">vol_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vol_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dir_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="nd">@prj_shape</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">prj_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prj_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adj_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ProjectorOperator.fp">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.ProjectorOperator.fp">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define the interface of the forward-projection.</span>
 
@@ -465,7 +463,7 @@
 <div class="viewcode-block" id="ProjectorOperator.bp">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.ProjectorOperator.bp">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define the interface for the back-projection.</span>
 
@@ -483,19 +481,19 @@
 
 <div class="viewcode-block" id="ProjectorOperator._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.ProjectorOperator._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ProjectorOperator._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.ProjectorOperator._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ProjectorOperator.get_pre_weights">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.ProjectorOperator.get_pre_weights">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the pre-weights of the projector geometry (notably for cone-beam geometries).</span>
 
 <span class="sd">        Returns</span>
@@ -510,10 +508,10 @@
 
 <div class="viewcode-block" id="TransformIdentity">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformIdentity">[docs]</a>
-<span class="k">class</span> <span class="nc">TransformIdentity</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformIdentity</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Identity operator.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Identity operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -527,13 +525,13 @@
 
 <div class="viewcode-block" id="TransformIdentity._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformIdentity._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
 
 <div class="viewcode-block" id="TransformIdentity._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformIdentity._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">x</span></div>
 </div>
 
@@ -541,12 +539,12 @@
 
 <div class="viewcode-block" id="TransformDiagonalScaling">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformDiagonalScaling">[docs]</a>
-<span class="k">class</span> <span class="nc">TransformDiagonalScaling</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformDiagonalScaling</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Diagonal scaling operator.&quot;&quot;&quot;</span>
 
     <span class="n">scale</span><span class="p">:</span> <span class="n">NDArray</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">scale</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">scale</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Diagonal scaling operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -563,7 +561,7 @@
 
 <div class="viewcode-block" id="TransformDiagonalScaling.absolute">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformDiagonalScaling.absolute">[docs]</a>
-    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TransformDiagonalScaling&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TransformDiagonalScaling&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the projection operator using the absolute value of the projection coefficients.</span>
 
 <span class="sd">        Returns</span>
@@ -576,13 +574,13 @@
 
 <div class="viewcode-block" id="TransformDiagonalScaling._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformDiagonalScaling._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span></div>
 
 
 <div class="viewcode-block" id="TransformDiagonalScaling._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformDiagonalScaling._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span></div>
 </div>
 
@@ -590,7 +588,7 @@
 
 <div class="viewcode-block" id="TransformConvolution">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformConvolution">[docs]</a>
-<span class="k">class</span> <span class="nc">TransformConvolution</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformConvolution</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convolution operator.</span>
 
@@ -614,7 +612,7 @@
     <span class="n">is_symm</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">flip_adjoint</span><span class="p">:</span> <span class="nb">bool</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="n">is_symm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">flip_adjoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dir_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -630,7 +628,7 @@
 
 <div class="viewcode-block" id="TransformConvolution.absolute">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformConvolution.absolute">[docs]</a>
-    <span class="k">def</span> <span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TransformConvolution&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TransformConvolution&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the convolution operator using the absolute value of the kernel coefficients.</span>
 
@@ -644,21 +642,21 @@
 
 <div class="viewcode-block" id="TransformConvolution._pad_valid">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformConvolution._pad_valid">[docs]</a>
-    <span class="k">def</span> <span class="nf">_pad_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pad_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
         <span class="n">pad_width</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="n">pad_width</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_mode</span><span class="p">),</span> <span class="n">pad_width</span>  <span class="c1"># type: ignore</span></div>
 
 
 <div class="viewcode-block" id="TransformConvolution._crop_valid">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformConvolution._crop_valid">[docs]</a>
-    <span class="k">def</span> <span class="nf">_crop_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">pad_width</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_crop_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">pad_width</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="n">pw</span> <span class="k">if</span> <span class="n">pw</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="o">-</span><span class="n">pw</span> <span class="k">if</span> <span class="n">pw</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">pw</span> <span class="ow">in</span> <span class="n">pad_width</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span><span class="p">)]</span></div>
 
 
 <div class="viewcode-block" id="TransformConvolution._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformConvolution._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">pw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pad_valid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">spsig</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crop_valid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pw</span><span class="p">)</span></div>
@@ -666,7 +664,7 @@
 
 <div class="viewcode-block" id="TransformConvolution._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformConvolution._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_symm</span><span class="p">:</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">pw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pad_valid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip_adjoint</span><span class="p">:</span>
@@ -683,7 +681,7 @@
 
 <div class="viewcode-block" id="BaseWaveletTransform">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseWaveletTransform">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseWaveletTransform</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseWaveletTransform</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base Wavelet transform.&quot;&quot;&quot;</span>
 
     <span class="n">axes</span><span class="p">:</span> <span class="n">NDArrayInt</span>
@@ -695,7 +693,7 @@
 
 <div class="viewcode-block" id="BaseWaveletTransform._initialize_filter_bank">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.BaseWaveletTransform._initialize_filter_bank">[docs]</a>
-    <span class="k">def</span> <span class="nf">_initialize_filter_bank</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_filter_bank</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">num_axes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">bin</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">num_axes</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="n">num_axes</span><span class="p">)]</span>
 
@@ -713,10 +711,10 @@
 
 <div class="viewcode-block" id="TransformDecimatedWavelet">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformDecimatedWavelet">[docs]</a>
-<span class="k">class</span> <span class="nc">TransformDecimatedWavelet</span><span class="p">(</span><span class="n">BaseWaveletTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformDecimatedWavelet</span><span class="p">(</span><span class="n">BaseWaveletTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Decimated wavelet Transform operator.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -780,7 +778,7 @@
 
 <div class="viewcode-block" id="TransformDecimatedWavelet.direct_dwt">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformDecimatedWavelet.direct_dwt">[docs]</a>
-    <span class="k">def</span> <span class="nf">direct_dwt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">direct_dwt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the direct wavelet transform.</span>
 
@@ -799,7 +797,7 @@
 
 <div class="viewcode-block" id="TransformDecimatedWavelet.inverse_dwt">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformDecimatedWavelet.inverse_dwt">[docs]</a>
-    <span class="k">def</span> <span class="nf">inverse_dwt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inverse_dwt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the inverse wavelet transform.</span>
 
@@ -822,7 +820,7 @@
 
 <div class="viewcode-block" id="TransformDecimatedWavelet._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformDecimatedWavelet._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct_dwt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slicing_info</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">coeffs_to_array</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">y</span></div>
@@ -830,7 +828,7 @@
 
 <div class="viewcode-block" id="TransformDecimatedWavelet._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformDecimatedWavelet._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">slicing_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op_direct</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir_shape</span><span class="p">))</span>
 
@@ -842,10 +840,10 @@
 
 <div class="viewcode-block" id="TransformStationaryWavelet">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformStationaryWavelet">[docs]</a>
-<span class="k">class</span> <span class="nc">TransformStationaryWavelet</span><span class="p">(</span><span class="n">BaseWaveletTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformStationaryWavelet</span><span class="p">(</span><span class="n">BaseWaveletTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stationary wavelet Transform operator.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -912,7 +910,7 @@
 
 <div class="viewcode-block" id="TransformStationaryWavelet.direct_swt">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformStationaryWavelet.direct_swt">[docs]</a>
-    <span class="k">def</span> <span class="nf">direct_swt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">direct_swt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the direct wavelet transform.</span>
 
@@ -938,7 +936,7 @@
 
 <div class="viewcode-block" id="TransformStationaryWavelet.inverse_swt">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformStationaryWavelet.inverse_swt">[docs]</a>
-    <span class="k">def</span> <span class="nf">inverse_swt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inverse_swt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the inverse wavelet transform.</span>
 
@@ -965,7 +963,7 @@
 
 <div class="viewcode-block" id="TransformStationaryWavelet._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformStationaryWavelet._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct_swt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="n">lvl</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">lvl</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div>
@@ -973,8 +971,8 @@
 
 <div class="viewcode-block" id="TransformStationaryWavelet._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformStationaryWavelet._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">get_lvl_pos</span><span class="p">(</span><span class="n">lvl</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_lvl_pos</span><span class="p">(</span><span class="n">lvl</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">lvl</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 
         <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[</span>
@@ -987,7 +985,7 @@
 
 <div class="viewcode-block" id="TransformGradient">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformGradient">[docs]</a>
-<span class="k">class</span> <span class="nc">TransformGradient</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformGradient</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gradient operator.</span>
 
@@ -1001,7 +999,7 @@
 <span class="sd">        Padding mode of the gradient. The default is &quot;edge&quot;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">):</span>
         <span class="n">x_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1018,7 +1016,7 @@
 
 <div class="viewcode-block" id="TransformGradient.gradient">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformGradient.gradient">[docs]</a>
-    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the gradient.</span>
 
@@ -1043,7 +1041,7 @@
 
 <div class="viewcode-block" id="TransformGradient.divergence">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformGradient.divergence">[docs]</a>
-    <span class="k">def</span> <span class="nf">divergence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">divergence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the divergence - transpose of gradient.</span>
 
@@ -1068,13 +1066,13 @@
 
 <div class="viewcode-block" id="TransformGradient._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformGradient._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TransformGradient._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformGradient._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">divergence</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 </div>
 
@@ -1082,10 +1080,10 @@
 
 <div class="viewcode-block" id="TransformFourier">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformFourier">[docs]</a>
-<span class="k">class</span> <span class="nc">TransformFourier</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformFourier</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fourier transform operator.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fourier transform.</span>
 
@@ -1114,7 +1112,7 @@
 
 <div class="viewcode-block" id="TransformFourier.fft">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformFourier.fft">[docs]</a>
-    <span class="k">def</span> <span class="nf">fft</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fft</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the fft.</span>
 
@@ -1137,7 +1135,7 @@
 
 <div class="viewcode-block" id="TransformFourier.ifft">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformFourier.ifft">[docs]</a>
-    <span class="k">def</span> <span class="nf">ifft</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ifft</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the inverse of the fft.</span>
 
 <span class="sd">        Parameters</span>
@@ -1156,13 +1154,13 @@
 
 <div class="viewcode-block" id="TransformFourier._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformFourier._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TransformFourier._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformFourier._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 </div>
 
@@ -1170,7 +1168,7 @@
 
 <div class="viewcode-block" id="TransformLaplacian">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformLaplacian">[docs]</a>
-<span class="k">class</span> <span class="nc">TransformLaplacian</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformLaplacian</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Laplacian transform operator.</span>
 
@@ -1184,7 +1182,7 @@
 <span class="sd">        Padding mode of the Laplacian. The default is &quot;edge&quot;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">):</span>
         <span class="n">x_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1201,7 +1199,7 @@
 
 <div class="viewcode-block" id="TransformLaplacian.laplacian">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformLaplacian.laplacian">[docs]</a>
-    <span class="k">def</span> <span class="nf">laplacian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">laplacian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the laplacian.</span>
 
 <span class="sd">        Parameters</span>
@@ -1225,13 +1223,13 @@
 
 <div class="viewcode-block" id="TransformLaplacian._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformLaplacian._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">laplacian</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TransformLaplacian._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformLaplacian._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">laplacian</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 </div>
 
@@ -1239,7 +1237,7 @@
 
 <div class="viewcode-block" id="TransformSVD">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformSVD">[docs]</a>
-<span class="k">class</span> <span class="nc">TransformSVD</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformSVD</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Singular value decomposition based decomposition operator.&quot;&quot;&quot;</span>
 
     <span class="n">U</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span>
@@ -1247,7 +1245,7 @@
 
     <span class="n">rescale</span><span class="p">:</span> <span class="nb">bool</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
         <span class="n">axes_rows</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
@@ -1314,7 +1312,7 @@
 
 <div class="viewcode-block" id="TransformSVD.direct_svd">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformSVD.direct_svd">[docs]</a>
-    <span class="k">def</span> <span class="nf">direct_svd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">direct_svd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs the SVD decomposition.</span>
 
@@ -1333,7 +1331,7 @@
 
 <div class="viewcode-block" id="TransformSVD.inverse_svd">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformSVD.inverse_svd">[docs]</a>
-    <span class="k">def</span> <span class="nf">inverse_svd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">U</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Vt</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inverse_svd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">U</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Vt</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs the inverse SVD decomposition.</span>
 
@@ -1356,7 +1354,7 @@
 
 <div class="viewcode-block" id="TransformSVD._op_direct">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformSVD._op_direct">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fwd_transpose</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fwd_shape</span><span class="p">)</span>
 
@@ -1372,7 +1370,7 @@
 
 <div class="viewcode-block" id="TransformSVD._op_adjoint">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.TransformSVD._op_adjoint">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_adjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">Vt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Operator not initialized!&quot;</span><span class="p">)</span>
 

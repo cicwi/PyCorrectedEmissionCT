@@ -47,6 +47,10 @@
   - ```{autodoc2-docstring} corrct.param_tuning.fit_func_min
     :summary:
     ```
+* - {py:obj}`_compute_reconstruction_and_loss <corrct.param_tuning._compute_reconstruction_and_loss>`
+  - ```{autodoc2-docstring} corrct.param_tuning._compute_reconstruction_and_loss
+    :summary:
+    ```
 ````
 
 ### Data
@@ -55,8 +59,8 @@
 :class: autosummary longtable
 :align: left
 
-* - {py:obj}`num_threads <corrct.param_tuning.num_threads>`
-  - ```{autodoc2-docstring} corrct.param_tuning.num_threads
+* - {py:obj}`MAX_THREADS <corrct.param_tuning.MAX_THREADS>`
+  - ```{autodoc2-docstring} corrct.param_tuning.MAX_THREADS
     :summary:
     ```
 * - {py:obj}`NDArrayFloat <corrct.param_tuning.NDArrayFloat>`
@@ -67,12 +71,12 @@
 
 ### API
 
-````{py:data} num_threads
-:canonical: corrct.param_tuning.num_threads
+````{py:data} MAX_THREADS
+:canonical: corrct.param_tuning.MAX_THREADS
 :value: >
-   'round(...)'
+   'int(...)'
 
-```{autodoc2-docstring} corrct.param_tuning.num_threads
+```{autodoc2-docstring} corrct.param_tuning.MAX_THREADS
 ```
 
 ````
@@ -108,7 +112,14 @@
 ```
 ````
 
-`````{py:class} BaseParameterTuning(dtype: numpy.typing.DTypeLike = np.float32, parallel_eval: bool = True, verbose: bool = False, plot_result: bool = False)
+````{py:function} _compute_reconstruction_and_loss(spawn: typing.Callable, call: typing.Callable[[typing.Any], tuple[corrct.param_tuning.NDArrayFloat, corrct.solvers.SolutionInfo]], hp_val: float, *args: typing.Any, **kwds: typing.Any) -> tuple[float, corrct.param_tuning.NDArrayFloat]
+:canonical: corrct.param_tuning._compute_reconstruction_and_loss
+
+```{autodoc2-docstring} corrct.param_tuning._compute_reconstruction_and_loss
+```
+````
+
+`````{py:class} BaseParameterTuning(dtype: numpy.typing.DTypeLike = np.float32, parallel_eval: typing.Union[concurrent.futures.Executor, int, bool] = True, verbose: bool = False, plot_result: bool = False)
 :canonical: corrct.param_tuning.BaseParameterTuning
 
 Bases: {py:obj}`abc.ABC`
@@ -140,6 +151,17 @@ Bases: {py:obj}`abc.ABC`
    None
 
 ```{autodoc2-docstring} corrct.param_tuning.BaseParameterTuning._solver_calling_function
+```
+
+````
+
+````{py:attribute} parallel_eval
+:canonical: corrct.param_tuning.BaseParameterTuning.parallel_eval
+:type: typing.Union[int, concurrent.futures.Executor]
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.param_tuning.BaseParameterTuning.parallel_eval
 ```
 
 ````
@@ -179,6 +201,14 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
+````{py:method} compute_all_reconstructions_and_losses(hp_vals: typing.Union[numpy.typing.ArrayLike, corrct.param_tuning.NDArrayFloat], data_mask: typing.Optional[numpy.typing.NDArray] = None) -> tuple[list[numpy.typing.NDArray], list[float]]
+:canonical: corrct.param_tuning.BaseParameterTuning.compute_all_reconstructions_and_losses
+
+```{autodoc2-docstring} corrct.param_tuning.BaseParameterTuning.compute_all_reconstructions_and_losses
+```
+
+````
+
 ````{py:method} compute_reconstruction_error(hp_vals: typing.Union[numpy.typing.ArrayLike, corrct.param_tuning.NDArrayFloat], gnd_truth: corrct.param_tuning.NDArrayFloat) -> tuple[corrct.param_tuning.NDArrayFloat, corrct.param_tuning.NDArrayFloat]
 :canonical: corrct.param_tuning.BaseParameterTuning.compute_reconstruction_error
 
@@ -187,7 +217,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} compute_loss_values(hp_vals: typing.Union[numpy.typing.ArrayLike, corrct.param_tuning.NDArrayFloat]) -> corrct.param_tuning.NDArrayFloat
+````{py:method} compute_loss_values(hp_vals: typing.Union[numpy.typing.ArrayLike, corrct.param_tuning.NDArrayFloat], return_recs: bool = False) -> typing.Union[corrct.param_tuning.NDArrayFloat, tuple[corrct.param_tuning.NDArrayFloat, corrct.param_tuning.NDArrayFloat]]
 :canonical: corrct.param_tuning.BaseParameterTuning.compute_loss_values
 :abstractmethod:
 
@@ -198,7 +228,7 @@ Bases: {py:obj}`abc.ABC`
 
 `````
 
-`````{py:class} LCurve(loss_function: typing.Callable, data_dtype: numpy.typing.DTypeLike = np.float32, parallel_eval: bool = True, verbose: bool = False, plot_result: bool = False)
+`````{py:class} LCurve(loss_function: typing.Callable, data_dtype: numpy.typing.DTypeLike = np.float32, parallel_eval: typing.Union[concurrent.futures.Executor, int, bool] = True, verbose: bool = False, plot_result: bool = False)
 :canonical: corrct.param_tuning.LCurve
 
 Bases: {py:obj}`corrct.param_tuning.BaseParameterTuning`
@@ -212,7 +242,7 @@ Bases: {py:obj}`corrct.param_tuning.BaseParameterTuning`
 ```{autodoc2-docstring} corrct.param_tuning.LCurve.__init__
 ```
 
-````{py:method} compute_loss_values(hp_vals: typing.Union[numpy.typing.ArrayLike, corrct.param_tuning.NDArrayFloat]) -> corrct.param_tuning.NDArrayFloat
+````{py:method} compute_loss_values(hp_vals: typing.Union[numpy.typing.ArrayLike, corrct.param_tuning.NDArrayFloat], return_recs: bool = False) -> typing.Union[corrct.param_tuning.NDArrayFloat, tuple[corrct.param_tuning.NDArrayFloat, corrct.param_tuning.NDArrayFloat]]
 :canonical: corrct.param_tuning.LCurve.compute_loss_values
 
 ```{autodoc2-docstring} corrct.param_tuning.LCurve.compute_loss_values
@@ -222,7 +252,7 @@ Bases: {py:obj}`corrct.param_tuning.BaseParameterTuning`
 
 `````
 
-`````{py:class} CrossValidation(data_shape: typing.Sequence[int], dtype: numpy.typing.DTypeLike = np.float32, cv_fraction: float = 0.1, num_averages: int = 7, parallel_eval: bool = True, verbose: bool = False, plot_result: bool = False)
+`````{py:class} CrossValidation(data_shape: typing.Sequence[int], dtype: numpy.typing.DTypeLike = np.float32, cv_fraction: float = 0.1, num_averages: int = 7, parallel_eval: typing.Union[concurrent.futures.Executor, int, bool] = True, verbose: bool = False, plot_result: bool = False)
 :canonical: corrct.param_tuning.CrossValidation
 
 Bases: {py:obj}`corrct.param_tuning.BaseParameterTuning`
@@ -244,7 +274,7 @@ Bases: {py:obj}`corrct.param_tuning.BaseParameterTuning`
 
 ````
 
-````{py:method} compute_loss_values(hp_vals: typing.Union[numpy.typing.ArrayLike, corrct.param_tuning.NDArrayFloat]) -> tuple[corrct.param_tuning.NDArrayFloat, corrct.param_tuning.NDArrayFloat, corrct.param_tuning.NDArrayFloat]
+````{py:method} compute_loss_values(hp_vals: typing.Union[numpy.typing.ArrayLike, corrct.param_tuning.NDArrayFloat], return_recs: bool = False) -> typing.Union[tuple[corrct.param_tuning.NDArrayFloat, corrct.param_tuning.NDArrayFloat, corrct.param_tuning.NDArrayFloat], tuple[corrct.param_tuning.NDArrayFloat, corrct.param_tuning.NDArrayFloat, corrct.param_tuning.NDArrayFloat, list[corrct.param_tuning.NDArrayFloat]]]
 :canonical: corrct.param_tuning.CrossValidation.compute_loss_values
 
 ```{autodoc2-docstring} corrct.param_tuning.CrossValidation.compute_loss_values

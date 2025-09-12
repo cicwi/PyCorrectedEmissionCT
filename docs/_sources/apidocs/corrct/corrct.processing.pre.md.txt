@@ -43,6 +43,14 @@
   - ```{autodoc2-docstring} corrct.processing.pre.background_from_margin
     :summary:
     ```
+* - {py:obj}`snip <corrct.processing.pre.snip>`
+  - ```{autodoc2-docstring} corrct.processing.pre.snip
+    :summary:
+    ```
+* - {py:obj}`background_from_snip <corrct.processing.pre.background_from_snip>`
+  - ```{autodoc2-docstring} corrct.processing.pre.background_from_snip
+    :summary:
+    ```
 * - {py:obj}`destripe_wlf_vwu <corrct.processing.pre.destripe_wlf_vwu>`
   - ```{autodoc2-docstring} corrct.processing.pre.destripe_wlf_vwu
     :summary:
@@ -123,6 +131,20 @@
 :canonical: corrct.processing.pre.background_from_margin
 
 ```{autodoc2-docstring} corrct.processing.pre.background_from_margin
+```
+````
+
+````{py:function} snip(img: numpy.typing.NDArray, kernel_dims: typing.Union[int, None] = None, iterations: int = 1000, window: int = 3, verbose: bool = False) -> numpy.typing.NDArray
+:canonical: corrct.processing.pre.snip
+
+```{autodoc2-docstring} corrct.processing.pre.snip
+```
+````
+
+````{py:function} background_from_snip(data_vwu: numpy.typing.NDArray, snip_iterations: int = 6, smooth_std: float = 0.0) -> numpy.typing.NDArray
+:canonical: corrct.processing.pre.background_from_snip
+
+```{autodoc2-docstring} corrct.processing.pre.background_from_snip
 ```
 ````
 

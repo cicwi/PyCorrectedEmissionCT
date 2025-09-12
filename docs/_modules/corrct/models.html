@@ -1,27 +1,25 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.models &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../_static/copybutton.js?v=f281be69"></script>
-        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -92,17 +90,17 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
 
-<span class="kn">import</span> <span class="nn">scipy.spatial.transform</span> <span class="k">as</span> <span class="nn">spt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.spatial.transform</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spt</span>
 
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">replace</span> <span class="k">as</span> <span class="n">dc_replace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">replace</span> <span class="k">as</span> <span class="n">dc_replace</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
 
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
 
 <span class="n">ROT_DIRS_VALID</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;clockwise&quot;</span><span class="p">,</span> <span class="s2">&quot;counter-clockwise&quot;</span><span class="p">)</span>
@@ -110,12 +108,12 @@
 
 <div class="viewcode-block" id="Geometry">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.Geometry">[docs]</a>
-<span class="k">class</span> <span class="nc">Geometry</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Geometry</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base geometry class.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Geometry.__str__">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.Geometry.__str__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a human readable representation of the object.</span>
 
@@ -135,7 +133,7 @@
 <div class="viewcode-block" id="ProjectionGeometry">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">ProjectionGeometry</span><span class="p">(</span><span class="n">Geometry</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProjectionGeometry</span><span class="p">(</span><span class="n">Geometry</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Store the projection geometry.&quot;&quot;&quot;</span>
 
     <span class="n">geom_type</span><span class="p">:</span> <span class="nb">str</span>
@@ -149,7 +147,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.__post_init__">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.__post_init__">[docs]</a>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">det_pos_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -160,7 +158,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.__getitem__">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.__getitem__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indx</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indx</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Slice projection geometry along the angular direction.</span>
 
@@ -170,7 +168,7 @@
 <span class="sd">            Indices of the slicing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">slice_array</span><span class="p">(</span><span class="n">vecs_arr</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">indx</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">slice_array</span><span class="p">(</span><span class="n">vecs_arr</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">indx</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vecs_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">vecs_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">vecs_arr</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="p">:]</span>
             <span class="k">else</span><span class="p">:</span>
@@ -187,7 +185,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.copy">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.copy">[docs]</a>
-    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Deepcopy an existing geometry.</span>
 
 <span class="sd">        Returns</span>
@@ -201,7 +199,7 @@
 <div class="viewcode-block" id="ProjectionGeometry.get_default_parallel">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.get_default_parallel">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_default_parallel</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_default_parallel</span><span class="p">(</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">geom_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;3d&quot;</span><span class="p">,</span>
         <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -228,7 +226,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of dimensions of the geometry.</span>
 
 <span class="sd">        Returns</span>
@@ -249,7 +247,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.get_3d">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.get_3d">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the 3D version of the geometry.</span>
 
 <span class="sd">        Returns</span>
@@ -270,7 +268,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.set_detector_shape_vu">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.set_detector_shape_vu">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_detector_shape_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_detector_shape_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the detector VU shape.</span>
 
 <span class="sd">        Parameters</span>
@@ -283,7 +281,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.set_detector_shifts_vu">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.set_detector_shifts_vu">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_detector_shifts_vu</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_detector_shifts_vu</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">det_pos_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">cor_pos_u</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -330,7 +328,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.set_source_shifts_vu">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.set_source_shifts_vu">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_source_shifts_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_pos_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_source_shifts_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_pos_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the source position in XZ, from VU (vertical, horizontal) coordinates.</span>
 
@@ -358,7 +356,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.set_detector_tilt">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.set_detector_tilt">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_detector_tilt</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_detector_tilt</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">angles_t_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
         <span class="n">tilt_axis</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
@@ -413,7 +411,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.rotate">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.rotate">[docs]</a>
-    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angles_w_rad</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">patch_astra_2d</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angles_w_rad</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">patch_astra_2d</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Rotate the geometry by the given angle(s).</span>
 
@@ -446,7 +444,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.get_field_scaled">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.get_field_scaled">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_field_scaled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_field_scaled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the a field content, scaled by the pix2vox ratio.</span>
 
@@ -469,7 +467,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.project_displacement_to_detector">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.project_displacement_to_detector">[docs]</a>
-    <span class="k">def</span> <span class="nf">project_displacement_to_detector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disp_zyx</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">project_displacement_to_detector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disp_zyx</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Project a given displacement vector in the volume coordinates, over the detector.</span>
 
 <span class="sd">        Parameters</span>
@@ -505,7 +503,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.get_pre_weights">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.get_pre_weights">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_shape_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_shape_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the pre-weights of the projector geometry (notably for cone-beam geometries).</span>
 
 <span class="sd">        Parameters</span>
@@ -553,7 +551,7 @@
 <div class="viewcode-block" id="VolumeGeometry">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.VolumeGeometry">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">VolumeGeometry</span><span class="p">(</span><span class="n">Geometry</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">VolumeGeometry</span><span class="p">(</span><span class="n">Geometry</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Store the volume geometry.&quot;&quot;&quot;</span>
 
     <span class="n">_vol_shape_xyz</span><span class="p">:</span> <span class="n">NDArray</span>
@@ -561,14 +559,14 @@
 
 <div class="viewcode-block" id="VolumeGeometry.__post_init__">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.VolumeGeometry.__post_init__">[docs]</a>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the input parameters.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="VolumeGeometry.is_square">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.VolumeGeometry.is_square">[docs]</a>
-    <span class="k">def</span> <span class="nf">is_square</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_square</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute whether the volume is square in XY.</span>
 
 <span class="sd">        Returns</span>
@@ -580,7 +578,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shape_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the volume shape (XYZ).</span>
 
@@ -592,7 +590,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vol_shape_xyz</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape_zxy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shape_zxy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the volume shape (ZXY).</span>
 
@@ -607,7 +605,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">vol_shape_zyx</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">vol_shape_zyx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">vol_shape_zyx</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mask_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the XY volume shape for circular masks.</span>
 
 <span class="sd">        Returns</span>
@@ -618,7 +616,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_xyz</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">extent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return extent of the volume.</span>
 
@@ -632,7 +630,7 @@
 
 <div class="viewcode-block" id="VolumeGeometry.is_3D">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.VolumeGeometry.is_3D">[docs]</a>
-    <span class="k">def</span> <span class="nf">is_3D</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_3D</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tell whether this is a 3D geometry.</span>
 
@@ -646,7 +644,7 @@
 
 <div class="viewcode-block" id="VolumeGeometry.get_3d">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.VolumeGeometry.get_3d">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VolumeGeometry&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VolumeGeometry&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the 3D version of the geometry.</span>
 
 <span class="sd">        Returns</span>
@@ -663,7 +661,7 @@
 <div class="viewcode-block" id="VolumeGeometry.get_default_from_data">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.VolumeGeometry.get_default_from_data">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_default_from_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VolumeGeometry&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_default_from_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VolumeGeometry&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate a default volume geometry from the data shape.</span>
 
@@ -685,7 +683,7 @@
 <div class="viewcode-block" id="VolumeGeometry.get_default_from_volume">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.VolumeGeometry.get_default_from_volume">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_default_from_volume</span><span class="p">(</span><span class="n">volume</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VolumeGeometry&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_default_from_volume</span><span class="p">(</span><span class="n">volume</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;VolumeGeometry&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate a default volume geometry from the given volume.</span>
 
@@ -706,7 +704,7 @@
 
 <div class="viewcode-block" id="combine_shifts_vu">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.combine_shifts_vu">[docs]</a>
-<span class="k">def</span> <span class="nf">combine_shifts_vu</span><span class="p">(</span><span class="n">shifts_v</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shifts_u</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_shifts_vu</span><span class="p">(</span><span class="n">shifts_v</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">shifts_u</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine vertical and horizontal shifts.</span>
 
 <span class="sd">    Parameters</span>
@@ -734,7 +732,7 @@
 
 <div class="viewcode-block" id="get_rot_axis_dir">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.get_rot_axis_dir">[docs]</a>
-<span class="k">def</span> <span class="nf">get_rot_axis_dir</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_rot_axis_dir</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process the requested rotation axis direction and return a meaningful value.</span>
 
 <span class="sd">    Parameters</span>
@@ -767,7 +765,7 @@
 
 <div class="viewcode-block" id="_get_data_dims">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models._get_data_dims">[docs]</a>
-<span class="k">def</span> <span class="nf">_get_data_dims</span><span class="p">(</span><span class="n">data_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_data_dims</span><span class="p">(</span><span class="n">data_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]:</span>
     <span class="n">dims</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">),</span> <span class="mi">0</span><span class="p">):</span>
         <span class="n">dims</span><span class="p">[</span><span class="n">data_format</span><span class="p">[</span><span class="n">ii</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data_shape</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
@@ -777,7 +775,7 @@
 
 <div class="viewcode-block" id="get_prj_geom_parallel">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.get_prj_geom_parallel">[docs]</a>
-<span class="k">def</span> <span class="nf">get_prj_geom_parallel</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_prj_geom_parallel</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">geom_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;3d&quot;</span><span class="p">,</span>
     <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -843,7 +841,7 @@
 
 <div class="viewcode-block" id="get_prj_geom_cone">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.get_prj_geom_cone">[docs]</a>
-<span class="k">def</span> <span class="nf">get_prj_geom_cone</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_prj_geom_cone</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">src_to_sam_dist</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -899,7 +897,7 @@
 
 <div class="viewcode-block" id="get_vol_geom_from_data">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.get_vol_geom_from_data">[docs]</a>
-<span class="k">def</span> <span class="nf">get_vol_geom_from_data</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_vol_geom_from_data</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">padding_u</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">,</span> <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VolumeGeometry</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -909,7 +907,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    data : NDArray</span>
 <span class="sd">        The data.</span>
-<span class="sd">    padding_u : int | Sequence[int]</span>
+<span class="sd">    padding_u : int | Sequence[int], optional</span>
+<span class="sd">        The amount of padding along the U direction. The default is 0.</span>
 <span class="sd">    data_format : str, optional</span>
 <span class="sd">        The ordering and meaning of the dimensions in the data. The default is &quot;dvwu&quot;.</span>
 <span class="sd">    super_sampling: int, optional</span>
@@ -946,7 +945,7 @@
 
 <div class="viewcode-block" id="get_vol_geom_from_volume">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.get_vol_geom_from_volume">[docs]</a>
-<span class="k">def</span> <span class="nf">get_vol_geom_from_volume</span><span class="p">(</span><span class="n">volume</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VolumeGeometry</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_vol_geom_from_volume</span><span class="p">(</span><span class="n">volume</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VolumeGeometry</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a default volume geometry from the given volume.</span>
 

@@ -107,7 +107,7 @@
 
 ````
 
-`````{py:class} AttenuationVolume(incident_local: typing.Union[corrct.physics.attenuation.NDArrayFloat, None], emitted_local: typing.Union[corrct.physics.attenuation.NDArrayFloat, None], angles_rot_rad: numpy.typing.ArrayLike, angles_det_rad: typing.Union[corrct.physics.attenuation.NDArrayFloat, numpy.typing.ArrayLike, float] = np.pi / 2, dtype: numpy.typing.DTypeLike = np.float32)
+`````{py:class} AttenuationVolume(incident_local: typing.Union[corrct.physics.attenuation.NDArrayFloat, None], emitted_local: typing.Union[corrct.physics.attenuation.NDArrayFloat, None], angles_rot_rad: typing.Union[corrct.physics.attenuation.NDArrayFloat, collections.abc.Sequence[float]], angles_det_rad: typing.Union[corrct.physics.attenuation.NDArrayFloat, collections.abc.Sequence[typing.Union[float, corrct.physics.xrf.DetectorXRF]], float, corrct.physics.xrf.DetectorXRF] = np.pi / 2, emitted_sub_sampling: int = 1, dtype: numpy.typing.DTypeLike = np.float32)
 :canonical: corrct.physics.attenuation.AttenuationVolume
 
 ```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume
@@ -152,13 +152,24 @@
 
 ````
 
-````{py:attribute} angles_det_rad
-:canonical: corrct.physics.attenuation.AttenuationVolume.angles_det_rad
-:type: corrct.physics.attenuation.NDArrayFloat
+````{py:attribute} detectors
+:canonical: corrct.physics.attenuation.AttenuationVolume.detectors
+:type: collections.abc.Sequence[corrct.physics.xrf.DetectorXRF]
 :value: >
    None
 
-```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume.angles_det_rad
+```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume.detectors
+```
+
+````
+
+````{py:attribute} emitted_sub_sampling
+:canonical: corrct.physics.attenuation.AttenuationVolume.emitted_sub_sampling
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume.emitted_sub_sampling
 ```
 
 ````
@@ -196,6 +207,14 @@
 
 ````
 
+````{py:method} _get_detector_angles() -> numpy.typing.NDArray
+:canonical: corrct.physics.attenuation.AttenuationVolume._get_detector_angles
+
+```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume._get_detector_angles
+```
+
+````
+
 ````{py:method} _compute_attenuation_angle_in(local_att: corrct.physics.attenuation.NDArrayFloat, angle_rad: float) -> numpy.typing.NDArray
 :canonical: corrct.physics.attenuation.AttenuationVolume._compute_attenuation_angle_in
 
@@ -228,7 +247,7 @@
 
 ````
 
-````{py:method} get_maps(roi: typing.Optional[numpy.typing.ArrayLike] = None, rot_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None, det_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None) -> numpy.typing.NDArray
+````{py:method} get_maps(roi: typing.Optional[numpy.typing.ArrayLike] = None, rot_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None, det_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None, binning: int = 1) -> numpy.typing.NDArray
 :canonical: corrct.physics.attenuation.AttenuationVolume.get_maps
 
 ```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume.get_maps
@@ -236,7 +255,7 @@
 
 ````
 
-````{py:method} get_projector_args(roi: typing.Optional[numpy.typing.ArrayLike] = None, rot_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None, det_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None) -> dict[str, numpy.typing.NDArray]
+````{py:method} get_projector_args(roi: typing.Optional[numpy.typing.ArrayLike] = None, rot_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None, det_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None, binning: int = 1) -> dict[str, numpy.typing.NDArray]
 :canonical: corrct.physics.attenuation.AttenuationVolume.get_projector_args
 
 ```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume.get_projector_args

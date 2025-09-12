@@ -322,6 +322,17 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````
 
+````{py:attribute} sigma1
+:canonical: corrct.data_terms.DataFidelity_l2.sigma1
+:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2.sigma1
+```
+
+````
+
 ````{py:method} assign_data(data: typing.Union[float, corrct.data_terms.NDArrayFloat, None] = None, sigma: typing.Union[float, corrct.data_terms.NDArrayFloat] = 1.0) -> None
 :canonical: corrct.data_terms.DataFidelity_l2.assign_data
 
@@ -368,6 +379,28 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
 ````
 
+````{py:attribute} sigma1
+:canonical: corrct.data_terms.DataFidelity_wl2.sigma1
+:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_wl2.sigma1
+```
+
+````
+
+````{py:attribute} weights
+:canonical: corrct.data_terms.DataFidelity_wl2.weights
+:type: corrct.data_terms.NDArrayFloat
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_wl2.weights
+```
+
+````
+
 ````{py:method} assign_data(data: typing.Union[float, corrct.data_terms.NDArrayFloat, None], sigma: typing.Union[float, corrct.data_terms.NDArrayFloat] = 1.0)
 :canonical: corrct.data_terms.DataFidelity_wl2.assign_data
 
@@ -405,6 +438,39 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
    'l2b'
 
 ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2b.__data_fidelity_name__
+```
+
+````
+
+````{py:attribute} sigma1
+:canonical: corrct.data_terms.DataFidelity_l2b.sigma1
+:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2b.sigma1
+```
+
+````
+
+````{py:attribute} sigma_error
+:canonical: corrct.data_terms.DataFidelity_l2b.sigma_error
+:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2b.sigma_error
+```
+
+````
+
+````{py:attribute} sigma_sqrt_error
+:canonical: corrct.data_terms.DataFidelity_l2b.sigma_sqrt_error
+:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2b.sigma_sqrt_error
 ```
 
 ````
@@ -451,6 +517,17 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
    'Hub'
 
 ```{autodoc2-docstring} corrct.data_terms.DataFidelity_Huber.__data_fidelity_name__
+```
+
+````
+
+````{py:attribute} one_sigma_error
+:canonical: corrct.data_terms.DataFidelity_Huber.one_sigma_error
+:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_Huber.one_sigma_error
 ```
 
 ````
@@ -588,6 +665,17 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l1`
    'l1b'
 
 ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l1b.__data_fidelity_name__
+```
+
+````
+
+````{py:attribute} sigma_error
+:canonical: corrct.data_terms.DataFidelity_l1b.sigma_error
+:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l1b.sigma_error
 ```
 
 ````

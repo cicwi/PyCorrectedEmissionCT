@@ -1,27 +1,25 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.alignment.centering &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../../_static/copybutton.js?v=f281be69"></script>
-        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -90,23 +88,23 @@
 <span class="sd">@author: Nicola VIGANÒ, CEA-IRIG and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">fitting</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">fitting</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">models</span>
-<span class="kn">from</span> <span class="nn">..processing</span> <span class="kn">import</span> <span class="n">post</span> <span class="k">as</span> <span class="n">post_proc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">post</span> <span class="k">as</span> <span class="n">post_proc</span>
 
 
 <div class="viewcode-block" id="RecenterVolume">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.centering.html#corrct.alignment.RecenterVolume">[docs]</a>
-<span class="k">class</span> <span class="nc">RecenterVolume</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RecenterVolume</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Volume re-centering class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">proj_geom</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">ProjectionGeometry</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">],</span> <span class="n">precision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Volume recentering class, that shifts the detector position, in order to meet a certain volume position.</span>
@@ -125,14 +123,14 @@
 
 <div class="viewcode-block" id="RecenterVolume._apply_displacement_vu">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.centering.html#corrct.alignment.RecenterVolume._apply_displacement_vu">[docs]</a>
-    <span class="k">def</span> <span class="nf">_apply_displacement_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shifts_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">displacemenet_zyx</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_displacement_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shifts_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">displacemenet_zyx</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">shifts_vu_corrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj_geom</span><span class="o">.</span><span class="n">project_displacement_to_detector</span><span class="p">(</span><span class="n">displacemenet_zyx</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">shifts_vu</span> <span class="o">+</span> <span class="n">shifts_vu_corrs</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RecenterVolume.to_com">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.centering.html#corrct.alignment.RecenterVolume.to_com">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_com</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shifts_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">volume</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">com_ref_zyx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_com</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shifts_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">volume</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">com_ref_zyx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Recenter to a given center-of-mass (CoM).</span>
 
 <span class="sd">        Parameters</span>
@@ -156,7 +154,7 @@
 
 <div class="viewcode-block" id="RecenterVolume.as_reference">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.centering.html#corrct.alignment.RecenterVolume.as_reference">[docs]</a>
-    <span class="k">def</span> <span class="nf">as_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shifts_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">volume</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">reference</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;com&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shifts_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">volume</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">reference</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;com&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Recenter with respect to a given volume.</span>
 
 <span class="sd">        Parameters</span>

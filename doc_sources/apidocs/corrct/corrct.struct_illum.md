@@ -43,6 +43,10 @@
   - ```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostImaging
     :summary:
     ```
+* - {py:obj}`ProjectorGhostTomography <corrct.struct_illum.ProjectorGhostTomography>`
+  - ```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostTomography
+    :summary:
+    ```
 ````
 
 ### Functions
@@ -245,10 +249,10 @@
 
 ````
 
-````{py:method} get_QR_decomposition(buckets: numpy.typing.NDArray, shift: int = 0) -> tuple[corrct.struct_illum.MaskCollection, numpy.typing.NDArray]
-:canonical: corrct.struct_illum.MaskCollection.get_QR_decomposition
+````{py:method} get_qr_decomposition(buckets: numpy.typing.NDArray, shift: int = 0) -> tuple[corrct.struct_illum.MaskCollection, numpy.typing.NDArray]
+:canonical: corrct.struct_illum.MaskCollection.get_qr_decomposition
 
-```{autodoc2-docstring} corrct.struct_illum.MaskCollection.get_QR_decomposition
+```{autodoc2-docstring} corrct.struct_illum.MaskCollection.get_qr_decomposition
 ```
 
 ````
@@ -632,6 +636,14 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 
 ````
 
+````{py:method} _get_backend_device() -> tuple[str, typing.Union[str, None]]
+:canonical: corrct.struct_illum.ProjectorGhostImaging._get_backend_device
+
+```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostImaging._get_backend_device
+```
+
+````
+
 ````{py:method} _init_backend()
 :canonical: corrct.struct_illum.ProjectorGhostImaging._init_backend
 
@@ -676,6 +688,49 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 :canonical: corrct.struct_illum.ProjectorGhostImaging.absolute
 
 ```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostImaging.absolute
+```
+
+````
+
+`````
+
+`````{py:class} ProjectorGhostTomography(mask_collection: typing.Union[corrct.struct_illum.MaskCollection, numpy.typing.NDArray], tomo_proj: corrct.operators.ProjectorOperator, backend: str = 'torch')
+:canonical: corrct.struct_illum.ProjectorGhostTomography
+
+Bases: {py:obj}`corrct.struct_illum.ProjectorGhostImaging`
+
+```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostTomography
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostTomography.__init__
+```
+
+````{py:attribute} tomo_proj
+:canonical: corrct.struct_illum.ProjectorGhostTomography.tomo_proj
+:type: corrct.operators.ProjectorOperator
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostTomography.tomo_proj
+```
+
+````
+
+````{py:method} fp(vol_zyx: numpy.typing.NDArray) -> numpy.typing.NDArray
+:canonical: corrct.struct_illum.ProjectorGhostTomography.fp
+
+```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostTomography.fp
+```
+
+````
+
+````{py:method} bp(bucket_vals: numpy.typing.NDArray) -> numpy.typing.NDArray
+:canonical: corrct.struct_illum.ProjectorGhostTomography.bp
+
+```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostTomography.bp
 ```
 
 ````

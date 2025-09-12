@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,24 +7,20 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.struct_illum &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../_static/copybutton.js?v=f281be69"></script>
-        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -141,6 +139,9 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#corrct.struct_illum.ProjectorGhostImaging" title="corrct.struct_illum.ProjectorGhostImaging"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProjectorGhostImaging</span></code></a></p></td>
 <td><p>Projector class for the ghost imaging reconstructions.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.struct_illum.ProjectorGhostTomography" title="corrct.struct_illum.ProjectorGhostTomography"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProjectorGhostTomography</span></code></a></p></td>
+<td><p>Ghost tomography projector.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -202,7 +203,7 @@ The reordered masks and buckets.</p>
 <p>masks : NDArray
 The masks to decompose
 verbose : bool, optional
-Whether to emite verbose output, by default False</p>
+Whether to emit verbose output, by default False</p>
 <p class="rubric" id="id8">Returns</p>
 <p>Tuple[NDArray, NDArray]
 The Q and R components.</p>
@@ -349,8 +350,8 @@ The requested mask.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.get_QR_decomposition">
-<span class="sig-name descname"><span class="pre">get_QR_decomposition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buckets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.struct_illum.MaskCollection" title="corrct.struct_illum.MaskCollection"><span class="pre">corrct.struct_illum.MaskCollection</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskCollection.get_QR_decomposition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskCollection.get_QR_decomposition" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="corrct.struct_illum.MaskCollection.get_qr_decomposition">
+<span class="sig-name descname"><span class="pre">get_qr_decomposition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buckets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.struct_illum.MaskCollection" title="corrct.struct_illum.MaskCollection"><span class="pre">corrct.struct_illum.MaskCollection</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#MaskCollection.get_qr_decomposition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.MaskCollection.get_qr_decomposition" title="Link to this definition"></a></dt>
 <dd><p>Compute and return the QR decomposition of the masks.</p>
 <p class="rubric" id="id21">Parameters</p>
 <p>buckets : NDArray
@@ -760,6 +761,11 @@ Container of the masks.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostImaging._get_backend_device">
+<span class="sig-name descname"><span class="pre">_get_backend_device</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostImaging._get_backend_device"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostImaging._get_backend_device" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostImaging._init_backend">
 <span class="sig-name descname"><span class="pre">_init_backend</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostImaging._init_backend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostImaging._init_backend" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -825,6 +831,48 @@ The reconstructed image.</p>
 <p class="rubric" id="id67">Returns</p>
 <p>Op_a : ProjectorGhostImaging
 The absolute value of the projector.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostTomography">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.struct_illum.</span></span><span class="sig-name descname"><span class="pre">ProjectorGhostTomography</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.struct_illum.MaskCollection" title="corrct.struct_illum.MaskCollection"><span class="pre">corrct.struct_illum.MaskCollection</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tomo_proj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="corrct.operators.html#corrct.operators.ProjectorOperator" title="corrct.operators.ProjectorOperator"><span class="pre">corrct.operators.ProjectorOperator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'torch'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostTomography"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostTomography" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.struct_illum.ProjectorGhostImaging" title="corrct.struct_illum.ProjectorGhostImaging"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.struct_illum.ProjectorGhostImaging</span></code></a></p>
+<p>Ghost tomography projector.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize the Ghost Imaging projector class.</p>
+<p class="rubric" id="id68">Parameters</p>
+<p>mask_collection : MaskCollection
+Container of the masks.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostTomography.tomo_proj">
+<span class="sig-name descname"><span class="pre">tomo_proj</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="corrct.operators.html#corrct.operators.ProjectorOperator" title="corrct.operators.ProjectorOperator"><span class="pre">corrct.operators.ProjectorOperator</span></a></em><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostTomography.tomo_proj" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostTomography.fp">
+<span class="sig-name descname"><span class="pre">fp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vol_zyx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostTomography.fp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostTomography.fp" title="Link to this definition"></a></dt>
+<dd><p>Compute forward-projection (prediction) of the bucket values.</p>
+<p class="rubric" id="id69">Parameters</p>
+<p>vol_zyx : NDArray
+The volume for which we want to predict the bucket values.</p>
+<p class="rubric" id="id70">Returns</p>
+<p>NDArray
+The predicted bucket values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostTomography.bp">
+<span class="sig-name descname"><span class="pre">bp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostTomography.bp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostTomography.bp" title="Link to this definition"></a></dt>
+<dd><p>Compute back-projection of the bucket values.</p>
+<p class="rubric" id="id71">Parameters</p>
+<p>bucket_vals : NDArray
+The list of bucket values.</p>
+<p class="rubric" id="id72">Returns</p>
+<p>NDArray
+Back-projected volume.</p>
 </dd></dl>
 
 </dd></dl>

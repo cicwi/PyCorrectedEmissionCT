@@ -1,27 +1,25 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>corrct.physics.attenuation &mdash; PyCorrectedEmissionCT  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../../_static/copybutton.js?v=f281be69"></script>
-        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -91,20 +89,22 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">concurrent.futures</span> <span class="k">as</span> <span class="nn">cf</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">matplotlib.axes._axes</span> <span class="kn">import</span> <span class="n">Axes</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
-<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.axes._axes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Axes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span> <span class="nn">corrct</span> <span class="kn">import</span> <span class="n">_projector_backends</span> <span class="k">as</span> <span class="n">prj_backends</span>
-<span class="kn">from</span> <span class="nn">corrct</span> <span class="kn">import</span> <span class="n">models</span>
-<span class="kn">from</span> <span class="nn">corrct.physics.xraylib_helper</span> <span class="kn">import</span> <span class="n">get_compound</span><span class="p">,</span> <span class="n">get_compound_cross_section</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct</span><span class="w"> </span><span class="kn">import</span> <span class="n">_projector_backends</span> <span class="k">as</span> <span class="n">prj_backends</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics.xraylib_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_compound</span><span class="p">,</span> <span class="n">get_compound_cross_section</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics.xrf</span><span class="w"> </span><span class="kn">import</span> <span class="n">DetectorXRF</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.processing.pre</span><span class="w"> </span><span class="kn">import</span> <span class="n">bin_imgs</span>
 
 <span class="n">num_threads</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
 
@@ -116,25 +116,27 @@
 
 <div class="viewcode-block" id="AttenuationVolume">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume">[docs]</a>
-<span class="k">class</span> <span class="nc">AttenuationVolume</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AttenuationVolume</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Attenuation volume computation class.&quot;&quot;&quot;</span>
 
     <span class="n">incident_local</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
     <span class="n">emitted_local</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
     <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">NDArrayFloat</span>
-    <span class="n">angles_det_rad</span><span class="p">:</span> <span class="n">NDArrayFloat</span>
+    <span class="n">detectors</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DetectorXRF</span><span class="p">]</span>
+    <span class="n">emitted_sub_sampling</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span>
 
     <span class="n">vol_shape_zyx</span><span class="p">:</span> <span class="n">NDArray</span>
     <span class="n">maps</span><span class="p">:</span> <span class="n">NDArray</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">incident_local</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
         <span class="n">emitted_local</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
-        <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-        <span class="n">angles_det_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span>
+        <span class="n">angles_det_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">DetectorXRF</span><span class="p">]],</span> <span class="nb">float</span><span class="p">,</span> <span class="n">DetectorXRF</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">emitted_sub_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -148,7 +150,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">incident_local</span> <span class="o">=</span> <span class="n">incident_local</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">emitted_local</span> <span class="o">=</span> <span class="n">emitted_local</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angles_rot_rad</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angles_det_rad</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detectors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">angles_det_rad</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">DetectorXRF</span><span class="p">)):</span>
+            <span class="n">angles_det_rad</span> <span class="o">=</span> <span class="p">[</span><span class="n">angles_det_rad</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">angles_det_rad</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">DetectorXRF</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">detectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">detectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DetectorXRF</span><span class="p">(</span><span class="n">surface_mm2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">distance_mm</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">angle_rad</span><span class="o">=</span><span class="n">a</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Input parameter </span><span class="si">{</span><span class="n">angles_det_rad</span><span class="w"> </span><span class="si">= }</span><span class="s2"> should be one of: float | NDArray | Sequence[float | DetectorXRF]&quot;</span>
+                <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span>
 
@@ -165,31 +178,46 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No attenuation volumes were given.&quot;</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">emitted_sub_sampling</span> <span class="o">=</span> <span class="n">emitted_sub_sampling</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_zyx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_zyx</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">num_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_zyx</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">num_dims</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Maps can only be 2D or 3D Arrays. A </span><span class="si">{</span><span class="n">num_dims</span><span class="si">}</span><span class="s2">-dimensional was passed (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_zyx</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
 
+<div class="viewcode-block" id="AttenuationVolume._get_detector_angles">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume._get_detector_angles">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_detector_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">det</span><span class="o">.</span><span class="n">angle_rad</span> <span class="k">for</span> <span class="n">det</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">detectors</span><span class="p">],</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="AttenuationVolume._compute_attenuation_angle_in">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume._compute_attenuation_angle_in">[docs]</a>
-    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_att</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_attenuation_angle_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_att</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="n">local_att</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="AttenuationVolume._compute_attenuation_angle_out">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume._compute_attenuation_angle_out">[docs]</a>
-    <span class="k">def</span> <span class="nf">_compute_attenuation_angle_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_att</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-        <span class="n">angle_det</span> <span class="o">=</span> <span class="n">angle_rad</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span>
-        <span class="n">atts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_attenuation_angle_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_att</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+        <span class="n">angle_det</span> <span class="o">=</span> <span class="n">angle_rad</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_detector_angles</span><span class="p">()</span>
+        <span class="n">atts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">angle_det</span><span class="p">):</span>
-            <span class="n">atts</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="n">local_att</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detectors</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">surface_mm2</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">sub_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">detectors</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">angle_range_rad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">emitted_sub_sampling</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">sub_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">sub_angles</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;valid&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sub_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">a_s</span> <span class="ow">in</span> <span class="n">sub_angles</span><span class="p">:</span>
+                <span class="n">atts</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">+=</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">compute_attenuation</span><span class="p">(</span><span class="n">local_att</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="n">a_s</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">atts</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sub_angles</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">atts</span></div>
 
 
 <div class="viewcode-block" id="AttenuationVolume.compute_maps">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.compute_maps">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_maps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_multithreading</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_maps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_multithreading</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the correction maps for each angle.</span>
 
@@ -201,9 +229,9 @@
 <span class="sd">            Show verbose output. The default is True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">num_rot_angles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">maps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">num_rot_angles</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">),</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_zyx</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">num_rot_angles</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detectors</span><span class="p">),</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_zyx</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">process_angles</span><span class="p">(</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">process_angles</span><span class="p">(</span>
             <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">att_vol</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">use_multithreading</span><span class="p">:</span>
@@ -220,7 +248,7 @@
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">maps</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="n">f</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
                             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Angle </span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> (#</span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s2">) generated an exception&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+                                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Angle </span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> (#</span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s2">) generated an exception&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shutting down..&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                         <span class="n">executor</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">cancel_futures</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -237,6 +265,13 @@
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">emitted_local</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">emitted_sub_sampling</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">det</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detectors</span><span class="p">):</span>
+                    <span class="n">sub_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">det</span><span class="o">.</span><span class="n">angle_range_rad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">emitted_sub_sampling</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">sub_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">sub_angles</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;valid&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Detector #</span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s2">: Super-sampling outgoing sub-angles: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">sub_angles</span><span class="p">),</span><span class="w"> </span><span class="n">decimals</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> deg&quot;</span>
+                    <span class="p">)</span>
             <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Computing attenuation maps for emitted photons&quot;</span>
             <span class="n">process_angles</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_compute_attenuation_angle_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">emitted_local</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span>
@@ -245,7 +280,7 @@
 
 <div class="viewcode-block" id="AttenuationVolume.plot_map">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.plot_map">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_map</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_map</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span>
         <span class="n">rot_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -304,7 +339,7 @@
 
             <span class="n">prj_geom</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ProjectionGeometry</span><span class="o">.</span><span class="n">get_default_parallel</span><span class="p">()</span>
             <span class="n">beam_i_geom</span> <span class="o">=</span> <span class="n">prj_geom</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">[</span><span class="n">rot_ind</span><span class="p">])</span>
-            <span class="n">beam_e_geom</span> <span class="o">=</span> <span class="n">prj_geom</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">[</span><span class="n">rot_ind</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">[</span><span class="n">det_ind</span><span class="p">]))</span>
+            <span class="n">beam_e_geom</span> <span class="o">=</span> <span class="n">prj_geom</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles_rot_rad</span><span class="p">[</span><span class="n">rot_ind</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">detectors</span><span class="p">[</span><span class="n">det_ind</span><span class="p">]</span><span class="o">.</span><span class="n">angle_rad</span><span class="p">))</span>
 
             <span class="n">beam_i_dir</span> <span class="o">=</span> <span class="n">beam_i_geom</span><span class="o">.</span><span class="n">src_pos_xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">arrow_length</span>
             <span class="n">beam_i_orig</span> <span class="o">=</span> <span class="o">-</span><span class="n">beam_i_dir</span>
@@ -319,23 +354,26 @@
 
 <div class="viewcode-block" id="AttenuationVolume.get_maps">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.get_maps">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_maps</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_maps</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">roi</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">rot_ind</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">det_ind</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">binning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the attenuation maps.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        roi : ArrayLike, optional</span>
-<span class="sd">            The region-of-interest to select. The default is None.</span>
-<span class="sd">        rot_ind : int, optional</span>
-<span class="sd">            A specific rotation index, if only one is to be desired. The default is None.</span>
-<span class="sd">        det_ind : int, optional</span>
-<span class="sd">            A specific detector index, if only one is to be desired. The default is None.</span>
+<span class="sd">        roi : ArrayLike | None, optional</span>
+<span class="sd">                The region-of-interest to select. The default is None.</span>
+<span class="sd">        rot_ind : int | slice | Sequence[int] | NDArrayInt | None, optional</span>
+<span class="sd">            The rotation index or indices to select. The default is None.</span>
+<span class="sd">        det_ind : int | slice | Sequence[int] | NDArrayInt | None, optional</span>
+<span class="sd">            The detector index or indices to select. The default is None.</span>
+<span class="sd">        binning : int, optional</span>
+<span class="sd">            The binning factor to apply to the maps. The default is 1.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -357,28 +395,34 @@
         <span class="k">if</span> <span class="n">roi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Extracting a region of interest is not supported, yet.&quot;</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">binning</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">maps</span> <span class="o">=</span> <span class="n">bin_imgs</span><span class="p">(</span><span class="n">maps</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">binning</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_shape_zyx</span><span class="p">),</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">auto_crop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">maps</span></div>
 
 
 <div class="viewcode-block" id="AttenuationVolume.get_projector_args">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.get_projector_args">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_projector_args</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_projector_args</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">roi</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">rot_ind</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">det_ind</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">binning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the projector arguments.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        roi : ArrayLike, optional</span>
-<span class="sd">            The region-of-interest to select. The default is None.</span>
-<span class="sd">        rot_ind : int, optional</span>
-<span class="sd">            A specific rotation index, if only one is to be desired. The default is None.</span>
-<span class="sd">        det_ind : int, optional</span>
-<span class="sd">            A specific detector index, if only one is to be desired. The default is None.</span>
+<span class="sd">        roi : ArrayLike | None, optional</span>
+<span class="sd">                The region-of-interest to select. The default is None.</span>
+<span class="sd">        rot_ind : int | slice | Sequence[int] | NDArrayInt | None, optional</span>
+<span class="sd">            The rotation index or indices to select. The default is None.</span>
+<span class="sd">        det_ind : int | slice | Sequence[int] | NDArrayInt | None, optional</span>
+<span class="sd">            The detector index or indices to select. The default is None.</span>
+<span class="sd">        binning : int, optional</span>
+<span class="sd">            The binning factor to apply to the maps. The default is 1.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -386,17 +430,19 @@
 <span class="sd">            A dictionary containing the attenuation maps and the detector angle.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">det_ind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">det_angles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span>
+            <span class="n">det_angles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_detector_angles</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">det_angles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles_det_rad</span><span class="p">[</span><span class="n">det_ind</span><span class="p">]</span>
-        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">att_maps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_maps</span><span class="p">(</span><span class="n">roi</span><span class="o">=</span><span class="n">roi</span><span class="p">,</span> <span class="n">rot_ind</span><span class="o">=</span><span class="n">rot_ind</span><span class="p">,</span> <span class="n">det_ind</span><span class="o">=</span><span class="n">det_ind</span><span class="p">),</span> <span class="n">angles_detectors_rad</span><span class="o">=</span><span class="n">det_angles</span><span class="p">)</span></div>
+            <span class="n">det_angles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detectors</span><span class="p">[</span><span class="n">det_ind</span><span class="p">]</span><span class="o">.</span><span class="n">angle_rad</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">att_maps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_maps</span><span class="p">(</span><span class="n">roi</span><span class="o">=</span><span class="n">roi</span><span class="p">,</span> <span class="n">rot_ind</span><span class="o">=</span><span class="n">rot_ind</span><span class="p">,</span> <span class="n">det_ind</span><span class="o">=</span><span class="n">det_ind</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">binning</span><span class="p">),</span> <span class="n">angles_detectors_rad</span><span class="o">=</span><span class="n">det_angles</span>
+        <span class="p">)</span></div>
 </div>
 
 
 
 <div class="viewcode-block" id="get_linear_attenuation_coefficient">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.get_linear_attenuation_coefficient">[docs]</a>
-<span class="k">def</span> <span class="nf">get_linear_attenuation_coefficient</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_linear_attenuation_coefficient</span><span class="p">(</span>
     <span class="n">compound</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pixel_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the linear attenuation coefficient for given compound, energy, and pixel size.</span>
@@ -430,7 +476,7 @@
 
 <div class="viewcode-block" id="plot_emission_line_attenuation">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.plot_emission_line_attenuation">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_emission_line_attenuation</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_emission_line_attenuation</span><span class="p">(</span>
     <span class="n">compound</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">thickness_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">mean_energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -523,7 +569,7 @@
 
 <div class="viewcode-block" id="plot_transmittance_decay">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.plot_transmittance_decay">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_transmittance_decay</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_transmittance_decay</span><span class="p">(</span>
     <span class="n">compounds</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]],</span>
     <span class="n">mean_energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">thickness_range_um</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mi">101</span><span class="p">),</span>
