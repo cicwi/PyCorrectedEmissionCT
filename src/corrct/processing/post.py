@@ -12,11 +12,13 @@ from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
 from matplotlib.axes._axes import Axes
 from matplotlib.figure import Figure
 from numpy.typing import ArrayLike, NDArray
+from scipy.ndimage import convolve, zoom
 from scipy.optimize import minimize
+from scipy.signal.windows import hann
+from scipy.special import gamma
 
 from tqdm.auto import tqdm
 
@@ -112,10 +114,10 @@ def power_spectrum(
     ps /= dc_val
 
     if smooth is not None and smooth > 1:
-        win = sp.signal.windows.hann(smooth)
+        win = hann(smooth)
         win /= np.sum(win)
         win = win.reshape([*[1] * (ps.ndim - 1), -1])
-        ps = sp.ndimage.convolve(ps, win, mode="nearest")
+        ps = convolve(ps, win, mode="nearest")
 
     return ps[..., :cut_off]
 
@@ -192,25 +194,10 @@ def compute_frc(
     if img1.dtype != img2.dtype:
         print(f"WARNING: The two images have different dtype: img1 {img1.dtype}, img2 {img2.dtype}. Forcing the first.")
         img2 = img2.astype(img1.dtype)
-    dtype = img1.dtype
 
     if supersampling > 1:
-        # Bodge to make interpolation work with recent scipy: because the cython implementation does not compile for float32
-        dtype = float
-        img1 = img1.astype(dtype)
-        img2 = img2.astype(dtype)
-
-        base_grid = [np.linspace(-(d - 1) / 2, (d - 1) / 2, d, dtype=dtype) for d in img1_shape]
-
-        interp_grid = [np.linspace(-(d - 1) / 2, (d - 1) / 2, d, dtype=dtype) for d in img1_shape]
-        for a in axes:
-            d = img1_shape[a] * 2
-            interp_grid[a] = np.linspace(-(d - 1) / 4, (d - 1) / 4, d, dtype=dtype)
-        interp_grid = np.meshgrid(*interp_grid, indexing="ij")
-        interp_grid = np.transpose(interp_grid, [*range(1, len(img1_shape) + 1), 0])
-
-        img1 = sp.interpolate.interpn(base_grid, img1, interp_grid, bounds_error=False, fill_value=None)
-        img2 = sp.interpolate.interpn(base_grid, img2, interp_grid, bounds_error=False, fill_value=None)
+        img1 = zoom(img1, zoom=supersampling, order=5)
+        img2 = zoom(img2, zoom=supersampling, order=5)
 
         img1_shape = np.array(img1.shape)
 
@@ -241,13 +228,15 @@ def compute_frc(
     f1s_f2s = np.sqrt(f1s_f2s)
 
     frc = fc_int / f1s_f2s
+    if frc.ndim > 1:
+        frc = frc.mean(axis=tuple(range(-frc.ndim, -1)))
 
     if theo_threshold:
         # The number of pixels in a ring is given by the surface.
         # We compute the n-dimensional hyper-sphere surface, where n is given by the number of axes.
         n = len(axes)
         num_surf = 2 * np.pi ** (n / 2)
-        den_surf = sp.special.gamma(n / 2)
+        den_surf = gamma(n / 2)
         rings_size = np.concatenate(((1.0,), num_surf / den_surf * np.arange(1, len(frc)) ** (n - 1)))
     else:
         rings_size = azimuthal_integration(np.ones_like(img1), axes=axes, domain="fourier")
@@ -257,10 +246,10 @@ def compute_frc(
     t_hb = t_num / t_den
 
     if smooth is not None and smooth > 1:
-        win = sp.signal.windows.hann(smooth)
+        win = hann(smooth)
         win /= np.sum(win)
         win = win.reshape([*[1] * (frc.ndim - 1), -1])
-        frc = sp.ndimage.convolve(frc, win, mode="nearest")
+        frc = convolve(frc, win, mode="nearest")
 
     return frc[..., :cut_off], t_hb[..., :cut_off]
 
@@ -294,6 +283,7 @@ def plot_frcs(
     smooth: Optional[int] = 5,
     snrt: float = 0.2071,
     axes: Optional[Sequence[int]] = None,
+    taper_ratio: Optional[float] = 0.05,
     supersampling: int = 1,
     verbose: bool = False,
 ) -> tuple[Figure, Axes]:
@@ -314,6 +304,15 @@ def plot_frcs(
     axes : Sequence[int] | None, optional
         The axes along which we want to compute the FRC. The unused axes will be
         averaged. The default is None.
+    taper_ratio : Optional[float], optional
+        Ratio of the edge pixels to be tapered off. This is necessary when working
+        with truncated volumes / local tomography, to avoid truncation artifacts.
+        The default is 0.05.
+    supersampling : int, optional
+        Supersampling factor of the images.
+        Larger values increase the high-frequency range of the FRC/FSC function,
+        but might also suffer from aliasing.
+        The default is 1, which corresponds to the Nyquist frequency.
     verbose : bool, optional
         Whether to display verbose output, by default False.
     """
@@ -321,11 +320,14 @@ def plot_frcs(
     xps: list[Optional[tuple[float, float]]] = [(0.0, 0.0)] * len(volume_pairs)
 
     for ii, pair in enumerate(tqdm(volume_pairs, desc="Computing FRCs", disable=not verbose)):
-        frcs[ii], t_hb = compute_frc(pair[0], pair[1], snrt=snrt, smooth=smooth, axes=axes, supersampling=supersampling)
+        frcs[ii], t_hb = compute_frc(
+            pair[0], pair[1], snrt=snrt, smooth=smooth, axes=axes, supersampling=supersampling, taper_ratio=taper_ratio
+        )
         xps[ii] = estimate_resolution(frcs[ii], t_hb)
 
-    nyquist = len(frcs[0])
-    xx = np.linspace(0, 1, nyquist)
+    num_samples = len(frcs[0])
+    nyquist = (num_samples - 1) / supersampling
+    xx = np.linspace(0, supersampling, num_samples)
 
     fig, axs = plt.subplots(1, 1, sharex=True, sharey=True)
     for f, l in zip(frcs, labels):
@@ -333,14 +335,16 @@ def plot_frcs(
     axs.plot(xx, np.squeeze(t_hb), label="T 1/2 bit", linestyle="dashed")
     for ii, p in enumerate(xps):
         if p is not None:
-            res = p[0] / (nyquist - 1)
-            axs.stem(res, p[1], label=f"Resolution ({labels[ii]}): {res:.3}", linefmt=f"C{ii}-.", markerfmt=f"C{ii}o")
-    axs.set_xlim(0, 1)
+            bndw = p[0] / nyquist
+            # f"Resolution ({labels[ii]}): {res:.3}"
+            axs.stem(bndw, p[1], label=f"{labels[ii]}, bandwidth: {bndw:.3}$f_N$", linefmt=f"C{ii}-.", markerfmt=f"C{ii}o")
+    axs.axvline(1.0, linestyle="-.", color="k", alpha=0.5)
+    axs.set_xlim(0, supersampling)
     axs.set_ylim(0, None)
     axs.legend(fontsize=12)
     axs.grid()
     axs.set_ylabel("Magnitude", fontdict=dict(fontsize=16))
-    axs.set_xlabel("Spatial frequency / Nyquist", fontdict=dict(fontsize=16))
+    axs.set_xlabel("Spatial frequency / Nyquist ($f_N$)", fontdict=dict(fontsize=16))
     if title is not None:
         axs.set_title(title)
     for tl in axs.get_xticklabels():
