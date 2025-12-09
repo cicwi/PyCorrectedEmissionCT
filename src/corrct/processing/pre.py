@@ -261,7 +261,7 @@ def background_from_margin(
     data_shape_w = data_vwu.shape[-2]
     margin = np.array(margin, dtype=int, ndmin=1)
     if margin.size == 1:
-        margin = np.tile(margin, [*np.ones(margin.ndim - 1), 2])
+        margin = np.tile(margin, [1] * (margin.ndim - 1) + [2])
     if margin.ndim > 1:
         raise NotImplementedError("Complex masks support has not been implemented, yet.")
     if margin.sum() > data_shape_u:
@@ -351,7 +351,9 @@ def snip(
     return bckgnd_img
 
 
-def background_from_snip(data_vwu: NDArray, snip_iterations: int = 6, smooth_std: float = 0.0) -> NDArray:
+def background_from_snip(
+    data_vwu: NDArray, snip_iterations: int = 6, smooth_std: float | None = None, verbose: bool = False
+) -> NDArray:
     """
     Fit the background of the projection data using the SNIP algorithm.
 
@@ -361,8 +363,8 @@ def background_from_snip(data_vwu: NDArray, snip_iterations: int = 6, smooth_std
         The input dataset to process.
     snip_iterations : int, optional
         The number of iterations to run the SNIP algorithm.
-    smooth_std : float, optional
-        The standard deviation for Gaussian smoothing. If 0.0, no smoothing is applied.
+    smooth_std : float | None, optional
+        The standard deviation for Gaussian smoothing. If None, no smoothing is applied, by default None.
 
     Returns
     -------
@@ -372,14 +374,15 @@ def background_from_snip(data_vwu: NDArray, snip_iterations: int = 6, smooth_std
     bg_data_vwu = np.empty_like(data_vwu)
     for ii_a in trange(data_vwu.shape[-2], desc="Angles"):
         img = data_vwu[..., ii_a, :]
-        if smooth_std > 0.0:
+        if smooth_std is not None:
             img = gaussian_filter(img, sigma=smooth_std)
         if img.ndim > 2:
-            for ii_d in range(img.shape[0]):
+            img = img.copy()
+            for ii_d in trange(img.shape[0], disable=not verbose, desc="Slices"):
                 img[ii_d] = snip(img[ii_d], iterations=snip_iterations)
             bg_data_vwu[..., ii_a, :] = img
         else:
-            bg_data_vwu[..., ii_a, :] = snip(img, iterations=snip_iterations)
+            bg_data_vwu[..., ii_a, :] = snip(img, iterations=snip_iterations, verbose=verbose)
 
     return bg_data_vwu
 
