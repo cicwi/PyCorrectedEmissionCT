@@ -493,7 +493,7 @@ class DataFidelity_l1b(DataFidelity_l1):
 
 
 class DataFidelity_KL(DataFidelityBase):
-    """KullbackLeibler data-fidelity class."""
+    """Kullback-Leibler data-fidelity class."""
 
     __data_fidelity_name__ = "KL"
 
