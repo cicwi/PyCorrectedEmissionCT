@@ -13,6 +13,7 @@ import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from corrct.physics import xrf  # noqa: F401, F402
+from corrct.physics.units import energy_to_wlength
 from corrct.physics.xraylib_helper import get_compound, get_compound_cross_section, get_element_number, xraylib
 
 
@@ -99,6 +100,30 @@ class VolumeMaterial:
                 print(f" - total {cmp['density'] * cmp_cs * self.voxel_size_cm} (assuming material mass fraction = 1)")
             ph_lin_att += ph * cmp["density"] * cmp_cs
         return ph_lin_att * self.voxel_size_cm
+
+    def get_phase_shift(self, energy_keV: float) -> NDArray:
+        """
+        Compute the local phase shift for each voxel.
+
+        Parameters
+        ----------
+        energy_keV : float
+            The X-ray energy.
+
+        Returns
+        -------
+        NDArray
+            The computed local phase shift volume.
+        """
+        ph_phase_shift = np.zeros(self.shape, self.dtype)
+        for ph, cmp in zip(self.materials_fractions, self.materials_compositions):
+            delta = 1 - xraylib.Refractive_Index_Re(cmp["name"], energy_keV, cmp["density"])
+            if self.verbose:
+                print(f"Refractive index ({cmp['name']} at {energy_keV}): {delta}")
+
+            ph_phase_shift += ph * delta
+        wavelength_cm = energy_to_wlength(energy_keV, unit_wl="cm", unit_en="keV")
+        return -ph_phase_shift * self.voxel_size_cm * (2 * np.pi / wavelength_cm)
 
     def get_element_mass_fraction(self, element: str | int) -> NDArray:
         """Compute the local element mass fraction through out all the materials.
