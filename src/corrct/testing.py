@@ -8,26 +8,22 @@ Created on Thu Jun  4 12:28:21 2020
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import numpy as np
-from . import projectors, processing
-from . import physics
-
 from collections.abc import Sequence
-from typing import Optional
-from typing import Union
-from numpy.typing import DTypeLike
-from numpy.typing import NDArray
+
+import numpy as np
 import skimage.data as skd
 import skimage.filters as skf
-import skimage.transform as skt
-import skimage.segmentation as sks
 import skimage.morphology as skm
+import skimage.segmentation as sks
+import skimage.transform as skt
+from numpy.typing import DTypeLike, NDArray
 
+from . import physics, processing, projectors
 
 NDArrayFloat = NDArray[np.floating]
 
 
-def roundup_to_pow2(x: Union[int, float, NDArrayFloat], p: int, dtype: DTypeLike = int) -> Union[int, float, NDArrayFloat]:
+def roundup_to_pow2(x: int | float | NDArrayFloat, p: int, dtype: DTypeLike = int) -> int | float | NDArrayFloat:
     """Round first argument to the power of 2 indicated by second argument.
 
     Parameters
@@ -61,14 +57,14 @@ def download_phantom():
 
     urlreq.urlretrieve(phantom_url, phantom_path)
 
-    with open(phantom_path, "r", encoding="utf-8") as f:
+    with open(phantom_path, encoding="utf-8") as f:
         file_content = f.read()
     with open(phantom_path, "w", encoding="utf-8") as f:
         f.write(file_content.replace("xrange", "range"))
 
 
 def create_phantom_nuclei3d(
-    FoV_size: Union[int, None] = 100, dtype: DTypeLike = np.float32
+    FoV_size: int | None = 100, dtype: DTypeLike = np.float32
 ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
     """Create a 3D phantom of cell nuclei.
 
@@ -194,9 +190,9 @@ def phantom_assign_concentration(
 def phantom_assign_concentration_multi(
     ph_or: NDArrayFloat,
     elements: Sequence[str] = ("Ca", "Fe"),
-    em_lines: Union[str, Sequence[str]] = "KA",
+    em_lines: str | Sequence[str] = "KA",
     in_energy_keV: float = 20.0,
-    detectors_pos_rad: Optional[float] = None,
+    detectors_pos_rad: float | None = None,
 ) -> tuple[list[NDArrayFloat], NDArrayFloat, list[NDArrayFloat]]:
     """Build an XRF phantom.
 
@@ -267,11 +263,11 @@ def phantom_assign_concentration_multi(
 
 def add_noise(
     img_clean: NDArray,
-    num_photons: Union[int, float],
+    num_photons: int | float,
     add_poisson: bool = False,
-    readout_noise_std: Optional[float] = None,
-    background_avg: Optional[float] = None,
-    background_std: Optional[float] = None,
+    readout_noise_std: float | None = None,
+    background_avg: float | None = None,
+    background_std: float | None = None,
     detection_efficiency: float = 1.0,
     dtype: DTypeLike = np.float32,
 ) -> tuple[NDArray, NDArray, float]:
@@ -281,15 +277,15 @@ def add_noise(
     ----------
     img_clean : NDArray
         The clean input image.
-    num_photons : Union[int, float]
+    num_photons : int | float
         Number of photons corresponding to the value 1.0 in the image.
     add_poisson : bool, optional
         Whether to add Poisson noise, by default False.
-    readout_noise_std : Optional[float], optional
+    readout_noise_std : float | None, optional
         Standard deviation of the readout noise, by default None.
-    background_avg : Optional[float], optional
+    background_avg : float | None, optional
         Average value of the background, by default None.
-    background_std : Optional[float], optional
+    background_std : float | None, optional
         Standard deviation of the background, by default None.
     detection_efficiency : float, optional
         Efficiency of the detection (e.g. detector solid angle, inclination, etc), by default 1.0.
@@ -298,7 +294,7 @@ def add_noise(
 
     Returns
     -------
-    Tuple[NDArray, NDArray, float]
+    tuple[NDArray, NDArray, float]
         The noised and clean images (scaled by the photons and efficiency), and the background.
     """
     img_clean = num_photons * detection_efficiency * img_clean.copy().astype(dtype)
@@ -329,14 +325,14 @@ def create_sino(
     end_angle_deg: float = 180.0,
     dwell_time_s: float = 1.0,
     photon_flux: float = 1e9,
-    detectors_pos_rad: Union[float, Sequence[float], NDArrayFloat] = (np.pi / 2),
-    vol_att_in: Optional[NDArrayFloat] = None,
-    vol_att_out: Optional[NDArrayFloat] = None,
-    psf: Optional[NDArrayFloat] = None,
-    background_avg: Optional[float] = None,
-    background_std: Optional[float] = None,
+    detectors_pos_rad: float | Sequence[float] | NDArrayFloat = (np.pi / 2),
+    vol_att_in: NDArrayFloat | None = None,
+    vol_att_out: NDArrayFloat | None = None,
+    psf: NDArrayFloat | None = None,
+    background_avg: float | None = None,
+    background_std: float | None = None,
     add_poisson: bool = False,
-    readout_noise_std: Optional[float] = None,
+    readout_noise_std: float | None = None,
     dtype: DTypeLike = np.float32,
 ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, float]:
     """Compute the sinogram from a given phantom.
@@ -418,9 +414,9 @@ def create_sino_transmission(
     end_angle_deg: float = 180,
     dwell_time_s: float = 1,
     photon_flux: float = 1e9,
-    psf: Optional[NDArrayFloat] = None,
+    psf: NDArrayFloat | None = None,
     add_poisson: bool = False,
-    readout_noise_std: Optional[float] = None,
+    readout_noise_std: float | None = None,
     dtype: DTypeLike = np.float32,
 ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat]:
     """Compute the sinogram from a given phantom.

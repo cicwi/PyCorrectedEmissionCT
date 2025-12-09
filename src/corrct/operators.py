@@ -8,13 +8,12 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import copy as cp
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
-from typing import Callable, Optional, Union
+from collections.abc import Callable, Sequence
+
 import numpy as np
 import scipy.signal as spsig
 from numpy.typing import ArrayLike, NDArray
 from scipy.sparse.linalg import LinearOperator
-
 
 try:
     import pywt
@@ -211,10 +210,10 @@ class TransformFunctions(BaseTransform):
 
     def __init__(
         self,
-        dir_shape: Union[ArrayLike, NDArray],
-        adj_shape: Union[ArrayLike, NDArray],
+        dir_shape: ArrayLike | NDArray,
+        adj_shape: ArrayLike | NDArray,
         A: Callable[[NDArray], NDArray],
-        At: Optional[Callable[[NDArray], NDArray]] = None,
+        At: Callable[[NDArray], NDArray] | None = None,
     ) -> None:
         """Initialize the callable transform.
 
@@ -228,7 +227,7 @@ class TransformFunctions(BaseTransform):
             Shape of the adjoint space.
         A : Callable[[NDArray], NDArray]
             The transform function.
-        At : Optional[Callable[[NDArray], NDArray]], optional
+        At : Callable[[NDArray], NDArray] | None, optional
             The adjoint transform function, by default None
         """
         self.dir_shape = np.array(dir_shape, ndmin=1, dtype=int)
@@ -307,11 +306,11 @@ class ProjectorOperator(BaseTransform):
         return self.adj_shape
 
     @vol_shape.setter
-    def vol_shape(self, new_shape: Union[Sequence[int], NDArray]) -> None:
+    def vol_shape(self, new_shape: Sequence[int] | NDArray) -> None:
         self.dir_shape = np.array(new_shape, ndmin=1, dtype=int)
 
     @prj_shape.setter
-    def prj_shape(self, new_shape: Union[Sequence[int], NDArray]) -> None:
+    def prj_shape(self, new_shape: Sequence[int] | NDArray) -> None:
         self.adj_shape = np.array(new_shape, ndmin=1, dtype=int)
 
     @abstractmethod
@@ -352,12 +351,12 @@ class ProjectorOperator(BaseTransform):
     def _op_adjoint(self, x: NDArray) -> NDArray:
         return self.bp(x)
 
-    def get_pre_weights(self) -> Union[NDArray, None]:
+    def get_pre_weights(self) -> NDArray | None:
         """Compute the pre-weights of the projector geometry (notably for cone-beam geometries).
 
         Returns
         -------
-        Union[NDArray, None]
+        NDArray | None
             The computed detector weights
         """
         return None
@@ -366,7 +365,7 @@ class ProjectorOperator(BaseTransform):
 class TransformIdentity(BaseTransform):
     """Identity operator."""
 
-    def __init__(self, x_shape: Union[ArrayLike, NDArray]):
+    def __init__(self, x_shape: ArrayLike | NDArray):
         """Identity operator.
 
         Parameters
@@ -390,7 +389,7 @@ class TransformDiagonalScaling(BaseTransform):
 
     scale: NDArray
 
-    def __init__(self, x_shape: Union[ArrayLike, NDArray], scale: Union[ArrayLike, NDArray]):
+    def __init__(self, x_shape: ArrayLike | NDArray, scale: ArrayLike | NDArray):
         """Diagonal scaling operator.
 
         Parameters
@@ -526,10 +525,10 @@ class TransformDecimatedWavelet(BaseWaveletTransform):
 
     def __init__(
         self,
-        x_shape: Union[ArrayLike, NDArray],
+        x_shape: ArrayLike | NDArray,
         wavelet: str,
         level: int,
-        axes: Optional[ArrayLike] = None,
+        axes: ArrayLike | None = None,
         pad_on_demand: str = "edge",
     ):
         """
@@ -643,7 +642,7 @@ class TransformStationaryWavelet(BaseWaveletTransform):
         x_shape: ArrayLike,
         wavelet: str,
         level: int,
-        axes: Optional[ArrayLike] = None,
+        axes: ArrayLike | None = None,
         pad_on_demand: str = "edge",
         normalized: bool = True,
     ):
@@ -773,13 +772,13 @@ class TransformGradient(BaseTransform):
     ----------
     x_shape : ArrayLike
         Shape of the data to be transformed.
-    axes : Optional[ArrayLike], optional
+    axes : ArrayLike | None, optional
         Axes along which to do the gradient. The default is None.
     pad_mode : str, optional
         Padding mode of the gradient. The default is "edge".
     """
 
-    def __init__(self, x_shape: ArrayLike, axes: Optional[ArrayLike] = None, pad_mode: str = "edge"):
+    def __init__(self, x_shape: ArrayLike, axes: ArrayLike | None = None, pad_mode: str = "edge"):
         x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
         if axes is None:
@@ -848,7 +847,7 @@ class TransformGradient(BaseTransform):
 class TransformFourier(BaseTransform):
     """Fourier transform operator."""
 
-    def __init__(self, x_shape: ArrayLike, axes: Optional[ArrayLike] = None):
+    def __init__(self, x_shape: ArrayLike, axes: ArrayLike | None = None):
         """
         Fourier transform.
 
@@ -856,7 +855,7 @@ class TransformFourier(BaseTransform):
         ----------
         x_shape : ArrayLike
             Shape of the data to be Fourier transformed.
-        axes : Optional[ArrayLike], optional
+        axes : ArrayLike | None, optional
             Axes along which to do the Fourier transform.
 
         Returns
@@ -932,7 +931,7 @@ class TransformLaplacian(BaseTransform):
         Padding mode of the Laplacian. The default is "edge".
     """
 
-    def __init__(self, x_shape: ArrayLike, axes: Optional[ArrayLike] = None, pad_mode: str = "edge"):
+    def __init__(self, x_shape: ArrayLike, axes: ArrayLike | None = None, pad_mode: str = "edge"):
         x_shape = np.array(x_shape, ndmin=1, dtype=int)
 
         if axes is None:
@@ -978,16 +977,16 @@ class TransformLaplacian(BaseTransform):
 class TransformSVD(BaseTransform):
     """Singular value decomposition based decomposition operator."""
 
-    U: Optional[NDArray]
-    Vt: Optional[NDArray]
+    U: NDArray | None
+    Vt: NDArray | None
 
     rescale: bool
 
     def __init__(
         self,
         x_shape: ArrayLike,
-        axes_rows: Union[Sequence[int], NDArray] = (0,),
-        axes_cols: Union[Sequence[int], NDArray] = (-1,),
+        axes_rows: Sequence[int] | NDArray = (0,),
+        axes_cols: Sequence[int] | NDArray = (-1,),
         rescale: bool = False,
     ):
         """

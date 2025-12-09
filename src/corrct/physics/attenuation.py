@@ -7,8 +7,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import concurrent.futures as cf
 import multiprocessing as mp
-from collections.abc import Sequence
-from typing import Callable, Optional, Union
+from collections.abc import Callable, Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,8 +32,8 @@ CONVERT_UM_TO_CM = 1e-4
 class AttenuationVolume:
     """Attenuation volume computation class."""
 
-    incident_local: Union[NDArrayFloat, None]
-    emitted_local: Union[NDArrayFloat, None]
+    incident_local: NDArrayFloat | None
+    emitted_local: NDArrayFloat | None
     angles_rot_rad: NDArrayFloat
     detectors: Sequence[DetectorXRF]
     emitted_sub_sampling: int
@@ -46,10 +45,10 @@ class AttenuationVolume:
 
     def __init__(
         self,
-        incident_local: Union[NDArrayFloat, None],
-        emitted_local: Union[NDArrayFloat, None],
-        angles_rot_rad: Union[NDArrayFloat, Sequence[float]],
-        angles_det_rad: Union[NDArrayFloat, Sequence[Union[float, DetectorXRF]], float, DetectorXRF] = np.pi / 2,
+        incident_local: NDArrayFloat | None,
+        emitted_local: NDArrayFloat | None,
+        angles_rot_rad: NDArrayFloat | Sequence[float],
+        angles_det_rad: NDArrayFloat | Sequence[float | DetectorXRF] | float | DetectorXRF = np.pi / 2,
         emitted_sub_sampling: int = 1,
         dtype: DTypeLike = np.float32,
     ):
@@ -185,8 +184,8 @@ class AttenuationVolume:
         ax: Axes,
         rot_ind: int,
         det_ind: int = 0,
-        slice_ind: Optional[int] = None,
-        axes: Union[Sequence[int], NDArrayInt] = (-2, -1),
+        slice_ind: int | None = None,
+        axes: Sequence[int] | NDArrayInt = (-2, -1),
     ) -> Sequence[float]:
         """
         Plot the requested attenuation map.
@@ -199,7 +198,7 @@ class AttenuationVolume:
             Rotation angle index.
         det_ind : int, optional
             Detector angle index. The default is 0.
-        slice_ind : Optional[int], optional
+        slice_ind : int | None, optional
             Volume slice index (for 3D volumes). The default is None.
         axes : Sequence[int] | NDArray, optional
             Axes of the slice. The default is (-2, -1).
@@ -253,9 +252,9 @@ class AttenuationVolume:
 
     def get_maps(
         self,
-        roi: Optional[ArrayLike] = None,
-        rot_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
-        det_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
+        roi: ArrayLike | None = None,
+        rot_ind: int | slice | Sequence[int] | NDArrayInt | None = None,
+        det_ind: int | slice | Sequence[int] | NDArrayInt | None = None,
         binning: int = 1,
     ) -> NDArray:
         """
@@ -299,9 +298,9 @@ class AttenuationVolume:
 
     def get_projector_args(
         self,
-        roi: Optional[ArrayLike] = None,
-        rot_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
-        det_ind: Union[int, slice, Sequence[int], NDArrayInt, None] = None,
+        roi: ArrayLike | None = None,
+        rot_ind: int | slice | Sequence[int] | NDArrayInt | None = None,
+        det_ind: int | slice | Sequence[int] | NDArrayInt | None = None,
         binning: int = 1,
     ) -> dict[str, NDArray]:
         """
@@ -333,19 +332,19 @@ class AttenuationVolume:
 
 
 def get_linear_attenuation_coefficient(
-    compound: Union[str, dict], energy_keV: float, pixel_size_um: float, density: Union[float, None] = None
+    compound: str | dict, energy_keV: float, pixel_size_um: float, density: float | None = None
 ) -> float:
     """Compute the linear attenuation coefficient for given compound, energy, and pixel size.
 
     Parameters
     ----------
-    compound : Union[str, dict]
+    compound : str | dict
         The compound for which we compute the linear attenuation coefficient
     energy_keV : float
         The energy of the photons
     pixel_size_um : float
         The pixel size in microns
-    density : Union[float, None], optional
+    density : float | None, optional
         The density of the compound (if different from the default value), by default None
 
     Returns
@@ -364,7 +363,7 @@ def get_linear_attenuation_coefficient(
 
 
 def plot_emission_line_attenuation(
-    compound: Union[str, dict],
+    compound: str | dict,
     thickness_um: float,
     mean_energy_keV: float,
     fwhm_keV: float,
@@ -376,7 +375,7 @@ def plot_emission_line_attenuation(
 
     Parameters
     ----------
-    compound : Union[str, dict]
+    compound : str | dict
         Compound to consider
     thickness_um : float
         Thickness of the compound (in microns)
@@ -454,7 +453,7 @@ def plot_emission_line_attenuation(
 
 
 def plot_transmittance_decay(
-    compounds: Union[str, dict, Sequence[Union[str, dict]]],
+    compounds: str | dict | Sequence[str | dict],
     mean_energy_keV: float,
     thickness_range_um: tuple[float, float, int] = (0.0, 10.0, 101),
 ) -> None:
@@ -487,7 +486,7 @@ def plot_transmittance_decay(
     axs.legend(fontsize=13)
     axs.grid()
     axs.tick_params(labelsize=14)
-    axs.set_xlabel("Thickness [$\mu m$]", fontsize=14)
+    axs.set_xlabel(r"Thickness [$\mu m$]", fontsize=14)
     axs.set_xlim(thickness_range_um[0], thickness_range_um[1])
     axs.set_ylabel("Transmittance", fontsize=14)
     axs.set_ylim(0.0, 1.0)

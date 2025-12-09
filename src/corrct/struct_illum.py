@@ -9,17 +9,13 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import copy as cp
-
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as spalg
-
 from numpy.typing import DTypeLike, NDArray
-
 from tqdm.auto import tqdm
 
 from . import operators, processing
@@ -150,10 +146,10 @@ class MaskCollection:
     def __init__(
         self,
         masks_enc: NDArray,
-        masks_dec: Union[NDArray, None] = None,
+        masks_dec: NDArray | None = None,
         mask_dims: int = 2,
         mask_type: str = "measured",
-        mask_support: Union[None, Sequence[int], NDArrayInt] = None,
+        mask_support: None | Sequence[int] | NDArrayInt = None,
     ) -> None:
         """Initialize mask collection.
 
@@ -273,12 +269,12 @@ class MaskCollection:
         """
         return self.mask_type.lower()
 
-    def get_mask(self, mask_inds_vu: Union[Sequence, NDArray], mask_encoding: bool = True) -> NDArray:
+    def get_mask(self, mask_inds_vu: Sequence | NDArray, mask_encoding: bool = True) -> NDArray:
         """Return the requested mask.
 
         Parameters
         ----------
-        mask_inds_vu : Union[Sequence, NDArray]
+        mask_inds_vu : Sequence | NDArray
             The mask position.
         mask_encoding : bool, optional
             Whether it is an encoding or decoding mask, by default True
@@ -349,7 +345,7 @@ class MaskCollection:
 
         return new_masks
 
-    def inspect_masks(self, mask_inds_vu: Union[None, Sequence[int], NDArrayInt] = None):
+    def inspect_masks(self, mask_inds_vu: None | Sequence[int] | NDArrayInt = None):
         """Inspect the encoding and decoding masks at the requested shifts.
 
         Parameters
@@ -389,9 +385,9 @@ class MaskGenerator(ABC):
 
     def __init__(
         self,
-        shape_fov: Union[Sequence[int], NDArrayInt],
-        shape_mask: Union[Sequence[int], NDArrayInt],
-        shape_shifts: Union[Sequence[int], NDArrayInt],
+        shape_fov: Sequence[int] | NDArrayInt,
+        shape_mask: Sequence[int] | NDArrayInt,
+        shape_shifts: Sequence[int] | NDArrayInt,
         transmittance: float = 1.0,
         dtype: DTypeLike = np.float32,
     ) -> None:
@@ -463,7 +459,7 @@ class MaskGenerator(ABC):
         """
         return int(np.prod(self.shape_fov))
 
-    def _init_fov_mm(self, fov_size_mm: Union[float, Sequence[float], NDArray], req_res_mm: float) -> NDArrayInt:
+    def _init_fov_mm(self, fov_size_mm: float | Sequence[float] | NDArray, req_res_mm: float) -> NDArrayInt:
         self.fov_size_mm = np.array(fov_size_mm, ndmin=1)
         num_points = np.ceil(self.fov_size_mm / req_res_mm).astype(int)
         self.feature_size_mm = self.fov_size_mm / num_points
@@ -524,7 +520,7 @@ class MaskGenerator(ABC):
         return 1 - (1 - masks) * self.transmittance
 
     @abstractmethod
-    def generate_shifted_mask(self, mask_inds_vu: Union[Sequence, NDArray], mask_encoding: bool = True) -> NDArray:
+    def generate_shifted_mask(self, mask_inds_vu: Sequence | NDArray, mask_encoding: bool = True) -> NDArray:
         """Produce the shifted masks.
 
         Parameters
@@ -541,7 +537,7 @@ class MaskGenerator(ABC):
         """
 
     def _generate_mask_shifts(
-        self, shifts_v: Union[Sequence, NDArray], shifts_u: Union[Sequence, NDArray], mask_encoding: bool = True
+        self, shifts_v: Sequence | NDArray, shifts_u: Sequence | NDArray, mask_encoding: bool = True
     ) -> NDArray:
         """Produce all the masks.
 
@@ -565,7 +561,7 @@ class MaskGenerator(ABC):
         return np.stack(masks, axis=0)  # .reshape([*self.shift_shape, *self.fov_shape])
 
     def get_interval_shifts(
-        self, interval: Union[int, Sequence[int], NDArray], axes_order: Sequence[int] = (-2, -1)
+        self, interval: int | Sequence[int] | NDArray, axes_order: Sequence[int] = (-2, -1)
     ) -> Sequence[NDArray]:
         """Produce shifts for the "interval" shift type.
 
@@ -610,9 +606,7 @@ class MaskGenerator(ABC):
         perms = np.random.permutation(np.prod(self.shape_shifts))[:num_shifts]
         return [disp[perms] for disp in disps]
 
-    def get_sequential_shifts(
-        self, num_shifts: Union[int, None] = None, axes_order: Sequence[int] = (-2, -1)
-    ) -> Sequence[NDArray]:
+    def get_sequential_shifts(self, num_shifts: int | None = None, axes_order: Sequence[int] = (-2, -1)) -> Sequence[NDArray]:
         """Produce shifts for the "sequential" shift type.
 
         Parameters
@@ -638,7 +632,7 @@ class MaskGeneratorPoint(MaskGenerator):
 
     __mask_name__ = "pencil"
 
-    def __init__(self, fov_size_mm: Union[float, Sequence[float], NDArray], req_res_mm: float = 1.0):
+    def __init__(self, fov_size_mm: float | Sequence[float] | NDArray, req_res_mm: float = 1.0):
         """Initialize the pencil beam mask collection.
 
         Parameters
@@ -651,7 +645,7 @@ class MaskGeneratorPoint(MaskGenerator):
         num_points = self._init_fov_mm(fov_size_mm, req_res_mm)
         super().__init__(num_points, [1, 1], num_points)
 
-    def generate_shifted_mask(self, mask_inds_vu: Union[Sequence, NDArray], mask_encoding: bool = True) -> NDArray:
+    def generate_shifted_mask(self, mask_inds_vu: Sequence | NDArray, mask_encoding: bool = True) -> NDArray:
         """Produce the shifted masks.
 
         Parameters
@@ -676,9 +670,7 @@ class MaskGeneratorBernoulli(MaskGenerator):
 
     __mask_name__ = "bernoulli"
 
-    def __init__(
-        self, fov_size_mm: Union[float, Sequence[float], NDArray], req_res_mm: float = 1.0, max_masks_ratio: float = 1.2
-    ):
+    def __init__(self, fov_size_mm: float | Sequence[float] | NDArray, req_res_mm: float = 1.0, max_masks_ratio: float = 1.2):
         """
         Bernulli masks collection class.
 
@@ -698,7 +690,7 @@ class MaskGeneratorBernoulli(MaskGenerator):
             shape_fov=num_points, shape_mask=num_points, shape_shifts=np.ceil(num_points * max_masks_ratio).astype(int)
         )
 
-    def generate_shifted_mask(self, mask_inds_vu: Union[Sequence, NDArray], mask_encoding: bool = True) -> NDArray:
+    def generate_shifted_mask(self, mask_inds_vu: Sequence | NDArray, mask_encoding: bool = True) -> NDArray:
         """Produce the shifted masks.
 
         Parameters
@@ -722,9 +714,7 @@ class MaskGeneratorHalfGaussian(MaskGenerator):
 
     __mask_name__ = "half-gaussian"
 
-    def __init__(
-        self, fov_size_mm: Union[float, Sequence[float], NDArray], req_res_mm: float = 1.0, max_masks_ratio: float = 1.2
-    ):
+    def __init__(self, fov_size_mm: float | Sequence[float] | NDArray, req_res_mm: float = 1.0, max_masks_ratio: float = 1.2):
         """
         Half Gaussian masks collection class.
 
@@ -744,7 +734,7 @@ class MaskGeneratorHalfGaussian(MaskGenerator):
             shape_fov=num_points, shape_mask=num_points, shape_shifts=np.ceil(num_points * max_masks_ratio).astype(int)
         )
 
-    def generate_shifted_mask(self, mask_inds_vu: Union[Sequence, NDArray], mask_encoding: bool = True) -> NDArray:
+    def generate_shifted_mask(self, mask_inds_vu: Sequence | NDArray, mask_encoding: bool = True) -> NDArray:
         """Produce the shifted masks.
 
         Parameters
@@ -799,7 +789,7 @@ class MaskGeneratorMURA(MaskGenerator):
         super().__init__([num_points, num_points], [num_points, num_points], [num_points, num_points])
         self._enc_dec_mismatch = True
 
-    def generate_shifted_mask(self, mask_inds_vu: Union[Sequence, NDArray], mask_encoding: bool = True) -> NDArray:
+    def generate_shifted_mask(self, mask_inds_vu: Sequence | NDArray, mask_encoding: bool = True) -> NDArray:
         """Produce the shifted masks.
 
         Parameters
@@ -857,7 +847,7 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
 
     mc: MaskCollection
 
-    def __init__(self, mask_collection: Union[MaskCollection, NDArray], backend: str = "torch"):
+    def __init__(self, mask_collection: MaskCollection | NDArray, backend: str = "torch"):
         """
         Initialize the Ghost Imaging projector class.
 
@@ -885,7 +875,7 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
         self.backend = backend.lower()
         self._init_backend()
 
-    def _get_backend_device(self) -> tuple[str, Union[str, None]]:
+    def _get_backend_device(self) -> tuple[str, str | None]:
         backend, *device = self.backend.split(":")
         if len(device) == 0:
             return backend, None
@@ -1042,7 +1032,7 @@ class ProjectorGhostTomography(ProjectorGhostImaging):
     tomo_proj: operators.ProjectorOperator
 
     def __init__(
-        self, mask_collection: Union[MaskCollection, NDArray], tomo_proj: operators.ProjectorOperator, backend: str = "torch"
+        self, mask_collection: MaskCollection | NDArray, tomo_proj: operators.ProjectorOperator, backend: str = "torch"
     ):
         super().__init__(mask_collection, backend)
 

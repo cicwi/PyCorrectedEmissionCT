@@ -6,16 +6,13 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import numpy as np
-
-from typing import Optional
 from numpy.typing import NDArray
-
 
 eps = np.finfo(np.float32).eps
 
 
 def compute_variance_poisson(
-    Is: NDArray, I0: Optional[NDArray] = None, var_I0: Optional[NDArray] = None, normalized: bool = True
+    Is: NDArray, I0: NDArray | None = None, var_I0: NDArray | None = None, normalized: bool = True
 ) -> NDArray:
     """
     Compute the variance of a signal subject to Poisson noise, against a reference intensity.
@@ -27,9 +24,9 @@ def compute_variance_poisson(
     ----------
     Is : NDArray
         The signal intensity.
-    I0 : Optional[NDArray], optional
+    I0 : NDArray | None, optional
         The reference intensity. The default is None.
-    var_I0 : Optional[NDArray], optional
+    var_I0 : NDArray | None, optional
         The variance of the reference intensity. The default is None.
         If not given, it will be assumed to be equal to I0.
     normalized : bool, optional
@@ -58,9 +55,7 @@ def compute_variance_poisson(
         return var_Is
 
 
-def compute_variance_transmission(
-    Is: NDArray, I0: NDArray, var_I0: Optional[NDArray] = None, normalized: bool = True
-) -> NDArray:
+def compute_variance_transmission(Is: NDArray, I0: NDArray, var_I0: NDArray | None = None, normalized: bool = True) -> NDArray:
     """
     Compute the variance of a linearized attenuation (transmission) signal, against a reference intensity.
 
@@ -70,7 +65,7 @@ def compute_variance_transmission(
         The transmitted signal.
     I0 : NDArray
         The reference intensity.
-    var_I0 : Optional[NDArray], optional
+    var_I0 : NDArray | None, optional
         The variance of the reference intensity. The default is None.
         If not given, it will be assumed to be equal to I0.
     normalized : bool, optional
@@ -100,10 +95,10 @@ def compute_variance_weight(
     variance: NDArray,
     *,
     percentile: float = 0.001,
-    mask: Optional[NDArray] = None,
+    mask: NDArray | None = None,
     normalized: bool = False,
     use_std: bool = False,
-    semilog: bool = False
+    semilog: bool = False,
 ) -> NDArray:
     """
     Compute the weight associated to the given variance, in a weighted least-squares context.

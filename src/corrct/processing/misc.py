@@ -5,15 +5,12 @@ Miscellaneous processing routines.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import numpy as np
-import scipy as sp
-
-from typing import Optional, Union, Callable
-from collections.abc import Sequence
-from numpy.typing import NDArray, ArrayLike, DTypeLike
+from collections.abc import Callable, Sequence
 
 import matplotlib.pyplot as plt
-
+import numpy as np
+import scipy as sp
+from numpy.typing import ArrayLike, DTypeLike, NDArray
 
 eps = np.finfo(np.float32).eps
 
@@ -21,13 +18,13 @@ NDArrayInt = NDArray[np.signedinteger]
 
 
 def circular_mask(
-    vol_shape_zxy: Union[Sequence[int], NDArrayInt],
+    vol_shape_zxy: Sequence[int] | NDArrayInt,
     radius_offset: float = 0,
-    coords_ball: Union[Sequence[int], NDArrayInt, None] = None,
+    coords_ball: Sequence[int] | NDArrayInt | None = None,
     ball_norm: float = 2,
-    vol_origin_zxy: Union[Sequence[float], NDArray, None] = None,
-    taper_func: Optional[str] = None,
-    taper_target: Union[str, float] = "edge",
+    vol_origin_zxy: Sequence[float] | NDArray | None = None,
+    taper_func: str | None = None,
+    taper_target: str | float = "edge",
     super_sampling: int = 1,
     squeeze: bool = True,
     dtype: DTypeLike = np.float32,
@@ -45,7 +42,7 @@ def circular_mask(
         The coordinates to consider for the non-masked region. The default is None.
     ball_norm : float, optional
         The norm of the ball. The default is 2.
-    vol_origin_zxy : Optional[Sequence[float]], optional
+    vol_origin_zxy : Sequence[float] | None, optional
         The origin of the coordinates in voxels. The default is None.
     taper_func : str, optional
         The mask data type. Allowed types: "const" | "cos". The default is "const".
@@ -135,10 +132,10 @@ def circular_mask(
 
 def ball(
     data_shape_vu: ArrayLike,
-    radius: Union[int, float],
+    radius: int | float,
     super_sampling: int = 5,
     dtype: DTypeLike = np.float32,
-    func: Optional[Callable] = None,
+    func: Callable | None = None,
 ) -> ArrayLike:
     """
     Compute a ball with specified radius.
@@ -153,7 +150,7 @@ def ball(
         Super-sampling for having smoother ball edges. The default is 5.
     dtype : DTypeLike, optional
         Type of the output. The default is np.float32.
-    func : Optional[Callable], optional
+    func : Callable | None, optional
         Point-wise function for the local values. The default is None.
 
     Returns
@@ -257,10 +254,10 @@ def azimuthal_integration(img: NDArray, axes: Sequence[int] = (-2, -1), domain: 
 
 def lines_intersection(
     line_1: NDArray,
-    line_2: Union[float, NDArray],
+    line_2: float | NDArray,
     position: str = "first",
-    x_lims: Optional[tuple[Optional[float], Optional[float]]] = None,
-) -> Optional[tuple[float, float]]:
+    x_lims: tuple[float | None, float | None] | None = None,
+) -> tuple[float, float] | None:
     """
     Compute the intersection point between two lines.
 
@@ -347,13 +344,13 @@ def lines_intersection(
 
 def norm_cross_corr(
     img1: NDArray,
-    img2: Optional[NDArray] = None,
+    img2: NDArray | None = None,
     axes: Sequence[int] = (-2, -1),
     t_match: bool = False,
     mode_full: bool = True,
     compute_profile: bool = True,
     plot: bool = True,
-) -> Union[NDArray, tuple[NDArray, NDArray]]:
+) -> NDArray | tuple[NDArray, NDArray]:
     """
     Compute the normalized cross-correlation between two images.
 

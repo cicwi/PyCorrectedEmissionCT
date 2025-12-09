@@ -6,7 +6,6 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 from collections.abc import Sequence
-from typing import Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,12 +17,11 @@ from scipy.ndimage import convolve, fourier_shift, gaussian_filter, shift
 from skimage.measure import block_reduce
 from tqdm.auto import trange
 
-
 eps = np.finfo(np.float32).eps
 
 
 def pad_sinogram(
-    sinogram: NDArray, width: Union[int, Sequence[int], NDArray], pad_axis: int = -1, mode: str = "edge", **kwds
+    sinogram: NDArray, width: int | Sequence[int] | NDArray, pad_axis: int = -1, mode: str = "edge", **kwds
 ) -> NDArray:
     """
     Pad the sinogram.
@@ -32,7 +30,7 @@ def pad_sinogram(
     ----------
     sinogram : NDArray
         The sinogram to pad.
-    width : Union[int, Sequence[int]]
+    width : int | Sequence[int]
         The width of the padding. Normally, it should either be an int or a tuple(int, int).
     pad_axis : int, optional
         The axis to pad. The default is -1.
@@ -57,9 +55,9 @@ def pad_sinogram(
 def apply_flat_field(
     projs_wvu: NDArray,
     flats_wvu: NDArray,
-    darks_wvu: Optional[NDArray] = None,
-    crop: Union[NDArray, Sequence[int], None] = None,
-    cap_intensity: Optional[float] = None,
+    darks_wvu: NDArray | None = None,
+    crop: NDArray | Sequence[int] | None = None,
+    cap_intensity: float | None = None,
     dtype: DTypeLike = np.float32,
 ) -> NDArray:
     """
@@ -67,13 +65,13 @@ def apply_flat_field(
 
     Parameters
     ----------
-    projs : NDArray
+    projs_wvu : NDArray
         Projections.
-    flats : NDArray
+    flats_wvu : NDArray
         Flat fields.
-    darks : Optional[NDArray], optional
+    darks_wvu : NDArray | None, optional
         Dark noise. The default is None.
-    crop : Optional[Sequence[int]], optional
+    crop : NDArray | Sequence[int] | None, optional
         Crop region. The default is None.
     cap_intensity: float | None, optional
         Cap the intensity to a given value. The default is None.
@@ -180,7 +178,7 @@ def shift_proj_stack(data_vwu: NDArray, shifts: NDArray, use_fft: bool = False) 
 
 
 def bin_imgs(
-    imgs: NDArray, binning: Union[int, float], axes: Sequence[int] = (-2, -1), auto_crop: bool = False, verbose: bool = True
+    imgs: NDArray, binning: int | float, axes: Sequence[int] = (-2, -1), auto_crop: bool = False, verbose: bool = True
 ) -> NDArray:
     """Bin a stack of images.
 
@@ -234,7 +232,7 @@ def bin_imgs(
 
 
 def background_from_margin(
-    data_vwu: NDArray, margin: Union[int, Sequence[int], NDArray[np.integer]] = 4, poly_order: int = 0, plot: bool = False
+    data_vwu: NDArray, margin: int | Sequence[int] | NDArray[np.integer] = 4, poly_order: int = 0, plot: bool = False
 ) -> NDArray:
     """Compute background of the projection data, from the margins of the projections.
 
@@ -307,7 +305,7 @@ def background_from_margin(
 
 
 def snip(
-    img: NDArray, kernel_dims: Union[int, None] = None, iterations: int = 1000, window: int = 3, verbose: bool = False
+    img: NDArray, kernel_dims: int | None = None, iterations: int = 1000, window: int = 3, verbose: bool = False
 ) -> NDArray:
     """
     Apply the SNIP algorithm to an image to estimate the background.
@@ -316,7 +314,7 @@ def snip(
     ----------
     img : NDArray
         The input image to process.
-    kernel_dims : Union[int, None], optional
+    kernel_dims : int | None, optional
         The number of dimensions to apply the SNIP algorithm to. If None, it defaults to the number of dimensions of the image.
     iterations : int, optional
         The number of iterations to run the SNIP algorithm.
@@ -392,7 +390,7 @@ def destripe_wlf_vwu(
     level: int = 1,
     wavelet: str = "bior2.2",
     angle_axis: int = -2,
-    other_axes: Union[Sequence[int], NDArray, None] = None,
+    other_axes: Sequence[int] | NDArray | None = None,
 ) -> NDArray:
     """Remove stripes from sinogram, using the Wavelet-Fourier method.
 
@@ -408,7 +406,7 @@ def destripe_wlf_vwu(
         The type of wavelet to use, by default "bior2.2"
     angle_axis : int, optional
         The axis of the Fourier transform, by default -2
-    other_axes : Union[Sequence[int], NDArray, None], optional
+    other_axes : Sequence[int] | NDArray | None, optional
         The axes of the wavelet decomposition, by default None
 
     Returns
@@ -451,8 +449,8 @@ def destripe_wlf_vwu(
 
 def compute_eigen_flats(
     trans_wvu: NDArray,
-    flats_wvu: Optional[NDArray] = None,
-    darks_wvu: Optional[NDArray] = None,
+    flats_wvu: NDArray | None = None,
+    darks_wvu: NDArray | None = None,
     ndim: int = 2,
     plot: bool = False,
 ) -> tuple[NDArray, NDArray]:

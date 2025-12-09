@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Volume centering classes.
 
@@ -6,22 +5,17 @@ Volume centering classes.
 """
 
 import numpy as np
-
-from typing import Union
 from numpy.typing import ArrayLike, NDArray
-
-from . import fitting
 
 from .. import models
 from ..processing import post as post_proc
+from . import fitting
 
 
 class RecenterVolume:
     """Volume re-centering class."""
 
-    def __init__(
-        self, proj_geom: models.ProjectionGeometry, angles_rad: Union[NDArray, ArrayLike], precision: int = 2
-    ) -> None:
+    def __init__(self, proj_geom: models.ProjectionGeometry, angles_rad: NDArray | ArrayLike, precision: int = 2) -> None:
         """Volume recentering class, that shifts the detector position, in order to meet a certain volume position.
 
         Parameters
@@ -40,7 +34,7 @@ class RecenterVolume:
         shifts_vu_corrs = self.prj_geom.project_displacement_to_detector(displacemenet_zyx)
         return np.around(shifts_vu + shifts_vu_corrs, decimals=self.precision)
 
-    def to_com(self, shifts_vu: Union[ArrayLike, NDArray], volume: NDArray, com_ref_zyx: Union[ArrayLike, NDArray]) -> NDArray:
+    def to_com(self, shifts_vu: ArrayLike | NDArray, volume: NDArray, com_ref_zyx: ArrayLike | NDArray) -> NDArray:
         """Recenter to a given center-of-mass (CoM).
 
         Parameters

@@ -8,18 +8,14 @@ and ESRF - The European Synchrotron, Grenoble, France
 import concurrent.futures as cf
 import multiprocessing as mp
 from collections.abc import Sequence
-from typing import Optional
-from typing import Union
-import numpy as np
-from numpy.typing import ArrayLike
-from numpy.typing import DTypeLike
-from numpy.typing import NDArray
-from scipy.sparse import spmatrix
-from corrct import _projector_backends as prj_backends
-from corrct import models
-from corrct import operators
-from corrct.physics.attenuation import AttenuationVolume
 
+import numpy as np
+from numpy.typing import ArrayLike, DTypeLike, NDArray
+from scipy.sparse import spmatrix
+
+from corrct import _projector_backends as prj_backends
+from corrct import models, operators
+from corrct.physics.attenuation import AttenuationVolume
 
 num_threads = round(np.log2(mp.cpu_count() + 1))
 astra_available = prj_backends.has_astra and prj_backends.has_cuda
@@ -28,9 +24,9 @@ astra_available = prj_backends.has_astra and prj_backends.has_cuda
 class ProjectorMatrix(operators.ProjectorOperator):
     """Projector that uses an explicit projection matrix."""
 
-    A: Union[NDArray, spmatrix]
+    A: NDArray | spmatrix
 
-    def __init__(self, A: Union[NDArray, spmatrix], vol_shape: ArrayLike, prj_shape: ArrayLike) -> None:
+    def __init__(self, A: NDArray | spmatrix, vol_shape: ArrayLike, prj_shape: ArrayLike) -> None:
         """
         Initialize the matrix projector.
 
@@ -110,19 +106,19 @@ class ProjectorUncorrected(operators.ProjectorOperator):
     vol_geom: models.VolumeGeometry
     projector_backend: prj_backends.ProjectorBackend
 
-    prj_intensities: Union[NDArray[np.floating], None]
-    psf: Union[NDArray[np.floating], float, None]
+    prj_intensities: NDArray[np.floating] | None
+    psf: NDArray[np.floating] | float | None
 
     def __init__(
         self,
-        vol_geom: Union[Sequence[int], NDArray[np.integer], models.VolumeGeometry],
-        angles_rot_rad: Union[Sequence[float], NDArray],
-        rot_axis_shift_pix: Union[float, ArrayLike, NDArray, None] = None,
+        vol_geom: Sequence[int] | NDArray[np.integer] | models.VolumeGeometry,
+        angles_rot_rad: Sequence[float] | NDArray,
+        rot_axis_shift_pix: float | ArrayLike | NDArray | None = None,
         *,
-        prj_geom: Optional[models.ProjectionGeometry] = None,
-        prj_intensities: Optional[ArrayLike] = None,
-        psf: Optional[ArrayLike] = None,
-        backend: Union[str, prj_backends.ProjectorBackend] = "astra" if astra_available else "skimage",
+        prj_geom: models.ProjectionGeometry | None = None,
+        prj_intensities: ArrayLike | None = None,
+        psf: ArrayLike | None = None,
+        backend: str | prj_backends.ProjectorBackend = "astra" if astra_available else "skimage",
         create_single_projs: bool = False,
     ):
         """Initialize the base projection class.
@@ -230,7 +226,7 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         """De-initialize the with statement block."""
         self.projector_backend.dispose()
 
-    def _set_psf(self, psf: Optional[ArrayLike], is_conv_symm: bool = False) -> None:
+    def _set_psf(self, psf: ArrayLike | None, is_conv_symm: bool = False) -> None:
         if psf is not None:
             psf = np.squeeze(np.array(psf))
             if len(psf.shape) >= len(self.vol_geom.shape_xyz):
@@ -247,12 +243,12 @@ class ProjectorUncorrected(operators.ProjectorOperator):
         else:
             self.psf_vu = self.psf_vwu = None
 
-    def get_pre_weights(self) -> Union[NDArray, None]:
+    def get_pre_weights(self) -> NDArray | None:
         """Compute the pre-weights of the projector geometry (notably for cone-beam geometries).
 
         Returns
         -------
-        Union[NDArray, None]
+        NDArray | None
             The computed detector weights
         """
         if self.prj_geom is None:
@@ -354,25 +350,25 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
 
     att_vol_angles: NDArray[np.floating]
 
-    executor: Union[cf.ThreadPoolExecutor, None]
+    executor: cf.ThreadPoolExecutor | None
 
     def __init__(
         self,
-        vol_geom: Union[Sequence[int], NDArray[np.integer], models.VolumeGeometry],
-        angles_rot_rad: Union[Sequence[float], NDArray],
-        rot_axis_shift_pix: Union[float, ArrayLike, NDArray, None] = None,
+        vol_geom: Sequence[int] | NDArray[np.integer] | models.VolumeGeometry,
+        angles_rot_rad: Sequence[float] | NDArray,
+        rot_axis_shift_pix: float | ArrayLike | NDArray | None = None,
         *,
-        prj_geom: Optional[models.ProjectionGeometry] = None,
-        prj_intensities: Optional[ArrayLike] = None,
-        backend: Union[str, prj_backends.ProjectorBackend] = "astra" if astra_available else "skimage",
-        att_maps: Optional[NDArray[np.floating]] = None,
-        att_in: Optional[NDArray[np.floating]] = None,
-        att_out: Optional[NDArray[np.floating]] = None,
-        angles_detectors_rad: Union[float, ArrayLike] = (np.pi / 2),
-        weights_detectors: Optional[ArrayLike] = None,
-        psf: Optional[ArrayLike] = None,
+        prj_geom: models.ProjectionGeometry | None = None,
+        prj_intensities: ArrayLike | None = None,
+        backend: str | prj_backends.ProjectorBackend = "astra" if astra_available else "skimage",
+        att_maps: NDArray[np.floating] | None = None,
+        att_in: NDArray[np.floating] | None = None,
+        att_out: NDArray[np.floating] | None = None,
+        angles_detectors_rad: float | ArrayLike = (np.pi / 2),
+        weights_detectors: ArrayLike | None = None,
+        psf: ArrayLike | None = None,
         is_symmetric: bool = False,
-        weights_angles: Optional[ArrayLike] = None,
+        weights_angles: ArrayLike | None = None,
         use_multithreading: bool = True,
         data_type: DTypeLike = np.float32,
         verbose: bool = True,
@@ -388,28 +384,28 @@ class ProjectorAttenuationXRF(ProjectorUncorrected):
             The rotation angles.
         rot_axis_shift_pix : float | ArrayLike | NDArray | None, optional
             The rotation axis shift(s) in pixels. The default is None.
-        prj_geom : Optional[models.ProjectionGeometry], optional
+        prj_geom : models.ProjectionGeometry | None, optional
             The fully specified projection geometry.
             When active, the rotation axis shift is ignored. The default is None.
-        prj_intensities : Optional[ArrayLike], optional
+        prj_intensities : ArrayLike | None, optional
             Projection scaling factor. The default is None.
         backend : str | prj_backends.ProjectorBackend, optional
             Projector backend to use, by default "astra" if astra is available, otherwise "skimage".
-        att_maps : Optional[NDArray[np.floating]], optional
+        att_maps : NDArray[np.floating] | None, optional
             Precomputed attenuation maps for each angle, by default None
-        att_in : Optional[ArrayLike], optional
+        att_in : NDArray[np.floating] | None, optional
             Attenuation volume of the incoming beam. The default is None.
-        att_out : Optional[ArrayLike], optional
+        att_out : NDArray[np.floating] | None, optional
             Attenuation volume of the outgoing beam. The default is None.
         angles_detectors_rad : float | ArrayLike, optional
             Angles of the detector elements with respect to incident beam. The default is (np.pi / 2).
-        weights_detectors : Optional[ArrayLike], optional
+        weights_detectors : ArrayLike | None, optional
             Weights (e.g. solid angle, efficiency, etc) of the detector elements. The default is None.
-        psf : Optional[ArrayLike], optional
+        psf : ArrayLike | None, optional
             Optical system's point spread function (PSF). The default is None.
         is_symmetric : bool, optional
             Whether the projector is symmetric or not. The default is False.
-        weights_angles : Optional[ArrayLike], optional
+        weights_angles : ArrayLike | None, optional
             Projection weight for a given element at a given angle. The default is None.
         use_multithreading : bool, optional
             Whether to use multiple threads or not. The default is True.

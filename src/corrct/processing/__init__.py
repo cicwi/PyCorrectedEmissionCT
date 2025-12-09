@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
-
 """Package for data pre-processing and post-processing."""
 
 __author__ = """Nicola VIGANÒ"""
 __email__ = "N.R.Vigano@cwi.nl"
 
-from . import pre  # noqa: F401, F402
-from . import post  # noqa: F401, F402
+import numpy as np
+
 from . import misc  # noqa: F401, F402
 from . import noise  # noqa: F401, F402
-
-import numpy as np
+from . import post  # noqa: F401, F402
+from . import pre  # noqa: F401, F402
 
 circular_mask = misc.circular_mask
 

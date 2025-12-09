@@ -8,17 +8,17 @@ Created on Tue May 17 12:11:58 2022
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from typing import Optional, Union, Sequence
+from collections.abc import Sequence
 
+import matplotlib.pyplot as plt
 import numpy as np
-from numpy.polynomial import Polynomial
 import scipy.ndimage as spimg
 import scipy.optimize as spopt
+from numpy.polynomial import Polynomial
 from numpy.typing import ArrayLike, NDArray
-from skimage.transform import warp_polar
-from skimage.filters import window
 from scipy.optimize import minimize
-import matplotlib.pyplot as plt
+from skimage.filters import window
+from skimage.transform import warp_polar
 
 NDArrayFloat = NDArray[np.floating]
 
@@ -268,7 +268,7 @@ def fit_shifts_zyx_xc(
 
 
 def fit_image_rotation_and_scale(
-    img_1_vu: NDArray, img_2_vu: NDArray, pad_mode: Union[str, None] = None, window_type: str = "hann", verbose: bool = False
+    img_1_vu: NDArray, img_2_vu: NDArray, pad_mode: str | None = None, window_type: str = "hann", verbose: bool = False
 ) -> tuple[float, float]:
     """Fit the rotation and scaling of an image against a reference image. This works best for larger rotation angles.
 
@@ -278,7 +278,7 @@ def fit_image_rotation_and_scale(
         Reference image
     img_2_vu : NDArray
         Rotated and scaled image
-    pad_mode : Union[str, None], optional
+    pad_mode : str | None, optional
         Padding mode, by default None
     window_type : str, optional
         Windowing type (to cud the high frequency aliasing), by default "hann"
@@ -404,7 +404,7 @@ def fit_camera_tilt_angle(img_1: NDArray, img_2: NDArray, pad_u: bool = False, f
 
 
 def sinusoid(
-    x: Union[NDArrayFloat, float], a: Union[NDArrayFloat, float], p: Union[NDArrayFloat, float], b: Union[NDArrayFloat, float]
+    x: NDArrayFloat | float, a: NDArrayFloat | float, p: NDArrayFloat | float, b: NDArrayFloat | float
 ) -> NDArrayFloat:
     """Compute the values of a sine function.
 
@@ -464,8 +464,8 @@ def fit_sinusoid(angles: NDArrayFloat, values: NDArrayFloat, fit_l1: bool = Fals
 
 
 def extract_peak_regions_1d(
-    cc: NDArrayFloat, axis: int = -1, peak_radius: int = 1, cc_coords: Union[ArrayLike, NDArray, None] = None
-) -> tuple[NDArrayFloat, Optional[NDArray]]:
+    cc: NDArrayFloat, axis: int = -1, peak_radius: int = 1, cc_coords: ArrayLike | NDArray | None = None
+) -> tuple[NDArrayFloat, NDArray | None]:
     """
     Extract a region around the maximum value.
 
@@ -519,8 +519,8 @@ def extract_peak_regions_1d(
 
 
 def refine_max_position_1d(
-    f_vals: NDArrayFloat, f_x: Union[ArrayLike, NDArray, None] = None, return_vertex_val: bool = False, decimals: int = 2
-) -> Union[NDArrayFloat, tuple[NDArrayFloat, NDArrayFloat]]:
+    f_vals: NDArrayFloat, f_x: ArrayLike | NDArray | None = None, return_vertex_val: bool = False, decimals: int = 2
+) -> NDArrayFloat | tuple[NDArrayFloat, NDArrayFloat]:
     """Compute the sub-pixel max position of the given function sampling.
 
     Parameters
@@ -600,8 +600,8 @@ def refine_max_position_1d(
 
 
 def extract_peak_region_nd(
-    cc: NDArrayFloat, peak_radius: int = 1, cc_coords: Optional[Sequence[Union[Sequence, NDArray]]] = None
-) -> tuple[NDArray, Optional[Sequence[NDArray]]]:
+    cc: NDArrayFloat, peak_radius: int = 1, cc_coords: Sequence[Sequence | NDArray] | None = None
+) -> tuple[NDArray, Sequence[NDArray] | None]:
     """
     Extract a region around the maximum value.
 
@@ -643,7 +643,7 @@ def extract_peak_region_nd(
 
 
 def refine_max_position_2d(
-    f_vals: NDArrayFloat, fy: Union[ArrayLike, NDArray, None] = None, fx: Union[ArrayLike, NDArray, None] = None
+    f_vals: NDArrayFloat, fy: ArrayLike | NDArray | None = None, fx: ArrayLike | NDArray | None = None
 ) -> NDArray:
     """Compute the sub-pixel max position of the given function sampling.
 

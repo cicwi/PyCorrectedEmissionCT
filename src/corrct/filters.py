@@ -8,7 +8,8 @@ and ESRF - The European Synchrotron, Grenoble, France
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Optional, Union
+from typing import Any
+
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike, DTypeLike, NDArray
@@ -17,7 +18,6 @@ from skimage.transform.radon_transform import _get_fourier_filter
 
 from .operators import BaseTransform
 from .processing import circular_mask
-
 
 try:
     import pywt
@@ -72,7 +72,7 @@ class BasisOptions(ABC, Mapping):
 class BasisOptionsBlocks(BasisOptions):
     """Options for the wavelet bases."""
 
-    binning_start: Optional[int] = 2
+    binning_start: int | None = 2
     binning_type: str = "exponential"
     order: int = 1
     normalized: bool = True
@@ -89,7 +89,7 @@ class BasisOptionsWavelets(BasisOptions):
 
 def create_basis(
     num_pixels: int,
-    binning_start: Optional[int] = 2,
+    binning_start: int | None = 2,
     binning_type: str = "exponential",
     normalized: bool = False,
     order: int = 1,
@@ -101,7 +101,7 @@ def create_basis(
     ----------
     num_pixels : int
         Number of filter fixels.
-    binning_start : Optional[int], optional
+    binning_start : int | None, optional
         Starting displacement of the binning, by default 2.
     binning_type : str, optional
         Type of pixel binning, by default "exponential".
@@ -254,7 +254,7 @@ class Filter(ABC):
 
     def __init__(
         self,
-        fbp_filter: Union[ArrayLike, NDArray[np.floating], None],
+        fbp_filter: ArrayLike | NDArray[np.floating] | None,
         pad_mode: str,
         use_rfft: bool,
         dtype: DTypeLike,
@@ -263,12 +263,12 @@ class Filter(ABC):
 
         Parameters
         ----------
-        fbp_filter : Union[ArrayLike, NDArray[np.floating], None]
+        fbp_filter : ArrayLike | NDArray[np.floating] | None
             The filter.
         pad_mode : str
             The padding mode.
         use_rfft : bool
-            Whethert to use the `rfft` or complex `fft`.
+            Whether to use the `rfft` or complex `fft`.
         dtype : DTypeLike
             The data type of the filter.
         """
@@ -343,7 +343,7 @@ class Filter(ABC):
     def num_filters(self) -> int:
         return np.array(self.fbp_filter, ndmin=2).shape[-2]
 
-    def apply_filter(self, data_wu: NDArray, fbp_filter: Optional[NDArray] = None) -> NDArray:
+    def apply_filter(self, data_wu: NDArray, fbp_filter: NDArray | None = None) -> NDArray:
         """Apply the filter to the data_wu.
 
         Parameters
@@ -448,7 +448,7 @@ class FilterCustom(Filter):
 
     def __init__(
         self,
-        fbp_filter: Union[ArrayLike, NDArray[np.floating], None],
+        fbp_filter: ArrayLike | NDArray[np.floating] | None,
         pad_mode: str = "constant",
         use_rfft: bool = True,
         dtype: DTypeLike = np.float32,
@@ -457,12 +457,12 @@ class FilterCustom(Filter):
 
         Parameters
         ----------
-        fbp_filter : Union[ArrayLike, NDArray[np.floating], None]
+        fbp_filter : ArrayLike | NDArray[np.floating] | None
             The filter.
         pad_mode : str, optional
             The padding mode, by default "constant".
         use_rfft : bool, optional
-            Whethert to use the `rfft` or complex `fft`, by default True.
+            Whether to use the `rfft` or complex `fft`, by default True.
         dtype : DTypeLike, optional
             The data type of the filter, by default np.float32.
         """
@@ -542,9 +542,9 @@ class FilterMR(Filter):
     projector: BaseTransform
 
     binning_type: str
-    binning_start: Union[int, None]
+    binning_start: int | None
 
-    lambda_smooth: Union[float, None]
+    lambda_smooth: float | None
 
     is_initialized: bool
 
@@ -552,8 +552,8 @@ class FilterMR(Filter):
         self,
         projector: BaseTransform,
         binning_type: str = "exponential",
-        binning_start: Union[int, None] = 2,
-        lambda_smooth: Optional[float] = None,
+        binning_start: int | None = 2,
+        lambda_smooth: float | None = None,
         pad_mode: str = "constant",
         use_rfft: bool = True,
         dtype: DTypeLike = np.float32,

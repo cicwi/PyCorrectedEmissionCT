@@ -5,8 +5,8 @@ Advanced denoising methods.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from collections.abc import Sequence
-from typing import Callable, Optional, Union, overload
+from collections.abc import Callable, Sequence
+from typing import overload
 
 import numpy as np
 import scipy.signal as spsig
@@ -17,19 +17,19 @@ from . import data_terms, operators, param_tuning, regularizers, solvers
 eps = np.finfo(np.float32).eps
 
 
-def _default_regularizer_l1dwl(r_w: Union[float, NDArray]) -> regularizers.BaseRegularizer:
+def _default_regularizer_l1dwl(r_w: float | NDArray) -> regularizers.BaseRegularizer:
     return regularizers.Regularizer_l1dwl(r_w, "bior4.4", 3)
 
 
 @overload
 def denoise_image(
     img: NDArray,
-    reg_weight: Union[Sequence[float], NDArray],
-    psf: Optional[NDArray] = None,
-    pix_weights: Optional[NDArray] = None,
+    reg_weight: Sequence[float] | NDArray,
+    psf: NDArray | None = None,
+    pix_weights: NDArray | None = None,
     iterations: int = 250,
     regularizer: Callable = _default_regularizer_l1dwl,
-    lower_limit: Optional[float] = None,
+    lower_limit: float | None = None,
     verbose: bool = True,
 ) -> tuple[NDArray, float]: ...
 
@@ -38,25 +38,25 @@ def denoise_image(
 def denoise_image(
     img: NDArray,
     reg_weight: float,
-    psf: Optional[NDArray] = None,
-    pix_weights: Optional[NDArray] = None,
+    psf: NDArray | None = None,
+    pix_weights: NDArray | None = None,
     iterations: int = 250,
     regularizer: Callable = _default_regularizer_l1dwl,
-    lower_limit: Optional[float] = None,
+    lower_limit: float | None = None,
     verbose: bool = True,
 ) -> NDArray: ...
 
 
 def denoise_image(
     img: NDArray,
-    reg_weight: Union[float, Sequence[float], NDArray] = 1e-2,
-    psf: Optional[NDArray] = None,
-    pix_weights: Optional[NDArray] = None,
+    reg_weight: float | Sequence[float] | NDArray = 1e-2,
+    psf: NDArray | None = None,
+    pix_weights: NDArray | None = None,
     iterations: int = 250,
     regularizer: Callable = _default_regularizer_l1dwl,
-    lower_limit: Optional[float] = None,
+    lower_limit: float | None = None,
     verbose: bool = True,
-) -> Union[NDArray, tuple[NDArray, float]]:
+) -> NDArray | tuple[NDArray, float]:
     """
     Denoise an image.
 
@@ -68,18 +68,18 @@ def denoise_image(
     ----------
     img : NDArray
         The image to denoise.
-    reg_weight : Union[float, ArrayLike, NDArray], optional
+    reg_weight : float | ArrayLike | NDArray, optional
         Weight of the regularization term. The default is 1e-2.
         If a sequence / array is passed, all the different values will be tested.
         The one minimizing the error over the cross-validation set will be chosen and returned.
-    pix_weights : Union[ArrayLike, NDArray, None], optional
+    pix_weights : ArrayLike | NDArray | None, optional
         The local weights of the pixels, for a weighted least-squares minimization.
         If None, a standard least-squares minimization is performed. The default is None.
     iterations : int, optional
         Number of iterations. The default is 250.
     regularizer : Callable, optional
         The one-argument constructor of a regularizer. The default is the DWL regularizer.
-    lower_limit : Optional[float], optional
+    lower_limit : float | None, optional
         Lower clipping limit of the image. The default is None.
     verbose : bool, optional
         Turn verbosity on. The default is True.
@@ -106,7 +106,7 @@ def denoise_image(
             verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term, leave_progress=False
         )
 
-    def solver_call(solver: solvers.Solver, b_test_mask: Optional[NDArray] = None) -> tuple[NDArray, solvers.SolutionInfo]:
+    def solver_call(solver: solvers.Solver, b_test_mask: NDArray | None = None) -> tuple[NDArray, solvers.SolutionInfo]:
         x0 = img.copy()
         if b_test_mask is not None:
             med_img = spsig.medfilt2d(img, kernel_size=11)

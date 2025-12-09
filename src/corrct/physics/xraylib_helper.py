@@ -5,16 +5,13 @@ xraylib handling functions.
 @author: Nicola VIGANÒ, CEA-IRIG, Grenoble, France
 """
 
-from typing import Union
-
 import numpy as np
-
 import xraylib
 
 xraylib.XRayInit()
 
 
-def get_element_number(element: Union[str, int]) -> int:
+def get_element_number(element: str | int) -> int:
     """Return the element number from the symbol.
 
     Parameters
@@ -33,7 +30,7 @@ def get_element_number(element: Union[str, int]) -> int:
         return xraylib.SymbolToAtomicNumber(element)
 
 
-def get_element_number_and_symbol(element: Union[str, int]) -> tuple[str, int]:
+def get_element_number_and_symbol(element: str | int) -> tuple[str, int]:
     """Return both the element symbol and number from either the symbol or the number.
 
     Parameters
@@ -56,7 +53,7 @@ def get_element_number_and_symbol(element: Union[str, int]) -> tuple[str, int]:
     return el_sym, el_num
 
 
-def get_compound(cmp_name: str, density: Union[float, None] = None) -> dict:
+def get_compound(cmp_name: str, density: float | None = None) -> dict:
     """
     Build a compound from the compound composition string.
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Data fidelity classes.
 
@@ -7,17 +6,15 @@ Data fidelity classes.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import numpy as np
+from abc import ABC, abstractmethod
+from collections.abc import Sequence
+from copy import deepcopy
+from typing import Any
 
-from typing import Sequence, Union, Any
+import numpy as np
 from numpy.typing import NDArray
 
-from abc import ABC, abstractmethod
-
 from . import operators
-
-from copy import deepcopy
-
 
 eps = np.finfo(np.float32).eps
 
@@ -25,7 +22,7 @@ eps = np.finfo(np.float32).eps
 NDArrayFloat = NDArray[np.floating]
 
 
-def _soft_threshold(values: NDArrayFloat, threshold: Union[float, NDArrayFloat]) -> None:
+def _soft_threshold(values: NDArrayFloat, threshold: float | NDArrayFloat) -> None:
     abs_values = np.abs(values)
     valid_values = abs_values > 0
     if isinstance(threshold, (float, int)) or threshold.size == 1:
@@ -38,15 +35,15 @@ def _soft_threshold(values: NDArrayFloat, threshold: Union[float, NDArrayFloat])
 class DataFidelityBase(ABC):
     """Define the DataFidelity classes interface."""
 
-    data: Union[NDArrayFloat, None]
-    sigma: Union[float, NDArrayFloat]
-    background: Union[NDArrayFloat, None]
+    data: NDArrayFloat | None
+    sigma: float | NDArrayFloat
+    background: NDArrayFloat | None
 
-    sigma_data: Union[NDArrayFloat, None]
+    sigma_data: NDArrayFloat | None
 
     __data_fidelity_name__ = ""
 
-    def __init__(self, background: Union[float, NDArrayFloat, None] = None) -> None:
+    def __init__(self, background: float | NDArrayFloat | None = None) -> None:
         """
         Initialize the base data-fidelity class.
 
@@ -124,28 +121,28 @@ class DataFidelityBase(ABC):
         """
         return self.info().lower()
 
-    def assign_data(self, data: Union[float, NDArrayFloat, None] = None, sigma: Union[float, NDArrayFloat] = 1.0) -> None:
+    def assign_data(self, data: float | NDArrayFloat | None = None, sigma: float | NDArrayFloat = 1.0) -> None:
         """Initialize the data bias, and sigma of the data term.
 
         Parameters
         ----------
-        data : Union[float, NDArrayFloat, None], optional
+        data : float | NDArrayFloat | None, optional
             The data bias, by default None
-        sigma : Union[float, NDArrayFloat], optional
+        sigma : float | NDArrayFloat, optional
             The sigma, by default 1.0
         """
         self.data = np.array(data) if data is not None else None
         self.sigma = sigma
         self.sigma_data = self._compute_sigma_data()
 
-    def compute_residual(self, proj_primal: NDArrayFloat, mask: Union[NDArrayFloat, None] = None) -> NDArrayFloat:
+    def compute_residual(self, proj_primal: NDArrayFloat, mask: NDArrayFloat | None = None) -> NDArrayFloat:
         """Compute the residual in the dual domain.
 
         Parameters
         ----------
         proj_primal : NDArrayFloat
             Projection of the primal solution
-        mask : Union[NDArrayFloat, None], optional
+        mask : NDArrayFloat | None, optional
             Mask of the dual domain, by default None
 
         Returns
@@ -186,14 +183,14 @@ class DataFidelityBase(ABC):
         else:
             return self.sigma * self.data
 
-    def compute_data_dual_dot(self, dual: NDArrayFloat, mask: Union[NDArrayFloat, None] = None) -> float:
+    def compute_data_dual_dot(self, dual: NDArrayFloat, mask: NDArrayFloat | None = None) -> float:
         """Compute the dot product of the data bias and the dual solution.
 
         Parameters
         ----------
         dual : NDArrayFloat
             The dual solution.
-        mask : Union[NDArrayFloat, None], optional
+        mask : NDArrayFloat | None, optional
             Mask of the dual domain, by default None
 
         Returns
@@ -246,7 +243,7 @@ class DataFidelityBase(ABC):
 
     @abstractmethod
     def compute_primal_dual_gap(
-        self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: Union[NDArrayFloat, None] = None
+        self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: NDArrayFloat | None = None
     ) -> float:
         """Compute the primal-dual gap of the current solution.
 
@@ -256,7 +253,7 @@ class DataFidelityBase(ABC):
             The projected primal solution (in the dual domain)
         dual : NDArrayFloat
             The dual solution
-        mask : Union[NDArrayFloat, None], optional
+        mask : NDArrayFloat | None, optional
             Mask in the dual domain, by default None
 
         Returns
@@ -271,13 +268,13 @@ class DataFidelity_l2(DataFidelityBase):
 
     __data_fidelity_name__ = "l2"
 
-    sigma1: Union[float, NDArrayFloat]
+    sigma1: float | NDArrayFloat
 
-    def __init__(self, background: Union[float, NDArrayFloat, None] = None) -> None:
+    def __init__(self, background: float | NDArrayFloat | None = None) -> None:
         super().__init__(background=background)
         self.sigma1 = 1.0
 
-    def assign_data(self, data: Union[float, NDArrayFloat, None] = None, sigma: Union[float, NDArrayFloat] = 1.0) -> None:
+    def assign_data(self, data: float | NDArrayFloat | None = None, sigma: float | NDArrayFloat = 1.0) -> None:
         super().assign_data(data=data, sigma=sigma)
         self.sigma1 = 1 / (1 + sigma)
 
@@ -290,7 +287,7 @@ class DataFidelity_l2(DataFidelityBase):
         dual *= self.sigma1
 
     def compute_primal_dual_gap(
-        self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: Union[NDArrayFloat, None] = None
+        self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: NDArrayFloat | None = None
     ) -> float:
         return float(
             np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2) + np.linalg.norm(dual, ord=2)
@@ -302,15 +299,15 @@ class DataFidelity_wl2(DataFidelity_l2):
 
     __data_fidelity_name__ = "wl2"
 
-    sigma1: Union[float, NDArrayFloat]
+    sigma1: float | NDArrayFloat
     weights: NDArrayFloat
 
-    def __init__(self, weights: Union[float, NDArrayFloat], background: Union[float, NDArrayFloat, None] = None) -> None:
+    def __init__(self, weights: float | NDArrayFloat, background: float | NDArrayFloat | None = None) -> None:
         super().__init__(background=background)
         self.sigma1 = 1.0
         self.weights = np.array(weights)
 
-    def assign_data(self, data: Union[float, NDArrayFloat, None], sigma: Union[float, NDArrayFloat] = 1.0):
+    def assign_data(self, data: float | NDArrayFloat | None, sigma: float | NDArrayFloat = 1.0):
         super().assign_data(data=data, sigma=sigma)
         if isinstance(self.sigma, np.ndarray):
             dtype = self.sigma.dtype
@@ -319,7 +316,7 @@ class DataFidelity_wl2(DataFidelity_l2):
         invalid_weights = (self.weights == 0).astype(dtype)
         self.sigma1 = 1 / (1 + sigma / (self.weights + invalid_weights)) * (1 - invalid_weights)
 
-    def compute_residual(self, proj_primal, mask: Union[float, NDArrayFloat, None] = None):
+    def compute_residual(self, proj_primal, mask: float | NDArrayFloat | None = None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
         if self.data is not None:
@@ -330,7 +327,7 @@ class DataFidelity_wl2(DataFidelity_l2):
             residual *= mask
         return residual
 
-    def compute_residual_norm(self, dual: Union[float, NDArrayFloat]) -> float:
+    def compute_residual_norm(self, dual: float | NDArrayFloat) -> float:
         valid_weights = self.weights != 0
         if isinstance(dual, np.ndarray):
             dual = dual[valid_weights]
@@ -343,24 +340,24 @@ class DataFidelity_l2b(DataFidelity_l2):
 
     __data_fidelity_name__ = "l2b"
 
-    sigma1: Union[float, NDArrayFloat]
-    sigma_error: Union[float, NDArrayFloat]
-    sigma_sqrt_error: Union[float, NDArrayFloat]
+    sigma1: float | NDArrayFloat
+    sigma_error: float | NDArrayFloat
+    sigma_sqrt_error: float | NDArrayFloat
 
-    def __init__(self, local_error: Union[float, NDArrayFloat], background: Union[float, NDArrayFloat, None] = None):
+    def __init__(self, local_error: float | NDArrayFloat, background: float | NDArrayFloat | None = None):
         super().__init__(background=background)
         self.sigma1 = 1.0
         self.local_error = local_error
         self.sigma_error = 1.0 * self.local_error
         self.sigma_sqrt_error = 1.0 * np.sqrt(self.local_error)
 
-    def assign_data(self, data: Union[float, NDArrayFloat, None], sigma: Union[float, NDArrayFloat] = 1.0):
+    def assign_data(self, data: float | NDArrayFloat | None, sigma: float | NDArrayFloat = 1.0):
         self.sigma_error = sigma * self.local_error
         self.sigma_sqrt_error = sigma * np.sqrt(self.local_error)
         super().assign_data(data=data, sigma=sigma)
         self.sigma1 = 1 / (1 + self.sigma_error)
 
-    def compute_residual(self, proj_primal: NDArrayFloat, mask: Union[NDArrayFloat, None] = None) -> NDArrayFloat:
+    def compute_residual(self, proj_primal: NDArrayFloat, mask: NDArrayFloat | None = None) -> NDArrayFloat:
         residual = super().compute_residual(proj_primal, mask)
         _soft_threshold(residual, self.sigma_sqrt_error)
         return residual
@@ -372,7 +369,7 @@ class DataFidelity_l2b(DataFidelity_l2):
         dual *= self.sigma1
 
     def compute_primal_dual_gap(
-        self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: Union[NDArrayFloat, None] = None
+        self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: NDArrayFloat | None = None
     ) -> float:
         return float(
             np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2)
@@ -385,7 +382,7 @@ class DataFidelity_Huber(DataFidelityBase):
 
     __data_fidelity_name__ = "Hub"
 
-    one_sigma_error: Union[float, NDArrayFloat]
+    one_sigma_error: float | NDArrayFloat
 
     def __init__(self, local_error, background=None, l2_axis=None):
         super().__init__(background=background)
@@ -480,7 +477,7 @@ class DataFidelity_l1b(DataFidelity_l1):
 
     __data_fidelity_name__ = "l1b"
 
-    sigma_error: Union[float, NDArrayFloat]
+    sigma_error: float | NDArrayFloat
 
     def __init__(self, local_error, background=None):
         super().__init__(background=background)

@@ -8,16 +8,12 @@ and CEA-IRIG, Grenoble, France
 
 import copy as cp
 from collections.abc import Sequence
-from typing import Union
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from corrct.physics import xrf  # noqa: F401, F402
-from corrct.physics.xraylib_helper import get_compound_cross_section
-from corrct.physics.xraylib_helper import get_compound
-from corrct.physics.xraylib_helper import get_element_number
-from corrct.physics.xraylib_helper import xraylib
+from corrct.physics.xraylib_helper import get_compound, get_compound_cross_section, get_element_number, xraylib
 
 
 class VolumeMaterial:
@@ -104,7 +100,7 @@ class VolumeMaterial:
             ph_lin_att += ph * cmp["density"] * cmp_cs
         return ph_lin_att * self.voxel_size_cm
 
-    def get_element_mass_fraction(self, element: Union[str, int]) -> NDArray:
+    def get_element_mass_fraction(self, element: str | int) -> NDArray:
         """Compute the local element mass fraction through out all the materials.
 
         Parameters
@@ -142,7 +138,7 @@ class VolumeMaterial:
         return max_parallax < tolerance
 
     def get_compton_scattering(
-        self, energy_in_keV: float, angle_rad: Union[float, None] = None, detector: Union[xrf.DetectorXRF, None] = None
+        self, energy_in_keV: float, angle_rad: float | None = None, detector: xrf.DetectorXRF | None = None
     ) -> tuple[float, NDArray]:
         """Compute the local Compton scattering.
 
@@ -209,10 +205,10 @@ class VolumeMaterial:
 
     def get_fluo_production(
         self,
-        element: Union[str, int],
+        element: str | int,
         energy_in_keV: float,
-        fluo_lines: Union[str, xrf.FluoLine, Sequence[xrf.FluoLine]],
-        detector: Union[xrf.DetectorXRF, None] = None,
+        fluo_lines: str | xrf.FluoLine | Sequence[xrf.FluoLine],
+        detector: xrf.DetectorXRF | None = None,
     ) -> tuple[float, NDArray]:
         """Compute the local fluorescence production, for the given line of the given element.
 

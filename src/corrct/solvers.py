@@ -8,8 +8,8 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 import copy as cp
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Optional, Union
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
+from typing import Any
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
@@ -30,18 +30,18 @@ class SolutionInfo:
     iterations: int
     max_iterations: int
 
-    residual0: Union[float, np.floating]
-    residual0_cv: Union[float, np.floating]
+    residual0: float | np.floating
+    residual0_cv: float | np.floating
 
     residuals: NDArrayFloat
     residuals_cv: NDArrayFloat
-    tolerance: Union[float, np.floating, None]
+    tolerance: float | np.floating | None
 
     def __init__(
         self,
         method: str,
         max_iterations: int,
-        tolerance: Union[float, np.floating, None],
+        tolerance: float | np.floating | None,
         residual0: float = np.inf,
         residual0_cv: float = np.inf,
     ) -> None:
@@ -74,14 +74,14 @@ class Solver(ABC):
     ----------
     verbose : bool, optional
         Turn on verbose output. The default is False.
-    tolerance : Optional[float], optional
+    tolerance : float | None, optional
         Tolerance on the data residual for computing when to stop iterations.
         The default is None.
     relaxation : float, optional
         The relaxation length. The default is 1.0.
-    data_term : Union[str, data_terms.DataFidelityBase], optional
+    data_term : str | data_terms.DataFidelityBase, optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : Optional[data_terms.DataFidelityBase], optional
+    data_term_test : data_terms.DataFidelityBase | None, optional
         The data fidelity to be used for the test set.
         If None, it will use the same as for the rest of the data.
         The default is None.
@@ -92,9 +92,9 @@ class Solver(ABC):
         verbose: bool = False,
         leave_progress: bool = True,
         relaxation: float = 1.0,
-        tolerance: Optional[float] = None,
-        data_term: Union[str, data_terms.DataFidelityBase] = "l2",
-        data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
+        tolerance: float | None = None,
+        data_term: str | data_terms.DataFidelityBase = "l2",
+        data_term_test: str | data_terms.DataFidelityBase | None = None,
     ):
         self.verbose = verbose
         self.leave_progress = leave_progress
@@ -161,7 +161,7 @@ class Solver(ABC):
         """
 
     @staticmethod
-    def _initialize_data_fidelity_function(data_term: Union[str, data_terms.DataFidelityBase]) -> data_terms.DataFidelityBase:
+    def _initialize_data_fidelity_function(data_term: str | data_terms.DataFidelityBase) -> data_terms.DataFidelityBase:
         if isinstance(data_term, str):
             if data_term.lower() == "l2":
                 return data_terms.DataFidelity_l2()
@@ -176,7 +176,7 @@ class Solver(ABC):
 
     @staticmethod
     def _initialize_regularizer(
-        regularizer: Union[regularizers.BaseRegularizer, None, Sequence[regularizers.BaseRegularizer]]
+        regularizer: regularizers.BaseRegularizer | None | Sequence[regularizers.BaseRegularizer],
     ) -> Sequence[regularizers.BaseRegularizer]:
         if regularizer is None:
             return []
@@ -196,8 +196,8 @@ class Solver(ABC):
 
     @staticmethod
     def _initialize_b_masks(
-        b: NDArrayFloat, b_mask: Optional[NDArrayFloat], b_test_mask: Optional[NDArrayFloat]
-    ) -> tuple[Optional[NDArrayFloat], Optional[NDArrayFloat]]:
+        b: NDArrayFloat, b_mask: NDArrayFloat | None, b_test_mask: NDArrayFloat | None
+    ) -> tuple[NDArrayFloat | None, NDArrayFloat | None]:
         if b_test_mask is not None:
             if b_mask is None:
                 b_mask = np.ones_like(b)
@@ -215,9 +215,9 @@ class FBP(Solver):
         self,
         verbose: bool = False,
         leave_progress: bool = False,
-        regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
-        data_term: Union[str, data_terms.DataFidelityBase] = "l2",
-        fbp_filter: Union[str, NDArrayFloat, filters.Filter] = "ramp",
+        regularizer: Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None = None,
+        data_term: str | data_terms.DataFidelityBase = "l2",
+        fbp_filter: str | NDArrayFloat | filters.Filter = "ramp",
         pad_mode: str = "constant",
     ):
         """Initialize the Filtered Back-Projection (FBP) algorithm.
@@ -230,9 +230,9 @@ class FBP(Solver):
             Leave the progress bar after the computation is finished. The default is True.
         regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional
             NOT USED, only exposed for compatibility reasons.
-        data_term : Union[str, data_terms.DataFidelityBase], optional
+        data_term : str | data_terms.DataFidelityBase, optional
             NOT USED, only exposed for compatibility reasons.
-        fbp_filter : Union[str, NDArrayFloat], optional
+        fbp_filter : str | NDArrayFloat | filters.Filter, optional
             FBP filter to use. Either a string from scikit-image's list of `iradon` filters, or an array. The default is "ramp".
         pad_mode: str, optional
             The padding mode to use for the linear convolution. The default is "constant".
@@ -264,11 +264,11 @@ class FBP(Solver):
         A: operators.BaseTransform,
         b: NDArrayFloat,
         iterations: int = 0,
-        x0: Optional[NDArrayFloat] = None,
-        lower_limit: Union[float, NDArrayFloat, None] = None,
-        upper_limit: Union[float, NDArrayFloat, None] = None,
-        x_mask: Optional[NDArrayFloat] = None,
-        b_mask: Optional[NDArrayFloat] = None,
+        x0: NDArrayFloat | None = None,
+        lower_limit: float | NDArrayFloat | None = None,
+        upper_limit: float | NDArrayFloat | None = None,
+        x_mask: NDArrayFloat | None = None,
+        b_mask: NDArrayFloat | None = None,
     ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the FBP algorithm.
@@ -281,15 +281,15 @@ class FBP(Solver):
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        x0 : Optional[NDArrayFloat], optional
+        x0 : NDArrayFloat | None, optional
             Initial solution. The default is None.
-        lower_limit : Union[float, NDArrayFloat], optional
+        lower_limit : float | NDArrayFloat | None, optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, NDArrayFloat], optional
+        upper_limit : float | NDArrayFloat | None, optional
             Upper clipping value. The default is None.
-        x_mask : Optional[NDArrayFloat], optional
+        x_mask : NDArrayFloat | None, optional
             Solution mask. The default is None.
-        b_mask : Optional[NDArrayFloat], optional
+        b_mask : NDArrayFloat | None, optional
             Data mask. The default is None.
 
         Raises
@@ -299,7 +299,7 @@ class FBP(Solver):
 
         Returns
         -------
-        Tuple[NDArrayFloat, SolutionInfo]
+        tuple[NDArrayFloat, SolutionInfo]
             The reconstruction, and None.
         """
         if len(b.shape) < 2:
@@ -344,7 +344,7 @@ class SART(Solver):
         b: NDArrayFloat,
         x: NDArrayFloat,
         A_num_rows: int,
-        b_mask: Optional[NDArrayFloat],
+        b_mask: NDArrayFloat | None,
     ) -> NDArrayFloat:
         """Compute the solution residual.
 
@@ -358,7 +358,7 @@ class SART(Solver):
             The current solution
         A_num_rows : int
             The number of projections.
-        b_mask : Optional[NDArrayFloat]
+        b_mask : NDArrayFloat | None
             The mask to apply
 
         Returns
@@ -375,47 +375,47 @@ class SART(Solver):
 
     def __call__(  # noqa: C901
         self,
-        A: Union[Callable[[NDArray, int], NDArray], projectors.ProjectorUncorrected],
+        A: Callable[[NDArray, int], NDArray] | projectors.ProjectorUncorrected,
         b: NDArrayFloat,
         iterations: int,
-        A_num_rows: Optional[int] = None,
-        At: Optional[Callable] = None,
-        x0: Optional[NDArrayFloat] = None,
-        lower_limit: Union[float, NDArrayFloat, None] = None,
-        upper_limit: Union[float, NDArrayFloat, None] = None,
-        x_mask: Optional[NDArrayFloat] = None,
-        b_mask: Optional[NDArrayFloat] = None,
+        A_num_rows: int | None = None,
+        At: Callable | None = None,
+        x0: NDArrayFloat | None = None,
+        lower_limit: float | NDArrayFloat | None = None,
+        upper_limit: float | NDArrayFloat | None = None,
+        x_mask: NDArrayFloat | None = None,
+        b_mask: NDArrayFloat | None = None,
     ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the SART algorithm.
 
         Parameters
         ----------
-        A : Union[Callable, BaseTransform]
+        A : Callable[[NDArray, int], NDArray] | projectors.ProjectorUncorrected
             Projection operator.
         b : NDArrayFloat
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        A_num_rows : int
+        A_num_rows : int | None
             Number of projections.
-        x0 : Optional[NDArrayFloat], optional
+        x0 : NDArrayFloat | None, optional
             Initial solution. The default is None.
-        At : Callable, optional
+        At : Callable | None, optional
             The back-projection operator. This is only needed if the projection operator does not have an adjoint.
             The default is None.
-        lower_limit : Union[float, NDArrayFloat], optional
+        lower_limit : float | NDArrayFloat | None, optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, NDArrayFloat], optional
+        upper_limit : float | NDArrayFloat | None, optional
             Upper clipping value. The default is None.
-        x_mask : Optional[NDArrayFloat], optional
+        x_mask : NDArrayFloat | None, optional
             Solution mask. The default is None.
-        b_mask : Optional[NDArrayFloat], optional
+        b_mask : NDArrayFloat | None, optional
             Data mask. The default is None.
 
         Returns
         -------
-        Tuple[NDArrayFloat, SolutionInfo]
+        tuple[NDArrayFloat, SolutionInfo]
             The reconstruction, and the residuals.
         """
         if isinstance(A, projectors.ProjectorUncorrected):
@@ -508,14 +508,14 @@ class MLEM(Solver):
         Turn on verbose output. The default is False.
     leave_progress: bool, optional
         Leave the progress bar after the computation is finished. The default is True.
-    tolerance : Optional[float], optional
+    tolerance : float | None, optional
         Tolerance on the data residual for computing when to stop iterations.
         The default is None.
     regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional
         Regularizer to be used. The default is None.
-    data_term : Union[str, data_terms.DataFidelityBase], optional
+    data_term : str | data_terms.DataFidelityBase, optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : Optional[data_terms.DataFidelityBase], optional
+    data_term_test : data_terms.DataFidelityBase | None, optional
         The data fidelity to be used for the test set.
         If None, it will use the same as for the rest of the data.
         The default is None.
@@ -525,10 +525,10 @@ class MLEM(Solver):
         self,
         verbose: bool = False,
         leave_progress: bool = True,
-        tolerance: Optional[float] = None,
-        regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
-        data_term: Union[str, data_terms.DataFidelityBase] = "kl",
-        data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
+        tolerance: float | None = None,
+        regularizer: Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None = None,
+        data_term: str | data_terms.DataFidelityBase = "kl",
+        data_term_test: str | data_terms.DataFidelityBase | None = None,
     ):
         super().__init__(
             verbose=verbose,
@@ -555,12 +555,12 @@ class MLEM(Solver):
         A: operators.BaseTransform,
         b: NDArrayFloat,
         iterations: int,
-        x0: Optional[NDArrayFloat] = None,
-        lower_limit: Union[float, NDArrayFloat, None] = None,
-        upper_limit: Union[float, NDArrayFloat, None] = None,
-        x_mask: Optional[NDArrayFloat] = None,
-        b_mask: Optional[NDArrayFloat] = None,
-        b_test_mask: Optional[NDArrayFloat] = None,
+        x0: NDArrayFloat | None = None,
+        lower_limit: float | NDArrayFloat | None = None,
+        upper_limit: float | NDArrayFloat | None = None,
+        x_mask: NDArrayFloat | None = None,
+        b_mask: NDArrayFloat | None = None,
+        b_test_mask: NDArrayFloat | None = None,
     ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the MLEM algorithm.
@@ -573,22 +573,22 @@ class MLEM(Solver):
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        x0 : Optional[NDArrayFloat], optional
+        x0 : NDArrayFloat | None, optional
             Initial solution. The default is None.
-        lower_limit : Union[float, NDArrayFloat], optional
+        lower_limit : float | NDArrayFloat | None, optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, NDArrayFloat], optional
+        upper_limit : float | NDArrayFloat | None, optional
             Upper clipping value. The default is None.
-        x_mask : Optional[NDArrayFloat], optional
+        x_mask : NDArrayFloat | None, optional
             Solution mask. The default is None.
-        b_mask : Optional[NDArrayFloat], optional
+        b_mask : NDArrayFloat | None, optional
             Data mask. The default is None.
-        b_test_mask : Optional[NDArrayFloat], optional
+        b_test_mask : NDArrayFloat | None, optional
             Test data mask. The default is None.
 
         Returns
         -------
-        Tuple[NDArrayFloat, SolutionInfo]
+        tuple[NDArrayFloat, SolutionInfo]
             The reconstruction, and the residuals.
         """
         b = np.array(b)
@@ -682,16 +682,16 @@ class SIRT(Solver):
         Turn on verbose output. The default is False.
     leave_progress: bool, optional
         Leave the progress bar after the computation is finished. The default is True.
-    tolerance : Optional[float], optional
+    tolerance : float | None, optional
         Tolerance on the data residual for computing when to stop iterations.
         The default is None.
     relaxation : float, optional
         The relaxation length. The default is 1.95.
     regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional
         Regularizer to be used. The default is None.
-    data_term : Union[str, data_terms.DataFidelityBase], optional
+    data_term : str | data_terms.DataFidelityBase, optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : Optional[data_terms.DataFidelityBase], optional
+    data_term_test : data_terms.DataFidelityBase | None, optional
         The data fidelity to be used for the test set.
         If None, it will use the same as for the rest of the data.
         The default is None.
@@ -702,10 +702,10 @@ class SIRT(Solver):
         verbose: bool = False,
         leave_progress: bool = True,
         relaxation: float = 1.95,
-        tolerance: Optional[float] = None,
-        regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
-        data_term: Union[str, data_terms.DataFidelityBase] = "l2",
-        data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
+        tolerance: float | None = None,
+        regularizer: Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None = None,
+        data_term: str | data_terms.DataFidelityBase = "l2",
+        data_term_test: str | data_terms.DataFidelityBase | None = None,
     ):
         super().__init__(
             verbose=verbose,
@@ -734,12 +734,12 @@ class SIRT(Solver):
         A: operators.BaseTransform,
         b: NDArrayFloat,
         iterations: int,
-        x0: Optional[NDArrayFloat] = None,
-        lower_limit: Union[float, NDArrayFloat, None] = None,
-        upper_limit: Union[float, NDArrayFloat, None] = None,
-        x_mask: Optional[NDArrayFloat] = None,
-        b_mask: Optional[NDArrayFloat] = None,
-        b_test_mask: Optional[NDArrayFloat] = None,
+        x0: NDArrayFloat | None = None,
+        lower_limit: float | NDArrayFloat | None = None,
+        upper_limit: float | NDArrayFloat | None = None,
+        x_mask: NDArrayFloat | None = None,
+        b_mask: NDArrayFloat | None = None,
+        b_test_mask: NDArrayFloat | None = None,
     ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the SIRT algorithm.
@@ -752,22 +752,22 @@ class SIRT(Solver):
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        x0 : Optional[NDArrayFloat], optional
+        x0 : NDArrayFloat | None, optional
             Initial solution. The default is None.
-        lower_limit : Union[float, NDArrayFloat], optional
+        lower_limit : float | NDArrayFloat | None, optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, NDArrayFloat], optional
+        upper_limit : float | NDArrayFloat | None, optional
             Upper clipping value. The default is None.
-        x_mask : Optional[NDArrayFloat], optional
+        x_mask : NDArrayFloat | None, optional
             Solution mask. The default is None.
-        b_mask : Optional[NDArrayFloat], optional
+        b_mask : NDArrayFloat | None, optional
             Data mask. The default is None.
-        b_test_mask : Optional[NDArrayFloat], optional
+        b_test_mask : NDArrayFloat | None, optional
             Test data mask. The default is None.
 
         Returns
         -------
-        Tuple[NDArrayFloat, SolutionInfo]
+        tuple[NDArrayFloat, SolutionInfo]
             The reconstruction, and the residuals.
         """
         b = np.array(b)
@@ -867,16 +867,16 @@ class PDHG(Solver):
         Turn on verbose output. The default is False.
     leave_progress: bool, optional
         Leave the progress bar after the computation is finished. The default is True.
-    tolerance : Optional[float], optional
+    tolerance : float | None, optional
         Tolerance on the data residual for computing when to stop iterations.
         The default is None.
     relaxation : float, optional
         The relaxation length. The default is 0.95.
     regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional
         Regularizer to be used. The default is None.
-    data_term : Union[str, data_terms.DataFidelityBase], optional
+    data_term : str | data_terms.DataFidelityBase, optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : Optional[data_terms.DataFidelityBase], optional
+    data_term_test : data_terms.DataFidelityBase | None, optional
         The data fidelity to be used for the test set.
         If None, it will use the same as for the rest of the data.
         The default is None.
@@ -886,11 +886,11 @@ class PDHG(Solver):
         self,
         verbose: bool = False,
         leave_progress: bool = True,
-        tolerance: Optional[float] = None,
+        tolerance: float | None = None,
         relaxation: float = 0.95,
-        regularizer: Union[Sequence[regularizers.BaseRegularizer], regularizers.BaseRegularizer, None] = None,
-        data_term: Union[str, data_terms.DataFidelityBase] = "l2",
-        data_term_test: Union[str, data_terms.DataFidelityBase, None] = None,
+        regularizer: Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None = None,
+        data_term: str | data_terms.DataFidelityBase = "l2",
+        data_term_test: str | data_terms.DataFidelityBase | None = None,
     ):
         super().__init__(
             verbose=verbose,
@@ -915,7 +915,7 @@ class PDHG(Solver):
         return Solver.info(self) + "-" + self.data_term.info() + reg_info
 
     @staticmethod
-    def _initialize_data_fidelity_function(data_term: Union[str, data_terms.DataFidelityBase]):
+    def _initialize_data_fidelity_function(data_term: str | data_terms.DataFidelityBase):
         if isinstance(data_term, str):
             if data_term.lower() == "l2":
                 return data_terms.DataFidelity_l2()
@@ -982,12 +982,12 @@ class PDHG(Solver):
         A: operators.BaseTransform,
         b: NDArrayFloat,
         iterations: int,
-        x0: Optional[NDArrayFloat] = None,
-        lower_limit: Union[float, NDArrayFloat, None] = None,
-        upper_limit: Union[float, NDArrayFloat, None] = None,
-        x_mask: Optional[NDArrayFloat] = None,
-        b_mask: Optional[NDArrayFloat] = None,
-        b_test_mask: Optional[NDArrayFloat] = None,
+        x0: NDArrayFloat | None = None,
+        lower_limit: float | NDArrayFloat | None = None,
+        upper_limit: float | NDArrayFloat | None = None,
+        x_mask: NDArrayFloat | None = None,
+        b_mask: NDArrayFloat | None = None,
+        b_test_mask: NDArrayFloat | None = None,
         precondition: bool = True,
     ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
@@ -1001,24 +1001,24 @@ class PDHG(Solver):
             Data to reconstruct.
         iterations : int
             Number of iterations.
-        x0 : Optional[NDArrayFloat], optional
+        x0 : NDArrayFloat | None, optional
             Initial solution. The default is None.
-        lower_limit : Union[float, NDArrayFloat], optional
+        lower_limit : float | NDArrayFloat | None, optional
             Lower clipping value. The default is None.
-        upper_limit : Union[float, NDArrayFloat], optional
+        upper_limit : float | NDArrayFloat | None, optional
             Upper clipping value. The default is None.
-        x_mask : Optional[NDArrayFloat], optional
+        x_mask : NDArrayFloat | None, optional
             Solution mask. The default is None.
-        b_mask : Optional[NDArrayFloat], optional
+        b_mask : NDArrayFloat | None, optional
             Data mask. The default is None.
-        b_test_mask : Optional[NDArrayFloat], optional
+        b_test_mask : NDArrayFloat | None, optional
             Test data mask. The default is None.
         precondition : bool, optional
             Whether to use the preconditioned version of the algorithm. The default is True.
 
         Returns
         -------
-        Tuple[NDArrayFloat, SolutionInfo]
+        tuple[NDArrayFloat, SolutionInfo]
             The reconstruction, and the residuals.
         """
         b = np.array(b)

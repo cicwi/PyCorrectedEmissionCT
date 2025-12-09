@@ -6,7 +6,6 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 from collections.abc import Mapping
-from typing import Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -41,12 +40,12 @@ class DetectorShiftsBase:
     def __init__(
         self,
         data_dvwu: NDArrayFloat,
-        rot_angle_rad: Union[ArrayLike, NDArrayFloat],
+        rot_angle_rad: ArrayLike | NDArrayFloat,
         *,
         data_format: str = "dvwu",
-        data_mask_dvwu: Optional[NDArray] = None,
+        data_mask_dvwu: NDArray | None = None,
         borders_dvwu: dict = {"d": None, "v": None, "w": None, "u": None},
-        max_shifts: Union[float, NDArrayFloat, None] = None,
+        max_shifts: float | NDArrayFloat | None = None,
         precision_decimals: int = 2,
         verbose: bool = True,
     ):
@@ -224,7 +223,7 @@ class DetectorShiftsPRE(DetectorShiftsBase):
     def fit_u(
         self,
         fit_l1: bool = False,
-        background: Union[float, NDArray, None] = None,
+        background: float | NDArray | None = None,
         method: str = "com",
     ) -> tuple[NDArrayFloat, float]:
         """Compute the pre-alignment shifts for the horizontal dimension.
@@ -314,12 +313,12 @@ class DetectorShiftsPRE(DetectorShiftsBase):
 class DetectorShiftsXC(DetectorShiftsBase):
     """Compute the center-of-rotation for a given dataset, by cross correlation."""
 
-    def fit_vu_accum_drifts(self, ref_data_dvwu: Optional[NDArrayFloat] = None) -> NDArray:
+    def fit_vu_accum_drifts(self, ref_data_dvwu: NDArrayFloat | None = None) -> NDArray:
         """Fit static image drifts.
 
         Parameters
         ----------
-        ref_data_dvwu : Optional[NDArrayFloat], optional
+        ref_data_dvwu : NDArrayFloat | None, optional
             Reference image, by default None. If None, the first image in the
             data stack will be used.
 

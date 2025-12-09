@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tomographic projector backends.
 
@@ -6,17 +5,16 @@ Tomographic projector backends.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+from abc import ABC, abstractmethod
+from collections.abc import Mapping, Sequence
+
 import numpy as np
 import skimage
 import skimage.transform as skt
+from numpy.typing import ArrayLike, NDArray
 
 from . import filters
 from .models import ProjectionGeometry, VolumeGeometry
-
-from typing import Optional, Sequence, Union, Mapping, List
-from numpy.typing import ArrayLike, NDArray
-
-from abc import ABC, abstractmethod
 
 try:
     import astra
@@ -123,9 +121,9 @@ class ProjectorBackend(ABC):
     def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: Union[ArrayLike, NDArray],
-        rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
-        prj_geom: Optional[ProjectionGeometry] = None,
+        angles_rot_rad: ArrayLike | NDArray,
+        rot_axis_shift_pix: ArrayLike | NDArray | None = None,
+        prj_geom: ProjectionGeometry | None = None,
         create_single_projs: bool = False,
     ):
         """Initialize the projector geometry.
@@ -222,7 +220,7 @@ class ProjectorBackend(ABC):
             return class_name + "{ Not initialized! }"
 
     @abstractmethod
-    def fp(self, vol: NDArray, angle_ind: Optional[int] = None) -> NDArray:
+    def fp(self, vol: NDArray, angle_ind: int | None = None) -> NDArray:
         """Forward-project volume.
 
         Forward-projection interface. Derived backends need to implement this method.
@@ -236,7 +234,7 @@ class ProjectorBackend(ABC):
         """
 
     @abstractmethod
-    def bp(self, prj: NDArray, angle_ind: Optional[int] = None) -> NDArray:
+    def bp(self, prj: NDArray, angle_ind: int | None = None) -> NDArray:
         """Back-project data.
 
         Back-projection interface. Derived backends need to implement this method.
@@ -261,9 +259,9 @@ class ProjectorBackendSKimage(ProjectorBackend):
     def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: Union[ArrayLike, NDArray],
-        rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
-        prj_geom: Optional[ProjectionGeometry] = None,
+        angles_rot_rad: ArrayLike | NDArray,
+        rot_axis_shift_pix: ArrayLike | NDArray | None = None,
+        prj_geom: ProjectionGeometry | None = None,
         create_single_projs: bool = False,
     ):
         """Initialize projector backend based on scikit-image.
@@ -311,7 +309,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
     def _set_bpj_size(output_size):
         return dict(circle=False, output_size=output_size)
 
-    def fp(self, vol: NDArray, angle_ind: Optional[int] = None) -> NDArray:
+    def fp(self, vol: NDArray, angle_ind: int | None = None) -> NDArray:
         """Forward-projection of the volume to the sinogram or a single sinogram line.
 
         Parameters
@@ -334,7 +332,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
         else:
             return np.squeeze(skt.radon(vol, self.angles_w_deg[angle_ind : angle_ind + 1 :]))
 
-    def bp(self, prj: NDArray, angle_ind: Optional[int] = None) -> NDArray:
+    def bp(self, prj: NDArray, angle_ind: int | None = None) -> NDArray:
         """Back-projection of a single sinogram line to the volume.
 
         Parameters
@@ -364,7 +362,7 @@ class ProjectorBackendSKimage(ProjectorBackend):
 class ProjectorBackendASTRA(ProjectorBackend):
     """Projector backend based on astra-toolbox."""
 
-    proj_id: List
+    proj_id: list
 
     astra_vol_geom: Mapping
     proj_geom_ind: Sequence[Mapping]
@@ -384,9 +382,9 @@ class ProjectorBackendASTRA(ProjectorBackend):
     def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: Union[ArrayLike, NDArray],
-        rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
-        prj_geom: Optional[ProjectionGeometry] = None,
+        angles_rot_rad: ArrayLike | NDArray,
+        rot_axis_shift_pix: ArrayLike | NDArray | None = None,
+        prj_geom: ProjectionGeometry | None = None,
         create_single_projs: bool = False,
     ):
         """Initialize geometry of projector backend based on astra-toolbox.
@@ -533,7 +531,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         super().make_ready()
 
-    def _check_data(self, x: NDArray, expected_shape: Union[Sequence[int], NDArray[np.integer]]) -> NDArray:
+    def _check_data(self, x: NDArray, expected_shape: Sequence[int] | NDArray[np.integer]) -> NDArray:
         if x.dtype != np.float32:
             x = x.astype(np.float32)
         if not x.flags["C_CONTIGUOUS"]:
@@ -564,7 +562,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         super().dispose()
 
-    def fp(self, vol: NDArray, angle_ind: Optional[int] = None) -> NDArray:
+    def fp(self, vol: NDArray, angle_ind: int | None = None) -> NDArray:
         """Apply forward-projection of the volume to the sinogram or a single sinogram line.
 
         Parameters
@@ -616,7 +614,7 @@ class ProjectorBackendASTRA(ProjectorBackend):
 
         return np.squeeze(prj)
 
-    def bp(self, prj: NDArray, angle_ind: Optional[int] = None) -> NDArray:
+    def bp(self, prj: NDArray, angle_ind: int | None = None) -> NDArray:
         """Apply back-projection of a single sinogram line to the volume.
 
         Parameters
@@ -681,9 +679,9 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
     def initialize_geometry(
         self,
         vol_geom: VolumeGeometry,
-        angles_rot_rad: Union[ArrayLike, NDArray],
-        rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
-        prj_geom: Optional[ProjectionGeometry] = None,
+        angles_rot_rad: ArrayLike | NDArray,
+        rot_axis_shift_pix: ArrayLike | NDArray | None = None,
+        prj_geom: ProjectionGeometry | None = None,
         create_single_projs: bool = False,
     ):
         """Initialize projector backend based on experimental astra-toolbox functions.
@@ -784,7 +782,7 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
 
         ProjectorBackend.make_ready(self)
 
-    def fp(self, vol: NDArray, angle_ind: Optional[int] = None):
+    def fp(self, vol: NDArray, angle_ind: int | None = None):
         """Apply forward-projection of the volume to the sinogram or a single sinogram line.
 
         Parameters
@@ -816,7 +814,7 @@ class ProjectorBackendDirectASTRA(ProjectorBackendASTRA):
         astra.experimental.direct_FP3D(proj_id, vol, prj)
         return prj.reshape(out_shape)
 
-    def bp(self, prj: NDArray, angle_ind: Optional[int] = None):
+    def bp(self, prj: NDArray, angle_ind: int | None = None):
         """Apply back-projection of a single sinogram line to the volume.
 
         Parameters

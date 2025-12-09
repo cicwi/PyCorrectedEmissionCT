@@ -1,6 +1,6 @@
 """Units and conversion."""
 
-from typing import overload, Union
+from typing import overload
 
 import scipy.constants as spc
 from numpy.typing import NDArray
@@ -96,7 +96,7 @@ def energy_to_wlength(energy: float, unit_wl: str = "m", unit_en: str = "keV") -
 def energy_to_wlength(energy: NDArray, unit_wl: str = "m", unit_en: str = "keV") -> NDArray: ...
 
 
-def energy_to_wlength(energy: Union[float, NDArray], unit_wl: str = "m", unit_en: str = "keV") -> Union[float, NDArray]:
+def energy_to_wlength(energy: float | NDArray, unit_wl: str = "m", unit_en: str = "keV") -> float | NDArray:
     """Convert from energy to wavelength.
 
     Parameters
@@ -126,7 +126,7 @@ def wlength_to_energy(w_length: float, unit_wl: str = "m", unit_en: str = "keV")
 def wlength_to_energy(w_length: NDArray, unit_wl: str = "m", unit_en: str = "keV") -> NDArray: ...
 
 
-def wlength_to_energy(w_length: Union[float, NDArray], unit_wl: str = "m", unit_en: str = "keV") -> Union[float, NDArray]:
+def wlength_to_energy(w_length: float | NDArray, unit_wl: str = "m", unit_en: str = "keV") -> float | NDArray:
     """Convert wavelength to energy.
 
     Parameters

@@ -18,7 +18,8 @@ except ImportError:
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import overload, Literal, Union
+from typing import Literal, overload
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -107,17 +108,17 @@ def _get_lines_list(lines) -> Sequence[FluoLine]:
 
 
 def get_radiation_rate(
-    element: Union[str, int],
-    lines: Union[str, FluoLine, Sequence[FluoLine]],
+    element: str | int,
+    lines: str | FluoLine | Sequence[FluoLine],
     verbose: bool = False,
 ) -> NDArray:
     """Return the radiation rates of the requested lines for the given element.
 
     Parameters
     ----------
-    element : Union[str, int]
+    element : str | int
         The requested element
-    lines : Union[str, FluoLine, Sequence[FluoLine]]
+    lines : str | FluoLine | Sequence[FluoLine]
         The requested line. It can be a whole shell (transition to that shell),
         or sub-shells.
     verbose : bool, optional
@@ -145,8 +146,8 @@ def get_radiation_rate(
 
 @overload
 def get_energy(
-    element: Union[str, int],
-    lines: Union[str, FluoLine, Sequence[FluoLine]],
+    element: str | int,
+    lines: str | FluoLine | Sequence[FluoLine],
     *,
     compute_average: Literal[False] = False,
     verbose: bool = False,
@@ -155,8 +156,8 @@ def get_energy(
 
 @overload
 def get_energy(
-    element: Union[str, int],
-    lines: Union[str, FluoLine, Sequence[FluoLine]],
+    element: str | int,
+    lines: str | FluoLine | Sequence[FluoLine],
     *,
     compute_average: Literal[True] = True,
     verbose: bool = False,
@@ -164,28 +165,30 @@ def get_energy(
 
 
 def get_energy(
-    element: Union[str, int],
-    lines: Union[str, FluoLine, Sequence[FluoLine]],
+    element: str | int,
+    lines: str | FluoLine | Sequence[FluoLine],
     *,
     compute_average: bool = False,
     verbose: bool = False,
-) -> Union[float, NDArray]:
+) -> float | NDArray:
     """
     Return the energy(ies) of the requested line for the given element.
 
     Parameters
     ----------
-    element : Union[str, int]
+    element : str | int
         The requested element.
     line : str
         The requested line. It can be a whole shell (transition to that shell),
         or sub-shells.
     compute_average : bool, optional
         Weighted averaging the lines, using the radiation rate. The default is False.
+    verbose : bool, optional
+        Whether to produce verbose output in case of errors, by default False
 
     Returns
     -------
-    energy_keV : Union[float, NDArray]
+    energy_keV : float | NDArray
         Either the average energy or the list of different energies.
     """
     el_sym, el_num = xraylib_helper.get_element_number_and_symbol(element)
@@ -216,7 +219,7 @@ class DetectorXRF:
     """Simple XRF detector model."""
 
     surface_mm2: float = 0.0
-    distance_mm: Union[float, NDArray] = 1.0
+    distance_mm: float | NDArray = 1.0
     angle_rad: float = np.pi / 2
 
     def __post_init__(self):
@@ -226,7 +229,7 @@ class DetectorXRF:
             raise ValueError(f"The distance needs to be positive, but {self.distance_mm} was passed")
 
     @property
-    def solid_angle_sr(self) -> Union[float, NDArray]:
+    def solid_angle_sr(self) -> float | NDArray:
         """Compute the solid angle covered by the detector.
 
         Returns

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Define all the models used through-out the code.
 
@@ -7,18 +6,16 @@ Define all the models used through-out the code.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-import numpy as np
-from numpy.typing import ArrayLike, NDArray
-from typing import Optional, Sequence, Union, Any
-
-import scipy.spatial.transform as spt
-
-from dataclasses import dataclass, replace as dc_replace
-
 from abc import ABC
-
+from collections.abc import Sequence
 from copy import deepcopy
+from dataclasses import dataclass
+from dataclasses import replace as dc_replace
+from typing import Any
 
+import numpy as np
+import scipy.spatial.transform as spt
+from numpy.typing import ArrayLike, NDArray
 
 ROT_DIRS_VALID = ("clockwise", "counter-clockwise")
 
@@ -52,7 +49,7 @@ class ProjectionGeometry(Geometry):
     det_v_xyz: NDArray
     rot_dir_xyz: NDArray
     pix2vox_ratio: float = 1
-    det_shape_vu: Optional[NDArray] = None
+    det_shape_vu: NDArray | None = None
 
     def __post_init__(self) -> None:
         self.geom_type = self.geom_type.lower()
@@ -100,8 +97,8 @@ class ProjectionGeometry(Geometry):
     def get_default_parallel(
         *,
         geom_type: str = "3d",
-        rot_axis_shift_pix: Optional[ArrayLike] = None,
-        rot_axis_dir: Union[str, ArrayLike] = "clockwise",
+        rot_axis_shift_pix: ArrayLike | None = None,
+        rot_axis_dir: str | ArrayLike = "clockwise",
     ) -> "ProjectionGeometry":
         """
         Generate the default geometry for parallel beam.
@@ -110,9 +107,9 @@ class ProjectionGeometry(Geometry):
         ----------
         geom_type : str, optional
             The geometry type. The default is "parallel3d".
-        rot_axis_shift_pix : Optional[ArrayLike], optional
+        rot_axis_shift_pix : ArrayLike | None, optional
             Rotation axis shift in pixels. The default is None.
-        rot_axis_dir : Union[str, ArrayLike], optional
+        rot_axis_dir : str | ArrayLike, optional
             Rotation axis direction. It can be either a string or a direction. The default is "clockwise".
 
         Returns
@@ -160,7 +157,7 @@ class ProjectionGeometry(Geometry):
         else:
             return dc_replace(self)
 
-    def set_detector_shape_vu(self, vu: Union[int, Sequence[int], NDArray]) -> None:
+    def set_detector_shape_vu(self, vu: int | Sequence[int] | NDArray) -> None:
         """Set the detector VU shape.
 
         Parameters
@@ -172,8 +169,8 @@ class ProjectionGeometry(Geometry):
 
     def set_detector_shifts_vu(
         self,
-        det_pos_vu: Union[ArrayLike, NDArray, None] = None,
-        cor_pos_u: Union[float, None] = None,
+        det_pos_vu: ArrayLike | NDArray | None = None,
+        cor_pos_u: float | None = None,
         det_dist_y: ArrayLike = 0.0,
     ) -> None:
         """
@@ -214,7 +211,7 @@ class ProjectionGeometry(Geometry):
 
         self.det_pos_xyz[:, 1] += det_dist_y
 
-    def set_source_shifts_vu(self, src_pos_vu: Union[ArrayLike, NDArray, None] = None) -> None:
+    def set_source_shifts_vu(self, src_pos_vu: ArrayLike | NDArray | None = None) -> None:
         """
         Set the source position in XZ, from VU (vertical, horizontal) coordinates.
 
@@ -241,8 +238,8 @@ class ProjectionGeometry(Geometry):
 
     def set_detector_tilt(
         self,
-        angles_t_rad: Union[ArrayLike, NDArray],
-        tilt_axis: Union[Sequence[float], NDArray] = (0, 1, 0),
+        angles_t_rad: ArrayLike | NDArray,
+        tilt_axis: Sequence[float] | NDArray = (0, 1, 0),
         tilt_source: bool = False,
     ) -> None:
         """
@@ -374,7 +371,7 @@ class ProjectionGeometry(Geometry):
                 [self.det_v_xyz[..., : self.ndim].dot(disp_xyz), self.det_u_xyz[..., : self.ndim].dot(disp_xyz)], axis=0
             )
 
-    def get_pre_weights(self, det_shape_vu: Union[Sequence[int], NDArray, None] = None) -> Union[NDArray, None]:
+    def get_pre_weights(self, det_shape_vu: Sequence[int] | NDArray | None = None) -> NDArray | None:
         """Compute the pre-weights of the projector geometry (notably for cone-beam geometries).
 
         Parameters
@@ -575,12 +572,12 @@ def combine_shifts_vu(shifts_v: NDArray, shifts_u: NDArray) -> NDArray:
     return np.stack([np.squeeze(shifts_v), np.squeeze(shifts_u)], axis=-2)
 
 
-def get_rot_axis_dir(rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise") -> NDArray:
+def get_rot_axis_dir(rot_axis_dir: str | ArrayLike | NDArray = "clockwise") -> NDArray:
     """Process the requested rotation axis direction and return a meaningful value.
 
     Parameters
     ----------
-    rot_axis_dir : Union[str, ArrayLike, NDArray], optional
+    rot_axis_dir : str | ArrayLike | NDArray, optional
         The requested direction, by default "clockwise"
 
     Returns
@@ -605,8 +602,8 @@ def get_rot_axis_dir(rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise")
         return np.array(rot_axis_dir, ndmin=1)
 
 
-def _get_data_dims(data_shape: Union[Sequence[int], NDArray], data_format: str = "dvwu") -> dict[str, Union[int, None]]:
-    dims: dict[str, Union[int, None]] = dict(u=None, v=None, w=None, d=None)
+def _get_data_dims(data_shape: Sequence[int] | NDArray, data_format: str = "dvwu") -> dict[str, int | None]:
+    dims: dict[str, int | None] = dict(u=None, v=None, w=None, d=None)
     for ii in range(-len(data_shape), 0):
         dims[data_format[ii]] = data_shape[ii]
     return dims
@@ -615,9 +612,9 @@ def _get_data_dims(data_shape: Union[Sequence[int], NDArray], data_format: str =
 def get_prj_geom_parallel(
     *,
     geom_type: str = "3d",
-    rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
-    rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise",
-    data_shape: Union[Sequence[int], NDArray, None] = None,
+    rot_axis_shift_pix: ArrayLike | NDArray | None = None,
+    rot_axis_dir: str | ArrayLike | NDArray = "clockwise",
+    data_shape: Sequence[int] | NDArray | None = None,
     data_format: str = "dvwu",
 ) -> ProjectionGeometry:
     """
@@ -678,9 +675,9 @@ def get_prj_geom_parallel(
 def get_prj_geom_cone(
     *,
     src_to_sam_dist: float,
-    rot_axis_shift_pix: Union[ArrayLike, NDArray, None] = None,
-    rot_axis_dir: Union[str, ArrayLike, NDArray] = "clockwise",
-    data_shape: Union[Sequence[int], NDArray, None] = None,
+    rot_axis_shift_pix: ArrayLike | NDArray | None = None,
+    rot_axis_dir: str | ArrayLike | NDArray = "clockwise",
+    data_shape: Sequence[int] | NDArray | None = None,
     data_format: str = "dvwu",
 ) -> ProjectionGeometry:
     """
@@ -729,7 +726,7 @@ def get_prj_geom_cone(
 
 
 def get_vol_geom_from_data(
-    data: NDArray, padding_u: Union[int, Sequence[int], NDArray] = 0, data_format: str = "dvwu", super_sampling: int = 1
+    data: NDArray, padding_u: int | Sequence[int] | NDArray = 0, data_format: str = "dvwu", super_sampling: int = 1
 ) -> VolumeGeometry:
     """
     Generate a default volume geometry from the data shape.

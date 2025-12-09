@@ -6,7 +6,7 @@ Test `corrct.projectors` package.
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
-from typing import Callable, Optional
+from collections.abc import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,7 +22,7 @@ from corrct import _projector_backends as backends
 eps = np.finfo(np.float32).eps
 
 
-def _radon_rot_sk_w(x: NDArray, angles_rad: NDArray, shift: Optional[float] = None) -> NDArray:
+def _radon_rot_sk_w(x: NDArray, angles_rad: NDArray, shift: float | None = None) -> NDArray:
     """
     Compute the Radon transform using skimage's warp function.
 

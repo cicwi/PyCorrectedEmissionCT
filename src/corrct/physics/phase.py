@@ -15,14 +15,14 @@ except ImportError:
     raise
 
 from collections.abc import Sequence
-from typing import Union
+
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.ndimage as spimg
 from numpy.typing import DTypeLike, NDArray
 
 
-def get_delta_beta(cmp_name: str, energy_keV: float, density: Union[float, None] = None) -> float:
+def get_delta_beta(cmp_name: str, energy_keV: float, density: float | None = None) -> float:
     """Compute the delta-over-beta parameter for a specific compound.
 
     Parameters
@@ -31,7 +31,7 @@ def get_delta_beta(cmp_name: str, energy_keV: float, density: Union[float, None]
         Molar composition of a compound
     energy_keV : float
         Energy at which the d/b value should be computed
-    density : Optional[float], optional
+    density : float | None, optional
         Density of the compound, by default None
 
     Returns
@@ -145,7 +145,7 @@ def plot_filter_responses(
 
 
 def get_propagation_filter(
-    img_shape: Union[Sequence[int], NDArray],
+    img_shape: Sequence[int] | NDArray,
     pix_size_um: float,
     dist_um: float,
     wlength_um: float,
@@ -159,7 +159,7 @@ def get_propagation_filter(
 
     Parameters
     ----------
-    img_shape : Union[Sequence[int], NDArray]
+    img_shape : Sequence[int] | NDArray
         Shape of the target image
     pix_size_um : float
         Pixel size of the detector (in microns)

@@ -8,7 +8,6 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 from collections.abc import Sequence
-from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,17 +18,15 @@ from scipy.ndimage import convolve, zoom
 from scipy.optimize import minimize
 from scipy.signal.windows import hann
 from scipy.special import gamma
-
 from tqdm.auto import tqdm
 
 from corrct.operators import BaseTransform, TransformIdentity
 from corrct.processing.misc import azimuthal_integration, circular_mask, lines_intersection
 
-
 eps = np.finfo(np.float32).eps
 
 
-def com(vol: NDArray, axes: Optional[ArrayLike] = None) -> NDArray:
+def com(vol: NDArray, axes: ArrayLike | None = None) -> NDArray:
     """
     Compute center-of-mass for given volume.
 
@@ -64,9 +61,9 @@ def com(vol: NDArray, axes: Optional[ArrayLike] = None) -> NDArray:
 
 def power_spectrum(
     img: NDArray,
-    axes: Optional[Sequence[int]] = None,
-    smooth: Optional[int] = 5,
-    taper_ratio: Optional[float] = 0.05,
+    axes: Sequence[int] | None = None,
+    smooth: int | None = 5,
+    taper_ratio: float | None = 0.05,
     power: int = 2,
 ) -> NDArray:
     """
@@ -76,11 +73,11 @@ def power_spectrum(
     ----------
     img : NDArray
         The n-dimensional signal.
-    axes : Optional[Sequence[int]], optional
+    axes : Sequence[int] | None, optional
         The axes over which we want to compute the power spectrum, by default None
-    smooth : Optional[int], optional
+    smooth : int | None, optional
         The smoothing kernel size, by default 5
-    taper_ratio : Optional[float], optional
+    taper_ratio : float | None, optional
         Whether to taper the signal at the edges (for truncated signals), by default 0.05
     power : int, optional
         The exponent to use, by default 2
@@ -124,11 +121,11 @@ def power_spectrum(
 
 def compute_frc(
     img1: NDArray,
-    img2: Optional[NDArray],
+    img2: NDArray | None,
     snrt: float = 0.2071,
-    axes: Optional[Sequence[int]] = None,
-    smooth: Optional[int] = 5,
-    taper_ratio: Optional[float] = 0.05,
+    axes: Sequence[int] | None = None,
+    smooth: int | None = 5,
+    taper_ratio: float | None = 0.05,
     supersampling: int = 1,
     theo_threshold: bool = True,
 ) -> tuple[NDArray, NDArray]:
@@ -143,19 +140,19 @@ def compute_frc(
     ----------
     img1 : NDArray
         First image / volume.
-    img2 : NDArray
+    img2 : NDArray | None
         Second image / volume.
     snrt : float, optional
         SNR to be used for generating the threshold curve for resolution definition.
         The SNR value of 0.4142 corresponds to the hald-bit curve for a full dataset.
         When splitting datasets in two sub-datasets, that value needs to be halved.
         The default is 0.2071, which corresponds to the half-bit threashold for half dataset.
-    axes : Sequence[int], optional
+    axes : Sequence[int] | None, optional
         The axes over which we want to compute the FRC/FSC.
         If None, all axes will be used The default is None.
-    smooth : Optional[int], optional
+    smooth : int | None, optional
         Size of the Hann smoothing window. The default is 5.
-    taper_ratio : Optional[float], optional
+    taper_ratio : float | None, optional
         Ratio of the edge pixels to be tapered off. This is necessary when working
         with truncated volumes / local tomography, to avoid truncation artifacts.
         The default is 0.05.
@@ -163,6 +160,8 @@ def compute_frc(
         Supersampling factor of the images.
         Larger values increase the high-frequency range of the FRC/FSC function.
         The default is 1, which corresponds to the Nyquist frequency.
+    theo_threshold : bool, optional
+        Whether to compute the theoretical threshold curve. The default is True.
 
     Raises
     ------
@@ -254,7 +253,7 @@ def compute_frc(
     return frc[..., :cut_off], t_hb[..., :cut_off]
 
 
-def estimate_resolution(frc: NDArray, t_hb: NDArray) -> Optional[tuple[float, float]]:
+def estimate_resolution(frc: NDArray, t_hb: NDArray) -> tuple[float, float] | None:
     """Estimate the resolution or bandwidth, given an FRC and a threshold curve.
 
     Parameters
@@ -279,11 +278,11 @@ def estimate_resolution(frc: NDArray, t_hb: NDArray) -> Optional[tuple[float, fl
 def plot_frcs(
     volume_pairs: Sequence[tuple[NDArray, NDArray]],
     labels: Sequence[str],
-    title: Optional[str] = None,
-    smooth: Optional[int] = 5,
+    title: str | None = None,
+    smooth: int | None = 5,
     snrt: float = 0.2071,
-    axes: Optional[Sequence[int]] = None,
-    taper_ratio: Optional[float] = 0.05,
+    axes: Sequence[int] | None = None,
+    taper_ratio: float | None = 0.05,
     supersampling: int = 1,
     verbose: bool = False,
 ) -> tuple[Figure, Axes]:
@@ -291,20 +290,20 @@ def plot_frcs(
 
     Parameters
     ----------
-    volume_pairs : Sequence[Tuple[NDArray, NDArray]]
+    volume_pairs : Sequence[tuple[NDArray, NDArray]]
         A list of pairs of volumes to compute the FRCs on.
     labels : Sequence[str]
         The labels associated with each pair.
-    title : Optional[str], optional
+    title : str | None, optional
         The axes title, by default None.
-    smooth : Optional[int], optional
+    smooth : int | None, optional
         The size of the smoothing window for the computed curves, by default 5.
     snrt : float, optional
         The SNR of the T curve, by default 0.2071 - as per half-dataset SNR.
     axes : Sequence[int] | None, optional
         The axes along which we want to compute the FRC. The unused axes will be
         averaged. The default is None.
-    taper_ratio : Optional[float], optional
+    taper_ratio : float | None, optional
         Ratio of the edge pixels to be tapered off. This is necessary when working
         with truncated volumes / local tomography, to avoid truncation artifacts.
         The default is 0.05.
@@ -315,9 +314,14 @@ def plot_frcs(
         The default is 1, which corresponds to the Nyquist frequency.
     verbose : bool, optional
         Whether to display verbose output, by default False.
+
+    Returns
+    -------
+    tuple[Figure, Axes]
+        The figure and axes objects.
     """
     frcs = [np.array([])] * len(volume_pairs)
-    xps: list[Optional[tuple[float, float]]] = [(0.0, 0.0)] * len(volume_pairs)
+    xps: list[tuple[float, float] | None] = [(0.0, 0.0)] * len(volume_pairs)
 
     for ii, pair in enumerate(tqdm(volume_pairs, desc="Computing FRCs", disable=not verbose)):
         frcs[ii], t_hb = compute_frc(
@@ -358,7 +362,7 @@ def plot_frcs(
     return fig, axs
 
 
-def fit_scale_bias(img_data: NDArray, prj_data: NDArray, prj: Optional[BaseTransform] = None) -> tuple[float, float]:
+def fit_scale_bias(img_data: NDArray, prj_data: NDArray, prj: BaseTransform | None = None) -> tuple[float, float]:
     """Fit the scale and bias of an image, against its projection in a different space.
 
     Parameters
