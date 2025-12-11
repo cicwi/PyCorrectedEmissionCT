@@ -7,11 +7,12 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import inspect
-import multiprocessing as mp
-import time as tm
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from concurrent.futures import Executor, ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
+from os import cpu_count
+from time import perf_counter
 from typing import Any, Literal, overload
 from warnings import warn
 
@@ -19,15 +20,43 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import StrMethodFormatter
 from numpy.polynomial.polynomial import Polynomial
-from numpy.typing import ArrayLike, DTypeLike, NDArray
+from numpy.typing import DTypeLike, NDArray
 from tqdm.auto import tqdm
 
-from . import solvers
+from corrct.solvers import SolutionInfo
 
-MAX_THREADS = int(round(np.log2(mp.cpu_count() + 1)))
+NUM_CPUS = cpu_count() or 1
+MAX_THREADS = int(round(np.log2(NUM_CPUS + 1)))
 
 
 NDArrayFloat = NDArray[np.floating]
+
+
+@dataclass
+class PerfStatsItem:
+    """Performance tracking class for single reconstructions."""
+
+    spawn_time_s: float
+    processing_time_s: float
+    total_time_s: float
+
+
+@dataclass
+class PerfStatsBatch:
+    """Performance tracking class for batches of reconstructions."""
+
+    dispatch_time_s: float = 0.0
+    processing_time_s: float = 0.0
+    total_time_s: float = 0.0
+    items_time: list[PerfStatsItem] = field(default_factory=lambda: [])
+
+    def __add__(self, other: "PerfStatsBatch") -> "PerfStatsBatch":
+        return PerfStatsBatch(
+            dispatch_time_s=self.dispatch_time_s + other.dispatch_time_s,
+            processing_time_s=self.processing_time_s + other.processing_time_s,
+            total_time_s=self.total_time_s + other.total_time_s,
+            items_time=self.items_time + other.items_time,
+        )
 
 
 def create_random_test_mask(
@@ -90,7 +119,7 @@ def get_lambda_range(start: float, end: float, num_per_order: int = 4, aligned_o
 
 
 def fit_func_min(
-    hp_vals: ArrayLike | NDArrayFloat,
+    hp_vals: float | Sequence[float] | NDArrayFloat,
     f_vals: NDArrayFloat,
     f_stds: NDArrayFloat | None = None,
     scale: Literal["linear", "log"] = "log",
@@ -101,7 +130,7 @@ def fit_func_min(
 
     Parameters
     ----------
-    hp_vals : ArrayLike | NDArrayFloat
+    hp_vals : float | Sequence[float] | NDArrayFloat
         Hyper-parameter values.
     f_vals : NDArrayFloat
         Objective function costs of each hyper-parameter value.
@@ -151,7 +180,7 @@ def fit_func_min(
     lams_reg_fit = to_fit(hp_vals[hp_inds_fit])
     f_vals_fit = f_vals[hp_inds_fit]
 
-    counter = tm.perf_counter()
+    counter = perf_counter()
     if verbose:
         print(
             f"Fitting minimum within the interval [{hp_vals[hp_inds_fit[0]]:.3e}, {hp_vals[hp_inds_fit[-1]]:.3e}]"
@@ -184,7 +213,7 @@ def fit_func_min(
         res_hp_val, res_f_val = min_hp_val, min_f_val
 
     if verbose:
-        print(f"Found at {min_hp_val:.3e}, in {tm.perf_counter() - counter:g} seconds.\n")
+        print(f"Found at {min_hp_val:.3e}, in {perf_counter() - counter:g} seconds.\n")
 
     if plot_result:
         fig, axs = plt.subplots()
@@ -211,21 +240,128 @@ def fit_func_min(
     return res_hp_val, res_f_val
 
 
-def _compute_reconstruction_and_loss(
-    spawn: Callable, call: Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]], hp_val: float, *args: Any, **kwds: Any
-) -> tuple[float, NDArrayFloat]:
-    solver = spawn(hp_val)
-    rec, rec_info = call(solver, *args, **kwds)
+def _compute_reconstruction(
+    spawn: Callable,
+    call: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]],
+    hp_val: float,
+    *,
+    spawn_kwds: Mapping,
+    call_kwds: Mapping,
+) -> tuple[NDArrayFloat, SolutionInfo, PerfStatsItem]:
+    c0 = perf_counter()
+    solver = spawn(hp_val, **spawn_kwds)
+    c1 = perf_counter()
+    rec, rec_info = call(solver, **call_kwds)
+    c2 = perf_counter()
 
-    # Output will be: reconstruction, and cross-validation objective function cost
-    return rec, float(rec_info.residuals_cv_rel[-1])
+    stats = PerfStatsItem(spawn_time_s=(c1 - c0), processing_time_s=(c2 - c1), total_time_s=(c2 - c0))
+
+    return rec, rec_info, stats
+
+
+def _parallel_compute(
+    executor: Executor,
+    spawn: Callable,
+    call: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]],
+    hp_vals: float | Sequence[float] | NDArrayFloat,
+    *,
+    spawn_kwds: Mapping | None = None,
+    call_kwds: Mapping | None = None,
+    verbose: bool = True,
+) -> tuple[list[NDArray], list[SolutionInfo], PerfStatsBatch]:
+    c0 = perf_counter()
+
+    if spawn_kwds is None:
+        spawn_kwds = dict()
+    if call_kwds is None:
+        call_kwds = dict()
+
+    hp_vals = np.array(hp_vals, ndmin=1)
+
+    future_to_lambda = {
+        executor.submit(_compute_reconstruction, spawn, call, hp_val, spawn_kwds=spawn_kwds, call_kwds=call_kwds): (ii, hp_val)
+        for ii, hp_val in enumerate(hp_vals)
+    }
+
+    recs = [np.array([])] * len(hp_vals)
+    recs_info = [SolutionInfo("", 1, None)] * len(hp_vals)
+    perf_items = [PerfStatsItem(0, 0, 0)] * len(hp_vals)
+
+    c1 = perf_counter()
+
+    try:
+        for future in tqdm(
+            as_completed(future_to_lambda),
+            desc="Hyper-parameter values",
+            disable=not verbose,
+            total=len(hp_vals),
+        ):
+            hp_ind, hp_val = future_to_lambda[future]
+            try:
+                recs[hp_ind], recs_info[hp_ind], perf_items[hp_ind] = future.result()
+            except ValueError as exc:
+                print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
+                raise
+    except:
+        print("Shutting down..", end="", flush=True)
+        if "cancel_futures" in inspect.signature(executor.shutdown).parameters.keys():
+            executor.shutdown(cancel_futures=True)
+        else:
+            # This handles the case of Dask's ClientExecutor
+            executor.shutdown()
+        print("\b\b: Done.")
+        raise
+
+    c2 = perf_counter()
+    perf_batch = PerfStatsBatch(
+        dispatch_time_s=(c1 - c0), processing_time_s=(c2 - c1), total_time_s=(c2 - c0), items_time=perf_items
+    )
+
+    return recs, recs_info, perf_batch
+
+
+def _serial_compute(
+    spawn: Callable,
+    call: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]],
+    hp_vals: float | Sequence[float] | NDArrayFloat,
+    *,
+    spawn_kwds: Mapping | None = None,
+    call_kwds: Mapping | None = None,
+    verbose: bool = True,
+) -> tuple[list[NDArray], list[SolutionInfo], PerfStatsBatch]:
+    c0 = perf_counter()
+
+    if spawn_kwds is None:
+        spawn_kwds = dict()
+    if call_kwds is None:
+        call_kwds = dict()
+
+    hp_vals = np.array(hp_vals, ndmin=1)
+
+    recs = [np.array([])] * len(hp_vals)
+    recs_info = [SolutionInfo("", 1, None)] * len(hp_vals)
+    perf_items = [PerfStatsItem(0, 0, 0)] * len(hp_vals)
+
+    c1 = perf_counter()
+
+    for ii, l in enumerate(tqdm(hp_vals, desc="Hyper-parameter values", disable=not verbose)):
+        recs[ii], recs_info[ii], perf_items[ii] = _compute_reconstruction(
+            spawn, call, l, spawn_kwds=spawn_kwds, call_kwds=call_kwds
+        )
+
+    c2 = perf_counter()
+    perf_batch = PerfStatsBatch(
+        dispatch_time_s=(c1 - c0), processing_time_s=(c2 - c1), total_time_s=(c2 - c0), items_time=perf_items
+    )
+
+    return recs, recs_info, perf_batch
 
 
 class BaseParameterTuning(ABC):
     """Base class for parameter tuning classes."""
 
     _solver_spawning_functionls: Callable | None
-    _solver_calling_function: Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]] | None
+    _solver_calling_function: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]] | None
 
     parallel_eval: int | Executor
 
@@ -268,10 +404,10 @@ class BaseParameterTuning(ABC):
         return self._solver_spawning_function
 
     @property
-    def solver_calling_function(self) -> Callable[[Any, ...], tuple[NDArrayFloat, solvers.SolutionInfo]]:
+    def solver_calling_function(self) -> Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]:
         """Return the locally stored solver calling function."""
         if self._solver_calling_function is None:
-            raise ValueError("Solver spawning function not initialized!")
+            raise ValueError("Solver calling function not initialized!")
         return self._solver_calling_function
 
     @solver_spawning_function.setter
@@ -285,151 +421,108 @@ class BaseParameterTuning(ABC):
         self._solver_spawning_function = solver_spawn
 
     @solver_calling_function.setter
-    def solver_calling_function(self, solver_call: Callable[[Any, ...], tuple[NDArrayFloat, solvers.SolutionInfo]]) -> None:
+    def solver_calling_function(self, solver_call: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]) -> None:
         if not isinstance(solver_call, Callable):
             raise ValueError("Expected a solver calling function (callable)")
         if not len(inspect.signature(solver_call).parameters) >= 1:
             raise ValueError("Expected a solver calling function (callable), with at least one parameter (solver)")
         self._solver_calling_function = solver_call
 
-    @staticmethod
-    def get_lambda_range(start: float, end: float, num_per_order: int = 4) -> NDArrayFloat:
-        """Compute regularization weights within an interval.
+    def process_hp_vals(
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        data_mask: NDArray | None = None,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
+    ) -> tuple[list[NDArray], list[SolutionInfo], PerfStatsBatch]:
+        """
+        Compute reconstructions, solution information, and computing performance statistics for all hyperparameter values.
 
         Parameters
         ----------
-        start : float
-            First regularization weight.
-        end : float
-            Last regularization weight.
-        num_per_order : int, optional
-            Number of steps per order of magnitude. The default is 4.
-
-        Returns
-        -------
-        NDArrayFloat
-            List of regularization weights.
-        """
-        return get_lambda_range(start=start, end=end, num_per_order=num_per_order)
-
-    def compute_reconstruction_and_loss(self, hp_val: float, *args: Any, **kwds: Any) -> tuple[float, NDArrayFloat]:
-        """Compute objective function cost for the given hyper-parameter value.
-
-        Parameters
-        ----------
-        hp_val : float
-            hyper-parameter value.
-        *args : Any
-            Optional positional arguments for the reconstruction.
-        **kwds : Any
-            Optional keyword arguments for the reconstruction.
-
-        Returns
-        -------
-        rec : NDArray
-            Reconstruction at the given weight.
-        cost : float
-            Cost of the given regularization weight.
-        """
-        return _compute_reconstruction_and_loss(
-            self.solver_spawning_function, self.solver_calling_function, hp_val, *args, **kwds
-        )
-
-    def compute_all_reconstructions_and_losses(
-        self, hp_vals: ArrayLike | NDArrayFloat, data_mask: NDArray | None = None
-    ) -> tuple[list[NDArray], list[float]]:
-        """
-        Compute reconstructions and losses for all hyperparameter values.
-
-        This method computes the reconstructions and corresponding losses for a
-        given set of hyperparameter values. It supports both parallel and sequential
-        evaluation based on the `parallel_eval` attribute.
-
-        Parameters
-        ----------
-        hp_vals : ArrayLike | NDArrayFloat
+        hp_vals : float | Sequence[float] | NDArrayFloat
             A list or array of hyperparameter values to evaluate.
         data_mask : NDArray | None, optional
             An optional mask to apply to the data during evaluation. By default None.
+        spawn_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the solver spawning function. By default None.
+        call_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the solver calling function. By default None.
 
         Returns
         -------
-        tuple[list[NDArray], list[float]]
+        tuple[list[NDArray], list[SolutionInfo], PerfStatsBatch]
             A tuple containing:
-            - A list of reconstructions for each hyperparameter value.
-            - A list of loss values corresponding to each reconstruction.
+            - A list of reconstructions corresponding to each hyperparameter value.
+            - A list of solution information objects corresponding to each reconstruction.
+            - A computing performance statistics object containing aggregated performance metrics.
 
         Raises
         ------
         ValueError
-            If `parallel_eval` is neither an Executor nor an int.
+            If `parallel_eval` is neither an Executor, a boolean, nor an int.
         """
+        if self._solver_spawning_function is None:
+            raise ValueError("Solver spawning function not initialized!")
+        if self._solver_calling_function is None:
+            raise ValueError("Solver calling function not initialized!")
 
-        def _parallel_compute(executor: Executor, data_test_mask: NDArray | None) -> tuple[list[NDArray], list[float]]:
-            future_to_lambda = {
-                executor.submit(
-                    _compute_reconstruction_and_loss,
-                    self.solver_spawning_function,
-                    self.solver_calling_function,
-                    l,
-                    data_test_mask,
-                ): (ii, l)
-                for ii, l in enumerate(hp_vals)
-            }
+        if isinstance(self.parallel_eval, bool) and self.parallel_eval:
+            self.parallel_eval = MAX_THREADS
 
-            recs = [np.array([])] * len(hp_vals)
-            f_vals = [0.0] * len(hp_vals)
-            try:
-                for future in tqdm(
-                    as_completed(future_to_lambda),
-                    desc="Hyper-parameter values",
-                    disable=not self.verbose,
-                    total=len(hp_vals),
-                ):
-                    hp_ind, hp_val = future_to_lambda[future]
-                    try:
-                        recs[hp_ind], f_vals[hp_ind] = future.result()
-                    except ValueError as exc:
-                        print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
-                        raise
-            except:
-                print("Shutting down..", end="", flush=True)
-                executor.shutdown(cancel_futures=True)
-                print("\b\b: Done.")
-                raise
+        if spawn_kwds is None:
+            spawn_kwds = dict()
+        if call_kwds is None:
+            call_kwds = dict()
 
-            return recs, f_vals
+        if data_mask is not None:
+            f_sig = inspect.signature(self._solver_calling_function)
+            if "b_test_mask" not in f_sig.parameters.keys():
+                raise ValueError("The solver calling function should have a parameter called `b_test_mask`")
+
+            call_kwds = dict(**call_kwds)
+            call_kwds["b_test_mask"] = data_mask
+
+        compute_args = [self._solver_spawning_function, self._solver_calling_function, hp_vals]
+        compute_kwds = dict(spawn_kwds=spawn_kwds, call_kwds=call_kwds, verbose=self.verbose)
 
         if isinstance(self.parallel_eval, Executor):
-            recs, f_vals = _parallel_compute(self.parallel_eval, data_mask)
+            recs, recs_info, perf_batch = _parallel_compute(self.parallel_eval, *compute_args, **compute_kwds)
         elif isinstance(self.parallel_eval, int):
             if self.parallel_eval:
                 with ThreadPoolExecutor(max_workers=self.parallel_eval) as executor:
-                    recs, f_vals = _parallel_compute(executor, data_mask)
+                    recs, recs_info, perf_batch = _parallel_compute(executor, *compute_args, **compute_kwds)
             else:
-                results = [
-                    _compute_reconstruction_and_loss(self.solver_spawning_function, self.solver_calling_function, l, data_mask)
-                    for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
-                ]
-                recs, f_vals = zip(*results)
+                recs, recs_info, perf_batch = _serial_compute(*compute_args, **compute_kwds)
         else:
             raise ValueError(
                 f"The variable `parallel_eval` should either be an Executor, a boolean, or an int. "
                 f"A `{type(self.parallel_eval)}` was passed instead."
             )
-        return recs, f_vals
+
+        return recs, recs_info, perf_batch
 
     def compute_reconstruction_error(
-        self, hp_vals: ArrayLike | NDArrayFloat, gnd_truth: NDArrayFloat
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        gnd_truth: NDArrayFloat,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
     ) -> tuple[NDArrayFloat, NDArrayFloat]:
         """Compute the reconstruction errors for each hyper-parameter values against the ground truth.
 
         Parameters
         ----------
-        hp_vals : ArrayLike | NDArrayFloat
+        hp_vals : float | Sequence[float] | NDArrayFloat
             List of hyper-parameter values.
         gnd_truth : NDArrayFloat
             Expected reconstruction.
+        spawn_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the solver spawning function. By default None.
+        call_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the solver calling function. By default None.
 
         Returns
         -------
@@ -451,7 +544,7 @@ class BaseParameterTuning(ABC):
                     f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
                 )
 
-        recs, _ = self.compute_all_reconstructions_and_losses(hp_vals)
+        recs, _, _ = self.process_hp_vals(hp_vals, spawn_kwds=spawn_kwds, call_kwds=call_kwds)
 
         err_l1 = np.zeros((len(hp_vals),), dtype=self.dtype)
         err_l2 = np.zeros((len(hp_vals),), dtype=self.dtype)
@@ -475,32 +568,57 @@ class BaseParameterTuning(ABC):
         return err_l1, err_l2
 
     @overload
-    def compute_loss_values(self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[False] = False) -> NDArrayFloat: ...
+    def compute_loss_values(
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
+        return_all: Literal[False] = False,
+    ) -> NDArrayFloat: ...
 
     @overload
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[True] = True
-    ) -> tuple[NDArrayFloat, NDArrayFloat]: ...
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
+        return_all: Literal[True] = True,
+    ) -> tuple[NDArrayFloat, list[NDArrayFloat], list[SolutionInfo], PerfStatsBatch]: ...
 
     @abstractmethod
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: bool = False
-    ) -> NDArrayFloat | tuple[NDArrayFloat, NDArrayFloat]:
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
+        return_all: bool = False,
+    ) -> NDArrayFloat | tuple[NDArrayFloat, list[NDArrayFloat], list[SolutionInfo], PerfStatsBatch]:
         """Compute the objective function costs for a list of hyper-parameter values.
 
         Parameters
         ----------
-        hp_vals : ArrayLike | NDArrayFloat
+        hp_vals : float | Sequence[float] | NDArrayFloat
             List of hyper-parameter values.
-        return_recs : bool, optional
-            If True, return the reconstructions along with the loss values. Default is False.
+        spawn_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the solver spawning function. By default None.
+        call_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the solver calling function. By default None.
+        return_all : bool, optional
+            If True, return all the computation information (reconstructions, all loss values, performance). Default is False.
 
         Returns
         -------
         NDArrayFloat
             Objective function cost for each hyper-parameter value.
         recs : NDArrayFloat, optional
-            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
+            Reconstructions for each hyper-parameter value (returned only if `return_all` is True).
+        recs_info : list[SolutionInfo], optional
+            Solution information for each reconstruction (returned only if `return_all` is True).
+        perf_batch : PerfStatsBatch, optional
+            Performance statistics for the batch of reconstructions (returned only if `return_all` is True).
         """
 
 
@@ -547,35 +665,60 @@ class LCurve(BaseParameterTuning):
         self.loss_function = loss_function
 
     @overload
-    def compute_loss_values(self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[False] = False) -> NDArrayFloat: ...
+    def compute_loss_values(
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
+        return_all: Literal[False] = False,
+    ) -> NDArrayFloat: ...
 
     @overload
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[True] = True
-    ) -> tuple[NDArrayFloat, NDArrayFloat]: ...
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
+        return_all: Literal[True] = True,
+    ) -> tuple[NDArrayFloat, list[NDArrayFloat], list[SolutionInfo], PerfStatsBatch]: ...
 
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: bool = False
-    ) -> NDArrayFloat | tuple[NDArrayFloat, NDArrayFloat]:
-        """Compute objective function values for all hyper-parameter values.
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
+        return_all: bool = False,
+    ) -> NDArrayFloat | tuple[NDArrayFloat, list[NDArrayFloat], list[SolutionInfo], PerfStatsBatch]:
+        """Compute the objective function costs for a list of hyper-parameter values.
 
         Parameters
         ----------
-        hp_vals : ArrayLike | NDArrayFloat
-            Hyper-parameter values to use for computing the different objective function values.
-        return_recs : bool, optional
-            If True, return the reconstructions along with the loss values. Default is False.
+        hp_vals : float | Sequence[float] | NDArrayFloat
+            List of hyper-parameter values.
+        spawn_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the solver spawning function. By default None.
+        call_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the solver calling function. By default None.
+        return_all : bool, optional
+            If True, return all the computation information (reconstructions, all loss values, performance). Default is False.
 
         Returns
         -------
         f_vals : NDArrayFloat
             Objective function cost for each hyper-parameter value.
-        recs : NDArrayFloat, optional
-            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
+        recs : list[NDArrayFloat], optional
+            Reconstructions for each hyper-parameter value (returned only if `return_all` is True).
+        recs_info : list[SolutionInfo], optional
+            Solution information for each reconstruction (returned only if `return_all` is True).
+        perf_batch : PerfStatsBatch, optional
+            Performance statistics for the batch of reconstructions (returned only if `return_all` is True).
         """
         hp_vals = np.array(hp_vals, ndmin=1)
 
-        counter = tm.perf_counter()
+        counter = perf_counter()
         if self.verbose:
             print("Computing L-curve loss values:")
             print(f"- Hyper-parameter values range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
@@ -587,11 +730,11 @@ class LCurve(BaseParameterTuning):
                     f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
                 )
 
-        recs, _ = self.compute_all_reconstructions_and_losses(hp_vals)
+        recs, recs_info, perf_batch = self.process_hp_vals(hp_vals, spawn_kwds=spawn_kwds, call_kwds=call_kwds)
         f_vals = np.array([self.loss_function(rec) for rec in recs], dtype=self.dtype)
 
         if self.verbose:
-            print(f"Done in {tm.perf_counter() - counter} seconds.\n")
+            print(f"Done in {perf_counter() - counter} seconds.\n")
 
         if self.plot_result:
             fig, axs = plt.subplots()
@@ -603,8 +746,8 @@ class LCurve(BaseParameterTuning):
             fig.tight_layout()
             plt.show(block=False)
 
-        if return_recs:
-            return f_vals, recs
+        if return_all:
+            return f_vals, recs, recs_info, perf_batch
         else:
             return f_vals
 
@@ -653,24 +796,46 @@ class CrossValidation(BaseParameterTuning):
 
     @overload
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[False] = False
-    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]: ...
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
+        return_all: Literal[False] = False,
+    ) -> tuple[NDArrayFloat, NDArrayFloat, list[NDArrayFloat]]: ...
 
     @overload
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[True] = True
-    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat]: ...
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
+        return_all: bool = False,
+    ) -> tuple[NDArrayFloat, NDArrayFloat, list[tuple[list[NDArrayFloat], list[SolutionInfo], PerfStatsBatch]]]: ...
 
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: bool = False
-    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat] | tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, list[NDArrayFloat]]:
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        spawn_kwds: Mapping | None = None,
+        call_kwds: Mapping | None = None,
+        return_all: bool = False,
+    ) -> (
+        tuple[NDArrayFloat, NDArrayFloat, list[NDArrayFloat]]
+        | tuple[NDArrayFloat, NDArrayFloat, list[tuple[list[NDArrayFloat], list[SolutionInfo], PerfStatsBatch]]]
+    ):
         """Compute objective function values for all requested hyper-parameter values.
 
         Parameters
         ----------
-        hp_vals : ArrayLike | NDArrayFloat
+        hp_vals : float | Sequence[float] | NDArrayFloat
             Hyper-parameter values (e.g., regularization weight) to evaluate.
-        return_recs : bool, optional
+        spawn_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the solver spawning function. By default None.
+        call_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the solver calling function. By default None.
+        return_all : bool, optional
             If True, return the reconstructions along with the loss values. Default is False.
 
         Returns
@@ -682,11 +847,11 @@ class CrossValidation(BaseParameterTuning):
         f_vals : NDArrayFloat
             Objective function costs for each hyper-parameter value.
         recs : list[NDArrayFloat], optional
-            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
+            Reconstructions for each hyper-parameter value (returned only if `return_all` is True).
         """
         hp_vals = np.array(hp_vals, ndmin=1)
 
-        counter = tm.perf_counter()
+        counter = perf_counter()
         if self.verbose:
             print("Computing cross-validation loss values:")
             print(f"- Hyper-parameter range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
@@ -700,23 +865,30 @@ class CrossValidation(BaseParameterTuning):
                     f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
                 )
 
-        recs = list()
-        f_vals = np.empty((self.num_averages, len(hp_vals)), dtype=self.dtype)
+        f_vals = [np.array([])] * self.num_averages
+        results = []
+
         for ii_avg in range(self.num_averages):
             if self.verbose:
                 print(f"\nRound: {ii_avg + 1}/{self.num_averages}")
 
             curr_data_test_mask = self.data_test_masks[ii_avg]
 
-            recs_ii, f_vals_ii = self.compute_all_reconstructions_and_losses(hp_vals, curr_data_test_mask)
-            recs.append(recs_ii)
-            f_vals[ii_avg, :] = np.array(f_vals_ii)
+            recs_ii, recs_info_ii, perf_batch_ii = self.process_hp_vals(
+                hp_vals, curr_data_test_mask, spawn_kwds=spawn_kwds, call_kwds=call_kwds
+            )
+            f_vals[ii_avg] = np.array([info.residuals_cv_rel[-1] for info in recs_info_ii])
 
-        f_avgs = f_vals.mean(axis=0)
-        f_stds = f_vals.std(axis=0)
+            if return_all:
+                results.append((recs_ii, recs_info_ii, perf_batch_ii))
+            else:
+                results.append(f_vals[ii_avg])
+
+        f_avgs: NDArrayFloat = np.mean(f_vals, axis=0)
+        f_stds: NDArrayFloat = np.std(f_vals, axis=0)
 
         if self.verbose:
-            print(f"Done in {tm.perf_counter() - counter:g} seconds.\n")
+            print(f"Done in {perf_counter() - counter:g} seconds.\n")
 
         if self.plot_result:
             fig, axs = plt.subplots()
@@ -729,14 +901,11 @@ class CrossValidation(BaseParameterTuning):
             fig.tight_layout()
             plt.show(block=False)
 
-        if return_recs:
-            return f_avgs, f_stds, f_vals, recs
-        else:
-            return f_avgs, f_stds, f_vals
+        return f_avgs, f_stds, results
 
     def fit_loss_min(
         self,
-        hp_vals: ArrayLike | NDArrayFloat,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
         f_vals: NDArrayFloat,
         f_stds: NDArrayFloat | None = None,
         scale: Literal["linear", "log"] = "log",
@@ -745,7 +914,7 @@ class CrossValidation(BaseParameterTuning):
 
         Parameters
         ----------
-        hp_vals : ArrayLike | NDArrayFloat
+        hp_vals : float | Sequence[float] | NDArrayFloat
             Hyper-parameter values.
         f_vals : NDArrayFloat
             Objective function costs of each hyper-parameter value.
