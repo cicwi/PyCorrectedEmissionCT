@@ -17,6 +17,7 @@ import skimage.morphology as skm
 import skimage.segmentation as sks
 import skimage.transform as skt
 from numpy.typing import DTypeLike, NDArray
+from urllib.request import urlretrieve
 
 from . import physics, processing, projectors
 
@@ -46,21 +47,22 @@ def roundup_to_pow2(x: int | float | NDArrayFloat, p: int, dtype: DTypeLike = in
 def download_phantom():
     """Download the phantom generation module from Nicolas Barbey's repository on github."""
     phantom_url = "https://raw.githubusercontent.com/nbarbey/TomograPy/master/tomograpy/phantom.py"
-    phantom_path = "./phantom.py"
+    phantom_path = "phantom.py"
 
     print(
-        "This example uses the phantom definition from the package Tomograpy, "
-        f"developed by Nicolas Barbey. The needed module will be downloaded from: {phantom_url}"
+        "This example uses the phantom definition from the package Tomography, "
+        f"developed by Nicolas Barbey. The needed module will be downloaded from: {phantom_url} to {phantom_path}"
     )
 
-    import urllib.request as urlreq
+    urlretrieve(phantom_url, phantom_path)
 
-    urlreq.urlretrieve(phantom_url, phantom_path)
-
-    with open(phantom_path, encoding="utf-8") as f:
-        file_content = f.read()
-    with open(phantom_path, "w", encoding="utf-8") as f:
-        f.write(file_content.replace("xrange", "range"))
+    with open(phantom_path, "r", encoding="utf-8") as fid:
+        file_content = fid.read()
+    file_content = file_content.replace("xrange", "range")
+    file_content = file_content.replace("mgrid = np.lib.index_tricks.nd_grid()", "")
+    file_content = file_content.replace("mgrid[", "np.mgrid[")
+    with open(phantom_path, "w", encoding="utf-8") as fid:
+        fid.write(file_content)
 
 
 def create_phantom_nuclei3d(
