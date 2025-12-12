@@ -85,12 +85,12 @@ def create_random_test_mask(
         The shape of the data.
     test_fraction : float, optional
         The fraction of pixels to mask. The default is 0.05.
-    data_dtype : DTypeLike, optional
+    dtype : DTypeLike, optional
         The data type of the mask. The default is np.float32.
 
     Returns
     -------
-    data_test_mask : NDArrayFloat
+    NDArrayFloat
         The pixel mask.
     """
     data_test_mask = np.zeros(data_shape, dtype=dtype)
@@ -102,7 +102,8 @@ def create_random_test_mask(
 
 
 def get_lambda_range(start: float, end: float, num_per_order: int = 4, aligned_order: bool = True) -> NDArrayFloat:
-    """Compute hyper-parameter values within an interval.
+    """
+    Compute hyper-parameter values within an interval.
 
     Parameters
     ----------
@@ -140,7 +141,8 @@ def fit_func_min(
     verbose: bool = False,
     plot_result: bool = False,
 ) -> tuple[float, float]:
-    """Parabolic fit of objective function costs for the different hyper-parameter values.
+    """
+    Parabolic fit of objective function costs for the different hyper-parameter values.
 
     Parameters
     ----------
@@ -262,6 +264,31 @@ def _compute_reconstruction(
     init_fun_kwds: Mapping,
     exec_fun_kwds: Mapping,
 ) -> tuple[NDArrayFloat, SolutionInfo, PerfMeterTask]:
+    """
+    Compute a single reconstruction.
+
+    Parameters
+    ----------
+    init_fun : Callable
+        The task initialization function.
+    exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
+        The task execution function.
+    hp_val : float
+        The hyper-parameter value.
+    init_fun_kwds : Mapping
+        Additional keyword arguments to pass to the task initialization function.
+    exec_fun_kwds : Mapping
+        Additional keyword arguments to pass to the task execution function.
+
+    Returns
+    -------
+    NDArrayFloat
+        The reconstruction.
+    SolutionInfo
+        The solution information.
+    PerfMeterTask
+        The performance statistics for the reconstruction.
+    """
     c0 = perf_counter()
     solver = init_fun(hp_val, **init_fun_kwds)
     c1 = perf_counter()
@@ -283,6 +310,35 @@ def _parallel_compute(
     exec_fun_kwds: Mapping | None = None,
     verbose: bool = True,
 ) -> tuple[list[NDArray], list[SolutionInfo], PerfMeterBatch]:
+    """
+    Compute reconstructions in parallel.
+
+    Parameters
+    ----------
+    executor : Executor
+        The executor to use for parallel computation.
+    init_fun : Callable
+        The task initialization function.
+    exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
+        The task execution function.
+    hp_vals : float | Sequence[float] | NDArrayFloat
+        A list or array of hyperparameter values to evaluate.
+    init_fun_kwds : Mapping | None, optional
+        Additional keyword arguments to pass to the task initialization function. By default None.
+    exec_fun_kwds : Mapping | None, optional
+        Additional keyword arguments to pass to the task execution function. By default None.
+    verbose : bool, optional
+        Whether to produce verbose output, by default True
+
+    Returns
+    -------
+    list[NDArray]
+        A list of reconstructions corresponding to each hyperparameter value.
+    list[SolutionInfo]
+        A list of solution information objects corresponding to each reconstruction.
+    PerfMeterBatch
+        A computing performance statistics object containing aggregated performance metrics.
+    """
     c0 = perf_counter()
 
     if init_fun_kwds is None:
@@ -345,6 +401,33 @@ def _serial_compute(
     exec_fun_kwds: Mapping | None = None,
     verbose: bool = True,
 ) -> tuple[list[NDArray], list[SolutionInfo], PerfMeterBatch]:
+    """
+    Compute reconstructions in serial.
+
+    Parameters
+    ----------
+    init_fun : Callable
+        The task initialization function.
+    exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
+        The task execution function.
+    hp_vals : float | Sequence[float] | NDArrayFloat
+        A list or array of hyperparameter values to evaluate.
+    init_fun_kwds : Mapping | None, optional
+        Additional keyword arguments to pass to the task initialization function. By default None.
+    exec_fun_kwds : Mapping | None, optional
+        Additional keyword arguments to pass to the task execution function. By default None.
+    verbose : bool, optional
+        Whether to produce verbose output, by default True
+
+    Returns
+    -------
+    list[NDArray]
+        A list of reconstructions corresponding to each hyperparameter value.
+    list[SolutionInfo]
+        A list of solution information objects corresponding to each reconstruction.
+    PerfMeterBatch
+        A computing performance statistics object containing aggregated performance metrics.
+    """
     c0 = perf_counter()
 
     if init_fun_kwds is None:
@@ -388,7 +471,8 @@ class BaseParameterTuning(ABC):
         verbose: bool = False,
         plot_result: bool = False,
     ) -> None:
-        """Initialize a base helper class.
+        """
+        Initialize a base helper class.
 
         Parameters
         ----------
@@ -414,20 +498,42 @@ class BaseParameterTuning(ABC):
 
     @property
     def task_init_function(self) -> Callable:
-        """Return the local reference to the task initialization function."""
+        """
+        Return the local reference to the task initialization function.
+
+        Returns
+        -------
+        Callable
+            The task initialization function.
+        """
         if self._task_init_function is None:
             raise ValueError("Task initialization function not initialized!")
         return self._task_init_function
 
     @property
     def task_exec_function(self) -> Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]:
-        """Return the local reference to the task execution function."""
+        """
+        Return the local reference to the task execution function.
+
+        Returns
+        -------
+        Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
+            The task execution function.
+        """
         if self._task_exec_function is None:
             raise ValueError("Task execution function not initialized!")
         return self._task_exec_function
 
     @task_init_function.setter
     def task_init_function(self, init_fun: Callable) -> None:
+        """
+        Set the task initialization function.
+
+        Parameters
+        ----------
+        init_fun : Callable
+            The task initialization function.
+        """
         if not isinstance(init_fun, Callable):
             raise ValueError("Expected a task initialization function (callable)")
         if len(inspect.signature(init_fun).parameters) != 1:
@@ -438,6 +544,14 @@ class BaseParameterTuning(ABC):
 
     @task_exec_function.setter
     def task_exec_function(self, exec_fun: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]) -> None:
+        """
+        Set the task execution function.
+
+        Parameters
+        ----------
+        exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
+            The task execution function.
+        """
         if not isinstance(exec_fun, Callable):
             raise ValueError("Expected a task execution function (callable)")
         if not len(inspect.signature(exec_fun).parameters) >= 1:
@@ -492,11 +606,6 @@ class BaseParameterTuning(ABC):
             - A list of reconstructions corresponding to each hyperparameter value.
             - A list of solution information objects corresponding to each reconstruction.
             - A computing performance statistics object containing aggregated performance metrics.
-
-        Raises
-        ------
-        ValueError
-            If `parallel_eval` is neither an Executor, a boolean, nor an int.
         """
         if self._task_init_function is None:
             raise ValueError("Task initialization function not initialized!")
@@ -533,7 +642,8 @@ class BaseParameterTuning(ABC):
         init_fun_kwds: Mapping | None = None,
         exec_fun_kwds: Mapping | None = None,
     ) -> tuple[NDArrayFloat, NDArrayFloat]:
-        """Compute the reconstruction errors for each hyper-parameter values against the ground truth.
+        """
+        Compute the reconstruction errors for each hyper-parameter values against the ground truth.
 
         Parameters
         ----------
@@ -618,7 +728,8 @@ class BaseParameterTuning(ABC):
         exec_fun_kwds: Mapping | None = None,
         return_all: bool = False,
     ) -> NDArrayFloat | tuple[NDArrayFloat, list[NDArrayFloat], list[SolutionInfo], PerfMeterBatch]:
-        """Compute the objective function costs for a list of hyper-parameter values.
+        """
+        Compute the objective function costs for a list of hyper-parameter values.
 
         Parameters
         ----------
@@ -654,8 +765,9 @@ class LCurve(BaseParameterTuning):
         parallel_eval: Executor | int | bool = True,
         verbose: bool = False,
         plot_result: bool = False,
-    ):
-        """Create an L-curve regularization parameter estimation helper.
+    ) -> None:
+        """
+        Create an L-curve regularization parameter estimation helper.
 
         Parameters
         ----------
@@ -669,11 +781,6 @@ class LCurve(BaseParameterTuning):
             Print verbose output. The default is False.
         plot_result : bool, optional
             Plot results. The default is False.
-
-        Raises
-        ------
-        ValueError
-            In case 'loss_function' is not callable or does not expose at least one argument.
         """
         super().__init__(dtype=data_dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result)
 
@@ -714,7 +821,8 @@ class LCurve(BaseParameterTuning):
         exec_fun_kwds: Mapping | None = None,
         return_all: bool = False,
     ) -> NDArrayFloat | tuple[NDArrayFloat, list[NDArrayFloat], list[SolutionInfo], PerfMeterBatch]:
-        """Compute the objective function costs for a list of hyper-parameter values.
+        """
+        Compute the objective function costs for a list of hyper-parameter values.
 
         Parameters
         ----------
@@ -790,14 +898,15 @@ class CrossValidation(BaseParameterTuning):
         parallel_eval: Executor | int | bool = True,
         verbose: bool = False,
         plot_result: bool = False,
-    ):
-        """Create a cross-validation hyper-parameter estimation helper.
+    ) -> None:
+        """
+        Create a cross-validation hyper-parameter estimation helper.
 
         Parameters
         ----------
         data_shape : Sequence[int]
             Shape of the projection data.
-        data_dtype : DTypeLike, optional
+        dtype : DTypeLike, optional
             Type of the input data. The default is np.float32.
         cv_fraction : float, optional
             Fraction of detector points to use for the leave-out set. The default is 0.1.
@@ -819,10 +928,9 @@ class CrossValidation(BaseParameterTuning):
 
         self.mask_param_name = mask_param_name
 
-        self.data_cv_masks = [self._create_random_test_mask() for _ in range(self.num_averages)]
-
-    def _create_random_test_mask(self) -> NDArrayFloat:
-        return create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype)
+        self.data_cv_masks = [
+            create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype) for _ in range(self.num_averages)
+        ]
 
     @overload
     def compute_loss_values(
@@ -855,7 +963,8 @@ class CrossValidation(BaseParameterTuning):
         tuple[NDArrayFloat, NDArrayFloat, list[NDArrayFloat]]
         | tuple[NDArrayFloat, NDArrayFloat, list[tuple[list[NDArrayFloat], list[SolutionInfo], PerfMeterBatch]]]
     ):
-        """Compute objective function values for all requested hyper-parameter values.
+        """
+        Compute objective function values for all requested hyper-parameter values.
 
         Parameters
         ----------
@@ -958,7 +1067,8 @@ class CrossValidation(BaseParameterTuning):
         f_stds: NDArrayFloat | None = None,
         scale: Literal["linear", "log"] = "log",
     ) -> tuple[float, float]:
-        """Parabolic fit of objective function costs for the different hyper-parameter values.
+        """
+        Parabolic fit of objective function costs for the different hyper-parameter values.
 
         Parameters
         ----------
