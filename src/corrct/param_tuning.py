@@ -469,7 +469,6 @@ class BaseParameterTuning(ABC):
     def process_hp_vals(
         self,
         hp_vals: float | Sequence[float] | NDArrayFloat,
-        data_mask: NDArray | None = None,
         *,
         init_fun_kwds: Mapping | None = None,
         exec_fun_kwds: Mapping | None = None,
@@ -481,8 +480,6 @@ class BaseParameterTuning(ABC):
         ----------
         hp_vals : float | Sequence[float] | NDArrayFloat
             A list or array of hyperparameter values to evaluate.
-        data_mask : NDArray | None, optional
-            An optional mask to apply to the data during evaluation. By default None.
         init_fun_kwds : Mapping | None, optional
             Additional keyword arguments to pass to the task initialization function. By default None.
         exec_fun_kwds : Mapping | None, optional
@@ -508,19 +505,6 @@ class BaseParameterTuning(ABC):
 
         if isinstance(self.parallel_eval, bool) and self.parallel_eval:
             self.parallel_eval = MAX_THREADS
-
-        if init_fun_kwds is None:
-            init_fun_kwds = dict()
-        if exec_fun_kwds is None:
-            exec_fun_kwds = dict()
-
-        if data_mask is not None:
-            f_sig = inspect.signature(self._task_exec_function)
-            if "b_test_mask" not in f_sig.parameters.keys():
-                raise ValueError("The task execution function should have a parameter called `b_test_mask`")
-
-            exec_fun_kwds = dict(**exec_fun_kwds)
-            exec_fun_kwds["b_test_mask"] = data_mask
 
         compute_args = [self._task_init_function, self._task_exec_function, hp_vals]
         compute_kwds = dict(init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds, verbose=self.verbose)
@@ -793,12 +777,16 @@ class LCurve(BaseParameterTuning):
 class CrossValidation(BaseParameterTuning):
     """Cross-validation hyper-parameter estimation class."""
 
+    data_cv_masks: list[NDArrayFloat]
+    mask_param_name: str
+
     def __init__(
         self,
         data_shape: Sequence[int],
         dtype: DTypeLike = np.float32,
         cv_fraction: float = 0.1,
         num_averages: int = 5,
+        mask_param_name: str = "b_test_mask",
         parallel_eval: Executor | int | bool = True,
         verbose: bool = False,
         plot_result: bool = False,
@@ -815,6 +803,8 @@ class CrossValidation(BaseParameterTuning):
             Fraction of detector points to use for the leave-out set. The default is 0.1.
         num_averages : int, optional
             Number of averages random leave-out sets to use. The default is 5.
+        mask_param_name: str, optional
+            The parameter name in the task execution function that accepts the data masks. The default is "b_test_mask".
         parallel_eval : Executor | int | bool, optional
             Compute loss and error values in parallel. The default is True.
         verbose : bool, optional
@@ -827,7 +817,9 @@ class CrossValidation(BaseParameterTuning):
         self.cv_fraction = cv_fraction
         self.num_averages = num_averages
 
-        self.data_test_masks = [self._create_random_test_mask() for _ in range(self.num_averages)]
+        self.mask_param_name = mask_param_name
+
+        self.data_cv_masks = [self._create_random_test_mask() for _ in range(self.num_averages)]
 
     def _create_random_test_mask(self) -> NDArrayFloat:
         return create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype)
@@ -887,6 +879,24 @@ class CrossValidation(BaseParameterTuning):
         recs : list[NDArrayFloat], optional
             Reconstructions for each hyper-parameter value (returned only if `return_all` is True).
         """
+        if self._task_init_function is None:
+            raise ValueError("Task initialization function not initialized!")
+        if self._task_exec_function is None:
+            raise ValueError("Task execution function not initialized!")
+
+        f_sig = inspect.signature(self._task_exec_function)
+        if self.mask_param_name not in f_sig.parameters.keys():
+            raise ValueError(
+                f"The task execution function should have a parameter called `{self.mask_param_name}`, "
+                f"which is defined by the property `mask_param_name`. Please adjust accordingly."
+            )
+
+        if init_fun_kwds is None:
+            init_fun_kwds = dict()
+        if exec_fun_kwds is None:
+            exec_fun_kwds = dict()
+        exec_fun_kwds = dict(**exec_fun_kwds)
+
         hp_vals = np.array(hp_vals, ndmin=1)
 
         counter = perf_counter()
@@ -910,10 +920,10 @@ class CrossValidation(BaseParameterTuning):
             if self.verbose:
                 print(f"\nRound: {ii_avg + 1}/{self.num_averages}")
 
-            curr_data_test_mask = self.data_test_masks[ii_avg]
+            exec_fun_kwds[self.mask_param_name] = self.data_cv_masks[ii_avg]
 
             recs_ii, recs_info_ii, perf_batch_ii = self.process_hp_vals(
-                hp_vals, curr_data_test_mask, init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds
+                hp_vals, init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds
             )
             f_vals[ii_avg] = np.array([info.residuals_cv_rel[-1] for info in recs_info_ii])
 
