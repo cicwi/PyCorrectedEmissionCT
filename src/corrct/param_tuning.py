@@ -101,6 +101,50 @@ def create_random_test_mask(
     return data_test_mask
 
 
+def create_k_fold_test_masks(
+    data_shape: Sequence[int],
+    k_folds: int,
+    dtype: DTypeLike = np.float32,
+    seed: int | None = None,
+) -> list[NDArray]:
+    """
+    Create K random masks for K-fold cross-validation.
+
+    Parameters
+    ----------
+    data_shape : Sequence[int]
+        The shape of the data.
+    k_folds : int
+        The number of folds.
+    dtype : DTypeLike, optional
+        The data type of the masks. The default is np.float32.
+    seed : int | None, optional
+        Seed for the random number generator. The default is None.
+
+    Returns
+    -------
+    list[NDArray]
+        A list of K pixel masks.
+    """
+    # Create a random number generator
+    rng = np.random.default_rng(seed)
+
+    # Create a list of indices and shuffle it
+    indices = rng.permutation(np.prod(data_shape))
+
+    # Split the indices into K folds using strides
+    folds = [indices[i::k_folds] for i in range(k_folds)]
+
+    # Create the masks
+    masks = []
+    for fold in folds:
+        mask = np.zeros(data_shape, dtype=dtype)
+        mask.ravel()[fold] = 1
+        masks.append(mask)
+
+    return masks
+
+
 def get_lambda_range(start: float, end: float, num_per_order: int = 4, aligned_order: bool = True) -> NDArrayFloat:
     """
     Compute hyper-parameter values within an interval.
@@ -454,6 +498,27 @@ def _serial_compute(
     )
 
     return recs, recs_info, perf_batch
+
+
+def plot_cv_curves(solution_infos: list[SolutionInfo], hp_vals: Sequence[float]) -> None:
+    """
+    Plot the relative cross-validation curves for all hyper-parameter values.
+
+    Parameters
+    ----------
+    solution_infos : list[SolutionInfo]
+        List of SolutionInfo objects containing the relative cross-validation residuals.
+    hp_vals : Sequence[float]
+        Sequence of hyper-parameter values corresponding to the solution_infos.
+    """
+    fig, axs = plt.subplots()
+    for hp_val, info in zip(hp_vals, solution_infos):
+        axs.semilogy(info.residuals_cv_rel, label=f"CV residuals, HP val={hp_val:.3e}")
+    axs.set_xlabel("Iterations")
+    axs.grid()
+    axs.legend()
+    fig.tight_layout()
+    plt.show(block=False)
 
 
 class BaseParameterTuning(ABC):
@@ -885,17 +950,21 @@ class LCurve(BaseParameterTuning):
 class CrossValidation(BaseParameterTuning):
     """Cross-validation hyper-parameter estimation class."""
 
-    data_cv_masks: list[NDArrayFloat]
+    data_shape: Sequence[int]
+    cv_fraction: float | None
+    num_averages: int
+
+    data_cv_masks: list[NDArray]
     mask_param_name: str
 
     def __init__(
         self,
         data_shape: Sequence[int],
-        dtype: DTypeLike = np.float32,
-        cv_fraction: float = 0.1,
+        cv_fraction: float | None = 0.1,
         num_averages: int = 5,
         mask_param_name: str = "b_test_mask",
         parallel_eval: Executor | int | bool = True,
+        dtype: DTypeLike = np.float32,
         verbose: bool = False,
         plot_result: bool = False,
     ) -> None:
@@ -906,16 +975,18 @@ class CrossValidation(BaseParameterTuning):
         ----------
         data_shape : Sequence[int]
             Shape of the projection data.
-        dtype : DTypeLike, optional
-            Type of the input data. The default is np.float32.
-        cv_fraction : float, optional
-            Fraction of detector points to use for the leave-out set. The default is 0.1.
+        cv_fraction : float | None, optional
+            Fraction of detector points to use for the leave-out set.
+            If None, K-fold cross-validation is used, where `num_averages` indicates the number of k-folds.
+            The default is 0.1.
         num_averages : int, optional
             Number of averages random leave-out sets to use. The default is 5.
         mask_param_name: str, optional
             The parameter name in the task execution function that accepts the data masks. The default is "b_test_mask".
         parallel_eval : Executor | int | bool, optional
             Compute loss and error values in parallel. The default is True.
+        dtype : DTypeLike, optional
+            Type of the input data. The default is np.float32.
         verbose : bool, optional
             Print verbose output. The default is False.
         plot_result : bool, optional
@@ -928,9 +999,12 @@ class CrossValidation(BaseParameterTuning):
 
         self.mask_param_name = mask_param_name
 
-        self.data_cv_masks = [
-            create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype) for _ in range(self.num_averages)
-        ]
+        if self.cv_fraction is not None:
+            self.data_cv_masks = [
+                create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype) for _ in range(self.num_averages)
+            ]
+        else:
+            self.data_cv_masks = create_k_fold_test_masks(self.data_shape, self.num_averages)
 
     @overload
     def compute_loss_values(
@@ -1010,10 +1084,11 @@ class CrossValidation(BaseParameterTuning):
 
         counter = perf_counter()
         if self.verbose:
+            is_kfold = self.cv_fraction is None
             print("Computing cross-validation loss values:")
             print(f"- Hyper-parameter range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
-            print(f"- Number of averages: {self.num_averages}")
-            print(f"- Leave-out pixel fraction: {self.cv_fraction:%}")
+            print(f"- Number of averages: {self.num_averages}" + " (K-folds)" if is_kfold else "")
+            print(f"- Leave-out pixel fraction: {self.cv_fraction if is_kfold else 1 / self.num_averages:%}")
             if isinstance(self.parallel_eval, Executor):
                 print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
             else:
