@@ -97,22 +97,22 @@ def main() -> None:
     # reg = cct.regularizers.Regularizer_fft
 
     # Instantiates the solver object, that is later used for computing the reconstruction
-    def solver_spawn(lam_reg: float):
+    def solver_init(lam_reg: float):
         # Using the PDHG solver from Chambolle and Pock
         return cct.solvers.PDHG(
             verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw, leave_progress=False
         )
 
     # Computes the reconstruction for a given solver and a given cross-validation data mask
-    def solver_call(solver, b_test_mask: NDArray | None = None):
+    def solver_exec(solver, b_test_mask: NDArray | None = None):
         with cct.projectors.ProjectorUncorrected(ph.shape, angles) as prj:
             return solver(prj, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, b_test_mask=b_test_mask)
 
     print("Reconstructing:")
     # Create the regularization weight finding helper object (using cross-validation)
     reg_help_cv = cct.param_tuning.CrossValidation(sinogram.shape, verbose=True, num_averages=3)
-    reg_help_cv.solver_spawning_function = solver_spawn
-    reg_help_cv.solver_calling_function = solver_call
+    reg_help_cv.task_init_function = solver_init
+    reg_help_cv.task_exec_function = solver_exec
 
     # Define the regularization weight range
     lams_reg = cct.param_tuning.get_lambda_range(1e-3, 1e1, num_per_order=4)
@@ -126,8 +126,8 @@ def main() -> None:
     lam_min, _ = reg_help_cv.fit_loss_min(lams_reg, f_avgs)
 
     # Regularized weighted least-squares solver (PDHG), on the whole dataset
-    solver = solver_spawn(lam_min)
-    rec, rec_info = solver_call(solver)
+    solver = solver_init(lam_min)
+    rec, rec_info = solver_exec(solver)
 
     with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
         # Unregularized weighted least-squares solver (PDHG), for reference
@@ -136,8 +136,8 @@ def main() -> None:
 
     # Create the regularization weight finding helper object (using L-curve)
     reg_help_lc = cct.param_tuning.LCurve(iso_tv_seminorm, verbose=True, plot_result=True)
-    reg_help_lc.solver_spawning_function = solver_spawn
-    reg_help_lc.solver_calling_function = solver_call
+    reg_help_lc.task_init_function = solver_init
+    reg_help_lc.task_exec_function = solver_exec
 
     f_vals_lc = reg_help_lc.compute_loss_values(lams_reg)
 
