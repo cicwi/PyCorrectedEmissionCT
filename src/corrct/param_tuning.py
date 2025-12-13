@@ -1087,8 +1087,8 @@ class CrossValidation(BaseParameterTuning):
             is_kfold = self.cv_fraction is None
             print("Computing cross-validation loss values:")
             print(f"- Hyper-parameter range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
-            print(f"- Number of averages: {self.num_averages}" + " (K-folds)" if is_kfold else "")
-            print(f"- Leave-out pixel fraction: {self.cv_fraction if is_kfold else 1 / self.num_averages:%}")
+            print(f"- Number of averages: {self.num_averages}" + (" (K-folds)" if is_kfold else ""))
+            print(f"- Leave-out pixel fraction: {1 / self.num_averages if is_kfold else self.cv_fraction:.3%}")
             if isinstance(self.parallel_eval, Executor):
                 print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
             else:
