@@ -356,7 +356,7 @@ def fit_func_min(
 
 
 def _compute_reconstruction(
-    init_fun: Callable,
+    init_fun: Callable | None,
     exec_fun: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]],
     hp_val: float,
     *,
@@ -368,7 +368,7 @@ def _compute_reconstruction(
 
     Parameters
     ----------
-    init_fun : Callable
+    init_fun : Callable | None
         The task initialization function.
     exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
         The task execution function.
@@ -389,9 +389,13 @@ def _compute_reconstruction(
         The performance statistics for the reconstruction.
     """
     c0 = perf_counter()
-    solver = init_fun(hp_val, **init_fun_kwds)
-    c1 = perf_counter()
-    rec, rec_info = exec_fun(solver, **exec_fun_kwds)
+    if init_fun is not None:
+        solver = init_fun(hp_val, **init_fun_kwds)
+        c1 = perf_counter()
+        rec, rec_info = exec_fun(solver, **exec_fun_kwds)
+    else:
+        c1 = perf_counter()
+        rec, rec_info = exec_fun(hp_val, **exec_fun_kwds)
     c2 = perf_counter()
 
     stats = PerfMeterTask(init_time_s=(c1 - c0), exec_time_s=(c2 - c1), total_time_s=(c2 - c0))
@@ -401,7 +405,7 @@ def _compute_reconstruction(
 
 def _parallel_compute(
     executor: Executor,
-    init_fun: Callable,
+    init_fun: Callable | None,
     exec_fun: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]],
     hp_vals: float | Sequence[float] | NDArrayFloat,
     *,
@@ -416,7 +420,7 @@ def _parallel_compute(
     ----------
     executor : Executor
         The executor to use for parallel computation.
-    init_fun : Callable
+    init_fun : Callable | None
         The task initialization function.
     exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
         The task execution function.
@@ -492,7 +496,7 @@ def _parallel_compute(
 
 
 def _serial_compute(
-    init_fun: Callable,
+    init_fun: Callable | None,
     exec_fun: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]],
     hp_vals: float | Sequence[float] | NDArrayFloat,
     *,
@@ -505,7 +509,7 @@ def _serial_compute(
 
     Parameters
     ----------
-    init_fun : Callable
+    init_fun : Callable | None
         The task initialization function.
     exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
         The task execution function.
@@ -626,17 +630,15 @@ class BaseParameterTuning(ABC):
         self._task_exec_function = None
 
     @property
-    def task_init_function(self) -> Callable:
+    def task_init_function(self) -> Callable | None:
         """
         Return the local reference to the task initialization function.
 
         Returns
         -------
-        Callable
-            The task initialization function.
+        Callable | None
+            The task initialization function, if initialized.
         """
-        if self._task_init_function is None:
-            raise ValueError("Task initialization function not initialized!")
         return self._task_init_function
 
     @property
@@ -654,21 +656,22 @@ class BaseParameterTuning(ABC):
         return self._task_exec_function
 
     @task_init_function.setter
-    def task_init_function(self, init_fun: Callable) -> None:
+    def task_init_function(self, init_fun: Callable | None) -> None:
         """
         Set the task initialization function.
 
         Parameters
         ----------
-        init_fun : Callable
+        init_fun : Callable | None
             The task initialization function.
         """
-        if not isinstance(init_fun, Callable):
-            raise ValueError("Expected a task initialization function (callable)")
-        if len(inspect.signature(init_fun).parameters) != 1:
-            raise ValueError(
-                "Expected a task initialization function (callable), whose only parameter is the hyper-parameter value"
-            )
+        if init_fun is not None:
+            if not isinstance(init_fun, Callable):
+                raise ValueError("Expected a task initialization function (callable)")
+            if len(inspect.signature(init_fun).parameters) != 1:
+                raise ValueError(
+                    "Expected a task initialization function (callable), whose only parameter is the hyper-parameter value"
+                )
         self._task_init_function = init_fun
 
     @task_exec_function.setter
@@ -688,7 +691,7 @@ class BaseParameterTuning(ABC):
         self._task_exec_function = exec_fun
 
     @property
-    def solver_spawning_function(self) -> Callable:
+    def solver_spawning_function(self) -> Callable | None:
         """Return the local reference to the task initialization function."""
         warn("DEPRECATED: This property is deprecated, and will be removed. Please use the property `task_init_function`")
         return self.task_init_function
@@ -736,8 +739,6 @@ class BaseParameterTuning(ABC):
             - A list of solution information objects corresponding to each reconstruction.
             - A computing performance statistics object containing aggregated performance metrics.
         """
-        if self._task_init_function is None:
-            raise ValueError("Task initialization function not initialized!")
         if self._task_exec_function is None:
             raise ValueError("Task execution function not initialized!")
 
@@ -1125,8 +1126,6 @@ class CrossValidation(BaseParameterTuning):
         recs : list[NDArrayFloat], optional
             Reconstructions for each hyper-parameter value (returned only if `return_all` is True).
         """
-        if self._task_init_function is None:
-            raise ValueError("Task initialization function not initialized!")
         if self._task_exec_function is None:
             raise ValueError("Task execution function not initialized!")
 
