@@ -898,6 +898,7 @@ class LCurve(BaseParameterTuning):
         parallel_eval: Executor | int | bool = True,
         verbose: bool = False,
         plot_result: bool = False,
+        print_timings: bool = False,
     ) -> None:
         """
         Create an L-curve regularization parameter estimation helper.
@@ -914,8 +915,16 @@ class LCurve(BaseParameterTuning):
             Print verbose output. The default is False.
         plot_result : bool, optional
             Plot results. The default is False.
+        print_timings : bool, optional
+            Whether to print the performance metrics, by default False
         """
-        super().__init__(dtype=data_dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result)
+        super().__init__(
+            dtype=data_dtype,
+            parallel_eval=parallel_eval,
+            verbose=verbose,
+            plot_result=plot_result,
+            print_timings=print_timings,
+        )
 
         if not isinstance(loss_function, Callable):
             raise ValueError(
@@ -1031,6 +1040,7 @@ class CrossValidation(BaseParameterTuning):
         dtype: DTypeLike = np.float32,
         verbose: bool = False,
         plot_result: bool = False,
+        print_timings: bool = False,
     ) -> None:
         """
         Create a cross-validation hyper-parameter estimation helper.
@@ -1055,8 +1065,12 @@ class CrossValidation(BaseParameterTuning):
             Print verbose output. The default is False.
         plot_result : bool, optional
             Plot results. The default is False.
+        print_timings : bool, optional
+            Whether to print the performance metrics, by default False
         """
-        super().__init__(dtype=dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result)
+        super().__init__(
+            dtype=dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result, print_timings=print_timings
+        )
         self.data_shape = data_shape
         self.cv_fraction = cv_fraction
         self.num_averages = num_averages
