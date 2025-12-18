@@ -32,6 +32,27 @@ MAX_THREADS = int(round(np.log2(NUM_CPUS + 1)))
 NDArrayFloat = NDArray[np.floating]
 
 
+def format_time(seconds: float) -> str:
+    """
+    Convert seconds to a formatted string in the format <hours>:<minutes>:<seconds>.<milliseconds>.
+
+    Parameters
+    ----------
+    seconds : float
+        Time in seconds.
+
+    Returns
+    -------
+    str
+        Formatted time string.
+    """
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    seconds_remainder = seconds % 60
+    milliseconds = int((seconds_remainder - int(seconds_remainder)) * 1000)
+    return f"{hours:02d}:{minutes:02d}:{int(seconds_remainder):02d}.{milliseconds:03d}"
+
+
 @dataclass
 class PerfMeterTask:
     """Performance tracking class for single reconstructions."""
@@ -71,6 +92,40 @@ class PerfMeterBatch:
             total_time_s=self.total_time_s + other.total_time_s,
             tasks_perf=self.tasks_perf + other.tasks_perf,
         )
+
+    def __str__(self) -> str:
+        """
+        Return a formatted string representation of the performance statistics.
+
+        Returns
+        -------
+        str
+            Formatted string representation of the performance statistics.
+        """
+        stats_str = "Performance Statistics:\n"
+        stats_str += f"- Dispatch time: {format_time(self.dispatch_time_s)}\n"
+        stats_str += f"- Processing time: {format_time(self.processing_time_s)}\n"
+
+        if self.tasks_perf:
+            avg_init_time = sum(task.init_time_s for task in self.tasks_perf) / len(self.tasks_perf)
+            avg_exec_time = sum(task.exec_time_s for task in self.tasks_perf) / len(self.tasks_perf)
+            avg_total_time = sum(task.total_time_s for task in self.tasks_perf) / len(self.tasks_perf)
+
+            # Calculate apparent speed-up
+            if self.processing_time_s > 0:
+                speed_up = avg_total_time * len(self.tasks_perf) / self.processing_time_s
+                stats_str += f"- Total time: {format_time(self.total_time_s)} (Tasks/Total ratio: {speed_up:.2f})\n"
+            else:
+                stats_str += f"- Total time: {format_time(self.total_time_s)}\n"
+
+            stats_str += "\nAverage Task Performance:\n"
+            stats_str += f"- Initialization time: {format_time(avg_init_time)}\n"
+            stats_str += f"- Execution time: {format_time(avg_exec_time)}\n"
+            stats_str += f"- Total time: {format_time(avg_total_time)}\n"
+        else:
+            stats_str += f"- Total time: {format_time(self.total_time_s)}\n"
+
+        return stats_str
 
 
 def create_random_test_mask(
@@ -529,12 +584,18 @@ class BaseParameterTuning(ABC):
 
     parallel_eval: int | Executor
 
+    dtype: DTypeLike
+    verbose: bool
+    plot_result: bool
+    print_timings: bool
+
     def __init__(
         self,
         dtype: DTypeLike = np.float32,
         parallel_eval: Executor | int | bool = True,
         verbose: bool = False,
         plot_result: bool = False,
+        print_timings: bool = False,
     ) -> None:
         """
         Initialize a base helper class.
@@ -549,6 +610,8 @@ class BaseParameterTuning(ABC):
             Whether to produce verbose output, by default False
         plot_result : bool, optional
             Whether to plot the results, by default False
+        print_timings : bool, optional
+            Whether to print the performance metrics, by default False
         """
         self.dtype = dtype
 
@@ -557,6 +620,7 @@ class BaseParameterTuning(ABC):
         self.parallel_eval = parallel_eval
         self.verbose = verbose
         self.plot_result = plot_result
+        self.print_timings = print_timings
 
         self._task_init_function = None
         self._task_exec_function = None
@@ -696,6 +760,9 @@ class BaseParameterTuning(ABC):
                 f"The variable `parallel_eval` should either be an Executor, a boolean, or an int. "
                 f"A `{type(self.parallel_eval)}` was passed instead."
             )
+
+        if self.print_timings:
+            print(perf_batch)
 
         return recs, recs_info, perf_batch
 
@@ -913,7 +980,6 @@ class LCurve(BaseParameterTuning):
         """
         hp_vals = np.array(hp_vals, ndmin=1)
 
-        counter = perf_counter()
         if self.verbose:
             print("Computing L-curve loss values:")
             print(f"- Hyper-parameter values range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
@@ -927,9 +993,6 @@ class LCurve(BaseParameterTuning):
 
         recs, recs_info, perf_batch = self.process_hp_vals(hp_vals, init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds)
         f_vals = np.array([self.loss_function(rec) for rec in recs], dtype=self.dtype)
-
-        if self.verbose:
-            print(f"Done in {perf_counter() - counter} seconds.\n")
 
         if self.plot_result:
             fig, axs = plt.subplots()
