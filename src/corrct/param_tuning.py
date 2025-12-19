@@ -66,8 +66,8 @@ class PerfMeterTask:
 class PerfMeterBatch:
     """Performance tracking class for batches of reconstructions."""
 
-    dispatch_time_s: float = 0.0
-    processing_time_s: float = 0.0
+    init_time_s: float = 0.0
+    proc_time_s: float = 0.0
     total_time_s: float = 0.0
     tasks_perf: list[PerfMeterTask] = field(default_factory=lambda: [])
 
@@ -79,7 +79,7 @@ class PerfMeterBatch:
         task : PerfMeterTask
             The task to append to the batch.
         """
-        self.processing_time_s += task.total_time_s
+        self.proc_time_s += task.total_time_s
         self.total_time_s += task.total_time_s
         self.tasks_perf.append(task)
 
@@ -99,8 +99,8 @@ class PerfMeterBatch:
             lists from both instances.
         """
         return PerfMeterBatch(
-            dispatch_time_s=self.dispatch_time_s + other.dispatch_time_s,
-            processing_time_s=self.processing_time_s + other.processing_time_s,
+            init_time_s=self.init_time_s + other.init_time_s,
+            proc_time_s=self.proc_time_s + other.proc_time_s,
             total_time_s=self.total_time_s + other.total_time_s,
             tasks_perf=self.tasks_perf + other.tasks_perf,
         )
@@ -115,8 +115,8 @@ class PerfMeterBatch:
             Formatted string representation of the performance statistics.
         """
         stats_str = "Performance Statistics:\n"
-        stats_str += f"- Dispatch time: {format_time(self.dispatch_time_s)}\n"
-        stats_str += f"- Processing time: {format_time(self.processing_time_s)}\n"
+        stats_str += f"- Initialization time: {format_time(self.init_time_s)}\n"
+        stats_str += f"- Processing time: {format_time(self.proc_time_s)}\n"
 
         if self.tasks_perf:
             avg_init_time = sum(task.init_time_s for task in self.tasks_perf) / len(self.tasks_perf)
@@ -124,8 +124,8 @@ class PerfMeterBatch:
             avg_total_time = sum(task.total_time_s for task in self.tasks_perf) / len(self.tasks_perf)
 
             # Calculate apparent speed-up
-            if self.processing_time_s > 0:
-                speed_up = avg_total_time * len(self.tasks_perf) / self.processing_time_s
+            if self.proc_time_s > 0:
+                speed_up = avg_total_time * len(self.tasks_perf) / self.proc_time_s
                 stats_str += f"- Total time: {format_time(self.total_time_s)} (Tasks/Total ratio: {speed_up:.2f})\n"
             else:
                 stats_str += f"- Total time: {format_time(self.total_time_s)}\n"
@@ -500,9 +500,7 @@ def _parallel_compute(
         raise
 
     c2 = perf_counter()
-    perf_batch = PerfMeterBatch(
-        dispatch_time_s=(c1 - c0), processing_time_s=(c2 - c1), total_time_s=(c2 - c0), tasks_perf=perf_items
-    )
+    perf_batch = PerfMeterBatch(init_time_s=(c1 - c0), proc_time_s=(c2 - c1), total_time_s=(c2 - c0), tasks_perf=perf_items)
 
     return recs, recs_info, perf_batch
 
@@ -564,9 +562,7 @@ def _serial_compute(
         )
 
     c2 = perf_counter()
-    perf_batch = PerfMeterBatch(
-        dispatch_time_s=(c1 - c0), processing_time_s=(c2 - c1), total_time_s=(c2 - c0), tasks_perf=perf_items
-    )
+    perf_batch = PerfMeterBatch(init_time_s=(c1 - c0), proc_time_s=(c2 - c1), total_time_s=(c2 - c0), tasks_perf=perf_items)
 
     return recs, recs_info, perf_batch
 
