@@ -71,6 +71,18 @@ class PerfMeterBatch:
     total_time_s: float = 0.0
     tasks_perf: list[PerfMeterTask] = field(default_factory=lambda: [])
 
+    def append(self, task: PerfMeterTask) -> None:
+        """Append a task's performance metrics to the batch.
+
+        Parameters
+        ----------
+        task : PerfMeterTask
+            The task to append to the batch.
+        """
+        self.processing_time_s += task.total_time_s
+        self.total_time_s += task.total_time_s
+        self.tasks_perf.append(task)
+
     def __add__(self, other: "PerfMeterBatch") -> "PerfMeterBatch":
         """Add two PerfMeterBatch instances together.
 
