@@ -360,7 +360,7 @@ def fit_func_min(
             tl.set_fontsize(13)
         axs.set_xlabel(r"$\lambda$ values", fontsize=16)
         axs.set_ylabel("Cross-validation loss values", fontsize=16)
-        axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.2e}"))
+        axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.1e}"))
         fig.tight_layout()
         plt.show(block=False)
 
@@ -581,9 +581,13 @@ def plot_cv_curves(solution_infos: list[SolutionInfo], hp_vals: Sequence[float])
     fig, axs = plt.subplots()
     for hp_val, info in zip(hp_vals, solution_infos):
         axs.semilogy(info.residuals_cv_rel, label=f"CV residuals, HP val={hp_val:.3e}")
-    axs.set_xlabel("Iterations")
+    axs.set_xlabel("Iterations", fontsize=16)
     axs.grid()
-    axs.legend()
+    axs.legend(fontsize=13)
+    for tl in axs.get_xticklabels():
+        tl.set_fontsize(13)
+    for tl in axs.get_yticklabels():
+        tl.set_fontsize(13)
     fig.tight_layout()
     plt.show(block=False)
 
@@ -835,6 +839,12 @@ class BaseParameterTuning(ABC):
             axs[1].set_xscale("log", nonpositive="clip")  # type: ignore
             axs[1].plot(hp_vals, err_l2, label="Error - l2-norm ^ 2")  # type: ignore
             axs[1].legend()  # type: ignore
+            for tl in axs.get_xticklabels():
+                tl.set_fontsize(13)
+            for tl in axs.get_yticklabels():
+                tl.set_fontsize(13)
+            axs.set_xlabel(r"$\lambda$ values", fontsize=16)
+            axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.1e}"))
             fig.tight_layout()
             plt.show(block=False)
 
@@ -1014,11 +1024,17 @@ class LCurve(BaseParameterTuning):
 
         if self.plot_result:
             fig, axs = plt.subplots()
-            axs.set_title("L-Curve loss values")
+            axs.set_title("L-Curve loss values", fontsize=16)
             axs.set_xscale("log", nonpositive="clip")
             axs.set_yscale("log", nonpositive="clip")
             axs.plot(hp_vals, f_vals)
             axs.grid()
+            for tl in axs.get_xticklabels():
+                tl.set_fontsize(13)
+            for tl in axs.get_yticklabels():
+                tl.set_fontsize(13)
+            axs.set_xlabel(r"$\lambda$ values", fontsize=16)
+            axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.1e}"))
             fig.tight_layout()
             plt.show(block=False)
 
@@ -1208,12 +1224,19 @@ class CrossValidation(BaseParameterTuning):
 
         if self.plot_result:
             fig, axs = plt.subplots()
-            axs.set_title(f"Cross-validation loss values (avgs: {self.num_averages})")
+            axs.set_title(f"Cross-validation loss values (avgs: {self.num_averages})", fontsize=16)
             axs.set_xscale("log", nonpositive="clip")
             axs.errorbar(hp_vals, f_avgs, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
             for f_vals_ii in f_vals:
                 axs.plot(hp_vals, f_vals_ii, linewidth=1, linestyle="--")
             axs.grid()
+            for tl in axs.get_xticklabels():
+                tl.set_fontsize(13)
+            for tl in axs.get_yticklabels():
+                tl.set_fontsize(13)
+            axs.set_xlabel(r"$\lambda$ values", fontsize=16)
+            axs.set_ylabel("Loss values", fontsize=16)
+            axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.1e}"))
             fig.tight_layout()
             plt.show(block=False)
 
