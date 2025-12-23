@@ -724,6 +724,27 @@ class BaseParameterTuning(ABC):
         warn("DEPRECATED: This property is deprecated, and will be removed. Please use the property `task_exec_function`")
         self.task_exec_function = exec_fun
 
+    @staticmethod
+    def get_lambda_range(start: float, end: float, num_per_order: int = 4) -> NDArrayFloat:
+        """Compute regularization weights within an interval.
+
+        Parameters
+        ----------
+        start : float
+            First regularization weight.
+        end : float
+            Last regularization weight.
+        num_per_order : int, optional
+            Number of steps per order of magnitude. The default is 4.
+
+        Returns
+        -------
+        NDArrayFloat
+            List of regularization weights.
+        """
+        warn("DEPRECATED: This method is deprecated, and will be removed. Please use the module function with the same name")
+        return get_lambda_range(start=start, end=end, num_per_order=num_per_order)
+
     def process_hp_vals(
         self,
         hp_vals: float | Sequence[float] | NDArrayFloat,
