@@ -1,4 +1,5 @@
 from os import getenv
+from typing import Literal
 
 import numpy as np
 import pytest
@@ -11,8 +12,28 @@ import corrct as cct
 SKIP_TESTS = getenv("GITHUB_ACTIONS") is not None
 
 
+def iso_tv_seminorm(x):
+    """
+    Compute the isotropic TV seminorm of an image.
+
+    Parameters
+    ----------
+    x : NDArray
+        The input image.
+
+    Returns
+    -------
+    float
+        The isotropic TV seminorm of the image.
+    """
+    op = cct.operators.TransformGradient(x.shape)
+    d = op(x)
+    d = np.linalg.norm(d, axis=0, ord=2)
+    return np.linalg.norm(d.flatten(), ord=1)
+
+
 @pytest.fixture
-def phantom():
+def phantom() -> NDArray:
     """
     Fixture to create a phantom image using the Shepp-Logan phantom.
 
@@ -27,7 +48,7 @@ def phantom():
 
 
 @pytest.fixture
-def sinogram_data(phantom):
+def sinogram_data(phantom: NDArray) -> tuple[NDArray, NDArray, NDArray]:
     """
     Fixture to generate sinogram data from the phantom image.
 
@@ -100,7 +121,9 @@ def generate_task_exec(phantom, angles, sinogram):
 @pytest.mark.skipif(SKIP_TESTS, reason="Test is long and heavy, so we skip in a github action.")
 @pytest.mark.parametrize("parallel_eval", [True, False, 2])
 @pytest.mark.parametrize("num_averages", [1, 3])
-def test_cross_validation(phantom, sinogram_data, parallel_eval, num_averages):
+def test_cross_validation(
+    phantom: NDArray, sinogram_data: tuple[NDArray, NDArray, NDArray], parallel_eval: int, num_averages: int
+):
     """
     Test the cross-validation functionality.
 
@@ -134,7 +157,7 @@ def test_cross_validation(phantom, sinogram_data, parallel_eval, num_averages):
 
 @pytest.mark.skipif(SKIP_TESTS, reason="Test is long and heavy, so we skip in a github action.")
 @pytest.mark.parametrize("parallel_eval", [True, False, 2])
-def test_reconstruction_error(phantom, sinogram_data, parallel_eval):
+def test_reconstruction_error(phantom: NDArray, sinogram_data: tuple[NDArray, NDArray, NDArray], parallel_eval: int):
     """
     Test the reconstruction error functionality.
 
@@ -167,7 +190,10 @@ def test_reconstruction_error(phantom, sinogram_data, parallel_eval):
 
 @pytest.mark.skipif(SKIP_TESTS, reason="Test is long and heavy, so we skip in a github action.")
 @pytest.mark.parametrize("parallel_eval", [True, False, 2])
-def test_l_curve(phantom, sinogram_data, parallel_eval):
+@pytest.mark.parametrize("use_two_function", [True, False])
+def test_l_curve(
+    phantom: NDArray, sinogram_data: tuple[NDArray, NDArray, NDArray], parallel_eval: int, use_two_function: bool
+):
     """
     Test the L-curve functionality.
 
@@ -184,28 +210,17 @@ def test_l_curve(phantom, sinogram_data, parallel_eval):
 
     sinogram, angles, _ = sinogram_data  # Remove background_avg from the unpacking
 
-    def iso_tv_seminorm(x):
-        """
-        Compute the isotropic TV seminorm of an image.
-
-        Parameters
-        ----------
-        x : NDArray
-            The input image.
-
-        Returns
-        -------
-        float
-            The isotropic TV seminorm of the image.
-        """
-        op = cct.operators.TransformGradient(x.shape)
-        d = op(x)
-        d = np.linalg.norm(d, axis=0, ord=2)
-        return np.linalg.norm(d.flatten(), ord=1)
-
     hpt_lc = cct.param_tuning.LCurve(iso_tv_seminorm, verbose=True, plot_result=debug, parallel_eval=parallel_eval)
-    hpt_lc.task_init_function = generate_task_init()
-    hpt_lc.task_exec_function = generate_task_exec(phantom, angles, sinogram)
+    if use_two_function:
+        hpt_lc.task_init_function = generate_task_init()
+        hpt_lc.task_exec_function = generate_task_exec(phantom, angles, sinogram)
+    else:
+
+        def solve_reg(lam: float):
+            solver = generate_task_init()(lam)
+            return generate_task_exec(phantom, angles, sinogram)(solver)
+
+        hpt_lc.task_exec_function = solve_reg
 
     lams_reg = cct.param_tuning.get_lambda_range(1e-3, 1e1, num_per_order=2)
     f_vals_lc = hpt_lc.compute_loss_values(lams_reg)
