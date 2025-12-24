@@ -7,11 +7,12 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 import inspect
-import multiprocessing as mp
-import time as tm
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from concurrent.futures import Executor, ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
+from os import cpu_count
+from time import perf_counter
 from typing import Any, Literal, overload
 from warnings import warn
 
@@ -19,15 +20,124 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import StrMethodFormatter
 from numpy.polynomial.polynomial import Polynomial
-from numpy.typing import ArrayLike, DTypeLike, NDArray
+from numpy.typing import DTypeLike, NDArray
 from tqdm.auto import tqdm
 
-from . import solvers
+from corrct.solvers import SolutionInfo
 
-MAX_THREADS = int(round(np.log2(mp.cpu_count() + 1)))
+NUM_CPUS = cpu_count() or 1
+MAX_THREADS = int(round(np.log2(NUM_CPUS + 1)))
 
 
 NDArrayFloat = NDArray[np.floating]
+
+
+def format_time(seconds: float) -> str:
+    """
+    Convert seconds to a formatted string in the format <hours>:<minutes>:<seconds>.<milliseconds>.
+
+    Parameters
+    ----------
+    seconds : float
+        Time in seconds.
+
+    Returns
+    -------
+    str
+        Formatted time string.
+    """
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    seconds_remainder = seconds % 60
+    milliseconds = int((seconds_remainder - int(seconds_remainder)) * 1000)
+    return f"{hours:02d}:{minutes:02d}:{int(seconds_remainder):02d}.{milliseconds:03d}"
+
+
+@dataclass
+class PerfMeterTask:
+    """Performance tracking class for single reconstructions."""
+
+    init_time_s: float
+    exec_time_s: float
+    total_time_s: float
+
+
+@dataclass
+class PerfMeterBatch:
+    """Performance tracking class for batches of reconstructions."""
+
+    init_time_s: float = 0.0
+    proc_time_s: float = 0.0
+    total_time_s: float = 0.0
+    tasks_perf: list[PerfMeterTask] = field(default_factory=lambda: [])
+
+    def append(self, task: PerfMeterTask) -> None:
+        """Append a task's performance metrics to the batch.
+
+        Parameters
+        ----------
+        task : PerfMeterTask
+            The task to append to the batch.
+        """
+        self.proc_time_s += task.total_time_s
+        self.total_time_s += task.total_time_s
+        self.tasks_perf.append(task)
+
+    def __add__(self, other: "PerfMeterBatch") -> "PerfMeterBatch":
+        """Add two PerfMeterBatch instances together.
+
+        Parameters
+        ----------
+        other : PerfMeterBatch
+            The other PerfMeterBatch instance to add to this one.
+
+        Returns
+        -------
+        PerfMeterBatch
+            A new PerfMeterBatch instance with the sum of the dispatch times,
+            processing times, total times, and concatenated task performance
+            lists from both instances.
+        """
+        return PerfMeterBatch(
+            init_time_s=self.init_time_s + other.init_time_s,
+            proc_time_s=self.proc_time_s + other.proc_time_s,
+            total_time_s=self.total_time_s + other.total_time_s,
+            tasks_perf=self.tasks_perf + other.tasks_perf,
+        )
+
+    def __str__(self) -> str:
+        """
+        Return a formatted string representation of the performance statistics.
+
+        Returns
+        -------
+        str
+            Formatted string representation of the performance statistics.
+        """
+        stats_str = "Performance Statistics:\n"
+        stats_str += f"- Initialization time: {format_time(self.init_time_s)}\n"
+        stats_str += f"- Processing time: {format_time(self.proc_time_s)}\n"
+
+        if self.tasks_perf:
+            avg_init_time = sum(task.init_time_s for task in self.tasks_perf) / len(self.tasks_perf)
+            avg_exec_time = sum(task.exec_time_s for task in self.tasks_perf) / len(self.tasks_perf)
+            avg_total_time = sum(task.total_time_s for task in self.tasks_perf) / len(self.tasks_perf)
+
+            # Calculate apparent speed-up
+            if self.proc_time_s > 0:
+                speed_up = avg_total_time * len(self.tasks_perf) / self.proc_time_s
+                stats_str += f"- Total time: {format_time(self.total_time_s)} (Tasks/Total ratio: {speed_up:.2f})\n"
+            else:
+                stats_str += f"- Total time: {format_time(self.total_time_s)}\n"
+
+            stats_str += "\nAverage Task Performance:\n"
+            stats_str += f"- Initialization time: {format_time(avg_init_time)}\n"
+            stats_str += f"- Execution time: {format_time(avg_exec_time)}\n"
+            stats_str += f"- Total time: {format_time(avg_total_time)}\n"
+        else:
+            stats_str += f"- Total time: {format_time(self.total_time_s)}\n"
+
+        return stats_str
 
 
 def create_random_test_mask(
@@ -42,12 +152,12 @@ def create_random_test_mask(
         The shape of the data.
     test_fraction : float, optional
         The fraction of pixels to mask. The default is 0.05.
-    data_dtype : DTypeLike, optional
+    dtype : DTypeLike, optional
         The data type of the mask. The default is np.float32.
 
     Returns
     -------
-    data_test_mask : NDArrayFloat
+    NDArrayFloat
         The pixel mask.
     """
     data_test_mask = np.zeros(data_shape, dtype=dtype)
@@ -58,8 +168,53 @@ def create_random_test_mask(
     return data_test_mask
 
 
+def create_k_fold_test_masks(
+    data_shape: Sequence[int],
+    k_folds: int,
+    dtype: DTypeLike = np.float32,
+    seed: int | None = None,
+) -> list[NDArray]:
+    """
+    Create K random masks for K-fold cross-validation.
+
+    Parameters
+    ----------
+    data_shape : Sequence[int]
+        The shape of the data.
+    k_folds : int
+        The number of folds.
+    dtype : DTypeLike, optional
+        The data type of the masks. The default is np.float32.
+    seed : int | None, optional
+        Seed for the random number generator. The default is None.
+
+    Returns
+    -------
+    list[NDArray]
+        A list of K pixel masks.
+    """
+    # Create a random number generator
+    rng = np.random.default_rng(seed)
+
+    # Create a list of indices and shuffle it
+    indices = rng.permutation(np.prod(data_shape))
+
+    # Split the indices into K folds using strides
+    folds = [indices[i::k_folds] for i in range(k_folds)]
+
+    # Create the masks
+    masks = []
+    for fold in folds:
+        mask = np.zeros(data_shape, dtype=dtype)
+        mask.ravel()[fold] = 1
+        masks.append(mask)
+
+    return masks
+
+
 def get_lambda_range(start: float, end: float, num_per_order: int = 4, aligned_order: bool = True) -> NDArrayFloat:
-    """Compute hyper-parameter values within an interval.
+    """
+    Compute hyper-parameter values within an interval.
 
     Parameters
     ----------
@@ -90,18 +245,19 @@ def get_lambda_range(start: float, end: float, num_per_order: int = 4, aligned_o
 
 
 def fit_func_min(
-    hp_vals: ArrayLike | NDArrayFloat,
+    hp_vals: float | Sequence[float] | NDArrayFloat,
     f_vals: NDArrayFloat,
     f_stds: NDArrayFloat | None = None,
     scale: Literal["linear", "log"] = "log",
     verbose: bool = False,
     plot_result: bool = False,
 ) -> tuple[float, float]:
-    """Parabolic fit of objective function costs for the different hyper-parameter values.
+    """
+    Parabolic fit of objective function costs for the different hyper-parameter values.
 
     Parameters
     ----------
-    hp_vals : ArrayLike | NDArrayFloat
+    hp_vals : float | Sequence[float] | NDArrayFloat
         Hyper-parameter values.
     f_vals : NDArrayFloat
         Objective function costs of each hyper-parameter value.
@@ -151,7 +307,7 @@ def fit_func_min(
     lams_reg_fit = to_fit(hp_vals[hp_inds_fit])
     f_vals_fit = f_vals[hp_inds_fit]
 
-    counter = tm.perf_counter()
+    counter = perf_counter()
     if verbose:
         print(
             f"Fitting minimum within the interval [{hp_vals[hp_inds_fit[0]]:.3e}, {hp_vals[hp_inds_fit[-1]]:.3e}]"
@@ -184,7 +340,7 @@ def fit_func_min(
         res_hp_val, res_f_val = min_hp_val, min_f_val
 
     if verbose:
-        print(f"Found at {min_hp_val:.3e}, in {tm.perf_counter() - counter:g} seconds.\n")
+        print(f"Found at {min_hp_val:.3e}, in {perf_counter() - counter:g} seconds.\n")
 
     if plot_result:
         fig, axs = plt.subplots()
@@ -204,30 +360,250 @@ def fit_func_min(
             tl.set_fontsize(13)
         axs.set_xlabel(r"$\lambda$ values", fontsize=16)
         axs.set_ylabel("Cross-validation loss values", fontsize=16)
-        axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.2e}"))
+        axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.1e}"))
         fig.tight_layout()
         plt.show(block=False)
 
     return res_hp_val, res_f_val
 
 
-def _compute_reconstruction_and_loss(
-    spawn: Callable, call: Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]], hp_val: float, *args: Any, **kwds: Any
-) -> tuple[float, NDArrayFloat]:
-    solver = spawn(hp_val)
-    rec, rec_info = call(solver, *args, **kwds)
+def _compute_reconstruction(
+    init_fun: Callable | None,
+    exec_fun: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]],
+    hp_val: float,
+    *,
+    init_fun_kwds: Mapping,
+    exec_fun_kwds: Mapping,
+) -> tuple[NDArrayFloat, SolutionInfo, PerfMeterTask]:
+    """
+    Compute a single reconstruction.
 
-    # Output will be: reconstruction, and cross-validation objective function cost
-    return rec, float(rec_info.residuals_cv_rel[-1])
+    Parameters
+    ----------
+    init_fun : Callable | None
+        The task initialization function.
+    exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
+        The task execution function.
+    hp_val : float
+        The hyper-parameter value.
+    init_fun_kwds : Mapping
+        Additional keyword arguments to pass to the task initialization function.
+    exec_fun_kwds : Mapping
+        Additional keyword arguments to pass to the task execution function.
+
+    Returns
+    -------
+    NDArrayFloat
+        The reconstruction.
+    SolutionInfo
+        The solution information.
+    PerfMeterTask
+        The performance statistics for the reconstruction.
+    """
+    c0 = perf_counter()
+    if init_fun is not None:
+        solver = init_fun(hp_val, **init_fun_kwds)
+        c1 = perf_counter()
+        rec, rec_info = exec_fun(solver, **exec_fun_kwds)
+    else:
+        c1 = perf_counter()
+        rec, rec_info = exec_fun(hp_val, **exec_fun_kwds)
+    c2 = perf_counter()
+
+    stats = PerfMeterTask(init_time_s=(c1 - c0), exec_time_s=(c2 - c1), total_time_s=(c2 - c0))
+
+    return rec, rec_info, stats
+
+
+def _parallel_compute(
+    executor: Executor,
+    init_fun: Callable | None,
+    exec_fun: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]],
+    hp_vals: float | Sequence[float] | NDArrayFloat,
+    *,
+    init_fun_kwds: Mapping | None = None,
+    exec_fun_kwds: Mapping | None = None,
+    verbose: bool = True,
+) -> tuple[list[NDArray], list[SolutionInfo], PerfMeterBatch]:
+    """
+    Compute reconstructions in parallel.
+
+    Parameters
+    ----------
+    executor : Executor
+        The executor to use for parallel computation.
+    init_fun : Callable | None
+        The task initialization function.
+    exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
+        The task execution function.
+    hp_vals : float | Sequence[float] | NDArrayFloat
+        A list or array of hyperparameter values to evaluate.
+    init_fun_kwds : Mapping | None, optional
+        Additional keyword arguments to pass to the task initialization function. By default None.
+    exec_fun_kwds : Mapping | None, optional
+        Additional keyword arguments to pass to the task execution function. By default None.
+    verbose : bool, optional
+        Whether to produce verbose output, by default True
+
+    Returns
+    -------
+    list[NDArray]
+        A list of reconstructions corresponding to each hyperparameter value.
+    list[SolutionInfo]
+        A list of solution information objects corresponding to each reconstruction.
+    PerfMeterBatch
+        A computing performance statistics object containing aggregated performance metrics.
+    """
+    c0 = perf_counter()
+
+    if init_fun_kwds is None:
+        init_fun_kwds = dict()
+    if exec_fun_kwds is None:
+        exec_fun_kwds = dict()
+
+    hp_vals = np.array(hp_vals, ndmin=1)
+
+    future_to_lambda = {
+        executor.submit(
+            _compute_reconstruction, init_fun, exec_fun, hp_val, init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds
+        ): (ii, hp_val)
+        for ii, hp_val in enumerate(hp_vals)
+    }
+
+    recs = [np.array([])] * len(hp_vals)
+    recs_info = [SolutionInfo("", 1, None)] * len(hp_vals)
+    perf_items = [PerfMeterTask(0, 0, 0)] * len(hp_vals)
+
+    c1 = perf_counter()
+
+    try:
+        for future in tqdm(
+            as_completed(future_to_lambda),
+            desc="Hyper-parameter values",
+            disable=not verbose,
+            total=len(hp_vals),
+        ):
+            hp_ind, hp_val = future_to_lambda[future]
+            try:
+                recs[hp_ind], recs_info[hp_ind], perf_items[hp_ind] = future.result()
+            except ValueError as exc:
+                print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
+                raise
+    except:
+        print("Shutting down..", end="", flush=True)
+        if "cancel_futures" in inspect.signature(executor.shutdown).parameters.keys():
+            executor.shutdown(cancel_futures=True)
+        else:
+            # This handles the case of Dask's ClientExecutor
+            executor.shutdown()
+        print("\b\b: Done.")
+        raise
+
+    c2 = perf_counter()
+    perf_batch = PerfMeterBatch(init_time_s=(c1 - c0), proc_time_s=(c2 - c1), total_time_s=(c2 - c0), tasks_perf=perf_items)
+
+    return recs, recs_info, perf_batch
+
+
+def _serial_compute(
+    init_fun: Callable | None,
+    exec_fun: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]],
+    hp_vals: float | Sequence[float] | NDArrayFloat,
+    *,
+    init_fun_kwds: Mapping | None = None,
+    exec_fun_kwds: Mapping | None = None,
+    verbose: bool = True,
+) -> tuple[list[NDArray], list[SolutionInfo], PerfMeterBatch]:
+    """
+    Compute reconstructions in serial.
+
+    Parameters
+    ----------
+    init_fun : Callable | None
+        The task initialization function.
+    exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
+        The task execution function.
+    hp_vals : float | Sequence[float] | NDArrayFloat
+        A list or array of hyperparameter values to evaluate.
+    init_fun_kwds : Mapping | None, optional
+        Additional keyword arguments to pass to the task initialization function. By default None.
+    exec_fun_kwds : Mapping | None, optional
+        Additional keyword arguments to pass to the task execution function. By default None.
+    verbose : bool, optional
+        Whether to produce verbose output, by default True
+
+    Returns
+    -------
+    list[NDArray]
+        A list of reconstructions corresponding to each hyperparameter value.
+    list[SolutionInfo]
+        A list of solution information objects corresponding to each reconstruction.
+    PerfMeterBatch
+        A computing performance statistics object containing aggregated performance metrics.
+    """
+    c0 = perf_counter()
+
+    if init_fun_kwds is None:
+        init_fun_kwds = dict()
+    if exec_fun_kwds is None:
+        exec_fun_kwds = dict()
+
+    hp_vals = np.array(hp_vals, ndmin=1)
+
+    recs = [np.array([])] * len(hp_vals)
+    recs_info = [SolutionInfo("", 1, None)] * len(hp_vals)
+    perf_items = [PerfMeterTask(0, 0, 0)] * len(hp_vals)
+
+    c1 = perf_counter()
+
+    for ii, l in enumerate(tqdm(hp_vals, desc="Hyper-parameter values", disable=not verbose)):
+        recs[ii], recs_info[ii], perf_items[ii] = _compute_reconstruction(
+            init_fun, exec_fun, l, init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds
+        )
+
+    c2 = perf_counter()
+    perf_batch = PerfMeterBatch(init_time_s=(c1 - c0), proc_time_s=(c2 - c1), total_time_s=(c2 - c0), tasks_perf=perf_items)
+
+    return recs, recs_info, perf_batch
+
+
+def plot_cv_curves(solution_infos: list[SolutionInfo], hp_vals: Sequence[float]) -> None:
+    """
+    Plot the relative cross-validation curves for all hyper-parameter values.
+
+    Parameters
+    ----------
+    solution_infos : list[SolutionInfo]
+        List of SolutionInfo objects containing the relative cross-validation residuals.
+    hp_vals : Sequence[float]
+        Sequence of hyper-parameter values corresponding to the solution_infos.
+    """
+    fig, axs = plt.subplots()
+    for hp_val, info in zip(hp_vals, solution_infos):
+        axs.semilogy(info.residuals_cv_rel, label=f"CV residuals, HP val={hp_val:.3e}")
+    axs.set_xlabel("Iterations", fontsize=16)
+    axs.grid()
+    axs.legend(fontsize=13)
+    for tl in axs.get_xticklabels():
+        tl.set_fontsize(13)
+    for tl in axs.get_yticklabels():
+        tl.set_fontsize(13)
+    fig.tight_layout()
+    plt.show(block=False)
 
 
 class BaseParameterTuning(ABC):
     """Base class for parameter tuning classes."""
 
-    _solver_spawning_functionls: Callable | None
-    _solver_calling_function: Callable[[Any], tuple[NDArrayFloat, solvers.SolutionInfo]] | None
+    _task_init_function: Callable | None
+    _task_exec_function: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]] | None
 
     parallel_eval: int | Executor
+
+    dtype: DTypeLike
+    verbose: bool
+    plot_result: bool
+    print_timings: bool
 
     def __init__(
         self,
@@ -235,8 +611,10 @@ class BaseParameterTuning(ABC):
         parallel_eval: Executor | int | bool = True,
         verbose: bool = False,
         plot_result: bool = False,
+        print_timings: bool = False,
     ) -> None:
-        """Initialize a base helper class.
+        """
+        Initialize a base helper class.
 
         Parameters
         ----------
@@ -248,6 +626,8 @@ class BaseParameterTuning(ABC):
             Whether to produce verbose output, by default False
         plot_result : bool, optional
             Whether to plot the results, by default False
+        print_timings : bool, optional
+            Whether to print the performance metrics, by default False
         """
         self.dtype = dtype
 
@@ -256,41 +636,93 @@ class BaseParameterTuning(ABC):
         self.parallel_eval = parallel_eval
         self.verbose = verbose
         self.plot_result = plot_result
+        self.print_timings = print_timings
 
-        self._solver_spawning_function = None
-        self._solver_calling_function = None
-
-    @property
-    def solver_spawning_function(self) -> Callable:
-        """Return the locally stored solver spawning function."""
-        if self._solver_spawning_function is None:
-            raise ValueError("Solver spawning function not initialized!")
-        return self._solver_spawning_function
+        self._task_init_function = None
+        self._task_exec_function = None
 
     @property
-    def solver_calling_function(self) -> Callable[[Any, ...], tuple[NDArrayFloat, solvers.SolutionInfo]]:
-        """Return the locally stored solver calling function."""
-        if self._solver_calling_function is None:
-            raise ValueError("Solver spawning function not initialized!")
-        return self._solver_calling_function
+    def task_init_function(self) -> Callable | None:
+        """
+        Return the local reference to the task initialization function.
+
+        Returns
+        -------
+        Callable | None
+            The task initialization function, if initialized.
+        """
+        return self._task_init_function
+
+    @property
+    def task_exec_function(self) -> Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]:
+        """
+        Return the local reference to the task execution function.
+
+        Returns
+        -------
+        Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
+            The task execution function.
+        """
+        if self._task_exec_function is None:
+            raise ValueError("Task execution function not initialized!")
+        return self._task_exec_function
+
+    @task_init_function.setter
+    def task_init_function(self, init_fun: Callable | None) -> None:
+        """
+        Set the task initialization function.
+
+        Parameters
+        ----------
+        init_fun : Callable | None
+            The task initialization function.
+        """
+        if init_fun is not None:
+            if not isinstance(init_fun, Callable):
+                raise ValueError("Expected a task initialization function (callable)")
+            if len(inspect.signature(init_fun).parameters) != 1:
+                raise ValueError(
+                    "Expected a task initialization function (callable), whose only parameter is the hyper-parameter value"
+                )
+        self._task_init_function = init_fun
+
+    @task_exec_function.setter
+    def task_exec_function(self, exec_fun: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]) -> None:
+        """
+        Set the task execution function.
+
+        Parameters
+        ----------
+        exec_fun : Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]
+            The task execution function.
+        """
+        if not isinstance(exec_fun, Callable):
+            raise ValueError("Expected a task execution function (callable)")
+        if not len(inspect.signature(exec_fun).parameters) >= 1:
+            raise ValueError("Expected a task execution function (callable), with at least one parameter (solver)")
+        self._task_exec_function = exec_fun
+
+    @property
+    def solver_spawning_function(self) -> Callable | None:
+        """Return the local reference to the task initialization function."""
+        warn("DEPRECATED: This property is deprecated, and will be removed. Please use the property `task_init_function`")
+        return self.task_init_function
+
+    @property
+    def solver_calling_function(self) -> Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]:
+        """Return the local reference to the task execution function."""
+        warn("DEPRECATED: This property is deprecated, and will be removed. Please use the property `task_exec_function`")
+        return self.task_exec_function
 
     @solver_spawning_function.setter
-    def solver_spawning_function(self, solver_spawn: Callable) -> None:
-        if not isinstance(solver_spawn, Callable):
-            raise ValueError("Expected a solver spawning function (callable)")
-        if len(inspect.signature(solver_spawn).parameters) != 1:
-            raise ValueError(
-                "Expected a solver spawning function (callable), whose only parameter is the regularization lambda"
-            )
-        self._solver_spawning_function = solver_spawn
+    def solver_spawning_function(self, init_fun: Callable) -> None:
+        warn("DEPRECATED: This property is deprecated, and will be removed. Please use the property `task_init_function`")
+        self.task_init_function = init_fun
 
     @solver_calling_function.setter
-    def solver_calling_function(self, solver_call: Callable[[Any, ...], tuple[NDArrayFloat, solvers.SolutionInfo]]) -> None:
-        if not isinstance(solver_call, Callable):
-            raise ValueError("Expected a solver calling function (callable)")
-        if not len(inspect.signature(solver_call).parameters) >= 1:
-            raise ValueError("Expected a solver calling function (callable), with at least one parameter (solver)")
-        self._solver_calling_function = solver_call
+    def solver_calling_function(self, exec_fun: Callable[[Any], tuple[NDArrayFloat, SolutionInfo]]) -> None:
+        warn("DEPRECATED: This property is deprecated, and will be removed. Please use the property `task_exec_function`")
+        self.task_exec_function = exec_fun
 
     @staticmethod
     def get_lambda_range(start: float, end: float, num_per_order: int = 4) -> NDArrayFloat:
@@ -310,126 +742,85 @@ class BaseParameterTuning(ABC):
         NDArrayFloat
             List of regularization weights.
         """
+        warn("DEPRECATED: This method is deprecated, and will be removed. Please use the module function with the same name")
         return get_lambda_range(start=start, end=end, num_per_order=num_per_order)
 
-    def compute_reconstruction_and_loss(self, hp_val: float, *args: Any, **kwds: Any) -> tuple[float, NDArrayFloat]:
-        """Compute objective function cost for the given hyper-parameter value.
+    def process_hp_vals(
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
+    ) -> tuple[list[NDArray], list[SolutionInfo], PerfMeterBatch]:
+        """
+        Compute reconstructions, solution information, and computing performance statistics for all hyperparameter values.
 
         Parameters
         ----------
-        hp_val : float
-            hyper-parameter value.
-        *args : Any
-            Optional positional arguments for the reconstruction.
-        **kwds : Any
-            Optional keyword arguments for the reconstruction.
-
-        Returns
-        -------
-        rec : NDArray
-            Reconstruction at the given weight.
-        cost : float
-            Cost of the given regularization weight.
-        """
-        return _compute_reconstruction_and_loss(
-            self.solver_spawning_function, self.solver_calling_function, hp_val, *args, **kwds
-        )
-
-    def compute_all_reconstructions_and_losses(
-        self, hp_vals: ArrayLike | NDArrayFloat, data_mask: NDArray | None = None
-    ) -> tuple[list[NDArray], list[float]]:
-        """
-        Compute reconstructions and losses for all hyperparameter values.
-
-        This method computes the reconstructions and corresponding losses for a
-        given set of hyperparameter values. It supports both parallel and sequential
-        evaluation based on the `parallel_eval` attribute.
-
-        Parameters
-        ----------
-        hp_vals : ArrayLike | NDArrayFloat
+        hp_vals : float | Sequence[float] | NDArrayFloat
             A list or array of hyperparameter values to evaluate.
-        data_mask : NDArray | None, optional
-            An optional mask to apply to the data during evaluation. By default None.
+        init_fun_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the task initialization function. By default None.
+        exec_fun_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the task execution function. By default None.
 
         Returns
         -------
-        tuple[list[NDArray], list[float]]
+        tuple[list[NDArray], list[SolutionInfo], PerfStatsBatch]
             A tuple containing:
-            - A list of reconstructions for each hyperparameter value.
-            - A list of loss values corresponding to each reconstruction.
-
-        Raises
-        ------
-        ValueError
-            If `parallel_eval` is neither an Executor nor an int.
+            - A list of reconstructions corresponding to each hyperparameter value.
+            - A list of solution information objects corresponding to each reconstruction.
+            - A computing performance statistics object containing aggregated performance metrics.
         """
+        if self._task_exec_function is None:
+            raise ValueError("Task execution function not initialized!")
 
-        def _parallel_compute(executor: Executor, data_test_mask: NDArray | None) -> tuple[list[NDArray], list[float]]:
-            future_to_lambda = {
-                executor.submit(
-                    _compute_reconstruction_and_loss,
-                    self.solver_spawning_function,
-                    self.solver_calling_function,
-                    l,
-                    data_test_mask,
-                ): (ii, l)
-                for ii, l in enumerate(hp_vals)
-            }
+        if isinstance(self.parallel_eval, bool) and self.parallel_eval:
+            self.parallel_eval = MAX_THREADS
 
-            recs = [np.array([])] * len(hp_vals)
-            f_vals = [0.0] * len(hp_vals)
-            try:
-                for future in tqdm(
-                    as_completed(future_to_lambda),
-                    desc="Hyper-parameter values",
-                    disable=not self.verbose,
-                    total=len(hp_vals),
-                ):
-                    hp_ind, hp_val = future_to_lambda[future]
-                    try:
-                        recs[hp_ind], f_vals[hp_ind] = future.result()
-                    except ValueError as exc:
-                        print(f"Hyper-parameter value {hp_val} (#{hp_ind}) generated an exception: {exc}")
-                        raise
-            except:
-                print("Shutting down..", end="", flush=True)
-                executor.shutdown(cancel_futures=True)
-                print("\b\b: Done.")
-                raise
-
-            return recs, f_vals
+        compute_args = [self._task_init_function, self._task_exec_function, hp_vals]
+        compute_kwds = dict(init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds, verbose=self.verbose)
 
         if isinstance(self.parallel_eval, Executor):
-            recs, f_vals = _parallel_compute(self.parallel_eval, data_mask)
+            recs, recs_info, perf_batch = _parallel_compute(self.parallel_eval, *compute_args, **compute_kwds)
         elif isinstance(self.parallel_eval, int):
             if self.parallel_eval:
                 with ThreadPoolExecutor(max_workers=self.parallel_eval) as executor:
-                    recs, f_vals = _parallel_compute(executor, data_mask)
+                    recs, recs_info, perf_batch = _parallel_compute(executor, *compute_args, **compute_kwds)
             else:
-                results = [
-                    _compute_reconstruction_and_loss(self.solver_spawning_function, self.solver_calling_function, l, data_mask)
-                    for l in tqdm(hp_vals, desc="Hyper-parameter values", disable=not self.verbose)
-                ]
-                recs, f_vals = zip(*results)
+                recs, recs_info, perf_batch = _serial_compute(*compute_args, **compute_kwds)
         else:
             raise ValueError(
                 f"The variable `parallel_eval` should either be an Executor, a boolean, or an int. "
                 f"A `{type(self.parallel_eval)}` was passed instead."
             )
-        return recs, f_vals
+
+        if self.print_timings:
+            print(perf_batch)
+
+        return recs, recs_info, perf_batch
 
     def compute_reconstruction_error(
-        self, hp_vals: ArrayLike | NDArrayFloat, gnd_truth: NDArrayFloat
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        gnd_truth: NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
     ) -> tuple[NDArrayFloat, NDArrayFloat]:
-        """Compute the reconstruction errors for each hyper-parameter values against the ground truth.
+        """
+        Compute the reconstruction errors for each hyper-parameter values against the ground truth.
 
         Parameters
         ----------
-        hp_vals : ArrayLike | NDArrayFloat
+        hp_vals : float | Sequence[float] | NDArrayFloat
             List of hyper-parameter values.
         gnd_truth : NDArrayFloat
             Expected reconstruction.
+        init_fun_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the task initialization function. By default None.
+        exec_fun_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the task execution function. By default None.
 
         Returns
         -------
@@ -451,7 +842,7 @@ class BaseParameterTuning(ABC):
                     f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
                 )
 
-        recs, _ = self.compute_all_reconstructions_and_losses(hp_vals)
+        recs, _, _ = self.process_hp_vals(hp_vals, init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds)
 
         err_l1 = np.zeros((len(hp_vals),), dtype=self.dtype)
         err_l2 = np.zeros((len(hp_vals),), dtype=self.dtype)
@@ -469,38 +860,70 @@ class BaseParameterTuning(ABC):
             axs[1].set_xscale("log", nonpositive="clip")  # type: ignore
             axs[1].plot(hp_vals, err_l2, label="Error - l2-norm ^ 2")  # type: ignore
             axs[1].legend()  # type: ignore
+            for tl in axs.get_xticklabels():
+                tl.set_fontsize(13)
+            for tl in axs.get_yticklabels():
+                tl.set_fontsize(13)
+            axs.set_xlabel(r"$\lambda$ values", fontsize=16)
+            axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.1e}"))
             fig.tight_layout()
             plt.show(block=False)
 
         return err_l1, err_l2
 
     @overload
-    def compute_loss_values(self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[False] = False) -> NDArrayFloat: ...
+    def compute_loss_values(
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
+        return_all: Literal[False] = False,
+    ) -> NDArrayFloat: ...
 
     @overload
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[True] = True
-    ) -> tuple[NDArrayFloat, NDArrayFloat]: ...
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
+        return_all: Literal[True] = True,
+    ) -> tuple[NDArrayFloat, list[NDArrayFloat], list[SolutionInfo], PerfMeterBatch]: ...
 
     @abstractmethod
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: bool = False
-    ) -> NDArrayFloat | tuple[NDArrayFloat, NDArrayFloat]:
-        """Compute the objective function costs for a list of hyper-parameter values.
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
+        return_all: bool = False,
+    ) -> NDArrayFloat | tuple[NDArrayFloat, list[NDArrayFloat], list[SolutionInfo], PerfMeterBatch]:
+        """
+        Compute the objective function costs for a list of hyper-parameter values.
 
         Parameters
         ----------
-        hp_vals : ArrayLike | NDArrayFloat
+        hp_vals : float | Sequence[float] | NDArrayFloat
             List of hyper-parameter values.
-        return_recs : bool, optional
-            If True, return the reconstructions along with the loss values. Default is False.
+        init_fun_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the task initialization function. By default None.
+        exec_fun_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the task execution function. By default None.
+        return_all : bool, optional
+            If True, return all the computation information (reconstructions, all loss values, performance). Default is False.
 
         Returns
         -------
         NDArrayFloat
             Objective function cost for each hyper-parameter value.
         recs : NDArrayFloat, optional
-            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
+            Reconstructions for each hyper-parameter value (returned only if `return_all` is True).
+        recs_info : list[SolutionInfo], optional
+            Solution information for each reconstruction (returned only if `return_all` is True).
+        perf_batch : PerfStatsBatch, optional
+            Performance statistics for the batch of reconstructions (returned only if `return_all` is True).
         """
 
 
@@ -514,8 +937,10 @@ class LCurve(BaseParameterTuning):
         parallel_eval: Executor | int | bool = True,
         verbose: bool = False,
         plot_result: bool = False,
-    ):
-        """Create an L-curve regularization parameter estimation helper.
+        print_timings: bool = False,
+    ) -> None:
+        """
+        Create an L-curve regularization parameter estimation helper.
 
         Parameters
         ----------
@@ -529,13 +954,16 @@ class LCurve(BaseParameterTuning):
             Print verbose output. The default is False.
         plot_result : bool, optional
             Plot results. The default is False.
-
-        Raises
-        ------
-        ValueError
-            In case 'loss_function' is not callable or does not expose at least one argument.
+        print_timings : bool, optional
+            Whether to print the performance metrics, by default False
         """
-        super().__init__(dtype=data_dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result)
+        super().__init__(
+            dtype=data_dtype,
+            parallel_eval=parallel_eval,
+            verbose=verbose,
+            plot_result=plot_result,
+            print_timings=print_timings,
+        )
 
         if not isinstance(loss_function, Callable):
             raise ValueError(
@@ -547,35 +975,60 @@ class LCurve(BaseParameterTuning):
         self.loss_function = loss_function
 
     @overload
-    def compute_loss_values(self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[False] = False) -> NDArrayFloat: ...
+    def compute_loss_values(
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
+        return_all: Literal[False] = False,
+    ) -> NDArrayFloat: ...
 
     @overload
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[True] = True
-    ) -> tuple[NDArrayFloat, NDArrayFloat]: ...
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
+        return_all: Literal[True] = True,
+    ) -> tuple[NDArrayFloat, list[NDArrayFloat], list[SolutionInfo], PerfMeterBatch]: ...
 
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: bool = False
-    ) -> NDArrayFloat | tuple[NDArrayFloat, NDArrayFloat]:
-        """Compute objective function values for all hyper-parameter values.
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
+        return_all: bool = False,
+    ) -> NDArrayFloat | tuple[NDArrayFloat, list[NDArrayFloat], list[SolutionInfo], PerfMeterBatch]:
+        """
+        Compute the objective function costs for a list of hyper-parameter values.
 
         Parameters
         ----------
-        hp_vals : ArrayLike | NDArrayFloat
-            Hyper-parameter values to use for computing the different objective function values.
-        return_recs : bool, optional
-            If True, return the reconstructions along with the loss values. Default is False.
+        hp_vals : float | Sequence[float] | NDArrayFloat
+            List of hyper-parameter values.
+        init_fun_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the task initialization function. By default None.
+        exec_fun_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the task execution function. By default None.
+        return_all : bool, optional
+            If True, return all the computation information (reconstructions, all loss values, performance). Default is False.
 
         Returns
         -------
         f_vals : NDArrayFloat
             Objective function cost for each hyper-parameter value.
-        recs : NDArrayFloat, optional
-            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
+        recs : list[NDArrayFloat], optional
+            Reconstructions for each hyper-parameter value (returned only if `return_all` is True).
+        recs_info : list[SolutionInfo], optional
+            Solution information for each reconstruction (returned only if `return_all` is True).
+        perf_batch : PerfStatsBatch, optional
+            Performance statistics for the batch of reconstructions (returned only if `return_all` is True).
         """
         hp_vals = np.array(hp_vals, ndmin=1)
 
-        counter = tm.perf_counter()
         if self.verbose:
             print("Computing L-curve loss values:")
             print(f"- Hyper-parameter values range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
@@ -587,24 +1040,27 @@ class LCurve(BaseParameterTuning):
                     f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
                 )
 
-        recs, _ = self.compute_all_reconstructions_and_losses(hp_vals)
+        recs, recs_info, perf_batch = self.process_hp_vals(hp_vals, init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds)
         f_vals = np.array([self.loss_function(rec) for rec in recs], dtype=self.dtype)
-
-        if self.verbose:
-            print(f"Done in {tm.perf_counter() - counter} seconds.\n")
 
         if self.plot_result:
             fig, axs = plt.subplots()
-            axs.set_title("L-Curve loss values")
+            axs.set_title("L-Curve loss values", fontsize=16)
             axs.set_xscale("log", nonpositive="clip")
             axs.set_yscale("log", nonpositive="clip")
             axs.plot(hp_vals, f_vals)
             axs.grid()
+            for tl in axs.get_xticklabels():
+                tl.set_fontsize(13)
+            for tl in axs.get_yticklabels():
+                tl.set_fontsize(13)
+            axs.set_xlabel(r"$\lambda$ values", fontsize=16)
+            axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.1e}"))
             fig.tight_layout()
             plt.show(block=False)
 
-        if return_recs:
-            return f_vals, recs
+        if return_all:
+            return f_vals, recs, recs_info, perf_batch
         else:
             return f_vals
 
@@ -612,65 +1068,110 @@ class LCurve(BaseParameterTuning):
 class CrossValidation(BaseParameterTuning):
     """Cross-validation hyper-parameter estimation class."""
 
+    data_shape: Sequence[int]
+    cv_fraction: float | None
+    num_averages: int
+
+    data_cv_masks: list[NDArray]
+    mask_param_name: str
+
     def __init__(
         self,
         data_shape: Sequence[int],
-        dtype: DTypeLike = np.float32,
-        cv_fraction: float = 0.1,
-        num_averages: int = 7,
+        cv_fraction: float | None = 0.1,
+        num_averages: int = 5,
+        mask_param_name: str = "b_test_mask",
         parallel_eval: Executor | int | bool = True,
+        dtype: DTypeLike = np.float32,
         verbose: bool = False,
         plot_result: bool = False,
-    ):
-        """Create a cross-validation hyper-parameter estimation helper.
+        print_timings: bool = False,
+    ) -> None:
+        """
+        Create a cross-validation hyper-parameter estimation helper.
 
         Parameters
         ----------
         data_shape : Sequence[int]
             Shape of the projection data.
-        data_dtype : DTypeLike, optional
-            Type of the input data. The default is np.float32.
-        cv_fraction : float, optional
-            Fraction of detector points to use for the leave-out set. The default is 0.1.
+        cv_fraction : float | None, optional
+            Fraction of detector points to use for the leave-out set.
+            If None, K-fold cross-validation is used, where `num_averages` indicates the number of k-folds.
+            The default is 0.1.
         num_averages : int, optional
-            Number of averages random leave-out sets to use. The default is 7.
+            Number of averages random leave-out sets to use. The default is 5.
+        mask_param_name: str, optional
+            The parameter name in the task execution function that accepts the data masks. The default is "b_test_mask".
         parallel_eval : Executor | int | bool, optional
             Compute loss and error values in parallel. The default is True.
+        dtype : DTypeLike, optional
+            Type of the input data. The default is np.float32.
         verbose : bool, optional
             Print verbose output. The default is False.
         plot_result : bool, optional
             Plot results. The default is False.
+        print_timings : bool, optional
+            Whether to print the performance metrics, by default False
         """
-        super().__init__(dtype=dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result)
+        super().__init__(
+            dtype=dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result, print_timings=print_timings
+        )
         self.data_shape = data_shape
         self.cv_fraction = cv_fraction
         self.num_averages = num_averages
 
-        self.data_test_masks = [self._create_random_test_mask() for _ in range(self.num_averages)]
+        self.mask_param_name = mask_param_name
 
-    def _create_random_test_mask(self) -> NDArrayFloat:
-        return create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype)
+        if self.cv_fraction is not None:
+            self.data_cv_masks = [
+                create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype) for _ in range(self.num_averages)
+            ]
+        else:
+            self.data_cv_masks = create_k_fold_test_masks(self.data_shape, self.num_averages)
 
     @overload
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[False] = False
-    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]: ...
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
+        return_all: Literal[False] = False,
+    ) -> tuple[NDArrayFloat, NDArrayFloat, list[NDArrayFloat]]: ...
 
     @overload
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: Literal[True] = True
-    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, NDArrayFloat]: ...
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
+        return_all: bool = False,
+    ) -> tuple[NDArrayFloat, NDArrayFloat, list[tuple[list[NDArrayFloat], list[SolutionInfo], PerfMeterBatch]]]: ...
 
     def compute_loss_values(
-        self, hp_vals: ArrayLike | NDArrayFloat, return_recs: bool = False
-    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat] | tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat, list[NDArrayFloat]]:
-        """Compute objective function values for all requested hyper-parameter values.
+        self,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
+        *,
+        init_fun_kwds: Mapping | None = None,
+        exec_fun_kwds: Mapping | None = None,
+        return_all: bool = False,
+    ) -> (
+        tuple[NDArrayFloat, NDArrayFloat, list[NDArrayFloat]]
+        | tuple[NDArrayFloat, NDArrayFloat, list[tuple[list[NDArrayFloat], list[SolutionInfo], PerfMeterBatch]]]
+    ):
+        """
+        Compute objective function values for all requested hyper-parameter values.
 
         Parameters
         ----------
-        hp_vals : ArrayLike | NDArrayFloat
+        hp_vals : float | Sequence[float] | NDArrayFloat
             Hyper-parameter values (e.g., regularization weight) to evaluate.
-        return_recs : bool, optional
+        init_fun_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the task initialization function. By default None.
+        exec_fun_kwds : Mapping | None, optional
+            Additional keyword arguments to pass to the task execution function. By default None.
+        return_all : bool, optional
             If True, return the reconstructions along with the loss values. Default is False.
 
         Returns
@@ -682,16 +1183,33 @@ class CrossValidation(BaseParameterTuning):
         f_vals : NDArrayFloat
             Objective function costs for each hyper-parameter value.
         recs : list[NDArrayFloat], optional
-            Reconstructions for each hyper-parameter value (returned only if `return_recs` is True).
+            Reconstructions for each hyper-parameter value (returned only if `return_all` is True).
         """
+        if self._task_exec_function is None:
+            raise ValueError("Task execution function not initialized!")
+
+        f_sig = inspect.signature(self._task_exec_function)
+        if self.mask_param_name not in f_sig.parameters.keys():
+            raise ValueError(
+                f"The task execution function should have a parameter called `{self.mask_param_name}`, "
+                f"which is defined by the property `mask_param_name`. Please adjust accordingly."
+            )
+
+        if init_fun_kwds is None:
+            init_fun_kwds = dict()
+        if exec_fun_kwds is None:
+            exec_fun_kwds = dict()
+        exec_fun_kwds = dict(**exec_fun_kwds)
+
         hp_vals = np.array(hp_vals, ndmin=1)
 
-        counter = tm.perf_counter()
+        counter = perf_counter()
         if self.verbose:
+            is_kfold = self.cv_fraction is None
             print("Computing cross-validation loss values:")
             print(f"- Hyper-parameter range: [{hp_vals[0]:.3e}, {hp_vals[-1]:.3e}] in {len(hp_vals)} steps")
-            print(f"- Number of averages: {self.num_averages}")
-            print(f"- Leave-out pixel fraction: {self.cv_fraction:%}")
+            print(f"- Number of averages: {self.num_averages}" + (" (K-folds)" if is_kfold else ""))
+            print(f"- Leave-out pixel fraction: {1 / self.num_averages if is_kfold else self.cv_fraction:.3%}")
             if isinstance(self.parallel_eval, Executor):
                 print(f"Parallel evaluation with externally provided executor: {self.parallel_eval}")
             else:
@@ -700,52 +1218,64 @@ class CrossValidation(BaseParameterTuning):
                     f"(n. threads: {self.parallel_eval})" if self.parallel_eval > 0 else "",
                 )
 
-        recs = list()
-        f_vals = np.empty((self.num_averages, len(hp_vals)), dtype=self.dtype)
+        f_vals = [np.array([])] * self.num_averages
+        results = []
+
         for ii_avg in range(self.num_averages):
             if self.verbose:
                 print(f"\nRound: {ii_avg + 1}/{self.num_averages}")
 
-            curr_data_test_mask = self.data_test_masks[ii_avg]
+            exec_fun_kwds[self.mask_param_name] = self.data_cv_masks[ii_avg]
 
-            recs_ii, f_vals_ii = self.compute_all_reconstructions_and_losses(hp_vals, curr_data_test_mask)
-            recs.append(recs_ii)
-            f_vals[ii_avg, :] = np.array(f_vals_ii)
+            recs_ii, recs_info_ii, perf_batch_ii = self.process_hp_vals(
+                hp_vals, init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds
+            )
+            f_vals[ii_avg] = np.array([info.residuals_cv_rel[-1] for info in recs_info_ii])
 
-        f_avgs = f_vals.mean(axis=0)
-        f_stds = f_vals.std(axis=0)
+            if return_all:
+                results.append((recs_ii, recs_info_ii, perf_batch_ii))
+            else:
+                results.append(f_vals[ii_avg])
+
+        f_avgs: NDArrayFloat = np.mean(f_vals, axis=0)
+        f_stds: NDArrayFloat = np.std(f_vals, axis=0)
 
         if self.verbose:
-            print(f"Done in {tm.perf_counter() - counter:g} seconds.\n")
+            print(f"Done in {perf_counter() - counter:g} seconds.\n")
 
         if self.plot_result:
             fig, axs = plt.subplots()
-            axs.set_title(f"Cross-validation loss values (avgs: {self.num_averages})")
+            axs.set_title(f"Cross-validation loss values (avgs: {self.num_averages})", fontsize=16)
             axs.set_xscale("log", nonpositive="clip")
             axs.errorbar(hp_vals, f_avgs, yerr=f_stds, ecolor=(0.5, 0.5, 0.5), elinewidth=1, capsize=2)
             for f_vals_ii in f_vals:
                 axs.plot(hp_vals, f_vals_ii, linewidth=1, linestyle="--")
             axs.grid()
+            for tl in axs.get_xticklabels():
+                tl.set_fontsize(13)
+            for tl in axs.get_yticklabels():
+                tl.set_fontsize(13)
+            axs.set_xlabel(r"$\lambda$ values", fontsize=16)
+            axs.set_ylabel("Loss values", fontsize=16)
+            axs.yaxis.set_major_formatter(StrMethodFormatter("{x:.1e}"))
             fig.tight_layout()
             plt.show(block=False)
 
-        if return_recs:
-            return f_avgs, f_stds, f_vals, recs
-        else:
-            return f_avgs, f_stds, f_vals
+        return f_avgs, f_stds, results
 
     def fit_loss_min(
         self,
-        hp_vals: ArrayLike | NDArrayFloat,
+        hp_vals: float | Sequence[float] | NDArrayFloat,
         f_vals: NDArrayFloat,
         f_stds: NDArrayFloat | None = None,
         scale: Literal["linear", "log"] = "log",
     ) -> tuple[float, float]:
-        """Parabolic fit of objective function costs for the different hyper-parameter values.
+        """
+        Parabolic fit of objective function costs for the different hyper-parameter values.
 
         Parameters
         ----------
-        hp_vals : ArrayLike | NDArrayFloat
+        hp_vals : float | Sequence[float] | NDArrayFloat
             Hyper-parameter values.
         f_vals : NDArrayFloat
             Objective function costs of each hyper-parameter value.
