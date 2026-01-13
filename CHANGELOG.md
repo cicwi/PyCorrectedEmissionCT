@@ -4,7 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v1.1.0...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v2.0.0...develop
+
+## 2.0.0 - 2026-01-13
+### Added
+- Moved to Python 3.10+
+- Reworked parameter tuning:
+  - Changed API
+  - Support for single function
+  - Support for timing statistics
+  - Support for k-fold cross-validation
+  - Improved computation distribution code
+- Phase-shift volume generation
+### Fixed
+- Background computation with SNIP
+- FRC for non-integer sampling
 
 ## 1.1.0 - 2025-09-12
 ### Added
