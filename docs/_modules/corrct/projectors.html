@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
@@ -91,18 +92,14 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cf</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTypeLike</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">spmatrix</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">corrct</span><span class="w"> </span><span class="kn">import</span> <span class="n">_projector_backends</span> <span class="k">as</span> <span class="n">prj_backends</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">corrct</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">corrct</span><span class="w"> </span><span class="kn">import</span> <span class="n">operators</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics.attenuation</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttenuationVolume</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">spmatrix</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct</span><span class="w"> </span><span class="kn">import</span> <span class="n">_projector_backends</span> <span class="k">as</span> <span class="n">prj_backends</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">operators</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics.attenuation</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttenuationVolume</span>
 
 <span class="n">num_threads</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
 <span class="n">astra_available</span> <span class="o">=</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">has_astra</span> <span class="ow">and</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">has_cuda</span>
@@ -113,9 +110,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ProjectorMatrix</span><span class="p">(</span><span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Projector that uses an explicit projection matrix.&quot;&quot;&quot;</span>
 
-    <span class="n">A</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">]</span>
+    <span class="n">A</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="n">spmatrix</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">],</span> <span class="n">vol_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">prj_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="n">spmatrix</span><span class="p">,</span> <span class="n">vol_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">prj_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the matrix projector.</span>
 
@@ -210,19 +207,19 @@
     <span class="n">vol_geom</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">VolumeGeometry</span>
     <span class="n">projector_backend</span><span class="p">:</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackend</span>
 
-    <span class="n">prj_intensities</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
-    <span class="n">psf</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">prj_intensities</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">psf</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">vol_geom</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">],</span> <span class="n">models</span><span class="o">.</span><span class="n">VolumeGeometry</span><span class="p">],</span>
-        <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">vol_geom</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]</span> <span class="o">|</span> <span class="n">models</span><span class="o">.</span><span class="n">VolumeGeometry</span><span class="p">,</span>
+        <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">prj_geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">models</span><span class="o">.</span><span class="n">ProjectionGeometry</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">prj_intensities</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">backend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackend</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;astra&quot;</span> <span class="k">if</span> <span class="n">astra_available</span> <span class="k">else</span> <span class="s2">&quot;skimage&quot;</span><span class="p">,</span>
+        <span class="n">prj_geom</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">ProjectionGeometry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prj_intensities</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">psf</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackend</span> <span class="o">=</span> <span class="s2">&quot;astra&quot;</span> <span class="k">if</span> <span class="n">astra_available</span> <span class="k">else</span> <span class="s2">&quot;skimage&quot;</span><span class="p">,</span>
         <span class="n">create_single_projs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the base projection class.</span>
@@ -338,7 +335,7 @@
 
 <div class="viewcode-block" id="ProjectorUncorrected._set_psf">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorUncorrected._set_psf">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_psf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">],</span> <span class="n">is_conv_symm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_psf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">psf</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">is_conv_symm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">psf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">psf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">psf</span><span class="p">))</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">psf</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_geom</span><span class="o">.</span><span class="n">shape_xyz</span><span class="p">):</span>
@@ -358,12 +355,12 @@
 
 <div class="viewcode-block" id="ProjectorUncorrected.get_pre_weights">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorUncorrected.get_pre_weights">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the pre-weights of the projector geometry (notably for cone-beam geometries).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Union[NDArray, None]</span>
+<span class="sd">        NDArray | None</span>
 <span class="sd">            The computed detector weights</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj_geom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -481,25 +478,25 @@
 
     <span class="n">att_vol_angles</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
 
-    <span class="n">executor</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">cf</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">executor</span><span class="p">:</span> <span class="n">cf</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span> <span class="o">|</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">vol_geom</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">],</span> <span class="n">models</span><span class="o">.</span><span class="n">VolumeGeometry</span><span class="p">],</span>
-        <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">vol_geom</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]</span> <span class="o">|</span> <span class="n">models</span><span class="o">.</span><span class="n">VolumeGeometry</span><span class="p">,</span>
+        <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">prj_geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">models</span><span class="o">.</span><span class="n">ProjectionGeometry</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">prj_intensities</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">backend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackend</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;astra&quot;</span> <span class="k">if</span> <span class="n">astra_available</span> <span class="k">else</span> <span class="s2">&quot;skimage&quot;</span><span class="p">,</span>
-        <span class="n">att_maps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">att_in</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">att_out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">angles_detectors_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
-        <span class="n">weights_detectors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prj_geom</span><span class="p">:</span> <span class="n">models</span><span class="o">.</span><span class="n">ProjectionGeometry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prj_intensities</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">prj_backends</span><span class="o">.</span><span class="n">ProjectorBackend</span> <span class="o">=</span> <span class="s2">&quot;astra&quot;</span> <span class="k">if</span> <span class="n">astra_available</span> <span class="k">else</span> <span class="s2">&quot;skimage&quot;</span><span class="p">,</span>
+        <span class="n">att_maps</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">att_in</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">att_out</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">angles_detectors_rad</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">ArrayLike</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="n">weights_detectors</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">psf</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">is_symmetric</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">weights_angles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">weights_angles</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_multithreading</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">data_type</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -515,28 +512,28 @@
 <span class="sd">            The rotation angles.</span>
 <span class="sd">        rot_axis_shift_pix : float | ArrayLike | NDArray | None, optional</span>
 <span class="sd">            The rotation axis shift(s) in pixels. The default is None.</span>
-<span class="sd">        prj_geom : Optional[models.ProjectionGeometry], optional</span>
+<span class="sd">        prj_geom : models.ProjectionGeometry | None, optional</span>
 <span class="sd">            The fully specified projection geometry.</span>
 <span class="sd">            When active, the rotation axis shift is ignored. The default is None.</span>
-<span class="sd">        prj_intensities : Optional[ArrayLike], optional</span>
+<span class="sd">        prj_intensities : ArrayLike | None, optional</span>
 <span class="sd">            Projection scaling factor. The default is None.</span>
 <span class="sd">        backend : str | prj_backends.ProjectorBackend, optional</span>
 <span class="sd">            Projector backend to use, by default &quot;astra&quot; if astra is available, otherwise &quot;skimage&quot;.</span>
-<span class="sd">        att_maps : Optional[NDArray[np.floating]], optional</span>
+<span class="sd">        att_maps : NDArray[np.floating] | None, optional</span>
 <span class="sd">            Precomputed attenuation maps for each angle, by default None</span>
-<span class="sd">        att_in : Optional[ArrayLike], optional</span>
+<span class="sd">        att_in : NDArray[np.floating] | None, optional</span>
 <span class="sd">            Attenuation volume of the incoming beam. The default is None.</span>
-<span class="sd">        att_out : Optional[ArrayLike], optional</span>
+<span class="sd">        att_out : NDArray[np.floating] | None, optional</span>
 <span class="sd">            Attenuation volume of the outgoing beam. The default is None.</span>
 <span class="sd">        angles_detectors_rad : float | ArrayLike, optional</span>
 <span class="sd">            Angles of the detector elements with respect to incident beam. The default is (np.pi / 2).</span>
-<span class="sd">        weights_detectors : Optional[ArrayLike], optional</span>
+<span class="sd">        weights_detectors : ArrayLike | None, optional</span>
 <span class="sd">            Weights (e.g. solid angle, efficiency, etc) of the detector elements. The default is None.</span>
-<span class="sd">        psf : Optional[ArrayLike], optional</span>
+<span class="sd">        psf : ArrayLike | None, optional</span>
 <span class="sd">            Optical system&#39;s point spread function (PSF). The default is None.</span>
 <span class="sd">        is_symmetric : bool, optional</span>
 <span class="sd">            Whether the projector is symmetric or not. The default is False.</span>
-<span class="sd">        weights_angles : Optional[ArrayLike], optional</span>
+<span class="sd">        weights_angles : ArrayLike | None, optional</span>
 <span class="sd">            Projection weight for a given element at a given angle. The default is None.</span>
 <span class="sd">        use_multithreading : bool, optional</span>
 <span class="sd">            Whether to use multiple threads or not. The default is True.</span>

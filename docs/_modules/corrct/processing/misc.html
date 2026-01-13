@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -88,15 +89,12 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
 
 <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
 
@@ -106,13 +104,13 @@
 <div class="viewcode-block" id="circular_mask">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.misc.html#corrct.processing.circular_mask">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">circular_mask</span><span class="p">(</span>
-    <span class="n">vol_shape_zxy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">],</span>
+    <span class="n">vol_shape_zxy</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArrayInt</span><span class="p">,</span>
     <span class="n">radius_offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">coords_ball</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">coords_ball</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArrayInt</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ball_norm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="n">vol_origin_zxy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">taper_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">taper_target</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
+    <span class="n">vol_origin_zxy</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">taper_func</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">taper_target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
     <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">squeeze</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
@@ -130,7 +128,7 @@
 <span class="sd">        The coordinates to consider for the non-masked region. The default is None.</span>
 <span class="sd">    ball_norm : float, optional</span>
 <span class="sd">        The norm of the ball. The default is 2.</span>
-<span class="sd">    vol_origin_zxy : Optional[Sequence[float]], optional</span>
+<span class="sd">    vol_origin_zxy : Sequence[float] | None, optional</span>
 <span class="sd">        The origin of the coordinates in voxels. The default is None.</span>
 <span class="sd">    taper_func : str, optional</span>
 <span class="sd">        The mask data type. Allowed types: &quot;const&quot; | &quot;cos&quot;. The default is &quot;const&quot;.</span>
@@ -223,10 +221,10 @@
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.misc.html#corrct.processing.ball">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ball</span><span class="p">(</span>
     <span class="n">data_shape_vu</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-    <span class="n">radius</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-    <span class="n">func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute a ball with specified radius.</span>
@@ -241,7 +239,7 @@
 <span class="sd">        Super-sampling for having smoother ball edges. The default is 5.</span>
 <span class="sd">    dtype : DTypeLike, optional</span>
 <span class="sd">        Type of the output. The default is np.float32.</span>
-<span class="sd">    func : Optional[Callable], optional</span>
+<span class="sd">    func : Callable | None, optional</span>
 <span class="sd">        Point-wise function for the local values. The default is None.</span>
 
 <span class="sd">    Returns</span>
@@ -351,10 +349,10 @@
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.misc.html#corrct.processing.lines_intersection">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">lines_intersection</span><span class="p">(</span>
     <span class="n">line_1</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
-    <span class="n">line_2</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+    <span class="n">line_2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span>
-    <span class="n">x_lims</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+    <span class="n">x_lims</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the intersection point between two lines.</span>
 
@@ -444,13 +442,13 @@
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.misc.html#corrct.processing.norm_cross_corr">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">norm_cross_corr</span><span class="p">(</span>
     <span class="n">img1</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
-    <span class="n">img2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">img2</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
     <span class="n">t_match</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">mode_full</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">compute_profile</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the normalized cross-correlation between two images.</span>
 

@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
@@ -91,8 +92,8 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
@@ -115,18 +116,18 @@
     <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span>
 
-    <span class="n">residual0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
-    <span class="n">residual0_cv</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
+    <span class="n">residual0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
+    <span class="n">residual0_cv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
 
     <span class="n">residuals</span><span class="p">:</span> <span class="n">NDArrayFloat</span>
     <span class="n">residuals_cv</span><span class="p">:</span> <span class="n">NDArrayFloat</span>
-    <span class="n">tolerance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span> <span class="o">|</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">tolerance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">residual0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
         <span class="n">residual0_cv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -162,14 +163,14 @@
 <span class="sd">    ----------</span>
 <span class="sd">    verbose : bool, optional</span>
 <span class="sd">        Turn on verbose output. The default is False.</span>
-<span class="sd">    tolerance : Optional[float], optional</span>
+<span class="sd">    tolerance : float | None, optional</span>
 <span class="sd">        Tolerance on the data residual for computing when to stop iterations.</span>
 <span class="sd">        The default is None.</span>
 <span class="sd">    relaxation : float, optional</span>
 <span class="sd">        The relaxation length. The default is 1.0.</span>
-<span class="sd">    data_term : Union[str, data_terms.DataFidelityBase], optional</span>
+<span class="sd">    data_term : str | data_terms.DataFidelityBase, optional</span>
 <span class="sd">        Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
-<span class="sd">    data_term_test : Optional[data_terms.DataFidelityBase], optional</span>
+<span class="sd">    data_term_test : data_terms.DataFidelityBase | None, optional</span>
 <span class="sd">        The data fidelity to be used for the test set.</span>
 <span class="sd">        If None, it will use the same as for the rest of the data.</span>
 <span class="sd">        The default is None.</span>
@@ -180,9 +181,9 @@
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">leave_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">relaxation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">tolerance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
-        <span class="n">data_term_test</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_term</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
+        <span class="n">data_term_test</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">leave_progress</span> <span class="o">=</span> <span class="n">leave_progress</span>
@@ -263,7 +264,7 @@
 <div class="viewcode-block" id="Solver._initialize_data_fidelity_function">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._initialize_data_fidelity_function">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_data_fidelity_function</span><span class="p">(</span><span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_data_fidelity_function</span><span class="p">(</span><span class="n">data_term</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_term</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">data_term</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;l2&quot;</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">()</span>
@@ -281,7 +282,7 @@
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._initialize_regularizer">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_regularizer</span><span class="p">(</span>
-        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">]]</span>
+        <span class="n">regularizer</span><span class="p">:</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">regularizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
@@ -304,8 +305,8 @@
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._initialize_b_masks">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_b_masks</span><span class="p">(</span>
-        <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">],</span> <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]]:</span>
+        <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">b_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">b_test_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">b_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">b_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
@@ -327,9 +328,9 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">leave_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">],</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
-        <span class="n">fbp_filter</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">filters</span><span class="o">.</span><span class="n">Filter</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ramp&quot;</span><span class="p">,</span>
+        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">]</span> <span class="o">|</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_term</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
+        <span class="n">fbp_filter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="n">filters</span><span class="o">.</span><span class="n">Filter</span> <span class="o">=</span> <span class="s2">&quot;ramp&quot;</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Filtered Back-Projection (FBP) algorithm.</span>
@@ -342,9 +343,9 @@
 <span class="sd">            Leave the progress bar after the computation is finished. The default is True.</span>
 <span class="sd">        regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional</span>
 <span class="sd">            NOT USED, only exposed for compatibility reasons.</span>
-<span class="sd">        data_term : Union[str, data_terms.DataFidelityBase], optional</span>
+<span class="sd">        data_term : str | data_terms.DataFidelityBase, optional</span>
 <span class="sd">            NOT USED, only exposed for compatibility reasons.</span>
-<span class="sd">        fbp_filter : Union[str, NDArrayFloat], optional</span>
+<span class="sd">        fbp_filter : str | NDArrayFloat | filters.Filter, optional</span>
 <span class="sd">            FBP filter to use. Either a string from scikit-image&#39;s list of `iradon` filters, or an array. The default is &quot;ramp&quot;.</span>
 <span class="sd">        pad_mode: str, optional</span>
 <span class="sd">            The padding mode to use for the linear convolution. The default is &quot;constant&quot;.</span>
@@ -381,11 +382,11 @@
         <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span>
         <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
         <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">x0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">upper_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">x_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x0</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">SolutionInfo</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reconstruct the data, using the FBP algorithm.</span>
@@ -398,15 +399,15 @@
 <span class="sd">            Data to reconstruct.</span>
 <span class="sd">        iterations : int</span>
 <span class="sd">            Number of iterations.</span>
-<span class="sd">        x0 : Optional[NDArrayFloat], optional</span>
+<span class="sd">        x0 : NDArrayFloat | None, optional</span>
 <span class="sd">            Initial solution. The default is None.</span>
-<span class="sd">        lower_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">        lower_limit : float | NDArrayFloat | None, optional</span>
 <span class="sd">            Lower clipping value. The default is None.</span>
-<span class="sd">        upper_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">        upper_limit : float | NDArrayFloat | None, optional</span>
 <span class="sd">            Upper clipping value. The default is None.</span>
-<span class="sd">        x_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        x_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Solution mask. The default is None.</span>
-<span class="sd">        b_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        b_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Data mask. The default is None.</span>
 
 <span class="sd">        Raises</span>
@@ -416,7 +417,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Tuple[NDArrayFloat, SolutionInfo]</span>
+<span class="sd">        tuple[NDArrayFloat, SolutionInfo]</span>
 <span class="sd">            The reconstruction, and None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
@@ -467,7 +468,7 @@
         <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
         <span class="n">x</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
         <span class="n">A_num_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">],</span>
+        <span class="n">b_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the solution residual.</span>
 
@@ -481,7 +482,7 @@
 <span class="sd">            The current solution</span>
 <span class="sd">        A_num_rows : int</span>
 <span class="sd">            The number of projections.</span>
-<span class="sd">        b_mask : Optional[NDArrayFloat]</span>
+<span class="sd">        b_mask : NDArrayFloat | None</span>
 <span class="sd">            The mask to apply</span>
 
 <span class="sd">        Returns</span>
@@ -501,47 +502,47 @@
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.SART.__call__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">A</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">],</span>
+        <span class="n">A</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">|</span> <span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">,</span>
         <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
         <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">A_num_rows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">At</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">x0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">upper_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">x_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">A_num_rows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">At</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x0</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">SolutionInfo</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reconstruct the data, using the SART algorithm.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        A : Union[Callable, BaseTransform]</span>
+<span class="sd">        A : Callable[[NDArray, int], NDArray] | projectors.ProjectorUncorrected</span>
 <span class="sd">            Projection operator.</span>
 <span class="sd">        b : NDArrayFloat</span>
 <span class="sd">            Data to reconstruct.</span>
 <span class="sd">        iterations : int</span>
 <span class="sd">            Number of iterations.</span>
-<span class="sd">        A_num_rows : int</span>
+<span class="sd">        A_num_rows : int | None</span>
 <span class="sd">            Number of projections.</span>
-<span class="sd">        x0 : Optional[NDArrayFloat], optional</span>
+<span class="sd">        x0 : NDArrayFloat | None, optional</span>
 <span class="sd">            Initial solution. The default is None.</span>
-<span class="sd">        At : Callable, optional</span>
+<span class="sd">        At : Callable | None, optional</span>
 <span class="sd">            The back-projection operator. This is only needed if the projection operator does not have an adjoint.</span>
 <span class="sd">            The default is None.</span>
-<span class="sd">        lower_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">        lower_limit : float | NDArrayFloat | None, optional</span>
 <span class="sd">            Lower clipping value. The default is None.</span>
-<span class="sd">        upper_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">        upper_limit : float | NDArrayFloat | None, optional</span>
 <span class="sd">            Upper clipping value. The default is None.</span>
-<span class="sd">        x_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        x_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Solution mask. The default is None.</span>
-<span class="sd">        b_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        b_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Data mask. The default is None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Tuple[NDArrayFloat, SolutionInfo]</span>
+<span class="sd">        tuple[NDArrayFloat, SolutionInfo]</span>
 <span class="sd">            The reconstruction, and the residuals.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">):</span>
@@ -638,14 +639,14 @@
 <span class="sd">        Turn on verbose output. The default is False.</span>
 <span class="sd">    leave_progress: bool, optional</span>
 <span class="sd">        Leave the progress bar after the computation is finished. The default is True.</span>
-<span class="sd">    tolerance : Optional[float], optional</span>
+<span class="sd">    tolerance : float | None, optional</span>
 <span class="sd">        Tolerance on the data residual for computing when to stop iterations.</span>
 <span class="sd">        The default is None.</span>
 <span class="sd">    regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional</span>
 <span class="sd">        Regularizer to be used. The default is None.</span>
-<span class="sd">    data_term : Union[str, data_terms.DataFidelityBase], optional</span>
+<span class="sd">    data_term : str | data_terms.DataFidelityBase, optional</span>
 <span class="sd">        Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
-<span class="sd">    data_term_test : Optional[data_terms.DataFidelityBase], optional</span>
+<span class="sd">    data_term_test : data_terms.DataFidelityBase | None, optional</span>
 <span class="sd">        The data fidelity to be used for the test set.</span>
 <span class="sd">        If None, it will use the same as for the rest of the data.</span>
 <span class="sd">        The default is None.</span>
@@ -655,10 +656,10 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">leave_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">tolerance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">],</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;kl&quot;</span><span class="p">,</span>
-        <span class="n">data_term_test</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">]</span> <span class="o">|</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_term</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="s2">&quot;kl&quot;</span><span class="p">,</span>
+        <span class="n">data_term_test</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
@@ -690,12 +691,12 @@
         <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span>
         <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
         <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">x0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">upper_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">x_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x0</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">SolutionInfo</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reconstruct the data, using the MLEM algorithm.</span>
@@ -708,22 +709,22 @@
 <span class="sd">            Data to reconstruct.</span>
 <span class="sd">        iterations : int</span>
 <span class="sd">            Number of iterations.</span>
-<span class="sd">        x0 : Optional[NDArrayFloat], optional</span>
+<span class="sd">        x0 : NDArrayFloat | None, optional</span>
 <span class="sd">            Initial solution. The default is None.</span>
-<span class="sd">        lower_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">        lower_limit : float | NDArrayFloat | None, optional</span>
 <span class="sd">            Lower clipping value. The default is None.</span>
-<span class="sd">        upper_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">        upper_limit : float | NDArrayFloat | None, optional</span>
 <span class="sd">            Upper clipping value. The default is None.</span>
-<span class="sd">        x_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        x_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Solution mask. The default is None.</span>
-<span class="sd">        b_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        b_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Data mask. The default is None.</span>
-<span class="sd">        b_test_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        b_test_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Test data mask. The default is None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Tuple[NDArrayFloat, SolutionInfo]</span>
+<span class="sd">        tuple[NDArrayFloat, SolutionInfo]</span>
 <span class="sd">            The reconstruction, and the residuals.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
@@ -821,16 +822,16 @@
 <span class="sd">        Turn on verbose output. The default is False.</span>
 <span class="sd">    leave_progress: bool, optional</span>
 <span class="sd">        Leave the progress bar after the computation is finished. The default is True.</span>
-<span class="sd">    tolerance : Optional[float], optional</span>
+<span class="sd">    tolerance : float | None, optional</span>
 <span class="sd">        Tolerance on the data residual for computing when to stop iterations.</span>
 <span class="sd">        The default is None.</span>
 <span class="sd">    relaxation : float, optional</span>
 <span class="sd">        The relaxation length. The default is 1.95.</span>
 <span class="sd">    regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional</span>
 <span class="sd">        Regularizer to be used. The default is None.</span>
-<span class="sd">    data_term : Union[str, data_terms.DataFidelityBase], optional</span>
+<span class="sd">    data_term : str | data_terms.DataFidelityBase, optional</span>
 <span class="sd">        Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
-<span class="sd">    data_term_test : Optional[data_terms.DataFidelityBase], optional</span>
+<span class="sd">    data_term_test : data_terms.DataFidelityBase | None, optional</span>
 <span class="sd">        The data fidelity to be used for the test set.</span>
 <span class="sd">        If None, it will use the same as for the rest of the data.</span>
 <span class="sd">        The default is None.</span>
@@ -841,10 +842,10 @@
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">leave_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">relaxation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.95</span><span class="p">,</span>
-        <span class="n">tolerance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">],</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
-        <span class="n">data_term_test</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">]</span> <span class="o">|</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_term</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
+        <span class="n">data_term_test</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
@@ -878,12 +879,12 @@
         <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span>
         <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
         <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">x0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">upper_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">x_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x0</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">SolutionInfo</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reconstruct the data, using the SIRT algorithm.</span>
@@ -896,22 +897,22 @@
 <span class="sd">            Data to reconstruct.</span>
 <span class="sd">        iterations : int</span>
 <span class="sd">            Number of iterations.</span>
-<span class="sd">        x0 : Optional[NDArrayFloat], optional</span>
+<span class="sd">        x0 : NDArrayFloat | None, optional</span>
 <span class="sd">            Initial solution. The default is None.</span>
-<span class="sd">        lower_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">        lower_limit : float | NDArrayFloat | None, optional</span>
 <span class="sd">            Lower clipping value. The default is None.</span>
-<span class="sd">        upper_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">        upper_limit : float | NDArrayFloat | None, optional</span>
 <span class="sd">            Upper clipping value. The default is None.</span>
-<span class="sd">        x_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        x_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Solution mask. The default is None.</span>
-<span class="sd">        b_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        b_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Data mask. The default is None.</span>
-<span class="sd">        b_test_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        b_test_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Test data mask. The default is None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Tuple[NDArrayFloat, SolutionInfo]</span>
+<span class="sd">        tuple[NDArrayFloat, SolutionInfo]</span>
 <span class="sd">            The reconstruction, and the residuals.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
@@ -1015,16 +1016,16 @@
 <span class="sd">        Turn on verbose output. The default is False.</span>
 <span class="sd">    leave_progress: bool, optional</span>
 <span class="sd">        Leave the progress bar after the computation is finished. The default is True.</span>
-<span class="sd">    tolerance : Optional[float], optional</span>
+<span class="sd">    tolerance : float | None, optional</span>
 <span class="sd">        Tolerance on the data residual for computing when to stop iterations.</span>
 <span class="sd">        The default is None.</span>
 <span class="sd">    relaxation : float, optional</span>
 <span class="sd">        The relaxation length. The default is 0.95.</span>
 <span class="sd">    regularizer : Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None, optional</span>
 <span class="sd">        Regularizer to be used. The default is None.</span>
-<span class="sd">    data_term : Union[str, data_terms.DataFidelityBase], optional</span>
+<span class="sd">    data_term : str | data_terms.DataFidelityBase, optional</span>
 <span class="sd">        Data fidelity term for computing the data residual. The default is &quot;l2&quot;.</span>
-<span class="sd">    data_term_test : Optional[data_terms.DataFidelityBase], optional</span>
+<span class="sd">    data_term_test : data_terms.DataFidelityBase | None, optional</span>
 <span class="sd">        The data fidelity to be used for the test set.</span>
 <span class="sd">        If None, it will use the same as for the rest of the data.</span>
 <span class="sd">        The default is None.</span>
@@ -1034,11 +1035,11 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">leave_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">tolerance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">relaxation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
-        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">],</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
-        <span class="n">data_term_test</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">regularizer</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">]</span> <span class="o">|</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_term</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span>
+        <span class="n">data_term_test</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
@@ -1068,7 +1069,7 @@
 <div class="viewcode-block" id="PDHG._initialize_data_fidelity_function">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG._initialize_data_fidelity_function">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_data_fidelity_function</span><span class="p">(</span><span class="n">data_term</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_data_fidelity_function</span><span class="p">(</span><span class="n">data_term</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_term</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">data_term</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;l2&quot;</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">()</span>
@@ -1144,12 +1145,12 @@
         <span class="n">A</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span>
         <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
         <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">x0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">upper_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">x_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">b_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x0</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">precondition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">SolutionInfo</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1163,24 +1164,24 @@
 <span class="sd">            Data to reconstruct.</span>
 <span class="sd">        iterations : int</span>
 <span class="sd">            Number of iterations.</span>
-<span class="sd">        x0 : Optional[NDArrayFloat], optional</span>
+<span class="sd">        x0 : NDArrayFloat | None, optional</span>
 <span class="sd">            Initial solution. The default is None.</span>
-<span class="sd">        lower_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">        lower_limit : float | NDArrayFloat | None, optional</span>
 <span class="sd">            Lower clipping value. The default is None.</span>
-<span class="sd">        upper_limit : Union[float, NDArrayFloat], optional</span>
+<span class="sd">        upper_limit : float | NDArrayFloat | None, optional</span>
 <span class="sd">            Upper clipping value. The default is None.</span>
-<span class="sd">        x_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        x_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Solution mask. The default is None.</span>
-<span class="sd">        b_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        b_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Data mask. The default is None.</span>
-<span class="sd">        b_test_mask : Optional[NDArrayFloat], optional</span>
+<span class="sd">        b_test_mask : NDArrayFloat | None, optional</span>
 <span class="sd">            Test data mask. The default is None.</span>
 <span class="sd">        precondition : bool, optional</span>
 <span class="sd">            Whether to use the preconditioned version of the algorithm. The default is True.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Tuple[NDArrayFloat, SolutionInfo]</span>
+<span class="sd">        tuple[NDArrayFloat, SolutionInfo]</span>
 <span class="sd">            The reconstruction, and the residuals.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>

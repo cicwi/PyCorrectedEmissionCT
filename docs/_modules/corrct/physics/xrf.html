@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -102,7 +103,8 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">overload</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">overload</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 
@@ -205,17 +207,17 @@
 <div class="viewcode-block" id="get_radiation_rate">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf.get_radiation_rate">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_radiation_rate</span><span class="p">(</span>
-    <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
-    <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
+    <span class="n">element</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">FluoLine</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">],</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the radiation rates of the requested lines for the given element.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    element : Union[str, int]</span>
+<span class="sd">    element : str | int</span>
 <span class="sd">        The requested element</span>
-<span class="sd">    lines : Union[str, FluoLine, Sequence[FluoLine]]</span>
+<span class="sd">    lines : str | FluoLine | Sequence[FluoLine]</span>
 <span class="sd">        The requested line. It can be a whole shell (transition to that shell),</span>
 <span class="sd">        or sub-shells.</span>
 <span class="sd">    verbose : bool, optional</span>
@@ -244,8 +246,8 @@
 
 <span class="nd">@overload</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_energy</span><span class="p">(</span>
-    <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
-    <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
+    <span class="n">element</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">FluoLine</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">compute_average</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -254,8 +256,8 @@
 
 <span class="nd">@overload</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_energy</span><span class="p">(</span>
-    <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
-    <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
+    <span class="n">element</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">FluoLine</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">compute_average</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -265,28 +267,30 @@
 <div class="viewcode-block" id="get_energy">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf.get_energy">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_energy</span><span class="p">(</span>
-    <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
-    <span class="n">lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">]],</span>
+    <span class="n">element</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">FluoLine</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">FluoLine</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">compute_average</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the energy(ies) of the requested line for the given element.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    element : Union[str, int]</span>
+<span class="sd">    element : str | int</span>
 <span class="sd">        The requested element.</span>
 <span class="sd">    line : str</span>
 <span class="sd">        The requested line. It can be a whole shell (transition to that shell),</span>
 <span class="sd">        or sub-shells.</span>
 <span class="sd">    compute_average : bool, optional</span>
 <span class="sd">        Weighted averaging the lines, using the radiation rate. The default is False.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to produce verbose output in case of errors, by default False</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    energy_keV : Union[float, NDArray]</span>
+<span class="sd">    energy_keV : float | NDArray</span>
 <span class="sd">        Either the average energy or the list of different energies.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">el_sym</span><span class="p">,</span> <span class="n">el_num</span> <span class="o">=</span> <span class="n">xraylib_helper</span><span class="o">.</span><span class="n">get_element_number_and_symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
@@ -320,7 +324,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple XRF detector model.&quot;&quot;&quot;</span>
 
     <span class="n">surface_mm2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">distance_mm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">distance_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
 
 <div class="viewcode-block" id="DetectorXRF.__post_init__">
@@ -333,7 +337,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">solid_angle_sr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">solid_angle_sr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the solid angle covered by the detector.</span>
 
 <span class="sd">        Returns</span>

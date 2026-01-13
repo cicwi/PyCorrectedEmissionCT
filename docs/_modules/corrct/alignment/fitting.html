@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -91,17 +92,17 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.polynomial</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polynomial</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spimg</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spopt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.polynomial</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polynomial</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">skimage.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">warp_polar</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">skimage.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">window</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">skimage.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">window</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">skimage.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">warp_polar</span>
 
 <span class="n">NDArrayFloat</span> <span class="o">=</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
 
@@ -362,7 +363,7 @@
 <div class="viewcode-block" id="fit_image_rotation_and_scale">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_image_rotation_and_scale">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">fit_image_rotation_and_scale</span><span class="p">(</span>
-    <span class="n">img_1_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">img_2_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">window_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;hann&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">img_1_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">img_2_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">window_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;hann&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fit the rotation and scaling of an image against a reference image. This works best for larger rotation angles.</span>
 
@@ -372,7 +373,7 @@
 <span class="sd">        Reference image</span>
 <span class="sd">    img_2_vu : NDArray</span>
 <span class="sd">        Rotated and scaled image</span>
-<span class="sd">    pad_mode : Union[str, None], optional</span>
+<span class="sd">    pad_mode : str | None, optional</span>
 <span class="sd">        Padding mode, by default None</span>
 <span class="sd">    window_type : str, optional</span>
 <span class="sd">        Windowing type (to cud the high frequency aliasing), by default &quot;hann&quot;</span>
@@ -504,7 +505,7 @@
 <div class="viewcode-block" id="sinusoid">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.sinusoid">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">sinusoid</span><span class="p">(</span>
-    <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">a</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">p</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">b</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="nb">float</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the values of a sine function.</span>
 
@@ -570,8 +571,8 @@
 <div class="viewcode-block" id="extract_peak_regions_1d">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.extract_peak_regions_1d">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_peak_regions_1d</span><span class="p">(</span>
-    <span class="n">cc</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">peak_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cc_coords</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]]:</span>
+    <span class="n">cc</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">peak_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cc_coords</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract a region around the maximum value.</span>
 
@@ -628,8 +629,8 @@
 <div class="viewcode-block" id="refine_max_position_1d">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.refine_max_position_1d">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">refine_max_position_1d</span><span class="p">(</span>
-    <span class="n">f_vals</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">f_x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">return_vertex_val</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">decimals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]]:</span>
+    <span class="n">f_vals</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">f_x</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">return_vertex_val</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">decimals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the sub-pixel max position of the given function sampling.</span>
 
 <span class="sd">    Parameters</span>
@@ -712,8 +713,8 @@
 <div class="viewcode-block" id="extract_peak_region_nd">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.extract_peak_region_nd">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_peak_region_nd</span><span class="p">(</span>
-    <span class="n">cc</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">peak_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cc_coords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]]]:</span>
+    <span class="n">cc</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">peak_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cc_coords</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract a region around the maximum value.</span>
 
@@ -758,7 +759,7 @@
 <div class="viewcode-block" id="refine_max_position_2d">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.refine_max_position_2d">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">refine_max_position_2d</span><span class="p">(</span>
-    <span class="n">f_vals</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">fy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">f_vals</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">fy</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fx</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the sub-pixel max position of the given function sampling.</span>
 

@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
@@ -88,8 +89,8 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">overload</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spsig</span>
@@ -102,7 +103,7 @@
 
 <div class="viewcode-block" id="_default_regularizer_l1dwl">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.denoisers.html#corrct.denoisers._default_regularizer_l1dwl">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">_default_regularizer_l1dwl</span><span class="p">(</span><span class="n">r_w</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_default_regularizer_l1dwl</span><span class="p">(</span><span class="n">r_w</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">BaseRegularizer</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">Regularizer_l1dwl</span><span class="p">(</span><span class="n">r_w</span><span class="p">,</span> <span class="s2">&quot;bior4.4&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
 
 
@@ -110,12 +111,12 @@
 <span class="nd">@overload</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">denoise_image</span><span class="p">(</span>
     <span class="n">img</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
-    <span class="n">reg_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span>
-    <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">pix_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reg_weight</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">psf</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pix_weights</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
     <span class="n">regularizer</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">_default_regularizer_l1dwl</span><span class="p">,</span>
-    <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span> <span class="o">...</span>
 
@@ -124,11 +125,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">denoise_image</span><span class="p">(</span>
     <span class="n">img</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">reg_weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">pix_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">psf</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pix_weights</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
     <span class="n">regularizer</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">_default_regularizer_l1dwl</span><span class="p">,</span>
-    <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span> <span class="o">...</span>
 
@@ -137,14 +138,14 @@
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.denoisers.html#corrct.denoisers.denoise_image">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">denoise_image</span><span class="p">(</span>
     <span class="n">img</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
-    <span class="n">reg_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
-    <span class="n">psf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">pix_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reg_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
+    <span class="n">psf</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pix_weights</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
     <span class="n">regularizer</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">_default_regularizer_l1dwl</span><span class="p">,</span>
-    <span class="n">lower_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Denoise an image.</span>
 
@@ -156,18 +157,18 @@
 <span class="sd">    ----------</span>
 <span class="sd">    img : NDArray</span>
 <span class="sd">        The image to denoise.</span>
-<span class="sd">    reg_weight : Union[float, ArrayLike, NDArray], optional</span>
+<span class="sd">    reg_weight : float | ArrayLike | NDArray, optional</span>
 <span class="sd">        Weight of the regularization term. The default is 1e-2.</span>
 <span class="sd">        If a sequence / array is passed, all the different values will be tested.</span>
 <span class="sd">        The one minimizing the error over the cross-validation set will be chosen and returned.</span>
-<span class="sd">    pix_weights : Union[ArrayLike, NDArray, None], optional</span>
+<span class="sd">    pix_weights : ArrayLike | NDArray | None, optional</span>
 <span class="sd">        The local weights of the pixels, for a weighted least-squares minimization.</span>
 <span class="sd">        If None, a standard least-squares minimization is performed. The default is None.</span>
 <span class="sd">    iterations : int, optional</span>
 <span class="sd">        Number of iterations. The default is 250.</span>
 <span class="sd">    regularizer : Callable, optional</span>
 <span class="sd">        The one-argument constructor of a regularizer. The default is the DWL regularizer.</span>
-<span class="sd">    lower_limit : Optional[float], optional</span>
+<span class="sd">    lower_limit : float | None, optional</span>
 <span class="sd">        Lower clipping limit of the image. The default is None.</span>
 <span class="sd">    verbose : bool, optional</span>
 <span class="sd">        Turn verbosity on. The default is True.</span>
@@ -194,7 +195,7 @@
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg</span><span class="p">,</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term</span><span class="p">,</span> <span class="n">leave_progress</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">:</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Solver</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">solvers</span><span class="o">.</span><span class="n">SolutionInfo</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">solver_call</span><span class="p">(</span><span class="n">solver</span><span class="p">:</span> <span class="n">solvers</span><span class="o">.</span><span class="n">Solver</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">solvers</span><span class="o">.</span><span class="n">SolutionInfo</span><span class="p">]:</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">b_test_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">med_img</span> <span class="o">=</span> <span class="n">spsig</span><span class="o">.</span><span class="n">medfilt2d</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>

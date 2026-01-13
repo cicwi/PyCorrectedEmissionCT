@@ -194,7 +194,7 @@ Bases: {py:obj}`corrct.models.Geometry`
 
 ````{py:attribute} det_shape_vu
 :canonical: corrct.models.ProjectionGeometry.det_shape_vu
-:type: typing.Optional[numpy.typing.NDArray]
+:type: numpy.typing.NDArray | None
 :value: >
    None
 
@@ -227,7 +227,7 @@ Bases: {py:obj}`corrct.models.Geometry`
 
 ````
 
-````{py:method} get_default_parallel(*, geom_type: str = '3d', rot_axis_shift_pix: typing.Optional[numpy.typing.ArrayLike] = None, rot_axis_dir: typing.Union[str, numpy.typing.ArrayLike] = 'clockwise') -> corrct.models.ProjectionGeometry
+````{py:method} get_default_parallel(*, geom_type: str = '3d', rot_axis_shift_pix: numpy.typing.ArrayLike | None = None, rot_axis_dir: str | numpy.typing.ArrayLike = 'clockwise') -> corrct.models.ProjectionGeometry
 :canonical: corrct.models.ProjectionGeometry.get_default_parallel
 :staticmethod:
 
@@ -253,7 +253,7 @@ Bases: {py:obj}`corrct.models.Geometry`
 
 ````
 
-````{py:method} set_detector_shape_vu(vu: typing.Union[int, typing.Sequence[int], numpy.typing.NDArray]) -> None
+````{py:method} set_detector_shape_vu(vu: int | collections.abc.Sequence[int] | numpy.typing.NDArray) -> None
 :canonical: corrct.models.ProjectionGeometry.set_detector_shape_vu
 
 ```{autodoc2-docstring} corrct.models.ProjectionGeometry.set_detector_shape_vu
@@ -261,7 +261,7 @@ Bases: {py:obj}`corrct.models.Geometry`
 
 ````
 
-````{py:method} set_detector_shifts_vu(det_pos_vu: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, cor_pos_u: typing.Union[float, None] = None, det_dist_y: numpy.typing.ArrayLike = 0.0) -> None
+````{py:method} set_detector_shifts_vu(det_pos_vu: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, cor_pos_u: float | None = None, det_dist_y: numpy.typing.ArrayLike = 0.0) -> None
 :canonical: corrct.models.ProjectionGeometry.set_detector_shifts_vu
 
 ```{autodoc2-docstring} corrct.models.ProjectionGeometry.set_detector_shifts_vu
@@ -269,7 +269,7 @@ Bases: {py:obj}`corrct.models.Geometry`
 
 ````
 
-````{py:method} set_source_shifts_vu(src_pos_vu: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None) -> None
+````{py:method} set_source_shifts_vu(src_pos_vu: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None) -> None
 :canonical: corrct.models.ProjectionGeometry.set_source_shifts_vu
 
 ```{autodoc2-docstring} corrct.models.ProjectionGeometry.set_source_shifts_vu
@@ -277,7 +277,7 @@ Bases: {py:obj}`corrct.models.Geometry`
 
 ````
 
-````{py:method} set_detector_tilt(angles_t_rad: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray], tilt_axis: typing.Union[typing.Sequence[float], numpy.typing.NDArray] = (0, 1, 0), tilt_source: bool = False) -> None
+````{py:method} set_detector_tilt(angles_t_rad: numpy.typing.ArrayLike | numpy.typing.NDArray, tilt_axis: collections.abc.Sequence[float] | numpy.typing.NDArray = (0, 1, 0), tilt_source: bool = False) -> None
 :canonical: corrct.models.ProjectionGeometry.set_detector_tilt
 
 ```{autodoc2-docstring} corrct.models.ProjectionGeometry.set_detector_tilt
@@ -309,7 +309,7 @@ Bases: {py:obj}`corrct.models.Geometry`
 
 ````
 
-````{py:method} get_pre_weights(det_shape_vu: typing.Union[typing.Sequence[int], numpy.typing.NDArray, None] = None) -> typing.Union[numpy.typing.NDArray, None]
+````{py:method} get_pre_weights(det_shape_vu: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None) -> numpy.typing.NDArray | None
 :canonical: corrct.models.ProjectionGeometry.get_pre_weights
 
 ```{autodoc2-docstring} corrct.models.ProjectionGeometry.get_pre_weights
@@ -394,7 +394,7 @@ Bases: {py:obj}`corrct.models.Geometry`
 
 ````{py:property} extent
 :canonical: corrct.models.VolumeGeometry.extent
-:type: typing.Sequence[float]
+:type: collections.abc.Sequence[float]
 
 ```{autodoc2-docstring} corrct.models.VolumeGeometry.extent
 ```
@@ -444,35 +444,35 @@ Bases: {py:obj}`corrct.models.Geometry`
 ```
 ````
 
-````{py:function} get_rot_axis_dir(rot_axis_dir: typing.Union[str, numpy.typing.ArrayLike, numpy.typing.NDArray] = 'clockwise') -> numpy.typing.NDArray
+````{py:function} get_rot_axis_dir(rot_axis_dir: str | numpy.typing.ArrayLike | numpy.typing.NDArray = 'clockwise') -> numpy.typing.NDArray
 :canonical: corrct.models.get_rot_axis_dir
 
 ```{autodoc2-docstring} corrct.models.get_rot_axis_dir
 ```
 ````
 
-````{py:function} _get_data_dims(data_shape: typing.Union[typing.Sequence[int], numpy.typing.NDArray], data_format: str = 'dvwu') -> dict[str, typing.Union[int, None]]
+````{py:function} _get_data_dims(data_shape: collections.abc.Sequence[int] | numpy.typing.NDArray, data_format: str = 'dvwu') -> dict[str, int | None]
 :canonical: corrct.models._get_data_dims
 
 ```{autodoc2-docstring} corrct.models._get_data_dims
 ```
 ````
 
-````{py:function} get_prj_geom_parallel(*, geom_type: str = '3d', rot_axis_shift_pix: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, rot_axis_dir: typing.Union[str, numpy.typing.ArrayLike, numpy.typing.NDArray] = 'clockwise', data_shape: typing.Union[typing.Sequence[int], numpy.typing.NDArray, None] = None, data_format: str = 'dvwu') -> corrct.models.ProjectionGeometry
+````{py:function} get_prj_geom_parallel(*, geom_type: str = '3d', rot_axis_shift_pix: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, rot_axis_dir: str | numpy.typing.ArrayLike | numpy.typing.NDArray = 'clockwise', data_shape: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, data_format: str = 'dvwu') -> corrct.models.ProjectionGeometry
 :canonical: corrct.models.get_prj_geom_parallel
 
 ```{autodoc2-docstring} corrct.models.get_prj_geom_parallel
 ```
 ````
 
-````{py:function} get_prj_geom_cone(*, src_to_sam_dist: float, rot_axis_shift_pix: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, rot_axis_dir: typing.Union[str, numpy.typing.ArrayLike, numpy.typing.NDArray] = 'clockwise', data_shape: typing.Union[typing.Sequence[int], numpy.typing.NDArray, None] = None, data_format: str = 'dvwu') -> corrct.models.ProjectionGeometry
+````{py:function} get_prj_geom_cone(*, src_to_sam_dist: float, rot_axis_shift_pix: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, rot_axis_dir: str | numpy.typing.ArrayLike | numpy.typing.NDArray = 'clockwise', data_shape: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, data_format: str = 'dvwu') -> corrct.models.ProjectionGeometry
 :canonical: corrct.models.get_prj_geom_cone
 
 ```{autodoc2-docstring} corrct.models.get_prj_geom_cone
 ```
 ````
 
-````{py:function} get_vol_geom_from_data(data: numpy.typing.NDArray, padding_u: typing.Union[int, typing.Sequence[int], numpy.typing.NDArray] = 0, data_format: str = 'dvwu', super_sampling: int = 1) -> corrct.models.VolumeGeometry
+````{py:function} get_vol_geom_from_data(data: numpy.typing.NDArray, padding_u: int | collections.abc.Sequence[int] | numpy.typing.NDArray = 0, data_format: str = 'dvwu', super_sampling: int = 1) -> corrct.models.VolumeGeometry
 :canonical: corrct.models.get_vol_geom_from_data
 
 ```{autodoc2-docstring} corrct.models.get_vol_geom_from_data

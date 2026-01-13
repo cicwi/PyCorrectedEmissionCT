@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
@@ -82,7 +83,6 @@
              
   <h1>Source code for corrct.models</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python3</span>
-<span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Define all the models used through-out the code.</span>
 
@@ -90,18 +90,16 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.spatial.transform</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spt</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">replace</span> <span class="k">as</span> <span class="n">dc_replace</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">replace</span> <span class="k">as</span> <span class="n">dc_replace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.spatial.transform</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
 
 <span class="n">ROT_DIRS_VALID</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;clockwise&quot;</span><span class="p">,</span> <span class="s2">&quot;counter-clockwise&quot;</span><span class="p">)</span>
 
@@ -143,7 +141,7 @@
     <span class="n">det_v_xyz</span><span class="p">:</span> <span class="n">NDArray</span>
     <span class="n">rot_dir_xyz</span><span class="p">:</span> <span class="n">NDArray</span>
     <span class="n">pix2vox_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">det_shape_vu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">det_shape_vu</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ProjectionGeometry.__post_init__">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.__post_init__">[docs]</a>
@@ -202,8 +200,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_default_parallel</span><span class="p">(</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">geom_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;3d&quot;</span><span class="p">,</span>
-        <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">,</span>
+        <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rot_axis_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ArrayLike</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ProjectionGeometry&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the default geometry for parallel beam.</span>
@@ -212,9 +210,9 @@
 <span class="sd">        ----------</span>
 <span class="sd">        geom_type : str, optional</span>
 <span class="sd">            The geometry type. The default is &quot;parallel3d&quot;.</span>
-<span class="sd">        rot_axis_shift_pix : Optional[ArrayLike], optional</span>
+<span class="sd">        rot_axis_shift_pix : ArrayLike | None, optional</span>
 <span class="sd">            Rotation axis shift in pixels. The default is None.</span>
-<span class="sd">        rot_axis_dir : Union[str, ArrayLike], optional</span>
+<span class="sd">        rot_axis_dir : str | ArrayLike, optional</span>
 <span class="sd">            Rotation axis direction. It can be either a string or a direction. The default is &quot;clockwise&quot;.</span>
 
 <span class="sd">        Returns</span>
@@ -268,7 +266,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.set_detector_shape_vu">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.set_detector_shape_vu">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_detector_shape_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_detector_shape_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vu</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the detector VU shape.</span>
 
 <span class="sd">        Parameters</span>
@@ -283,8 +281,8 @@
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.set_detector_shifts_vu">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_detector_shifts_vu</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">det_pos_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">cor_pos_u</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">det_pos_vu</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cor_pos_u</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">det_dist_y</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -328,7 +326,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.set_source_shifts_vu">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.set_source_shifts_vu">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_source_shifts_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_pos_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_source_shifts_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_pos_vu</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the source position in XZ, from VU (vertical, horizontal) coordinates.</span>
 
@@ -358,8 +356,8 @@
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.set_detector_tilt">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_detector_tilt</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">angles_t_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">tilt_axis</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">angles_t_rad</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">tilt_axis</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">tilt_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -503,7 +501,7 @@
 
 <div class="viewcode-block" id="ProjectionGeometry.get_pre_weights">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.get_pre_weights">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_shape_vu</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_shape_vu</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the pre-weights of the projector geometry (notably for cone-beam geometries).</span>
 
 <span class="sd">        Parameters</span>
@@ -732,12 +730,12 @@
 
 <div class="viewcode-block" id="get_rot_axis_dir">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.get_rot_axis_dir">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_rot_axis_dir</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_rot_axis_dir</span><span class="p">(</span><span class="n">rot_axis_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process the requested rotation axis direction and return a meaningful value.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    rot_axis_dir : Union[str, ArrayLike, NDArray], optional</span>
+<span class="sd">    rot_axis_dir : str | ArrayLike | NDArray, optional</span>
 <span class="sd">        The requested direction, by default &quot;clockwise&quot;</span>
 
 <span class="sd">    Returns</span>
@@ -765,8 +763,8 @@
 
 <div class="viewcode-block" id="_get_data_dims">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models._get_data_dims">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_data_dims</span><span class="p">(</span><span class="n">data_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]:</span>
-    <span class="n">dims</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_data_dims</span><span class="p">(</span><span class="n">data_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="n">dims</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">),</span> <span class="mi">0</span><span class="p">):</span>
         <span class="n">dims</span><span class="p">[</span><span class="n">data_format</span><span class="p">[</span><span class="n">ii</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data_shape</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">dims</span></div>
@@ -778,9 +776,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">get_prj_geom_parallel</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">geom_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;3d&quot;</span><span class="p">,</span>
-    <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">,</span>
-    <span class="n">data_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rot_axis_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">,</span>
+    <span class="n">data_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProjectionGeometry</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -844,9 +842,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">get_prj_geom_cone</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">src_to_sam_dist</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">rot_axis_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">,</span>
-    <span class="n">data_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rot_axis_shift_pix</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rot_axis_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="s2">&quot;clockwise&quot;</span><span class="p">,</span>
+    <span class="n">data_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProjectionGeometry</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -898,7 +896,7 @@
 <div class="viewcode-block" id="get_vol_geom_from_data">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.models.html#corrct.models.get_vol_geom_from_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_vol_geom_from_data</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">padding_u</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">,</span> <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">padding_u</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">,</span> <span class="n">super_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VolumeGeometry</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a default volume geometry from the data shape.</span>

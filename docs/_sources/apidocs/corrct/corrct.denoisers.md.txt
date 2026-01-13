@@ -49,14 +49,14 @@
 
 ````
 
-````{py:function} _default_regularizer_l1dwl(r_w: typing.Union[float, numpy.typing.NDArray]) -> corrct.regularizers.BaseRegularizer
+````{py:function} _default_regularizer_l1dwl(r_w: float | numpy.typing.NDArray) -> corrct.regularizers.BaseRegularizer
 :canonical: corrct.denoisers._default_regularizer_l1dwl
 
 ```{autodoc2-docstring} corrct.denoisers._default_regularizer_l1dwl
 ```
 ````
 
-````{py:function} denoise_image(img: numpy.typing.NDArray, reg_weight: typing.Union[float, collections.abc.Sequence[float], numpy.typing.NDArray] = 0.01, psf: typing.Optional[numpy.typing.NDArray] = None, pix_weights: typing.Optional[numpy.typing.NDArray] = None, iterations: int = 250, regularizer: typing.Callable = _default_regularizer_l1dwl, lower_limit: typing.Optional[float] = None, verbose: bool = True) -> typing.Union[numpy.typing.NDArray, tuple[numpy.typing.NDArray, float]]
+````{py:function} denoise_image(img: numpy.typing.NDArray, reg_weight: float | collections.abc.Sequence[float] | numpy.typing.NDArray = 0.01, psf: numpy.typing.NDArray | None = None, pix_weights: numpy.typing.NDArray | None = None, iterations: int = 250, regularizer: collections.abc.Callable = _default_regularizer_l1dwl, lower_limit: float | None = None, verbose: bool = True) -> numpy.typing.NDArray | tuple[numpy.typing.NDArray, float]
 :canonical: corrct.denoisers.denoise_image
 
 ```{autodoc2-docstring} corrct.denoisers.denoise_image

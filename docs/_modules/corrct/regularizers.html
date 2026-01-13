@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
@@ -90,7 +91,6 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -125,7 +125,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    weight : Union[float, NDArray]</span>
+<span class="sd">    weight : float | NDArray</span>
 <span class="sd">        The weight of the regularizer.</span>
 <span class="sd">    norm : DataFidelityBase</span>
 <span class="sd">        The norm of the regularizer minimization.</span>
@@ -135,17 +135,17 @@
 
     <span class="n">weight</span><span class="p">:</span> <span class="n">NDArray</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span>
-    <span class="n">op</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">op</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">BaseTransform</span> <span class="o">|</span> <span class="kc">None</span>
 
-    <span class="n">sigma</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span>
+    <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span>
 
-    <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span>
+    <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
@@ -199,7 +199,7 @@
 <div class="viewcode-block" id="BaseRegularizer.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer.initialize_sigma_tau">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the internal state, operator, and sigma. It then returns the tau.</span>
 
@@ -210,7 +210,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Union[float, NDArray]</span>
+<span class="sd">        float | NDArray</span>
 <span class="sd">            The tau to be used in the SIRT or PDHG algorithm.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
@@ -315,7 +315,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    weight : Union[float, NDArray]</span>
+<span class="sd">    weight : float | NDArray</span>
 <span class="sd">        The weight of the regularizer.</span>
 <span class="sd">    ndims : int, optional</span>
 <span class="sd">        The number of dimensions. The default is 2.</span>
@@ -331,11 +331,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
@@ -351,7 +351,7 @@
 
 <div class="viewcode-block" id="Regularizer_Grad.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_Grad.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformGradient</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_mode</span><span class="p">)</span>
@@ -378,10 +378,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
@@ -397,10 +397,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
@@ -416,10 +416,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
@@ -435,11 +435,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">huber_size</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span>
@@ -461,11 +461,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">huber_size</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span>
@@ -487,10 +487,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
@@ -506,10 +506,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
@@ -525,10 +525,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
@@ -544,11 +544,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">(),</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
 
@@ -563,7 +563,7 @@
 
 <div class="viewcode-block" id="Regularizer_lap.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_lap.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformLaplacian</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_mode</span><span class="p">)</span>
@@ -589,9 +589,9 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">weight</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">Regularizer_lap</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
 
@@ -607,9 +607,9 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">weight</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">Regularizer_lap</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
 
@@ -625,9 +625,9 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">weight</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">Regularizer_lap</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
 
@@ -642,15 +642,15 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Regularizer_l1.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -694,13 +694,13 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">(),</span>
@@ -727,7 +727,7 @@
 
 <div class="viewcode-block" id="Regularizer_swl.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_swl.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformStationaryWavelet</span><span class="p">(</span>
@@ -815,13 +815,13 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
@@ -849,13 +849,13 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
@@ -883,16 +883,16 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">huber_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">huber_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -932,13 +932,13 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">(),</span>
     <span class="p">):</span>
@@ -961,7 +961,7 @@
 
 <div class="viewcode-block" id="Regularizer_dwl.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_dwl.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformDecimatedWavelet</span><span class="p">(</span>
@@ -1056,13 +1056,13 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -1086,13 +1086,13 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -1116,14 +1116,14 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">huber_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">huber_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -1161,9 +1161,9 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">filt_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
@@ -1171,7 +1171,7 @@
 
 <div class="viewcode-block" id="BaseRegularizer_med.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer_med.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -1201,7 +1201,7 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l1med&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">filt_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">filt_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
         <span class="n">BaseRegularizer_med</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">filt_size</span><span class="o">=</span><span class="n">filt_size</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">())</span></div>
 
 
@@ -1213,7 +1213,7 @@
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l2med&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">filt_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">filt_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
         <span class="n">BaseRegularizer_med</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">filt_size</span><span class="o">=</span><span class="n">filt_size</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">())</span></div>
 
 
@@ -1227,11 +1227,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">fft_filter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;exp&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
@@ -1248,7 +1248,7 @@
 
 <div class="viewcode-block" id="Regularizer_fft.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_fft.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformFourier</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
@@ -1300,13 +1300,13 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">spectral_norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">(),</span>
-        <span class="n">x_ref</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_ref</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="n">ndims</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
 
@@ -1316,7 +1316,7 @@
 
 <div class="viewcode-block" id="Regularizer_TNV.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_TNV.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">tau</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialize_sigma_tau</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1343,12 +1343,12 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">pwise_der_norm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">pwise_chan_norm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
-        <span class="n">x_ref</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pwise_der_norm</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">pwise_chan_norm</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+        <span class="n">x_ref</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="n">ndims</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
 
@@ -1434,17 +1434,17 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">spectral_norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">(),</span>
-        <span class="n">x_ref</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_ref</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -1463,7 +1463,7 @@
 
 <div class="viewcode-block" id="Regularizer_lnswl.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_lnswl.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">tau</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialize_sigma_tau</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1487,18 +1487,18 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">pwise_lvl_norm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">pwise_chan_norm</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
-        <span class="n">x_ref</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pwise_lvl_norm</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">pwise_chan_norm</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+        <span class="n">x_ref</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -1534,7 +1534,7 @@
 
 <div class="viewcode-block" id="Regularizer_vl1wl.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_vl1wl.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="n">tau</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initialize_sigma_tau</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1595,11 +1595,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">axis_channels</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
@@ -1615,7 +1615,7 @@
 
 <div class="viewcode-block" id="Regularizer_vSVD.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_vSVD.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformSVD</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">axes_rows</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_channels</span><span class="p">,</span> <span class="n">axes_cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="n">rescale</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1660,8 +1660,8 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
@@ -1669,7 +1669,7 @@
 
 <div class="viewcode-block" id="Constraint_LowerLimit.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_LowerLimit.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -1723,8 +1723,8 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l2</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
@@ -1732,7 +1732,7 @@
 
 <div class="viewcode-block" id="Constraint_UpperLimit.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_UpperLimit.initialize_sigma_tau">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformIdentity</span><span class="p">(</span><span class="n">primal</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>

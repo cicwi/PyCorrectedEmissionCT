@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
@@ -91,13 +92,12 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spsig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearOperator</span>
-
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">pywt</span>
@@ -326,10 +326,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">dir_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">adj_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">dir_shape</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">adj_shape</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">A</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">NDArray</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span>
-        <span class="n">At</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">NDArray</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">At</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">NDArray</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the callable transform.</span>
 
@@ -343,7 +343,7 @@
 <span class="sd">            Shape of the adjoint space.</span>
 <span class="sd">        A : Callable[[NDArray], NDArray]</span>
 <span class="sd">            The transform function.</span>
-<span class="sd">        At : Optional[Callable[[NDArray], NDArray]], optional</span>
+<span class="sd">        At : Callable[[NDArray], NDArray] | None, optional</span>
 <span class="sd">            The adjoint transform function, by default None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dir_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dir_shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -434,11 +434,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adj_shape</span>
 
     <span class="nd">@vol_shape</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">vol_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vol_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dir_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="nd">@prj_shape</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">prj_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prj_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adj_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ProjectorOperator.fp">
@@ -493,12 +493,12 @@
 
 <div class="viewcode-block" id="ProjectorOperator.get_pre_weights">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.operators.html#corrct.operators.ProjectorOperator.get_pre_weights">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_pre_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the pre-weights of the projector geometry (notably for cone-beam geometries).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Union[NDArray, None]</span>
+<span class="sd">        NDArray | None</span>
 <span class="sd">            The computed detector weights</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span></div>
@@ -511,7 +511,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">TransformIdentity</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Identity operator.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Identity operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -544,7 +544,7 @@
 
     <span class="n">scale</span><span class="p">:</span> <span class="n">NDArray</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">scale</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Diagonal scaling operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -716,10 +716,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">x_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -848,7 +848,7 @@
         <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
         <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
@@ -993,13 +993,13 @@
 <span class="sd">    ----------</span>
 <span class="sd">    x_shape : ArrayLike</span>
 <span class="sd">        Shape of the data to be transformed.</span>
-<span class="sd">    axes : Optional[ArrayLike], optional</span>
+<span class="sd">    axes : ArrayLike | None, optional</span>
 <span class="sd">        Axes along which to do the gradient. The default is None.</span>
 <span class="sd">    pad_mode : str, optional</span>
 <span class="sd">        Padding mode of the gradient. The default is &quot;edge&quot;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">):</span>
         <span class="n">x_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1083,7 +1083,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">TransformFourier</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fourier transform operator.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fourier transform.</span>
 
@@ -1091,7 +1091,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        x_shape : ArrayLike</span>
 <span class="sd">            Shape of the data to be Fourier transformed.</span>
-<span class="sd">        axes : Optional[ArrayLike], optional</span>
+<span class="sd">        axes : ArrayLike | None, optional</span>
 <span class="sd">            Axes along which to do the Fourier transform.</span>
 
 <span class="sd">        Returns</span>
@@ -1182,7 +1182,7 @@
 <span class="sd">        Padding mode of the Laplacian. The default is &quot;edge&quot;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">):</span>
         <span class="n">x_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_shape</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1240,16 +1240,16 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">TransformSVD</span><span class="p">(</span><span class="n">BaseTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Singular value decomposition based decomposition operator.&quot;&quot;&quot;</span>
 
-    <span class="n">U</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span>
-    <span class="n">Vt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span>
+    <span class="n">U</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">Vt</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span>
 
     <span class="n">rescale</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x_shape</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-        <span class="n">axes_rows</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
-        <span class="n">axes_cols</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),</span>
+        <span class="n">axes_rows</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
+        <span class="n">axes_cols</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),</span>
         <span class="n">rescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

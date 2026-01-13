@@ -114,7 +114,7 @@
 ```
 ````
 
-`````{py:class} MaskCollection(masks_enc: numpy.typing.NDArray, masks_dec: typing.Union[numpy.typing.NDArray, None] = None, mask_dims: int = 2, mask_type: str = 'measured', mask_support: typing.Union[None, collections.abc.Sequence[int], corrct.struct_illum.NDArrayInt] = None)
+`````{py:class} MaskCollection(masks_enc: numpy.typing.NDArray, masks_dec: numpy.typing.NDArray | None = None, mask_dims: int = 2, mask_type: str = 'measured', mask_support: None | collections.abc.Sequence[int] | corrct.struct_illum.NDArrayInt = None)
 :canonical: corrct.struct_illum.MaskCollection
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskCollection
@@ -241,7 +241,7 @@
 
 ````
 
-````{py:method} get_mask(mask_inds_vu: typing.Union[collections.abc.Sequence, numpy.typing.NDArray], mask_encoding: bool = True) -> numpy.typing.NDArray
+````{py:method} get_mask(mask_inds_vu: collections.abc.Sequence | numpy.typing.NDArray, mask_encoding: bool = True) -> numpy.typing.NDArray
 :canonical: corrct.struct_illum.MaskCollection.get_mask
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskCollection.get_mask
@@ -265,7 +265,7 @@
 
 ````
 
-````{py:method} inspect_masks(mask_inds_vu: typing.Union[None, collections.abc.Sequence[int], corrct.struct_illum.NDArrayInt] = None)
+````{py:method} inspect_masks(mask_inds_vu: None | collections.abc.Sequence[int] | corrct.struct_illum.NDArrayInt = None)
 :canonical: corrct.struct_illum.MaskCollection.inspect_masks
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskCollection.inspect_masks
@@ -275,7 +275,7 @@
 
 `````
 
-`````{py:class} MaskGenerator(shape_fov: typing.Union[collections.abc.Sequence[int], corrct.struct_illum.NDArrayInt], shape_mask: typing.Union[collections.abc.Sequence[int], corrct.struct_illum.NDArrayInt], shape_shifts: typing.Union[collections.abc.Sequence[int], corrct.struct_illum.NDArrayInt], transmittance: float = 1.0, dtype: numpy.typing.DTypeLike = np.float32)
+`````{py:class} MaskGenerator(shape_fov: collections.abc.Sequence[int] | corrct.struct_illum.NDArrayInt, shape_mask: collections.abc.Sequence[int] | corrct.struct_illum.NDArrayInt, shape_shifts: collections.abc.Sequence[int] | corrct.struct_illum.NDArrayInt, transmittance: float = 1.0, dtype: numpy.typing.DTypeLike = np.float32)
 :canonical: corrct.struct_illum.MaskGenerator
 
 Bases: {py:obj}`abc.ABC`
@@ -399,7 +399,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} _init_fov_mm(fov_size_mm: typing.Union[float, collections.abc.Sequence[float], numpy.typing.NDArray], req_res_mm: float) -> corrct.struct_illum.NDArrayInt
+````{py:method} _init_fov_mm(fov_size_mm: float | collections.abc.Sequence[float] | numpy.typing.NDArray, req_res_mm: float) -> corrct.struct_illum.NDArrayInt
 :canonical: corrct.struct_illum.MaskGenerator._init_fov_mm
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskGenerator._init_fov_mm
@@ -423,7 +423,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} generate_shifted_mask(mask_inds_vu: typing.Union[collections.abc.Sequence, numpy.typing.NDArray], mask_encoding: bool = True) -> numpy.typing.NDArray
+````{py:method} generate_shifted_mask(mask_inds_vu: collections.abc.Sequence | numpy.typing.NDArray, mask_encoding: bool = True) -> numpy.typing.NDArray
 :canonical: corrct.struct_illum.MaskGenerator.generate_shifted_mask
 :abstractmethod:
 
@@ -432,7 +432,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} _generate_mask_shifts(shifts_v: typing.Union[collections.abc.Sequence, numpy.typing.NDArray], shifts_u: typing.Union[collections.abc.Sequence, numpy.typing.NDArray], mask_encoding: bool = True) -> numpy.typing.NDArray
+````{py:method} _generate_mask_shifts(shifts_v: collections.abc.Sequence | numpy.typing.NDArray, shifts_u: collections.abc.Sequence | numpy.typing.NDArray, mask_encoding: bool = True) -> numpy.typing.NDArray
 :canonical: corrct.struct_illum.MaskGenerator._generate_mask_shifts
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskGenerator._generate_mask_shifts
@@ -440,7 +440,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} get_interval_shifts(interval: typing.Union[int, collections.abc.Sequence[int], numpy.typing.NDArray], axes_order: collections.abc.Sequence[int] = (-2, -1)) -> collections.abc.Sequence[numpy.typing.NDArray]
+````{py:method} get_interval_shifts(interval: int | collections.abc.Sequence[int] | numpy.typing.NDArray, axes_order: collections.abc.Sequence[int] = (-2, -1)) -> collections.abc.Sequence[numpy.typing.NDArray]
 :canonical: corrct.struct_illum.MaskGenerator.get_interval_shifts
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskGenerator.get_interval_shifts
@@ -456,7 +456,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} get_sequential_shifts(num_shifts: typing.Union[int, None] = None, axes_order: collections.abc.Sequence[int] = (-2, -1)) -> collections.abc.Sequence[numpy.typing.NDArray]
+````{py:method} get_sequential_shifts(num_shifts: int | None = None, axes_order: collections.abc.Sequence[int] = (-2, -1)) -> collections.abc.Sequence[numpy.typing.NDArray]
 :canonical: corrct.struct_illum.MaskGenerator.get_sequential_shifts
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskGenerator.get_sequential_shifts
@@ -466,7 +466,7 @@ Bases: {py:obj}`abc.ABC`
 
 `````
 
-`````{py:class} MaskGeneratorPoint(fov_size_mm: typing.Union[float, collections.abc.Sequence[float], numpy.typing.NDArray], req_res_mm: float = 1.0)
+`````{py:class} MaskGeneratorPoint(fov_size_mm: float | collections.abc.Sequence[float] | numpy.typing.NDArray, req_res_mm: float = 1.0)
 :canonical: corrct.struct_illum.MaskGeneratorPoint
 
 Bases: {py:obj}`corrct.struct_illum.MaskGenerator`
@@ -490,7 +490,7 @@ Bases: {py:obj}`corrct.struct_illum.MaskGenerator`
 
 ````
 
-````{py:method} generate_shifted_mask(mask_inds_vu: typing.Union[collections.abc.Sequence, numpy.typing.NDArray], mask_encoding: bool = True) -> numpy.typing.NDArray
+````{py:method} generate_shifted_mask(mask_inds_vu: collections.abc.Sequence | numpy.typing.NDArray, mask_encoding: bool = True) -> numpy.typing.NDArray
 :canonical: corrct.struct_illum.MaskGeneratorPoint.generate_shifted_mask
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskGeneratorPoint.generate_shifted_mask
@@ -500,7 +500,7 @@ Bases: {py:obj}`corrct.struct_illum.MaskGenerator`
 
 `````
 
-`````{py:class} MaskGeneratorBernoulli(fov_size_mm: typing.Union[float, collections.abc.Sequence[float], numpy.typing.NDArray], req_res_mm: float = 1.0, max_masks_ratio: float = 1.2)
+`````{py:class} MaskGeneratorBernoulli(fov_size_mm: float | collections.abc.Sequence[float] | numpy.typing.NDArray, req_res_mm: float = 1.0, max_masks_ratio: float = 1.2)
 :canonical: corrct.struct_illum.MaskGeneratorBernoulli
 
 Bases: {py:obj}`corrct.struct_illum.MaskGenerator`
@@ -524,7 +524,7 @@ Bases: {py:obj}`corrct.struct_illum.MaskGenerator`
 
 ````
 
-````{py:method} generate_shifted_mask(mask_inds_vu: typing.Union[collections.abc.Sequence, numpy.typing.NDArray], mask_encoding: bool = True) -> numpy.typing.NDArray
+````{py:method} generate_shifted_mask(mask_inds_vu: collections.abc.Sequence | numpy.typing.NDArray, mask_encoding: bool = True) -> numpy.typing.NDArray
 :canonical: corrct.struct_illum.MaskGeneratorBernoulli.generate_shifted_mask
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskGeneratorBernoulli.generate_shifted_mask
@@ -534,7 +534,7 @@ Bases: {py:obj}`corrct.struct_illum.MaskGenerator`
 
 `````
 
-`````{py:class} MaskGeneratorHalfGaussian(fov_size_mm: typing.Union[float, collections.abc.Sequence[float], numpy.typing.NDArray], req_res_mm: float = 1.0, max_masks_ratio: float = 1.2)
+`````{py:class} MaskGeneratorHalfGaussian(fov_size_mm: float | collections.abc.Sequence[float] | numpy.typing.NDArray, req_res_mm: float = 1.0, max_masks_ratio: float = 1.2)
 :canonical: corrct.struct_illum.MaskGeneratorHalfGaussian
 
 Bases: {py:obj}`corrct.struct_illum.MaskGenerator`
@@ -558,7 +558,7 @@ Bases: {py:obj}`corrct.struct_illum.MaskGenerator`
 
 ````
 
-````{py:method} generate_shifted_mask(mask_inds_vu: typing.Union[collections.abc.Sequence, numpy.typing.NDArray], mask_encoding: bool = True) -> numpy.typing.NDArray
+````{py:method} generate_shifted_mask(mask_inds_vu: collections.abc.Sequence | numpy.typing.NDArray, mask_encoding: bool = True) -> numpy.typing.NDArray
 :canonical: corrct.struct_illum.MaskGeneratorHalfGaussian.generate_shifted_mask
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskGeneratorHalfGaussian.generate_shifted_mask
@@ -592,7 +592,7 @@ Bases: {py:obj}`corrct.struct_illum.MaskGenerator`
 
 ````
 
-````{py:method} generate_shifted_mask(mask_inds_vu: typing.Union[collections.abc.Sequence, numpy.typing.NDArray], mask_encoding: bool = True) -> numpy.typing.NDArray
+````{py:method} generate_shifted_mask(mask_inds_vu: collections.abc.Sequence | numpy.typing.NDArray, mask_encoding: bool = True) -> numpy.typing.NDArray
 :canonical: corrct.struct_illum.MaskGeneratorMURA.generate_shifted_mask
 
 ```{autodoc2-docstring} corrct.struct_illum.MaskGeneratorMURA.generate_shifted_mask
@@ -611,7 +611,7 @@ Bases: {py:obj}`corrct.struct_illum.MaskGenerator`
 
 `````
 
-`````{py:class} ProjectorGhostImaging(mask_collection: typing.Union[corrct.struct_illum.MaskCollection, numpy.typing.NDArray], backend: str = 'torch')
+`````{py:class} ProjectorGhostImaging(mask_collection: corrct.struct_illum.MaskCollection | numpy.typing.NDArray, backend: str = 'torch')
 :canonical: corrct.struct_illum.ProjectorGhostImaging
 
 Bases: {py:obj}`corrct.operators.ProjectorOperator`
@@ -636,7 +636,7 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 
 ````
 
-````{py:method} _get_backend_device() -> tuple[str, typing.Union[str, None]]
+````{py:method} _get_backend_device() -> tuple[str, str | None]
 :canonical: corrct.struct_illum.ProjectorGhostImaging._get_backend_device
 
 ```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostImaging._get_backend_device
@@ -694,7 +694,7 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 
 `````
 
-`````{py:class} ProjectorGhostTomography(mask_collection: typing.Union[corrct.struct_illum.MaskCollection, numpy.typing.NDArray], tomo_proj: corrct.operators.ProjectorOperator, backend: str = 'torch')
+`````{py:class} ProjectorGhostTomography(mask_collection: corrct.struct_illum.MaskCollection | numpy.typing.NDArray, tomo_proj: corrct.operators.ProjectorOperator, backend: str = 'torch')
 :canonical: corrct.struct_illum.ProjectorGhostTomography
 
 Bases: {py:obj}`corrct.struct_illum.ProjectorGhostImaging`

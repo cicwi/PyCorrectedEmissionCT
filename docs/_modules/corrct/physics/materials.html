@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -92,16 +93,13 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">xrf</span>  <span class="c1"># noqa: F401, F402</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics.xraylib_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_compound_cross_section</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics.xraylib_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_compound</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics.xraylib_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_element_number</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics.xraylib_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">xraylib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">energy_to_wlength</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.physics.xraylib_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_compound</span><span class="p">,</span> <span class="n">get_compound_cross_section</span><span class="p">,</span> <span class="n">get_element_number</span><span class="p">,</span> <span class="n">xraylib</span>
 
 
 <div class="viewcode-block" id="VolumeMaterial">
@@ -193,9 +191,36 @@
         <span class="k">return</span> <span class="n">ph_lin_att</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span></div>
 
 
+<div class="viewcode-block" id="VolumeMaterial.get_phase_shift">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.materials.html#corrct.physics.VolumeMaterial.get_phase_shift">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_phase_shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the local phase shift for each voxel.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        energy_keV : float</span>
+<span class="sd">            The X-ray energy.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NDArray</span>
+<span class="sd">            The computed local phase shift volume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ph_phase_shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ph</span><span class="p">,</span> <span class="n">cmp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">materials_fractions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials_compositions</span><span class="p">):</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">xraylib</span><span class="o">.</span><span class="n">Refractive_Index_Re</span><span class="p">(</span><span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">energy_keV</span><span class="p">,</span> <span class="n">cmp</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Refractive index (</span><span class="si">{</span><span class="n">cmp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">energy_keV</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">delta</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">ph_phase_shift</span> <span class="o">+=</span> <span class="n">ph</span> <span class="o">*</span> <span class="n">delta</span>
+        <span class="n">wavelength_cm</span> <span class="o">=</span> <span class="n">energy_to_wlength</span><span class="p">(</span><span class="n">energy_keV</span><span class="p">,</span> <span class="n">unit_wl</span><span class="o">=</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="n">unit_en</span><span class="o">=</span><span class="s2">&quot;keV&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">ph_phase_shift</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_size_cm</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">wavelength_cm</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="VolumeMaterial.get_element_mass_fraction">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.materials.html#corrct.physics.VolumeMaterial.get_element_mass_fraction">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_element_mass_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_element_mass_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the local element mass fraction through out all the materials.</span>
 
 <span class="sd">        Parameters</span>
@@ -239,7 +264,7 @@
 <div class="viewcode-block" id="VolumeMaterial.get_compton_scattering">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.materials.html#corrct.physics.VolumeMaterial.get_compton_scattering">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_compton_scattering</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">energy_in_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">detector</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xrf</span><span class="o">.</span><span class="n">DetectorXRF</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">energy_in_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">angle_rad</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">detector</span><span class="p">:</span> <span class="n">xrf</span><span class="o">.</span><span class="n">DetectorXRF</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the local Compton scattering.</span>
 
@@ -309,10 +334,10 @@
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.materials.html#corrct.physics.VolumeMaterial.get_fluo_production">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_fluo_production</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">element</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">energy_in_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">fluo_lines</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">xrf</span><span class="o">.</span><span class="n">FluoLine</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">xrf</span><span class="o">.</span><span class="n">FluoLine</span><span class="p">]],</span>
-        <span class="n">detector</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xrf</span><span class="o">.</span><span class="n">DetectorXRF</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fluo_lines</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">xrf</span><span class="o">.</span><span class="n">FluoLine</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">xrf</span><span class="o">.</span><span class="n">FluoLine</span><span class="p">],</span>
+        <span class="n">detector</span><span class="p">:</span> <span class="n">xrf</span><span class="o">.</span><span class="n">DetectorXRF</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the local fluorescence production, for the given line of the given element.</span>
 

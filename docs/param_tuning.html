@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hyperparameter Tuning &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Alignment" href="alignment_tools.html" />
+    <link rel="prev" title="Attenuation correction" href="attenuation_tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial (basics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Hyperparameter Tuning</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#l-curve-method">L-curve Method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cross-validation-method">Cross-Validation Method</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#k-fold-cross-validation">k-Fold Cross-Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#parallelization-distributed-computation">Parallelization &amp; distributed computation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dedicated-task-initialization-function-support">Dedicated task initialization function support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#computation-performance-metrics">Computation performance metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#complete-code-example">Complete code example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidocs/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Hyperparameter Tuning</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/param_tuning.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="hyperparameter-tuning">
+<h1>Hyperparameter Tuning<a class="headerlink" href="#hyperparameter-tuning" title="Link to this heading"></a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h2>
+<p>Hyperparameter tuning is a crucial step in the process of regularized reconstruction. The goal is to find the optimal hyperparameters that balance the trade-off between data fidelity and regularization. The data fidelity term measures the discrepancy between the reconstructed image and the measured data, while the regularization term enforces a desired property on the reconstructed image, such as smoothness or sparsity.
+In the context of regularized reconstruction, the hyperparameter of interest is typically the regularization weight (λ). The regularization weight controls the strength of the regularization term in the objective function, thus controlling the trade-off between these two terms. A too high regularization weight results in a over-regularized reconstruction, while a too low regularization weight results in a noisier (under-regularized) reconstruction.
+The objective function can be expressed as the following: <span class="math notranslate nohighlight">\( \min_x \frac{1}{2} \lVert Ax - b \rVert_2^2 + \lambda R(x)\)</span>, where <span class="math notranslate nohighlight">\(R: \mathbb{R}^N \rightarrow \mathbb{R}\)</span> denotes a regularization term, <span class="math notranslate nohighlight">\(A: \mathbb{R}^N \rightarrow \mathbb{R}^M\)</span> is the forward operator, <span class="math notranslate nohighlight">\(\hat{x}  \in \mathbb{R}^{N}\)</span> the sought reconstruction, and <span class="math notranslate nohighlight">\(b \in \mathbb{R}^{M}\)</span> the measured data (with <span class="math notranslate nohighlight">\(N\)</span> the number of unknowns and <span class="math notranslate nohighlight">\(M\)</span> the number of measurements).</p>
+<p>The module <code class="docutils literal notranslate"><span class="pre">param_tuning</span></code> provides a couple of methods to find the best regularization weight, according to the metrics defined by the user. To work with this module, we need to first define a reconstruction function that accepts the lambda value as input. Depending on the method, the function might also need to accept a data mask, which allows the method to mask certain data points (e.g., the cross-validation method). Here below is an example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">solve_reg</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">SolutionInfo</span><span class="p">]:</span>
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term_lsw</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">),</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term_lsw</span><span class="p">,</span> <span class="n">leave_progress</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">angles</span><span class="p">)</span> <span class="k">as</span> <span class="n">prj</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">solver</span><span class="p">(</span><span class="n">prj</span><span class="p">,</span> <span class="n">sino_substr</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">vol_mask</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="o">=</span><span class="n">b_test_mask</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This function will then be passed to the method of choice to compute the corresponding merit function values. In fact, each method will have a different way of testing the quality of each reconstruction and then select the best one.</p>
+<p>We also need to define the lambda values to test, and this can be done with the utility function <code class="docutils literal notranslate"><span class="pre">get_lambda_range</span></code>, like the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lams_reg</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">param_tuning</span><span class="o">.</span><span class="n">get_lambda_range</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e1</span><span class="p">,</span> <span class="n">num_per_order</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="l-curve-method">
+<h2>L-curve Method<a class="headerlink" href="#l-curve-method" title="Link to this heading"></a></h2>
+<p>The L-curve method is a popular approach for hyperparameter tuning in regularized reconstruction. The L-curve method involves plotting the regularization parameter (λ) against corresponding objective function values, computed over a merit function of interest. This means that each reconstruction is evaluated with a specific function which associates a cost to it. Here, we will use the total variation (TV) semi-norm.</p>
+<p>The L-curve method is based on the observation that the optimal regularization parameter corresponds to the “corner” of the L-curve. The corner of the L-curve represents the point where the objective function value starts to increase rapidly. This point corresponds to the optimal balance between data fidelity and regularization.</p>
+<p>In the provided code, the L-curve method is implemented in the <code class="docutils literal notranslate"><span class="pre">LCurve</span></code> class. The <code class="docutils literal notranslate"><span class="pre">LCurve</span></code> class takes a loss function as input, which is used to compute the objective function values for different regularization parameters. The <code class="docutils literal notranslate"><span class="pre">compute_loss_values</span></code> method of the <code class="docutils literal notranslate"><span class="pre">LCurve</span></code> class computes the objective function values for a range of regularization parameters. The <code class="docutils literal notranslate"><span class="pre">plot_result</span></code> method of the <code class="docutils literal notranslate"><span class="pre">LCurve</span></code> class plots the L-curve, which can be used to identify the optimal regularization parameter.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up the required functions</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">iso_tv_seminorm</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the isotropic TV semi-norm.</span>
+
+<span class="sd">    Used in the L-curve.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : NDArray</span>
+<span class="sd">        Input array.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The isotropic TV semi-norm of the input array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">op</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">operators</span><span class="o">.</span><span class="n">TransformGradient</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">op</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="c1"># Create the regularization weight finding helper object (using L-curve)</span>
+<span class="n">hpt_lc</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">param_tuning</span><span class="o">.</span><span class="n">LCurve</span><span class="p">(</span><span class="n">iso_tv_seminorm</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plot_result</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">hpt_lc</span><span class="o">.</span><span class="n">task_exec_function</span> <span class="o">=</span> <span class="n">solve_reg</span>
+
+<span class="n">f_vals_lc</span> <span class="o">=</span> <span class="n">hpt_lc</span><span class="o">.</span><span class="n">compute_loss_values</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><img alt="example of L-curve" src="_images/param-tuning_L-curve.png" /></p>
+<p>Here above, we show an example of <code class="docutils literal notranslate"><span class="pre">L-curve</span></code> loss plot, where the convex “corner” of the curve is the usual point where one would want to select the lambda value.</p>
+</section>
+<section id="cross-validation-method">
+<h2>Cross-Validation Method<a class="headerlink" href="#cross-validation-method" title="Link to this heading"></a></h2>
+<p>The cross-validation (CV) method is another popular approach for hyperparameter tuning in regularized reconstruction. The CV method involves splitting the data into <strong>training</strong> and <strong>validation sets</strong>. The training set is used to compute the regularized reconstruction, while the validation set is used to evaluate the quality of the reconstruction.
+The CV method is based on the observation that the optimal regularization parameter corresponds to the point where the <strong>reconstruction error on the validation set is minimized</strong>. The reconstruction error is typically computed using a metric such as the mean squared error (MSE) or the mean absolute error (MAE).</p>
+<p><strong>Definitions of the Sets</strong><br />
+Let the full measurement set be represented by the forward operator <span class="math notranslate nohighlight">\(A\)</span> and the measured data <span class="math notranslate nohighlight">\(b\)</span>. These are partitioned as follows:</p>
+<ul class="simple">
+<li><p><strong>Reconstruction set</strong>: <span class="math notranslate nohighlight">\(A_{\text{r}}\)</span>, <span class="math notranslate nohighlight">\(b_{\text{r}}\)</span></p></li>
+<li><p><strong>Cross-validation set</strong>: <span class="math notranslate nohighlight">\(A_{\text{cv}}\)</span>, <span class="math notranslate nohighlight">\(b_{\text{cv}}\)</span></p></li>
+</ul>
+<p>These sets are complementary, meaning:
+<span class="math notranslate nohighlight">\(
+A = \begin{bmatrix} A_{\text{r}} \\ A_{\text{cv}} \end{bmatrix}, \quad
+b = \begin{bmatrix} b_{\text{r}} \\ b_{\text{cv}} \end{bmatrix}
+\)</span></p>
+<p><strong>Regularized Reconstruction Problem</strong><br />
+The regularized reconstruction is computed using the reconstruction set, with the objective function:
+<span class="math notranslate nohighlight">\(
+\min_{x} \left\{ \frac{1}{2} \|A_{\text{r}}x - b_{\text{r}}\|_2^2 + \lambda R(x) \right\}
+\)</span>
+where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(A_{\text{r}}\)</span> is the forward operator for the reconstruction set,</p></li>
+<li><p><span class="math notranslate nohighlight">\(b_{\text{r}}\)</span> is the measured data for the reconstruction set,</p></li>
+<li><p><span class="math notranslate nohighlight">\(x\)</span> is the reconstructed image,</p></li>
+<li><p><span class="math notranslate nohighlight">\(R(x)\)</span> is the regularization term (e.g., <span class="math notranslate nohighlight">\(\| \, |\nabla x | \, \|_1\)</span> for the TV semi-norm),</p></li>
+<li><p><span class="math notranslate nohighlight">\(\lambda\)</span> is the regularization weight.</p></li>
+</ul>
+<p><strong>Cross-Validation Objective Function</strong><br />
+The cross-validation objective function evaluates the quality of the reconstruction <span class="math notranslate nohighlight">\(x(\lambda)\)</span> (obtained for a given <span class="math notranslate nohighlight">\(\lambda\)</span>) on the cross-validation set:
+<span class="math notranslate nohighlight">\(
+f(\lambda) = \frac{1}{2} \|A_{\text{cv}}x(\lambda) - b_{\text{cv}}\|_2^2
+\)</span>
+where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(A_{\text{cv}}\)</span> is the forward operator for the cross-validation set,</p></li>
+<li><p><span class="math notranslate nohighlight">\(b_{\text{cv}}\)</span> is the measured data for the cross-validation set,</p></li>
+<li><p><span class="math notranslate nohighlight">\(x(\lambda)\)</span> is the reconstructed image for a given <span class="math notranslate nohighlight">\(\lambda\)</span>.</p></li>
+</ul>
+<p>The goal of the CV method is to find the regularization weight <span class="math notranslate nohighlight">\(\lambda\)</span> that minimizes the cross-validation objective function <span class="math notranslate nohighlight">\(f(\lambda)\)</span>. This ensures that the chosen <span class="math notranslate nohighlight">\(\lambda\)</span> generalizes well to unseen data, as the cross-validation set is not used during the reconstruction process.</p>
+<p>The CV method is implemented in the <code class="docutils literal notranslate"><span class="pre">CrossValidation</span></code> class. This class takes the data shape and the number of averages as input. Its <code class="docutils literal notranslate"><span class="pre">compute_loss_values</span></code> method computes the cross-validation loss values for a range of regularization parameters. The <code class="docutils literal notranslate"><span class="pre">fit_loss_min</span></code> method is used to estimate the best regularization parameter, by fitting a parabola around the lowest loss curve value and identifying the vertex position of the parabola (i.e., its minimum) as the optimal regularization parameter.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the regularization weight finding helper object (using cross-validation)</span>
+<span class="n">hpt_cv</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">param_tuning</span><span class="o">.</span><span class="n">CrossValidation</span><span class="p">(</span><span class="n">sinogram</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_averages</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">hpt_cv</span><span class="o">.</span><span class="n">task_exec_function</span> <span class="o">=</span> <span class="n">solve_reg</span>
+
+<span class="c1"># Define the regularization weight range</span>
+<span class="n">lams_reg</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">param_tuning</span><span class="o">.</span><span class="n">get_lambda_range</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e1</span><span class="p">,</span> <span class="n">num_per_order</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Compute the loss function values for all the regularization weights</span>
+<span class="n">f_avgs</span><span class="p">,</span> <span class="n">f_stds</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">hpt_cv</span><span class="o">.</span><span class="n">compute_loss_values</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">)</span>
+
+<span class="c1"># Compute the error values for all the regularization weights</span>
+<span class="n">err_l1</span><span class="p">,</span> <span class="n">err_l2</span> <span class="o">=</span> <span class="n">hpt_cv</span><span class="o">.</span><span class="n">compute_reconstruction_error</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">,</span> <span class="n">expected_ph</span><span class="p">)</span>
+
+<span class="c1"># Parabolic fit of minimum over the computer curve</span>
+<span class="n">lam_min</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">hpt_cv</span><span class="o">.</span><span class="n">fit_loss_min</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">,</span> <span class="n">f_avgs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As mentioned above, the task execution function should accept an extra parameter, which takes the data mask indicating the cross-validation values. This parameter is conventionally called <code class="docutils literal notranslate"><span class="pre">b_test_mask</span></code> for historical reasons. It’s name can be changed, provided that it is also passed to the argument <code class="docutils literal notranslate"><span class="pre">mask_param_name</span></code> of the <code class="docutils literal notranslate"><span class="pre">CrossValidation</span></code> class.</p>
+<p><img alt="example of cross-validation" src="_images/param-tuning_cross-validation.png" /></p>
+<p>Here above, we show an example of the cross-validation loss plot, which is presented alongside the reconstruction error of the corresponding reconstructions (both computed with the <span class="math notranslate nohighlight">\(l_2\)</span> and <span class="math notranslate nohighlight">\(l_1\)</span> norms). The highest fidelity reconstruction (according to the minimum of the reconstruction error) is in the neighborhood of the lowest cross-validation loss value.</p>
+<section id="k-fold-cross-validation">
+<h3>k-Fold Cross-Validation<a class="headerlink" href="#k-fold-cross-validation" title="Link to this heading"></a></h3>
+<p>A popular extension of the CV method is <strong>k-fold cross-validation</strong>, where the full dataset is divided into <span class="math notranslate nohighlight">\(k\)</span> equally sized folds. The reconstruction and validation process is repeated <span class="math notranslate nohighlight">\(k\)</span> times, each time using a different fold as the cross-validation set and the remaining <span class="math notranslate nohighlight">\(k-1\)</span> folds as the reconstruction set. The final regularization parameter <span class="math notranslate nohighlight">\(\lambda\)</span> is selected based on the average performance across all <span class="math notranslate nohighlight">\(k\)</span> folds. This approach reduces variance in the estimate of the optimal <span class="math notranslate nohighlight">\(\lambda\)</span> and provides a more robust evaluation of the model’s generalization ability.</p>
+<p>k-Fold CV can be achieved by setting the <code class="docutils literal notranslate"><span class="pre">cv_fraction</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">None</span></code> in the initialization of the <code class="docutils literal notranslate"><span class="pre">CrossValidation</span></code> class, which will then use the function <code class="docutils literal notranslate"><span class="pre">create_k_fold_test_masks</span></code> to create the data masks. The number of folds will be determined by the parameter <code class="docutils literal notranslate"><span class="pre">num_averages</span></code>, which is equal to 5 by default. For more details we refer to <a class="reference external" href="https://scikit-learn.org/stable/modules/cross_validation.html"><code class="docutils literal notranslate"><span class="pre">scikit-Learn</span></code>’s excellent explanation</a>.</p>
+</section>
+</section>
+<section id="parallelization-distributed-computation">
+<h2>Parallelization &amp; distributed computation<a class="headerlink" href="#parallelization-distributed-computation" title="Link to this heading"></a></h2>
+<p>It is possible to accelerate the computation of the objective function values by using parallelization. This can be achieved by setting the <code class="docutils literal notranslate"><span class="pre">parallel_eval</span></code> parameter to one of the following values: <code class="docutils literal notranslate"><span class="pre">True</span></code>, an <code class="docutils literal notranslate"><span class="pre">int</span></code>, or an <code class="docutils literal notranslate"><span class="pre">Executor</span></code> object. If <code class="docutils literal notranslate"><span class="pre">parallel_eval</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the number of parallel threads will be determined by the number of available CPUs. If <code class="docutils literal notranslate"><span class="pre">parallel_eval</span></code> is set to an integer, the number of parallel threads will be set to that value. If <code class="docutils literal notranslate"><span class="pre">parallel_eval</span></code> is set to an <code class="docutils literal notranslate"><span class="pre">Executor</span></code> object, the <code class="docutils literal notranslate"><span class="pre">Executor</span></code> object will be used to parallelize the computation. Examples of <code class="docutils literal notranslate"><span class="pre">Executor</span></code> objects are <code class="docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code>, <code class="docutils literal notranslate"><span class="pre">ProcessPoolExecutor</span></code>, or the <code class="docutils literal notranslate"><span class="pre">Executor</span></code>-like object returned by <code class="docutils literal notranslate"><span class="pre">distributed</span></code>’s <code class="docutils literal notranslate"><span class="pre">Client.get_executor()</span></code> method. For more details on parallelization, we refer to the <a class="reference external" href="https://docs.python.org/3/library/concurrent.futures.html"><code class="docutils literal notranslate"><span class="pre">concurrent.futures</span></code></a> module and the <a class="reference external" href="https://distributed.dask.org/en/latest/"><code class="docutils literal notranslate"><span class="pre">distributed</span></code></a> library.</p>
+<p>Here is an example of how to use a <code class="docutils literal notranslate"><span class="pre">distributed</span></code> cluster to parallelize the computation of the objective function values:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocalCluster</span><span class="p">,</span> <span class="n">Client</span>
+
+<span class="k">with</span> <span class="n">LocalCluster</span><span class="p">(</span><span class="n">n_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">threads_per_worker</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">Client</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+    <span class="n">hpt_cv</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">param_tuning</span><span class="o">.</span><span class="n">CrossValidation</span><span class="p">(</span>
+        <span class="n">sinogram</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_averages</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">parallel_eval</span><span class="o">=</span><span class="n">client</span><span class="o">.</span><span class="n">get_executor</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">hpt_cv</span><span class="o">.</span><span class="n">task_exec_function</span> <span class="o">=</span> <span class="n">solve_reg</span>
+
+    <span class="c1"># Compute the loss function values for all the regularization weights</span>
+    <span class="n">f_avgs</span><span class="p">,</span> <span class="n">f_stds</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">hpt_cv</span><span class="o">.</span><span class="n">compute_loss_values</span><span class="p">(</span><span class="n">lams_reg</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Beware that every <code class="docutils literal notranslate"><span class="pre">NDArray</span></code> (even hidden inside another object) that is passed to the <code class="docutils literal notranslate"><span class="pre">solve_reg</span></code> closure should be copied to avoid race conditions.
+Thus, the function should be modified as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">solve_reg</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">SolutionInfo</span><span class="p">]:</span>
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">data_term</span><span class="o">=</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_term_lsw</span><span class="p">),</span>
+        <span class="n">regularizer</span><span class="o">=</span><span class="n">reg</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">),</span>
+        <span class="n">data_term_test</span><span class="o">=</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_term_lsw</span><span class="p">),</span>
+        <span class="n">leave_progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">angles</span><span class="p">)</span> <span class="k">as</span> <span class="n">prj</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">solver</span><span class="p">(</span>
+            <span class="n">prj</span><span class="p">,</span>
+            <span class="n">sino_substr</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="n">iterations</span><span class="p">,</span>
+            <span class="n">x_mask</span><span class="o">=</span><span class="n">vol_mask</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">,</span>
+            <span class="n">b_test_mask</span><span class="o">=</span><span class="n">b_test_mask</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="dedicated-task-initialization-function-support">
+<h2>Dedicated task initialization function support<a class="headerlink" href="#dedicated-task-initialization-function-support" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">LCurve</span></code> and <code class="docutils literal notranslate"><span class="pre">CrossValidation</span></code> classes support passing a dedicated initialization function, alongside the execution function (<code class="docutils literal notranslate"><span class="pre">task_init_function</span></code> and <code class="docutils literal notranslate"><span class="pre">task_exec_function</span></code> respectively). This is useful when the initialization of the task could benefit from being implemented in a separate function, for example to avoid making the task execution function too complex, to acquire more granular execution timings, or to just keep the two business logics separate.</p>
+<p>The initialization function should be a callable that takes the lambda value as first argument, while now the task execution function should take the output of the initialization function as first argument. Here below is an example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Instantiates the solver object, that is later used for computing the reconstruction</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">solver_init</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="c1"># Using the PDHG solver from Chambolle and Pock</span>
+    <span class="k">return</span> <span class="n">cct</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">data_term</span><span class="o">=</span><span class="n">data_term_lsw</span><span class="p">,</span> <span class="n">regularizer</span><span class="o">=</span><span class="n">reg</span><span class="p">(</span><span class="n">lam_reg</span><span class="p">),</span> <span class="n">data_term_test</span><span class="o">=</span><span class="n">data_term_lsw</span><span class="p">,</span> <span class="n">leave_progress</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+
+<span class="c1"># Computes the reconstruction for a given solver and a given cross-validation data mask</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">solver_exec</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">ph</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">angles</span><span class="p">)</span> <span class="k">as</span> <span class="n">prj</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">solver</span><span class="p">(</span><span class="n">prj</span><span class="p">,</span> <span class="n">sino_substr</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">vol_mask</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">,</span> <span class="n">b_test_mask</span><span class="o">=</span><span class="n">b_test_mask</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reconstructing:&quot;</span><span class="p">)</span>
+<span class="c1"># Create the regularization weight finding helper object (using cross-validation)</span>
+<span class="n">hpt_cv</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">param_tuning</span><span class="o">.</span><span class="n">CrossValidation</span><span class="p">(</span><span class="n">sinogram</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_averages</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">hpt_cv</span><span class="o">.</span><span class="n">task_init_function</span> <span class="o">=</span> <span class="n">solver_init</span>
+<span class="n">hpt_cv</span><span class="o">.</span><span class="n">task_exec_function</span> <span class="o">=</span> <span class="n">solver_exec</span>
+</pre></div>
+</div>
+</section>
+<section id="computation-performance-metrics">
+<h2>Computation performance metrics<a class="headerlink" href="#computation-performance-metrics" title="Link to this heading"></a></h2>
+<p>It is possible to obtain computation performance metrics, by setting the parameter <code class="docutils literal notranslate"><span class="pre">print_timings</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>. At the end of each computation batch, the <code class="docutils literal notranslate"><span class="pre">LCurve</span></code> and <code class="docutils literal notranslate"><span class="pre">CrossValidation</span></code> classes will print the total batch time, broken into initialization, and total execution, alongside the average task time. When using the two-function approach, the execution time will also correctly report the time spent in the initialization function and the execution function, respectively.
+The output will look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Performance</span> <span class="n">Statistics</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">Initialization</span> <span class="n">time</span><span class="p">:</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">00.007</span>
+<span class="o">-</span> <span class="n">Processing</span> <span class="n">time</span><span class="p">:</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">13.949</span>
+<span class="o">-</span> <span class="n">Total</span> <span class="n">time</span><span class="p">:</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">13.956</span> <span class="p">(</span><span class="n">Tasks</span><span class="o">/</span><span class="n">Total</span> <span class="n">ratio</span><span class="p">:</span> <span class="mf">6.27</span><span class="p">)</span>
+
+<span class="n">Average</span> <span class="n">Task</span> <span class="n">Performance</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">Initialization</span> <span class="n">time</span><span class="p">:</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">00.000</span>
+<span class="o">-</span> <span class="n">Execution</span> <span class="n">time</span><span class="p">:</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">05.142</span>
+<span class="o">-</span> <span class="n">Total</span> <span class="n">time</span><span class="p">:</span> <span class="mi">00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">05.142</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">Tasks/Total</span> <span class="pre">ratio</span></code> indicates the ratio between the total execution time and the total time spent in the task functions. This ratio is useful to estimate the speed-up that was obtained by parallelizing the task execution. It does not take reduced performance due to resource contention between the tasks, so it should be taken only as an approximate indication of the parallelization efficiency.</p>
+<p>It is also possible to return this information in the form of <code class="docutils literal notranslate"><span class="pre">PerfMeterBatch</span></code> and <code class="docutils literal notranslate"><span class="pre">list[PerfMeterBatch]</span></code> when passing the argument <code class="docutils literal notranslate"><span class="pre">return_all=True</span></code> to the <code class="docutils literal notranslate"><span class="pre">compute_loss_values</span></code> method. This allows for more detailed analysis of the performance of the parallel execution by the user.</p>
+</section>
+<section id="complete-code-example">
+<h2>Complete code example<a class="headerlink" href="#complete-code-example" title="Link to this heading"></a></h2>
+<p>For a complete code example on how to use the <code class="docutils literal notranslate"><span class="pre">LCurve</span></code> and <code class="docutils literal notranslate"><span class="pre">CrossValidation</span></code> classes to perform hyperparameter tuning for regularized reconstruction, we refer to the script: <code class="docutils literal notranslate"><span class="pre">examples/example_06_guided_regularization.py</span></code>. The code first sets up the required functions and initializes the objects and the search range for the hyperparameter. It then computes the objective function values and the reconstruction error for a range of regularization parameters. Finally, it visualizes the results.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="attenuation_tutorial.html" class="btn btn-neutral float-left" title="Attenuation correction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="alignment_tools.html" class="btn btn-neutral float-right" title="Alignment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

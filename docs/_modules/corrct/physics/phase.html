@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -99,7 +100,7 @@
     <span class="k">raise</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spimg</span>
@@ -108,7 +109,7 @@
 
 <div class="viewcode-block" id="get_delta_beta">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.phase.html#corrct.physics.phase.get_delta_beta">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_delta_beta</span><span class="p">(</span><span class="n">cmp_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_delta_beta</span><span class="p">(</span><span class="n">cmp_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the delta-over-beta parameter for a specific compound.</span>
 
 <span class="sd">    Parameters</span>
@@ -117,7 +118,7 @@
 <span class="sd">        Molar composition of a compound</span>
 <span class="sd">    energy_keV : float</span>
 <span class="sd">        Energy at which the d/b value should be computed</span>
-<span class="sd">    density : Optional[float], optional</span>
+<span class="sd">    density : float | None, optional</span>
 <span class="sd">        Density of the compound, by default None</span>
 
 <span class="sd">    Returns</span>
@@ -246,7 +247,7 @@
 <div class="viewcode-block" id="get_propagation_filter">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.phase.html#corrct.physics.phase.get_propagation_filter">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_propagation_filter</span><span class="p">(</span>
-    <span class="n">img_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">],</span>
+    <span class="n">img_shape</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">pix_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">dist_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">wlength_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -260,7 +261,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    img_shape : Union[Sequence[int], NDArray]</span>
+<span class="sd">    img_shape : Sequence[int] | NDArray</span>
 <span class="sd">        Shape of the target image</span>
 <span class="sd">    pix_size_um : float</span>
 <span class="sd">        Pixel size of the detector (in microns)</span>

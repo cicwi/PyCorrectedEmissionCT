@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -91,8 +92,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cf</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mp</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -119,8 +119,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">AttenuationVolume</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Attenuation volume computation class.&quot;&quot;&quot;</span>
 
-    <span class="n">incident_local</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-    <span class="n">emitted_local</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">incident_local</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">emitted_local</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">NDArrayFloat</span>
     <span class="n">detectors</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DetectorXRF</span><span class="p">]</span>
     <span class="n">emitted_sub_sampling</span><span class="p">:</span> <span class="nb">int</span>
@@ -132,10 +132,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">incident_local</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
-        <span class="n">emitted_local</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
-        <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span>
-        <span class="n">angles_det_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">DetectorXRF</span><span class="p">]],</span> <span class="nb">float</span><span class="p">,</span> <span class="n">DetectorXRF</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">incident_local</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">emitted_local</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">angles_rot_rad</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">angles_det_rad</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span> <span class="o">|</span> <span class="n">DetectorXRF</span><span class="p">]</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">DetectorXRF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
         <span class="n">emitted_sub_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
     <span class="p">):</span>
@@ -285,8 +285,8 @@
         <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span>
         <span class="n">rot_ind</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">det_ind</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">slice_ind</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">slice_ind</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArrayInt</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the requested attenuation map.</span>
@@ -299,7 +299,7 @@
 <span class="sd">            Rotation angle index.</span>
 <span class="sd">        det_ind : int, optional</span>
 <span class="sd">            Detector angle index. The default is 0.</span>
-<span class="sd">        slice_ind : Optional[int], optional</span>
+<span class="sd">        slice_ind : int | None, optional</span>
 <span class="sd">            Volume slice index (for 3D volumes). The default is None.</span>
 <span class="sd">        axes : Sequence[int] | NDArray, optional</span>
 <span class="sd">            Axes of the slice. The default is (-2, -1).</span>
@@ -356,9 +356,9 @@
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.get_maps">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_maps</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">roi</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">rot_ind</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">det_ind</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">roi</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rot_ind</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArrayInt</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">det_ind</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArrayInt</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">binning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -405,9 +405,9 @@
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.get_projector_args">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_projector_args</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">roi</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">rot_ind</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">det_ind</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayInt</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">roi</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rot_ind</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArrayInt</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">det_ind</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArrayInt</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">binning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -443,19 +443,19 @@
 <div class="viewcode-block" id="get_linear_attenuation_coefficient">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.get_linear_attenuation_coefficient">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_linear_attenuation_coefficient</span><span class="p">(</span>
-    <span class="n">compound</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pixel_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">compound</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pixel_size_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the linear attenuation coefficient for given compound, energy, and pixel size.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    compound : Union[str, dict]</span>
+<span class="sd">    compound : str | dict</span>
 <span class="sd">        The compound for which we compute the linear attenuation coefficient</span>
 <span class="sd">    energy_keV : float</span>
 <span class="sd">        The energy of the photons</span>
 <span class="sd">    pixel_size_um : float</span>
 <span class="sd">        The pixel size in microns</span>
-<span class="sd">    density : Union[float, None], optional</span>
+<span class="sd">    density : float | None, optional</span>
 <span class="sd">        The density of the compound (if different from the default value), by default None</span>
 
 <span class="sd">    Returns</span>
@@ -477,7 +477,7 @@
 <div class="viewcode-block" id="plot_emission_line_attenuation">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.plot_emission_line_attenuation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">plot_emission_line_attenuation</span><span class="p">(</span>
-    <span class="n">compound</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">compound</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">thickness_um</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">mean_energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">fwhm_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -489,7 +489,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    compound : Union[str, dict]</span>
+<span class="sd">    compound : str | dict</span>
 <span class="sd">        Compound to consider</span>
 <span class="sd">    thickness_um : float</span>
 <span class="sd">        Thickness of the compound (in microns)</span>
@@ -570,7 +570,7 @@
 <div class="viewcode-block" id="plot_transmittance_decay">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.plot_transmittance_decay">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">plot_transmittance_decay</span><span class="p">(</span>
-    <span class="n">compounds</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]],</span>
+    <span class="n">compounds</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">mean_energy_keV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">thickness_range_um</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mi">101</span><span class="p">),</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -603,7 +603,7 @@
     <span class="n">axs</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
     <span class="n">axs</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
     <span class="n">axs</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
-    <span class="n">axs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Thickness [$\mu m$]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+    <span class="n">axs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Thickness [$\mu m$]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
     <span class="n">axs</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">thickness_range_um</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">thickness_range_um</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">axs</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Transmittance&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
     <span class="n">axs</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>

@@ -47,7 +47,7 @@
 
 ### API
 
-````{py:function} get_delta_beta(cmp_name: str, energy_keV: float, density: typing.Union[float, None] = None) -> float
+````{py:function} get_delta_beta(cmp_name: str, energy_keV: float, density: float | None = None) -> float
 :canonical: corrct.physics.phase.get_delta_beta
 
 ```{autodoc2-docstring} corrct.physics.phase.get_delta_beta
@@ -82,7 +82,7 @@
 ```
 ````
 
-````{py:function} get_propagation_filter(img_shape: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray], pix_size_um: float, dist_um: float, wlength_um: float, delta_beta: float, filter_type: str = 'ctf', use_rfft: bool = False, plot_result: bool = False, dtype: numpy.typing.DTypeLike = np.float32) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]
+````{py:function} get_propagation_filter(img_shape: collections.abc.Sequence[int] | numpy.typing.NDArray, pix_size_um: float, dist_um: float, wlength_um: float, delta_beta: float, filter_type: str = 'ctf', use_rfft: bool = False, plot_result: bool = False, dtype: numpy.typing.DTypeLike = np.float32) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]
 :canonical: corrct.physics.phase.get_propagation_filter
 
 ```{autodoc2-docstring} corrct.physics.phase.get_propagation_filter

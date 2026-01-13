@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -84,7 +85,7 @@
   <h1>Source code for corrct.physics.units</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Units and conversion.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">overload</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">overload</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy.constants</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">spc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
@@ -194,7 +195,7 @@
 
 <div class="viewcode-block" id="energy_to_wlength">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.units.html#corrct.physics.units.energy_to_wlength">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">energy_to_wlength</span><span class="p">(</span><span class="n">energy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">unit_wl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="n">unit_en</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;keV&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">energy_to_wlength</span><span class="p">(</span><span class="n">energy</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">unit_wl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="n">unit_en</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;keV&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert from energy to wavelength.</span>
 
 <span class="sd">    Parameters</span>
@@ -227,7 +228,7 @@
 
 <div class="viewcode-block" id="wlength_to_energy">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.physics.units.html#corrct.physics.units.wlength_to_energy">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">wlength_to_energy</span><span class="p">(</span><span class="n">w_length</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span> <span class="n">unit_wl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="n">unit_en</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;keV&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wlength_to_energy</span><span class="p">(</span><span class="n">w_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">unit_wl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="n">unit_en</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;keV&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert wavelength to energy.</span>
 
 <span class="sd">    Parameters</span>

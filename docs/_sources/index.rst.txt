@@ -15,6 +15,7 @@ Contents:
    geometry
    physics_model
    attenuation_tutorial
+   param_tuning
    alignment_tools
    apidocs/index
    changelog

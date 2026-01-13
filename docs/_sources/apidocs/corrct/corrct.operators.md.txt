@@ -205,7 +205,7 @@ Bases: {py:obj}`scipy.sparse.linalg.LinearOperator`, {py:obj}`abc.ABC`
 
 `````
 
-`````{py:class} TransformFunctions(dir_shape: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray], adj_shape: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray], A: typing.Callable[[numpy.typing.NDArray], numpy.typing.NDArray], At: typing.Optional[typing.Callable[[numpy.typing.NDArray], numpy.typing.NDArray]] = None)
+`````{py:class} TransformFunctions(dir_shape: numpy.typing.ArrayLike | numpy.typing.NDArray, adj_shape: numpy.typing.ArrayLike | numpy.typing.NDArray, A: collections.abc.Callable[[numpy.typing.NDArray], numpy.typing.NDArray], At: collections.abc.Callable[[numpy.typing.NDArray], numpy.typing.NDArray] | None = None)
 :canonical: corrct.operators.TransformFunctions
 
 Bases: {py:obj}`corrct.operators.BaseTransform`
@@ -305,7 +305,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 ````
 
-````{py:method} get_pre_weights() -> typing.Union[numpy.typing.NDArray, None]
+````{py:method} get_pre_weights() -> numpy.typing.NDArray | None
 :canonical: corrct.operators.ProjectorOperator.get_pre_weights
 
 ```{autodoc2-docstring} corrct.operators.ProjectorOperator.get_pre_weights
@@ -315,7 +315,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 `````
 
-`````{py:class} TransformIdentity(x_shape: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray])
+`````{py:class} TransformIdentity(x_shape: numpy.typing.ArrayLike | numpy.typing.NDArray)
 :canonical: corrct.operators.TransformIdentity
 
 Bases: {py:obj}`corrct.operators.BaseTransform`
@@ -341,7 +341,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 `````
 
-`````{py:class} TransformDiagonalScaling(x_shape: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray], scale: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray])
+`````{py:class} TransformDiagonalScaling(x_shape: numpy.typing.ArrayLike | numpy.typing.NDArray, scale: numpy.typing.ArrayLike | numpy.typing.NDArray)
 :canonical: corrct.operators.TransformDiagonalScaling
 
 Bases: {py:obj}`corrct.operators.BaseTransform`
@@ -559,7 +559,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`, {py:obj}`abc.ABC`
 
 `````
 
-`````{py:class} TransformDecimatedWavelet(x_shape: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray], wavelet: str, level: int, axes: typing.Optional[numpy.typing.ArrayLike] = None, pad_on_demand: str = 'edge')
+`````{py:class} TransformDecimatedWavelet(x_shape: numpy.typing.ArrayLike | numpy.typing.NDArray, wavelet: str, level: int, axes: numpy.typing.ArrayLike | None = None, pad_on_demand: str = 'edge')
 :canonical: corrct.operators.TransformDecimatedWavelet
 
 Bases: {py:obj}`corrct.operators.BaseWaveletTransform`
@@ -601,7 +601,7 @@ Bases: {py:obj}`corrct.operators.BaseWaveletTransform`
 
 `````
 
-`````{py:class} TransformStationaryWavelet(x_shape: numpy.typing.ArrayLike, wavelet: str, level: int, axes: typing.Optional[numpy.typing.ArrayLike] = None, pad_on_demand: str = 'edge', normalized: bool = True)
+`````{py:class} TransformStationaryWavelet(x_shape: numpy.typing.ArrayLike, wavelet: str, level: int, axes: numpy.typing.ArrayLike | None = None, pad_on_demand: str = 'edge', normalized: bool = True)
 :canonical: corrct.operators.TransformStationaryWavelet
 
 Bases: {py:obj}`corrct.operators.BaseWaveletTransform`
@@ -643,7 +643,7 @@ Bases: {py:obj}`corrct.operators.BaseWaveletTransform`
 
 `````
 
-`````{py:class} TransformGradient(x_shape: numpy.typing.ArrayLike, axes: typing.Optional[numpy.typing.ArrayLike] = None, pad_mode: str = 'edge')
+`````{py:class} TransformGradient(x_shape: numpy.typing.ArrayLike, axes: numpy.typing.ArrayLike | None = None, pad_mode: str = 'edge')
 :canonical: corrct.operators.TransformGradient
 
 Bases: {py:obj}`corrct.operators.BaseTransform`
@@ -685,7 +685,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 `````
 
-`````{py:class} TransformFourier(x_shape: numpy.typing.ArrayLike, axes: typing.Optional[numpy.typing.ArrayLike] = None)
+`````{py:class} TransformFourier(x_shape: numpy.typing.ArrayLike, axes: numpy.typing.ArrayLike | None = None)
 :canonical: corrct.operators.TransformFourier
 
 Bases: {py:obj}`corrct.operators.BaseTransform`
@@ -727,7 +727,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 `````
 
-`````{py:class} TransformLaplacian(x_shape: numpy.typing.ArrayLike, axes: typing.Optional[numpy.typing.ArrayLike] = None, pad_mode: str = 'edge')
+`````{py:class} TransformLaplacian(x_shape: numpy.typing.ArrayLike, axes: numpy.typing.ArrayLike | None = None, pad_mode: str = 'edge')
 :canonical: corrct.operators.TransformLaplacian
 
 Bases: {py:obj}`corrct.operators.BaseTransform`
@@ -761,7 +761,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 `````
 
-`````{py:class} TransformSVD(x_shape: numpy.typing.ArrayLike, axes_rows: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray] = (0, ), axes_cols: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray] = (-1, ), rescale: bool = False)
+`````{py:class} TransformSVD(x_shape: numpy.typing.ArrayLike, axes_rows: collections.abc.Sequence[int] | numpy.typing.NDArray = (0, ), axes_cols: collections.abc.Sequence[int] | numpy.typing.NDArray = (-1, ), rescale: bool = False)
 :canonical: corrct.operators.TransformSVD
 
 Bases: {py:obj}`corrct.operators.BaseTransform`
@@ -777,7 +777,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 ````{py:attribute} U
 :canonical: corrct.operators.TransformSVD.U
-:type: typing.Optional[numpy.typing.NDArray]
+:type: numpy.typing.NDArray | None
 :value: >
    None
 
@@ -788,7 +788,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 ````{py:attribute} Vt
 :canonical: corrct.operators.TransformSVD.Vt
-:type: typing.Optional[numpy.typing.NDArray]
+:type: numpy.typing.NDArray | None
 :value: >
    None
 

@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Reconstruction geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../physics_model.html">Physics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
@@ -89,7 +90,6 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -129,12 +129,12 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_dvwu</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
-        <span class="n">rot_angle_rad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">],</span>
+        <span class="n">rot_angle_rad</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArrayFloat</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dvwu&quot;</span><span class="p">,</span>
-        <span class="n">data_mask_dvwu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_mask_dvwu</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">borders_dvwu</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;u&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
-        <span class="n">max_shifts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArrayFloat</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_shifts</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">precision_decimals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
@@ -320,7 +320,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">fit_u</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fit_l1</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">background</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">background</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;com&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the pre-alignment shifts for the horizontal dimension.</span>
@@ -416,12 +416,12 @@
 
 <div class="viewcode-block" id="DetectorShiftsXC.fit_vu_accum_drifts">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.DetectorShiftsXC.fit_vu_accum_drifts">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fit_vu_accum_drifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_data_dvwu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_vu_accum_drifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_data_dvwu</span><span class="p">:</span> <span class="n">NDArrayFloat</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit static image drifts.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        ref_data_dvwu : Optional[NDArrayFloat], optional</span>
+<span class="sd">        ref_data_dvwu : NDArrayFloat | None, optional</span>
 <span class="sd">            Reference image, by default None. If None, the first image in the</span>
 <span class="sd">            data stack will be used.</span>
 

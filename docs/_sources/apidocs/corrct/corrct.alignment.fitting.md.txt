@@ -120,7 +120,7 @@
 ```
 ````
 
-````{py:function} fit_image_rotation_and_scale(img_1_vu: numpy.typing.NDArray, img_2_vu: numpy.typing.NDArray, pad_mode: typing.Union[str, None] = None, window_type: str = 'hann', verbose: bool = False) -> tuple[float, float]
+````{py:function} fit_image_rotation_and_scale(img_1_vu: numpy.typing.NDArray, img_2_vu: numpy.typing.NDArray, pad_mode: str | None = None, window_type: str = 'hann', verbose: bool = False) -> tuple[float, float]
 :canonical: corrct.alignment.fitting.fit_image_rotation_and_scale
 
 ```{autodoc2-docstring} corrct.alignment.fitting.fit_image_rotation_and_scale
@@ -134,7 +134,7 @@
 ```
 ````
 
-````{py:function} sinusoid(x: typing.Union[corrct.alignment.fitting.NDArrayFloat, float], a: typing.Union[corrct.alignment.fitting.NDArrayFloat, float], p: typing.Union[corrct.alignment.fitting.NDArrayFloat, float], b: typing.Union[corrct.alignment.fitting.NDArrayFloat, float]) -> corrct.alignment.fitting.NDArrayFloat
+````{py:function} sinusoid(x: corrct.alignment.fitting.NDArrayFloat | float, a: corrct.alignment.fitting.NDArrayFloat | float, p: corrct.alignment.fitting.NDArrayFloat | float, b: corrct.alignment.fitting.NDArrayFloat | float) -> corrct.alignment.fitting.NDArrayFloat
 :canonical: corrct.alignment.fitting.sinusoid
 
 ```{autodoc2-docstring} corrct.alignment.fitting.sinusoid
@@ -148,28 +148,28 @@
 ```
 ````
 
-````{py:function} extract_peak_regions_1d(cc: corrct.alignment.fitting.NDArrayFloat, axis: int = -1, peak_radius: int = 1, cc_coords: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None) -> tuple[corrct.alignment.fitting.NDArrayFloat, typing.Optional[numpy.typing.NDArray]]
+````{py:function} extract_peak_regions_1d(cc: corrct.alignment.fitting.NDArrayFloat, axis: int = -1, peak_radius: int = 1, cc_coords: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None) -> tuple[corrct.alignment.fitting.NDArrayFloat, numpy.typing.NDArray | None]
 :canonical: corrct.alignment.fitting.extract_peak_regions_1d
 
 ```{autodoc2-docstring} corrct.alignment.fitting.extract_peak_regions_1d
 ```
 ````
 
-````{py:function} refine_max_position_1d(f_vals: corrct.alignment.fitting.NDArrayFloat, f_x: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, return_vertex_val: bool = False, decimals: int = 2) -> typing.Union[corrct.alignment.fitting.NDArrayFloat, tuple[corrct.alignment.fitting.NDArrayFloat, corrct.alignment.fitting.NDArrayFloat]]
+````{py:function} refine_max_position_1d(f_vals: corrct.alignment.fitting.NDArrayFloat, f_x: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, return_vertex_val: bool = False, decimals: int = 2) -> corrct.alignment.fitting.NDArrayFloat | tuple[corrct.alignment.fitting.NDArrayFloat, corrct.alignment.fitting.NDArrayFloat]
 :canonical: corrct.alignment.fitting.refine_max_position_1d
 
 ```{autodoc2-docstring} corrct.alignment.fitting.refine_max_position_1d
 ```
 ````
 
-````{py:function} extract_peak_region_nd(cc: corrct.alignment.fitting.NDArrayFloat, peak_radius: int = 1, cc_coords: typing.Optional[typing.Sequence[typing.Union[typing.Sequence, numpy.typing.NDArray]]] = None) -> tuple[numpy.typing.NDArray, typing.Optional[typing.Sequence[numpy.typing.NDArray]]]
+````{py:function} extract_peak_region_nd(cc: corrct.alignment.fitting.NDArrayFloat, peak_radius: int = 1, cc_coords: collections.abc.Sequence[collections.abc.Sequence | numpy.typing.NDArray] | None = None) -> tuple[numpy.typing.NDArray, collections.abc.Sequence[numpy.typing.NDArray] | None]
 :canonical: corrct.alignment.fitting.extract_peak_region_nd
 
 ```{autodoc2-docstring} corrct.alignment.fitting.extract_peak_region_nd
 ```
 ````
 
-````{py:function} refine_max_position_2d(f_vals: corrct.alignment.fitting.NDArrayFloat, fy: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, fx: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None) -> numpy.typing.NDArray
+````{py:function} refine_max_position_2d(f_vals: corrct.alignment.fitting.NDArrayFloat, fy: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, fx: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None) -> numpy.typing.NDArray
 :canonical: corrct.alignment.fitting.refine_max_position_2d
 
 ```{autodoc2-docstring} corrct.alignment.fitting.refine_max_position_2d

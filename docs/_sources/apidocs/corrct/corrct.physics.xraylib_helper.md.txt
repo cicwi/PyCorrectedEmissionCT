@@ -35,21 +35,21 @@
 
 ### API
 
-````{py:function} get_element_number(element: typing.Union[str, int]) -> int
+````{py:function} get_element_number(element: str | int) -> int
 :canonical: corrct.physics.xraylib_helper.get_element_number
 
 ```{autodoc2-docstring} corrct.physics.xraylib_helper.get_element_number
 ```
 ````
 
-````{py:function} get_element_number_and_symbol(element: typing.Union[str, int]) -> tuple[str, int]
+````{py:function} get_element_number_and_symbol(element: str | int) -> tuple[str, int]
 :canonical: corrct.physics.xraylib_helper.get_element_number_and_symbol
 
 ```{autodoc2-docstring} corrct.physics.xraylib_helper.get_element_number_and_symbol
 ```
 ````
 
-````{py:function} get_compound(cmp_name: str, density: typing.Union[float, None] = None) -> dict
+````{py:function} get_compound(cmp_name: str, density: float | None = None) -> dict
 :canonical: corrct.physics.xraylib_helper.get_compound
 
 ```{autodoc2-docstring} corrct.physics.xraylib_helper.get_compound
