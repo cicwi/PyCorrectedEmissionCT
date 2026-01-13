@@ -53,21 +53,21 @@
 
 ````
 
-````{py:function} compute_variance_poisson(Is: numpy.typing.NDArray, I0: typing.Optional[numpy.typing.NDArray] = None, var_I0: typing.Optional[numpy.typing.NDArray] = None, normalized: bool = True) -> numpy.typing.NDArray
+````{py:function} compute_variance_poisson(Is: numpy.typing.NDArray, I0: numpy.typing.NDArray | None = None, var_I0: numpy.typing.NDArray | None = None, normalized: bool = True) -> numpy.typing.NDArray
 :canonical: corrct.processing.noise.compute_variance_poisson
 
 ```{autodoc2-docstring} corrct.processing.noise.compute_variance_poisson
 ```
 ````
 
-````{py:function} compute_variance_transmission(Is: numpy.typing.NDArray, I0: numpy.typing.NDArray, var_I0: typing.Optional[numpy.typing.NDArray] = None, normalized: bool = True) -> numpy.typing.NDArray
+````{py:function} compute_variance_transmission(Is: numpy.typing.NDArray, I0: numpy.typing.NDArray, var_I0: numpy.typing.NDArray | None = None, normalized: bool = True) -> numpy.typing.NDArray
 :canonical: corrct.processing.noise.compute_variance_transmission
 
 ```{autodoc2-docstring} corrct.processing.noise.compute_variance_transmission
 ```
 ````
 
-````{py:function} compute_variance_weight(variance: numpy.typing.NDArray, *, percentile: float = 0.001, mask: typing.Optional[numpy.typing.NDArray] = None, normalized: bool = False, use_std: bool = False, semilog: bool = False) -> numpy.typing.NDArray
+````{py:function} compute_variance_weight(variance: numpy.typing.NDArray, *, percentile: float = 0.001, mask: numpy.typing.NDArray | None = None, normalized: bool = False, use_std: bool = False, semilog: bool = False) -> numpy.typing.NDArray
 :canonical: corrct.processing.noise.compute_variance_weight
 
 ```{autodoc2-docstring} corrct.processing.noise.compute_variance_weight

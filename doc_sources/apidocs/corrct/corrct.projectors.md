@@ -67,7 +67,7 @@
 
 ````
 
-`````{py:class} ProjectorMatrix(A: typing.Union[numpy.typing.NDArray, scipy.sparse.spmatrix], vol_shape: numpy.typing.ArrayLike, prj_shape: numpy.typing.ArrayLike)
+`````{py:class} ProjectorMatrix(A: numpy.typing.NDArray | scipy.sparse.spmatrix, vol_shape: numpy.typing.ArrayLike, prj_shape: numpy.typing.ArrayLike)
 :canonical: corrct.projectors.ProjectorMatrix
 
 Bases: {py:obj}`corrct.operators.ProjectorOperator`
@@ -83,7 +83,7 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 
 ````{py:attribute} A
 :canonical: corrct.projectors.ProjectorMatrix.A
-:type: typing.Union[numpy.typing.NDArray, scipy.sparse.spmatrix]
+:type: numpy.typing.NDArray | scipy.sparse.spmatrix
 :value: >
    None
 
@@ -126,7 +126,7 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 
 `````
 
-`````{py:class} ProjectorUncorrected(vol_geom: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray[numpy.integer], corrct.models.VolumeGeometry], angles_rot_rad: typing.Union[collections.abc.Sequence[float], numpy.typing.NDArray], rot_axis_shift_pix: typing.Union[float, numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, *, prj_geom: typing.Optional[corrct.models.ProjectionGeometry] = None, prj_intensities: typing.Optional[numpy.typing.ArrayLike] = None, psf: typing.Optional[numpy.typing.ArrayLike] = None, backend: typing.Union[str, corrct._projector_backends.ProjectorBackend] = 'astra' if astra_available else 'skimage', create_single_projs: bool = False)
+`````{py:class} ProjectorUncorrected(vol_geom: collections.abc.Sequence[int] | numpy.typing.NDArray[numpy.integer] | corrct.models.VolumeGeometry, angles_rot_rad: collections.abc.Sequence[float] | numpy.typing.NDArray, rot_axis_shift_pix: float | numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, *, prj_geom: corrct.models.ProjectionGeometry | None = None, prj_intensities: numpy.typing.ArrayLike | None = None, psf: numpy.typing.ArrayLike | None = None, backend: str | corrct._projector_backends.ProjectorBackend = 'astra' if astra_available else 'skimage', create_single_projs: bool = False)
 :canonical: corrct.projectors.ProjectorUncorrected
 
 Bases: {py:obj}`corrct.operators.ProjectorOperator`
@@ -164,7 +164,7 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 
 ````{py:attribute} prj_intensities
 :canonical: corrct.projectors.ProjectorUncorrected.prj_intensities
-:type: typing.Union[numpy.typing.NDArray[numpy.floating], None]
+:type: numpy.typing.NDArray[numpy.floating] | None
 :value: >
    None
 
@@ -175,7 +175,7 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 
 ````{py:attribute} psf
 :canonical: corrct.projectors.ProjectorUncorrected.psf
-:type: typing.Union[numpy.typing.NDArray[numpy.floating], float, None]
+:type: numpy.typing.NDArray[numpy.floating] | float | None
 :value: >
    None
 
@@ -209,7 +209,7 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 
 ````
 
-````{py:method} _set_psf(psf: typing.Optional[numpy.typing.ArrayLike], is_conv_symm: bool = False) -> None
+````{py:method} _set_psf(psf: numpy.typing.ArrayLike | None, is_conv_symm: bool = False) -> None
 :canonical: corrct.projectors.ProjectorUncorrected._set_psf
 
 ```{autodoc2-docstring} corrct.projectors.ProjectorUncorrected._set_psf
@@ -217,7 +217,7 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 
 ````
 
-````{py:method} get_pre_weights() -> typing.Union[numpy.typing.NDArray, None]
+````{py:method} get_pre_weights() -> numpy.typing.NDArray | None
 :canonical: corrct.projectors.ProjectorUncorrected.get_pre_weights
 
 ```{autodoc2-docstring} corrct.projectors.ProjectorUncorrected.get_pre_weights
@@ -259,7 +259,7 @@ Bases: {py:obj}`corrct.operators.ProjectorOperator`
 
 `````
 
-`````{py:class} ProjectorAttenuationXRF(vol_geom: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray[numpy.integer], corrct.models.VolumeGeometry], angles_rot_rad: typing.Union[collections.abc.Sequence[float], numpy.typing.NDArray], rot_axis_shift_pix: typing.Union[float, numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, *, prj_geom: typing.Optional[corrct.models.ProjectionGeometry] = None, prj_intensities: typing.Optional[numpy.typing.ArrayLike] = None, backend: typing.Union[str, corrct._projector_backends.ProjectorBackend] = 'astra' if astra_available else 'skimage', att_maps: typing.Optional[numpy.typing.NDArray[numpy.floating]] = None, att_in: typing.Optional[numpy.typing.NDArray[numpy.floating]] = None, att_out: typing.Optional[numpy.typing.NDArray[numpy.floating]] = None, angles_detectors_rad: typing.Union[float, numpy.typing.ArrayLike] = np.pi / 2, weights_detectors: typing.Optional[numpy.typing.ArrayLike] = None, psf: typing.Optional[numpy.typing.ArrayLike] = None, is_symmetric: bool = False, weights_angles: typing.Optional[numpy.typing.ArrayLike] = None, use_multithreading: bool = True, data_type: numpy.typing.DTypeLike = np.float32, verbose: bool = True)
+`````{py:class} ProjectorAttenuationXRF(vol_geom: collections.abc.Sequence[int] | numpy.typing.NDArray[numpy.integer] | corrct.models.VolumeGeometry, angles_rot_rad: collections.abc.Sequence[float] | numpy.typing.NDArray, rot_axis_shift_pix: float | numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, *, prj_geom: corrct.models.ProjectionGeometry | None = None, prj_intensities: numpy.typing.ArrayLike | None = None, backend: str | corrct._projector_backends.ProjectorBackend = 'astra' if astra_available else 'skimage', att_maps: numpy.typing.NDArray[numpy.floating] | None = None, att_in: numpy.typing.NDArray[numpy.floating] | None = None, att_out: numpy.typing.NDArray[numpy.floating] | None = None, angles_detectors_rad: float | numpy.typing.ArrayLike = np.pi / 2, weights_detectors: numpy.typing.ArrayLike | None = None, psf: numpy.typing.ArrayLike | None = None, is_symmetric: bool = False, weights_angles: numpy.typing.ArrayLike | None = None, use_multithreading: bool = True, data_type: numpy.typing.DTypeLike = np.float32, verbose: bool = True)
 :canonical: corrct.projectors.ProjectorAttenuationXRF
 
 Bases: {py:obj}`corrct.projectors.ProjectorUncorrected`
@@ -286,7 +286,7 @@ Bases: {py:obj}`corrct.projectors.ProjectorUncorrected`
 
 ````{py:attribute} executor
 :canonical: corrct.projectors.ProjectorAttenuationXRF.executor
-:type: typing.Union[concurrent.futures.ThreadPoolExecutor, None]
+:type: concurrent.futures.ThreadPoolExecutor | None
 :value: >
    None
 

@@ -23,7 +23,7 @@
 
 ### API
 
-`````{py:class} RecenterVolume(proj_geom: corrct.models.ProjectionGeometry, angles_rad: typing.Union[numpy.typing.NDArray, numpy.typing.ArrayLike], precision: int = 2)
+`````{py:class} RecenterVolume(proj_geom: corrct.models.ProjectionGeometry, angles_rad: numpy.typing.NDArray | numpy.typing.ArrayLike, precision: int = 2)
 :canonical: corrct.alignment.centering.RecenterVolume
 
 ```{autodoc2-docstring} corrct.alignment.centering.RecenterVolume
@@ -43,7 +43,7 @@
 
 ````
 
-````{py:method} to_com(shifts_vu: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray], volume: numpy.typing.NDArray, com_ref_zyx: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray]) -> numpy.typing.NDArray
+````{py:method} to_com(shifts_vu: numpy.typing.ArrayLike | numpy.typing.NDArray, volume: numpy.typing.NDArray, com_ref_zyx: numpy.typing.ArrayLike | numpy.typing.NDArray) -> numpy.typing.NDArray
 :canonical: corrct.alignment.centering.RecenterVolume.to_com
 
 ```{autodoc2-docstring} corrct.alignment.centering.RecenterVolume.to_com

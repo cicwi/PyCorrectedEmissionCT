@@ -77,7 +77,7 @@
 
 ````
 
-````{py:function} roundup_to_pow2(x: typing.Union[int, float, corrct.testing.NDArrayFloat], p: int, dtype: numpy.typing.DTypeLike = int) -> typing.Union[int, float, corrct.testing.NDArrayFloat]
+````{py:function} roundup_to_pow2(x: int | float | corrct.testing.NDArrayFloat, p: int, dtype: numpy.typing.DTypeLike = int) -> int | float | corrct.testing.NDArrayFloat
 :canonical: corrct.testing.roundup_to_pow2
 
 ```{autodoc2-docstring} corrct.testing.roundup_to_pow2
@@ -91,7 +91,7 @@
 ```
 ````
 
-````{py:function} create_phantom_nuclei3d(FoV_size: typing.Union[int, None] = 100, dtype: numpy.typing.DTypeLike = np.float32) -> tuple[corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat]
+````{py:function} create_phantom_nuclei3d(FoV_size: int | None = 100, dtype: numpy.typing.DTypeLike = np.float32) -> tuple[corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat]
 :canonical: corrct.testing.create_phantom_nuclei3d
 
 ```{autodoc2-docstring} corrct.testing.create_phantom_nuclei3d
@@ -105,28 +105,28 @@
 ```
 ````
 
-````{py:function} phantom_assign_concentration_multi(ph_or: corrct.testing.NDArrayFloat, elements: collections.abc.Sequence[str] = ('Ca', 'Fe'), em_lines: typing.Union[str, collections.abc.Sequence[str]] = 'KA', in_energy_keV: float = 20.0, detectors_pos_rad: typing.Optional[float] = None) -> tuple[list[corrct.testing.NDArrayFloat], corrct.testing.NDArrayFloat, list[corrct.testing.NDArrayFloat]]
+````{py:function} phantom_assign_concentration_multi(ph_or: corrct.testing.NDArrayFloat, elements: collections.abc.Sequence[str] = ('Ca', 'Fe'), em_lines: str | collections.abc.Sequence[str] = 'KA', in_energy_keV: float = 20.0, detectors_pos_rad: float | None = None) -> tuple[list[corrct.testing.NDArrayFloat], corrct.testing.NDArrayFloat, list[corrct.testing.NDArrayFloat]]
 :canonical: corrct.testing.phantom_assign_concentration_multi
 
 ```{autodoc2-docstring} corrct.testing.phantom_assign_concentration_multi
 ```
 ````
 
-````{py:function} add_noise(img_clean: numpy.typing.NDArray, num_photons: typing.Union[int, float], add_poisson: bool = False, readout_noise_std: typing.Optional[float] = None, background_avg: typing.Optional[float] = None, background_std: typing.Optional[float] = None, detection_efficiency: float = 1.0, dtype: numpy.typing.DTypeLike = np.float32) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray, float]
+````{py:function} add_noise(img_clean: numpy.typing.NDArray, num_photons: int | float, add_poisson: bool = False, readout_noise_std: float | None = None, background_avg: float | None = None, background_std: float | None = None, detection_efficiency: float = 1.0, dtype: numpy.typing.DTypeLike = np.float32) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray, float]
 :canonical: corrct.testing.add_noise
 
 ```{autodoc2-docstring} corrct.testing.add_noise
 ```
 ````
 
-````{py:function} create_sino(ph: corrct.testing.NDArrayFloat, num_angles: int, start_angle_deg: float = 0.0, end_angle_deg: float = 180.0, dwell_time_s: float = 1.0, photon_flux: float = 1000000000.0, detectors_pos_rad: typing.Union[float, collections.abc.Sequence[float], corrct.testing.NDArrayFloat] = np.pi / 2, vol_att_in: typing.Optional[corrct.testing.NDArrayFloat] = None, vol_att_out: typing.Optional[corrct.testing.NDArrayFloat] = None, psf: typing.Optional[corrct.testing.NDArrayFloat] = None, background_avg: typing.Optional[float] = None, background_std: typing.Optional[float] = None, add_poisson: bool = False, readout_noise_std: typing.Optional[float] = None, dtype: numpy.typing.DTypeLike = np.float32) -> tuple[corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat, float]
+````{py:function} create_sino(ph: corrct.testing.NDArrayFloat, num_angles: int, start_angle_deg: float = 0.0, end_angle_deg: float = 180.0, dwell_time_s: float = 1.0, photon_flux: float = 1000000000.0, detectors_pos_rad: float | collections.abc.Sequence[float] | corrct.testing.NDArrayFloat = np.pi / 2, vol_att_in: corrct.testing.NDArrayFloat | None = None, vol_att_out: corrct.testing.NDArrayFloat | None = None, psf: corrct.testing.NDArrayFloat | None = None, background_avg: float | None = None, background_std: float | None = None, add_poisson: bool = False, readout_noise_std: float | None = None, dtype: numpy.typing.DTypeLike = np.float32) -> tuple[corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat, float]
 :canonical: corrct.testing.create_sino
 
 ```{autodoc2-docstring} corrct.testing.create_sino
 ```
 ````
 
-````{py:function} create_sino_transmission(ph: corrct.testing.NDArrayFloat, num_angles: int, start_angle_deg: float = 0, end_angle_deg: float = 180, dwell_time_s: float = 1, photon_flux: float = 1000000000.0, psf: typing.Optional[corrct.testing.NDArrayFloat] = None, add_poisson: bool = False, readout_noise_std: typing.Optional[float] = None, dtype: numpy.typing.DTypeLike = np.float32) -> tuple[corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat]
+````{py:function} create_sino_transmission(ph: corrct.testing.NDArrayFloat, num_angles: int, start_angle_deg: float = 0, end_angle_deg: float = 180, dwell_time_s: float = 1, photon_flux: float = 1000000000.0, psf: corrct.testing.NDArrayFloat | None = None, add_poisson: bool = False, readout_noise_std: float | None = None, dtype: numpy.typing.DTypeLike = np.float32) -> tuple[corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat, corrct.testing.NDArrayFloat]
 :canonical: corrct.testing.create_sino_transmission
 
 ```{autodoc2-docstring} corrct.testing.create_sino_transmission

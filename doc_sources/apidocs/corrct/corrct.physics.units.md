@@ -117,14 +117,14 @@
 
 `````
 
-````{py:function} energy_to_wlength(energy: typing.Union[float, numpy.typing.NDArray], unit_wl: str = 'm', unit_en: str = 'keV') -> typing.Union[float, numpy.typing.NDArray]
+````{py:function} energy_to_wlength(energy: float | numpy.typing.NDArray, unit_wl: str = 'm', unit_en: str = 'keV') -> float | numpy.typing.NDArray
 :canonical: corrct.physics.units.energy_to_wlength
 
 ```{autodoc2-docstring} corrct.physics.units.energy_to_wlength
 ```
 ````
 
-````{py:function} wlength_to_energy(w_length: typing.Union[float, numpy.typing.NDArray], unit_wl: str = 'm', unit_en: str = 'keV') -> typing.Union[float, numpy.typing.NDArray]
+````{py:function} wlength_to_energy(w_length: float | numpy.typing.NDArray, unit_wl: str = 'm', unit_en: str = 'keV') -> float | numpy.typing.NDArray
 :canonical: corrct.physics.units.wlength_to_energy
 
 ```{autodoc2-docstring} corrct.physics.units.wlength_to_energy

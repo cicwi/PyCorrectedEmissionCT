@@ -107,7 +107,7 @@
 
 ````
 
-`````{py:class} AttenuationVolume(incident_local: typing.Union[corrct.physics.attenuation.NDArrayFloat, None], emitted_local: typing.Union[corrct.physics.attenuation.NDArrayFloat, None], angles_rot_rad: typing.Union[corrct.physics.attenuation.NDArrayFloat, collections.abc.Sequence[float]], angles_det_rad: typing.Union[corrct.physics.attenuation.NDArrayFloat, collections.abc.Sequence[typing.Union[float, corrct.physics.xrf.DetectorXRF]], float, corrct.physics.xrf.DetectorXRF] = np.pi / 2, emitted_sub_sampling: int = 1, dtype: numpy.typing.DTypeLike = np.float32)
+`````{py:class} AttenuationVolume(incident_local: corrct.physics.attenuation.NDArrayFloat | None, emitted_local: corrct.physics.attenuation.NDArrayFloat | None, angles_rot_rad: corrct.physics.attenuation.NDArrayFloat | collections.abc.Sequence[float], angles_det_rad: corrct.physics.attenuation.NDArrayFloat | collections.abc.Sequence[float | corrct.physics.xrf.DetectorXRF] | float | corrct.physics.xrf.DetectorXRF = np.pi / 2, emitted_sub_sampling: int = 1, dtype: numpy.typing.DTypeLike = np.float32)
 :canonical: corrct.physics.attenuation.AttenuationVolume
 
 ```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume
@@ -121,7 +121,7 @@
 
 ````{py:attribute} incident_local
 :canonical: corrct.physics.attenuation.AttenuationVolume.incident_local
-:type: typing.Union[corrct.physics.attenuation.NDArrayFloat, None]
+:type: corrct.physics.attenuation.NDArrayFloat | None
 :value: >
    None
 
@@ -132,7 +132,7 @@
 
 ````{py:attribute} emitted_local
 :canonical: corrct.physics.attenuation.AttenuationVolume.emitted_local
-:type: typing.Union[corrct.physics.attenuation.NDArrayFloat, None]
+:type: corrct.physics.attenuation.NDArrayFloat | None
 :value: >
    None
 
@@ -239,7 +239,7 @@
 
 ````
 
-````{py:method} plot_map(ax: matplotlib.axes._axes.Axes, rot_ind: int, det_ind: int = 0, slice_ind: typing.Optional[int] = None, axes: typing.Union[collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt] = (-2, -1)) -> collections.abc.Sequence[float]
+````{py:method} plot_map(ax: matplotlib.axes._axes.Axes, rot_ind: int, det_ind: int = 0, slice_ind: int | None = None, axes: collections.abc.Sequence[int] | corrct.physics.attenuation.NDArrayInt = (-2, -1)) -> collections.abc.Sequence[float]
 :canonical: corrct.physics.attenuation.AttenuationVolume.plot_map
 
 ```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume.plot_map
@@ -247,7 +247,7 @@
 
 ````
 
-````{py:method} get_maps(roi: typing.Optional[numpy.typing.ArrayLike] = None, rot_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None, det_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None, binning: int = 1) -> numpy.typing.NDArray
+````{py:method} get_maps(roi: numpy.typing.ArrayLike | None = None, rot_ind: int | slice | collections.abc.Sequence[int] | corrct.physics.attenuation.NDArrayInt | None = None, det_ind: int | slice | collections.abc.Sequence[int] | corrct.physics.attenuation.NDArrayInt | None = None, binning: int = 1) -> numpy.typing.NDArray
 :canonical: corrct.physics.attenuation.AttenuationVolume.get_maps
 
 ```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume.get_maps
@@ -255,7 +255,7 @@
 
 ````
 
-````{py:method} get_projector_args(roi: typing.Optional[numpy.typing.ArrayLike] = None, rot_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None, det_ind: typing.Union[int, slice, collections.abc.Sequence[int], corrct.physics.attenuation.NDArrayInt, None] = None, binning: int = 1) -> dict[str, numpy.typing.NDArray]
+````{py:method} get_projector_args(roi: numpy.typing.ArrayLike | None = None, rot_ind: int | slice | collections.abc.Sequence[int] | corrct.physics.attenuation.NDArrayInt | None = None, det_ind: int | slice | collections.abc.Sequence[int] | corrct.physics.attenuation.NDArrayInt | None = None, binning: int = 1) -> dict[str, numpy.typing.NDArray]
 :canonical: corrct.physics.attenuation.AttenuationVolume.get_projector_args
 
 ```{autodoc2-docstring} corrct.physics.attenuation.AttenuationVolume.get_projector_args
@@ -265,21 +265,21 @@
 
 `````
 
-````{py:function} get_linear_attenuation_coefficient(compound: typing.Union[str, dict], energy_keV: float, pixel_size_um: float, density: typing.Union[float, None] = None) -> float
+````{py:function} get_linear_attenuation_coefficient(compound: str | dict, energy_keV: float, pixel_size_um: float, density: float | None = None) -> float
 :canonical: corrct.physics.attenuation.get_linear_attenuation_coefficient
 
 ```{autodoc2-docstring} corrct.physics.attenuation.get_linear_attenuation_coefficient
 ```
 ````
 
-````{py:function} plot_emission_line_attenuation(compound: typing.Union[str, dict], thickness_um: float, mean_energy_keV: float, fwhm_keV: float, line_shape: str = 'lorentzian', num_points: int = 201, plot_lines_mean: bool = True) -> None
+````{py:function} plot_emission_line_attenuation(compound: str | dict, thickness_um: float, mean_energy_keV: float, fwhm_keV: float, line_shape: str = 'lorentzian', num_points: int = 201, plot_lines_mean: bool = True) -> None
 :canonical: corrct.physics.attenuation.plot_emission_line_attenuation
 
 ```{autodoc2-docstring} corrct.physics.attenuation.plot_emission_line_attenuation
 ```
 ````
 
-````{py:function} plot_transmittance_decay(compounds: typing.Union[str, dict, collections.abc.Sequence[typing.Union[str, dict]]], mean_energy_keV: float, thickness_range_um: tuple[float, float, int] = (0.0, 10.0, 101)) -> None
+````{py:function} plot_transmittance_decay(compounds: str | dict | collections.abc.Sequence[str | dict], mean_energy_keV: float, thickness_range_um: tuple[float, float, int] = (0.0, 10.0, 101)) -> None
 :canonical: corrct.physics.attenuation.plot_transmittance_decay
 
 ```{autodoc2-docstring} corrct.physics.attenuation.plot_transmittance_decay

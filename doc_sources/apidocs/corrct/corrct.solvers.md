@@ -83,7 +83,7 @@
 
 ````
 
-`````{py:class} SolutionInfo(method: str, max_iterations: int, tolerance: typing.Union[float, numpy.floating, None], residual0: float = np.inf, residual0_cv: float = np.inf)
+`````{py:class} SolutionInfo(method: str, max_iterations: int, tolerance: float | numpy.floating | None, residual0: float = np.inf, residual0_cv: float = np.inf)
 :canonical: corrct.solvers.SolutionInfo
 
 ```{autodoc2-docstring} corrct.solvers.SolutionInfo
@@ -130,7 +130,7 @@
 
 ````{py:attribute} residual0
 :canonical: corrct.solvers.SolutionInfo.residual0
-:type: typing.Union[float, numpy.floating]
+:type: float | numpy.floating
 :value: >
    None
 
@@ -141,7 +141,7 @@
 
 ````{py:attribute} residual0_cv
 :canonical: corrct.solvers.SolutionInfo.residual0_cv
-:type: typing.Union[float, numpy.floating]
+:type: float | numpy.floating
 :value: >
    None
 
@@ -174,7 +174,7 @@
 
 ````{py:attribute} tolerance
 :canonical: corrct.solvers.SolutionInfo.tolerance
-:type: typing.Union[float, numpy.floating, None]
+:type: float | numpy.floating | None
 :value: >
    None
 
@@ -203,7 +203,7 @@
 
 `````
 
-`````{py:class} Solver(verbose: bool = False, leave_progress: bool = True, relaxation: float = 1.0, tolerance: typing.Optional[float] = None, data_term: typing.Union[str, corrct.data_terms.DataFidelityBase] = 'l2', data_term_test: typing.Union[str, corrct.data_terms.DataFidelityBase, None] = None)
+`````{py:class} Solver(verbose: bool = False, leave_progress: bool = True, relaxation: float = 1.0, tolerance: float | None = None, data_term: str | corrct.data_terms.DataFidelityBase = 'l2', data_term_test: str | corrct.data_terms.DataFidelityBase | None = None)
 :canonical: corrct.solvers.Solver
 
 Bases: {py:obj}`abc.ABC`
@@ -250,7 +250,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} _initialize_data_fidelity_function(data_term: typing.Union[str, corrct.data_terms.DataFidelityBase]) -> corrct.data_terms.DataFidelityBase
+````{py:method} _initialize_data_fidelity_function(data_term: str | corrct.data_terms.DataFidelityBase) -> corrct.data_terms.DataFidelityBase
 :canonical: corrct.solvers.Solver._initialize_data_fidelity_function
 :staticmethod:
 
@@ -259,7 +259,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} _initialize_regularizer(regularizer: typing.Union[corrct.regularizers.BaseRegularizer, None, collections.abc.Sequence[corrct.regularizers.BaseRegularizer]]) -> collections.abc.Sequence[corrct.regularizers.BaseRegularizer]
+````{py:method} _initialize_regularizer(regularizer: corrct.regularizers.BaseRegularizer | None | collections.abc.Sequence[corrct.regularizers.BaseRegularizer]) -> collections.abc.Sequence[corrct.regularizers.BaseRegularizer]
 :canonical: corrct.solvers.Solver._initialize_regularizer
 :staticmethod:
 
@@ -268,7 +268,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} _initialize_b_masks(b: corrct.solvers.NDArrayFloat, b_mask: typing.Optional[corrct.solvers.NDArrayFloat], b_test_mask: typing.Optional[corrct.solvers.NDArrayFloat]) -> tuple[typing.Optional[corrct.solvers.NDArrayFloat], typing.Optional[corrct.solvers.NDArrayFloat]]
+````{py:method} _initialize_b_masks(b: corrct.solvers.NDArrayFloat, b_mask: corrct.solvers.NDArrayFloat | None, b_test_mask: corrct.solvers.NDArrayFloat | None) -> tuple[corrct.solvers.NDArrayFloat | None, corrct.solvers.NDArrayFloat | None]
 :canonical: corrct.solvers.Solver._initialize_b_masks
 :staticmethod:
 
@@ -279,7 +279,7 @@ Bases: {py:obj}`abc.ABC`
 
 `````
 
-`````{py:class} FBP(verbose: bool = False, leave_progress: bool = False, regularizer: typing.Union[collections.abc.Sequence[corrct.regularizers.BaseRegularizer], corrct.regularizers.BaseRegularizer, None] = None, data_term: typing.Union[str, corrct.data_terms.DataFidelityBase] = 'l2', fbp_filter: typing.Union[str, corrct.solvers.NDArrayFloat, corrct.filters.Filter] = 'ramp', pad_mode: str = 'constant')
+`````{py:class} FBP(verbose: bool = False, leave_progress: bool = False, regularizer: collections.abc.Sequence[corrct.regularizers.BaseRegularizer] | corrct.regularizers.BaseRegularizer | None = None, data_term: str | corrct.data_terms.DataFidelityBase = 'l2', fbp_filter: str | corrct.solvers.NDArrayFloat | corrct.filters.Filter = 'ramp', pad_mode: str = 'constant')
 :canonical: corrct.solvers.FBP
 
 Bases: {py:obj}`corrct.solvers.Solver`
@@ -301,7 +301,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 
 ````
 
-````{py:method} __call__(A: corrct.operators.BaseTransform, b: corrct.solvers.NDArrayFloat, iterations: int = 0, x0: typing.Optional[corrct.solvers.NDArrayFloat] = None, lower_limit: typing.Union[float, corrct.solvers.NDArrayFloat, None] = None, upper_limit: typing.Union[float, corrct.solvers.NDArrayFloat, None] = None, x_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None, b_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None) -> tuple[corrct.solvers.NDArrayFloat, corrct.solvers.SolutionInfo]
+````{py:method} __call__(A: corrct.operators.BaseTransform, b: corrct.solvers.NDArrayFloat, iterations: int = 0, x0: corrct.solvers.NDArrayFloat | None = None, lower_limit: float | corrct.solvers.NDArrayFloat | None = None, upper_limit: float | corrct.solvers.NDArrayFloat | None = None, x_mask: corrct.solvers.NDArrayFloat | None = None, b_mask: corrct.solvers.NDArrayFloat | None = None) -> tuple[corrct.solvers.NDArrayFloat, corrct.solvers.SolutionInfo]
 :canonical: corrct.solvers.FBP.__call__
 
 ```{autodoc2-docstring} corrct.solvers.FBP.__call__
@@ -311,7 +311,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 
 `````
 
-`````{py:class} SART(verbose: bool = False, leave_progress: bool = True, relaxation: float = 1.0, tolerance: typing.Optional[float] = None, data_term: typing.Union[str, corrct.data_terms.DataFidelityBase] = 'l2', data_term_test: typing.Union[str, corrct.data_terms.DataFidelityBase, None] = None)
+`````{py:class} SART(verbose: bool = False, leave_progress: bool = True, relaxation: float = 1.0, tolerance: float | None = None, data_term: str | corrct.data_terms.DataFidelityBase = 'l2', data_term_test: str | corrct.data_terms.DataFidelityBase | None = None)
 :canonical: corrct.solvers.SART
 
 Bases: {py:obj}`corrct.solvers.Solver`
@@ -325,7 +325,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 ```{autodoc2-docstring} corrct.solvers.SART.__init__
 ```
 
-````{py:method} compute_residual(A: typing.Callable, b: corrct.solvers.NDArrayFloat, x: corrct.solvers.NDArrayFloat, A_num_rows: int, b_mask: typing.Optional[corrct.solvers.NDArrayFloat]) -> corrct.solvers.NDArrayFloat
+````{py:method} compute_residual(A: collections.abc.Callable, b: corrct.solvers.NDArrayFloat, x: corrct.solvers.NDArrayFloat, A_num_rows: int, b_mask: corrct.solvers.NDArrayFloat | None) -> corrct.solvers.NDArrayFloat
 :canonical: corrct.solvers.SART.compute_residual
 
 ```{autodoc2-docstring} corrct.solvers.SART.compute_residual
@@ -333,7 +333,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 
 ````
 
-````{py:method} __call__(A: typing.Union[typing.Callable[[numpy.typing.NDArray, int], numpy.typing.NDArray], corrct.projectors.ProjectorUncorrected], b: corrct.solvers.NDArrayFloat, iterations: int, A_num_rows: typing.Optional[int] = None, At: typing.Optional[typing.Callable] = None, x0: typing.Optional[corrct.solvers.NDArrayFloat] = None, lower_limit: typing.Union[float, corrct.solvers.NDArrayFloat, None] = None, upper_limit: typing.Union[float, corrct.solvers.NDArrayFloat, None] = None, x_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None, b_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None) -> tuple[corrct.solvers.NDArrayFloat, corrct.solvers.SolutionInfo]
+````{py:method} __call__(A: collections.abc.Callable[[numpy.typing.NDArray, int], numpy.typing.NDArray] | corrct.projectors.ProjectorUncorrected, b: corrct.solvers.NDArrayFloat, iterations: int, A_num_rows: int | None = None, At: collections.abc.Callable | None = None, x0: corrct.solvers.NDArrayFloat | None = None, lower_limit: float | corrct.solvers.NDArrayFloat | None = None, upper_limit: float | corrct.solvers.NDArrayFloat | None = None, x_mask: corrct.solvers.NDArrayFloat | None = None, b_mask: corrct.solvers.NDArrayFloat | None = None) -> tuple[corrct.solvers.NDArrayFloat, corrct.solvers.SolutionInfo]
 :canonical: corrct.solvers.SART.__call__
 
 ```{autodoc2-docstring} corrct.solvers.SART.__call__
@@ -343,7 +343,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 
 `````
 
-`````{py:class} MLEM(verbose: bool = False, leave_progress: bool = True, tolerance: typing.Optional[float] = None, regularizer: typing.Union[collections.abc.Sequence[corrct.regularizers.BaseRegularizer], corrct.regularizers.BaseRegularizer, None] = None, data_term: typing.Union[str, corrct.data_terms.DataFidelityBase] = 'kl', data_term_test: typing.Union[str, corrct.data_terms.DataFidelityBase, None] = None)
+`````{py:class} MLEM(verbose: bool = False, leave_progress: bool = True, tolerance: float | None = None, regularizer: collections.abc.Sequence[corrct.regularizers.BaseRegularizer] | corrct.regularizers.BaseRegularizer | None = None, data_term: str | corrct.data_terms.DataFidelityBase = 'kl', data_term_test: str | corrct.data_terms.DataFidelityBase | None = None)
 :canonical: corrct.solvers.MLEM
 
 Bases: {py:obj}`corrct.solvers.Solver`
@@ -365,7 +365,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 
 ````
 
-````{py:method} __call__(A: corrct.operators.BaseTransform, b: corrct.solvers.NDArrayFloat, iterations: int, x0: typing.Optional[corrct.solvers.NDArrayFloat] = None, lower_limit: typing.Union[float, corrct.solvers.NDArrayFloat, None] = None, upper_limit: typing.Union[float, corrct.solvers.NDArrayFloat, None] = None, x_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None, b_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None, b_test_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None) -> tuple[corrct.solvers.NDArrayFloat, corrct.solvers.SolutionInfo]
+````{py:method} __call__(A: corrct.operators.BaseTransform, b: corrct.solvers.NDArrayFloat, iterations: int, x0: corrct.solvers.NDArrayFloat | None = None, lower_limit: float | corrct.solvers.NDArrayFloat | None = None, upper_limit: float | corrct.solvers.NDArrayFloat | None = None, x_mask: corrct.solvers.NDArrayFloat | None = None, b_mask: corrct.solvers.NDArrayFloat | None = None, b_test_mask: corrct.solvers.NDArrayFloat | None = None) -> tuple[corrct.solvers.NDArrayFloat, corrct.solvers.SolutionInfo]
 :canonical: corrct.solvers.MLEM.__call__
 
 ```{autodoc2-docstring} corrct.solvers.MLEM.__call__
@@ -375,7 +375,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 
 `````
 
-`````{py:class} SIRT(verbose: bool = False, leave_progress: bool = True, relaxation: float = 1.95, tolerance: typing.Optional[float] = None, regularizer: typing.Union[collections.abc.Sequence[corrct.regularizers.BaseRegularizer], corrct.regularizers.BaseRegularizer, None] = None, data_term: typing.Union[str, corrct.data_terms.DataFidelityBase] = 'l2', data_term_test: typing.Union[str, corrct.data_terms.DataFidelityBase, None] = None)
+`````{py:class} SIRT(verbose: bool = False, leave_progress: bool = True, relaxation: float = 1.95, tolerance: float | None = None, regularizer: collections.abc.Sequence[corrct.regularizers.BaseRegularizer] | corrct.regularizers.BaseRegularizer | None = None, data_term: str | corrct.data_terms.DataFidelityBase = 'l2', data_term_test: str | corrct.data_terms.DataFidelityBase | None = None)
 :canonical: corrct.solvers.SIRT
 
 Bases: {py:obj}`corrct.solvers.Solver`
@@ -397,7 +397,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 
 ````
 
-````{py:method} __call__(A: corrct.operators.BaseTransform, b: corrct.solvers.NDArrayFloat, iterations: int, x0: typing.Optional[corrct.solvers.NDArrayFloat] = None, lower_limit: typing.Union[float, corrct.solvers.NDArrayFloat, None] = None, upper_limit: typing.Union[float, corrct.solvers.NDArrayFloat, None] = None, x_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None, b_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None, b_test_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None) -> tuple[corrct.solvers.NDArrayFloat, corrct.solvers.SolutionInfo]
+````{py:method} __call__(A: corrct.operators.BaseTransform, b: corrct.solvers.NDArrayFloat, iterations: int, x0: corrct.solvers.NDArrayFloat | None = None, lower_limit: float | corrct.solvers.NDArrayFloat | None = None, upper_limit: float | corrct.solvers.NDArrayFloat | None = None, x_mask: corrct.solvers.NDArrayFloat | None = None, b_mask: corrct.solvers.NDArrayFloat | None = None, b_test_mask: corrct.solvers.NDArrayFloat | None = None) -> tuple[corrct.solvers.NDArrayFloat, corrct.solvers.SolutionInfo]
 :canonical: corrct.solvers.SIRT.__call__
 
 ```{autodoc2-docstring} corrct.solvers.SIRT.__call__
@@ -407,7 +407,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 
 `````
 
-`````{py:class} PDHG(verbose: bool = False, leave_progress: bool = True, tolerance: typing.Optional[float] = None, relaxation: float = 0.95, regularizer: typing.Union[collections.abc.Sequence[corrct.regularizers.BaseRegularizer], corrct.regularizers.BaseRegularizer, None] = None, data_term: typing.Union[str, corrct.data_terms.DataFidelityBase] = 'l2', data_term_test: typing.Union[str, corrct.data_terms.DataFidelityBase, None] = None)
+`````{py:class} PDHG(verbose: bool = False, leave_progress: bool = True, tolerance: float | None = None, relaxation: float = 0.95, regularizer: collections.abc.Sequence[corrct.regularizers.BaseRegularizer] | corrct.regularizers.BaseRegularizer | None = None, data_term: str | corrct.data_terms.DataFidelityBase = 'l2', data_term_test: str | corrct.data_terms.DataFidelityBase | None = None)
 :canonical: corrct.solvers.PDHG
 
 Bases: {py:obj}`corrct.solvers.Solver`
@@ -429,7 +429,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 
 ````
 
-````{py:method} _initialize_data_fidelity_function(data_term: typing.Union[str, corrct.data_terms.DataFidelityBase])
+````{py:method} _initialize_data_fidelity_function(data_term: str | corrct.data_terms.DataFidelityBase)
 :canonical: corrct.solvers.PDHG._initialize_data_fidelity_function
 :staticmethod:
 
@@ -454,7 +454,7 @@ Bases: {py:obj}`corrct.solvers.Solver`
 
 ````
 
-````{py:method} __call__(A: corrct.operators.BaseTransform, b: corrct.solvers.NDArrayFloat, iterations: int, x0: typing.Optional[corrct.solvers.NDArrayFloat] = None, lower_limit: typing.Union[float, corrct.solvers.NDArrayFloat, None] = None, upper_limit: typing.Union[float, corrct.solvers.NDArrayFloat, None] = None, x_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None, b_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None, b_test_mask: typing.Optional[corrct.solvers.NDArrayFloat] = None, precondition: bool = True) -> tuple[corrct.solvers.NDArrayFloat, corrct.solvers.SolutionInfo]
+````{py:method} __call__(A: corrct.operators.BaseTransform, b: corrct.solvers.NDArrayFloat, iterations: int, x0: corrct.solvers.NDArrayFloat | None = None, lower_limit: float | corrct.solvers.NDArrayFloat | None = None, upper_limit: float | corrct.solvers.NDArrayFloat | None = None, x_mask: corrct.solvers.NDArrayFloat | None = None, b_mask: corrct.solvers.NDArrayFloat | None = None, b_test_mask: corrct.solvers.NDArrayFloat | None = None, precondition: bool = True) -> tuple[corrct.solvers.NDArrayFloat, corrct.solvers.SolutionInfo]
 :canonical: corrct.solvers.PDHG.__call__
 
 ```{autodoc2-docstring} corrct.solvers.PDHG.__call__

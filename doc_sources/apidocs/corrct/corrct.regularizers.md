@@ -177,7 +177,7 @@
 
 ````
 
-`````{py:class} BaseRegularizer(weight: typing.Union[float, numpy.typing.NDArray], norm: corrct.data_terms.DataFidelityBase, upd_mask: typing.Optional[numpy.typing.NDArray] = None, dtype: numpy.typing.DTypeLike = np.float32)
+`````{py:class} BaseRegularizer(weight: float | numpy.typing.NDArray, norm: corrct.data_terms.DataFidelityBase, upd_mask: numpy.typing.NDArray | None = None, dtype: numpy.typing.DTypeLike = np.float32)
 :canonical: corrct.regularizers.BaseRegularizer
 
 Bases: {py:obj}`abc.ABC`
@@ -224,7 +224,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````{py:attribute} op
 :canonical: corrct.regularizers.BaseRegularizer.op
-:type: typing.Union[corrct.operators.BaseTransform, None]
+:type: corrct.operators.BaseTransform | None
 :value: >
    None
 
@@ -235,7 +235,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````{py:attribute} sigma
 :canonical: corrct.regularizers.BaseRegularizer.sigma
-:type: typing.Union[float, numpy.typing.NDArray]
+:type: float | numpy.typing.NDArray
 :value: >
    None
 
@@ -246,7 +246,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````{py:attribute} upd_mask
 :canonical: corrct.regularizers.BaseRegularizer.upd_mask
-:type: typing.Optional[numpy.typing.NDArray]
+:type: numpy.typing.NDArray | None
 :value: >
    None
 
@@ -279,7 +279,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.BaseRegularizer.initialize_sigma_tau
 :abstractmethod:
 
@@ -330,7 +330,7 @@ Bases: {py:obj}`abc.ABC`
 
 `````
 
-`````{py:class} Regularizer_Grad(weight: typing.Union[float, numpy.typing.NDArray], ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
+`````{py:class} Regularizer_Grad(weight: float | numpy.typing.NDArray, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
 :canonical: corrct.regularizers.Regularizer_Grad
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -354,14 +354,14 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_Grad.initialize_sigma_tau
 
 ````
 
 `````
 
-`````{py:class} Regularizer_TV1D(weight: typing.Union[float, numpy.typing.NDArray], axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
+`````{py:class} Regularizer_TV1D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
 :canonical: corrct.regularizers.Regularizer_TV1D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -387,7 +387,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_TV2D(weight: typing.Union[float, numpy.typing.NDArray], axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
+`````{py:class} Regularizer_TV2D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
 :canonical: corrct.regularizers.Regularizer_TV2D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -413,7 +413,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_TV3D(weight: typing.Union[float, numpy.typing.NDArray], axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
+`````{py:class} Regularizer_TV3D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
 :canonical: corrct.regularizers.Regularizer_TV3D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -439,7 +439,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_HubTV2D(weight: typing.Union[float, numpy.typing.NDArray], huber_size: float, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_HubTV2D(weight: float | numpy.typing.NDArray, huber_size: float, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_HubTV2D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -465,7 +465,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_HubTV3D(weight: typing.Union[float, numpy.typing.NDArray], huber_size: float, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_HubTV3D(weight: float | numpy.typing.NDArray, huber_size: float, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_HubTV3D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -491,7 +491,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_smooth1D(weight: typing.Union[float, numpy.typing.NDArray], axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l2())
+`````{py:class} Regularizer_smooth1D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l2())
 :canonical: corrct.regularizers.Regularizer_smooth1D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -517,7 +517,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_smooth2D(weight: typing.Union[float, numpy.typing.NDArray], axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l2())
+`````{py:class} Regularizer_smooth2D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l2())
 :canonical: corrct.regularizers.Regularizer_smooth2D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -543,7 +543,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_smooth3D(weight: typing.Union[float, numpy.typing.NDArray], axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l2())
+`````{py:class} Regularizer_smooth3D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l2())
 :canonical: corrct.regularizers.Regularizer_smooth3D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -569,7 +569,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_lap(weight: typing.Union[float, numpy.typing.NDArray], ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_lap(weight: float | numpy.typing.NDArray, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_lap
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -593,14 +593,14 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_lap.initialize_sigma_tau
 
 ````
 
 `````
 
-`````{py:class} Regularizer_lap1D(weight, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_lap1D(weight, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_lap1D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_lap`
@@ -626,7 +626,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_lap`
 
 `````
 
-`````{py:class} Regularizer_lap2D(weight, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_lap2D(weight, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_lap2D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_lap`
@@ -652,7 +652,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_lap`
 
 `````
 
-`````{py:class} Regularizer_lap3D(weight, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_lap3D(weight, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_lap3D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_lap`
@@ -678,7 +678,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_lap`
 
 `````
 
-`````{py:class} Regularizer_l1(weight: typing.Union[float, numpy.typing.NDArray], upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
+`````{py:class} Regularizer_l1(weight: float | numpy.typing.NDArray, upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
 :canonical: corrct.regularizers.Regularizer_l1
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -702,7 +702,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_l1.initialize_sigma_tau
 
 ````
@@ -714,7 +714,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 `````
 
-`````{py:class} Regularizer_swl(weight: typing.Union[float, numpy.typing.NDArray], wavelet: str, level: int, ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_on_demand: str = 'constant', upd_mask: typing.Optional[numpy.typing.NDArray] = None, normalized: bool = False, min_approx: bool = True, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
+`````{py:class} Regularizer_swl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
 :canonical: corrct.regularizers.Regularizer_swl
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -746,7 +746,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_swl.initialize_sigma_tau
 
 ````
@@ -763,7 +763,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 `````
 
-`````{py:class} Regularizer_l1swl(weight: typing.Union[float, numpy.typing.NDArray], wavelet: str, level: int, ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_on_demand: str = 'constant', upd_mask: typing.Optional[numpy.typing.NDArray] = None, normalized: bool = False, min_approx: bool = True)
+`````{py:class} Regularizer_l1swl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True)
 :canonical: corrct.regularizers.Regularizer_l1swl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_swl`
@@ -789,7 +789,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_swl`
 
 `````
 
-`````{py:class} Regularizer_l12swl(weight: typing.Union[float, numpy.typing.NDArray], wavelet: str, level: int, ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_on_demand: str = 'constant', upd_mask: typing.Optional[numpy.typing.NDArray] = None, normalized: bool = False, min_approx: bool = True)
+`````{py:class} Regularizer_l12swl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True)
 :canonical: corrct.regularizers.Regularizer_l12swl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_swl`
@@ -815,7 +815,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_swl`
 
 `````
 
-`````{py:class} Regularizer_Hub_swl(weight: typing.Union[float, numpy.typing.NDArray], wavelet: str, level: int, ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_on_demand: str = 'constant', upd_mask: typing.Optional[numpy.typing.NDArray] = None, normalized: bool = False, min_approx: bool = True, huber_size: typing.Optional[int] = None)
+`````{py:class} Regularizer_Hub_swl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True, huber_size: int | None = None)
 :canonical: corrct.regularizers.Regularizer_Hub_swl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_swl`
@@ -841,7 +841,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_swl`
 
 `````
 
-`````{py:class} Regularizer_dwl(weight: typing.Union[float, numpy.typing.NDArray], wavelet: str, level: int, ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_on_demand: str = 'constant', upd_mask: typing.Optional[numpy.typing.NDArray] = None, min_approx: bool = True, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
+`````{py:class} Regularizer_dwl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, min_approx: bool = True, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
 :canonical: corrct.regularizers.Regularizer_dwl
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -873,7 +873,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_dwl.initialize_sigma_tau
 
 ````
@@ -890,7 +890,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 `````
 
-`````{py:class} Regularizer_l1dwl(weight: typing.Union[float, numpy.typing.NDArray], wavelet: str, level: int, ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_on_demand: str = 'constant', upd_mask: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_l1dwl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_l1dwl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_dwl`
@@ -916,7 +916,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_dwl`
 
 `````
 
-`````{py:class} Regularizer_l12dwl(weight: typing.Union[float, numpy.typing.NDArray], wavelet: str, level: int, ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_on_demand: str = 'constant', upd_mask: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_l12dwl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_l12dwl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_dwl`
@@ -942,7 +942,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_dwl`
 
 `````
 
-`````{py:class} Regularizer_Hub_dwl(weight: typing.Union[float, numpy.typing.NDArray], wavelet: str, level: int, ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_on_demand: str = 'constant', upd_mask: typing.Optional[numpy.typing.NDArray] = None, huber_size: typing.Optional[int] = None)
+`````{py:class} Regularizer_Hub_dwl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, huber_size: int | None = None)
 :canonical: corrct.regularizers.Regularizer_Hub_dwl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_dwl`
@@ -968,7 +968,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_dwl`
 
 `````
 
-`````{py:class} BaseRegularizer_med(weight: typing.Union[float, numpy.typing.NDArray], filt_size: int = 3, upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
+`````{py:class} BaseRegularizer_med(weight: float | numpy.typing.NDArray, filt_size: int = 3, upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
 :canonical: corrct.regularizers.BaseRegularizer_med
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -1000,7 +1000,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.BaseRegularizer_med.initialize_sigma_tau
 
 ````
@@ -1012,7 +1012,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 `````
 
-`````{py:class} Regularizer_l1med(weight: typing.Union[float, numpy.typing.NDArray], filt_size: int = 3)
+`````{py:class} Regularizer_l1med(weight: float | numpy.typing.NDArray, filt_size: int = 3)
 :canonical: corrct.regularizers.Regularizer_l1med
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer_med`
@@ -1038,7 +1038,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer_med`
 
 `````
 
-`````{py:class} Regularizer_l2med(weight: typing.Union[float, numpy.typing.NDArray], filt_size: int = 3)
+`````{py:class} Regularizer_l2med(weight: float | numpy.typing.NDArray, filt_size: int = 3)
 :canonical: corrct.regularizers.Regularizer_l2med
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer_med`
@@ -1064,7 +1064,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer_med`
 
 `````
 
-`````{py:class} Regularizer_fft(weight: typing.Union[float, numpy.typing.NDArray], ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, fft_filter: str = 'exp', upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
+`````{py:class} Regularizer_fft(weight: float | numpy.typing.NDArray, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, fft_filter: str = 'exp', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
 :canonical: corrct.regularizers.Regularizer_fft
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -1088,14 +1088,14 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_fft.initialize_sigma_tau
 
 ````
 
 `````
 
-`````{py:class} Regularizer_TNV(weight: typing.Union[float, numpy.typing.NDArray], ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_mode: str = 'edge', upd_mask: typing.Optional[numpy.typing.NDArray] = None, spectral_norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1(), x_ref: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_TNV(weight: float | numpy.typing.NDArray, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, spectral_norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1(), x_ref: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_TNV
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -1119,14 +1119,14 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_TNV.initialize_sigma_tau
 
 ````
 
 `````
 
-`````{py:class} Regularizer_VTV(weight: typing.Union[float, numpy.typing.NDArray], ndims: int = 2, pwise_der_norm: typing.Union[int, float] = 2, pwise_chan_norm: typing.Union[int, float] = np.inf, x_ref: typing.Optional[numpy.typing.NDArray] = None, upd_mask: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_VTV(weight: float | numpy.typing.NDArray, ndims: int = 2, pwise_der_norm: int | float = 2, pwise_chan_norm: int | float = np.inf, x_ref: numpy.typing.NDArray | None = None, upd_mask: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_VTV
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -1165,7 +1165,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_lnswl(weight: typing.Union[float, numpy.typing.NDArray], wavelet: str, level: int, ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_on_demand: str = 'constant', upd_mask: typing.Optional[numpy.typing.NDArray] = None, normalized: bool = False, min_approx: bool = True, spectral_norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1(), x_ref: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_lnswl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True, spectral_norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1(), x_ref: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_lnswl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_l1swl`
@@ -1189,14 +1189,14 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_l1swl`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_lnswl.initialize_sigma_tau
 
 ````
 
 `````
 
-`````{py:class} Regularizer_vl1wl(weight: typing.Union[float, numpy.typing.NDArray], wavelet: str, level: int, ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, pad_on_demand: str = 'constant', upd_mask: typing.Optional[numpy.typing.NDArray] = None, normalized: bool = False, min_approx: bool = True, pwise_lvl_norm: typing.Union[int, float] = 1, pwise_chan_norm: typing.Union[int, float] = np.inf, x_ref: typing.Optional[numpy.typing.NDArray] = None)
+`````{py:class} Regularizer_vl1wl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True, pwise_lvl_norm: int | float = 1, pwise_chan_norm: int | float = np.inf, x_ref: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_vl1wl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_l1swl`
@@ -1228,7 +1228,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_l1swl`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_vl1wl.initialize_sigma_tau
 
 ````
@@ -1240,7 +1240,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_l1swl`
 
 `````
 
-`````{py:class} Regularizer_vSVD(weight: typing.Union[float, numpy.typing.NDArray], ndims: int = 2, axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None, axis_channels: collections.abc.Sequence[int] = (0, ), upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
+`````{py:class} Regularizer_vSVD(weight: float | numpy.typing.NDArray, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, axis_channels: collections.abc.Sequence[int] = (0, ), upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
 :canonical: corrct.regularizers.Regularizer_vSVD
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -1264,14 +1264,14 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_vSVD.initialize_sigma_tau
 
 ````
 
 `````
 
-`````{py:class} Constraint_LowerLimit(limit: typing.Union[float, numpy.typing.NDArray], upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l2())
+`````{py:class} Constraint_LowerLimit(limit: float | numpy.typing.NDArray, upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l2())
 :canonical: corrct.regularizers.Constraint_LowerLimit
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -1303,7 +1303,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Constraint_LowerLimit.initialize_sigma_tau
 
 ````
@@ -1320,7 +1320,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 `````
 
-`````{py:class} Constraint_UpperLimit(limit: typing.Union[float, numpy.typing.NDArray], upd_mask: typing.Optional[numpy.typing.NDArray] = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l2())
+`````{py:class} Constraint_UpperLimit(limit: float | numpy.typing.NDArray, upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l2())
 :canonical: corrct.regularizers.Constraint_UpperLimit
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -1352,7 +1352,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> typing.Union[float, numpy.typing.NDArray]
+````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Constraint_UpperLimit.initialize_sigma_tau
 
 ````

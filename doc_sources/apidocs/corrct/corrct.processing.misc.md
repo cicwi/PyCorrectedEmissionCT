@@ -79,14 +79,14 @@
 
 ````
 
-````{py:function} circular_mask(vol_shape_zxy: typing.Union[collections.abc.Sequence[int], corrct.processing.misc.NDArrayInt], radius_offset: float = 0, coords_ball: typing.Union[collections.abc.Sequence[int], corrct.processing.misc.NDArrayInt, None] = None, ball_norm: float = 2, vol_origin_zxy: typing.Union[collections.abc.Sequence[float], numpy.typing.NDArray, None] = None, taper_func: typing.Optional[str] = None, taper_target: typing.Union[str, float] = 'edge', super_sampling: int = 1, squeeze: bool = True, dtype: numpy.typing.DTypeLike = np.float32) -> numpy.typing.NDArray
+````{py:function} circular_mask(vol_shape_zxy: collections.abc.Sequence[int] | corrct.processing.misc.NDArrayInt, radius_offset: float = 0, coords_ball: collections.abc.Sequence[int] | corrct.processing.misc.NDArrayInt | None = None, ball_norm: float = 2, vol_origin_zxy: collections.abc.Sequence[float] | numpy.typing.NDArray | None = None, taper_func: str | None = None, taper_target: str | float = 'edge', super_sampling: int = 1, squeeze: bool = True, dtype: numpy.typing.DTypeLike = np.float32) -> numpy.typing.NDArray
 :canonical: corrct.processing.misc.circular_mask
 
 ```{autodoc2-docstring} corrct.processing.misc.circular_mask
 ```
 ````
 
-````{py:function} ball(data_shape_vu: numpy.typing.ArrayLike, radius: typing.Union[int, float], super_sampling: int = 5, dtype: numpy.typing.DTypeLike = np.float32, func: typing.Optional[typing.Callable] = None) -> numpy.typing.ArrayLike
+````{py:function} ball(data_shape_vu: numpy.typing.ArrayLike, radius: int | float, super_sampling: int = 5, dtype: numpy.typing.DTypeLike = np.float32, func: collections.abc.Callable | None = None) -> numpy.typing.ArrayLike
 :canonical: corrct.processing.misc.ball
 
 ```{autodoc2-docstring} corrct.processing.misc.ball
@@ -100,14 +100,14 @@
 ```
 ````
 
-````{py:function} lines_intersection(line_1: numpy.typing.NDArray, line_2: typing.Union[float, numpy.typing.NDArray], position: str = 'first', x_lims: typing.Optional[tuple[typing.Optional[float], typing.Optional[float]]] = None) -> typing.Optional[tuple[float, float]]
+````{py:function} lines_intersection(line_1: numpy.typing.NDArray, line_2: float | numpy.typing.NDArray, position: str = 'first', x_lims: tuple[float | None, float | None] | None = None) -> tuple[float, float] | None
 :canonical: corrct.processing.misc.lines_intersection
 
 ```{autodoc2-docstring} corrct.processing.misc.lines_intersection
 ```
 ````
 
-````{py:function} norm_cross_corr(img1: numpy.typing.NDArray, img2: typing.Optional[numpy.typing.NDArray] = None, axes: collections.abc.Sequence[int] = (-2, -1), t_match: bool = False, mode_full: bool = True, compute_profile: bool = True, plot: bool = True) -> typing.Union[numpy.typing.NDArray, tuple[numpy.typing.NDArray, numpy.typing.NDArray]]
+````{py:function} norm_cross_corr(img1: numpy.typing.NDArray, img2: numpy.typing.NDArray | None = None, axes: collections.abc.Sequence[int] = (-2, -1), t_match: bool = False, mode_full: bool = True, compute_profile: bool = True, plot: bool = True) -> numpy.typing.NDArray | tuple[numpy.typing.NDArray, numpy.typing.NDArray]
 :canonical: corrct.processing.misc.norm_cross_corr
 
 ```{autodoc2-docstring} corrct.processing.misc.norm_cross_corr

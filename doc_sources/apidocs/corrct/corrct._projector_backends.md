@@ -145,7 +145,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} initialize_geometry(vol_geom: corrct.models.VolumeGeometry, angles_rot_rad: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray], rot_axis_shift_pix: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, prj_geom: typing.Optional[corrct.models.ProjectionGeometry] = None, create_single_projs: bool = False)
+````{py:method} initialize_geometry(vol_geom: corrct.models.VolumeGeometry, angles_rot_rad: numpy.typing.ArrayLike | numpy.typing.NDArray, rot_axis_shift_pix: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, prj_geom: corrct.models.ProjectionGeometry | None = None, create_single_projs: bool = False)
 :canonical: corrct._projector_backends.ProjectorBackend.initialize_geometry
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackend.initialize_geometry
@@ -201,7 +201,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} fp(vol: numpy.typing.NDArray, angle_ind: typing.Optional[int] = None) -> numpy.typing.NDArray
+````{py:method} fp(vol: numpy.typing.NDArray, angle_ind: int | None = None) -> numpy.typing.NDArray
 :canonical: corrct._projector_backends.ProjectorBackend.fp
 :abstractmethod:
 
@@ -210,7 +210,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} bp(prj: numpy.typing.NDArray, angle_ind: typing.Optional[int] = None) -> numpy.typing.NDArray
+````{py:method} bp(prj: numpy.typing.NDArray, angle_ind: int | None = None) -> numpy.typing.NDArray
 :canonical: corrct._projector_backends.ProjectorBackend.bp
 :abstractmethod:
 
@@ -235,7 +235,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendSKimage.__init__
 ```
 
-````{py:method} initialize_geometry(vol_geom: corrct.models.VolumeGeometry, angles_rot_rad: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray], rot_axis_shift_pix: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, prj_geom: typing.Optional[corrct.models.ProjectionGeometry] = None, create_single_projs: bool = False)
+````{py:method} initialize_geometry(vol_geom: corrct.models.VolumeGeometry, angles_rot_rad: numpy.typing.ArrayLike | numpy.typing.NDArray, rot_axis_shift_pix: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, prj_geom: corrct.models.ProjectionGeometry | None = None, create_single_projs: bool = False)
 :canonical: corrct._projector_backends.ProjectorBackendSKimage.initialize_geometry
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendSKimage.initialize_geometry
@@ -261,7 +261,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 
 ````
 
-````{py:method} fp(vol: numpy.typing.NDArray, angle_ind: typing.Optional[int] = None) -> numpy.typing.NDArray
+````{py:method} fp(vol: numpy.typing.NDArray, angle_ind: int | None = None) -> numpy.typing.NDArray
 :canonical: corrct._projector_backends.ProjectorBackendSKimage.fp
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendSKimage.fp
@@ -269,7 +269,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 
 ````
 
-````{py:method} bp(prj: numpy.typing.NDArray, angle_ind: typing.Optional[int] = None) -> numpy.typing.NDArray
+````{py:method} bp(prj: numpy.typing.NDArray, angle_ind: int | None = None) -> numpy.typing.NDArray
 :canonical: corrct._projector_backends.ProjectorBackendSKimage.bp
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendSKimage.bp
@@ -295,7 +295,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 
 ````{py:attribute} proj_id
 :canonical: corrct._projector_backends.ProjectorBackendASTRA.proj_id
-:type: typing.List
+:type: list
 :value: >
    None
 
@@ -306,7 +306,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 
 ````{py:attribute} astra_vol_geom
 :canonical: corrct._projector_backends.ProjectorBackendASTRA.astra_vol_geom
-:type: typing.Mapping
+:type: collections.abc.Mapping
 :value: >
    None
 
@@ -317,7 +317,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 
 ````{py:attribute} proj_geom_ind
 :canonical: corrct._projector_backends.ProjectorBackendASTRA.proj_geom_ind
-:type: typing.Sequence[typing.Mapping]
+:type: collections.abc.Sequence[collections.abc.Mapping]
 :value: >
    None
 
@@ -328,7 +328,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 
 ````{py:attribute} proj_geom_all
 :canonical: corrct._projector_backends.ProjectorBackendASTRA.proj_geom_all
-:type: typing.Mapping
+:type: collections.abc.Mapping
 :value: >
    None
 
@@ -337,7 +337,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 
 ````
 
-````{py:method} initialize_geometry(vol_geom: corrct.models.VolumeGeometry, angles_rot_rad: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray], rot_axis_shift_pix: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, prj_geom: typing.Optional[corrct.models.ProjectionGeometry] = None, create_single_projs: bool = False)
+````{py:method} initialize_geometry(vol_geom: corrct.models.VolumeGeometry, angles_rot_rad: numpy.typing.ArrayLike | numpy.typing.NDArray, rot_axis_shift_pix: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, prj_geom: corrct.models.ProjectionGeometry | None = None, create_single_projs: bool = False)
 :canonical: corrct._projector_backends.ProjectorBackendASTRA.initialize_geometry
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendASTRA.initialize_geometry
@@ -353,7 +353,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 
 ````
 
-````{py:method} _check_data(x: numpy.typing.NDArray, expected_shape: typing.Union[typing.Sequence[int], numpy.typing.NDArray[numpy.integer]]) -> numpy.typing.NDArray
+````{py:method} _check_data(x: numpy.typing.NDArray, expected_shape: collections.abc.Sequence[int] | numpy.typing.NDArray[numpy.integer]) -> numpy.typing.NDArray
 :canonical: corrct._projector_backends.ProjectorBackendASTRA._check_data
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendASTRA._check_data
@@ -377,7 +377,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 
 ````
 
-````{py:method} fp(vol: numpy.typing.NDArray, angle_ind: typing.Optional[int] = None) -> numpy.typing.NDArray
+````{py:method} fp(vol: numpy.typing.NDArray, angle_ind: int | None = None) -> numpy.typing.NDArray
 :canonical: corrct._projector_backends.ProjectorBackendASTRA.fp
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendASTRA.fp
@@ -385,7 +385,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackend`
 
 ````
 
-````{py:method} bp(prj: numpy.typing.NDArray, angle_ind: typing.Optional[int] = None) -> numpy.typing.NDArray
+````{py:method} bp(prj: numpy.typing.NDArray, angle_ind: int | None = None) -> numpy.typing.NDArray
 :canonical: corrct._projector_backends.ProjectorBackendASTRA.bp
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendASTRA.bp
@@ -411,7 +411,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackendASTRA`
 
 ````{py:attribute} astra_vol_shape
 :canonical: corrct._projector_backends.ProjectorBackendDirectASTRA.astra_vol_shape
-:type: typing.Sequence
+:type: collections.abc.Sequence
 :value: >
    None
 
@@ -422,7 +422,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackendASTRA`
 
 ````{py:attribute} astra_prj_shape
 :canonical: corrct._projector_backends.ProjectorBackendDirectASTRA.astra_prj_shape
-:type: typing.Sequence
+:type: collections.abc.Sequence
 :value: >
    None
 
@@ -433,7 +433,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackendASTRA`
 
 ````{py:attribute} astra_angle_prj_shape
 :canonical: corrct._projector_backends.ProjectorBackendDirectASTRA.astra_angle_prj_shape
-:type: typing.Sequence
+:type: collections.abc.Sequence
 :value: >
    None
 
@@ -444,7 +444,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackendASTRA`
 
 ````{py:attribute} angle_prj_shape
 :canonical: corrct._projector_backends.ProjectorBackendDirectASTRA.angle_prj_shape
-:type: typing.Sequence
+:type: collections.abc.Sequence
 :value: >
    None
 
@@ -453,7 +453,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackendASTRA`
 
 ````
 
-````{py:method} initialize_geometry(vol_geom: corrct.models.VolumeGeometry, angles_rot_rad: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray], rot_axis_shift_pix: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray, None] = None, prj_geom: typing.Optional[corrct.models.ProjectionGeometry] = None, create_single_projs: bool = False)
+````{py:method} initialize_geometry(vol_geom: corrct.models.VolumeGeometry, angles_rot_rad: numpy.typing.ArrayLike | numpy.typing.NDArray, rot_axis_shift_pix: numpy.typing.ArrayLike | numpy.typing.NDArray | None = None, prj_geom: corrct.models.ProjectionGeometry | None = None, create_single_projs: bool = False)
 :canonical: corrct._projector_backends.ProjectorBackendDirectASTRA.initialize_geometry
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendDirectASTRA.initialize_geometry
@@ -469,7 +469,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackendASTRA`
 
 ````
 
-````{py:method} fp(vol: numpy.typing.NDArray, angle_ind: typing.Optional[int] = None)
+````{py:method} fp(vol: numpy.typing.NDArray, angle_ind: int | None = None)
 :canonical: corrct._projector_backends.ProjectorBackendDirectASTRA.fp
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendDirectASTRA.fp
@@ -477,7 +477,7 @@ Bases: {py:obj}`corrct._projector_backends.ProjectorBackendASTRA`
 
 ````
 
-````{py:method} bp(prj: numpy.typing.NDArray, angle_ind: typing.Optional[int] = None)
+````{py:method} bp(prj: numpy.typing.NDArray, angle_ind: int | None = None)
 :canonical: corrct._projector_backends.ProjectorBackendDirectASTRA.bp
 
 ```{autodoc2-docstring} corrct._projector_backends.ProjectorBackendDirectASTRA.bp

@@ -107,7 +107,7 @@ Bases: {py:obj}`corrct.filters.BasisOptions`
 
 ````{py:attribute} binning_start
 :canonical: corrct.filters.BasisOptionsBlocks.binning_start
-:type: typing.Optional[int]
+:type: int | None
 :value: >
    2
 
@@ -194,7 +194,7 @@ Bases: {py:obj}`corrct.filters.BasisOptions`
 
 `````
 
-````{py:function} create_basis(num_pixels: int, binning_start: typing.Optional[int] = 2, binning_type: str = 'exponential', normalized: bool = False, order: int = 1, dtype: numpy.typing.DTypeLike = np.float32) -> numpy.typing.NDArray
+````{py:function} create_basis(num_pixels: int, binning_start: int | None = 2, binning_type: str = 'exponential', normalized: bool = False, order: int = 1, dtype: numpy.typing.DTypeLike = np.float32) -> numpy.typing.NDArray
 :canonical: corrct.filters.create_basis
 
 ```{autodoc2-docstring} corrct.filters.create_basis
@@ -208,7 +208,7 @@ Bases: {py:obj}`corrct.filters.BasisOptions`
 ```
 ````
 
-`````{py:class} Filter(fbp_filter: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray[numpy.floating], None], pad_mode: str, use_rfft: bool, dtype: numpy.typing.DTypeLike)
+`````{py:class} Filter(fbp_filter: numpy.typing.ArrayLike | numpy.typing.NDArray[numpy.floating] | None, pad_mode: str, use_rfft: bool, dtype: numpy.typing.DTypeLike)
 :canonical: corrct.filters.Filter
 
 Bases: {py:obj}`abc.ABC`
@@ -317,7 +317,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} apply_filter(data_wu: numpy.typing.NDArray, fbp_filter: typing.Optional[numpy.typing.NDArray] = None) -> numpy.typing.NDArray
+````{py:method} apply_filter(data_wu: numpy.typing.NDArray, fbp_filter: numpy.typing.NDArray | None = None) -> numpy.typing.NDArray
 :canonical: corrct.filters.Filter.apply_filter
 
 ```{autodoc2-docstring} corrct.filters.Filter.apply_filter
@@ -352,7 +352,7 @@ Bases: {py:obj}`abc.ABC`
 
 `````
 
-`````{py:class} FilterCustom(fbp_filter: typing.Union[numpy.typing.ArrayLike, numpy.typing.NDArray[numpy.floating], None], pad_mode: str = 'constant', use_rfft: bool = True, dtype: numpy.typing.DTypeLike = np.float32)
+`````{py:class} FilterCustom(fbp_filter: numpy.typing.ArrayLike | numpy.typing.NDArray[numpy.floating] | None, pad_mode: str = 'constant', use_rfft: bool = True, dtype: numpy.typing.DTypeLike = np.float32)
 :canonical: corrct.filters.FilterCustom
 
 Bases: {py:obj}`corrct.filters.Filter`
@@ -429,7 +429,7 @@ Bases: {py:obj}`corrct.filters.Filter`
 
 `````
 
-`````{py:class} FilterMR(projector: corrct.operators.BaseTransform, binning_type: str = 'exponential', binning_start: typing.Union[int, None] = 2, lambda_smooth: typing.Optional[float] = None, pad_mode: str = 'constant', use_rfft: bool = True, dtype: numpy.typing.DTypeLike = np.float32)
+`````{py:class} FilterMR(projector: corrct.operators.BaseTransform, binning_type: str = 'exponential', binning_start: int | None = 2, lambda_smooth: float | None = None, pad_mode: str = 'constant', use_rfft: bool = True, dtype: numpy.typing.DTypeLike = np.float32)
 :canonical: corrct.filters.FilterMR
 
 Bases: {py:obj}`corrct.filters.Filter`
@@ -467,7 +467,7 @@ Bases: {py:obj}`corrct.filters.Filter`
 
 ````{py:attribute} binning_start
 :canonical: corrct.filters.FilterMR.binning_start
-:type: typing.Union[int, None]
+:type: int | None
 :value: >
    None
 
@@ -478,7 +478,7 @@ Bases: {py:obj}`corrct.filters.Filter`
 
 ````{py:attribute} lambda_smooth
 :canonical: corrct.filters.FilterMR.lambda_smooth
-:type: typing.Union[float, None]
+:type: float | None
 :value: >
    None
 

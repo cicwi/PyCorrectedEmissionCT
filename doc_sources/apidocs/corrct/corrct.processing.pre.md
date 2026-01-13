@@ -85,14 +85,14 @@
 
 ````
 
-````{py:function} pad_sinogram(sinogram: numpy.typing.NDArray, width: typing.Union[int, collections.abc.Sequence[int], numpy.typing.NDArray], pad_axis: int = -1, mode: str = 'edge', **kwds) -> numpy.typing.NDArray
+````{py:function} pad_sinogram(sinogram: numpy.typing.NDArray, width: int | collections.abc.Sequence[int] | numpy.typing.NDArray, pad_axis: int = -1, mode: str = 'edge', **kwds) -> numpy.typing.NDArray
 :canonical: corrct.processing.pre.pad_sinogram
 
 ```{autodoc2-docstring} corrct.processing.pre.pad_sinogram
 ```
 ````
 
-````{py:function} apply_flat_field(projs_wvu: numpy.typing.NDArray, flats_wvu: numpy.typing.NDArray, darks_wvu: typing.Optional[numpy.typing.NDArray] = None, crop: typing.Union[numpy.typing.NDArray, collections.abc.Sequence[int], None] = None, cap_intensity: typing.Optional[float] = None, dtype: numpy.typing.DTypeLike = np.float32) -> numpy.typing.NDArray
+````{py:function} apply_flat_field(projs_wvu: numpy.typing.NDArray, flats_wvu: numpy.typing.NDArray, darks_wvu: numpy.typing.NDArray | None = None, crop: numpy.typing.NDArray | collections.abc.Sequence[int] | None = None, cap_intensity: float | None = None, dtype: numpy.typing.DTypeLike = np.float32) -> numpy.typing.NDArray
 :canonical: corrct.processing.pre.apply_flat_field
 
 ```{autodoc2-docstring} corrct.processing.pre.apply_flat_field
@@ -120,42 +120,42 @@
 ```
 ````
 
-````{py:function} bin_imgs(imgs: numpy.typing.NDArray, binning: typing.Union[int, float], axes: collections.abc.Sequence[int] = (-2, -1), auto_crop: bool = False, verbose: bool = True) -> numpy.typing.NDArray
+````{py:function} bin_imgs(imgs: numpy.typing.NDArray, binning: int | float, axes: collections.abc.Sequence[int] = (-2, -1), auto_crop: bool = False, verbose: bool = True) -> numpy.typing.NDArray
 :canonical: corrct.processing.pre.bin_imgs
 
 ```{autodoc2-docstring} corrct.processing.pre.bin_imgs
 ```
 ````
 
-````{py:function} background_from_margin(data_vwu: numpy.typing.NDArray, margin: typing.Union[int, collections.abc.Sequence[int], numpy.typing.NDArray[numpy.integer]] = 4, poly_order: int = 0, plot: bool = False) -> numpy.typing.NDArray
+````{py:function} background_from_margin(data_vwu: numpy.typing.NDArray, margin: int | collections.abc.Sequence[int] | numpy.typing.NDArray[numpy.integer] = 4, poly_order: int = 0, plot: bool = False) -> numpy.typing.NDArray
 :canonical: corrct.processing.pre.background_from_margin
 
 ```{autodoc2-docstring} corrct.processing.pre.background_from_margin
 ```
 ````
 
-````{py:function} snip(img: numpy.typing.NDArray, kernel_dims: typing.Union[int, None] = None, iterations: int = 1000, window: int = 3, verbose: bool = False) -> numpy.typing.NDArray
+````{py:function} snip(img: numpy.typing.NDArray, kernel_dims: int | None = None, iterations: int = 1000, window: int = 3, verbose: bool = False) -> numpy.typing.NDArray
 :canonical: corrct.processing.pre.snip
 
 ```{autodoc2-docstring} corrct.processing.pre.snip
 ```
 ````
 
-````{py:function} background_from_snip(data_vwu: numpy.typing.NDArray, snip_iterations: int = 6, smooth_std: float = 0.0) -> numpy.typing.NDArray
+````{py:function} background_from_snip(data_vwu: numpy.typing.NDArray, snip_iterations: int = 6, smooth_std: float | None = None, verbose: bool = False) -> numpy.typing.NDArray
 :canonical: corrct.processing.pre.background_from_snip
 
 ```{autodoc2-docstring} corrct.processing.pre.background_from_snip
 ```
 ````
 
-````{py:function} destripe_wlf_vwu(data: numpy.typing.NDArray, sigma: float = 0.005, level: int = 1, wavelet: str = 'bior2.2', angle_axis: int = -2, other_axes: typing.Union[collections.abc.Sequence[int], numpy.typing.NDArray, None] = None) -> numpy.typing.NDArray
+````{py:function} destripe_wlf_vwu(data: numpy.typing.NDArray, sigma: float = 0.005, level: int = 1, wavelet: str = 'bior2.2', angle_axis: int = -2, other_axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None) -> numpy.typing.NDArray
 :canonical: corrct.processing.pre.destripe_wlf_vwu
 
 ```{autodoc2-docstring} corrct.processing.pre.destripe_wlf_vwu
 ```
 ````
 
-````{py:function} compute_eigen_flats(trans_wvu: numpy.typing.NDArray, flats_wvu: typing.Optional[numpy.typing.NDArray] = None, darks_wvu: typing.Optional[numpy.typing.NDArray] = None, ndim: int = 2, plot: bool = False) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]
+````{py:function} compute_eigen_flats(trans_wvu: numpy.typing.NDArray, flats_wvu: numpy.typing.NDArray | None = None, darks_wvu: numpy.typing.NDArray | None = None, ndim: int = 2, plot: bool = False) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]
 :canonical: corrct.processing.pre.compute_eigen_flats
 
 ```{autodoc2-docstring} corrct.processing.pre.compute_eigen_flats

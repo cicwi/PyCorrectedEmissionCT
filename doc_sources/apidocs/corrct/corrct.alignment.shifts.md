@@ -86,7 +86,7 @@
 ```
 ````
 
-`````{py:class} DetectorShiftsBase(data_dvwu: corrct.alignment.shifts.NDArrayFloat, rot_angle_rad: typing.Union[numpy.typing.ArrayLike, corrct.alignment.shifts.NDArrayFloat], *, data_format: str = 'dvwu', data_mask_dvwu: typing.Optional[numpy.typing.NDArray] = None, borders_dvwu: dict = {'d': None, 'v': None, 'w': None, 'u': None}, max_shifts: typing.Union[float, corrct.alignment.shifts.NDArrayFloat, None] = None, precision_decimals: int = 2, verbose: bool = True)
+`````{py:class} DetectorShiftsBase(data_dvwu: corrct.alignment.shifts.NDArrayFloat, rot_angle_rad: numpy.typing.ArrayLike | corrct.alignment.shifts.NDArrayFloat, *, data_format: str = 'dvwu', data_mask_dvwu: numpy.typing.NDArray | None = None, borders_dvwu: dict = {'d': None, 'v': None, 'w': None, 'u': None}, max_shifts: float | corrct.alignment.shifts.NDArrayFloat | None = None, precision_decimals: int = 2, verbose: bool = True)
 :canonical: corrct.alignment.shifts.DetectorShiftsBase
 
 ```{autodoc2-docstring} corrct.alignment.shifts.DetectorShiftsBase
@@ -122,7 +122,7 @@
 
 `````
 
-`````{py:class} DetectorShiftsPRE(data_dvwu: corrct.alignment.shifts.NDArrayFloat, rot_angle_rad: typing.Union[numpy.typing.ArrayLike, corrct.alignment.shifts.NDArrayFloat], *, data_format: str = 'dvwu', data_mask_dvwu: typing.Optional[numpy.typing.NDArray] = None, borders_dvwu: dict = {'d': None, 'v': None, 'w': None, 'u': None}, max_shifts: typing.Union[float, corrct.alignment.shifts.NDArrayFloat, None] = None, precision_decimals: int = 2, verbose: bool = True)
+`````{py:class} DetectorShiftsPRE(data_dvwu: corrct.alignment.shifts.NDArrayFloat, rot_angle_rad: numpy.typing.ArrayLike | corrct.alignment.shifts.NDArrayFloat, *, data_format: str = 'dvwu', data_mask_dvwu: numpy.typing.NDArray | None = None, borders_dvwu: dict = {'d': None, 'v': None, 'w': None, 'u': None}, max_shifts: float | corrct.alignment.shifts.NDArrayFloat | None = None, precision_decimals: int = 2, verbose: bool = True)
 :canonical: corrct.alignment.shifts.DetectorShiftsPRE
 
 Bases: {py:obj}`corrct.alignment.shifts.DetectorShiftsBase`
@@ -144,7 +144,7 @@ Bases: {py:obj}`corrct.alignment.shifts.DetectorShiftsBase`
 
 ````
 
-````{py:method} fit_u(fit_l1: bool = False, background: typing.Union[float, numpy.typing.NDArray, None] = None, method: str = 'com') -> tuple[corrct.alignment.shifts.NDArrayFloat, float]
+````{py:method} fit_u(fit_l1: bool = False, background: float | numpy.typing.NDArray | None = None, method: str = 'com') -> tuple[corrct.alignment.shifts.NDArrayFloat, float]
 :canonical: corrct.alignment.shifts.DetectorShiftsPRE.fit_u
 
 ```{autodoc2-docstring} corrct.alignment.shifts.DetectorShiftsPRE.fit_u
@@ -154,7 +154,7 @@ Bases: {py:obj}`corrct.alignment.shifts.DetectorShiftsBase`
 
 `````
 
-`````{py:class} DetectorShiftsXC(data_dvwu: corrct.alignment.shifts.NDArrayFloat, rot_angle_rad: typing.Union[numpy.typing.ArrayLike, corrct.alignment.shifts.NDArrayFloat], *, data_format: str = 'dvwu', data_mask_dvwu: typing.Optional[numpy.typing.NDArray] = None, borders_dvwu: dict = {'d': None, 'v': None, 'w': None, 'u': None}, max_shifts: typing.Union[float, corrct.alignment.shifts.NDArrayFloat, None] = None, precision_decimals: int = 2, verbose: bool = True)
+`````{py:class} DetectorShiftsXC(data_dvwu: corrct.alignment.shifts.NDArrayFloat, rot_angle_rad: numpy.typing.ArrayLike | corrct.alignment.shifts.NDArrayFloat, *, data_format: str = 'dvwu', data_mask_dvwu: numpy.typing.NDArray | None = None, borders_dvwu: dict = {'d': None, 'v': None, 'w': None, 'u': None}, max_shifts: float | corrct.alignment.shifts.NDArrayFloat | None = None, precision_decimals: int = 2, verbose: bool = True)
 :canonical: corrct.alignment.shifts.DetectorShiftsXC
 
 Bases: {py:obj}`corrct.alignment.shifts.DetectorShiftsBase`
@@ -168,7 +168,7 @@ Bases: {py:obj}`corrct.alignment.shifts.DetectorShiftsBase`
 ```{autodoc2-docstring} corrct.alignment.shifts.DetectorShiftsXC.__init__
 ```
 
-````{py:method} fit_vu_accum_drifts(ref_data_dvwu: typing.Optional[corrct.alignment.shifts.NDArrayFloat] = None) -> numpy.typing.NDArray
+````{py:method} fit_vu_accum_drifts(ref_data_dvwu: corrct.alignment.shifts.NDArrayFloat | None = None) -> numpy.typing.NDArray
 :canonical: corrct.alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts
 
 ```{autodoc2-docstring} corrct.alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts

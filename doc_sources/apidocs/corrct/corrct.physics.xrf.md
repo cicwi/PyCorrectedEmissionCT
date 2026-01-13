@@ -115,14 +115,14 @@
 ```
 ````
 
-````{py:function} get_radiation_rate(element: typing.Union[str, int], lines: typing.Union[str, corrct.physics.xrf.FluoLine, collections.abc.Sequence[corrct.physics.xrf.FluoLine]], verbose: bool = False) -> numpy.typing.NDArray
+````{py:function} get_radiation_rate(element: str | int, lines: str | corrct.physics.xrf.FluoLine | collections.abc.Sequence[corrct.physics.xrf.FluoLine], verbose: bool = False) -> numpy.typing.NDArray
 :canonical: corrct.physics.xrf.get_radiation_rate
 
 ```{autodoc2-docstring} corrct.physics.xrf.get_radiation_rate
 ```
 ````
 
-````{py:function} get_energy(element: typing.Union[str, int], lines: typing.Union[str, corrct.physics.xrf.FluoLine, collections.abc.Sequence[corrct.physics.xrf.FluoLine]], *, compute_average: bool = False, verbose: bool = False) -> typing.Union[float, numpy.typing.NDArray]
+````{py:function} get_energy(element: str | int, lines: str | corrct.physics.xrf.FluoLine | collections.abc.Sequence[corrct.physics.xrf.FluoLine], *, compute_average: bool = False, verbose: bool = False) -> float | numpy.typing.NDArray
 :canonical: corrct.physics.xrf.get_energy
 
 ```{autodoc2-docstring} corrct.physics.xrf.get_energy
@@ -148,7 +148,7 @@
 
 ````{py:attribute} distance_mm
 :canonical: corrct.physics.xrf.DetectorXRF.distance_mm
-:type: typing.Union[float, numpy.typing.NDArray]
+:type: float | numpy.typing.NDArray
 :value: >
    1.0
 
@@ -178,7 +178,7 @@
 
 ````{py:property} solid_angle_sr
 :canonical: corrct.physics.xrf.DetectorXRF.solid_angle_sr
-:type: typing.Union[float, numpy.typing.NDArray]
+:type: float | numpy.typing.NDArray
 
 ```{autodoc2-docstring} corrct.physics.xrf.DetectorXRF.solid_angle_sr
 ```

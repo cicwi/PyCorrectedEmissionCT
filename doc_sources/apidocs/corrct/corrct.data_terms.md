@@ -107,14 +107,14 @@
 
 ````
 
-````{py:function} _soft_threshold(values: corrct.data_terms.NDArrayFloat, threshold: typing.Union[float, corrct.data_terms.NDArrayFloat]) -> None
+````{py:function} _soft_threshold(values: corrct.data_terms.NDArrayFloat, threshold: float | corrct.data_terms.NDArrayFloat) -> None
 :canonical: corrct.data_terms._soft_threshold
 
 ```{autodoc2-docstring} corrct.data_terms._soft_threshold
 ```
 ````
 
-`````{py:class} DataFidelityBase(background: typing.Union[float, corrct.data_terms.NDArrayFloat, None] = None)
+`````{py:class} DataFidelityBase(background: float | corrct.data_terms.NDArrayFloat | None = None)
 :canonical: corrct.data_terms.DataFidelityBase
 
 Bases: {py:obj}`abc.ABC`
@@ -130,7 +130,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````{py:attribute} data
 :canonical: corrct.data_terms.DataFidelityBase.data
-:type: typing.Union[corrct.data_terms.NDArrayFloat, None]
+:type: corrct.data_terms.NDArrayFloat | None
 :value: >
    None
 
@@ -141,7 +141,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````{py:attribute} sigma
 :canonical: corrct.data_terms.DataFidelityBase.sigma
-:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:type: float | corrct.data_terms.NDArrayFloat
 :value: >
    None
 
@@ -152,7 +152,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````{py:attribute} background
 :canonical: corrct.data_terms.DataFidelityBase.background
-:type: typing.Union[corrct.data_terms.NDArrayFloat, None]
+:type: corrct.data_terms.NDArrayFloat | None
 :value: >
    None
 
@@ -163,7 +163,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````{py:attribute} sigma_data
 :canonical: corrct.data_terms.DataFidelityBase.sigma_data
-:type: typing.Union[corrct.data_terms.NDArrayFloat, None]
+:type: corrct.data_terms.NDArrayFloat | None
 :value: >
    None
 
@@ -221,7 +221,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} assign_data(data: typing.Union[float, corrct.data_terms.NDArrayFloat, None] = None, sigma: typing.Union[float, corrct.data_terms.NDArrayFloat] = 1.0) -> None
+````{py:method} assign_data(data: float | corrct.data_terms.NDArrayFloat | None = None, sigma: float | corrct.data_terms.NDArrayFloat = 1.0) -> None
 :canonical: corrct.data_terms.DataFidelityBase.assign_data
 
 ```{autodoc2-docstring} corrct.data_terms.DataFidelityBase.assign_data
@@ -229,7 +229,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} compute_residual(proj_primal: corrct.data_terms.NDArrayFloat, mask: typing.Union[corrct.data_terms.NDArrayFloat, None] = None) -> corrct.data_terms.NDArrayFloat
+````{py:method} compute_residual(proj_primal: corrct.data_terms.NDArrayFloat, mask: corrct.data_terms.NDArrayFloat | None = None) -> corrct.data_terms.NDArrayFloat
 :canonical: corrct.data_terms.DataFidelityBase.compute_residual
 
 ```{autodoc2-docstring} corrct.data_terms.DataFidelityBase.compute_residual
@@ -254,7 +254,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} compute_data_dual_dot(dual: corrct.data_terms.NDArrayFloat, mask: typing.Union[corrct.data_terms.NDArrayFloat, None] = None) -> float
+````{py:method} compute_data_dual_dot(dual: corrct.data_terms.NDArrayFloat, mask: corrct.data_terms.NDArrayFloat | None = None) -> float
 :canonical: corrct.data_terms.DataFidelityBase.compute_data_dual_dot
 
 ```{autodoc2-docstring} corrct.data_terms.DataFidelityBase.compute_data_dual_dot
@@ -287,7 +287,7 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} compute_primal_dual_gap(proj_primal: corrct.data_terms.NDArrayFloat, dual: corrct.data_terms.NDArrayFloat, mask: typing.Union[corrct.data_terms.NDArrayFloat, None] = None) -> float
+````{py:method} compute_primal_dual_gap(proj_primal: corrct.data_terms.NDArrayFloat, dual: corrct.data_terms.NDArrayFloat, mask: corrct.data_terms.NDArrayFloat | None = None) -> float
 :canonical: corrct.data_terms.DataFidelityBase.compute_primal_dual_gap
 :abstractmethod:
 
@@ -298,7 +298,7 @@ Bases: {py:obj}`abc.ABC`
 
 `````
 
-`````{py:class} DataFidelity_l2(background: typing.Union[float, corrct.data_terms.NDArrayFloat, None] = None)
+`````{py:class} DataFidelity_l2(background: float | corrct.data_terms.NDArrayFloat | None = None)
 :canonical: corrct.data_terms.DataFidelity_l2
 
 Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
@@ -324,7 +324,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````{py:attribute} sigma1
 :canonical: corrct.data_terms.DataFidelity_l2.sigma1
-:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:type: float | corrct.data_terms.NDArrayFloat
 :value: >
    None
 
@@ -333,7 +333,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````
 
-````{py:method} assign_data(data: typing.Union[float, corrct.data_terms.NDArrayFloat, None] = None, sigma: typing.Union[float, corrct.data_terms.NDArrayFloat] = 1.0) -> None
+````{py:method} assign_data(data: float | corrct.data_terms.NDArrayFloat | None = None, sigma: float | corrct.data_terms.NDArrayFloat = 1.0) -> None
 :canonical: corrct.data_terms.DataFidelity_l2.assign_data
 
 ````
@@ -348,14 +348,14 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````
 
-````{py:method} compute_primal_dual_gap(proj_primal: corrct.data_terms.NDArrayFloat, dual: corrct.data_terms.NDArrayFloat, mask: typing.Union[corrct.data_terms.NDArrayFloat, None] = None) -> float
+````{py:method} compute_primal_dual_gap(proj_primal: corrct.data_terms.NDArrayFloat, dual: corrct.data_terms.NDArrayFloat, mask: corrct.data_terms.NDArrayFloat | None = None) -> float
 :canonical: corrct.data_terms.DataFidelity_l2.compute_primal_dual_gap
 
 ````
 
 `````
 
-`````{py:class} DataFidelity_wl2(weights: typing.Union[float, corrct.data_terms.NDArrayFloat], background: typing.Union[float, corrct.data_terms.NDArrayFloat, None] = None)
+`````{py:class} DataFidelity_wl2(weights: float | corrct.data_terms.NDArrayFloat, background: float | corrct.data_terms.NDArrayFloat | None = None)
 :canonical: corrct.data_terms.DataFidelity_wl2
 
 Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
@@ -381,7 +381,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
 ````{py:attribute} sigma1
 :canonical: corrct.data_terms.DataFidelity_wl2.sigma1
-:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:type: float | corrct.data_terms.NDArrayFloat
 :value: >
    None
 
@@ -401,24 +401,24 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
 ````
 
-````{py:method} assign_data(data: typing.Union[float, corrct.data_terms.NDArrayFloat, None], sigma: typing.Union[float, corrct.data_terms.NDArrayFloat] = 1.0)
+````{py:method} assign_data(data: float | corrct.data_terms.NDArrayFloat | None, sigma: float | corrct.data_terms.NDArrayFloat = 1.0)
 :canonical: corrct.data_terms.DataFidelity_wl2.assign_data
 
 ````
 
-````{py:method} compute_residual(proj_primal, mask: typing.Union[float, corrct.data_terms.NDArrayFloat, None] = None)
+````{py:method} compute_residual(proj_primal, mask: float | corrct.data_terms.NDArrayFloat | None = None)
 :canonical: corrct.data_terms.DataFidelity_wl2.compute_residual
 
 ````
 
-````{py:method} compute_residual_norm(dual: typing.Union[float, corrct.data_terms.NDArrayFloat]) -> float
+````{py:method} compute_residual_norm(dual: float | corrct.data_terms.NDArrayFloat) -> float
 :canonical: corrct.data_terms.DataFidelity_wl2.compute_residual_norm
 
 ````
 
 `````
 
-`````{py:class} DataFidelity_l2b(local_error: typing.Union[float, corrct.data_terms.NDArrayFloat], background: typing.Union[float, corrct.data_terms.NDArrayFloat, None] = None)
+`````{py:class} DataFidelity_l2b(local_error: float | corrct.data_terms.NDArrayFloat, background: float | corrct.data_terms.NDArrayFloat | None = None)
 :canonical: corrct.data_terms.DataFidelity_l2b
 
 Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
@@ -444,7 +444,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
 ````{py:attribute} sigma1
 :canonical: corrct.data_terms.DataFidelity_l2b.sigma1
-:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:type: float | corrct.data_terms.NDArrayFloat
 :value: >
    None
 
@@ -455,7 +455,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
 ````{py:attribute} sigma_error
 :canonical: corrct.data_terms.DataFidelity_l2b.sigma_error
-:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:type: float | corrct.data_terms.NDArrayFloat
 :value: >
    None
 
@@ -466,7 +466,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
 ````{py:attribute} sigma_sqrt_error
 :canonical: corrct.data_terms.DataFidelity_l2b.sigma_sqrt_error
-:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:type: float | corrct.data_terms.NDArrayFloat
 :value: >
    None
 
@@ -475,12 +475,12 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
 ````
 
-````{py:method} assign_data(data: typing.Union[float, corrct.data_terms.NDArrayFloat, None], sigma: typing.Union[float, corrct.data_terms.NDArrayFloat] = 1.0)
+````{py:method} assign_data(data: float | corrct.data_terms.NDArrayFloat | None, sigma: float | corrct.data_terms.NDArrayFloat = 1.0)
 :canonical: corrct.data_terms.DataFidelity_l2b.assign_data
 
 ````
 
-````{py:method} compute_residual(proj_primal: corrct.data_terms.NDArrayFloat, mask: typing.Union[corrct.data_terms.NDArrayFloat, None] = None) -> corrct.data_terms.NDArrayFloat
+````{py:method} compute_residual(proj_primal: corrct.data_terms.NDArrayFloat, mask: corrct.data_terms.NDArrayFloat | None = None) -> corrct.data_terms.NDArrayFloat
 :canonical: corrct.data_terms.DataFidelity_l2b.compute_residual
 
 ````
@@ -490,7 +490,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
 ````
 
-````{py:method} compute_primal_dual_gap(proj_primal: corrct.data_terms.NDArrayFloat, dual: corrct.data_terms.NDArrayFloat, mask: typing.Union[corrct.data_terms.NDArrayFloat, None] = None) -> float
+````{py:method} compute_primal_dual_gap(proj_primal: corrct.data_terms.NDArrayFloat, dual: corrct.data_terms.NDArrayFloat, mask: corrct.data_terms.NDArrayFloat | None = None) -> float
 :canonical: corrct.data_terms.DataFidelity_l2b.compute_primal_dual_gap
 
 ````
@@ -523,7 +523,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````{py:attribute} one_sigma_error
 :canonical: corrct.data_terms.DataFidelity_Huber.one_sigma_error
-:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:type: float | corrct.data_terms.NDArrayFloat
 :value: >
    None
 
@@ -671,7 +671,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l1`
 
 ````{py:attribute} sigma_error
 :canonical: corrct.data_terms.DataFidelity_l1b.sigma_error
-:type: typing.Union[float, corrct.data_terms.NDArrayFloat]
+:type: float | corrct.data_terms.NDArrayFloat
 :value: >
    None
 
@@ -695,7 +695,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l1`
 
 `````
 
-`````{py:class} DataFidelity_KL(background: typing.Union[float, corrct.data_terms.NDArrayFloat, None] = None)
+`````{py:class} DataFidelity_KL(background: float | corrct.data_terms.NDArrayFloat | None = None)
 :canonical: corrct.data_terms.DataFidelity_KL
 
 Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
@@ -749,7 +749,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 `````
 
-`````{py:class} DataFidelity_ln(background=None, ln_axes: typing.Sequence[int] = (1, -1), spectral_norm: corrct.data_terms.DataFidelityBase = DataFidelity_l1())
+`````{py:class} DataFidelity_ln(background=None, ln_axes: collections.abc.Sequence[int] = (1, -1), spectral_norm: corrct.data_terms.DataFidelityBase = DataFidelity_l1())
 :canonical: corrct.data_terms.DataFidelity_ln
 
 Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
