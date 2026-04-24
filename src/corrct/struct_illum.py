@@ -18,7 +18,10 @@ import scipy.linalg as spalg
 from numpy.typing import DTypeLike, NDArray
 from tqdm.auto import tqdm
 
-from . import operators, processing
+from corrct.operators import ProjectorOperator
+from corrct.processing.misc import lines_intersection, norm_cross_corr
+from corrct.processing.pre import bin_imgs
+from corrct.solvers import FBP
 
 try:
     import torch as pt
@@ -111,8 +114,8 @@ def estimate_resolution(masks: NDArray, verbose: bool = True, plot_result: bool 
 
     resolutions = np.zeros(len(masks))
     for ind, mask in enumerate(tqdm(masks, desc="Computing auto-correlations", disable=not verbose)):
-        _, auto_corr = processing.misc.norm_cross_corr(mask, plot=False)
-        point = processing.misc.lines_intersection(auto_corr, 0.5, position="first")
+        _, auto_corr = norm_cross_corr(mask, plot=False)
+        point = lines_intersection(auto_corr, 0.5, position="first")
         resolutions[ind] = point[0] if point is not None else 0
 
     res_mean = resolutions.mean()
@@ -340,8 +343,8 @@ class MaskCollection:
         """
         new_masks = cp.deepcopy(self)
 
-        new_masks.masks_enc = processing.pre.bin_imgs(new_masks.masks_enc, binning=binning)
-        new_masks.masks_dec = processing.pre.bin_imgs(new_masks.masks_dec, binning=binning)
+        new_masks.masks_enc = bin_imgs(new_masks.masks_enc, binning=binning)
+        new_masks.masks_dec = bin_imgs(new_masks.masks_dec, binning=binning)
 
         return new_masks
 
@@ -842,7 +845,7 @@ class MaskGeneratorMURA(MaskGenerator):
         return test_values[primes]
 
 
-class ProjectorGhostImaging(operators.ProjectorOperator):
+class ProjectorGhostImaging(ProjectorOperator):
     """Projector class for the ghost imaging reconstructions."""
 
     mc: MaskCollection
@@ -1029,11 +1032,9 @@ class ProjectorGhostImaging(operators.ProjectorOperator):
 class ProjectorGhostTomography(ProjectorGhostImaging):
     """Ghost tomography projector."""
 
-    tomo_proj: operators.ProjectorOperator
+    tomo_proj: ProjectorOperator
 
-    def __init__(
-        self, mask_collection: MaskCollection | NDArray, tomo_proj: operators.ProjectorOperator, backend: str = "torch"
-    ):
+    def __init__(self, mask_collection: MaskCollection | NDArray, tomo_proj: ProjectorOperator, backend: str = "torch"):
         super().__init__(mask_collection, backend)
 
         tomo_prj_shape = np.array([*tomo_proj.dir_shape[:-2], tomo_proj.dir_shape[-1]])
@@ -1079,3 +1080,25 @@ class ProjectorGhostTomography(ProjectorGhostImaging):
         imgs_wvu = super().bp(bucket_vals)
         imgs_vwu = np.squeeze(np.array(imgs_wvu, ndmin=3).swapaxes(-3, -2))
         return self.tomo_proj.bp(imgs_vwu)
+
+    def fbp(self, bucket_vals: NDArray, use_lstsq: bool = True, adjust_scaling: bool = False) -> NDArray:
+        """Compute cross-correlation / FBP reconstruction of the bucket values.
+
+        Parameters
+        ----------
+        bucket_vals : NDArray
+            The bucket vales to reconstruct.
+        use_lstsq : bool, optional
+            If True, uses least squares for reconstruction, by default True.
+        adjust_scaling : bool, optional
+            If True, adjusts scaling of the reconstructed image, to account for the intensity loss, by default False.
+
+        Returns
+        -------
+        NDArray
+            The reconstructed image.
+        """
+        imgs_wvu = [super().fbp(bs, use_lstsq, adjust_scaling) for bs in bucket_vals]
+        imgs_vwu = np.squeeze(np.array(imgs_wvu, ndmin=3).swapaxes(-3, -2))
+        solver_fbp = FBP()
+        return solver_fbp(self.tomo_proj, imgs_vwu)
