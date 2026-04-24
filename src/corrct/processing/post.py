@@ -8,6 +8,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 """
 
 from collections.abc import Sequence
+from warnings import warn
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -360,6 +361,64 @@ def plot_frcs(
     plt.show(block=False)
 
     return fig, axs
+
+
+def compute_reconstruction_bias_variance_maps(
+    reference: NDArray, reconstructions: Sequence[NDArray] | NDArray
+) -> tuple[NDArray, NDArray, NDArray]:
+    """
+    Pixel-wise bias-variance decomposition of MSE over noise realisations.
+
+    MSE(x) = Bias^2(x) + Var(x)
+    where
+        Bias(x)   = E[x_hat] - x*           (systematic error)
+        Var(x)    = E[(x_hat - E[x_hat])^2]  (stochastic spread)
+
+    Parameters
+    ----------
+    reference : NDArray, shape (D1, D2, ..., Dn)
+        The noiseless reference image x*.
+    reconstructions : Sequence[NDArray] | NDArray, shape (R, D1, D2, ..., Dn)
+        R independent reconstructions of the *same* ground-truth image,
+        each produced from a different noise realisation.
+
+    Returns
+    -------
+    tuple[NDArray, NDArray, NDArray]
+        A tuple containing:
+        - mse_map: NDArray, shape (D1, D2, ..., Dn)
+            The mean squared error map.
+        - bias_sq_map: NDArray, shape (D1, D2, ..., Dn)
+            The squared bias map.
+        - var_map: NDArray, shape (D1, D2, ..., Dn)
+            The variance map.
+
+    Notes
+    -----
+    With R the number of realisations the empirical mean converges as 1/sqrt(R),
+    so R >= 20 is recommended; R >= 50 gives reliable variance estimates.
+    """
+    reconstructions = np.array(reconstructions)
+    if reconstructions.ndim != (reference.ndim + 1) or reference.shape != reconstructions.shape[1:]:
+        raise ValueError(
+            f"`reconstructions` needs to be a sequence of arrays, who's shape is: {reference.shape}"
+            f", but we got {reconstructions.shape[1:]}, with a number of arrays equal to: {len(reconstructions)}"
+        )
+
+    num_realizations = reconstructions.shape[0]
+    if num_realizations < 10:
+        warn(
+            f"Only {num_realizations} realisations supplied; bias-variance estimates will be " "noisy. Recommend R >= 20.",
+            stacklevel=2,
+        )
+
+    mean_recon: NDArray = reconstructions.mean(axis=0)
+    bias_map: NDArray = mean_recon - reference  # signed reconstruction bias
+    bias_sq_map: NDArray = bias_map**2
+    var_map: NDArray = reconstructions.var(axis=0, ddof=1)  # unbiased sample variance
+    mse_map: NDArray = ((reconstructions - reference[None, ...]) ** 2).mean(axis=0)
+
+    return mse_map, bias_sq_map, var_map
 
 
 def fit_scale_bias(img_data: NDArray, prj_data: NDArray, prj: BaseTransform | None = None) -> tuple[float, float]:
