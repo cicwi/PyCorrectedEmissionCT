@@ -391,9 +391,11 @@ def fit_scale_bias(img_data: NDArray, prj_data: NDArray, prj: BaseTransform | No
     prj_1_dot_prj_x = float(np.sum(prj_1 * prj_x))
 
     def obj_func(ab: NDArray) -> tuple[float, NDArray]:
-        residual = prj(img_data * ab[0] + ab[1]) - prj_data
-        grad_a = m_y_dot_prj_x + prj_x_2 * ab[0] + prj_1_dot_prj_x * ab[1]
-        grad_b = m_y_dot_prj_1 + prj_1_2 * ab[1] + prj_1_dot_prj_x * ab[0]
+        a = float(ab[0])
+        b = float(ab[1])
+        residual = prj(img_data * a + b) - prj_data
+        grad_a = m_y_dot_prj_x + prj_x_2 * a + prj_1_dot_prj_x * b
+        grad_b = m_y_dot_prj_1 + prj_1_2 * b + prj_1_dot_prj_x * a
         return float(np.linalg.norm(residual, ord=2) ** 2) / 2, np.array((grad_a, grad_b))
 
     opt_res = minimize(obj_func, [1.0, 0.0], jac=True)
