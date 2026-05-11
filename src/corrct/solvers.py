@@ -593,7 +593,7 @@ class MLEM(Solver):
         """
         b = np.array(b)
 
-        (b_mask, b_test_mask) = self._initialize_b_masks(b, b_mask, b_test_mask)
+        b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
 
         # Back-projection diagonal re-scaling
         b_ones = np.ones_like(b)
@@ -772,7 +772,7 @@ class SIRT(Solver):
         """
         b = np.array(b)
 
-        (b_mask, b_test_mask) = self._initialize_b_masks(b, b_mask, b_test_mask)
+        b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
 
         # Back-projection diagonal re-scaling
         b_ones = np.ones_like(b)
@@ -966,7 +966,7 @@ class PDHG(Solver):
         return (L, x.shape, x.dtype)
 
     def _get_data_sigma_tau_unpreconditioned(self, A: operators.BaseTransform, b: NDArrayFloat):
-        (L, x_shape, x_dtype) = self.power_method(A, b)
+        L, x_shape, x_dtype = self.power_method(A, b)
         tau = L
 
         dummy_x = np.empty(x_shape, dtype=x_dtype)
@@ -1032,7 +1032,7 @@ class PDHG(Solver):
                 print("WARNING: Turning off preconditioning because system matrix does not support absolute")
                 precondition = False
 
-        (b_mask, b_test_mask) = self._initialize_b_masks(b, b_mask, b_test_mask)
+        b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
 
         if precondition:
             tau = np.ones_like(b)
@@ -1054,7 +1054,7 @@ class PDHG(Solver):
             sigma[(sigma / np.max(sigma)) < 1e-5] = 1
             sigma = self.relaxation / sigma
         else:
-            (x_shape, x_dtype, sigma, tau) = self._get_data_sigma_tau_unpreconditioned(A, b)
+            x_shape, x_dtype, sigma, tau = self._get_data_sigma_tau_unpreconditioned(A, b)
 
         if x0 is None:
             x0 = np.zeros(x_shape, dtype=x_dtype)
