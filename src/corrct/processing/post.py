@@ -364,7 +364,7 @@ def plot_frcs(
 
 
 def compute_reconstruction_bias_variance_maps(
-    reference: NDArray, reconstructions: Sequence[NDArray] | NDArray
+    reference: NDArray, reconstructions: Sequence[NDArray] | NDArray, realizations_axis: int = 0
 ) -> tuple[NDArray, NDArray, NDArray]:
     """
     Pixel-wise bias-variance decomposition of MSE over noise realisations.
@@ -399,24 +399,26 @@ def compute_reconstruction_bias_variance_maps(
     so R >= 20 is recommended; R >= 50 gives reliable variance estimates.
     """
     reconstructions = np.array(reconstructions)
-    if reconstructions.ndim != (reference.ndim + 1) or reference.shape != reconstructions.shape[1:]:
+    recs = np.moveaxis(reconstructions, source=realizations_axis, destination=0)
+    ref_ndims = reference.ndim
+    if recs.ndim < (ref_ndims + 1) or any(refd != recd for refd, recd in zip(reference.shape, recs.shape[-ref_ndims:])):
         raise ValueError(
             f"`reconstructions` needs to be a sequence of arrays, who's shape is: {reference.shape}"
-            f", but we got {reconstructions.shape[1:]}, with a number of arrays equal to: {len(reconstructions)}"
+            f", but we got {recs.shape[-ref_ndims:]}, with a number of arrays equal to: {len(recs)} (full shape: {reconstructions.shape})"
         )
 
-    num_realizations = reconstructions.shape[0]
+    num_realizations = recs.shape[0]
     if num_realizations < 10:
         warn(
             f"Only {num_realizations} realisations supplied; bias-variance estimates will be " "noisy. Recommend R >= 20.",
             stacklevel=2,
         )
 
-    mean_recon: NDArray = reconstructions.mean(axis=0)
+    mean_recon: NDArray = recs.mean(axis=0)
     bias_map: NDArray = mean_recon - reference  # signed reconstruction bias
     bias_sq_map: NDArray = bias_map**2
-    var_map: NDArray = reconstructions.var(axis=0, ddof=1)  # unbiased sample variance
-    mse_map: NDArray = ((reconstructions - reference[None, ...]) ** 2).mean(axis=0)
+    var_map: NDArray = recs.var(axis=0, ddof=1)  # unbiased sample variance
+    mse_map: NDArray = ((recs - reference) ** 2).mean(axis=0)
 
     return mse_map, bias_sq_map, var_map
 
