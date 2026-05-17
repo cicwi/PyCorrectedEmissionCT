@@ -9,24 +9,23 @@ and CEA-IRIG, Grenoble, France
 import json
 from dataclasses import dataclass
 from dataclasses import replace as dc_replace
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
-from numpy.typing import ArrayLike, NDArray
 from tqdm import tqdm
 
-from . import fitting
-
 from .. import models, projectors, solvers
+from . import fitting
 
 
 def _class_to_json(obj: object) -> str:
     return json.dumps(obj, default=lambda o: {o.__class__.__name__: o.__dict__}, sort_keys=True, indent=4)
 
 
-def _get_rot_axis_angle_rad(center_1_vu: Union[ArrayLike, NDArray], center_2_vu: Union[ArrayLike, NDArray]) -> float:
+def _get_rot_axis_angle_rad(center_1_vu: Sequence[float] | NDArray, center_2_vu: Sequence[float] | NDArray) -> float:
     diffs_vu = np.array(center_1_vu) - np.array(center_2_vu)
     angle_rad = np.arctan2(diffs_vu[-1], diffs_vu[-2])
     angle_rad = np.mod(angle_rad, 2 * np.pi)
@@ -145,7 +144,7 @@ class ConeBeamGeometry:
             vox_size=1 / up_sampling,
         )
 
-    def update(self, field: str, val: float, is_relative: bool = True, decimals: Union[int, None] = 3) -> "ConeBeamGeometry":
+    def update(self, field: str, val: float, is_relative: bool = True, decimals: int | None = 3) -> "ConeBeamGeometry":
         """
         Return a copy of the original data, with a replaced field.
 
@@ -171,7 +170,7 @@ class ConeBeamGeometry:
         return dc_replace(self, **{field: new_val})
 
     def get_tuning_params(
-        self, field: str, val_range: Union[ArrayLike, NDArray], is_relative: bool = True
+        self, field: str, val_range: Sequence[float] | NDArray, is_relative: bool = True
     ) -> Sequence["ConeBeamGeometry"]:
         """
         Generate sequences of acquisition geometries, with a slight variation over a field's value.
@@ -180,7 +179,7 @@ class ConeBeamGeometry:
         ----------
         field : str
             The field to tune.
-        val_range : ArrayLike
+        val_range : Sequence[float] | NDArray
             The value range.
         is_relative : bool, optional
             Whether the values are relative. The default is True.
@@ -245,10 +244,10 @@ class FitConeBeamGeometry:
 
     def __init__(
         self,
-        prj_size_vu: Union[ArrayLike, NDArray],
-        points_ell1: Union[ArrayLike, NDArray],
-        points_ell2: Union[ArrayLike, NDArray],
-        points_axis: Union[ArrayLike, NDArray, None] = None,
+        prj_size_vu: Sequence[int] | NDArray,
+        points_ell1: Sequence[Sequence[float]] | NDArray,
+        points_ell2: Sequence[Sequence[float]] | NDArray,
+        points_axis: Sequence[Sequence[float]] | NDArray | None = None,
         verbose: bool = True,
         plot_result: bool = False,
     ):
@@ -256,13 +255,13 @@ class FitConeBeamGeometry:
 
         Parameters
         ----------
-        prj_size_vu : Union[ArrayLike, NDArray]
+        prj_size_vu : Sequence[int] | NDArray
             Size of the projections.
-        points_ell1 : Union[ArrayLike, NDArray]
+        points_ell1 : Sequence[Sequence[float]] | NDArray
             Points of first ellipse.
-        points_ell2 : Union[ArrayLike, NDArray]
+        points_ell2 : Sequence[Sequence[float]] | NDArray
             Points of second ellipse.
-        points_axis : Union[ArrayLike, NDArray, None], optional
+        points_axis : Sequence[Sequence[float]] | NDArray | None, optional
             Points of the rotation axis, by default None
         verbose : bool, optional
             Whether to produce verbose output, by default True
@@ -292,8 +291,8 @@ class FitConeBeamGeometry:
         self._initialize()
 
     def _initialize(self, use_least_squares: bool = False) -> None:
-        self.ell1_acq = fitting.Ellipse(self.points_ell1, least_squares=use_least_squares)
-        self.ell2_acq = fitting.Ellipse(self.points_ell2, least_squares=use_least_squares)
+        self.ell1_acq = fitting.Ellipse(self.points_ell1, use_least_squares=use_least_squares)
+        self.ell2_acq = fitting.Ellipse(self.points_ell2, use_least_squares=use_least_squares)
 
         if self.points_axis is not None:
             # Using measured projected center, whenever available
@@ -323,9 +322,9 @@ class FitConeBeamGeometry:
             self.points_ell1_rot = self.points_ell1.copy()
             self.points_ell2_rot = self.points_ell2.copy()
 
-        # Re-instatiate ellipse class, after rotation
-        self.ell1_rot = fitting.Ellipse(self.points_ell1_rot, least_squares=use_least_squares)
-        self.ell2_rot = fitting.Ellipse(self.points_ell2_rot, least_squares=use_least_squares)
+        # Re-instantiate ellipse class, after rotation
+        self.ell1_rot = fitting.Ellipse(self.points_ell1_rot, use_least_squares=use_least_squares)
+        self.ell2_rot = fitting.Ellipse(self.points_ell2_rot, use_least_squares=use_least_squares)
 
         if self.plot_result:
             fig, axs = plt.subplots()
@@ -459,10 +458,10 @@ class FitConeBeamGeometry:
 
 def tune_acquisition_geometry(
     acq_geom_init: ConeBeamGeometry,
-    data: Union[ArrayLike, NDArray],
-    angles_rot_rad: Union[ArrayLike, NDArray],
-    params: dict[str, Union[ArrayLike, NDArray]],
-    data_mask: Union[ArrayLike, NDArray, None] = None,
+    data: NDArray,
+    angles_rot_rad: Sequence[float] | NDArray,
+    params: dict[str, Sequence[float] | NDArray],
+    data_mask: NDArray | None = None,
     verbose: bool = True,
 ) -> ConeBeamGeometry:
     """
@@ -472,14 +471,14 @@ def tune_acquisition_geometry(
     ----------
     acq_geom : ConeBeamGeometry
         The cone-beam geometry to refine.
-    data : ArrayLike | NDArray
+    data : NDArray
         The calibration projection data.
-    angles : ArrayLike | NDArray
+    angles : Sequence[float] | NDArray
         Angles of the projections.
-    params : dict[str, ArrayLike | NDArray]
+    params : dict[str, Sequence[float] | NDArray]
         Parameters to tune as a dictionary.
         The acquisition parameters to tune are the keys, and their test values are the dictionary values.
-    data_mask : ArrayLike | NDArray | None, optional
+    data_mask : NDArray | None, optional
         Pixel mask of the data, to mask out dead or hot pixels. The default is None.
     verbose : bool, optional
         Whether to output verbose information or not, by default False.
@@ -489,7 +488,7 @@ def tune_acquisition_geometry(
     if data_mask is not None:
         data_mask = np.array(data_mask)
 
-    solver = solvers.SIRT(tolerance=0)
+    solver = solvers.SIRT(tolerance=0.0)
 
     acq_geom_tuned = acq_geom_init
 

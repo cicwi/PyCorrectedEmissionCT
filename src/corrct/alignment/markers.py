@@ -6,29 +6,29 @@ Fiducial marker tracking routines.
 and CEA-IRIG, Grenoble, France
 """
 
-from typing import Union
+from collections.abc import Sequence
 
 import numpy as np
 import scipy.ndimage as spimg
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 import matplotlib.pyplot as plt
 
 from . import fitting
 
 
-def cm2inch(dims: Union[ArrayLike, NDArray]) -> tuple[float]:
-    """Convert cm into inch.
+def cm2inch(dims: Sequence[float] | NDArray) -> tuple[float]:
+    """Convert dimensions from centimeters to inches.
 
     Parameters
     ----------
-    dims : Union[ArrayLike, NDArray]
-        The dimentions of the object in cm
+    dims : Sequence[float] | NDArray
+        The dimensions of the object in centimeters. Can be a sequence of floats or a NumPy array.
 
     Returns
     -------
     tuple[float]
-        The output dimensions in inch
+        The converted dimensions in inches, as a tuple of floats.
     """
     return tuple(np.array(dims) / 2.54)
 
@@ -56,26 +56,25 @@ def track_marker(prj_data: NDArray, marker_vu: NDArray, stack_axis: int = -2) ->
 
 
 def create_marker_disk(
-    data_shape_vu: Union[ArrayLike, NDArray], radius: float, super_sampling: int = 5, conv: bool = True
+    data_shape_vu: Sequence[int] | NDArray, radius: float, super_sampling: int = 5, conv: bool = True
 ) -> NDArray:
-    """
-    Create a Disk probe object, that will be used for tracking a calibration object's movement.
+    """Create a disk-shaped marker for tracking a calibration object's movement.
 
     Parameters
     ----------
-    data_shape_vu : ArrayLike
-        Shape of the images (vertical, horizontal).
+    data_shape_vu : Sequence[int] | NDArray
+        Shape of the images (vertical, horizontal). Can be a sequence of integers or a NumPy array.
     radius : float
-        Radius of the probe.
+        Radius of the marker in pixels.
     super_sampling : int, optional
-        Super sampling of the coordinates used for creation. The default is 5.
+        Super-sampling factor for the coordinates used in marker creation. Default is 5.
     conv : bool, optional
-        Whether to convolve the initial probe with itself. The default is True.
+        Whether to convolve the initial marker with itself. Default is True.
 
     Returns
     -------
     NDArray
-        An image of the same size as the projections, that contains the marker in the center.
+        An image of the same size as the input projections, with the marker centered.
     """
     data_shape_vu = np.array(data_shape_vu, dtype=int) * super_sampling
 
@@ -103,16 +102,16 @@ class MarkerTrackingVisualizer:
 
     def __init__(
         self,
-        fitted_positions_vu: Union[ArrayLike, NDArray],
+        fitted_positions_vu: NDArray,
         images: NDArray,
         marker: NDArray,
-        trajectory: Union[fitting.Trajectory, None] = None,
+        trajectory: fitting.Trajectory | None = None,
     ) -> None:
         """Initialize the visualization utility for checking the marker position fitting.
 
         Parameters
         ----------
-        fitted_positions_vu : Union[ArrayLike, NDArray]
+        fitted_positions_vu : NDArray
             The fitted positions of the marker
         imgs : NDArray
             The original images
