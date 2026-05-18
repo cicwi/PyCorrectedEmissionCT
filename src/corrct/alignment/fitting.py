@@ -10,6 +10,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -756,14 +757,16 @@ def fit_parabola_min(
         )
 
     if scale.lower() == "log":
-        to_fit = np.log10
 
-        def from_fit(vals):
+        def to_fit(vals: NDArray) -> NDArray:
+            return np.log10(vals)
+
+        def from_fit(vals: NDArray) -> NDArray:
             return 10**vals
 
     elif scale.lower() == "linear":
 
-        def to_fit(vals):
+        def to_fit(vals: NDArray) -> NDArray:
             return vals
 
         from_fit = to_fit
