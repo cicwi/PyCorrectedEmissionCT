@@ -7,18 +7,19 @@ and CEA-IRIG, Grenoble, France
 """
 
 import json
-from dataclasses import dataclass
-from dataclasses import replace as dc_replace
+from dataclasses import dataclass, replace as dc_replace
 from collections.abc import Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
-from .. import models, projectors, solvers
-from . import fitting
+from corrct.models import ProjectionGeometry, VolumeGeometry
+from corrct.projectors import ProjectorUncorrected
+from corrct.solvers import SIRT
+from corrct.alignment.fitting import Ellipse, fit_parabola_min
 
 
 def _class_to_json(obj: object) -> str:
@@ -68,7 +69,7 @@ class ConeBeamGeometry:
             descr += ",\n"
         return descr + ")"
 
-    def get_prj_geom(self, translate_z_to_center: bool = True) -> models.ProjectionGeometry:
+    def get_prj_geom(self, translate_z_to_center: bool = True) -> ProjectionGeometry:
         """
         Create the geometry for reconstruction.
 
@@ -120,7 +121,7 @@ class ConeBeamGeometry:
         e_u_xyz = rotation.apply(alpha_xyz)
         e_v_xyz = rotation.apply(beta_xyz)
 
-        return models.ProjectionGeometry(
+        return ProjectionGeometry(
             geom_type="cone",
             src_pos_xyz=src_pos_xyz,
             det_pos_xyz=det_pos_xyz,
@@ -130,7 +131,7 @@ class ConeBeamGeometry:
             pix2vox_ratio=pix2vox_ratio,
         )
 
-    def get_vol_geom(self, up_sampling: int = 1) -> models.VolumeGeometry:
+    def get_vol_geom(self, up_sampling: int = 1) -> VolumeGeometry:
         """
         Generate volume geometry.
 
@@ -139,7 +140,7 @@ class ConeBeamGeometry:
         VolumeGeometry
             The volume geometry.
         """
-        return models.VolumeGeometry(
+        return VolumeGeometry(
             _vol_shape_xyz=np.array([self.det_pix_u, self.det_pix_u, self.det_pix_v], dtype=int) * up_sampling,
             vox_size=1 / up_sampling,
         )
@@ -291,8 +292,8 @@ class FitConeBeamGeometry:
         self._initialize()
 
     def _initialize(self, use_least_squares: bool = False) -> None:
-        self.ell1_acq = fitting.Ellipse(self.points_ell1, use_least_squares=use_least_squares)
-        self.ell2_acq = fitting.Ellipse(self.points_ell2, use_least_squares=use_least_squares)
+        self.ell1_acq = Ellipse(self.points_ell1, use_least_squares=use_least_squares)
+        self.ell2_acq = Ellipse(self.points_ell2, use_least_squares=use_least_squares)
 
         if self.points_axis is not None:
             # Using measured projected center, whenever available
@@ -323,8 +324,8 @@ class FitConeBeamGeometry:
             self.points_ell2_rot = self.points_ell2.copy()
 
         # Re-instantiate ellipse class, after rotation
-        self.ell1_rot = fitting.Ellipse(self.points_ell1_rot, use_least_squares=use_least_squares)
-        self.ell2_rot = fitting.Ellipse(self.points_ell2_rot, use_least_squares=use_least_squares)
+        self.ell1_rot = Ellipse(self.points_ell1_rot, use_least_squares=use_least_squares)
+        self.ell2_rot = Ellipse(self.points_ell2_rot, use_least_squares=use_least_squares)
 
         if self.plot_result:
             fig, axs = plt.subplots()
@@ -433,7 +434,7 @@ class FitConeBeamGeometry:
         return self.acq_geom
 
     @staticmethod
-    def _fit_distance_det2src(ellipse_1: fitting.Ellipse, ellipse_2: fitting.Ellipse, e: float = 1) -> float:
+    def _fit_distance_det2src(ellipse_1: Ellipse, ellipse_2: Ellipse, e: float = 1) -> float:
         b1, a1, c1, v1, _ = ellipse_1.parameters
         b2, a2, c2, v2, _ = ellipse_2.parameters
 
@@ -488,7 +489,7 @@ def tune_acquisition_geometry(
     if data_mask is not None:
         data_mask = np.array(data_mask)
 
-    solver = solvers.SIRT(tolerance=0.0)
+    solver = SIRT(tolerance=0.0)
 
     acq_geom_tuned = acq_geom_init
 
@@ -499,11 +500,11 @@ def tune_acquisition_geometry(
         for par_ind, acq_geom in enumerate(tqdm(acq_geom_tuned.get_tuning_params(par_name, par_vals), desc=desc)):
             vol_geom = acq_geom.get_vol_geom()
             prj_geom = acq_geom.get_prj_geom()
-            with projectors.ProjectorUncorrected(vol_geom, angles_rot_rad, prj_geom=prj_geom) as prj:
+            with ProjectorUncorrected(vol_geom, angles_rot_rad, prj_geom=prj_geom) as prj:
                 _, info = solver(prj, data, iterations=100, b_mask=data_mask)
                 residuals[par_ind] = info.residuals[-1]
 
-        min_par, min_res, fit_info = fitting.fit_parabola_min(par_vals, residuals, decimals=6)
+        min_par, min_res, fit_info = fit_parabola_min(par_vals, residuals, decimals=6)
 
         if verbose:
             old_par_val = getattr(acq_geom_tuned, par_name)
