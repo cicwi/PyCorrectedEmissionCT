@@ -12,7 +12,7 @@ from collections.abc import Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import DTypeLike, NDArray
 from scipy.spatial.transform import Rotation
 from tqdm.auto import tqdm
 
@@ -26,11 +26,33 @@ def _class_to_json(obj: object) -> str:
     return json.dumps(obj, default=lambda o: {o.__class__.__name__: o.__dict__}, sort_keys=True, indent=4)
 
 
-def _get_rot_axis_angle_rad(center_1_vu: Sequence[float] | NDArray, center_2_vu: Sequence[float] | NDArray) -> float:
-    diffs_vu = np.array(center_1_vu) - np.array(center_2_vu)
+def _get_rot_axis_angle_deg(
+    center_1_vu: Sequence[float] | NDArray,
+    center_2_vu: Sequence[float] | NDArray,
+    decimals: int | None = 4,
+    dtype: DTypeLike = np.float32,
+) -> float:
+    center_1_vu = np.squeeze(np.array(center_1_vu, dtype=dtype))
+    center_2_vu = np.squeeze(np.array(center_2_vu, dtype=dtype))
+
+    # Check if the arrays are 2D
+    if center_1_vu.ndim != 1 or center_2_vu.ndim != 1:
+        raise ValueError("Input arrays must be 1D")
+
+    # Check if the first dimension has length 2
+    if center_1_vu.shape[0] != 2 or center_2_vu.shape[0] != 2:
+        raise ValueError("Input arrays must have length 2")
+
+    diffs_vu = center_1_vu - center_2_vu
     angle_rad = np.arctan2(diffs_vu[-1], diffs_vu[-2])
     angle_rad = np.mod(angle_rad, 2 * np.pi)
-    return angle_rad - np.pi
+
+    angle_deg = np.rad2deg(angle_rad - np.pi)
+
+    if decimals is not None:
+        angle_deg = np.around(angle_deg, decimals=decimals)
+
+    return float(angle_deg)
 
 
 @dataclass
@@ -292,43 +314,37 @@ class FitConeBeamGeometry:
         self._initialize()
 
     def _initialize(self, use_least_squares: bool = False) -> None:
-        ell1_acq_cvu = fit_ellipse_center(self.points_ell1, use_l1_norm=not use_least_squares)
-        ell2_acq_cvu = fit_ellipse_center(self.points_ell2, use_l1_norm=not use_least_squares)
+        ell1_fit_prj_c_vu = fit_ellipse_center(self.points_ell1, use_l1_norm=not use_least_squares)
+        ell2_fit_prj_c_vu = fit_ellipse_center(self.points_ell2, use_l1_norm=not use_least_squares)
 
         if self.points_axis is not None:
             # Using measured projected center, whenever available
-            self.ell1_prj_center_vu = self.points_axis[:, 0]
-            self.ell2_prj_center_vu = self.points_axis[:, 2]
-
-            self.prj_origin_vu = self.points_axis[:, 1]
+            ell1_acq_prj_c_vu = self.points_axis[:, 0]
+            ell2_acq_prj_c_vu = self.points_axis[:, 2]
 
             if self.verbose:
-                # Calculate the difference in pixels between the computed and measured ellipse centers
-                diff_ell1 = ell1_acq_cvu - self.ell1_prj_center_vu
-                diff_ell2 = ell2_acq_cvu - self.ell2_prj_center_vu
+                print("Difference between fitted and measured ellipse centers:")
+                print(f"- Ellipse 1: fitted={ell1_fit_prj_c_vu} vs acquired={ell1_acq_prj_c_vu}")
+                print(f"- Ellipse 2: fitted={ell2_fit_prj_c_vu} vs acquired={ell2_acq_prj_c_vu}")
+                fit_eta_deg = _get_rot_axis_angle_deg(ell1_fit_prj_c_vu, ell2_fit_prj_c_vu)
+                acq_eta_deg = _get_rot_axis_angle_deg(ell1_acq_prj_c_vu, ell2_acq_prj_c_vu)
+                print(f"- Eta differences: fitted={fit_eta_deg:.4} vs acq={acq_eta_deg:.4}")
 
-                print("Difference between computed and measured ellipse centers:")
-                print("- Ellipse 1:")
-                print(f"  Positions: computed={ell1_acq_cvu} vs acquired={self.ell1_prj_center_vu}")
-                print(
-                    f"  Norm: {np.linalg.norm(diff_ell1):.2f} pixels, Coordinates: x={diff_ell1[0]:.2f} pixels, y={diff_ell1[1]:.2f} pixels"
-                )
-                print("- Ellipse 2:")
-                print(f"  Positions: computed={ell2_acq_cvu} vs acquired={self.ell2_prj_center_vu}")
-                print(
-                    f"  Norm: {np.linalg.norm(diff_ell2):.2f} pixels, Coordinates: x={diff_ell2[0]:.2f} pixels, y={diff_ell2[1]:.2f} pixels"
-                )
+            self.ell1_prj_c_vu = ell1_acq_prj_c_vu
+            self.ell2_prj_c_vu = ell2_acq_prj_c_vu
+
+            self.prj_origin_vu = self.points_axis[:, 1]
         else:
-            self.ell1_prj_center_vu = ell1_acq_cvu
-            self.ell2_prj_center_vu = ell2_acq_cvu
+            self.ell1_prj_c_vu = ell1_fit_prj_c_vu
+            self.ell2_prj_c_vu = ell2_fit_prj_c_vu
 
             self.prj_origin_vu = None
 
-        self.acq_geom.eta_deg = np.rad2deg(_get_rot_axis_angle_rad(self.ell1_prj_center_vu, self.ell2_prj_center_vu))
+        self.acq_geom.eta_deg = _get_rot_axis_angle_deg(self.ell1_prj_c_vu, self.ell2_prj_c_vu)
 
         if self.verbose:
             print(f"Projected origin on the detector (pix): {self.prj_origin_vu}")
-            print(f"Detector tilt around its normal (eta), fitted (deg): {self.acq_geom.eta_deg}")
+            print(f"Detector tilt around its normal (eta), fitted (deg): {self.acq_geom.eta_deg:.4}")
 
         if np.abs(self.acq_geom.eta_deg) > 0.1:
             rot = Rotation.from_rotvec(-np.deg2rad(self.acq_geom.eta_deg) * np.array([0, 0, 1]))
@@ -350,7 +366,7 @@ class FitConeBeamGeometry:
             axs.plot(self.points_ell2[1, :], self.points_ell2[0, :], "C1--", label="Ellipse 2 - Acquired")
             axs.plot(points_ell1_rot[1, :], points_ell1_rot[0, :], "C0", label="Ellipse 1 - Rotated")
             axs.plot(points_ell2_rot[1, :], points_ell2_rot[0, :], "C1", label="Ellipse 2 - Rotated")
-            axs.plot([ell1_acq_cvu[1], ell2_acq_cvu[1]], [ell1_acq_cvu[0], ell2_acq_cvu[0]], "C2--")
+            axs.plot([ell1_fit_prj_c_vu[1], ell2_fit_prj_c_vu[1]], [ell1_fit_prj_c_vu[0], ell2_fit_prj_c_vu[0]], "C2--")
             axs.plot([self.ell1_rot.u, self.ell2_rot.u], [self.ell1_rot.v, self.ell2_rot.v], "C2")
             if self.points_axis is not None:
                 axs.scatter(self.points_axis[1], self.points_axis[0], c="C2", marker="*", label="Centers - Acquired")
@@ -438,7 +454,7 @@ class FitConeBeamGeometry:
         self.acq_geom.R = (-self.z2 * R_e1 + self.z1 * R_e2) / z_full
 
         if self.prj_origin_vu is None:
-            self.prj_origin_vu = (-self.z2 * self.ell1_prj_center_vu + self.z1 * self.ell2_prj_center_vu) / z_full
+            self.prj_origin_vu = (-self.z2 * self.ell1_prj_c_vu + self.z1 * self.ell2_prj_c_vu) / z_full
             if self.verbose:
                 print(f"Projected origin on the detector (pix): {self.prj_origin_vu}")
 
