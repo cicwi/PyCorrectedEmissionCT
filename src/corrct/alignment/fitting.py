@@ -813,9 +813,15 @@ def fit_parabola_min(
     return min_fx, min_f_val, (coeffs, fx_fit)
 
 
-def fit_ellipse_center(prj_points_vu: NDArray, rescale: bool = True, use_l1_norm: bool = False) -> NDArray:
+def fit_ellipse_center(
+    prj_points_vu: NDArray, rescale: bool = True, use_l1_norm: bool = False, decimals: int | None = 2
+) -> NDArray:
     """
     Fit an ellipse center to a set of projected points in VU coordinates.
+
+    The function uses a least-squares approach to fit an ellipse center to the given points.
+    Optionally, it can use L1 norm for fitting instead of the default L2 norm, and rescale
+    the points during fitting to have a maximum range of 1 (improve numerical stability).
 
     Parameters
     ----------
@@ -827,20 +833,23 @@ def fit_ellipse_center(prj_points_vu: NDArray, rescale: bool = True, use_l1_norm
         If True, rescale the points to have a maximum range of 1. Default is True.
     use_l1_norm : bool, optional
         If True, use L1 norm for fitting instead of the default L2 norm. Default is False.
+    decimals : int | None, optional
+        The number of decimal places to round the result to. If None, no rounding is performed.
+        Default is 2.
 
     Returns
     -------
     NDArray
         The fitted ellipse center in VU coordinates.
     """
-    c_vu = np.mean(prj_points_vu, axis=-1, keepdims=True)
-    pos_vu = prj_points_vu - c_vu
+    c_vu = np.mean(prj_points_vu, axis=-1)
+    pos_vu = prj_points_vu - c_vu[:, None]
 
     if rescale:
-        scale_vu = np.max(pos_vu, axis=-1, keepdims=True) - np.min(pos_vu, axis=-1, keepdims=True)
-        pos_vu /= scale_vu
+        scale_vu = np.max(pos_vu, axis=-1) - np.min(pos_vu, axis=-1)
+        pos_vu /= scale_vu[:, None]
     else:
-        scale_vu = 1.0
+        scale_vu = np.ones(2, dtype=pos_vu.dtype)
 
     num_lines = pos_vu.shape[-1] // 2
     pos1_vu = pos_vu[:, :num_lines]
@@ -861,7 +870,12 @@ def fit_ellipse_center(prj_points_vu: NDArray, rescale: bool = True, use_l1_norm
         opt_p_vu = spopt.minimize(_func, p_vu)
         p_vu = opt_p_vu.x
 
-    return p_vu * scale_vu + c_vu
+    pred_c_vu = p_vu * scale_vu + c_vu
+
+    if decimals is not None:
+        pred_c_vu = np.around(pred_c_vu, decimals=decimals)
+
+    return pred_c_vu
 
 
 def fit_ellipse_parameters(
@@ -970,32 +984,52 @@ class Ellipse(Trajectory):
 
     c_vu: NDArrayFloat
 
-    prj_points_vu: NDArray
-
-    rescale: bool
-    use_least_squares: bool
-
-    def __init__(self, prj_points_vu: ArrayLike | NDArray, rescale: bool = True, use_least_squares: bool = True):
+    def __init__(self, a: float, b: float, c: float, u: float, v: float, c_vu: NDArrayFloat) -> None:
         """Initialize ellipse class.
+
+        Ellipse corresponding to the equation: a*(x - u)**2 + b*(y - v)**2 + 2*c*(x - u)*(y - v) = 1
 
         Parameters
         ----------
-        prj_points_vu : ArrayLike | NDArray
-            List of sampled points over the trajectory.
-        rescale : bool, optional
-            Whether to rescale the data within the interval [-1, 1]. The default is True.
-        use_least_squares : bool, optional
-            Whether to use the least-squares (l2-norm) fit or l1-norm. The default is True.
+        a : float
+            The semi-major axis of the ellipse.
+        b : float
+            The semi-minor axis of the ellipse.
+        c : float
+            The rotation angle of the ellipse in radians.
+        u : float
+            The center of the ellipse along the x-axis.
+        v : float
+            The center of the ellipse along the y-axis.
+        c_vu : NDArrayFloat
+            The covariance matrix of the ellipse parameters.
         """
-        self.prj_points_vu = np.array(prj_points_vu)
+        self.a = a
+        self.b = b
+        self.c = c
+        self.u = u
+        self.v = v
+        self.c_vu = c_vu
 
-        self.rescale = rescale
-        self.use_least_squares = use_least_squares
+    def __repr__(self) -> str:
+        """Return a string representation of the Ellipse instance."""
+        return f"Ellipse(a={self.a}, b={self.b}, c={self.c}, u={self.u}, v={self.v}, c_vu={self.c_vu})"
 
-        self.c_vu = fit_ellipse_center(self.prj_points_vu, self.rescale, not self.use_least_squares)
-        self.a, self.b, self.c, self.u, self.v = fit_ellipse_parameters(
-            self.prj_points_vu, self.rescale, not self.use_least_squares
-        )
+    @property
+    def extremes_u(self) -> tuple[float, float]:
+        """
+        Find the most extreme x coordinates (U coordinates) that are still valid for the given ellipse equation.
+
+        Returns
+        -------
+        tuple[float, float]
+            A tuple containing the most extreme U coordinates (u_min, u_max).
+        """
+        # Calculate the extreme U coordinates
+        u_min = self.u - np.sqrt(1 / self.a)
+        u_max = self.u + np.sqrt(1 / self.a)
+
+        return u_min, u_max
 
     @property
     def center_vu(self) -> NDArray:
@@ -1035,11 +1069,48 @@ class Ellipse(Trajectory):
         b, a, c, v, u = np.array(self.parameters)
         uus = np.array(uus)
 
+        uus_u = uus - u
+
         a_tilde = b
-        b_tilde = 2 * (-b * v + c * uus - c * u)
-        c_tilde = -(1 - a * (uus - u) ** 2 - b * v**2 + 2 * c * v * (uus - u))
+        # b_tilde = 2 * (-b * v + c * uus - c * u)
+        # c_tilde = -(1 - a * (uus - u) ** 2 - b * v**2 + 2 * c * v * (uus - u))
+        b_tilde = 2 * (-b * v + c * uus_u)
+        c_tilde = -(1 - a * uus_u**2 - b * v**2 + 2 * c * v * uus_u)
         delta_tilde = np.sqrt(b_tilde**2 - 4 * a_tilde * c_tilde)
         v_1 = (-b_tilde + delta_tilde) / (2 * a_tilde)
         v_2 = (-b_tilde - delta_tilde) / (2 * a_tilde)
 
         return v_1, v_2
+
+
+def fit_ellipse(prj_points_vu: ArrayLike | NDArray, rescale: bool = True, use_least_squares: bool = True) -> Ellipse:
+    """Fit an ellipse to a set of 2D points using either least-squares or l1-norm optimization.
+
+    Parameters
+    ----------
+    prj_points_vu : ArrayLike | NDArray
+        A list or array of 2D points (shape: Nx2) representing the trajectory to fit.
+    rescale : bool, optional
+        Whether to rescale the data within the interval [-1, 1] to improve numerical stability.
+        Default is True.
+    use_least_squares : bool, optional
+        Whether to use the least-squares (l2-norm) fit for optimization. If False, uses l1-norm.
+        Default is True.
+
+    Returns
+    -------
+    Ellipse
+        An Ellipse object containing the fitted ellipse parameters (center, axes, and rotation angle).
+
+    Notes
+    -----
+    The function first fits the ellipse parameters (axes and rotation angle) and then fits the center
+    separately. The optimization method can be switched between least-squares and l1-norm for robustness
+    against outliers.
+    """
+    prj_points_vu = np.array(prj_points_vu)
+
+    return Ellipse(
+        *fit_ellipse_parameters(prj_points_vu, rescale, not use_least_squares),
+        fit_ellipse_center(prj_points_vu, rescale, not use_least_squares),
+    )

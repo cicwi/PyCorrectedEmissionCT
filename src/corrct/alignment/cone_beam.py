@@ -19,7 +19,7 @@ from tqdm.auto import tqdm
 from corrct.models import ProjectionGeometry, VolumeGeometry
 from corrct.projectors import ProjectorUncorrected
 from corrct.solvers import SIRT
-from corrct.alignment.fitting import Ellipse, fit_parabola_min
+from corrct.alignment.fitting import Ellipse, fit_parabola_min, fit_ellipse, fit_ellipse_center
 
 
 def _class_to_json(obj: object) -> str:
@@ -292,8 +292,8 @@ class FitConeBeamGeometry:
         self._initialize()
 
     def _initialize(self, use_least_squares: bool = False) -> None:
-        self.ell1_acq = Ellipse(self.points_ell1, use_least_squares=use_least_squares)
-        self.ell2_acq = Ellipse(self.points_ell2, use_least_squares=use_least_squares)
+        ell1_acq_cvu = fit_ellipse_center(self.points_ell1, use_l1_norm=not use_least_squares)
+        ell2_acq_cvu = fit_ellipse_center(self.points_ell2, use_l1_norm=not use_least_squares)
 
         if self.points_axis is not None:
             # Using measured projected center, whenever available
@@ -301,9 +301,26 @@ class FitConeBeamGeometry:
             self.ell2_prj_center_vu = self.points_axis[:, 2]
 
             self.prj_origin_vu = self.points_axis[:, 1]
+
+            if self.verbose:
+                # Calculate the difference in pixels between the computed and measured ellipse centers
+                diff_ell1 = ell1_acq_cvu - self.ell1_prj_center_vu
+                diff_ell2 = ell2_acq_cvu - self.ell2_prj_center_vu
+
+                print("Difference between computed and measured ellipse centers:")
+                print("- Ellipse 1:")
+                print(f"  Positions: acquired={ell1_acq_cvu} vs computed={self.ell1_prj_center_vu}")
+                print(
+                    f"  Norm: {np.linalg.norm(diff_ell1):.2f} pixels, Coordinates: x={diff_ell1[0]:.2f} pixels, y={diff_ell1[1]:.2f} pixels"
+                )
+                print("- Ellipse 2:")
+                print(f"  Positions: acquired={ell2_acq_cvu} vs computed={self.ell2_prj_center_vu}")
+                print(
+                    f"  Norm: {np.linalg.norm(diff_ell2):.2f} pixels, Coordinates: x={diff_ell2[0]:.2f} pixels, y={diff_ell2[1]:.2f} pixels"
+                )
         else:
-            self.ell1_prj_center_vu = self.ell1_acq.center_vu
-            self.ell2_prj_center_vu = self.ell2_acq.center_vu
+            self.ell1_prj_center_vu = ell1_acq_cvu
+            self.ell2_prj_center_vu = ell2_acq_cvu
 
             self.prj_origin_vu = None
 
@@ -317,23 +334,23 @@ class FitConeBeamGeometry:
             rot = Rotation.from_rotvec(-np.deg2rad(self.acq_geom.eta_deg) * np.array([0, 0, 1]))
             rot_mat = rot.as_matrix()[:2, :2]
 
-            self.points_ell1_rot = rot_mat.dot(self.points_ell1)
-            self.points_ell2_rot = rot_mat.dot(self.points_ell2)
+            points_ell1_rot = rot_mat.dot(self.points_ell1)
+            points_ell2_rot = rot_mat.dot(self.points_ell2)
         else:
-            self.points_ell1_rot = self.points_ell1.copy()
-            self.points_ell2_rot = self.points_ell2.copy()
+            points_ell1_rot = self.points_ell1.copy()
+            points_ell2_rot = self.points_ell2.copy()
 
         # Re-instantiate ellipse class, after rotation
-        self.ell1_rot = Ellipse(self.points_ell1_rot, use_least_squares=use_least_squares)
-        self.ell2_rot = Ellipse(self.points_ell2_rot, use_least_squares=use_least_squares)
+        self.ell1_rot: Ellipse = fit_ellipse(points_ell1_rot, use_least_squares=use_least_squares)
+        self.ell2_rot: Ellipse = fit_ellipse(points_ell2_rot, use_least_squares=use_least_squares)
 
         if self.plot_result:
             fig, axs = plt.subplots()
             axs.plot(self.points_ell1[1, :], self.points_ell1[0, :], "C0--", label="Ellipse 1 - Acquired")
             axs.plot(self.points_ell2[1, :], self.points_ell2[0, :], "C1--", label="Ellipse 2 - Acquired")
-            axs.plot(self.points_ell1_rot[1, :], self.points_ell1_rot[0, :], "C0", label="Ellipse 1 - Rotated")
-            axs.plot(self.points_ell2_rot[1, :], self.points_ell2_rot[0, :], "C1", label="Ellipse 2 - Rotated")
-            axs.plot([self.ell1_acq.u, self.ell2_acq.u], [self.ell1_acq.v, self.ell2_acq.v], "C2--")
+            axs.plot(points_ell1_rot[1, :], points_ell1_rot[0, :], "C0", label="Ellipse 1 - Rotated")
+            axs.plot(points_ell2_rot[1, :], points_ell2_rot[0, :], "C1", label="Ellipse 2 - Rotated")
+            axs.plot([ell1_acq_cvu[1], ell2_acq_cvu[1]], [ell1_acq_cvu[0], ell2_acq_cvu[0]], "C2--")
             axs.plot([self.ell1_rot.u, self.ell2_rot.u], [self.ell1_rot.v, self.ell2_rot.v], "C2")
             if self.points_axis is not None:
                 axs.scatter(self.points_axis[1], self.points_axis[0], c="C2", marker="*", label="Centers - Acquired")
