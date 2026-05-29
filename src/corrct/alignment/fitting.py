@@ -1002,7 +1002,7 @@ class Ellipse(Trajectory):
         v : float
             The center of the ellipse along the y-axis.
         c_vu : NDArrayFloat
-            The covariance matrix of the ellipse parameters.
+            The projected center of the circular orbit generating the ellipse.
         """
         self.a = a
         self.b = b

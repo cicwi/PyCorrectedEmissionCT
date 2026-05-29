@@ -309,12 +309,12 @@ class FitConeBeamGeometry:
 
                 print("Difference between computed and measured ellipse centers:")
                 print("- Ellipse 1:")
-                print(f"  Positions: acquired={ell1_acq_cvu} vs computed={self.ell1_prj_center_vu}")
+                print(f"  Positions: computed={ell1_acq_cvu} vs acquired={self.ell1_prj_center_vu}")
                 print(
                     f"  Norm: {np.linalg.norm(diff_ell1):.2f} pixels, Coordinates: x={diff_ell1[0]:.2f} pixels, y={diff_ell1[1]:.2f} pixels"
                 )
                 print("- Ellipse 2:")
-                print(f"  Positions: acquired={ell2_acq_cvu} vs computed={self.ell2_prj_center_vu}")
+                print(f"  Positions: computed={ell2_acq_cvu} vs acquired={self.ell2_prj_center_vu}")
                 print(
                     f"  Norm: {np.linalg.norm(diff_ell2):.2f} pixels, Coordinates: x={diff_ell2[0]:.2f} pixels, y={diff_ell2[1]:.2f} pixels"
                 )
