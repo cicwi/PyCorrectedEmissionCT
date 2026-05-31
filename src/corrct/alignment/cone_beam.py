@@ -67,12 +67,13 @@ class ConeBeamGeometry:
     theta_deg: float = 0.0
     phi_deg: float = 0.0
     eta_deg: float = 0.0
-    D: float = 0.0
-    R: float = 0.0
-    v0: float = 0.0
-    u0: float = 0.0
-    det_pix_v: int = 0
-    det_pix_u: int = 0
+    D_pix: float = 0.0
+    R_pix: float = 0.0
+    v0_pix: float = 0.0
+    u0_pix: float = 0.0
+    det_size_v_pix: int = 0
+    det_size_u_pix: int = 0
+    pix_size_um: float = 0.0
 
     def __str__(self) -> str:
         """
@@ -87,7 +88,13 @@ class ConeBeamGeometry:
         for field, value in self.__dict__.items():
             descr += f"    {field} = {value}"
             if field.lower()[-3:] == "deg":
-                descr += f" ({value} deg)"
+                descr += " [deg]"
+            elif field.lower()[-3:] == "pix":
+                descr += " [pix]"
+                if self.pix_size_um > 0.0:
+                    descr += f" ({value * self.pix_size_um} [um])"
+            elif field.lower()[-2:] == "um":
+                descr += " [um]"
             descr += ",\n"
         return descr + ")"
 
@@ -127,15 +134,15 @@ class ConeBeamGeometry:
             ]
         )
 
-        det_pos_xyz = -e_n_xyz * self.D + e_x_xyz * self.R - alpha_xyz * self.u0 - beta_xyz * self.v0
-        src_pos_xyz = e_x_xyz * self.R
+        det_pos_xyz = -e_n_xyz * self.D_pix + e_x_xyz * self.R_pix - alpha_xyz * self.u0_pix - beta_xyz * self.v0_pix
+        src_pos_xyz = e_x_xyz * self.R_pix
 
-        pix2vox_ratio = self.R / self.D * np.abs(np.dot(e_n_xyz, e_x_xyz))
+        pix2vox_ratio = self.R_pix / self.D_pix * np.abs(np.dot(e_n_xyz, e_x_xyz))
 
         if translate_z_to_center:
-            det_center_xyz = e_n_xyz * self.D + alpha_xyz * self.u0 + beta_xyz * self.v0
+            det_center_xyz = e_n_xyz * self.D_pix + alpha_xyz * self.u0_pix + beta_xyz * self.v0_pix
 
-            translation_z = det_center_xyz[2] / np.abs(det_center_xyz[0]) * self.R
+            translation_z = det_center_xyz[2] / np.abs(det_center_xyz[0]) * self.R_pix
             src_pos_xyz[2] += translation_z
             det_pos_xyz[2] += translation_z
 
@@ -163,7 +170,7 @@ class ConeBeamGeometry:
             The volume geometry.
         """
         return VolumeGeometry(
-            _vol_shape_xyz=np.array([self.det_pix_u, self.det_pix_u, self.det_pix_v], dtype=int) * up_sampling,
+            _vol_shape_xyz=np.array([self.det_size_u_pix, self.det_size_u_pix, self.det_size_v_pix], dtype=int) * up_sampling,
             vox_size=1 / up_sampling,
         )
 
@@ -271,6 +278,7 @@ class FitConeBeamGeometry:
         points_ell1: Sequence[Sequence[float]] | NDArray,
         points_ell2: Sequence[Sequence[float]] | NDArray,
         points_axis: Sequence[Sequence[float]] | NDArray | None = None,
+        pix_size_um: float | None = None,
         verbose: bool = True,
         plot_result: bool = False,
     ):
@@ -292,18 +300,38 @@ class FitConeBeamGeometry:
             Whether to plot the results of the geometry, by default False
             It requires verbose to be True.
         """
-        self.prj_size_vu = np.array(prj_size_vu)
-        self.center_vu = self.prj_size_vu[:, None] / 2
+        prj_size_vu = np.array(prj_size_vu)
+        if prj_size_vu.ndim != 1 or len(prj_size_vu) != 2:
+            if len(prj_size_vu) == 1:
+                prj_size_vu = np.tile(prj_size_vu, 2)
+            else:
+                raise ValueError("prj_size_vu must be a 1D array with 2 elements")
+        self.prj_size_vu = prj_size_vu
+
+        self.center_vu = np.squeeze(self.prj_size_vu)[:, None] / 2
         self.prj_origin_vu = None
 
-        self.points_ell1 = np.array(points_ell1) - self.center_vu
-        self.points_ell2 = np.array(points_ell2) - self.center_vu
+        points_ell1 = np.array(points_ell1)
+        if points_ell1.ndim != 2:
+            raise ValueError("points_ell1 must be a 2D array")
+        if points_ell1.shape[0] != 2:
+            raise ValueError("points_ell1 must have a first dimension equal to 2")
+        self.points_ell1 = points_ell1 - self.center_vu
+
+        points_ell2 = np.array(points_ell2)
+        if points_ell2.ndim != 2:
+            raise ValueError("points_ell2 must be a 2D array")
+        if points_ell2.shape[0] != 2:
+            raise ValueError("points_ell2 must have a first dimension equal to 2")
+        self.points_ell2 = points_ell2 - self.center_vu
 
         if points_axis is not None:
             points_axis = np.array(points_axis) - self.center_vu
         self.points_axis = points_axis
 
-        self.acq_geom = ConeBeamGeometry(det_pix_v=int(self.prj_size_vu[0]), det_pix_u=int(self.prj_size_vu[1]))
+        self.acq_geom = ConeBeamGeometry(det_size_v_pix=int(self.prj_size_vu[0]), det_size_u_pix=int(self.prj_size_vu[1]))
+        if pix_size_um is not None:
+            self.acq_geom.pix_size_um = pix_size_um
 
         self.verbose = verbose
         self.plot_result = plot_result and verbose
@@ -316,35 +344,43 @@ class FitConeBeamGeometry:
     def _initialize(self, use_least_squares: bool = False) -> None:
         ell1_fit_prj_c_vu = fit_ellipse_center(self.points_ell1, use_l1_norm=not use_least_squares)
         ell2_fit_prj_c_vu = fit_ellipse_center(self.points_ell2, use_l1_norm=not use_least_squares)
+        fit_eta_deg = _get_rot_axis_angle_deg(ell1_fit_prj_c_vu, ell2_fit_prj_c_vu)
+
+        if self.verbose:
+            print("Fitted / measured values:")
 
         if self.points_axis is not None:
             # Using measured projected center, whenever available
             ell1_acq_prj_c_vu = self.points_axis[:, 0]
             ell2_acq_prj_c_vu = self.points_axis[:, 2]
+            acq_eta_deg = _get_rot_axis_angle_deg(ell1_acq_prj_c_vu, ell2_acq_prj_c_vu)
 
             if self.verbose:
-                print("Difference between fitted and measured ellipse centers:")
-                print(f"- Ellipse 1: fitted={ell1_fit_prj_c_vu} vs acquired={ell1_acq_prj_c_vu}")
-                print(f"- Ellipse 2: fitted={ell2_fit_prj_c_vu} vs acquired={ell2_acq_prj_c_vu}")
-                fit_eta_deg = _get_rot_axis_angle_deg(ell1_fit_prj_c_vu, ell2_fit_prj_c_vu)
-                acq_eta_deg = _get_rot_axis_angle_deg(ell1_acq_prj_c_vu, ell2_acq_prj_c_vu)
-                print(f"- Eta differences: fitted={fit_eta_deg:.4} vs acq={acq_eta_deg:.4}")
+                print(f"- Ellipse 1 center: fitted = {ell1_fit_prj_c_vu} vs acquired = {ell1_acq_prj_c_vu} [pix]")
+                print(f"- Ellipse 2 center: fitted = {ell2_fit_prj_c_vu} vs acquired = {ell2_acq_prj_c_vu} [pix]")
+                print("- Detector tilt around its normal (eta):")
+                print(f"  * fitted = {fit_eta_deg:.4} vs acq = {acq_eta_deg:.4} [deg] <= Using acquired!")
 
             self.ell1_prj_c_vu = ell1_acq_prj_c_vu
             self.ell2_prj_c_vu = ell2_acq_prj_c_vu
 
             self.prj_origin_vu = self.points_axis[:, 1]
+            self.acq_geom.eta_deg = acq_eta_deg
         else:
             self.ell1_prj_c_vu = ell1_fit_prj_c_vu
             self.ell2_prj_c_vu = ell2_fit_prj_c_vu
 
             self.prj_origin_vu = None
+            self.acq_geom.eta_deg = fit_eta_deg
+            if self.verbose:
+                print(f"- Detector tilt around its normal (eta), fitted: {self.acq_geom.eta_deg:.4} [deg]")
 
-        self.acq_geom.eta_deg = _get_rot_axis_angle_deg(self.ell1_prj_c_vu, self.ell2_prj_c_vu)
-
-        if self.verbose:
-            print(f"Projected origin on the detector (pix): {self.prj_origin_vu}")
-            print(f"Detector tilt around its normal (eta), fitted (deg): {self.acq_geom.eta_deg:.4}")
+        pix_size_um = self.acq_geom.pix_size_um
+        if self.verbose and self.prj_origin_vu is not None:
+            print(
+                f"- Projected origin on the detector: {self.prj_origin_vu} [pix]",
+                f"({self.prj_origin_vu * pix_size_um} [um])" if pix_size_um > 0.0 else "",
+            )
 
         if np.abs(self.acq_geom.eta_deg) > 0.1:
             rot = Rotation.from_rotvec(-np.deg2rad(self.acq_geom.eta_deg) * np.array([0, 0, 1]))
@@ -375,68 +411,96 @@ class FitConeBeamGeometry:
             fig.tight_layout()
             plt.show(block=False)
 
-        self.acq_geom.D = self._fit_distance_det2src(self.ell1_rot, self.ell2_rot)
-
-        if self.verbose:
-            print(f"Fitted detector distance from source (pix): {self.acq_geom.D}")
-
-    def fit(self, r: float, e: float = 1) -> ConeBeamGeometry:
+    def fit(self, r: float, e: float = 1, meas_D_pix: float | None = None) -> ConeBeamGeometry:
         """
         Fit the cone-beam geometry parameters, that will be used for producing the projection geometry.
 
         Parameters
         ----------
         r : float
-            The radius of the circle performed by the spheres.
+            The radius of the circle performed by the spheres in pixels.
         e : float, optional
             Either 1 or -1, indicating whether the source is between the circles or not. The default is 1.
+        meas_D_pix : float, optional
+            The measured source-detector distance in pixels. This parameter is only necessary when the
+            computed source-detector distance is invalid or zero.
 
         Raises
         ------
         ValueError
-            In case of flipped ellipses.
+            In case of flipped ellipses or invalid computed source-detector distance.
         """
+
+        def get_v0(v: float, b: float, a: float, c: float, D: float, sign_z: float) -> float:
+            return v - sign_z * np.sqrt(a + (a**2) * (D**2)) / np.sqrt(a * b - (c**2))
+
+        def get_denom(b: float, a: float, c: float, D: float) -> float:
+            return np.sqrt(a * b + (a**2) * b * (D**2) - (c**2))
+
+        def get_rho(b: float, a: float, c: float, D: float) -> float:
+            return np.sqrt(a * b - (c**2)) / get_denom(b, a, c, D)
+
+        def get_zeta(b: float, a: float, c: float, D: float, sign_zk: float) -> float:
+            return D * sign_zk * a * np.sqrt(a) / get_denom(b, a, c, D)
+
         b1, a1, c1, v1, u1 = self.ell1_rot.parameters
         b2, a2, c2, v2, u2 = self.ell2_rot.parameters
+
+        if self.verbose:
+            print("Fitted values from the calibration scan parameters:")
+            print("- Ellipses' parameters:")
+            print(f"  * upper ({a1 = :.6}, {b1 = :.6}, {c1 = :.6}, {v1 = :.6}, {u1 = :.6})")
+            print(f"  * lower ({a2 = :.6}, {b2 = :.6}, {c2 = :.6}, {v2 = :.6}, {u2 = :.6})")
+
+        pix_size_um = self.acq_geom.pix_size_um
+
+        comp_D_pix = self._fit_distance_det2src(self.ell1_rot, self.ell2_rot, e=e)
+        if meas_D_pix is None:
+            if np.isnan(comp_D_pix) or np.isclose(comp_D_pix, 0.0):
+                raise ValueError(
+                    f"The computed source-detector distance is invalid ({comp_D_pix}), please enter a measured value"
+                )
+
+            self.acq_geom.D_pix = comp_D_pix
+
+            if self.verbose:
+                print(
+                    f"- Computed source-detector distance: {self.acq_geom.D_pix:.6} [pix]",
+                    f"({self.acq_geom.D_pix * pix_size_um:.4e} [um])" if pix_size_um > 0.0 else "",
+                )
+        else:
+            self.acq_geom.D_pix = meas_D_pix
+
+            if self.verbose:
+                print("- Source-detector distance (using measured):")
+                print(f"  * Measured = {meas_D_pix:.6} vs computed = {comp_D_pix:.6} [pix]")
+                print(f"  * Measured = {meas_D_pix*pix_size_um:.6} vs computed = {comp_D_pix*pix_size_um:.6} [um]")
 
         sign_z1 = -1
         sign_z2 = sign_z1 * -e
 
-        def get_v0(vk, bk, ak, ck, D, sign_zk) -> float:
-            return vk - sign_zk * np.sqrt(ak + (ak**2) * (D**2)) / np.sqrt(ak * bk - (ck**2))
+        v01 = get_v0(v1, b1, a1, c1, self.acq_geom.D_pix, sign_z1)
+        v02 = get_v0(v2, b2, a2, c2, self.acq_geom.D_pix, sign_z2)
 
-        def get_denom(bk, ak, ck, D) -> float:
-            return np.sqrt(ak * bk + (ak**2) * bk * (D**2) - (ck**2))
-
-        def get_rho(bk, ak, ck, D) -> float:
-            return np.sqrt(ak * bk - (ck**2)) / get_denom(bk, ak, ck, D)
-
-        def get_zeta(bk, ak, ck, D, sign_zk) -> float:
-            return D * sign_zk * ak * np.sqrt(ak) / get_denom(bk, ak, ck, D)
-
-        v01 = get_v0(v1, b1, a1, c1, self.acq_geom.D, sign_z1)
-        v02 = get_v0(v2, b2, a2, c2, self.acq_geom.D, sign_z2)
-
-        self.acq_geom.v0 = np.array([v01, v02]).mean()
-        self.acq_geom.u0 = (
-            np.mean([u1, u2]) + c1 / (2 * a1) * (v1 - self.acq_geom.v0) + c2 / (2 * a2) * (v2 - self.acq_geom.v0)
+        self.acq_geom.v0_pix = np.array([v01, v02]).mean()
+        self.acq_geom.u0_pix = (
+            np.mean([u1, u2]) + c1 / (2 * a1) * (v1 - self.acq_geom.v0_pix) + c2 / (2 * a2) * (v2 - self.acq_geom.v0_pix)
         )
 
         if self.verbose:
-            print(f"Ellipses' positions:\n- upper (v1={v1}, u1={u1})\n- lower (v2={v2}, u2={u2})")
-            print(f"Fitted source position over detector: v0={self.acq_geom.v0}, u0={self.acq_geom.u0}")
-            print(f"- Separately fitted v: v01={v01}, v02={v02}")
+            print(f"- Source position over detector: v0 = {self.acq_geom.v0_pix:.6}, u0 = {self.acq_geom.u0_pix:.6}")
+            print(f"  * Separately fitted v (from the two ellipses): {v01 = :.6}, {v02 = :.6}")
 
         if np.linalg.norm(v01 - v02) > np.linalg.norm(v1 - v2):
             raise ValueError(
                 f"Obtained: v01={v01}, v02={v02}, while v1={v1}, v2={v2}. Probably wrong order of ellipses (please flip them!)"
             )
 
-        rho1 = get_rho(b1, a1, c1, self.acq_geom.D)
-        rho2 = get_rho(b2, a2, c2, self.acq_geom.D)
+        rho1 = get_rho(b1, a1, c1, self.acq_geom.D_pix)
+        rho2 = get_rho(b2, a2, c2, self.acq_geom.D_pix)
 
-        zeta1 = get_zeta(b1, a1, c1, self.acq_geom.D, sign_z1)
-        zeta2 = get_zeta(b2, a2, c2, self.acq_geom.D, sign_z2)
+        zeta1 = get_zeta(b1, a1, c1, self.acq_geom.D_pix, sign_z1)
+        zeta2 = get_zeta(b2, a2, c2, self.acq_geom.D_pix, sign_z2)
 
         self.acq_geom.phi_deg = np.rad2deg(np.arcsin(-c1 / (2 * a1) * zeta1 - c2 / (2 * a2) * zeta2))
 
@@ -448,21 +512,34 @@ class FitConeBeamGeometry:
 
         z_full = self.z1 - self.z2
 
-        self.acq_geom.theta_deg = 0.0
-        # self.acq_geom.theta_rad = np.arcsin((R1 - R2) / z_full) / np.mean(self.prj_size_vu)
+        self.acq_geom.R_pix = (-self.z2 * R_e1 + self.z1 * R_e2) / z_full
 
-        self.acq_geom.R = (-self.z2 * R_e1 + self.z1 * R_e2) / z_full
+        if np.isnan(self.acq_geom.R_pix) or np.isclose(self.acq_geom.R_pix, 0.0):
+            raise ValueError(f"The computed source-origin distance is invalid ({self.acq_geom.R_pix})")
 
         if self.prj_origin_vu is None:
             self.prj_origin_vu = (-self.z2 * self.ell1_prj_c_vu + self.z1 * self.ell2_prj_c_vu) / z_full
             if self.verbose:
-                print(f"Projected origin on the detector (pix): {self.prj_origin_vu}")
+                print(f"- Projected origin on the detector: {self.prj_origin_vu} [pix]")
+
+        self.acq_geom.theta_deg = 0.0
+        # self.acq_geom.theta_rad = np.arcsin((R1 - R2) / z_full) / np.mean(self.prj_size_vu)
 
         if self.verbose:
-            print(f"Fitted distances between source and rotation axis (pix):\n- R1={R_e1}, R={self.acq_geom.R}, R2={R_e2}")
-            print(f"Fitted heights of the two ellipses, with respect to the source (pix): z1={self.z1}, z2={self.z2}")
-            print(f"Fitted polar angle of the detector (phi deg): {self.acq_geom.phi_deg}")
-            print(f"Fitted azimuthal angle of the detector (theta deg): {self.acq_geom.theta_deg}")
+            print("- Distances between source and rotation axis:")
+            print(f"  * R1 = {R_e1:.6}, R = {self.acq_geom.R_pix:.6}, R2 = {R_e2:.6} [pix]")
+            if pix_size_um > 0.0:
+                print(
+                    f"  * R1 = {R_e1 * pix_size_um:.4e},",
+                    f"R = {self.acq_geom.R_pix * pix_size_um:.4e},",
+                    f"R2 = {R_e2 * pix_size_um:.4e} [um]",
+                )
+            print("- Heights of the two ellipses, with respect to the source:")
+            print(f"  * z1 = {self.z1:.6}, z2 = {self.z2:.6} [pix]")
+            if pix_size_um > 0.0:
+                print(f"  * z1 = {self.z1 * pix_size_um:.4e}, z2 = {self.z2 * pix_size_um:.4e} [um]")
+            print(f"- Polar angle of the detector (phi deg): {self.acq_geom.phi_deg}")
+            print(f"- Azimuthal angle of the detector (theta deg): {self.acq_geom.theta_deg}")
 
         return self.acq_geom
 
