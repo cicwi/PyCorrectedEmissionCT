@@ -279,6 +279,7 @@ class FitConeBeamGeometry:
         points_ell2: Sequence[Sequence[float]] | NDArray,
         points_axis: Sequence[Sequence[float]] | NDArray | None = None,
         pix_size_um: float | None = None,
+        use_l1_norm: bool = False,
         verbose: bool = True,
         plot_result: bool = False,
     ):
@@ -294,6 +295,11 @@ class FitConeBeamGeometry:
             Points of second ellipse.
         points_axis : Sequence[Sequence[float]] | NDArray | None, optional
             Points of the rotation axis, by default None
+        pix_size_um : float | None, optional
+            The size of the pixel edge in micrometers. Default is None.
+        use_l1_norm : bool, optional
+            Whether to use the l1-norm or the least-squares (l2-norm) fit for optimization.
+            Default is False.
         verbose : bool, optional
             Whether to produce verbose output, by default True
         plot_result : bool, optional
@@ -336,14 +342,11 @@ class FitConeBeamGeometry:
         self.verbose = verbose
         self.plot_result = plot_result and verbose
 
-        self.z1 = np.array([])
-        self.z2 = np.array([])
+        self._initialize(use_l1_norm=use_l1_norm)
 
-        self._initialize()
-
-    def _initialize(self, use_least_squares: bool = False) -> None:
-        ell1_fit_prj_c_vu = fit_ellipse_center(self.points_ell1, use_l1_norm=not use_least_squares)
-        ell2_fit_prj_c_vu = fit_ellipse_center(self.points_ell2, use_l1_norm=not use_least_squares)
+    def _initialize(self, use_l1_norm: bool) -> None:
+        ell1_fit_prj_c_vu = fit_ellipse_center(self.points_ell1, use_l1_norm=use_l1_norm)
+        ell2_fit_prj_c_vu = fit_ellipse_center(self.points_ell2, use_l1_norm=use_l1_norm)
         fit_eta_deg = _get_rot_axis_angle_deg(ell1_fit_prj_c_vu, ell2_fit_prj_c_vu)
 
         if self.verbose:
@@ -393,8 +396,8 @@ class FitConeBeamGeometry:
             points_ell2_rot = self.points_ell2.copy()
 
         # Re-instantiate ellipse class, after rotation
-        self.ell1_rot: Ellipse = fit_ellipse(points_ell1_rot, use_least_squares=use_least_squares)
-        self.ell2_rot: Ellipse = fit_ellipse(points_ell2_rot, use_least_squares=use_least_squares)
+        self.ell1_rot: Ellipse = fit_ellipse(points_ell1_rot, use_l1_norm=use_l1_norm)
+        self.ell2_rot: Ellipse = fit_ellipse(points_ell2_rot, use_l1_norm=use_l1_norm)
 
         if self.plot_result:
             fig, axs = plt.subplots()
@@ -493,7 +496,7 @@ class FitConeBeamGeometry:
 
         if np.linalg.norm(v01 - v02) > np.linalg.norm(v1 - v2):
             raise ValueError(
-                f"Obtained: v01={v01}, v02={v02}, while v1={v1}, v2={v2}. Probably wrong order of ellipses (please flip them!)"
+                f"Obtained: {v01 = }, {v02 = }, while {v1 = }, {v2 = }. Probably wrong order of ellipses (please flip them!)"
             )
 
         rho1 = get_rho(b1, a1, c1, self.acq_geom.D_pix)
@@ -507,18 +510,18 @@ class FitConeBeamGeometry:
         R_e1 = r / rho1
         R_e2 = r / rho2
 
-        self.z1 = R_e1 * zeta1
-        self.z2 = R_e2 * zeta2
+        z1 = R_e1 * zeta1
+        z2 = R_e2 * zeta2
 
-        z_full = self.z1 - self.z2
+        z_full = z1 - z2
 
-        self.acq_geom.R_pix = (-self.z2 * R_e1 + self.z1 * R_e2) / z_full
+        self.acq_geom.R_pix = (-z2 * R_e1 + z1 * R_e2) / z_full
 
         if np.isnan(self.acq_geom.R_pix) or np.isclose(self.acq_geom.R_pix, 0.0):
             raise ValueError(f"The computed source-origin distance is invalid ({self.acq_geom.R_pix})")
 
         if self.prj_origin_vu is None:
-            self.prj_origin_vu = (-self.z2 * self.ell1_prj_c_vu + self.z1 * self.ell2_prj_c_vu) / z_full
+            self.prj_origin_vu = (-z2 * self.ell1_prj_c_vu + z1 * self.ell2_prj_c_vu) / z_full
             if self.verbose:
                 print(f"- Projected origin on the detector: {self.prj_origin_vu} [pix]")
 
@@ -535,9 +538,9 @@ class FitConeBeamGeometry:
                     f"R2 = {R_e2 * pix_size_um:.4e} [um]",
                 )
             print("- Heights of the two ellipses, with respect to the source:")
-            print(f"  * z1 = {self.z1:.6}, z2 = {self.z2:.6} [pix]")
+            print(f"  * {z1 = :.6}, {z2 = :.6} [pix]")
             if pix_size_um > 0.0:
-                print(f"  * z1 = {self.z1 * pix_size_um:.4e}, z2 = {self.z2 * pix_size_um:.4e} [um]")
+                print(f"  * z1 = {z1 * pix_size_um:.4e}, z2 = {z2 * pix_size_um:.4e} [um]")
             print(f"- Polar angle of the detector (phi deg): {self.acq_geom.phi_deg}")
             print(f"- Azimuthal angle of the detector (theta deg): {self.acq_geom.theta_deg}")
 

@@ -1083,7 +1083,7 @@ class Ellipse(Trajectory):
         return v_1, v_2
 
 
-def fit_ellipse(prj_points_vu: ArrayLike | NDArray, rescale: bool = True, use_least_squares: bool = True) -> Ellipse:
+def fit_ellipse(prj_points_vu: ArrayLike | NDArray, rescale: bool = True, use_l1_norm: bool = False) -> Ellipse:
     """Fit an ellipse to a set of 2D points using either least-squares or l1-norm optimization.
 
     Parameters
@@ -1093,9 +1093,9 @@ def fit_ellipse(prj_points_vu: ArrayLike | NDArray, rescale: bool = True, use_le
     rescale : bool, optional
         Whether to rescale the data within the interval [-1, 1] to improve numerical stability.
         Default is True.
-    use_least_squares : bool, optional
-        Whether to use the least-squares (l2-norm) fit for optimization. If False, uses l1-norm.
-        Default is True.
+    use_l1_norm : bool, optional
+        Whether to use the l1-norm or the least-squares (l2-norm) fit for optimization.
+        Default is False.
 
     Returns
     -------
@@ -1111,6 +1111,6 @@ def fit_ellipse(prj_points_vu: ArrayLike | NDArray, rescale: bool = True, use_le
     prj_points_vu = np.array(prj_points_vu)
 
     return Ellipse(
-        *fit_ellipse_parameters(prj_points_vu, rescale, not use_least_squares),
-        fit_ellipse_center(prj_points_vu, rescale, not use_least_squares),
+        *fit_ellipse_parameters(prj_points_vu, rescale, use_l1_norm=use_l1_norm),
+        fit_ellipse_center(prj_points_vu, rescale, use_l1_norm=use_l1_norm),
     )
