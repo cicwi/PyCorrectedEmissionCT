@@ -158,6 +158,7 @@ class ConeBeamGeometry:
             det_v_xyz=e_v_xyz,
             rot_dir_xyz=np.array([0, 0, 1]),
             pix2vox_ratio=pix2vox_ratio,
+            det_shape_vu=np.array((self.det_size_v_pix, self.det_size_u_pix)),
         )
 
     def get_vol_geom(self, up_sampling: int = 1) -> VolumeGeometry:
