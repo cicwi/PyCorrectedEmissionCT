@@ -1043,15 +1043,15 @@ class Ellipse(Trajectory):
         return self.c_vu
 
     @property
-    def parameters(self) -> NDArray:
+    def parameters(self) -> tuple[float, float, float, float, float]:
         """Return the fitted ellipse parameters.
 
         Returns
         -------
-        NDArray
-            The fitted ellipse parameters.
+        tuple[float, float, float, float, float]
+            The fitted ellipse parameters: b, a, c, v, u.
         """
-        return np.array([self.b, self.a, self.c, self.v, self.u])
+        return self.b, self.a, self.c, self.v, self.u
 
     def __call__(self, uus: ArrayLike | NDArray) -> Sequence[NDArray]:
         """Predict V coordinates of ellipse from its parameters, and U coordinates.

@@ -371,6 +371,10 @@ class FitConeBeamGeometry:
             self.prj_origin_vu = self.points_axis[:, 1]
             self.acq_geom.eta_deg = acq_eta_deg
         else:
+            if self.verbose:
+                print(f"- Ellipse 1 center: fitted = {ell1_fit_prj_c_vu} [pix]")
+                print(f"- Ellipse 2 center: fitted = {ell2_fit_prj_c_vu} [pix]")
+
             self.ell1_prj_c_vu = ell1_fit_prj_c_vu
             self.ell2_prj_c_vu = ell2_fit_prj_c_vu
 
@@ -486,9 +490,12 @@ class FitConeBeamGeometry:
         v01 = get_v0(v1, b1, a1, c1, self.acq_geom.D_pix, sign_z1)
         v02 = get_v0(v2, b2, a2, c2, self.acq_geom.D_pix, sign_z2)
 
+        tilt_ratio1 = c1 / (2 * a1)
+        tilt_ratio2 = c2 / (2 * a2)
+
         self.acq_geom.v0_pix = np.array([v01, v02]).mean()
         self.acq_geom.u0_pix = (
-            np.mean([u1, u2]) + c1 / (2 * a1) * (v1 - self.acq_geom.v0_pix) + c2 / (2 * a2) * (v2 - self.acq_geom.v0_pix)
+            (u1 + u2) / 2 + tilt_ratio1 * (v1 - self.acq_geom.v0_pix) + tilt_ratio2 * (v2 - self.acq_geom.v0_pix)
         )
 
         if self.verbose:
@@ -506,7 +513,9 @@ class FitConeBeamGeometry:
         zeta1 = get_zeta(b1, a1, c1, self.acq_geom.D_pix, sign_z1)
         zeta2 = get_zeta(b2, a2, c2, self.acq_geom.D_pix, sign_z2)
 
-        self.acq_geom.phi_deg = np.rad2deg(np.arcsin(-c1 / (2 * a1) * zeta1 - c2 / (2 * a2) * zeta2))
+        sin_phi1 = -tilt_ratio1 * zeta1
+        sin_phi2 = -tilt_ratio2 * zeta2
+        self.acq_geom.phi_deg = np.rad2deg(np.arcsin(sin_phi1 + sin_phi2))
 
         R_e1 = r / rho1
         R_e2 = r / rho2
