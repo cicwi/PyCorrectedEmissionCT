@@ -823,10 +823,6 @@ def plot_projection_geometry(prj_geom: ProjectionGeometry, vol_geom: VolumeGeome
 
     pix_size = vol_geom.vox_size / prj_geom.pix2vox_ratio
 
-    # Plot the source
-    ax.scatter(*src_pos, color='r', s=100, label='Source')
-    print(f"{prj_geom.det_shape_vu = }, {vol_geom = }")
-
     # Plot the detector
     det_corners = np.array(
         [
@@ -874,18 +870,19 @@ def plot_projection_geometry(prj_geom: ProjectionGeometry, vol_geom: VolumeGeome
     volume.set_facecolor('g')
     ax.add_collection3d(volume)
 
+    if prj_geom.geom_type.lower() == "cone":
+        # Plot the source
+        ax.scatter(*src_pos, color='r', s=100)  # , label='Source'
+
+        # Plot vectors from the origin to the source and detector center
+        ax.quiver(*([0.0] * 3), *src_pos, color='r', arrow_length_ratio=0.1, label='Source Position')
+    else:
+        # plot the projection direction
+        prj_dir = src_pos / np.linalg.norm(src_pos) * np.linalg.norm(det_pos)
+        ax.quiver(*([0.0] * 3), *prj_dir, color='r', arrow_length_ratio=0.1, label='Projection direction')
+
     # Plot vectors from the origin to the source and detector center
-    ax.quiver(
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [src_pos[0], det_pos[0]],
-        [src_pos[1], det_pos[1]],
-        [src_pos[2], det_pos[2]],
-        color=['r', 'b'],
-        arrow_length_ratio=0.1,
-        label='Source and Detector Center',
-    )
+    ax.quiver(*([0.0] * 3), *det_pos, color=['b'], arrow_length_ratio=0.1, label='Detector Center')
 
     # Plot vectors from the detector center to the u and v unit vectors
     ax.quiver(
