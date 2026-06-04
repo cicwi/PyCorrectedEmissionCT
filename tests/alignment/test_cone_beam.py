@@ -93,6 +93,7 @@ def compute_xyz_rotated(
 @pytest.mark.parametrize("R", [30.0, 50.0])
 @pytest.mark.parametrize("D", [70.0, 80.0])
 def test_cone_beam_ellipse_distances(R: float, D: float):
+    """Test the cone beam geometry determination for different distance combinations."""
     debug = False
 
     det_size_vu = 12
@@ -151,6 +152,7 @@ def test_cone_beam_ellipse_distances(R: float, D: float):
 
 @pytest.mark.parametrize(("p", "n"), [(30.0, 0.0), (5.0, 1.0), (0.0, 15.0)])
 def test_cone_beam_ellipse_angles(p: float, n: float):
+    """Test the cone beam geometry determination for different angles combinations."""
     debug = False
 
     det_size_vu = 12
@@ -211,7 +213,6 @@ def test_cone_beam_ellipse_angles(p: float, n: float):
 if __name__ == "__main__":
     points_xyz_tst = np.array([[0, 1, 2], [3, 4, 5]])
 
-    # acq_geom = ConeBeamGeometry(theta_deg=0.0, phi_deg=0.0, eta_deg=0.0, D_pix=260.0, R_pix=160.0)
     acq_geom = ConeBeamGeometry(
         theta_deg=0.0,
         phi_deg=0.0,
@@ -222,13 +223,14 @@ if __name__ == "__main__":
         det_size_v_pix=100,
     )
     print(acq_geom)
+
     prj_geom = acq_geom.get_prj_geom()
     prj_uv_coords = project_to_uv(points_xyz=points_xyz_tst, proj_geom=prj_geom)
     print(prj_uv_coords)
 
     # Compute rotated XYZ for arrays of (r, z, w)
-    ws = np.array([0, np.pi / 4, np.pi / 2])
-    xyz_rotated = compute_xyz_rotated(r=2.0, z=1.0, ws=ws)
+    ws_test = np.array([0, np.pi / 4, np.pi / 2])
+    xyz_rotated = compute_xyz_rotated(r=2.0, z=1.0, ws=ws_test)
     print(xyz_rotated)
 
     plot_projection_geometry(acq_geom.get_prj_geom(), acq_geom.get_vol_geom())
