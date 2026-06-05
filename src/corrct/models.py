@@ -16,6 +16,7 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.spatial.transform as spt
+from matplotlib.widgets import CheckButtons
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from numpy.typing import ArrayLike, NDArray
 
@@ -832,10 +833,10 @@ def plot_projection_geometry(prj_geom: ProjectionGeometry, vol_geom: VolumeGeome
             det_pos - det_u * prj_geom.det_shape_vu[1] * pix_size / 2 + det_v * prj_geom.det_shape_vu[0] * pix_size / 2,
         ]
     )
-    # print(det_corners)
 
     detector = Poly3DCollection([det_corners], alpha=0.5, linewidths=1, edgecolors='k')
     detector.set_facecolor('b')
+    detector.set_label("Detector")
     ax.add_collection3d(detector)
 
     # Plot the volume
@@ -843,18 +844,8 @@ def plot_projection_geometry(prj_geom: ProjectionGeometry, vol_geom: VolumeGeome
 
     # Create a cube
     cube_vertices = np.array(
-        [
-            [-x, -y, -z],
-            [x, -y, -z],
-            [x, y, -z],
-            [-x, y, -z],
-            [-x, -y, z],
-            [x, -y, z],
-            [x, y, z],
-            [-x, y, z],
-        ]
+        [[-x, -y, -z], [x, -y, -z], [x, y, -z], [-x, y, -z], [-x, -y, z], [x, -y, z], [x, y, z], [-x, y, z]]
     )
-    # print(cube_vertices)
 
     # Create the 8 faces of the cube
     cube_faces = [
@@ -868,49 +859,62 @@ def plot_projection_geometry(prj_geom: ProjectionGeometry, vol_geom: VolumeGeome
 
     volume = Poly3DCollection(cube_faces, alpha=0.1, linewidths=1, edgecolors='k')
     volume.set_facecolor('g')
+    volume.set_label("Volume")
     ax.add_collection3d(volume)
+
+    # Organize the objects and their labels in a list
+    objects: list = [detector, volume]
 
     if prj_geom.geom_type.lower() == "cone":
         # Plot the source
-        ax.scatter(*src_pos, color='r', s=100)  # , label='Source'
+        src_scatter = ax.scatter(*src_pos, color='r', s=100, label='Source Spot')
+        objects.append(src_scatter)
 
         # Plot vectors from the origin to the source and detector center
-        ax.quiver(*([0.0] * 3), *src_pos, color='r', arrow_length_ratio=0.1, label='Source Position')
+        src_quiver = ax.quiver(*([0.0] * 3), *src_pos, color='r', arrow_length_ratio=0.1, label='Source Position')
+        objects.append(src_quiver)
     else:
         # plot the projection direction
         prj_dir = src_pos / np.linalg.norm(src_pos) * np.linalg.norm(det_pos)
-        ax.quiver(*([0.0] * 3), *prj_dir, color='r', arrow_length_ratio=0.1, label='Projection direction')
+        prj_quiver = ax.quiver(*([0.0] * 3), *prj_dir, color='r', arrow_length_ratio=0.1, label='Projection direction')
+        objects.append(prj_quiver)
 
     # Plot vectors from the origin to the source and detector center
-    ax.quiver(*([0.0] * 3), *det_pos, color=['b'], arrow_length_ratio=0.1, label='Detector Center')
+    det_quiver = ax.quiver(*([0.0] * 3), *det_pos, color='b', arrow_length_ratio=0.1, label='Detector Center')
+    objects.append(det_quiver)
 
     # Plot vectors from the detector center to the u and v unit vectors
-    ax.quiver(
-        [det_pos[0], det_pos[0]],
-        [det_pos[1], det_pos[1]],
-        [det_pos[2], det_pos[2]],
-        [
-            det_u[0] * prj_geom.det_shape_vu[1] * pix_size / 4,
-            det_v[0] * prj_geom.det_shape_vu[0] * pix_size / 4,
-        ],
-        [
-            det_u[1] * prj_geom.det_shape_vu[1] * pix_size / 4,
-            det_v[1] * prj_geom.det_shape_vu[0] * pix_size / 4,
-        ],
-        [
-            det_u[2] * prj_geom.det_shape_vu[1] * pix_size / 4,
-            det_v[2] * prj_geom.det_shape_vu[0] * pix_size / 4,
-        ],
-        color=['m', 'c'],
-        arrow_length_ratio=0.1,
-        label='U and V Vectors',
+    u_quiver = ax.quiver(
+        *det_pos, *(det_u * prj_geom.det_shape_vu[1] * pix_size / 4), color='m', arrow_length_ratio=0.1, label='U vector'
     )
+    objects.append(u_quiver)
+    v_quiver = ax.quiver(
+        *det_pos, *(det_v * prj_geom.det_shape_vu[0] * pix_size / 4), color='c', arrow_length_ratio=0.1, label='V vector'
+    )
+    objects.append(v_quiver)
 
-    # Set labels and legend
+    labels = [o.get_label() for o in objects]
+    colors = [o.get_color() if hasattr(o, "get_color") else o.get_facecolor()[0] for o in objects]
+    visibility = [o.get_visible() for o in objects]
+
+    # Create a rectangle for the CheckButtons
+    rax = ax.inset_axes([0.0, 0.0, 0.3, 0.25])
+    visibility = [True] * len(objects)
+    check = CheckButtons(rax, labels, visibility, label_props={'color': colors, "fontsize": [14] * len(objects)})
+
+    # Define the function to update the visibility of the elements
+    def func(label):
+        index = labels.index(label)
+        objects[index].set_visible(not objects[index].get_visible())
+        plt.draw()
+
+    # Register the function with the CheckButtons
+    check.on_clicked(func)
+
+    # Set labels
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-    ax.legend()
     ax.set_aspect("equal")
     fig.tight_layout()
 
