@@ -117,22 +117,10 @@ class ConeBeamGeometry:
 
         # Rotated detector base vectors
         alpha_xyz = np.array([-np.sin(phi_rad), -np.cos(phi_rad), 0])
-        beta_xyz = np.array(
-            [
-                -np.sin(theta_rad) * np.cos(phi_rad),
-                np.sin(theta_rad) * np.sin(phi_rad),
-                np.cos(theta_rad),
-            ]
-        )
+        beta_xyz = np.array([-np.sin(theta_rad) * np.cos(phi_rad), np.sin(theta_rad) * np.sin(phi_rad), np.cos(theta_rad)])
 
         # Detector normal
-        e_n_xyz = np.array(
-            [
-                np.cos(theta_rad) * np.cos(phi_rad),
-                -np.cos(theta_rad) * np.sin(phi_rad),
-                np.sin(theta_rad),
-            ]
-        )
+        e_n_xyz = np.array([np.cos(theta_rad) * np.cos(phi_rad), -np.cos(theta_rad) * np.sin(phi_rad), np.sin(theta_rad)])
 
         det_pos_xyz = -e_n_xyz * self.D_pix + e_x_xyz * self.R_pix - alpha_xyz * self.u0_pix - beta_xyz * self.v0_pix
         src_pos_xyz = e_x_xyz * self.R_pix
