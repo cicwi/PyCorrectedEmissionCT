@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.spatial.transform as spt
 from matplotlib.widgets import CheckButtons
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
 from numpy.typing import ArrayLike, NDArray
 
 ROT_DIRS_VALID = ("clockwise", "counter-clockwise")
@@ -866,6 +866,11 @@ def plot_projection_geometry(prj_geom: ProjectionGeometry, vol_geom: VolumeGeome
     objects: list = [detector, volume]
 
     if prj_geom.geom_type.lower() == "cone":
+        prj_lines = [np.stack((src_pos, d_c), axis=0) for d_c in det_corners]
+        prj_lines_c = Line3DCollection(prj_lines, colors="g", linestyles="-.", linewidths=1.0, label="Projection lines")
+        ax.add_collection(prj_lines_c)
+        objects.append(prj_lines_c)
+
         # Plot the source
         src_scatter = ax.scatter(*src_pos, color='r', s=100, label='Source Spot')
         objects.append(src_scatter)
