@@ -26,7 +26,7 @@ def _load_data(fname: str | Path) -> dict[str, NDArray]:
         return {k: _get_data(fid, f"/{k}") for k in fid.keys()}
 
 
-data = _load_data("./data/calib/calibration_scans.h5")
+data = _load_data("./data/calibration_scans.h5")
 
 prj_size_vu = (data["scan_1"].shape[0], data["scan_1"].shape[2])
 
@@ -43,3 +43,22 @@ acq_geom = fit_cb_geom.fit(r=orbit_radius_pix)
 
 print(acq_geom)
 cct.models.plot_projection_geometry(acq_geom.get_prj_geom(), acq_geom.get_vol_geom())
+
+imgs_t = (data["scan_1"] + data["scan_2"]).astype(np.float32)
+
+acq_geom = cct.alignment.cone_beam.tune_acquisition_geometry(
+    acq_geom,
+    data=imgs_t,
+    angles_rot_rad=np.deg2rad(data["angles_deg"]),
+    params=dict(
+        D_pix=np.linspace(-24 * 2, 0, 9),
+        theta_deg=np.linspace(-1, 1, 5),
+        eta_deg=np.linspace(-1, 1, 5),
+        phi_deg=np.linspace(-0.25, 0.25, 5),
+        u0_pix=np.linspace(-1, 1, 9),
+        v0_pix=np.linspace(-1, 1, 9),
+    ),
+    verbose=True,
+)
+
+print(acq_geom)
