@@ -1,19 +1,16 @@
-# -*- coding: utf-8 -*-
 """
 Example demonstrating the use of pre-alignment routines.
 
 @author: Nicola VIGANÒ, CEA-IRIG, Grenoble, France
 """
 
-import numpy as np
+from collections.abc import Sequence
 
 import matplotlib.pyplot as plt
-
-import corrct as cct
-
-from typing import Sequence, Union
+import numpy as np
 from numpy.typing import NDArray
 
+import corrct as cct
 
 try:
     import phantom
@@ -22,7 +19,7 @@ except ImportError:
     import phantom
 
 
-def cm2inch(x: Union[float, Sequence[float], NDArray]) -> Sequence[float]:
+def cm2inch(x: float | Sequence[float] | NDArray) -> Sequence[float]:
     """Convert centimeters to inches.
 
     Parameters
