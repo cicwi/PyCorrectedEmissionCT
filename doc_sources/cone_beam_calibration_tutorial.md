@@ -1,6 +1,23 @@
 # Cone-Beam Geometry Calibration
 
-In this tutorial, we'll demonstrate how to use `corrct`'s cone-beam geometry calibration routines. This process is crucial for accurate X-ray tomography reconstructions, especially when dealing with cone-beam geometry setups.
+In this tutorial, we'll demonstrate how to use `corrct`'s cone-beam geometry calibration routines.
+This process is crucial for accurate X-ray tomography reconstructions, especially when dealing with cone-beam geometry setups.
+This calibration procedure is based on:
+
+- Noo, F., Clackdoyle, R., Mennessier, C., White, T. A. & Roney, T. J. (2000). Phys. Med. Biol. 45, 3489–3508.
+  doi: 10.1088/0031-9155/45/11/327
+
+This procedure relies on certain assumptions of the geometry (e.g., non-degeneracy of certain parameters), and it has
+limitations with respect to its accuracy or ability to determine certain parameters (i.e., one of the detector tilts).
+More advanced procedures have been published in the literature more recently, which address its pitfalls.
+However, it is quite straight-forward to be carried out, and it requires minimal data to work.
+The remaining uncertainties can be fine tuned with the data-driven approach presented here below.
+
+In particular, this procedure assumes that you provide two different tomography scans of a rotating marker,
+on circular orbits around the rotation axis of the sample coordinates.
+Ideally, these two trajectories should be on opposite sides of the origin along the rotation axis (not necessarily at the exact same distance).
+The projections of these two orbits will form two distinct ellipses over the detector.
+
 To follow this tutorial, you will need to download the demonstration dataset from [Zenodo](https://doi.org/10.5281/zenodo.20559974), and place it a sub-directory `./data/` of the current working directory.
 
 ## Setup and Data Loading
@@ -35,13 +52,12 @@ except FileNotFoundError as exc:
 ```
 
 This dataset is composed of two different tomographic scans, with 60 angles each. In each scan, we record the motion of a
-sphere in a circular orbit around the rotation axis of the sample rotation stage. The difference between the two scans is the
-height of the orbit with respect to the origin of the sample coordinate system.
+sphere in a circular orbit at radius of 3 millimeters around the rotation axis of the sample rotation stage.
 
 ## Sphere Trajectory Tracking
 
 Before we can proceed with the geometry calibration, we need to identify the sphere position over the detector at each angle.
-The sphere trajectory over the detector will be an ellipse, corresponding to the projection of each circular trajectory in the
+The sphere trajectory over the detector will be an ellipse, corresponding to the projection of each circular trajectory from the
 sample space.
 
 We'll start by creating a marker disk:
@@ -79,10 +95,6 @@ print(acq_geom)
 ```
 
 The radius of the circular trajectory should be known and provided in pixels.
-This calibration procedure is based on:
-
-- Noo, F., Clackdoyle, R., Mennessier, C., White, T. A. & Roney, T. J. (2000). Phys. Med. Biol. 45, 3489–3508.
-  doi: 10.1088/0031-9155/45/11/327
 
 :::{note}
    While the attribute `pix_size_um` is optional, we suggest passing it, as it will, as it will enable the fitting routines
