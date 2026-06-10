@@ -8,7 +8,9 @@ Created on Tue May 17 12:11:58 2022
 and ESRF - The European Synchrotron, Grenoble, France
 """
 
+from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -458,7 +460,7 @@ def fit_sinusoid(angles: NDArrayFloat, values: NDArrayFloat, fit_l1: bool = Fals
             return float(l1_diff)
 
         apb = spopt.minimize(f, np.array([a, p, b]))
-        (a, p, b) = apb.x
+        a, p, b = apb.x
 
     return a, p, b
 
@@ -719,3 +721,396 @@ def refine_max_position_2d(
             + f" Input values: {f_vals}"
         )
     return vertex_yx
+
+
+def fit_parabola_min(
+    fun_x: ArrayLike | NDArray,
+    fun_vals: ArrayLike | NDArray,
+    scale: Literal["linear", "log"] = "linear",
+    decimals: int = 2,
+) -> tuple[float, float, tuple[NDArray, NDArray] | None]:
+    """Parabolic fit local function stationary point.
+
+    Parameters
+    ----------
+    fx : ArrayLike
+        Parameter values.
+    f_vals : ArrayLike
+        Objective function costs of each parameter value.
+    scale : str, optional
+        Scale of the fit. Options are: "log" | "linear". The default is "log".
+
+    Returns
+    -------
+    min_fx : float
+        Expected parameter value of the fitted minimum.
+    min_f_val : float
+        Expected objective function cost of the fitted minimum.
+    """
+    fun_x = np.array(fun_x)
+    fun_vals = np.array(fun_vals)
+
+    if len(fun_x) < 3 or len(fun_vals) < 3 or len(fun_x) != len(fun_vals):
+        raise ValueError(
+            "Lengths of the parameter values and function values should be identical and >= 3."
+            + f"Given: fx={len(fun_x)}, f_vals={len(fun_vals)}"
+        )
+
+    if scale.lower() == "log":
+
+        def to_fit(vals: NDArray) -> NDArray:
+            return np.log10(vals)
+
+        def from_fit(vals: NDArray) -> NDArray:
+            return 10**vals
+
+    elif scale.lower() == "linear":
+
+        def to_fit(vals: NDArray) -> NDArray:
+            return vals
+
+        from_fit = to_fit
+    else:
+        raise ValueError(f"Parameter 'scale' should be either 'log' or 'linear', given '{scale}' instead")
+
+    min_pos = np.argmin(fun_vals)
+    if min_pos == 0:
+        print("WARNING: minimum value at the beginning of the lambda range.")
+        fx_fit = to_fit(fun_x[:3])
+        f_vals_fit = fun_vals[:3]
+    elif min_pos == (len(fun_vals) - 1):
+        print("WARNING: minimum value at the end of the lambda range.")
+        fx_fit = to_fit(fun_x[-3:])
+        f_vals_fit = fun_vals[-3:]
+    else:
+        fx_fit = to_fit(fun_x[min_pos - 1 : min_pos + 2])
+        f_vals_fit = fun_vals[min_pos - 1 : min_pos + 2]
+
+    # using Polynomial.fit, because it is supposed to be more numerically
+    # stable than previous solutions (according to numpy).
+    poly = Polynomial.fit(fx_fit, f_vals_fit, deg=2)
+    coeffs = poly.convert().coef
+    if coeffs[2] <= 0:
+        print("WARNING: fitted curve is concave. Returning minimum measured point.")
+        return fun_x[min_pos], fun_vals[min_pos], None
+
+    # For a 1D parabola `f(x) = c + bx + ax^2`, the vertex position is:
+    # x_v = -b / 2a.
+    vertex_pos = -coeffs[1] / (2 * coeffs[2])
+    vertex_val = coeffs[0] + vertex_pos * coeffs[1] / 2
+
+    vertex_pos = np.around(vertex_pos, decimals=decimals)
+    vertex_val = np.around(vertex_val, decimals=decimals)
+
+    min_fx, min_f_val = from_fit(vertex_pos), vertex_val
+    if min_fx < fun_x[0] or min_fx > fun_x[-1]:
+        print(
+            f"WARNING: fitted stationary point {min_fx} is outside input range [{fun_x[0]}, {fun_x[-1]}]."
+            + " Returning minimum measured point."
+        )
+        return fun_x[min_pos], fun_vals[min_pos], None
+
+    return min_fx, min_f_val, (coeffs, fx_fit)
+
+
+def fit_ellipse_center(
+    prj_points_vu: NDArray, rescale: bool = True, use_l1_norm: bool = False, decimals: int | None = 2
+) -> NDArray:
+    """
+    Fit an ellipse center to a set of projected points in VU coordinates.
+
+    The function uses a least-squares approach to fit an ellipse center to the given points.
+    Optionally, it can use L1 norm for fitting instead of the default L2 norm, and rescale
+    the points during fitting to have a maximum range of 1 (improve numerical stability).
+
+    Parameters
+    ----------
+    prj_points_vu : NDArray
+        Projected points in VU coordinates. The expected organization is:
+        - Last dimension: List of points (each point is a 2D coordinate).
+        - First dimension: Coordinates (V and U).
+    rescale : bool, optional
+        If True, rescale the points to have a maximum range of 1. Default is True.
+    use_l1_norm : bool, optional
+        If True, use L1 norm for fitting instead of the default L2 norm. Default is False.
+    decimals : int | None, optional
+        The number of decimal places to round the result to. If None, no rounding is performed.
+        Default is 2.
+
+    Returns
+    -------
+    NDArray
+        The fitted ellipse center in VU coordinates.
+    """
+    c_vu = np.mean(prj_points_vu, axis=-1)
+    pos_vu = prj_points_vu - c_vu[:, None]
+
+    if rescale:
+        scale_vu = np.max(pos_vu, axis=-1) - np.min(pos_vu, axis=-1)
+        pos_vu /= scale_vu[:, None]
+    else:
+        scale_vu = np.ones(2, dtype=pos_vu.dtype)
+
+    num_lines = pos_vu.shape[-1] // 2
+    pos1_vu = pos_vu[:, :num_lines]
+    pos2_vu = pos_vu[:, num_lines : num_lines * 2]
+
+    diffs_vu = pos2_vu - pos1_vu
+    vandermonde = np.stack([diffs_vu[-1, :], -diffs_vu[-2, :]], axis=-1)
+    values = np.cross(pos1_vu, pos2_vu, axis=0)
+
+    p_vu = np.linalg.lstsq(vandermonde, values, rcond=None)[0]
+    if use_l1_norm:
+
+        def _func(params: NDArrayFloat) -> float:
+            predicted_values = vandermonde.dot(params)
+            l1_diff = np.linalg.norm(predicted_values - values, ord=1)
+            return float(l1_diff)
+
+        opt_p_vu = spopt.minimize(_func, p_vu)
+        p_vu = opt_p_vu.x
+
+    pred_c_vu = p_vu * scale_vu + c_vu
+
+    if decimals is not None:
+        pred_c_vu = np.around(pred_c_vu, decimals=decimals)
+
+    return pred_c_vu
+
+
+def fit_ellipse_parameters(
+    prj_points_vu: NDArray, rescale: bool = True, use_l1_norm: bool = False
+) -> tuple[float, float, float, float, float]:
+    """
+    Fit ellipse parameters to a set of projected points in VU coordinates.
+
+    Parameters
+    ----------
+    prj_points_vu : NDArray
+        Projected points in VU coordinates. The expected organization is:
+        - Last dimension: List of points (each point is a 2D coordinate).
+        - First dimension: Coordinates (V and U).
+    rescale : bool, optional
+        If True, rescale the points to have a maximum range of 1. Default is True.
+    use_l1_norm : bool, optional
+        If True, use L1 norm for fitting instead of the default L2 norm. Default is False.
+
+    Returns
+    -------
+    tuple[float, float, float, float, float]
+        The fitted ellipse parameters: a, b, c, u, v.
+    """
+    # First we fit 5 intermediate variables
+    p_u: NDArray = prj_points_vu[-1, :]
+    p_v: NDArray = prj_points_vu[-2, :]
+
+    if rescale:
+        c_u = float(np.mean(p_u))
+        c_v = float(np.mean(p_v))
+        p_u = p_u - c_u
+        p_v = p_v - c_v
+
+        p_u_scaling = float(np.abs(p_u).max())
+        p_v_scaling = float(np.abs(p_v).max())
+        p_u /= p_u_scaling
+        p_v /= p_v_scaling
+    else:
+        c_u = 0.0
+        c_v = 0.0
+        p_u_scaling = 1.0
+        p_v_scaling = 1.0
+
+    vandermonde = np.stack([p_u**2, -2 * p_u, -2 * p_v, 2 * p_u * p_v, np.ones_like(p_u)], axis=-1)
+    values = -(p_v**2)
+
+    coeffs = np.linalg.lstsq(vandermonde, values, rcond=None)[0]
+    if use_l1_norm:
+
+        def _func(pars: NDArrayFloat) -> float:
+            predicted_b = vandermonde.dot(pars)
+            l1_diff = np.linalg.norm(predicted_b - values, ord=1)
+            return float(l1_diff)
+
+        opt_params = spopt.minimize(_func, coeffs)
+        coeffs = opt_params.x
+
+    if rescale:
+        coeffs[0] *= (p_v_scaling**2) / (p_u_scaling**2)
+        coeffs[1] *= (p_v_scaling**2) / p_u_scaling
+        coeffs[2] *= p_v_scaling
+        coeffs[3] *= p_v_scaling / p_u_scaling
+        coeffs[4] *= p_v_scaling**2
+
+    u = (coeffs[1] - coeffs[2] * coeffs[3]) / (coeffs[0] - coeffs[3] ** 2)
+    v = (coeffs[0] * coeffs[2] - coeffs[1] * coeffs[3]) / (coeffs[0] - coeffs[2] * coeffs[3])
+
+    a = coeffs[0] / (coeffs[0] * u**2 + v**2 + 2 * coeffs[3] * u * v - coeffs[4])
+    b = a / coeffs[0]
+    c = coeffs[3] * b
+
+    u += c_u
+    v += c_v
+
+    return a, b, c, u, v
+
+
+class Trajectory(ABC):
+    """Base trajectory class."""
+
+    @abstractmethod
+    def __call__(self, uus: Sequence[float] | NDArray) -> Sequence[NDArray]:
+        """Compute V coordinates, given V coordinates.
+
+        Parameters
+        ----------
+        uus : Sequence[float] | NDArray
+            The U coordinates
+
+        Returns
+        -------
+        Sequence[NDArray]
+            Corresponding V coordinates, given the multiplicity of the trajectory
+        """
+
+
+class Ellipse(Trajectory):
+    """Elliptic trajectory class."""
+
+    a: float
+    b: float
+    c: float
+    u: float
+    v: float
+
+    c_vu: NDArrayFloat
+
+    def __init__(self, a: float, b: float, c: float, u: float, v: float, c_vu: NDArrayFloat) -> None:
+        """Initialize ellipse class.
+
+        Ellipse corresponding to the equation: a*(x - u)**2 + b*(y - v)**2 + 2*c*(x - u)*(y - v) = 1
+
+        Parameters
+        ----------
+        a : float
+            The semi-major axis of the ellipse.
+        b : float
+            The semi-minor axis of the ellipse.
+        c : float
+            The rotation angle of the ellipse in radians.
+        u : float
+            The center of the ellipse along the x-axis.
+        v : float
+            The center of the ellipse along the y-axis.
+        c_vu : NDArrayFloat
+            The projected center of the circular orbit generating the ellipse.
+        """
+        self.a = a
+        self.b = b
+        self.c = c
+        self.u = u
+        self.v = v
+        self.c_vu = c_vu
+
+    def __repr__(self) -> str:
+        """Return a string representation of the Ellipse instance."""
+        return f"Ellipse(a={self.a}, b={self.b}, c={self.c}, u={self.u}, v={self.v}, c_vu={self.c_vu})"
+
+    @property
+    def extremes_u(self) -> tuple[float, float]:
+        """
+        Find the most extreme x coordinates (U coordinates) that are still valid for the given ellipse equation.
+
+        Returns
+        -------
+        tuple[float, float]
+            A tuple containing the most extreme U coordinates (u_min, u_max).
+        """
+        # Calculate the extreme U coordinates
+        u_min = self.u - np.sqrt(1 / self.a)
+        u_max = self.u + np.sqrt(1 / self.a)
+
+        return u_min, u_max
+
+    @property
+    def center_vu(self) -> NDArray:
+        """Return the fitted ellipse center.
+
+        Returns
+        -------
+        NDArray
+            The fitted center position.
+        """
+        return self.c_vu
+
+    @property
+    def parameters(self) -> tuple[float, float, float, float, float]:
+        """Return the fitted ellipse parameters.
+
+        Returns
+        -------
+        tuple[float, float, float, float, float]
+            The fitted ellipse parameters: b, a, c, v, u.
+        """
+        return self.b, self.a, self.c, self.v, self.u
+
+    def __call__(self, uus: ArrayLike | NDArray) -> Sequence[NDArray]:
+        """Predict V coordinates of ellipse from its parameters, and U coordinates.
+
+        Parameters
+        ----------
+        uus : Union[ArrayLike, NDArray]
+            The U coordinates
+
+        Returns
+        -------
+        tuple[NDArray, NDArray]
+            The corresponding top and bottom V coordinates
+        """
+        b, a, c, v, u = np.array(self.parameters)
+        uus = np.array(uus)
+
+        uus_u = uus - u
+
+        a_tilde = b
+        # b_tilde = 2 * (-b * v + c * uus - c * u)
+        # c_tilde = -(1 - a * (uus - u) ** 2 - b * v**2 + 2 * c * v * (uus - u))
+        b_tilde = 2 * (-b * v + c * uus_u)
+        c_tilde = -(1 - a * uus_u**2 - b * v**2 + 2 * c * v * uus_u)
+        delta_tilde = np.sqrt(b_tilde**2 - 4 * a_tilde * c_tilde)
+        v_1 = (-b_tilde + delta_tilde) / (2 * a_tilde)
+        v_2 = (-b_tilde - delta_tilde) / (2 * a_tilde)
+
+        return v_1, v_2
+
+
+def fit_ellipse(prj_points_vu: ArrayLike | NDArray, rescale: bool = True, use_l1_norm: bool = False) -> Ellipse:
+    """Fit an ellipse to a set of 2D points using either least-squares or l1-norm optimization.
+
+    Parameters
+    ----------
+    prj_points_vu : ArrayLike | NDArray
+        A list or array of 2D points (shape: Nx2) representing the trajectory to fit.
+    rescale : bool, optional
+        Whether to rescale the data within the interval [-1, 1] to improve numerical stability.
+        Default is True.
+    use_l1_norm : bool, optional
+        Whether to use the l1-norm or the least-squares (l2-norm) fit for optimization.
+        Default is False.
+
+    Returns
+    -------
+    Ellipse
+        An Ellipse object containing the fitted ellipse parameters (center, axes, and rotation angle).
+
+    Notes
+    -----
+    The function first fits the ellipse parameters (axes and rotation angle) and then fits the center
+    separately. The optimization method can be switched between least-squares and l1-norm for robustness
+    against outliers.
+    """
+    prj_points_vu = np.array(prj_points_vu)
+
+    return Ellipse(
+        *fit_ellipse_parameters(prj_points_vu, rescale, use_l1_norm=use_l1_norm),
+        fit_ellipse_center(prj_points_vu, rescale, use_l1_norm=use_l1_norm),
+    )

@@ -13,8 +13,11 @@ from dataclasses import dataclass
 from dataclasses import replace as dc_replace
 from typing import Any
 
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.spatial.transform as spt
+from matplotlib.widgets import CheckButtons
+from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
 from numpy.typing import ArrayLike, NDArray
 
 ROT_DIRS_VALID = ("clockwise", "counter-clockwise")
@@ -788,3 +791,136 @@ def get_vol_geom_from_volume(volume: NDArray) -> VolumeGeometry:
     if len(vol_shape_zxy) < 2:
         raise ValueError(f"The volume should be at least 2-dimensional, but the following shape was passed: {vol_shape_zxy}")
     return VolumeGeometry(np.array([vol_shape_zxy[-2], vol_shape_zxy[-1], *np.flip(vol_shape_zxy[:-2])]))
+
+
+def plot_projection_geometry(prj_geom: ProjectionGeometry, vol_geom: VolumeGeometry):
+    """
+    Plot the projection geometry using matplotlib.
+
+    Parameters
+    ----------
+    prj_geom : ProjectionGeometry
+        ProjectionGeometry class with precomputed geometric properties.
+    vol_size_xyz : VolumeGeometry
+        VolumeGeometry class reporting the volume size in number of voxels in X, Y, and Z directions, and their size.
+    """
+    if prj_geom.det_shape_vu is None or len(prj_geom.det_shape_vu) != 2:
+        raise ValueError(f"prj_geom.det_shape_vu must be a 2-element sequence, got {prj_geom = } instead.")
+    # Check that the fields have exactly 3 elements
+    for field in ['det_pos_xyz', 'det_u_xyz', 'det_v_xyz', 'src_pos_xyz']:
+        field_value = getattr(prj_geom, field)
+        if field_value.size != 3:
+            raise ValueError(f"{field} must have exactly 3 elements, got {field_value.size} elements instead.")
+    if len(vol_geom.shape_xyz) != 3:
+        raise ValueError(f"vol_geom.shape_xyz must be a 3-element sequence, got {vol_geom = } instead.")
+
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    src_pos = prj_geom.src_pos_xyz.flatten()
+    det_pos = prj_geom.det_pos_xyz.flatten()
+    det_u = prj_geom.det_u_xyz.flatten()
+    det_v = prj_geom.det_v_xyz.flatten()
+
+    pix_size = vol_geom.vox_size / prj_geom.pix2vox_ratio
+
+    # Plot the detector
+    det_corners = np.array(
+        [
+            det_pos + det_u * prj_geom.det_shape_vu[1] * pix_size / 2 + det_v * prj_geom.det_shape_vu[0] * pix_size / 2,
+            det_pos + det_u * prj_geom.det_shape_vu[1] * pix_size / 2 - det_v * prj_geom.det_shape_vu[0] * pix_size / 2,
+            det_pos - det_u * prj_geom.det_shape_vu[1] * pix_size / 2 - det_v * prj_geom.det_shape_vu[0] * pix_size / 2,
+            det_pos - det_u * prj_geom.det_shape_vu[1] * pix_size / 2 + det_v * prj_geom.det_shape_vu[0] * pix_size / 2,
+        ]
+    )
+
+    detector = Poly3DCollection([det_corners], alpha=0.5, linewidths=1, edgecolors='k')
+    detector.set_facecolor('b')
+    detector.set_label("Detector")
+    ax.add_collection3d(detector)
+
+    # Plot the volume
+    x, y, z = vol_geom.shape_xyz * vol_geom.vox_size / 2
+
+    # Create a cube
+    cube_vertices = np.array(
+        [[-x, -y, -z], [x, -y, -z], [x, y, -z], [-x, y, -z], [-x, -y, z], [x, -y, z], [x, y, z], [-x, y, z]]
+    )
+
+    # Create the 8 faces of the cube
+    cube_faces = [
+        [cube_vertices[0], cube_vertices[1], cube_vertices[2], cube_vertices[3]],  # Bottom face
+        [cube_vertices[4], cube_vertices[5], cube_vertices[6], cube_vertices[7]],  # Top face
+        [cube_vertices[0], cube_vertices[1], cube_vertices[5], cube_vertices[4]],  # Front face
+        [cube_vertices[2], cube_vertices[3], cube_vertices[7], cube_vertices[6]],  # Back face
+        [cube_vertices[1], cube_vertices[2], cube_vertices[6], cube_vertices[5]],  # Right face
+        [cube_vertices[0], cube_vertices[3], cube_vertices[7], cube_vertices[4]],  # Left face
+    ]
+
+    volume = Poly3DCollection(cube_faces, alpha=0.1, linewidths=1, edgecolors='k')
+    volume.set_facecolor('g')
+    volume.set_label("Volume")
+    ax.add_collection3d(volume)
+
+    # Organize the objects and their labels in a list
+    objects: list = [detector, volume]
+
+    if prj_geom.geom_type.lower() == "cone":
+        prj_lines = [np.stack((src_pos, d_c), axis=0) for d_c in det_corners]
+        prj_lines_c = Line3DCollection(prj_lines, colors="g", linestyles="-.", linewidths=1.0, label="Projection lines")
+        ax.add_collection(prj_lines_c)
+        objects.append(prj_lines_c)
+
+        # Plot the source
+        src_scatter = ax.scatter(*src_pos, color='r', s=100, label='Source Spot')
+        objects.append(src_scatter)
+
+        # Plot vectors from the origin to the source and detector center
+        src_quiver = ax.quiver(*([0.0] * 3), *src_pos, color='r', arrow_length_ratio=0.1, label='Source Position')
+        objects.append(src_quiver)
+    else:
+        # plot the projection direction
+        prj_dir = src_pos / np.linalg.norm(src_pos) * np.linalg.norm(det_pos)
+        prj_quiver = ax.quiver(*([0.0] * 3), *prj_dir, color='r', arrow_length_ratio=0.1, label='Projection direction')
+        objects.append(prj_quiver)
+
+    # Plot vectors from the origin to the source and detector center
+    det_quiver = ax.quiver(*([0.0] * 3), *det_pos, color='b', arrow_length_ratio=0.1, label='Detector Center')
+    objects.append(det_quiver)
+
+    # Plot vectors from the detector center to the u and v unit vectors
+    u_quiver = ax.quiver(
+        *det_pos, *(det_u * prj_geom.det_shape_vu[1] * pix_size / 4), color='m', arrow_length_ratio=0.1, label='U vector'
+    )
+    objects.append(u_quiver)
+    v_quiver = ax.quiver(
+        *det_pos, *(det_v * prj_geom.det_shape_vu[0] * pix_size / 4), color='c', arrow_length_ratio=0.1, label='V vector'
+    )
+    objects.append(v_quiver)
+
+    labels = [o.get_label() for o in objects]
+    colors = [o.get_color() if hasattr(o, "get_color") else o.get_facecolor()[0] for o in objects]
+    visibility = [o.get_visible() for o in objects]
+
+    # Create a rectangle for the CheckButtons
+    rax = ax.inset_axes([0.0, 0.0, 0.3, 0.25])
+    visibility = [True] * len(objects)
+    check = CheckButtons(rax, labels, visibility, label_props={'color': colors, "fontsize": [14] * len(objects)})
+
+    # Define the function to update the visibility of the elements
+    def func(label):
+        index = labels.index(label)
+        objects[index].set_visible(not objects[index].get_visible())
+        plt.draw()
+
+    # Register the function with the CheckButtons
+    check.on_clicked(func)
+
+    # Set labels
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_aspect("equal")
+    fig.tight_layout()
+
+    plt.show()
