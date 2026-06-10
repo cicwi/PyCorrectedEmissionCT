@@ -14,7 +14,9 @@
 :maxdepth: 1
 
 corrct.alignment.centering
+corrct.alignment.cone_beam
 corrct.alignment.fitting
+corrct.alignment.markers
 corrct.alignment.shifts
 ```
 

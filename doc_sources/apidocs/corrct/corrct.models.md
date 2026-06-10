@@ -63,6 +63,10 @@
   - ```{autodoc2-docstring} corrct.models.get_vol_geom_from_volume
     :summary:
     ```
+* - {py:obj}`plot_projection_geometry <corrct.models.plot_projection_geometry>`
+  - ```{autodoc2-docstring} corrct.models.plot_projection_geometry
+    :summary:
+    ```
 ````
 
 ### Data
@@ -483,5 +487,12 @@ Bases: {py:obj}`corrct.models.Geometry`
 :canonical: corrct.models.get_vol_geom_from_volume
 
 ```{autodoc2-docstring} corrct.models.get_vol_geom_from_volume
+```
+````
+
+````{py:function} plot_projection_geometry(prj_geom: corrct.models.ProjectionGeometry, vol_geom: corrct.models.VolumeGeometry)
+:canonical: corrct.models.plot_projection_geometry
+
+```{autodoc2-docstring} corrct.models.plot_projection_geometry
 ```
 ````
