@@ -371,6 +371,12 @@ class FitConeBeamGeometry:
             if self.verbose:
                 print(f"- Detector tilt around its normal (eta), fitted: {self.acq_geom.eta_deg:.4} [deg]")
 
+        if np.abs(self.acq_geom.eta_deg) > 120:
+            raise ValueError(
+                "The order of the ellipses seems to have been inverted."
+                f" (it suggests an eta of {self.acq_geom.eta_deg}). Please swap them."
+            )
+
         pix_size_um = self.acq_geom.pix_size_um
         if self.verbose and self.prj_origin_vu is not None:
             print(
