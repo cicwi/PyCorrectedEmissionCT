@@ -840,7 +840,7 @@ class SIRT(Solver):
             q = [reg.initialize_dual() for reg in self.regularizer]
             for q_r, reg in zip(q, self.regularizer):
                 reg.update_dual(q_r, x)
-                reg.apply_proximal(q_r)
+                reg.apply_proximal_dual(q_r)
 
             upd = A.T(res * sigma)
             for q_r, reg in zip(q, self.regularizer):
@@ -1093,14 +1093,14 @@ class PDHG(Solver):
 
             Ax_rlx = A(x_relax)
             self.data_term.update_dual(p, Ax_rlx)
-            self.data_term.apply_proximal(p)
+            self.data_term.apply_proximal_dual(p)
 
             if b_mask is not None:
                 p *= b_mask
 
             for q_r, reg in zip(q, self.regularizer):
                 reg.update_dual(q_r, x_relax)
-                reg.apply_proximal(q_r)
+                reg.apply_proximal_dual(q_r)
 
             upd = A.T(p)
             for q_r, reg in zip(q, self.regularizer):

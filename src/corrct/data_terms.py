@@ -234,7 +234,7 @@ class DataFidelityBase(ABC):
             dual += (proj_primal + self.background) * self.sigma
 
     @abstractmethod
-    def apply_proximal(self, dual: NDArrayFloat) -> None:
+    def apply_proximal_dual(self, dual: NDArrayFloat) -> None:
         """Apply the proximal in the dual domain.
 
         Parameters
@@ -283,7 +283,7 @@ class DataFidelity_l2(DataFidelityBase):
     def compute_residual_norm(self, dual: NDArrayFloat) -> float:
         return float(np.linalg.norm(dual.flatten(), ord=2) ** 2)
 
-    def apply_proximal(self, dual: NDArrayFloat) -> None:
+    def apply_proximal_dual(self, dual: NDArrayFloat) -> None:
         if self.data is not None and self.sigma_data is not None:
             dual -= self.sigma_data
         dual *= self.sigma1
@@ -364,7 +364,7 @@ class DataFidelity_l2b(DataFidelity_l2):
         _soft_threshold(residual, self.sigma_sqrt_error)
         return residual
 
-    def apply_proximal(self, dual: NDArrayFloat) -> None:
+    def apply_proximal_dual(self, dual: NDArrayFloat) -> None:
         if self.data is not None and self.sigma_data is not None:
             dual -= self.sigma_data
         _soft_threshold(dual, self.sigma_sqrt_error)
@@ -401,7 +401,7 @@ class DataFidelity_Huber(DataFidelityBase):
         l1_points = 1 - l2_points
         return np.linalg.norm(dual[l2_points].flatten(), ord=2) ** 2 + np.linalg.norm(dual[l1_points].flatten(), ord=1)
 
-    def apply_proximal(self, dual):
+    def apply_proximal_dual(self, dual):
         if self.data is not None and self.sigma_data is not None:
             dual -= self.sigma_data
 
@@ -437,7 +437,7 @@ class DataFidelity_l1(DataFidelityBase):
     def _apply_threshold(self, dual):
         pass
 
-    def apply_proximal(self, dual, weight=1.0):
+    def apply_proximal_dual(self, dual, weight=1.0):
         if self.data is not None:
             dual -= self.sigma_data
         self._apply_threshold(dual)
@@ -505,7 +505,7 @@ class DataFidelity_KL(DataFidelityBase):
         else:
             return 4 * self.sigma * np.fmax(self.data, 0.0)
 
-    def apply_proximal(self, dual):
+    def apply_proximal_dual(self, dual):
         if self.sigma_data is not None:
             dual[:] = (1 + dual[:] - np.sqrt((dual[:] - 1) ** 2 + self.sigma_data[:])) / 2
         else:
@@ -517,7 +517,7 @@ class DataFidelity_KL(DataFidelityBase):
         # we take the Moreau envelope here, and apply the proximal to it
         residual = np.fmax(proj_primal, eps) * self.sigma
 
-        self.apply_proximal(residual)
+        self.apply_proximal_dual(residual)
 
         if mask is not None:
             residual *= mask
@@ -553,7 +553,7 @@ class DataFidelity_ln(DataFidelityBase):
         self.spectral_norm = spectral_norm
         self.use_fallback = False
 
-    def apply_proximal(self, dual):
+    def apply_proximal_dual(self, dual):
         dual_tmp = dual.copy()
 
         if self.sigma_data is not None:
@@ -569,7 +569,7 @@ class DataFidelity_ln(DataFidelityBase):
 
             U, s_p, Vt = np.linalg.svd(dual_tmp, full_matrices=False)
 
-            self.spectral_norm.apply_proximal(s_p)
+            self.spectral_norm.apply_proximal_dual(s_p)
 
             dual_tmp = np.matmul(U, s_p[..., None] * Vt)
             dual_tmp = np.transpose(dual_tmp, np.argsort(t_range))
@@ -577,7 +577,7 @@ class DataFidelity_ln(DataFidelityBase):
             op_svd = operators.TransformSVD(dual_tmp.shape, axes_rows=self.ln_axes[0], axes_cols=self.ln_axes[1])
             s_p = op_svd(dual_tmp)
 
-            self.spectral_norm.apply_proximal(s_p)
+            self.spectral_norm.apply_proximal_dual(s_p)
 
             dual_tmp = op_svd.T(s_p)
 

@@ -147,7 +147,7 @@ class BaseRegularizer(ABC):
 
         dual += self.sigma * self.op(primal)
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         """
         Apply the proximal operator to the dual in-place.
 
@@ -157,9 +157,9 @@ class BaseRegularizer(ABC):
             The dual to be applied the proximal on.
         """
         if isinstance(self.norm, dt.DataFidelity_l1):
-            self.norm.apply_proximal(dual, self.weight)
+            self.norm.apply_proximal_dual(dual, self.weight)
         else:
-            self.norm.apply_proximal(dual)
+            self.norm.apply_proximal_dual(dual)
 
     def compute_update_primal(self, dual: NDArray) -> NDArray:
         """
@@ -612,15 +612,15 @@ class Regularizer_swl(BaseRegularizer):
         if not self.min_approx:
             dual[0, ...] = 0
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         if isinstance(self.norm, dt.DataFidelity_l12):
             tmp_dual = dual[1:]
             tmp_dual = tmp_dual.reshape([-1, self.level, *dual.shape[1:]])
-            self.norm.apply_proximal(tmp_dual, self.weight)
+            self.norm.apply_proximal_dual(tmp_dual, self.weight)
             tmp_dual = dual[0:1:]
-            self.norm.apply_proximal(tmp_dual, self.weight)
+            self.norm.apply_proximal_dual(tmp_dual, self.weight)
         else:
-            super().apply_proximal(dual)
+            super().apply_proximal_dual(dual)
 
 
 class Regularizer_l1swl(Regularizer_swl):
@@ -818,7 +818,7 @@ class Regularizer_dwl(BaseRegularizer):
             slices = [slice(0, x) for x in op_wl.sub_band_shapes[0]]
             dual[tuple(slices)] = 0
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         if isinstance(self.norm, dt.DataFidelity_l12):
             op_wl: operators.TransformDecimatedWavelet = self.op
             coeffs = pywt.array_to_coeffs(dual, op_wl.slicing_info)
@@ -830,14 +830,14 @@ class Regularizer_dwl(BaseRegularizer):
                     labels.append(lab)
                     details.append(det)
                 c_ll = np.stack(details, axis=0)
-                self.norm.apply_proximal(c_ll, self.weight)
+                self.norm.apply_proximal_dual(c_ll, self.weight)
                 for ii, lab in enumerate(labels):
                     c_l[lab] = c_ll[ii]
                 coeffs[ii_l] = c_l
-            self.norm.apply_proximal(coeffs[0], self.weight)
+            self.norm.apply_proximal_dual(coeffs[0], self.weight)
             dual[:] = pywt.coeffs_to_array(coeffs)[0]
         else:
-            super().apply_proximal(dual)
+            super().apply_proximal_dual(dual)
 
 
 class Regularizer_l1dwl(Regularizer_dwl):
@@ -1130,7 +1130,7 @@ class Regularizer_VTV(Regularizer_Grad):
             + f" Provided the following instead: derivatives={self.pwise_der_norm}, channel={self.pwise_chan_norm}"
         )
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         # Following assignments will detach the local array from the original one
         dual_tmp = dual.copy()
 
@@ -1281,7 +1281,7 @@ class Regularizer_vl1wl(Regularizer_l1swl):
 
         return tau
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         dual_tmp = dual.copy()
 
         if self.q_ref is not None:
@@ -1405,9 +1405,9 @@ class Constraint_LowerLimit(BaseRegularizer):
     def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         dual += primal - self.limit
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         dual[dual > 0.0] = 0.0
-        self.norm.apply_proximal(dual)
+        self.norm.apply_proximal_dual(dual)
 
 
 class Constraint_UpperLimit(BaseRegularizer):
@@ -1453,6 +1453,6 @@ class Constraint_UpperLimit(BaseRegularizer):
     def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         dual += primal - self.limit
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         dual[dual < 0.0] = 0.0
-        self.norm.apply_proximal(dual)
+        self.norm.apply_proximal_dual(dual)
