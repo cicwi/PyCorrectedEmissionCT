@@ -99,14 +99,14 @@ def denoise_image(
     else:
         data_term = data_terms.DataFidelity_wl2(pix_weights)
 
-    def solver_spawn(lam_reg):
+    def solver_init(lam_reg):
         # Using the PDHG solver from Chambolle and Pock
         reg = regularizer(lam_reg)
         return solvers.PDHG(
             verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term, leave_progress=False
         )
 
-    def solver_call(solver: solvers.Solver, b_test_mask: NDArray | None = None) -> tuple[NDArray, solvers.SolutionInfo]:
+    def solver_exec(solver: solvers.Solver, b_test_mask: NDArray | None = None) -> tuple[NDArray, solvers.SolutionInfo]:
         x0 = img.copy()
         if b_test_mask is not None:
             med_img = spsig.medfilt2d(img, kernel_size=11)
@@ -119,8 +119,8 @@ def denoise_image(
     reg_weight = np.array(reg_weight)
     if reg_weight.size > 1:
         reg_help_cv = param_tuning.CrossValidation(img.shape, verbose=verbose, num_averages=3, plot_result=verbose)
-        reg_help_cv.solver_spawning_function = solver_spawn
-        reg_help_cv.solver_calling_function = solver_call
+        reg_help_cv.task_init_function = solver_init
+        reg_help_cv.task_exec_function = solver_exec
 
         f_avgs, _, _ = reg_help_cv.compute_loss_values(reg_weight)
 
@@ -128,10 +128,10 @@ def denoise_image(
     else:
         min_reg_weight = reg_weight
 
-    solver = solver_spawn(min_reg_weight)
-    denoised_img, _ = solver_call(solver, None)
+    solver = solver_init(min_reg_weight)
+    denoised_img, _ = solver_exec(solver, None)
 
     if reg_weight.size == 1:
         return denoised_img
     else:
-        return denoised_img, min_reg_weight
+        return denoised_img, float(min_reg_weight)
