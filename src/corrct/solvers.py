@@ -23,6 +23,93 @@ eps = np.finfo(np.float32).eps
 NDArrayFloat = NDArray[np.floating]
 
 
+def power_method(A: operators.BaseTransform, b: NDArrayFloat, iterations: int = 5) -> tuple[float, tuple[int, ...], DTypeLike]:
+    """
+    Compute the l2-norm of the operator A, with the power method.
+
+    Parameters
+    ----------
+    A : BaseTransform
+        The forward operator whose l2-norm needs to be computed.
+    b : NDArrayFloat
+        The data vector (used only for shape and dtype).
+    iterations : int, optional
+        Number of power-method iterations. The default is 5.
+
+    Returns
+    -------
+    Tuple[float, Tuple[int], DTypeLike]
+        The l2-norm of A, and the shape and type of the solution.
+    """
+    x: NDArrayFloat = np.random.rand(*b.shape).astype(b.dtype)
+    x /= np.linalg.norm(x)
+    x = A.T(x)
+
+    x_norm = np.linalg.norm(x)
+    L = x_norm
+
+    for _ in range(iterations):
+        x /= x_norm
+        x = A.T(A(x))
+        x_norm = np.linalg.norm(x)
+        L = np.sqrt(x_norm)
+
+    return float(L), x.shape, x.dtype
+
+
+def compute_diagonal_scaling(
+    A_abs: operators.BaseTransform,
+    At_abs: operators.BaseTransform,
+    b: NDArrayFloat,
+    regs: Sequence[regularizers.BaseRegularizer],
+    relaxation_sigma: float = 1.0,
+    relaxation_tau: float = 1.0,
+    x_mask: NDArray | None = None,
+    b_mask: NDArray | None = None,
+) -> tuple[NDArray, NDArray, tuple[int, ...], DTypeLike]:
+    # Back-projection diagonal re-scaling
+    # Tau = |A^T| 1_b  (row sums -> image-space diagonal)
+    b_ones = np.ones_like(b)
+    if b_mask is not None:
+        b_ones *= b_mask
+    tau = np.abs(At_abs(b_ones))
+    for reg in regs:
+        tau += reg.initialize_sigma_tau(tau)
+    tau[(tau / np.max(tau)) < 1e-5] = 1
+    tau = relaxation_tau / tau
+
+    # Forward-projection diagonal re-scaling
+    # Sigma = |A| 1_x  (column sums -> measurement-space diagonal)
+    x_ones = np.ones_like(tau)
+    if x_mask is not None:
+        x_ones *= x_mask
+    sigma = np.abs(A_abs(x_ones))
+    sigma[(sigma / np.max(sigma)) < 1e-5] = 1.0
+    sigma = relaxation_sigma / sigma
+
+    return sigma, tau, tau.shape, tau.dtype
+
+
+def compute_Lipschitz_scaling(
+    A: operators.BaseTransform,
+    b: NDArrayFloat,
+    regs: Sequence[regularizers.BaseRegularizer],
+    relaxation_sigma: float = 1.0,
+    relaxation_tau: float = 1.0,
+) -> tuple[float, float | NDArray, tuple[int, ...], DTypeLike]:
+    L, x_shape, x_dtype = power_method(A, b)
+    tau = L
+
+    dummy_x = np.empty(x_shape, dtype=x_dtype)
+    for reg in regs:
+        tau += reg.initialize_sigma_tau(dummy_x)
+
+    tau = relaxation_tau / tau
+    sigma = relaxation_sigma / L
+
+    return sigma, tau, x_shape, x_dtype
+
+
 class SolutionInfo:
     """Reconstruction info."""
 
@@ -774,26 +861,20 @@ class SIRT(Solver):
 
         b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
 
-        # Back-projection diagonal re-scaling
-        b_ones = np.ones_like(b)
-        if b_mask is not None:
-            b_ones *= b_mask
-        tau = np.abs(A.T(b_ones))
-        for reg in self.regularizer:
-            tau += reg.initialize_sigma_tau(tau)
-        tau[(tau / np.max(tau)) < 1e-5] = 1
-        tau = self.relaxation / tau
+        try:
+            At_abs = A.T.absolute()
+            A_abs = A.absolute()
+        except AttributeError:
+            print("WARNING: operator does not support absolute(); Using the operator itself.")
+            A_abs = A
+            At_abs = A.T
 
-        # Forward-projection diagonal re-scaling
-        x_ones = np.ones_like(tau)
-        if x_mask is not None:
-            x_ones *= x_mask
-        sigma = np.abs(A(x_ones))
-        sigma[(sigma / np.max(sigma)) < 1e-5] = 1
-        sigma = 1 / sigma
+        sigma, tau, x_shape, x_dtype = compute_diagonal_scaling(
+            A_abs, At_abs, b, regs=self.regularizer, relaxation_tau=self.relaxation, x_mask=x_mask, b_mask=b_mask
+        )
 
         if x0 is None:
-            x = np.zeros_like(x_ones)
+            x = np.zeros_like(tau)
         else:
             x = np.array(x0).copy()
 
@@ -928,55 +1009,6 @@ class PDHG(Solver):
         else:
             return cp.deepcopy(data_term)
 
-    def power_method(
-        self, A: operators.BaseTransform, b: NDArrayFloat, iterations: int = 5
-    ) -> tuple[np.floating, Sequence[int], DTypeLike]:
-        """
-        Compute the l2-norm of the operator A, with the power method.
-
-        Parameters
-        ----------
-        A : BaseTransform
-            Operator whose l2-norm needs to be computed.
-        b : NDArrayFloat
-            The data vector.
-        iterations : int, optional
-            Number of power method iterations. The default is 5.
-
-        Returns
-        -------
-        Tuple[float, Tuple[int], DTypeLike]
-            The l2-norm of A, and the shape and type of the solution.
-        """
-        x: NDArrayFloat = np.array(np.random.rand(*b.shape))
-        x = x.astype(b.dtype)
-        x /= np.linalg.norm(x)
-        x = A.T(x)
-
-        x_norm = np.linalg.norm(x)
-        L = x_norm
-
-        for _ in range(iterations):
-            x /= x_norm
-            x = A.T(A(x))
-
-            x_norm = np.linalg.norm(x)
-            L = np.sqrt(x_norm)
-
-        return (L, x.shape, x.dtype)
-
-    def _get_data_sigma_tau_unpreconditioned(self, A: operators.BaseTransform, b: NDArrayFloat):
-        L, x_shape, x_dtype = self.power_method(A, b)
-        tau = L
-
-        dummy_x = np.empty(x_shape, dtype=x_dtype)
-        for reg in self.regularizer:
-            tau += reg.initialize_sigma_tau(dummy_x)
-
-        tau = self.relaxation / tau
-        sigma = self.relaxation / L
-        return (x_shape, x_dtype, sigma, tau)
-
     def __call__(  # noqa: C901
         self,
         A: operators.BaseTransform,
@@ -1035,26 +1067,20 @@ class PDHG(Solver):
         b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
 
         if precondition:
-            tau = np.ones_like(b)
-            if b_mask is not None:
-                tau *= b_mask
-            tau = np.abs(At_abs(tau))
-            for reg in self.regularizer:
-                tau += reg.initialize_sigma_tau(tau)
-            tau[(tau / np.max(tau)) < 1e-5] = 1
-            tau = self.relaxation / tau
-
-            x_shape = tau.shape
-            x_dtype = tau.dtype
-
-            sigma = np.ones_like(tau)
-            if x_mask is not None:
-                sigma *= x_mask
-            sigma = np.abs(A_abs(sigma))
-            sigma[(sigma / np.max(sigma)) < 1e-5] = 1
-            sigma = self.relaxation / sigma
+            sigma, tau, x_shape, x_dtype = compute_diagonal_scaling(
+                A_abs,
+                At_abs,
+                b,
+                regs=self.regularizer,
+                relaxation_tau=self.relaxation,
+                relaxation_sigma=self.relaxation,
+                x_mask=x_mask,
+                b_mask=b_mask,
+            )
         else:
-            x_shape, x_dtype, sigma, tau = self._get_data_sigma_tau_unpreconditioned(A, b)
+            sigma, tau, x_shape, x_dtype = compute_Lipschitz_scaling(
+                A, b, regs=self.regularizer, relaxation_sigma=self.relaxation, relaxation_tau=self.relaxation
+            )
 
         if x0 is None:
             x0 = np.zeros(x_shape, dtype=x_dtype)
