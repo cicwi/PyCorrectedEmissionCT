@@ -134,6 +134,8 @@ class DataFidelityBase(ABC):
         self.data = np.array(data) if data is not None else None
         self.sigma = sigma
         self.sigma_data = self._compute_sigma_data()
+        if self.background is not None and self.data is not None:
+            self.background = self.background.astype(self.data.dtype)
 
     def compute_residual(self, proj_primal: NDArrayFloat, mask: NDArrayFloat | None = None) -> NDArrayFloat:
         """Compute the residual in the dual domain.
