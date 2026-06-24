@@ -854,6 +854,7 @@ class Regularizer_l1dwl(Regularizer_dwl):
         axes: Sequence[int] | NDArray | None = None,
         pad_on_demand: str = "constant",
         upd_mask: NDArray | None = None,
+        min_approx: bool = True,
     ):
         super().__init__(
             weight,
@@ -863,6 +864,7 @@ class Regularizer_l1dwl(Regularizer_dwl):
             axes=axes,
             pad_on_demand=pad_on_demand,
             upd_mask=upd_mask,
+            min_approx=min_approx,
             norm=dt.DataFidelity_l1(),
         )
 
@@ -881,6 +883,7 @@ class Regularizer_l12dwl(Regularizer_dwl):
         axes: Sequence[int] | NDArray | None = None,
         pad_on_demand: str = "constant",
         upd_mask: NDArray | None = None,
+        min_approx: bool = True,
     ):
         super().__init__(
             weight,
@@ -890,6 +893,7 @@ class Regularizer_l12dwl(Regularizer_dwl):
             axes=axes,
             pad_on_demand=pad_on_demand,
             upd_mask=upd_mask,
+            min_approx=min_approx,
             norm=dt.DataFidelity_l12(),
         )
 
