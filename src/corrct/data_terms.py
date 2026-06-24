@@ -244,6 +244,25 @@ class DataFidelityBase(ABC):
         """
 
     @abstractmethod
+    def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
+        """Apply the proximal operator in the primal domain, in-place.
+
+        Computes prox_{tau * f}(primal), i.e. the proximal of the data-fidelity
+        f with step size tau, and stores the result back into ``primal``.
+
+        Note: in FISTA the data term is handled via a gradient step, so this
+        method is exposed for standalone use or for algorithms that prefer a
+        pure proximal approach (e.g. when A = I).
+
+        Parameters
+        ----------
+        primal : NDArrayFloat
+            The current primal variable (modified in-place).
+        tau : float | NDArrayFloat
+            The proximal step size.
+        """
+
+    @abstractmethod
     def compute_primal_dual_gap(
         self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: NDArrayFloat | None = None
     ) -> float:
@@ -287,6 +306,26 @@ class DataFidelity_l2(DataFidelityBase):
         if self.data is not None and self.sigma_data is not None:
             dual -= self.sigma_data
         dual *= self.sigma1
+
+    def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
+        """Apply prox_{tau * (1/2) * ||. - b||^2} in-place.
+
+        The closed-form solution is:
+            prox(x) = (x + tau * b) / (1 + tau)
+
+        When no data has been assigned (b = 0):
+            prox(x) = x / (1 + tau)
+
+        Parameters
+        ----------
+        primal : NDArrayFloat
+            The primal variable to update in-place.
+        tau : float | NDArrayFloat
+            The proximal step size.
+        """
+        if self.data is not None:
+            primal += tau * self.data
+        primal /= 1.0 + tau
 
     def compute_primal_dual_gap(
         self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: NDArrayFloat | None = None
@@ -336,6 +375,29 @@ class DataFidelity_wl2(DataFidelity_l2):
         weights = self.weights[valid_weights]
         return float(np.linalg.norm((dual / np.sqrt(weights)).flatten(), ord=2) ** 2)
 
+    def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
+        """Apply prox_{tau * (1/2) * ||. - b||^2_W} in-place.
+
+        For the weighted l2 norm (1/2)||x - b||^2_W = (1/2) sum_i w_i (x_i - b_i)^2,
+        the proximal is computed element-wise:
+            prox(x)_i = (x_i + tau * w_i * b_i) / (1 + tau * w_i)
+
+        Zero-weight entries are left unchanged (no constraint enforced there).
+
+        Parameters
+        ----------
+        primal : NDArrayFloat
+            The primal variable to update in-place.
+        tau : float | NDArrayFloat
+            The proximal step size.
+        """
+        tau_w = tau * self.weights
+        if self.data is not None:
+            primal += tau_w * self.data
+        # For zero-weight entries: denominator = 1, so they pass through unchanged.
+        denom = 1.0 + tau_w
+        primal /= denom
+
 
 class DataFidelity_l2b(DataFidelity_l2):
     """l2-norm ball data-fidelity class."""
@@ -369,6 +431,33 @@ class DataFidelity_l2b(DataFidelity_l2):
             dual -= self.sigma_data
         _soft_threshold(dual, self.sigma_sqrt_error)
         dual *= self.sigma1
+
+    def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
+        """Apply prox_{tau * f_{l2b}} in-place.
+
+        The l2-ball data fidelity is:
+            f(x) = max(||x - b|| - sqrt(epsilon), 0)^2 / 2
+
+        whose proximal is a soft-thresholded then scaled l2 proximal.
+        Specifically:
+            v = x - b
+            soft-threshold v by sqrt(epsilon) * tau / (1 + tau * epsilon)
+            prox(x) = b + v_thresholded / (1 + tau * epsilon)
+
+        Parameters
+        ----------
+        primal : NDArrayFloat
+            The primal variable to update in-place.
+        tau : float | NDArrayFloat
+            The proximal step size.
+        """
+        if self.data is not None:
+            primal -= self.data
+        tau_eps = tau * self.local_error
+        _soft_threshold(primal, np.sqrt(self.local_error) * tau / (1.0 + tau_eps))
+        primal /= 1.0 + tau_eps
+        if self.data is not None:
+            primal += self.data
 
     def compute_primal_dual_gap(
         self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: NDArrayFloat | None = None
@@ -413,6 +502,26 @@ class DataFidelity_Huber(DataFidelityBase):
             dual_dir_norm_l2 = np.linalg.norm(dual, ord=2, axis=self.l2_axis, keepdims=True)
             dual /= np.fmax(1, dual_dir_norm_l2)
 
+    def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
+        """Not implemented: the Huber proximal in the primal has no simple closed form for general data.
+
+        The Huber function is f(x) = (1/2)||x-b||^2 if ||x-b|| <= a, else a*||x-b|| - a^2/2.
+        Its proximal is a smooth interpolation between the l2 and l1 proximals, whose
+        closed form depends on the norm of (x - b) relative to the threshold, making
+        it straightforward only for the scalar case. For vector inputs with l2_axis,
+        a Newton iteration would be required.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised; use a gradient step or PDHG instead.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__}.apply_proximal_primal: the Huber proximal has no simple "
+            "closed-form solution for general (possibly vector-valued) inputs. "
+            "Use a gradient step in the solver, or switch to PDHG for this data term."
+        )
+
     def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
@@ -445,6 +554,29 @@ class DataFidelity_l1(DataFidelityBase):
         dual /= np.fmax(dual_inner_norm, weight)
         dual *= weight
 
+    def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
+        """Apply prox_{tau * ||. - b||_1} in-place via soft-thresholding.
+
+        For f(x) = ||x - b||_1, the proximal is element-wise soft-thresholding
+        centered on b:
+            prox(x)_i = b_i + sign(x_i - b_i) * max(|x_i - b_i| - tau, 0)
+
+        When no data has been assigned (b = 0), this reduces to plain
+        soft-thresholding with threshold tau.
+
+        Parameters
+        ----------
+        primal : NDArrayFloat
+            The primal variable to update in-place.
+        tau : float | NDArrayFloat
+            The proximal step size (soft-threshold level).
+        """
+        if self.data is not None:
+            primal -= self.data
+        _soft_threshold(primal, tau)
+        if self.data is not None:
+            primal += self.data
+
     def compute_residual_norm(self, dual):
         dual = dual.copy()
         self._apply_threshold(dual)
@@ -473,6 +605,23 @@ class DataFidelity_l12(DataFidelity_l1):
     def _get_inner_norm(self, dual):
         return np.linalg.norm(dual, ord=2, axis=self.l2_axis, keepdims=True)
 
+    def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
+        """Not implemented: the l12 proximal in the primal domain requires a group soft-threshold
+        along l2_axis, which is straightforward only when the l2_axis corresponds to independent
+        groups that do not interact through A. For general use, apply PDHG or provide a
+        custom group-soft-threshold.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__}.apply_proximal_primal: the l12 norm proximal in the "
+            "primal domain is axis-dependent and cannot be applied independently per element. "
+            "Use PDHG for this data term, which handles it correctly via the dual."
+        )
+
 
 class DataFidelity_l1b(DataFidelity_l1):
     """l1-norm ball data-fidelity class."""
@@ -493,6 +642,35 @@ class DataFidelity_l1b(DataFidelity_l1):
     def _apply_threshold(self, dual):
         _soft_threshold(dual, self.local_error)
 
+    def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
+        """Apply prox_{tau * f_{l1b}} in-place.
+
+        The l1-ball data fidelity is:
+            f(x) = max(||x - b||_1 - epsilon, 0)
+
+        Its proximal is a two-stage soft-threshold:
+            v = x - b
+            soft-threshold v by (tau / (1 + tau)) elementwise, with level epsilon
+            prox(x) = b + v_thresholded
+
+        This is obtained via Moreau's identity applied to the indicator of the
+        l1-ball of radius epsilon.
+
+        Parameters
+        ----------
+        primal : NDArrayFloat
+            The primal variable to update in-place.
+        tau : float | NDArrayFloat
+            The proximal step size.
+        """
+        if self.data is not None:
+            primal -= self.data
+        # Two-level soft threshold: first remove the ball radius, then scale
+        _soft_threshold(primal, self.local_error)
+        primal *= tau / (1.0 + tau)
+        if self.data is not None:
+            primal += self.data
+
 
 class DataFidelity_KL(DataFidelityBase):
     """Kullback-Leibler data-fidelity class."""
@@ -511,13 +689,48 @@ class DataFidelity_KL(DataFidelityBase):
         else:
             dual[:] = (1 + dual[:] - np.sqrt((dual[:] - 1) ** 2)) / 2
 
-    def compute_residual(self, proj_primal, mask=None):
+    def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
+        """Apply prox_{tau * KL(b, .)} in-place.
+
+        The Kullback-Leibler divergence (in the emission-CT convention) is:
+            f(x) = sum_i (x_i - b_i * log(x_i))   (for x_i > 0)
+
+        Its proximal has the closed-form solution:
+            prox(x)_i = ((x_i - tau) + sqrt((x_i - tau)^2 + 4 * tau * b_i)) / 2
+
+        This is always non-negative when b_i >= 0 and x_i > 0.
+
+        Parameters
+        ----------
+        primal : NDArrayFloat
+            The primal variable to update in-place (must be > 0).
+        tau : float | NDArrayFloat
+            The proximal step size.
+        """
+        if self.data is not None:
+            b = np.fmax(self.data, 0.0)
+            disc = (primal - tau) ** 2 + 4.0 * tau * b
+            primal[:] = ((primal - tau) + np.sqrt(disc)) / 2.0
+        else:
+            # No data: f(x) = sum x_i, prox is max(x - tau, 0) clamped away from zero
+            primal[:] = np.fmax(primal - tau, eps)
+
+    def compute_residual(self, proj_primal: NDArray, mask: NDArray | None = None, use_proximal: bool = True) -> NDArrayFloat:
         if self.background is not None:
             proj_primal = proj_primal + self.background
-        # we take the Moreau envelope here, and apply the proximal to it
-        residual = np.fmax(proj_primal, eps) * self.sigma
 
-        self.apply_proximal_dual(residual)
+        proj_primal = np.fmax(proj_primal, eps)
+
+        if use_proximal:
+            # we take the Moreau envelope here, and apply the proximal to it
+            residual = np.fmax(proj_primal, eps) * self.sigma
+
+            self.apply_proximal_dual(residual)
+        else:
+            if self.data is not None:
+                residual = 1.0 - np.fmax(self.data, 0.0) / proj_primal
+            else:
+                residual = np.ones_like(proj_primal)
 
         if mask is not None:
             residual *= mask
@@ -587,6 +800,24 @@ class DataFidelity_ln(DataFidelityBase):
             dual_tmp = np.take(dual_tmp, np.arange(dual_tmp.shape[self.ln_axes[0]] - 1), axis=self.ln_axes[0])
 
         dual[:] = dual_tmp[:]
+
+    def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
+        """Not implemented: the nuclear-norm proximal requires a full SVD and singular-value
+        soft-thresholding, which is only well-defined for the dual formulation used here
+        (where the SVD axes and data structure are set up by the PDHG dual update).
+        Applying it directly in the primal domain would require re-interpreting primal
+        axes as matrix rows/columns, which depends on context not available here.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised; use PDHG for nuclear-norm data fidelity.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__}.apply_proximal_primal: the nuclear-norm proximal "
+            "requires an SVD over axes that are determined by the dual formulation. "
+            "It cannot be applied generically in the primal domain. Use PDHG instead."
+        )
 
     def compute_residual_norm(self, dual):
         op_svd = operators.TransformSVD(dual.shape, axes_rows=self.ln_axes[0], axes_cols=self.ln_axes[1])
