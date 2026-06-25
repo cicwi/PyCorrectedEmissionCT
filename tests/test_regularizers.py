@@ -45,12 +45,12 @@ class TestRegularizers:
 
         dual += weight / 2
         copy_dual = dual.copy()
-        reg.apply_proximal(dual)
+        reg.apply_proximal_dual(dual)
         assert np.all(np.isclose(dual, np.fmin(weight, copy_dual)))
 
         dual = copy_dual - weight * 2
         copy_dual = dual.copy()
-        reg.apply_proximal(dual)
+        reg.apply_proximal_dual(dual)
         assert np.all(np.isclose(dual, np.fmax(-weight, copy_dual)))
 
         upd = reg.compute_update_primal(dual)
@@ -78,7 +78,7 @@ class TestRegularizers:
         assert np.all(np.isclose(upd, reg.op.T(dual)))
 
         copy_dual = dual.copy()
-        reg.apply_proximal(dual)
+        reg.apply_proximal_dual(dual)
         assert np.all(np.isclose(dual, np.fmax(np.fmin(weight, copy_dual), -weight)))
 
     def _test_Regularizer_TV(self, vol):

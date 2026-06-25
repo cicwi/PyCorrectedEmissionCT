@@ -23,6 +23,141 @@ eps = np.finfo(np.float32).eps
 NDArrayFloat = NDArray[np.floating]
 
 
+def power_method(A: operators.BaseTransform, b: NDArrayFloat, iterations: int = 5) -> tuple[float, tuple[int, ...], DTypeLike]:
+    """
+    Compute the l2-norm of the operator A, with the power method.
+
+    Parameters
+    ----------
+    A : BaseTransform
+        The forward operator whose l2-norm needs to be computed.
+    b : NDArrayFloat
+        The data vector (used only for shape and dtype).
+    iterations : int, optional
+        Number of power-method iterations. The default is 5.
+
+    Returns
+    -------
+    Tuple[float, Tuple[int], DTypeLike]
+        The l2-norm of A, and the shape and type of the solution.
+    """
+    x: NDArrayFloat = np.random.rand(*b.shape).astype(b.dtype)
+    x /= np.linalg.norm(x)
+    x = A.T(x)
+
+    x_norm = np.linalg.norm(x)
+    L = x_norm
+
+    for _ in range(iterations):
+        x /= x_norm
+        x = A.T(A(x))
+        x_norm = np.linalg.norm(x)
+        L = np.sqrt(x_norm)
+
+    return float(L), x.shape, x.dtype
+
+
+def compute_diagonal_scaling(
+    A_abs: operators.BaseTransform,
+    At_abs: operators.BaseTransform,
+    b: NDArrayFloat,
+    regs: Sequence[regularizers.BaseRegularizer],
+    relaxation_sigma: float = 1.0,
+    relaxation_tau: float = 1.0,
+    x_mask: NDArray | None = None,
+    b_mask: NDArray | None = None,
+) -> tuple[NDArray, NDArray, tuple[int, ...], DTypeLike]:
+    """
+    Compute diagonal scaling factors for the forward and backward projections.
+
+    Parameters
+    ----------
+    A_abs : operators.BaseTransform
+        The absolute value of the forward projection operator.
+    At_abs : operators.BaseTransform
+        The absolute value of the backward projection operator.
+    b : NDArrayFloat
+        The measurement data.
+    regs : Sequence[regularizers.BaseRegularizer]
+        The sequence of regularizers.
+    relaxation_sigma : float, optional
+        The relaxation factor for the forward projection scaling, by default 1.0.
+    relaxation_tau : float, optional
+        The relaxation factor for the backward projection scaling, by default 1.0.
+    x_mask : NDArray | None, optional
+        The mask for the image space, by default None.
+    b_mask : NDArray | None, optional
+        The mask for the measurement space, by default None.
+
+    Returns
+    -------
+    tuple[NDArray, NDArray, tuple[int, ...], DTypeLike]
+        The scaling factors for the forward and backward projections, the shape of the image space, and the data type of the image space.
+    """
+    # Back-projection diagonal re-scaling
+    # Tau = |A^T| 1_b  (row sums -> image-space diagonal)
+    b_ones = np.ones_like(b)
+    if b_mask is not None:
+        b_ones *= b_mask
+    tau = np.abs(At_abs(b_ones))
+    for reg in regs:
+        tau += reg.initialize_sigma_tau(tau)
+    tau[(tau / np.max(tau)) < 1e-5] = 1
+    tau = relaxation_tau / tau
+
+    # Forward-projection diagonal re-scaling
+    # Sigma = |A| 1_x  (column sums -> measurement-space diagonal)
+    x_ones = np.ones_like(tau)
+    if x_mask is not None:
+        x_ones *= x_mask
+    sigma = np.abs(A_abs(x_ones))
+    sigma[(sigma / np.max(sigma)) < 1e-5] = 1.0
+    sigma = relaxation_sigma / sigma
+
+    return sigma, tau, tau.shape, tau.dtype
+
+
+def compute_Lipschitz_scaling(
+    A: operators.BaseTransform,
+    b: NDArrayFloat,
+    regs: Sequence[regularizers.BaseRegularizer],
+    relaxation_sigma: float = 1.0,
+    relaxation_tau: float = 1.0,
+) -> tuple[float, float | NDArray, tuple[int, ...], DTypeLike]:
+    """
+    Compute Lipschitz scaling factors for the forward and backward projections.
+
+    Parameters
+    ----------
+    A : operators.BaseTransform
+        The forward projection operator.
+    b : NDArrayFloat
+        The measurement data.
+    regs : Sequence[regularizers.BaseRegularizer]
+        The sequence of regularizers.
+    relaxation_sigma : float, optional
+        The relaxation factor for the forward projection scaling, by default 1.0.
+    relaxation_tau : float, optional
+        The relaxation factor for the backward projection scaling, by default 1.0.
+
+    Returns
+    -------
+    tuple[float, float | NDArray, tuple[int, ...], DTypeLike]
+        The scaling factors for the forward and backward projections, the shape of the image space, and the data type of the image space.
+    """
+    L, x_shape, x_dtype = power_method(A, b)
+    tau = L
+
+    dummy_x = np.empty(x_shape, dtype=x_dtype)
+    for reg in regs:
+        tau += reg.initialize_sigma_tau(dummy_x)
+
+    tau = relaxation_tau / tau
+    sigma = relaxation_sigma / L
+
+    return sigma, tau, x_shape, x_dtype
+
+
 class SolutionInfo:
     """Reconstruction info."""
 
@@ -774,26 +909,20 @@ class SIRT(Solver):
 
         b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
 
-        # Back-projection diagonal re-scaling
-        b_ones = np.ones_like(b)
-        if b_mask is not None:
-            b_ones *= b_mask
-        tau = np.abs(A.T(b_ones))
-        for reg in self.regularizer:
-            tau += reg.initialize_sigma_tau(tau)
-        tau[(tau / np.max(tau)) < 1e-5] = 1
-        tau = self.relaxation / tau
+        try:
+            At_abs = A.T.absolute()
+            A_abs = A.absolute()
+        except AttributeError:
+            print("WARNING: operator does not support absolute(); Using the operator itself.")
+            A_abs = A
+            At_abs = A.T
 
-        # Forward-projection diagonal re-scaling
-        x_ones = np.ones_like(tau)
-        if x_mask is not None:
-            x_ones *= x_mask
-        sigma = np.abs(A(x_ones))
-        sigma[(sigma / np.max(sigma)) < 1e-5] = 1
-        sigma = 1 / sigma
+        sigma, tau, x_shape, x_dtype = compute_diagonal_scaling(
+            A_abs, At_abs, b, regs=self.regularizer, relaxation_tau=self.relaxation, x_mask=x_mask, b_mask=b_mask
+        )
 
         if x0 is None:
-            x = np.zeros_like(x_ones)
+            x = np.zeros_like(tau)
         else:
             x = np.array(x0).copy()
 
@@ -840,7 +969,7 @@ class SIRT(Solver):
             q = [reg.initialize_dual() for reg in self.regularizer]
             for q_r, reg in zip(q, self.regularizer):
                 reg.update_dual(q_r, x)
-                reg.apply_proximal(q_r)
+                reg.apply_proximal_dual(q_r)
 
             upd = A.T(res * sigma)
             for q_r, reg in zip(q, self.regularizer):
@@ -928,55 +1057,6 @@ class PDHG(Solver):
         else:
             return cp.deepcopy(data_term)
 
-    def power_method(
-        self, A: operators.BaseTransform, b: NDArrayFloat, iterations: int = 5
-    ) -> tuple[np.floating, Sequence[int], DTypeLike]:
-        """
-        Compute the l2-norm of the operator A, with the power method.
-
-        Parameters
-        ----------
-        A : BaseTransform
-            Operator whose l2-norm needs to be computed.
-        b : NDArrayFloat
-            The data vector.
-        iterations : int, optional
-            Number of power method iterations. The default is 5.
-
-        Returns
-        -------
-        Tuple[float, Tuple[int], DTypeLike]
-            The l2-norm of A, and the shape and type of the solution.
-        """
-        x: NDArrayFloat = np.array(np.random.rand(*b.shape))
-        x = x.astype(b.dtype)
-        x /= np.linalg.norm(x)
-        x = A.T(x)
-
-        x_norm = np.linalg.norm(x)
-        L = x_norm
-
-        for _ in range(iterations):
-            x /= x_norm
-            x = A.T(A(x))
-
-            x_norm = np.linalg.norm(x)
-            L = np.sqrt(x_norm)
-
-        return (L, x.shape, x.dtype)
-
-    def _get_data_sigma_tau_unpreconditioned(self, A: operators.BaseTransform, b: NDArrayFloat):
-        L, x_shape, x_dtype = self.power_method(A, b)
-        tau = L
-
-        dummy_x = np.empty(x_shape, dtype=x_dtype)
-        for reg in self.regularizer:
-            tau += reg.initialize_sigma_tau(dummy_x)
-
-        tau = self.relaxation / tau
-        sigma = self.relaxation / L
-        return (x_shape, x_dtype, sigma, tau)
-
     def __call__(  # noqa: C901
         self,
         A: operators.BaseTransform,
@@ -1035,26 +1115,20 @@ class PDHG(Solver):
         b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
 
         if precondition:
-            tau = np.ones_like(b)
-            if b_mask is not None:
-                tau *= b_mask
-            tau = np.abs(At_abs(tau))
-            for reg in self.regularizer:
-                tau += reg.initialize_sigma_tau(tau)
-            tau[(tau / np.max(tau)) < 1e-5] = 1
-            tau = self.relaxation / tau
-
-            x_shape = tau.shape
-            x_dtype = tau.dtype
-
-            sigma = np.ones_like(tau)
-            if x_mask is not None:
-                sigma *= x_mask
-            sigma = np.abs(A_abs(sigma))
-            sigma[(sigma / np.max(sigma)) < 1e-5] = 1
-            sigma = self.relaxation / sigma
+            sigma, tau, x_shape, x_dtype = compute_diagonal_scaling(
+                A_abs,
+                At_abs,
+                b,
+                regs=self.regularizer,
+                relaxation_tau=self.relaxation,
+                relaxation_sigma=self.relaxation,
+                x_mask=x_mask,
+                b_mask=b_mask,
+            )
         else:
-            x_shape, x_dtype, sigma, tau = self._get_data_sigma_tau_unpreconditioned(A, b)
+            sigma, tau, x_shape, x_dtype = compute_Lipschitz_scaling(
+                A, b, regs=self.regularizer, relaxation_sigma=self.relaxation, relaxation_tau=self.relaxation
+            )
 
         if x0 is None:
             x0 = np.zeros(x_shape, dtype=x_dtype)
@@ -1093,14 +1167,14 @@ class PDHG(Solver):
 
             Ax_rlx = A(x_relax)
             self.data_term.update_dual(p, Ax_rlx)
-            self.data_term.apply_proximal(p)
+            self.data_term.apply_proximal_dual(p)
 
             if b_mask is not None:
                 p *= b_mask
 
             for q_r, reg in zip(q, self.regularizer):
                 reg.update_dual(q_r, x_relax)
-                reg.apply_proximal(q_r)
+                reg.apply_proximal_dual(q_r)
 
             upd = A.T(p)
             for q_r, reg in zip(q, self.regularizer):
@@ -1115,6 +1189,313 @@ class PDHG(Solver):
             x_relax = x_new + (x_new - x)
             x = x_new
 
+            if b_test_mask is not None or self.tolerance is not None:
+                Ax = A(x)
+                res = self.data_term.compute_residual(Ax, mask=b_mask)
+                info.residuals[ii] = self.data_term.compute_residual_norm(res)
+
+                if b_test_mask is not None:
+                    res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
+                    info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test)
+
+                if self.tolerance is not None and self.tolerance > info.residuals[ii]:
+                    if self.verbose:
+                        print(f"Residual reached the desired tolerance of {self.tolerance}. Ending iterations..")
+                    break
+
+        return x, info
+
+
+class FISTA(Solver):
+    """Fast Iterative Shrinkage-Thresholding Algorithm (FISTA).
+
+    Implements the accelerated proximal gradient method from Beck & Teboulle (2009),
+    "A Fast Iterative Shrinkage-Thresholding Algorithm for Linear Inverse Problems",
+    SIAM Journal on Imaging Sciences.
+
+    The algorithm minimizes:
+        min_x  f(x)  +  g(x)
+
+    where:
+      - f(x) is the data-fidelity term, handled via its *gradient*:
+            grad f(x) = A^T (A x - b)     for the l2 case
+            grad f(x) = A^T (1 - b / Ax)  for the KL case
+        (computed using ``data_term.compute_residual`` followed by ``A.T``).
+      - g(x) is an optional regularizer with a tractable *primal proximal*,
+        applied via ``regularizer.apply_proximal_primal``.
+
+    **TV-min regularization (Regularizer_Grad and all TV subclasses) is not
+    supported** because their primal proximal has no closed form.  Passing such
+    a regularizer raises ``ValueError`` at construction time.
+
+    **At most one regularizer** is accepted; passing a list with more than one
+    raises ``ValueError``.
+
+    Step-size strategy
+    ------------------
+    Two modes are available, selected by the ``precondition`` argument to
+    ``__call__``:
+
+    * ``precondition=False`` (default Lipschitz): the step size is
+      ``tau = relaxation / L`` where ``L = ||A||^2`` is estimated via the power
+      method.
+
+    * ``precondition=True`` (SIRT-style diagonal preconditioning): following the
+      same convention as SIRT,
+
+          Sigma = diag(|A| 1_x)      (column sums of |A|, in measurement space)
+          Tau   = diag(|A^T| 1_b)    (row sums of |A|, in image space)
+
+      The gradient step then reads:
+          x <- x - Tau * A^T(residual * Sigma)
+
+      where ``residual = b - A x``.  This is the SIRT preconditioned gradient step;
+      the ``relaxation`` scalar is folded into Tau as ``Tau = relaxation / Tau_raw``.
+
+    Parameters
+    ----------
+    verbose : bool, optional
+        Turn on verbose output. The default is False.
+    leave_progress : bool, optional
+        Leave the progress bar after computation. The default is True.
+    tolerance : float | None, optional
+        Stop early when the residual norm drops below this value. The default is None.
+    relaxation : float, optional
+        Step-size relaxation factor (scalar multiplier on tau). The default is 1.0.
+    regularizer : BaseRegularizer | None, optional
+        A single regularizer with a tractable primal proximal.  TV-type and
+        Laplacian regularizers are rejected.  The default is None.
+    data_term : str | DataFidelityBase, optional
+        Data fidelity. Accepts ``"l2"`` or a ``DataFidelity_l2`` instance.
+        The default is ``"l2"``.
+    data_term_test : DataFidelityBase | None, optional
+        Data fidelity for the held-out test set. Defaults to the same as
+        ``data_term``.
+    restart_period : int | None, optional
+        If given, the FISTA momentum sequence is restarted every
+        ``restart_period`` iterations.  If ``None`` (default), the pure
+        Beck-Teboulle monotone sequence is used with no restart.
+    """
+
+    def __init__(
+        self,
+        verbose: bool = False,
+        leave_progress: bool = True,
+        tolerance: float | None = None,
+        relaxation: float = 1.0,
+        regularizer: regularizers.BaseRegularizer | None = None,
+        data_term: str | data_terms.DataFidelityBase = "l2",
+        data_term_test: str | data_terms.DataFidelityBase | None = None,
+        restart_period: int | None = None,
+    ):
+        super().__init__(
+            verbose=verbose,
+            leave_progress=leave_progress,
+            relaxation=relaxation,
+            tolerance=tolerance,
+            data_term=data_term,
+            data_term_test=data_term_test,
+        )
+
+        # Validate and store the (single) regularizer
+        regs = self._initialize_regularizer(regularizer)
+        if len(regs) > 1:
+            raise ValueError(
+                "FISTA supports at most one regularizer, but "
+                f"{len(regs)} were provided. "
+                "To combine multiple regularizers use PDHG instead."
+            )
+        if len(regs) == 1:
+            reg = regs[0]
+            # Reject TV / gradient / Laplacian regularizers up front by
+            # attempting a dry-run of apply_proximal_primal with a tiny dummy.
+            # We call the method on a zero-size array; if it raises
+            # NotImplementedError we know the regularizer is unsupported.
+            try:
+                reg.apply_proximal_primal(np.zeros(1, dtype=np.float32), 1.0)
+            except NotImplementedError as exc:
+                raise ValueError(
+                    f"Regularizer '{reg.info()}' does not support a primal proximal "
+                    "and cannot be used with FISTA. "
+                    "Switch to PDHG for this regularizer, or use a wavelet / l1 "
+                    "regularizer with FISTA.\n"
+                    f"Original error: {exc}"
+                ) from exc
+            except Exception:
+                # Any other exception (e.g. shape mismatch on the dummy) is fine;
+                # it means the method exists and would be called correctly later.
+                pass
+        self.regularizer: list[regularizers.BaseRegularizer] = list(regs)
+        self.restart_period = restart_period
+
+    def info(self) -> str:
+        """Return the FISTA info string."""
+        reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+        return Solver.info(self) + "-" + self.data_term.info() + reg_info
+
+    @staticmethod
+    def _initialize_data_fidelity_function(data_term: str | data_terms.DataFidelityBase):
+        """Accept l2, wl2, l2b and their subclasses for FISTA."""
+        if isinstance(data_term, str):
+            if data_term.lower() == "l2":
+                return data_terms.DataFidelity_l2()
+            else:
+                raise ValueError(f"Unknown data term: '{data_term}'. FISTA only accepts 'l2' and derivatives.")
+        elif isinstance(data_term, data_terms.DataFidelity_l2):
+            return cp.deepcopy(data_term)
+        else:
+            raise ValueError(f"Unsupported data term type: {type(data_term)}. FISTA only accepts 'l2' and derivatives.")
+
+    def __call__(  # noqa: C901
+        self,
+        A: operators.BaseTransform,
+        b: NDArrayFloat,
+        iterations: int,
+        x0: NDArrayFloat | None = None,
+        lower_limit: float | NDArrayFloat | None = None,
+        upper_limit: float | NDArrayFloat | None = None,
+        x_mask: NDArrayFloat | None = None,
+        b_mask: NDArrayFloat | None = None,
+        b_test_mask: NDArrayFloat | None = None,
+        precondition: bool = True,
+    ) -> tuple[NDArrayFloat, SolutionInfo]:
+        """Run FISTA.
+
+        Parameters
+        ----------
+        A : BaseTransform
+            Forward operator.
+        b : NDArrayFloat
+            Measurement data.
+        iterations : int
+            Number of outer iterations.
+        x0 : NDArrayFloat | None, optional
+            Warm-start solution. The default is None (zero initialisation).
+        lower_limit : float | NDArrayFloat | None, optional
+            Hard lower bound applied after each proximal step (clipping).
+            The default is None.
+        upper_limit : float | NDArrayFloat | None, optional
+            Hard upper bound applied after each proximal step (clipping).
+            The default is None.
+        x_mask : NDArrayFloat | None, optional
+            Binary solution mask. The default is None.
+        b_mask : NDArrayFloat | None, optional
+            Binary data mask. The default is None.
+        b_test_mask : NDArrayFloat | None, optional
+            Held-out test set mask. The default is None.
+        precondition : bool, optional
+            If ``True`` (default), use SIRT-style diagonal preconditioning.
+            If ``False``, use ``tau = relaxation / L`` where
+            ``L`` is estimated by the power method.
+
+        Returns
+        -------
+        tuple[NDArrayFloat, SolutionInfo]
+            The reconstruction and associated iteration info.
+        """
+        b = np.array(b)
+
+        if precondition:
+            try:
+                At_abs = A.T.absolute()
+                A_abs = A.absolute()
+            except AttributeError:
+                print("WARNING: operator does not support absolute(); falling back to un-preconditioned Lipschitz step size.")
+                precondition = False
+
+        b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
+
+        if precondition:
+            sigma, tau, x_shape, x_dtype = compute_diagonal_scaling(
+                A_abs, At_abs, b, regs=[], relaxation_tau=self.relaxation, x_mask=x_mask, b_mask=b_mask
+            )
+        else:
+            sigma, tau, x_shape, x_dtype = compute_Lipschitz_scaling(A, b, regs=[], relaxation_tau=self.relaxation)
+
+        # We need x_shape to initialise the regularizer (also sets up self.op
+        # inside the regularizer so that apply_proximal_primal works).
+        dummy_x = np.zeros(x_shape, dtype=x_dtype)
+        tau_reg: float | NDArrayFloat = tau  # default; overwritten below if regularizer present
+        if self.regularizer:
+            reg = self.regularizer[0]
+            reg.initialize_sigma_tau(dummy_x)
+            # In FISTA the proximal step size for g is the same tau as used for
+            # the gradient step on f.  The regularizer's weight is already
+            # folded into apply_proximal_primal via tau * self.weight inside
+            # that method, so we pass tau directly.
+            # tau_reg is kept as a reference to tau so that if tau is a
+            # per-element array (preconditioned case) it is passed correctly.
+            tau_reg = tau
+
+        # sigma is passed for the test/residual tracking, but is NOT used in the
+        # gradient step here; the gradient is computed analytically from compute_residual).
+        self.data_term.assign_data(b)
+        if b_test_mask is not None:
+            if self.data_term_test.background != self.data_term.background:
+                print("WARNING - the data_term and data_term_test should have the same background. Making them equal.")
+                self.data_term_test.background = self.data_term.background
+            self.data_term_test.assign_data(b)
+
+        if x0 is None:
+            x = np.zeros(x_shape, dtype=x_dtype)
+        else:
+            x = np.array(x0, dtype=x_dtype).copy()
+        if x_mask is not None:
+            x *= x_mask
+
+        # y is the momentum-extrapolated point (Beck–Teboulle notation)
+        y = x.copy()
+        t = 1.0  # momentum parameter
+
+        info = SolutionInfo(self.info(), max_iterations=iterations, tolerance=self.tolerance)
+
+        if b_test_mask is not None or self.tolerance is not None:
+            Ax0 = A(x)
+
+            res_0 = self.data_term.compute_residual(Ax0, mask=b_mask)
+            info.residual0 = self.data_term.compute_residual_norm(res_0)
+
+            if b_test_mask is not None:
+                res_test_0 = self.data_term_test.compute_residual(Ax0, mask=b_test_mask)
+                info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
+
+        reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
+        algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
+
+        for ii in tqdm(range(iterations), desc=algo_info, disable=(not self.verbose), leave=self.leave_progress):
+            info.iterations += 1
+
+            # --- Gradient step on f at the momentum point y ---
+            Ay = A(y)
+            residual = self.data_term.compute_residual(Ay, mask=b_mask)
+            grad = A.T(residual * sigma)
+
+            x_new = y + tau * grad
+
+            # --- Proximal step on g (regularizer) ---
+            if self.regularizer:
+                self.regularizer[0].apply_proximal_primal(x_new, tau_reg)
+
+            # --- Hard clipping and solution mask ---
+            if lower_limit is not None or upper_limit is not None:
+                x_new = x_new.clip(lower_limit, upper_limit)
+            if x_mask is not None:
+                x_new *= x_mask
+
+            # --- Beck–Teboulle momentum update ---
+            t_new = float(1.0 + np.sqrt(1.0 + 4.0 * t * t)) / 2.0
+
+            # Optional fixed-period restart: reset momentum sequence
+            if self.restart_period is not None and (ii + 1) % self.restart_period == 0:
+                t_new = 1.0
+
+            momentum = (t - 1.0) / t_new
+            y = x_new + momentum * (x_new - x)
+
+            x = x_new
+            t = t_new
+
+            # --- Residual tracking ---
             if b_test_mask is not None or self.tolerance is not None:
                 Ax = A(x)
                 res = self.data_term.compute_residual(Ax, mask=b_mask)

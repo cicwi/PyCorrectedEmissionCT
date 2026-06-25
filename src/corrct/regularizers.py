@@ -147,7 +147,7 @@ class BaseRegularizer(ABC):
 
         dual += self.sigma * self.op(primal)
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         """
         Apply the proximal operator to the dual in-place.
 
@@ -157,9 +157,33 @@ class BaseRegularizer(ABC):
             The dual to be applied the proximal on.
         """
         if isinstance(self.norm, dt.DataFidelity_l1):
-            self.norm.apply_proximal(dual, self.weight)
+            self.norm.apply_proximal_dual(dual, self.weight)
         else:
-            self.norm.apply_proximal(dual)
+            self.norm.apply_proximal_dual(dual)
+
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Apply the proximal of the regularizer in the primal domain, in-place.
+
+        Computes prox_{tau * weight * g}(primal) where g is the regularization
+        functional, and stores the result back into ``primal``.
+
+        This method is only implemented for regularizers whose operator is
+        unitary (or the identity), so that the proximal separates in the primal
+        domain.  For regularizers based on non-unitary transforms (gradient,
+        Laplacian, etc.), this raises NotImplementedError — use PDHG instead.
+
+        Parameters
+        ----------
+        primal : NDArray
+            The primal variable to update in-place.
+        tau : float | NDArray
+            The proximal step size.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__}.apply_proximal_primal is not implemented. "
+            "Only regularizers with a unitary or identity transform support a primal proximal. "
+            "Use PDHG for this regularizer."
+        )
 
     def compute_update_primal(self, dual: NDArray) -> NDArray:
         """
@@ -206,7 +230,7 @@ class Regularizer_Grad(BaseRegularizer):
     axes : Sequence, optional
         The axes over which it computes the gradient. If None, it uses the last 2. The default is None.
     pad_mode: str, optional
-        The padding mode to use for the linear convolution. The default is "edge".
+        The padding mode to use. The default is "edge".
     norm : DataFidelityBase, optional
         The norm of the regularizer minimization. The default is DataFidelity_l12().
     """
@@ -247,6 +271,22 @@ class Regularizer_Grad(BaseRegularizer):
         if self.upd_mask is not None:
             tau = tau * self.upd_mask
         return tau
+
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Not implemented: gradient-based regularizers (TV, smooth) require solving
+        a non-trivial optimization subproblem in the primal domain, because the gradient
+        operator is not unitary. There is no simple closed-form proximal.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised; use PDHG for gradient-based regularizers.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__}.apply_proximal_primal: gradient-based regularizers "
+            "(TV, smooth) do not have a simple closed-form primal proximal because "
+            "TransformGradient is not unitary. Use PDHG for these regularizers."
+        )
 
 
 class Regularizer_TV1D(Regularizer_Grad):
@@ -428,6 +468,20 @@ class Regularizer_lap(BaseRegularizer):
             tau = tau * self.upd_mask
         return tau
 
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Not implemented: the Laplacian operator is not unitary, so its proximal in the primal
+        domain has no closed-form solution and requires an iterative solve.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised; use PDHG for Laplacian regularizers.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__}.apply_proximal_primal: the Laplacian operator is "
+            "not unitary, so there is no closed-form primal proximal. Use PDHG instead."
+        )
+
 
 class Regularizer_lap1D(Regularizer_lap):
     """Laplacian regularizer in 1D. It can be used to promote smooth reconstructions."""
@@ -501,6 +555,33 @@ class Regularizer_l1(BaseRegularizer):
 
     def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         dual += primal
+
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Apply prox_{tau * weight * ||.||_1} in-place via element-wise soft-thresholding.
+
+        For g(x) = weight * ||x||_1, the proximal is:
+            prox(x)_i = sign(x_i) * max(|x_i| - tau * weight, 0)
+
+        The operator is the identity (TransformIdentity), so the proximal
+        separates element-wise.  When ``upd_mask`` is set, only the elements
+        inside the mask are thresholded; the rest are left unchanged.
+
+        Parameters
+        ----------
+        primal : NDArray
+            The primal variable to update in-place.
+        tau : float | NDArray
+            The proximal step size.
+        """
+        if self.upd_mask is not None:
+            # Apply soft-threshold only inside the mask region
+            primal_masked = primal * self.upd_mask
+            self.norm.apply_proximal_primal(primal_masked, tau * self.weight)
+            # Blend: inside mask use thresholded value, outside keep original
+            primal *= 1 - self.upd_mask
+            primal += primal_masked
+        else:
+            self.norm.apply_proximal_primal(primal, tau * self.weight)
 
 
 class Regularizer_swl(BaseRegularizer):
@@ -612,15 +693,79 @@ class Regularizer_swl(BaseRegularizer):
         if not self.min_approx:
             dual[0, ...] = 0
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         if isinstance(self.norm, dt.DataFidelity_l12):
             tmp_dual = dual[1:]
             tmp_dual = tmp_dual.reshape([-1, self.level, *dual.shape[1:]])
-            self.norm.apply_proximal(tmp_dual, self.weight)
+            self.norm.apply_proximal_dual(tmp_dual, self.weight)
             tmp_dual = dual[0:1:]
-            self.norm.apply_proximal(tmp_dual, self.weight)
+            self.norm.apply_proximal_dual(tmp_dual, self.weight)
         else:
-            super().apply_proximal(dual)
+            super().apply_proximal_dual(dual)
+
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Apply prox_{tau * weight * g} in the primal domain via the wavelet transform.
+
+        The stationary wavelet transform (with ``normalized=True``) is a tight frame
+        (Parseval / isometric), so the proximal of weight * ||W .||_1 in the primal
+        domain is:
+
+            prox(x) = W^T * prox_{tau * weight * ||.||_1}(W * x)
+
+        i.e. transform -> soft-threshold coefficients -> inverse transform.
+
+        When ``normalized=False`` the frame is not tight and this method raises
+        NotImplementedError, because the correct step sizes per sub-band cannot be
+        collapsed into a single tau without further information.
+
+        Parameters
+        ----------
+        primal : NDArray
+            The primal variable to update in-place.
+        tau : float | NDArray
+            The proximal step size.
+
+        Raises
+        ------
+        NotImplementedError
+            When the wavelet transform is not normalized (not a tight frame).
+        ValueError
+            When the regularizer has not been initialized.
+        """
+        if self.op is None:
+            raise ValueError("Regularizer not initialized! Please use method: `initialize_sigma_tau`.")
+
+        if not self.normalized:
+            raise NotImplementedError(
+                f"{self.__class__.__name__}.apply_proximal_primal: the non-normalized "
+                "stationary wavelet transform is not a tight frame, so the per-sub-band "
+                "step sizes cannot be collapsed into a single tau. "
+                "Use normalized=True or switch to PDHG."
+            )
+
+        # Forward stationary wavelet transform -> list of dicts (pywt swtn format)
+        coeffs_list = self.op(primal)
+        # coeffs_list[0] is the approximation array; coeffs_list[1..level] are
+        # dicts of detail sub-bands keyed by orientation label.
+
+        threshold = tau * self.weight
+
+        # Threshold detail sub-bands
+        for lvl in range(1, len(coeffs_list)):
+            c_l = coeffs_list[lvl]
+            for lab in list(c_l.keys()):
+                coeff = c_l[lab]
+                self.norm.apply_proximal_primal(coeff, threshold)
+                c_l[lab] = coeff
+
+        # Optionally threshold the approximation sub-band
+        if self.min_approx:
+            approx = coeffs_list[0]
+            self.norm.apply_proximal_primal(approx, threshold)
+            coeffs_list[0] = approx
+
+        # Inverse stationary wavelet transform back to primal domain
+        primal[:] = self.op.T(coeffs_list)
 
 
 class Regularizer_l1swl(Regularizer_swl):
@@ -695,13 +840,13 @@ class Regularizer_Hub_swl(Regularizer_swl):
         weight: float | NDArray,
         wavelet: str,
         level: int,
+        huber_size: float,
         ndims: int = 2,
         axes: Sequence[int] | NDArray | None = None,
         pad_on_demand: str = "constant",
         upd_mask: NDArray | None = None,
         normalized: bool = False,
         min_approx: bool = True,
-        huber_size: int | None = None,
     ):
         super().__init__(
             weight,
@@ -818,8 +963,16 @@ class Regularizer_dwl(BaseRegularizer):
             slices = [slice(0, x) for x in op_wl.sub_band_shapes[0]]
             dual[tuple(slices)] = 0
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         if isinstance(self.norm, dt.DataFidelity_l12):
+            if self.op is None:
+                raise ValueError("Regularizer not initialized! Please use method: `initialize_sigma_tau`.")
+            if not isinstance(self.op, operators.TransformDecimatedWavelet):
+                raise RuntimeError(
+                    "Initialization error: the operator should have been `operators.TransformDecimatedWavelet`,"
+                    f" but {type(self.op)} was found."
+                )
+
             op_wl: operators.TransformDecimatedWavelet = self.op
             coeffs = pywt.array_to_coeffs(dual, op_wl.slicing_info)
             for ii_l in range(1, len(coeffs)):
@@ -830,14 +983,68 @@ class Regularizer_dwl(BaseRegularizer):
                     labels.append(lab)
                     details.append(det)
                 c_ll = np.stack(details, axis=0)
-                self.norm.apply_proximal(c_ll, self.weight)
+                self.norm.apply_proximal_dual(c_ll, self.weight)
                 for ii, lab in enumerate(labels):
                     c_l[lab] = c_ll[ii]
                 coeffs[ii_l] = c_l
-            self.norm.apply_proximal(coeffs[0], self.weight)
+            self.norm.apply_proximal_dual(coeffs[0], self.weight)
             dual[:] = pywt.coeffs_to_array(coeffs)[0]
         else:
-            super().apply_proximal(dual)
+            super().apply_proximal_dual(dual)
+
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Apply prox_{tau * weight * g} in the primal domain for decimated wavelets.
+
+        The decimated wavelet transform is orthogonal (W^T W = I), so it is a tight
+        frame with frame bound 1.  The proximal of weight * ||W .||_1 is therefore:
+
+            prox(x) = W^T * prox_{tau * weight * ||.||_1}(W * x)
+
+        i.e. transform -> soft-threshold each sub-band -> inverse transform.
+
+        Parameters
+        ----------
+        primal : NDArray
+            The primal variable to update in-place.
+        tau : float | NDArray
+            The proximal step size.
+
+        Raises
+        ------
+        ValueError
+            When the regularizer has not been initialized.
+        """
+        if self.op is None:
+            raise ValueError("Regularizer not initialized! Please use method: `initialize_sigma_tau`.")
+        if not isinstance(self.op, operators.TransformDecimatedWavelet):
+            raise RuntimeError(
+                "Initialization error: the operator should have been `operators.TransformDecimatedWavelet`,"
+                f" but {type(self.op)} was found."
+            )
+
+        op_wl: operators.TransformDecimatedWavelet = self.op
+
+        # Forward decimated wavelet transform (returns a pywt coefficient list)
+        coeffs_list = op_wl.direct_dwt(primal)
+
+        threshold = float(np.asarray(tau * self.weight).flat[0])
+
+        # Soft-threshold detail sub-bands; optionally suppress approximation
+        for ii_l in range(1, len(coeffs_list)):
+            c_l = coeffs_list[ii_l]
+            for lab in list(c_l.keys()):
+                coeff = c_l[lab]
+                self.norm.apply_proximal_primal(coeff, threshold)
+                c_l[lab] = coeff
+
+        if self.min_approx:
+            # Also threshold the approximation band
+            approx = coeffs_list[0]
+            self.norm.apply_proximal_primal(approx, threshold)
+            coeffs_list[0] = approx
+
+        # Inverse transform back to primal domain
+        primal[:] = op_wl.inverse_dwt(coeffs_list)
 
 
 class Regularizer_l1dwl(Regularizer_dwl):
@@ -908,11 +1115,11 @@ class Regularizer_Hub_dwl(Regularizer_dwl):
         weight: float | NDArray,
         wavelet: str,
         level: int,
+        huber_size: float,
         ndims: int = 2,
         axes: Sequence[int] | NDArray | None = None,
         pad_on_demand: str = "constant",
         upd_mask: NDArray | None = None,
-        huber_size: int | None = None,
     ):
         super().__init__(
             weight,
@@ -968,6 +1175,21 @@ class BaseRegularizer_med(BaseRegularizer):
 
     def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         dual += primal - spimg.median_filter(primal, self.filt_size)
+
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Not implemented: the median-filter regularizer has a non-linear, non-unitary
+        'operator' (x - median_filter(x)), so no closed-form primal proximal exists.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised; use PDHG for median-filter regularizers.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__}.apply_proximal_primal: the median-filter regularizer "
+            "uses a non-linear transform, so no closed-form primal proximal exists. "
+            "Use PDHG instead."
+        )
 
 
 class Regularizer_l1med(BaseRegularizer_med):
@@ -1047,6 +1269,53 @@ class Regularizer_fft(BaseRegularizer):
         if self.upd_mask is not None:
             tau = tau * self.upd_mask
         return tau
+
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Apply prox_{tau * weight * g} in the primal domain for the Fourier regularizer.
+
+        The DFT (with ortho normalization) is unitary, so the proximal of
+        weight * ||W .||_{norm} separates in the frequency domain:
+
+            prox(x) = W^{-1} * prox_{tau * weight * ||.||_norm}(W * x)
+
+        where W is TransformFourier (ortho-normalized FFT).  The frequency
+        mask ``self.sigma`` is applied before thresholding (as in the dual),
+        and masked-out frequencies (sigma == 0, i.e. the DC or low-frequency
+        components, depending on fft_filter) are left unpenalized.
+
+        Parameters
+        ----------
+        primal : NDArray
+            The primal variable to update in-place.
+        tau : float | NDArray
+            The proximal step size.
+
+        Raises
+        ------
+        ValueError
+            When the regularizer has not been initialized.
+        """
+        if self.op is None:
+            raise ValueError("Regularizer not initialized! Please use method: `initialize_sigma_tau`.")
+
+        # Forward ortho-normalized FFT: coeffs shape is (2, *x_shape)
+        coeffs = self.op(primal)
+
+        # Split into penalized (masked) and unpenalized (unmasked) frequencies.
+        # self.sigma is 1 for penalized frequencies and 0 for unpenalized ones
+        # (e.g. DC component for fft_filter="delta").
+        coeffs_pen = coeffs * self.sigma  # frequencies to be thresholded
+        coeffs_free = coeffs * (1.0 - self.sigma)  # frequencies left unchanged
+
+        # Apply the proximal (soft-threshold) only to the penalized frequencies
+        threshold = tau * self.weight
+        self.norm.apply_proximal_primal(coeffs_pen, threshold)
+
+        # Reconstruct full coefficient array: thresholded + unpenalized
+        coeffs_out = coeffs_pen + coeffs_free
+
+        # Inverse FFT back to primal domain
+        primal[:] = self.op.T(coeffs_out)
 
 
 # Multi-channel regularizers
@@ -1130,7 +1399,7 @@ class Regularizer_VTV(Regularizer_Grad):
             + f" Provided the following instead: derivatives={self.pwise_der_norm}, channel={self.pwise_chan_norm}"
         )
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         # Following assignments will detach the local array from the original one
         dual_tmp = dual.copy()
 
@@ -1281,7 +1550,7 @@ class Regularizer_vl1wl(Regularizer_l1swl):
 
         return tau
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         dual_tmp = dual.copy()
 
         if self.q_ref is not None:
@@ -1358,6 +1627,22 @@ class Regularizer_vSVD(BaseRegularizer):
             tau = tau * self.upd_mask
         return tau
 
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Not implemented: the SVD-based regularizer uses a non-unitary, data-dependent transform
+        (TransformSVD stores U and Vt from the last forward pass), so the proximal cannot be
+        applied in the primal domain without re-computing the SVD.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised; use PDHG for SVD-based regularizers.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__}.apply_proximal_primal: the SVD regularizer uses a "
+            "data-dependent, non-unitary transform. Its primal proximal requires a full SVD "
+            "recomputation and is not supported. Use PDHG instead."
+        )
+
 
 # ---- Constraints ----
 
@@ -1405,9 +1690,28 @@ class Constraint_LowerLimit(BaseRegularizer):
     def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         dual += primal - self.limit
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         dual[dual > 0.0] = 0.0
-        self.norm.apply_proximal(dual)
+        self.norm.apply_proximal_dual(dual)
+
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Apply the lower-limit constraint proximal in-place.
+
+        The proximal of the indicator function of {x >= limit} is the projection
+        onto the feasible half-space:
+            prox(x)_i = max(x_i, limit)
+
+        The step size tau has no effect on an indicator function proximal
+        (the projection is independent of tau).
+
+        Parameters
+        ----------
+        primal : NDArray
+            The primal variable to update in-place.
+        tau : float | NDArray
+            The proximal step size (unused for indicator functions, kept for API consistency).
+        """
+        np.fmax(primal, self.limit, out=primal)
 
 
 class Constraint_UpperLimit(BaseRegularizer):
@@ -1453,6 +1757,25 @@ class Constraint_UpperLimit(BaseRegularizer):
     def update_dual(self, dual: NDArray, primal: NDArray) -> None:
         dual += primal - self.limit
 
-    def apply_proximal(self, dual: NDArray) -> None:
+    def apply_proximal_dual(self, dual: NDArray) -> None:
         dual[dual < 0.0] = 0.0
-        self.norm.apply_proximal(dual)
+        self.norm.apply_proximal_dual(dual)
+
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Apply the upper-limit constraint proximal in-place.
+
+        The proximal of the indicator function of {x <= limit} is the projection
+        onto the feasible half-space:
+            prox(x)_i = min(x_i, limit)
+
+        The step size tau has no effect on an indicator function proximal
+        (the projection is independent of tau).
+
+        Parameters
+        ----------
+        primal : NDArray
+            The primal variable to update in-place.
+        tau : float | NDArray
+            The proximal step size (unused for indicator functions, kept for API consistency).
+        """
+        np.fmin(primal, self.limit, out=primal)

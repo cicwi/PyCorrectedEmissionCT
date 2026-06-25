@@ -124,12 +124,15 @@ filter can be selected, by passing the `fbp_filter` parameter at initialization:
 solver_fbp = cct.solvers.FBP(fbp_filter="shepp-logan")
 ```
 
-#### SIRT, PDHG, and MLEM
+#### SIRT, PDHG, MLEM, and FISTA
 
-The SIRT and PDHG algorithms, are algebraic (iterative) methods. They both
+The SIRT, PDHG and FISTA algorithms, are algebraic (iterative) methods. They all
 support regularization, and box constraints on the solution. The PDHG also
-supports various data fidelity terms.
-The MLEM algorithm is also an iterative algorithm to find the maximum likelihood estimation of the reconstructed signal. The MLEM does not currently support any regularization.
+supports various data fidelity terms. FISTA only supports regularizations that
+form a tight Parseval frame (like certain wavelet transforms).
+The MLEM algorithm is also an iterative algorithm to find the maximum likelihood
+estimation of the reconstructed signal. The MLEM does not currently support any
+regularization.
 
 The interface of the iterative methods is the same as for the FBP, with the only
 difference of requiring an iterations count:
@@ -146,7 +149,7 @@ with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:
     vol, _ = solver_sirt(p, sino, iterations=100)
 ```
 
-It is possible to specify an intial solution or box limits on the solutions like
+It is possible to specify an initial solution or box limits on the solutions like
 the following:
 ```python
 x0 = np.ones(vol_shape_xy)  # Initial solution

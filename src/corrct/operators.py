@@ -985,8 +985,8 @@ class TransformSVD(BaseTransform):
     def __init__(
         self,
         x_shape: ArrayLike,
-        axes_rows: Sequence[int] | NDArray = (0,),
-        axes_cols: Sequence[int] | NDArray = (-1,),
+        axes_rows: int | Sequence[int] | NDArray = (0,),
+        axes_cols: int | Sequence[int] | NDArray = (-1,),
         rescale: bool = False,
     ):
         """
@@ -1087,7 +1087,7 @@ class TransformSVD(BaseTransform):
         x = np.transpose(x, self.fwd_transpose)
         x = np.reshape(x, self.fwd_shape)
 
-        (self.U, s, self.Vt) = self.direct_svd(x)
+        self.U, s, self.Vt = self.direct_svd(x)
 
         if self.rescale:
             s /= np.sqrt(self.Vt.shape[-1] * self.U.shape[-2])
