@@ -475,22 +475,24 @@ class DataFidelity_Huber(DataFidelityBase):
 
     one_sigma_error: float | NDArrayFloat
 
-    def __init__(self, local_error, background=None, l2_axis=None):
+    def __init__(
+        self, local_error: float | NDArrayFloat, background: float | NDArrayFloat | None = None, l2_axis: int | None = None
+    ):
         super().__init__(background=background)
         self.local_error = local_error
         self.l2_axis = l2_axis
         self.one_sigma_error = 1.0
 
-    def assign_data(self, data, sigma=1.0):
+    def assign_data(self, data: NDArrayFloat, sigma: float | NDArrayFloat = 1.0):
         self.one_sigma_error = 1.0 / (1.0 + sigma * self.local_error)
         super().assign_data(data=data, sigma=sigma)
 
-    def compute_residual_norm(self, dual):
+    def compute_residual_norm(self, dual: NDArrayFloat) -> float:
         l2_points = dual <= self.local_error
         l1_points = 1 - l2_points
-        return np.linalg.norm(dual[l2_points].flatten(), ord=2) ** 2 + np.linalg.norm(dual[l1_points].flatten(), ord=1)
+        return float(np.linalg.norm(dual[l2_points].flatten(), ord=2) ** 2 + np.linalg.norm(dual[l1_points].flatten(), ord=1))
 
-    def apply_proximal_dual(self, dual):
+    def apply_proximal_dual(self, dual: NDArrayFloat) -> None:
         if self.data is not None and self.sigma_data is not None:
             dual -= self.sigma_data
 
@@ -522,10 +524,12 @@ class DataFidelity_Huber(DataFidelityBase):
             "Use a gradient step in the solver, or switch to PDHG for this data term."
         )
 
-    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
+    def compute_primal_dual_gap(
+        self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: NDArrayFloat | None = None
+    ) -> float:
         if self.background is not None:
             proj_primal = proj_primal + self.background
-        return (
+        return float(
             np.linalg.norm(self.compute_residual(proj_primal, mask), ord=2)
             + self.compute_data_dual_dot(dual)
             + self.local_error * np.linalg.norm(dual, ord=2)
@@ -540,14 +544,14 @@ class DataFidelity_l1(DataFidelityBase):
     def __init__(self, background=None):
         super().__init__(background=background)
 
-    def _get_inner_norm(self, dual):
+    def _get_inner_norm(self, dual: NDArrayFloat) -> NDArrayFloat:
         return np.abs(dual)
 
-    def _apply_threshold(self, dual):
+    def _apply_threshold(self, dual: NDArrayFloat):
         pass
 
-    def apply_proximal_dual(self, dual, weight=1.0):
-        if self.data is not None:
+    def apply_proximal_dual(self, dual: NDArrayFloat, weight: float | NDArrayFloat = 1.0):
+        if self.data is not None and self.sigma_data is not None:
             dual -= self.sigma_data
         self._apply_threshold(dual)
         dual_inner_norm = self._get_inner_norm(dual)
@@ -577,20 +581,22 @@ class DataFidelity_l1(DataFidelityBase):
         if self.data is not None:
             primal += self.data
 
-    def compute_residual_norm(self, dual):
+    def compute_residual_norm(self, dual: NDArrayFloat) -> float:
         dual = dual.copy()
         self._apply_threshold(dual)
         dual_inner_norm = self._get_inner_norm(dual)
-        return np.linalg.norm(dual_inner_norm, ord=1)
+        return float(np.linalg.norm(dual_inner_norm, ord=1))
 
-    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
+    def compute_primal_dual_gap(
+        self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: NDArrayFloat | None = None
+    ) -> float:
         if self.background is not None:
             proj_primal = proj_primal + self.background
 
         residual = self.compute_residual(proj_primal, mask)
         self._apply_threshold(residual)
         residual_inner_norm = self._get_inner_norm(residual)
-        return np.linalg.norm(residual_inner_norm, ord=1) + self.compute_data_dual_dot(dual)
+        return float(np.linalg.norm(residual_inner_norm, ord=1) + self.compute_data_dual_dot(dual))
 
 
 class DataFidelity_l12(DataFidelity_l1):
@@ -598,11 +604,11 @@ class DataFidelity_l12(DataFidelity_l1):
 
     __data_fidelity_name__ = "l12"
 
-    def __init__(self, background=None, l2_axis=0):
+    def __init__(self, background: float | NDArrayFloat | None = None, l2_axis: int = 0):
         super().__init__(background=background)
         self.l2_axis = l2_axis
 
-    def _get_inner_norm(self, dual):
+    def _get_inner_norm(self, dual: NDArrayFloat) -> NDArrayFloat:
         return np.linalg.norm(dual, ord=2, axis=self.l2_axis, keepdims=True)
 
     def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
@@ -630,16 +636,16 @@ class DataFidelity_l1b(DataFidelity_l1):
 
     sigma_error: float | NDArrayFloat
 
-    def __init__(self, local_error, background=None):
+    def __init__(self, local_error: float | NDArrayFloat, background: float | NDArrayFloat | None = None) -> None:
         super().__init__(background=background)
         self.local_error = local_error
         self.sigma_error = 1.0 * self.local_error
 
-    def assign_data(self, data, sigma=1.0):
+    def assign_data(self, data: NDArrayFloat, sigma: float | NDArrayFloat = 1.0) -> None:
         self.sigma_error = sigma * self.local_error
         super().assign_data(data=data, sigma=sigma)
 
-    def _apply_threshold(self, dual):
+    def _apply_threshold(self, dual: NDArrayFloat) -> None:
         _soft_threshold(dual, self.local_error)
 
     def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
@@ -683,7 +689,7 @@ class DataFidelity_KL(DataFidelityBase):
         else:
             return 4 * self.sigma * np.fmax(self.data, 0.0)
 
-    def apply_proximal_dual(self, dual):
+    def apply_proximal_dual(self, dual: NDArrayFloat):
         if self.sigma_data is not None:
             dual[:] = (1 + dual[:] - np.sqrt((dual[:] - 1) ** 2 + self.sigma_data[:])) / 2
         else:
@@ -736,10 +742,10 @@ class DataFidelity_KL(DataFidelityBase):
             residual *= mask
         return -residual
 
-    def compute_residual_norm(self, dual):
-        return np.linalg.norm(dual.flatten(), ord=1)
+    def compute_residual_norm(self, dual: NDArrayFloat) -> float:
+        return float(np.linalg.norm(dual.flatten(), ord=1))
 
-    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
+    def compute_primal_dual_gap(self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: NDArrayFloat | None = None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
 
@@ -760,13 +766,20 @@ class DataFidelity_ln(DataFidelityBase):
 
     __data_fidelity_name__ = "ln"
 
-    def __init__(self, background=None, ln_axes: Sequence[int] = (1, -1), spectral_norm: DataFidelityBase = DataFidelity_l1()):
+    ln_axes: Sequence[int]
+
+    def __init__(
+        self,
+        background: float | NDArrayFloat | None = None,
+        ln_axes: Sequence[int] = (1, -1),
+        spectral_norm: DataFidelityBase = DataFidelity_l1(),
+    ):
         super().__init__(background=background)
         self.ln_axes = ln_axes
         self.spectral_norm = spectral_norm
         self.use_fallback = False
 
-    def apply_proximal_dual(self, dual):
+    def apply_proximal_dual(self, dual: NDArrayFloat) -> None:
         dual_tmp = dual.copy()
 
         if self.sigma_data is not None:
@@ -819,12 +832,12 @@ class DataFidelity_ln(DataFidelityBase):
             "It cannot be applied generically in the primal domain. Use PDHG instead."
         )
 
-    def compute_residual_norm(self, dual):
+    def compute_residual_norm(self, dual: NDArrayFloat) -> float:
         op_svd = operators.TransformSVD(dual.shape, axes_rows=self.ln_axes[0], axes_cols=self.ln_axes[1])
         s_p = op_svd(dual)
-        return np.linalg.norm(s_p, ord=1)
+        return float(np.linalg.norm(s_p, ord=1))
 
-    def compute_primal_dual_gap(self, proj_primal, dual, mask=None):
+    def compute_primal_dual_gap(self, proj_primal: NDArrayFloat, dual: NDArrayFloat, mask: NDArrayFloat | None = None):
         if self.background is not None:
             proj_primal = proj_primal + self.background
 

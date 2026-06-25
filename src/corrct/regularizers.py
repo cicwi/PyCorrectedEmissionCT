@@ -230,7 +230,7 @@ class Regularizer_Grad(BaseRegularizer):
     axes : Sequence, optional
         The axes over which it computes the gradient. If None, it uses the last 2. The default is None.
     pad_mode: str, optional
-        The padding mode to use for the linear convolution. The default is "edge".
+        The padding mode to use. The default is "edge".
     norm : DataFidelityBase, optional
         The norm of the regularizer minimization. The default is DataFidelity_l12().
     """
@@ -583,6 +583,7 @@ class Regularizer_l1(BaseRegularizer):
         else:
             self.norm.apply_proximal_primal(primal, tau * self.weight)
 
+
 class Regularizer_swl(BaseRegularizer):
     """Base stationary wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
 
@@ -841,13 +842,13 @@ class Regularizer_Hub_swl(Regularizer_swl):
         weight: float | NDArray,
         wavelet: str,
         level: int,
+        huber_size: float,
         ndims: int = 2,
         axes: Sequence[int] | NDArray | None = None,
         pad_on_demand: str = "constant",
         upd_mask: NDArray | None = None,
         normalized: bool = False,
         min_approx: bool = True,
-        huber_size: int | None = None,
     ):
         super().__init__(
             weight,
@@ -966,6 +967,14 @@ class Regularizer_dwl(BaseRegularizer):
 
     def apply_proximal_dual(self, dual: NDArray) -> None:
         if isinstance(self.norm, dt.DataFidelity_l12):
+            if self.op is None:
+                raise ValueError("Regularizer not initialized! Please use method: `initialize_sigma_tau`.")
+            if not isinstance(self.op, operators.TransformDecimatedWavelet):
+                raise RuntimeError(
+                    "Initialization error: the operator should have been `operators.TransformDecimatedWavelet`,"
+                    f" but {type(self.op)} was found."
+                )
+
             op_wl: operators.TransformDecimatedWavelet = self.op
             coeffs = pywt.array_to_coeffs(dual, op_wl.slicing_info)
             for ii_l in range(1, len(coeffs)):
@@ -1009,6 +1018,11 @@ class Regularizer_dwl(BaseRegularizer):
         """
         if self.op is None:
             raise ValueError("Regularizer not initialized! Please use method: `initialize_sigma_tau`.")
+        if not isinstance(self.op, operators.TransformDecimatedWavelet):
+            raise RuntimeError(
+                "Initialization error: the operator should have been `operators.TransformDecimatedWavelet`,"
+                f" but {type(self.op)} was found."
+            )
 
         op_wl: operators.TransformDecimatedWavelet = self.op
 
@@ -1103,11 +1117,11 @@ class Regularizer_Hub_dwl(Regularizer_dwl):
         weight: float | NDArray,
         wavelet: str,
         level: int,
+        huber_size: float,
         ndims: int = 2,
         axes: Sequence[int] | NDArray | None = None,
         pad_on_demand: str = "constant",
         upd_mask: NDArray | None = None,
-        huber_size: int | None = None,
     ):
         super().__init__(
             weight,
@@ -1261,15 +1275,15 @@ class Regularizer_fft(BaseRegularizer):
     def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
         """Apply prox_{tau * weight * g} in the primal domain for the Fourier regularizer.
 
-        The DFT (with ortho normalisation) is unitary, so the proximal of
+        The DFT (with ortho normalization) is unitary, so the proximal of
         weight * ||W .||_{norm} separates in the frequency domain:
 
             prox(x) = W^{-1} * prox_{tau * weight * ||.||_norm}(W * x)
 
-        where W is TransformFourier (ortho-normalised FFT).  The frequency
+        where W is TransformFourier (ortho-normalized FFT).  The frequency
         mask ``self.sigma`` is applied before thresholding (as in the dual),
         and masked-out frequencies (sigma == 0, i.e. the DC or low-frequency
-        components, depending on fft_filter) are left unpenalised.
+        components, depending on fft_filter) are left unpenalized.
 
         Parameters
         ----------
@@ -1286,20 +1300,20 @@ class Regularizer_fft(BaseRegularizer):
         if self.op is None:
             raise ValueError("Regularizer not initialized! Please use method: `initialize_sigma_tau`.")
 
-        # Forward ortho-normalised FFT: coeffs shape is (2, *x_shape)
+        # Forward ortho-normalized FFT: coeffs shape is (2, *x_shape)
         coeffs = self.op(primal)
 
-        # Split into penalised (masked) and unpenalised (unmasked) frequencies.
-        # self.sigma is 1 for penalised frequencies and 0 for unpenalised ones
+        # Split into penalized (masked) and unpenalized (unmasked) frequencies.
+        # self.sigma is 1 for penalized frequencies and 0 for unpenalized ones
         # (e.g. DC component for fft_filter="delta").
         coeffs_pen = coeffs * self.sigma  # frequencies to be thresholded
         coeffs_free = coeffs * (1.0 - self.sigma)  # frequencies left unchanged
 
-        # Apply the proximal (soft-threshold) only to the penalised frequencies
+        # Apply the proximal (soft-threshold) only to the penalized frequencies
         threshold = tau * self.weight
         self.norm.apply_proximal_primal(coeffs_pen, threshold)
 
-        # Reconstruct full coefficient array: thresholded + unpenalised
+        # Reconstruct full coefficient array: thresholded + unpenalized
         coeffs_out = coeffs_pen + coeffs_free
 
         # Inverse FFT back to primal domain
