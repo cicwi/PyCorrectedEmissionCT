@@ -712,7 +712,7 @@ class Regularizer_swl(BaseRegularizer):
 
             prox(x) = W^T * prox_{tau * weight * ||.||_1}(W * x)
 
-        i.e. transform → soft-threshold coefficients → inverse transform.
+        i.e. transform -> soft-threshold coefficients -> inverse transform.
 
         When ``normalized=False`` the frame is not tight and this method raises
         NotImplementedError, because the correct step sizes per sub-band cannot be
@@ -743,10 +743,8 @@ class Regularizer_swl(BaseRegularizer):
                 "Use normalized=True or switch to PDHG."
             )
 
-        op_swl: operators.TransformStationaryWavelet = self.op  # type: ignore
-
-        # Forward stationary wavelet transform → list of dicts (pywt swtn format)
-        coeffs_list = op_swl.direct_swt(primal)
+        # Forward stationary wavelet transform -> list of dicts (pywt swtn format)
+        coeffs_list = self.op(primal)
         # coeffs_list[0] is the approximation array; coeffs_list[1..level] are
         # dicts of detail sub-bands keyed by orientation label.
 
@@ -767,7 +765,7 @@ class Regularizer_swl(BaseRegularizer):
             coeffs_list[0] = approx
 
         # Inverse stationary wavelet transform back to primal domain
-        primal[:] = op_swl.inverse_swt(coeffs_list)
+        primal[:] = self.op.T(coeffs_list)
 
 
 class Regularizer_l1swl(Regularizer_swl):
@@ -1002,7 +1000,7 @@ class Regularizer_dwl(BaseRegularizer):
 
             prox(x) = W^T * prox_{tau * weight * ||.||_1}(W * x)
 
-        i.e. transform → soft-threshold each sub-band → inverse transform.
+        i.e. transform -> soft-threshold each sub-band -> inverse transform.
 
         Parameters
         ----------

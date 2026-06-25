@@ -23,13 +23,9 @@ NDArrayFloat = NDArray[np.floating]
 
 
 def _soft_threshold(values: NDArrayFloat, threshold: float | NDArrayFloat) -> None:
-    abs_values = np.abs(values)
-    valid_values = abs_values > 0
-    if isinstance(threshold, (float, int)) or threshold.size == 1:
-        local_threshold = threshold
-    else:
-        local_threshold = threshold[valid_values]
-    values[valid_values] *= np.fmax((abs_values[valid_values] - local_threshold) / abs_values[valid_values], 0)
+    values_abs = np.abs(values)
+    values_sign = np.sign(values)
+    values[:] = values_sign * np.fmax(values_abs - threshold, 0.0)
 
 
 class DataFidelityBase(ABC):
