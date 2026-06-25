@@ -128,6 +128,8 @@ FLAT_2D_CASES = [
     (solvers.PDHG, 500, {}),
     (solvers.PDHG, 1_000, dict(precondition=False)),
     (solvers.PDHG, 500, dict(lower_limit=0, upper_limit=1)),
+    (solvers.FISTA, 2_000, dict(precondition=False)),
+    (solvers.FISTA, 1_000, dict(lower_limit=0, upper_limit=1)),
     (solvers.MLEM, 10_000, dict(lower_limit=0, upper_limit=1)),
 ]
 
