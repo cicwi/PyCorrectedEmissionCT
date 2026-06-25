@@ -857,7 +857,10 @@ def fit_ellipse_center(
 
     diffs_vu = pos2_vu - pos1_vu
     vandermonde = np.stack([diffs_vu[-1, :], -diffs_vu[-2, :]], axis=-1)
-    values = np.cross(pos1_vu, pos2_vu, axis=0)
+    extra_zeros = np.zeros((1, pos1_vu.shape[-1]))
+    pos1_vu0 = np.concatenate((pos1_vu, extra_zeros), axis=0)
+    pos2_vu0 = np.concatenate((pos2_vu, extra_zeros), axis=0)
+    values = np.cross(pos1_vu0, pos2_vu0, axis=0)[2, :]
 
     p_vu = np.linalg.lstsq(vandermonde, values, rcond=None)[0]
     if use_l1_norm:
