@@ -67,6 +67,33 @@ def compute_diagonal_scaling(
     x_mask: NDArray | None = None,
     b_mask: NDArray | None = None,
 ) -> tuple[NDArray, NDArray, tuple[int, ...], DTypeLike]:
+    """
+    Compute diagonal scaling factors for the forward and backward projections.
+
+    Parameters
+    ----------
+    A_abs : operators.BaseTransform
+        The absolute value of the forward projection operator.
+    At_abs : operators.BaseTransform
+        The absolute value of the backward projection operator.
+    b : NDArrayFloat
+        The measurement data.
+    regs : Sequence[regularizers.BaseRegularizer]
+        The sequence of regularizers.
+    relaxation_sigma : float, optional
+        The relaxation factor for the forward projection scaling, by default 1.0.
+    relaxation_tau : float, optional
+        The relaxation factor for the backward projection scaling, by default 1.0.
+    x_mask : NDArray | None, optional
+        The mask for the image space, by default None.
+    b_mask : NDArray | None, optional
+        The mask for the measurement space, by default None.
+
+    Returns
+    -------
+    tuple[NDArray, NDArray, tuple[int, ...], DTypeLike]
+        The scaling factors for the forward and backward projections, the shape of the image space, and the data type of the image space.
+    """
     # Back-projection diagonal re-scaling
     # Tau = |A^T| 1_b  (row sums -> image-space diagonal)
     b_ones = np.ones_like(b)
@@ -97,6 +124,27 @@ def compute_Lipschitz_scaling(
     relaxation_sigma: float = 1.0,
     relaxation_tau: float = 1.0,
 ) -> tuple[float, float | NDArray, tuple[int, ...], DTypeLike]:
+    """
+    Compute Lipschitz scaling factors for the forward and backward projections.
+
+    Parameters
+    ----------
+    A : operators.BaseTransform
+        The forward projection operator.
+    b : NDArrayFloat
+        The measurement data.
+    regs : Sequence[regularizers.BaseRegularizer]
+        The sequence of regularizers.
+    relaxation_sigma : float, optional
+        The relaxation factor for the forward projection scaling, by default 1.0.
+    relaxation_tau : float, optional
+        The relaxation factor for the backward projection scaling, by default 1.0.
+
+    Returns
+    -------
+    tuple[float, float | NDArray, tuple[int, ...], DTypeLike]
+        The scaling factors for the forward and backward projections, the shape of the image space, and the data type of the image space.
+    """
     L, x_shape, x_dtype = power_method(A, b)
     tau = L
 
