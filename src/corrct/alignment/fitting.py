@@ -146,6 +146,7 @@ def fit_shifts_vu_xc(
     if len(fft_dims) == 2:
         shifts_vu = np.empty((len(data_vwu.shape) - 1, num_angles))
         slices = [slice(None)] * len(data_vwu.shape)
+        fft_axes = (0, 1)
 
         for ii_a in range(num_angles):
             # For performance reasons, it is better to do the fft on each image
@@ -155,8 +156,8 @@ def fit_shifts_vu_xc(
                 proj_vu = proj_vwu.squeeze(axis=stack_axis)
             else:
                 proj_vu = proj_vwu[tuple(slices)].squeeze(axis=stack_axis)
-            data_vwu_f = local_fftn(data_vu, s=list(new_fft_shapes))
-            proj_vwu_f = local_fftn(proj_vu, s=list(new_fft_shapes))
+            data_vwu_f = local_fftn(data_vu, s=list(new_fft_shapes), axes=fft_axes)
+            proj_vwu_f = local_fftn(proj_vu, s=list(new_fft_shapes), axes=fft_axes)
 
             cc_f = data_vwu_f * proj_vwu_f.conj()
             if normalize_fourier:
