@@ -619,7 +619,7 @@ def tune_acquisition_geometry(
             prj_geom = acq_geom.get_prj_geom()
             with ProjectorUncorrected(vol_geom, angles_rot_rad, prj_geom=prj_geom) as prj:
                 _, info = solver(prj, data, iterations=100, b_mask=data_mask)
-                residuals[par_ind] = info.residuals[-1]
+                residuals[par_ind] = info.get_best_residual_rec()
 
         min_par, min_res, fit_info = fit_parabola_min(par_vals, residuals, decimals=6)
 

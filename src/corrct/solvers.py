@@ -9,7 +9,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 import copy as cp
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
@@ -165,40 +165,91 @@ class SolutionInfo:
     iterations: int
     max_iterations: int
 
-    residual0: float | np.floating
-    residual0_cv: float | np.floating
+    residual0_rec: float
+    residual0_val: float
 
-    residuals: NDArrayFloat
-    residuals_cv: NDArrayFloat
-    tolerance: float | np.floating | None
+    residuals_rec: NDArrayFloat
+    residuals_val: NDArrayFloat
+    tolerance: float | None
+
+    best_residual_ind_rec: int
+    best_residual_ind_val: int
 
     def __init__(
         self,
         method: str,
         max_iterations: int,
-        tolerance: float | np.floating | None,
-        residual0: float = np.inf,
-        residual0_cv: float = np.inf,
+        tolerance: float | None,
+        residual0_rec: float = np.inf,
+        residual0_val: float = np.inf,
     ) -> None:
         self.method = method
         self.max_iterations = max_iterations
         self.tolerance = tolerance
 
-        self.residual0 = residual0
-        self.residual0_cv = residual0_cv
+        self.residual0_rec = residual0_rec
+        self.residual0_val = residual0_val
 
-        self.residuals = np.zeros(max_iterations)
-        self.residuals_cv = np.zeros(max_iterations)
+        self.residuals_rec = np.full(max_iterations, fill_value=np.inf)
+        self.residuals_val = np.full(max_iterations, fill_value=np.inf)
+
+        self.best_residual_ind_rec = 0
+        self.best_residual_ind_val = 0
 
         self.iterations = 0
 
     @property
-    def residuals_rel(self) -> NDArrayFloat:
-        return self.residuals / self.residual0
+    def residuals_rec_rel(self) -> NDArrayFloat:
+        return self.residuals_rec / self.residual0_rec
 
     @property
-    def residuals_cv_rel(self) -> NDArrayFloat:
-        return self.residuals_cv / self.residual0_cv
+    def residuals_val_rel(self) -> NDArrayFloat:
+        return self.residuals_val / self.residual0_val
+
+    def set_residual_rec(self, res: float) -> None:
+        if self.iterations == 0:
+            self.residual0_rec = res
+        else:
+            self.residuals_rec[self.iterations - 1] = res
+            best_res = (
+                self.residuals_rec[self.best_residual_ind_rec - 1] if self.best_residual_ind_rec > 0 else self.residual0_rec
+            )
+            if res < best_res:
+                self.best_residual_ind_rec = self.iterations
+
+    def set_residual_val(self, res: float) -> None:
+        if self.iterations == 0:
+            self.residual0_val = res
+        else:
+            self.residuals_val[self.iterations - 1] = res
+            best_res = (
+                self.residuals_val[self.best_residual_ind_val - 1] if self.best_residual_ind_val > 0 else self.residual0_val
+            )
+            if res < best_res:
+                self.best_residual_ind_val = self.iterations
+
+    def get_best_residual_rec(self, is_relative: bool = True) -> float:
+        if self.best_residual_ind_rec == 0:
+            return 1.0 if is_relative else self.residual0_rec
+
+        ind = self.best_residual_ind_rec - 1
+        return self.residuals_rec_rel[ind] if is_relative else self.residuals_rec[ind]
+
+    def get_best_residual_val(self, is_relative: bool = True) -> float:
+        if self.best_residual_ind_val == 0:
+            return 1.0 if is_relative else self.residual0_val
+
+        ind = self.best_residual_ind_val - 1
+        return self.residuals_val_rel[ind] if is_relative else self.residuals_val[ind]
+
+    def __repr__(self) -> str:
+        return (
+            f"SolutionInfo(method={self.method!r}, iterations={self.iterations}, "
+            f"max_iterations={self.max_iterations}, residual0_rec={self.residual0_rec}, "
+            f"residual0_val={self.residual0_val}, residuals_rec={self.residuals_rec}, "
+            f"residuals_val={self.residuals_val}, tolerance={self.tolerance}, "
+            f"best_residual_rec={self.best_residual_ind_rec}, best_residual_val={self.best_residual_ind_val})"
+        )
 
 
 class Solver(ABC):
@@ -222,6 +273,12 @@ class Solver(ABC):
         The default is None.
     """
 
+    verbose: bool
+    leave_progress: bool
+    relaxation: float
+    tolerance: float | None
+    criterion: Literal["max_iter", "loss_rec", "loss_val"]
+
     def __init__(
         self,
         verbose: bool = False,
@@ -230,11 +287,13 @@ class Solver(ABC):
         tolerance: float | None = None,
         data_term: str | data_terms.DataFidelityBase = "l2",
         data_term_test: str | data_terms.DataFidelityBase | None = None,
+        criterion: Literal["max_iter", "loss_rec", "loss_val"] = "max_iter",
     ):
         self.verbose = verbose
         self.leave_progress = leave_progress
         self.relaxation = relaxation
         self.tolerance = tolerance
+        self.criterion = criterion
 
         self.data_term = self._initialize_data_fidelity_function(data_term)
         if data_term_test is None:
@@ -341,6 +400,21 @@ class Solver(ABC):
             # At the same time, we need to remove any masked pixel from the test count.
             b_mask, b_test_mask = b_mask * (1 - b_test_mask), b_test_mask * b_mask
         return (b_mask, b_test_mask)
+
+    def _check_require_residual(self, b_test_mask: NDArrayFloat | None) -> bool:
+        if self.criterion.lower() == "loss_val" and b_test_mask is None:
+            raise ValueError("A validation mask is needed, when selecting `criterion`='loss_val'.")
+        return self.tolerance is not None or b_test_mask is not None or self.criterion.lower() in ("loss_rec", "loss_val")
+
+    def _select_best_solution(self, info: SolutionInfo, curr_best_x: NDArray, new_x: NDArray) -> NDArray:
+        if (
+            self.criterion.lower() == "max_iter"
+            or (self.criterion.lower() == "loss_rec" and info.best_residual_ind_rec == info.iterations)
+            or (self.criterion.lower() == "loss_val" and info.best_residual_ind_val == info.iterations)
+        ):
+            return new_x
+        else:
+            return curr_best_x
 
 
 class FBP(Solver):
@@ -598,7 +672,7 @@ class SART(Solver):
 
         if self.tolerance is not None:
             res = self.compute_residual(A, b, x, A_num_rows=A_num_rows, b_mask=b_mask)
-            info.residual0 = np.linalg.norm(res.flatten())
+            info.set_residual_rec(float(np.linalg.norm(res.flatten())))
 
         rows_sequence = np.random.permutation(A_num_rows)
 
@@ -623,9 +697,9 @@ class SART(Solver):
 
             if self.tolerance is not None:
                 res = self.compute_residual(A, b, x, A_num_rows=A_num_rows, b_mask=b_mask)
-                info.residuals[ii] = np.linalg.norm(res)
+                info.set_residual_rec(float(np.linalg.norm(res)))
 
-                if self.tolerance > info.residuals[ii]:
+                if self.tolerance > info.residuals_rec[ii]:
                     break
 
         return x, info
@@ -664,6 +738,7 @@ class MLEM(Solver):
         regularizer: Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None = None,
         data_term: str | data_terms.DataFidelityBase = "kl",
         data_term_test: str | data_terms.DataFidelityBase | None = None,
+        criterion: Literal["max_iter", "loss_rec", "loss_val"] = "max_iter",
     ):
         super().__init__(
             verbose=verbose,
@@ -671,6 +746,7 @@ class MLEM(Solver):
             tolerance=tolerance,
             data_term=data_term,
             data_term_test=data_term_test,
+            criterion=criterion,
         )
         self.regularizer = self._initialize_regularizer(regularizer)
 
@@ -728,6 +804,7 @@ class MLEM(Solver):
         """
         b = np.array(b)
 
+        require_residual = self._check_require_residual(b_test_mask)
         b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
 
         # Back-projection diagonal re-scaling
@@ -751,11 +828,13 @@ class MLEM(Solver):
         if x_mask is not None:
             x *= x_mask
 
+        best_x = x
+
         self.data_term.assign_data(b)
 
         info = SolutionInfo(self.info(), max_iterations=iterations, tolerance=self.tolerance)
 
-        if b_test_mask is not None or self.tolerance is not None:
+        if require_residual:
             Ax = A(x)
 
             if b_test_mask is not None:
@@ -765,11 +844,11 @@ class MLEM(Solver):
                 self.data_term_test.assign_data(b)
 
                 res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
+                info.set_residual_val(self.data_term_test.compute_residual_norm(res_test_0))
 
             if self.tolerance is not None:
                 res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
-                info.residual0 = self.data_term.compute_residual_norm(res_0)
+                info.set_residual_rec(self.data_term.compute_residual_norm(res_0))
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
@@ -780,14 +859,17 @@ class MLEM(Solver):
             # The MLEM update
             Ax = A(x)
 
-            if b_test_mask is not None:
-                res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test)
+            if require_residual:
+                if b_test_mask is not None:
+                    res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
+                    info.set_residual_val(self.data_term_test.compute_residual_norm(res_test))
 
-            if self.tolerance is not None:
                 res = self.data_term.compute_residual(Ax, mask=b_mask)
-                info.residuals[ii] = self.data_term.compute_residual_norm(res)
-                if self.tolerance > info.residuals[ii]:
+                info.set_residual_rec(self.data_term.compute_residual_norm(res))
+
+                if self.tolerance is not None and self.tolerance > info.residuals_rec[ii]:
+                    if self.verbose:
+                        print(f"Residual reached the desired tolerance of {self.tolerance}. Ending iterations..")
                     break
 
             if self.data_term.background is not None:
@@ -802,7 +884,9 @@ class MLEM(Solver):
             if x_mask is not None:
                 x *= x_mask
 
-        return x, info
+            best_x = self._select_best_solution(info, best_x, x)
+
+        return best_x, info
 
 
 class SIRT(Solver):
@@ -841,6 +925,7 @@ class SIRT(Solver):
         regularizer: Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None = None,
         data_term: str | data_terms.DataFidelityBase = "l2",
         data_term_test: str | data_terms.DataFidelityBase | None = None,
+        criterion: Literal["max_iter", "loss_rec", "loss_val"] = "max_iter",
     ):
         super().__init__(
             verbose=verbose,
@@ -849,6 +934,7 @@ class SIRT(Solver):
             tolerance=tolerance,
             data_term=data_term,
             data_term_test=data_term_test,
+            criterion=criterion,
         )
         self.regularizer = self._initialize_regularizer(regularizer)
 
@@ -907,6 +993,7 @@ class SIRT(Solver):
         """
         b = np.array(b)
 
+        require_residual = self._check_require_residual(b_test_mask)
         b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
 
         try:
@@ -926,15 +1013,17 @@ class SIRT(Solver):
         else:
             x = np.array(x0).copy()
 
+        best_x = x
+
         self.data_term.assign_data(b, sigma)
 
         info = SolutionInfo(self.info(), max_iterations=iterations, tolerance=self.tolerance)
 
-        if b_test_mask is not None or self.tolerance is not None:
+        if require_residual:
             Ax = A(x)
 
             res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
-            info.residual0 = self.data_term.compute_residual_norm(res_0)
+            info.set_residual_rec(self.data_term.compute_residual_norm(res_0))
 
             if b_test_mask is not None:
                 if self.data_term_test.background != self.data_term.background:
@@ -943,7 +1032,7 @@ class SIRT(Solver):
                 self.data_term_test.assign_data(b, sigma)
 
                 res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
+                info.set_residual_val(self.data_term_test.compute_residual_norm(res_test_0))
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
@@ -954,14 +1043,14 @@ class SIRT(Solver):
             Ax = A(x)
             res = self.data_term.compute_residual(Ax, mask=b_mask)
 
-            if b_test_mask is not None or self.tolerance is not None:
-                info.residuals[ii] = self.data_term.compute_residual_norm(res)
+            if require_residual:
+                info.set_residual_rec(self.data_term.compute_residual_norm(res))
 
                 if b_test_mask is not None:
                     res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                    info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test)
+                    info.set_residual_val(self.data_term_test.compute_residual_norm(res_test))
 
-                if self.tolerance is not None and self.tolerance > info.residuals[ii]:
+                if self.tolerance is not None and self.tolerance > info.residuals_rec[ii]:
                     if self.verbose:
                         print(f"Residual reached the desired tolerance of {self.tolerance}. Ending iterations..")
                     break
@@ -981,7 +1070,9 @@ class SIRT(Solver):
             if x_mask is not None:
                 x *= x_mask
 
-        return x, info
+            best_x = self._select_best_solution(info, best_x, x)
+
+        return best_x, info
 
 
 class PDHG(Solver):
@@ -1020,6 +1111,7 @@ class PDHG(Solver):
         regularizer: Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None = None,
         data_term: str | data_terms.DataFidelityBase = "l2",
         data_term_test: str | data_terms.DataFidelityBase | None = None,
+        criterion: Literal["max_iter", "loss_rec", "loss_val"] = "max_iter",
     ):
         super().__init__(
             verbose=verbose,
@@ -1028,6 +1120,7 @@ class PDHG(Solver):
             tolerance=tolerance,
             data_term=data_term,
             data_term_test=data_term_test,
+            criterion=criterion,
         )
         self.regularizer = self._initialize_regularizer(regularizer)
 
@@ -1102,6 +1195,7 @@ class PDHG(Solver):
             The reconstruction, and the residuals.
         """
         b = np.array(b)
+        require_residual = self._check_require_residual(b_test_mask)
 
         if precondition:
             try:
@@ -1137,6 +1231,8 @@ class PDHG(Solver):
         x = x0
         x_relax = x.copy()
 
+        best_x = x
+
         self.data_term.assign_data(b, sigma)
         p = self.data_term.initialize_dual()
 
@@ -1144,11 +1240,11 @@ class PDHG(Solver):
 
         info = SolutionInfo(self.info(), max_iterations=iterations, tolerance=self.tolerance)
 
-        if b_test_mask is not None or self.tolerance is not None:
+        if require_residual:
             Ax = A(x)
 
             res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
-            info.residual0 = self.data_term.compute_residual_norm(res_0)
+            info.set_residual_rec(self.data_term.compute_residual_norm(res_0))
 
             if b_test_mask is not None:
                 if self.data_term_test.background != self.data_term.background:
@@ -1157,7 +1253,7 @@ class PDHG(Solver):
                 self.data_term_test.assign_data(b, sigma)
 
                 res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
+                info.set_residual_val(self.data_term_test.compute_residual_norm(res_test_0))
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
@@ -1189,21 +1285,23 @@ class PDHG(Solver):
             x_relax = x_new + (x_new - x)
             x = x_new
 
-            if b_test_mask is not None or self.tolerance is not None:
+            if require_residual:
                 Ax = A(x)
                 res = self.data_term.compute_residual(Ax, mask=b_mask)
-                info.residuals[ii] = self.data_term.compute_residual_norm(res)
+                info.set_residual_rec(self.data_term.compute_residual_norm(res))
 
                 if b_test_mask is not None:
                     res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                    info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test)
+                    info.set_residual_val(self.data_term_test.compute_residual_norm(res_test))
 
-                if self.tolerance is not None and self.tolerance > info.residuals[ii]:
+                if self.tolerance is not None and self.tolerance > info.residuals_rec[ii]:
                     if self.verbose:
                         print(f"Residual reached the desired tolerance of {self.tolerance}. Ending iterations..")
                     break
 
-        return x, info
+            best_x = self._select_best_solution(info, best_x, x)
+
+        return best_x, info
 
 
 class FISTA(Solver):
@@ -1286,6 +1384,7 @@ class FISTA(Solver):
         regularizer: regularizers.BaseRegularizer | None = None,
         data_term: str | data_terms.DataFidelityBase = "l2",
         data_term_test: str | data_terms.DataFidelityBase | None = None,
+        criterion: Literal["max_iter", "loss_rec", "loss_val"] = "max_iter",
         restart_period: int | None = None,
     ):
         super().__init__(
@@ -1295,6 +1394,7 @@ class FISTA(Solver):
             tolerance=tolerance,
             data_term=data_term,
             data_term_test=data_term_test,
+            criterion=criterion,
         )
 
         # Validate and store the (single) regularizer
@@ -1394,6 +1494,7 @@ class FISTA(Solver):
             The reconstruction and associated iteration info.
         """
         b = np.array(b)
+        require_residual = self._check_require_residual(b_test_mask)
 
         if precondition:
             try:
@@ -1443,21 +1544,23 @@ class FISTA(Solver):
         if x_mask is not None:
             x *= x_mask
 
+        best_x = x
+
         # y is the momentum-extrapolated point (Beck–Teboulle notation)
         y = x.copy()
         t = 1.0  # momentum parameter
 
         info = SolutionInfo(self.info(), max_iterations=iterations, tolerance=self.tolerance)
 
-        if b_test_mask is not None or self.tolerance is not None:
+        if require_residual:
             Ax0 = A(x)
 
             res_0 = self.data_term.compute_residual(Ax0, mask=b_mask)
-            info.residual0 = self.data_term.compute_residual_norm(res_0)
+            info.set_residual_rec(self.data_term.compute_residual_norm(res_0))
 
             if b_test_mask is not None:
                 res_test_0 = self.data_term_test.compute_residual(Ax0, mask=b_test_mask)
-                info.residual0_cv = self.data_term_test.compute_residual_norm(res_test_0)
+                info.set_residual_val(self.data_term_test.compute_residual_norm(res_test_0))
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
@@ -1496,18 +1599,20 @@ class FISTA(Solver):
             t = t_new
 
             # --- Residual tracking ---
-            if b_test_mask is not None or self.tolerance is not None:
+            if require_residual:
                 Ax = A(x)
                 res = self.data_term.compute_residual(Ax, mask=b_mask)
-                info.residuals[ii] = self.data_term.compute_residual_norm(res)
+                info.set_residual_rec(self.data_term.compute_residual_norm(res))
 
                 if b_test_mask is not None:
                     res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                    info.residuals_cv[ii] = self.data_term_test.compute_residual_norm(res_test)
+                    info.set_residual_val(self.data_term_test.compute_residual_norm(res_test))
 
-                if self.tolerance is not None and self.tolerance > info.residuals[ii]:
+                if self.tolerance is not None and self.tolerance > info.residuals_rec[ii]:
                     if self.verbose:
                         print(f"Residual reached the desired tolerance of {self.tolerance}. Ending iterations..")
                     break
 
-        return x, info
+            best_x = self._select_best_solution(info, best_x, x)
+
+        return best_x, info
