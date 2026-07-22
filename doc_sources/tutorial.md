@@ -92,6 +92,7 @@ The included solvers are:
 * Simultaneous Algebraic Reconstruction Technique [**SART**](#solvers.SART).
 * Simultaneous Iterative Reconstruction Technique [**SIRT**](#solvers.SIRT).
 * Primal-Dual Hybrid Gradient [**PDHG**](#solvers.PDHG), from Chambolle and Pock.
+* Fast Iterative Shrinkage-Thresholding Algorithm [**FISTA**](#solvers.FISTA), from Beck and Teboulle.
 
 #### FBP
 
@@ -171,6 +172,18 @@ latter impose prior knowledge on the weight given to the data points.
 
 Famous regularizers are the TV-min and wavelet l1-min. They can be found in the
 [](#regularizers) module.
+Here is a simple example of how to add the use of the TV2D regularizer to the
+previous example, using the PDHG solver:
+
+```python
+reg_weight = 1 / 5
+reg_tv = cct.regularizers.Regularizer_TV2D(reg_weight)
+
+solver_pdhg = cct.solvers.PDHG(regularizer=reg_tv)
+
+with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:
+    vol, _ = solver_pdhg(p, sino, iterations=100)
+```
 
 ### Data fidelity terms
 
@@ -184,6 +197,46 @@ the [](#data_terms) module, and they include:
 [`DataFidelity_l1`](#data_terms.DataFidelity_l1)
 * Kullback-Leibler - when dealing with Poisson noise:
 [`DataFidelity_KL`](#data_terms.DataFidelity_KL)
+
+Here is an example of how to use the weighted l2 norm data fidelity term,
+instead of the standard l2 norm:
+
+```python
+sino_weights = np.ones_like(sino)
+data_term_wl2 = cct.data_terms.DataFidelity_wl2(sino_weights)
+
+solver_pdhg = cct.solvers.PDHG(data_term=data_term_wl2)
+
+with cct.projectors.ProjectorUncorrected(vol_shape_xy, angles_rad) as p:
+    vol, _ = solver_pdhg(p, sino, iterations=100)
+```
+
+The weights used in the weighted l2 norm data fidelity term can be computed
+using the functions in the [](#processing.noise) module.
+The module provides two functions to compute the variance of the signal,
+depending on the data acquisition regime:
+
+* The `compute_variance_poisson` computes the variance of a signal subject to Poisson noise
+* The `compute_variance_transmission` computes the variance of a linearized attenuation (transmission) signal.
+
+The weights can then be computed from the variance using the
+`compute_variance_weight` function, which takes the variance as input and
+returns the weights. This function provides the following options:
+
+* Minimum percentile to discard, a mask of valid values
+* Scaling the largest weight to 1
+* Using the standard deviation instead of the variance
+* Scaling the variance over a logarithmic curve
+
+It is also possible to specify a different data term for the validation loss as
+follows:
+
+```python
+data_term_kl = cct.data_terms.DataFidelity_KL()
+data_term_wl2 = cct.data_terms.DataFidelity_wl2(sino_weights)
+
+solver_pdhg = cct.solvers.PDHG(data_term=data_term_kl, data_term_val=data_term_wl2)
+```
 
 ## Attenuation correction
 
@@ -221,10 +274,12 @@ the reader can have a look at the dedicated [geometry page](geometry.md).
 For a in-depth description of the functionality available in the physics module,
 instead, the reader can have a look at the dedicated [physics page](physics_model.md).
 
-## Guided regularization parameter selection
+## Hyperparameter tuning - Guided regularization parameter selection
 
-Regularizer parameter selection can be performed through either
-cross-validation, or the elbow method.
+Regularizer parameter selection (i.e., hyperparameter tuning) can be performed
+through either cross-validation, or the elbow method. We refer to the dedicated
+[parameter tuning](param_tuning.md) tutorial, for an in-depth explanation on how
+to use this functionality.
 
 ## References
 
