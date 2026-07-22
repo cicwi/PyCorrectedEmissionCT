@@ -8,12 +8,12 @@ The objective function can be expressed as the following: $ \min_x \frac{1}{2} \
 
 The module `param_tuning` provides a couple of methods to find the best regularization weight, according to the metrics defined by the user. To work with this module, we need to first define a reconstruction function that accepts the lambda value as input. Depending on the method, the function might also need to accept a data mask, which allows the method to mask certain data points (e.g., the cross-validation method). Here below is an example:
 ```python
-def solve_reg(lam_reg: float, b_test_mask: NDArray | None = None) -> tuple[NDArray, SolutionInfo]:
+def solve_reg(lam_reg: float, b_val_mask: NDArray | None = None) -> tuple[NDArray, SolutionInfo]:
     solver = cct.solvers.PDHG(
-        verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw, leave_progress=False
+        verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_val=data_term_lsw, leave_progress=False
     )
     with cct.projectors.ProjectorUncorrected(ph.shape, angles) as prj:
-        return solver(prj, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, b_test_mask=b_test_mask)
+        return solver(prj, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, b_val_mask=b_val_mask)
 ```
 This function will then be passed to the method of choice to compute the corresponding merit function values. In fact, each method will have a different way of testing the quality of each reconstruction and then select the best one.
 
@@ -123,7 +123,7 @@ err_l1, err_l2 = hpt_cv.compute_reconstruction_error(lams_reg, expected_ph)
 lam_min, _ = hpt_cv.fit_loss_min(lams_reg, f_avgs)
 ```
 
-As mentioned above, the task execution function should accept an extra parameter, which takes the data mask indicating the cross-validation values. This parameter is conventionally called `b_test_mask` for historical reasons. It's name can be changed, provided that it is also passed to the argument `mask_param_name` of the `CrossValidation` class.
+As mentioned above, the task execution function should accept an extra parameter, which takes the data mask indicating the cross-validation values. This parameter is conventionally called `b_val_mask` for historical reasons. It's name can be changed, provided that it is also passed to the argument `mask_param_name` of the `CrossValidation` class.
 
 ![example of cross-validation](images/param-tuning_cross-validation.png)
 
@@ -157,12 +157,12 @@ Thus, the function should be modified as follows:
 ```python
 from copy import deepcopy
 
-def solve_reg(lam_reg: float, b_test_mask: NDArray | None = None) -> tuple[NDArray, SolutionInfo]:
+def solve_reg(lam_reg: float, b_val_mask: NDArray | None = None) -> tuple[NDArray, SolutionInfo]:
     solver = cct.solvers.PDHG(
         verbose=True,
         data_term=deepcopy(data_term_lsw),
         regularizer=reg(lam_reg),
-        data_term_test=deepcopy(data_term_lsw),
+        data_term_val=deepcopy(data_term_lsw),
         leave_progress=False,
     )
     with cct.projectors.ProjectorUncorrected(ph.shape, angles) as prj:
@@ -172,7 +172,7 @@ def solve_reg(lam_reg: float, b_test_mask: NDArray | None = None) -> tuple[NDArr
             iterations,
             x_mask=vol_mask.copy(),
             lower_limit=lower_limit,
-            b_test_mask=b_test_mask.copy()
+            b_val_mask=b_val_mask.copy()
         )
 ```
 
@@ -186,13 +186,21 @@ The initialization function should be a callable that takes the lambda value as 
 def solver_init(lam_reg: float):
     # Using the PDHG solver from Chambolle and Pock
     return cct.solvers.PDHG(
-        verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw, leave_progress=False
+        verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), leave_progress=False
     )
 
+:::{note}
+   You can specify a different data term for the evaluation of the validation loss with `data_term_val`. If not passed, the solvers will use the same data term that is used for the reconstruction loss.
+:::
+
 # Computes the reconstruction for a given solver and a given cross-validation data mask
-def solver_exec(solver, b_test_mask: NDArray | None = None):
+def solver_exec(solver, b_val_mask: NDArray | None = None):
     with cct.projectors.ProjectorUncorrected(ph.shape, angles) as prj:
-        return solver(prj, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, b_test_mask=b_test_mask)
+        return solver(prj, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, b_val_mask=b_val_mask)
+
+:::{note}
+   Version 3.0 changed the parameter `b_test_mask` to `b_val_mask`.
+:::
 
 print("Reconstructing:")
 # Create the regularization weight finding helper object (using cross-validation)

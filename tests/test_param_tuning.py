@@ -110,10 +110,10 @@ def generate_task_exec(phantom, angles, sinogram):
         A function that calls a solver with given parameters.
     """
 
-    def solver_call(solver, b_test_mask=None):
+    def solver_call(solver, b_val_mask=None):
         vol_mask = cct.processing.circular_mask(phantom.shape)
         with cct.projectors.ProjectorUncorrected(phantom.shape, angles) as A:
-            return solver(A, sinogram, 200, x_mask=vol_mask, lower_limit=0, b_test_mask=b_test_mask)
+            return solver(A, sinogram, 200, x_mask=vol_mask, lower_limit=0, b_val_mask=b_val_mask)
 
     return solver_call
 

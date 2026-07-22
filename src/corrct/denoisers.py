@@ -99,26 +99,26 @@ def denoise_image(
     else:
         data_term = data_terms.DataFidelity_wl2(pix_weights)
 
-    def solver_run(lam_reg, b_test_mask: NDArray | None = None) -> tuple[NDArray, solvers.SolutionInfo]:
+    def solver_run(lam_reg, b_val_mask: NDArray | None = None) -> tuple[NDArray, solvers.SolutionInfo]:
         # Using the PDHG solver from Chambolle and Pock
         reg = regularizer(lam_reg)
         solver = solvers.PDHG(
             verbose=verbose,
             data_term=data_term,
             regularizer=reg,
-            data_term_test=data_term,
+            data_term_val=data_term,
             leave_progress=False,
             criterion="loss_val",
         )
 
         x0 = img.copy()
-        if b_test_mask is not None:
+        if b_val_mask is not None:
             med_img = spsig.medfilt2d(img, kernel_size=11)
-            masked_pixels = b_test_mask > 0.5
+            masked_pixels = b_val_mask > 0.5
 
             x0[masked_pixels] = med_img[masked_pixels]
 
-        return solver(op, img, iterations, x0=x0, lower_limit=lower_limit, b_test_mask=b_test_mask)
+        return solver(op, img, iterations, x0=x0, lower_limit=lower_limit, b_val_mask=b_val_mask)
 
     reg_weight = np.array(reg_weight)
     if reg_weight.size > 1:

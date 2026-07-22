@@ -91,40 +91,40 @@ data_term_lsb = cct.data_terms.DataFidelity_l2b(sino_variance)
 data_term_l1b = cct.data_terms.DataFidelity_l1b(sino_variance)
 data_term_hub = cct.data_terms.DataFidelity_Huber(sino_variance)
 
-solver_1 = cct.solvers.PDHG(verbose=True, data_term=data_term_ls, regularizer=reg_1, tolerance=0, data_term_test=data_term_lsw)
+solver_1 = cct.solvers.PDHG(verbose=True, data_term=data_term_ls, regularizer=reg_1, tolerance=0, data_term_val=data_term_lsw)
 solver_2 = cct.solvers.PDHG(
-    verbose=True, data_term=data_term_lsb, regularizer=reg_2, tolerance=0, data_term_test=data_term_lsw
+    verbose=True, data_term=data_term_lsb, regularizer=reg_2, tolerance=0, data_term_val=data_term_lsw
 )
 
 solver_3 = cct.solvers.PDHG(
-    verbose=True, data_term=data_term_lsw, regularizer=reg_3, tolerance=0, data_term_test=data_term_lsw
+    verbose=True, data_term=data_term_lsw, regularizer=reg_3, tolerance=0, data_term_val=data_term_lsw
 )
 solver_4 = cct.solvers.PDHG(
-    verbose=True, data_term=data_term_kl_bck, regularizer=reg_4, tolerance=0, data_term_test=data_term_lsw
+    verbose=True, data_term=data_term_kl_bck, regularizer=reg_4, tolerance=0, data_term_val=data_term_lsw
 )
 
-b_test_mask = np.zeros_like(sino)
+b_val_mask = np.zeros_like(sino)
 num_test_pixels = int(np.ceil(sino.size * 0.05))
 test_pixels = np.random.permutation(sino.size)
 test_pixels = np.unravel_index(test_pixels[:num_test_pixels], sino.shape)
-b_test_mask[test_pixels] = 1
+b_val_mask[test_pixels] = 1
 
 with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:
     print("Reconstructing:")
     (rec_1, info_1) = solver_1(
-        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
+        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_val_mask=b_val_mask
     )
     print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_1))
     (rec_2, info_2) = solver_2(
-        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
+        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_val_mask=b_val_mask
     )
     print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_2))
 
     (rec_3, info_3) = solver_3(
-        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask
+        A, sino_substract, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_val_mask=b_val_mask
     )
     print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_3))
-    (rec_4, info_4) = solver_4(A, sino, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_test_mask=b_test_mask)
+    (rec_4, info_4) = solver_4(A, sino, num_iterations, lower_limit=lower_limit, x_mask=vol_mask, b_val_mask=b_val_mask)
     print("- Phantom power: %g, noise power: %g" % cct.testing.compute_error_power(expected_ph, rec_4))
 
 label_1 = solver_1.info().upper()

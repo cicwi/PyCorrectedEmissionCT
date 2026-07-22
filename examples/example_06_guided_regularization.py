@@ -174,17 +174,21 @@ if __name__ == "__main__":
     def solver_init(lam_reg: float):
         # Using the PDHG solver from Chambolle and Pock
         return cct.solvers.PDHG(
-            verbose=True, data_term=data_term_lsw, regularizer=reg(lam_reg), data_term_test=data_term_lsw, leave_progress=False
+            verbose=True,
+            data_term=data_term_lsw,
+            regularizer=reg(lam_reg),
+            data_term_val=data_term_lsw,
+            leave_progress=False,
         )
 
     # Computes the reconstruction for a given solver and a given cross-validation data mask
-    def solver_exec(solver, b_test_mask: NDArray | None = None) -> tuple[NDArray, SolutionInfo]:
+    def solver_exec(solver, b_val_mask: NDArray | None = None) -> tuple[NDArray, SolutionInfo]:
         with cct.projectors.ProjectorUncorrected(ph.shape, angles) as prj:
-            return solver(prj, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, b_test_mask=b_test_mask)
+            return solver(prj, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit, b_val_mask=b_val_mask)
 
-    def solve_reg(lam_reg: float, b_test_mask: NDArray | None = None) -> tuple[NDArray, SolutionInfo]:
+    def solve_reg(lam_reg: float, b_val_mask: NDArray | None = None) -> tuple[NDArray, SolutionInfo]:
         solver = solver_init(lam_reg)
-        return solver_exec(solver, b_test_mask)
+        return solver_exec(solver, b_val_mask)
 
     print("Reconstructing:")
     # Create the regularization weight finding helper object (using cross-validation)

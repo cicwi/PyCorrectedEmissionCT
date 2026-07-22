@@ -1080,7 +1080,7 @@ class CrossValidation(BaseParameterTuning):
         data_shape: Sequence[int],
         cv_fraction: float | None = 0.1,
         num_averages: int = 5,
-        mask_param_name: str = "b_test_mask",
+        mask_param_name: str = "b_val_mask",
         parallel_eval: Executor | int | bool = True,
         dtype: DTypeLike = np.float32,
         verbose: bool = False,
@@ -1101,7 +1101,7 @@ class CrossValidation(BaseParameterTuning):
         num_averages : int, optional
             Number of averages random leave-out sets to use. The default is 5.
         mask_param_name: str, optional
-            The parameter name in the task execution function that accepts the data masks. The default is "b_test_mask".
+            The parameter name in the task execution function that accepts the data masks. The default is "b_val_mask".
         parallel_eval : Executor | int | bool, optional
             Compute loss and error values in parallel. The default is True.
         dtype : DTypeLike, optional

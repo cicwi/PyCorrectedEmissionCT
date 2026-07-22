@@ -267,8 +267,8 @@ class Solver(ABC):
         The relaxation length. The default is 1.0.
     data_term : str | data_terms.DataFidelityBase, optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : data_terms.DataFidelityBase | None, optional
-        The data fidelity to be used for the test set.
+    data_term_val : data_terms.DataFidelityBase | None, optional
+        The data fidelity to be used for the validation set.
         If None, it will use the same as for the rest of the data.
         The default is None.
     """
@@ -279,6 +279,9 @@ class Solver(ABC):
     tolerance: float | None
     criterion: Literal["max_iter", "loss_rec", "loss_val"]
 
+    data_term: data_terms.DataFidelityBase
+    data_term_val: data_terms.DataFidelityBase
+
     def __init__(
         self,
         verbose: bool = False,
@@ -286,7 +289,7 @@ class Solver(ABC):
         relaxation: float = 1.0,
         tolerance: float | None = None,
         data_term: str | data_terms.DataFidelityBase = "l2",
-        data_term_test: str | data_terms.DataFidelityBase | None = None,
+        data_term_val: str | data_terms.DataFidelityBase | None = None,
         criterion: Literal["max_iter", "loss_rec", "loss_val"] = "max_iter",
     ):
         self.verbose = verbose
@@ -296,11 +299,11 @@ class Solver(ABC):
         self.criterion = criterion
 
         self.data_term = self._initialize_data_fidelity_function(data_term)
-        if data_term_test is None:
-            data_term_test = self.data_term
+        if data_term_val is None:
+            data_term_val = self.data_term
         else:
-            data_term_test = self._initialize_data_fidelity_function(data_term_test)
-        self.data_term_test = cp.deepcopy(data_term_test)
+            data_term_val = self._initialize_data_fidelity_function(data_term_val)
+        self.data_term_val = cp.deepcopy(data_term_val)
 
     def info(self) -> str:
         """
@@ -390,21 +393,21 @@ class Solver(ABC):
 
     @staticmethod
     def _initialize_b_masks(
-        b: NDArrayFloat, b_mask: NDArrayFloat | None, b_test_mask: NDArrayFloat | None
+        b: NDArrayFloat, b_mask: NDArrayFloat | None, b_val_mask: NDArrayFloat | None
     ) -> tuple[NDArrayFloat | None, NDArrayFloat | None]:
-        if b_test_mask is not None:
+        if b_val_mask is not None:
             if b_mask is None:
                 b_mask = np.ones_like(b)
             # As we are being passed a test residual pixel mask, we need
             # to make sure to mask those pixels out from the reconstruction.
             # At the same time, we need to remove any masked pixel from the test count.
-            b_mask, b_test_mask = b_mask * (1 - b_test_mask), b_test_mask * b_mask
-        return (b_mask, b_test_mask)
+            b_mask, b_val_mask = b_mask * (1 - b_val_mask), b_val_mask * b_mask
+        return (b_mask, b_val_mask)
 
-    def _check_require_residual(self, b_test_mask: NDArrayFloat | None) -> bool:
-        if self.criterion.lower() == "loss_val" and b_test_mask is None:
+    def _check_require_residual(self, b_val_mask: NDArrayFloat | None) -> bool:
+        if self.criterion.lower() == "loss_val" and b_val_mask is None:
             raise ValueError("A validation mask is needed, when selecting `criterion`='loss_val'.")
-        return self.tolerance is not None or b_test_mask is not None or self.criterion.lower() in ("loss_rec", "loss_val")
+        return self.tolerance is not None or b_val_mask is not None or self.criterion.lower() in ("loss_rec", "loss_val")
 
     def _select_best_solution(self, info: SolutionInfo, curr_best_x: NDArray, new_x: NDArray) -> NDArray:
         if (
@@ -709,7 +712,7 @@ class MLEM(Solver):
     """
     Initialize the MLEM solver class.
 
-    This class implements the Maximul Likelihood Expectation Maximization (MLEM) algorithm.
+    This class implements the Maximum Likelihood Expectation Maximization (MLEM) algorithm.
 
     Parameters
     ----------
@@ -724,8 +727,8 @@ class MLEM(Solver):
         Regularizer to be used. The default is None.
     data_term : str | data_terms.DataFidelityBase, optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : data_terms.DataFidelityBase | None, optional
-        The data fidelity to be used for the test set.
+    data_term_val : data_terms.DataFidelityBase | None, optional
+        The data fidelity to be used for the validation set.
         If None, it will use the same as for the rest of the data.
         The default is None.
     """
@@ -737,7 +740,7 @@ class MLEM(Solver):
         tolerance: float | None = None,
         regularizer: Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None = None,
         data_term: str | data_terms.DataFidelityBase = "kl",
-        data_term_test: str | data_terms.DataFidelityBase | None = None,
+        data_term_val: str | data_terms.DataFidelityBase | None = None,
         criterion: Literal["max_iter", "loss_rec", "loss_val"] = "max_iter",
     ):
         super().__init__(
@@ -745,7 +748,7 @@ class MLEM(Solver):
             leave_progress=leave_progress,
             tolerance=tolerance,
             data_term=data_term,
-            data_term_test=data_term_test,
+            data_term_val=data_term_val,
             criterion=criterion,
         )
         self.regularizer = self._initialize_regularizer(regularizer)
@@ -759,7 +762,9 @@ class MLEM(Solver):
         str
             info string.
         """
-        return Solver.info(self) + f"(B:{self.data_term.background:g})" if self.data_term.background is not None else ""
+        return (
+            Solver.info(self) + f"(B:{self.data_term.background:g})" if self.data_term.background is not None else ""
+        )
 
     def __call__(  # noqa: C901
         self,
@@ -771,7 +776,7 @@ class MLEM(Solver):
         upper_limit: float | NDArrayFloat | None = None,
         x_mask: NDArrayFloat | None = None,
         b_mask: NDArrayFloat | None = None,
-        b_test_mask: NDArrayFloat | None = None,
+        b_val_mask: NDArrayFloat | None = None,
     ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the MLEM algorithm.
@@ -794,8 +799,8 @@ class MLEM(Solver):
             Solution mask. The default is None.
         b_mask : NDArrayFloat | None, optional
             Data mask. The default is None.
-        b_test_mask : NDArrayFloat | None, optional
-            Test data mask. The default is None.
+        b_val_mask : NDArrayFloat | None, optional
+            Validation data mask. The default is None.
 
         Returns
         -------
@@ -804,8 +809,8 @@ class MLEM(Solver):
         """
         b = np.array(b)
 
-        require_residual = self._check_require_residual(b_test_mask)
-        b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
+        require_residual = self._check_require_residual(b_val_mask)
+        b_mask, b_val_mask = self._initialize_b_masks(b, b_mask, b_val_mask)
 
         # Back-projection diagonal re-scaling
         b_ones = np.ones_like(b)
@@ -837,14 +842,16 @@ class MLEM(Solver):
         if require_residual:
             Ax = A(x)
 
-            if b_test_mask is not None:
-                if self.data_term_test.background != self.data_term.background:
-                    print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
-                    self.data_term_test.background = self.data_term.background
-                self.data_term_test.assign_data(b)
+            if b_val_mask is not None:
+                if self.data_term_val.background != self.data_term.background:
+                    print(
+                        "WARNING - the data_term and and data_term_val should have the same background. Making them equal."
+                    )
+                    self.data_term_val.background = self.data_term.background
+                self.data_term_val.assign_data(b)
 
-                res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                info.set_residual_val(self.data_term_test.compute_residual_norm(res_test_0))
+                res_test_0 = self.data_term_val.compute_residual(Ax, mask=b_val_mask)
+                info.set_residual_val(self.data_term_val.compute_residual_norm(res_test_0))
 
             if self.tolerance is not None:
                 res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
@@ -860,9 +867,9 @@ class MLEM(Solver):
             Ax = A(x)
 
             if require_residual:
-                if b_test_mask is not None:
-                    res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                    info.set_residual_val(self.data_term_test.compute_residual_norm(res_test))
+                if b_val_mask is not None:
+                    res_test = self.data_term_val.compute_residual(Ax, mask=b_val_mask)
+                    info.set_residual_val(self.data_term_val.compute_residual_norm(res_test))
 
                 res = self.data_term.compute_residual(Ax, mask=b_mask)
                 info.set_residual_rec(self.data_term.compute_residual_norm(res))
@@ -910,8 +917,8 @@ class SIRT(Solver):
         Regularizer to be used. The default is None.
     data_term : str | data_terms.DataFidelityBase, optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : data_terms.DataFidelityBase | None, optional
-        The data fidelity to be used for the test set.
+    data_term_val : data_terms.DataFidelityBase | None, optional
+        The data fidelity to be used for the validation set.
         If None, it will use the same as for the rest of the data.
         The default is None.
     """
@@ -924,7 +931,7 @@ class SIRT(Solver):
         tolerance: float | None = None,
         regularizer: Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None = None,
         data_term: str | data_terms.DataFidelityBase = "l2",
-        data_term_test: str | data_terms.DataFidelityBase | None = None,
+        data_term_val: str | data_terms.DataFidelityBase | None = None,
         criterion: Literal["max_iter", "loss_rec", "loss_val"] = "max_iter",
     ):
         super().__init__(
@@ -933,7 +940,7 @@ class SIRT(Solver):
             relaxation=relaxation,
             tolerance=tolerance,
             data_term=data_term,
-            data_term_test=data_term_test,
+            data_term_val=data_term_val,
             criterion=criterion,
         )
         self.regularizer = self._initialize_regularizer(regularizer)
@@ -960,7 +967,7 @@ class SIRT(Solver):
         upper_limit: float | NDArrayFloat | None = None,
         x_mask: NDArrayFloat | None = None,
         b_mask: NDArrayFloat | None = None,
-        b_test_mask: NDArrayFloat | None = None,
+        b_val_mask: NDArrayFloat | None = None,
     ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
         Reconstruct the data, using the SIRT algorithm.
@@ -983,8 +990,8 @@ class SIRT(Solver):
             Solution mask. The default is None.
         b_mask : NDArrayFloat | None, optional
             Data mask. The default is None.
-        b_test_mask : NDArrayFloat | None, optional
-            Test data mask. The default is None.
+        b_val_mask : NDArrayFloat | None, optional
+            Validation data mask. The default is None.
 
         Returns
         -------
@@ -993,8 +1000,8 @@ class SIRT(Solver):
         """
         b = np.array(b)
 
-        require_residual = self._check_require_residual(b_test_mask)
-        b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
+        require_residual = self._check_require_residual(b_val_mask)
+        b_mask, b_val_mask = self._initialize_b_masks(b, b_mask, b_val_mask)
 
         try:
             At_abs = A.T.absolute()
@@ -1025,14 +1032,16 @@ class SIRT(Solver):
             res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
             info.set_residual_rec(self.data_term.compute_residual_norm(res_0))
 
-            if b_test_mask is not None:
-                if self.data_term_test.background != self.data_term.background:
-                    print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
-                    self.data_term_test.background = self.data_term.background
-                self.data_term_test.assign_data(b, sigma)
+            if b_val_mask is not None:
+                if self.data_term_val.background != self.data_term.background:
+                    print(
+                        "WARNING - the data_term and and data_term_val should have the same background. Making them equal."
+                    )
+                    self.data_term_val.background = self.data_term.background
+                self.data_term_val.assign_data(b, sigma)
 
-                res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                info.set_residual_val(self.data_term_test.compute_residual_norm(res_test_0))
+                res_test_0 = self.data_term_val.compute_residual(Ax, mask=b_val_mask)
+                info.set_residual_val(self.data_term_val.compute_residual_norm(res_test_0))
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
@@ -1046,9 +1055,9 @@ class SIRT(Solver):
             if require_residual:
                 info.set_residual_rec(self.data_term.compute_residual_norm(res))
 
-                if b_test_mask is not None:
-                    res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                    info.set_residual_val(self.data_term_test.compute_residual_norm(res_test))
+                if b_val_mask is not None:
+                    res_test = self.data_term_val.compute_residual(Ax, mask=b_val_mask)
+                    info.set_residual_val(self.data_term_val.compute_residual_norm(res_test))
 
                 if self.tolerance is not None and self.tolerance > info.residuals_rec[ii]:
                     if self.verbose:
@@ -1096,8 +1105,8 @@ class PDHG(Solver):
         Regularizer to be used. The default is None.
     data_term : str | data_terms.DataFidelityBase, optional
         Data fidelity term for computing the data residual. The default is "l2".
-    data_term_test : data_terms.DataFidelityBase | None, optional
-        The data fidelity to be used for the test set.
+    data_term_val : data_terms.DataFidelityBase | None, optional
+        The data fidelity to be used for the validation set.
         If None, it will use the same as for the rest of the data.
         The default is None.
     """
@@ -1110,7 +1119,7 @@ class PDHG(Solver):
         relaxation: float = 0.95,
         regularizer: Sequence[regularizers.BaseRegularizer] | regularizers.BaseRegularizer | None = None,
         data_term: str | data_terms.DataFidelityBase = "l2",
-        data_term_test: str | data_terms.DataFidelityBase | None = None,
+        data_term_val: str | data_terms.DataFidelityBase | None = None,
         criterion: Literal["max_iter", "loss_rec", "loss_val"] = "max_iter",
     ):
         super().__init__(
@@ -1119,7 +1128,7 @@ class PDHG(Solver):
             relaxation=relaxation,
             tolerance=tolerance,
             data_term=data_term,
-            data_term_test=data_term_test,
+            data_term_val=data_term_val,
             criterion=criterion,
         )
         self.regularizer = self._initialize_regularizer(regularizer)
@@ -1160,7 +1169,7 @@ class PDHG(Solver):
         upper_limit: float | NDArrayFloat | None = None,
         x_mask: NDArrayFloat | None = None,
         b_mask: NDArrayFloat | None = None,
-        b_test_mask: NDArrayFloat | None = None,
+        b_val_mask: NDArrayFloat | None = None,
         precondition: bool = True,
     ) -> tuple[NDArrayFloat, SolutionInfo]:
         """
@@ -1184,8 +1193,8 @@ class PDHG(Solver):
             Solution mask. The default is None.
         b_mask : NDArrayFloat | None, optional
             Data mask. The default is None.
-        b_test_mask : NDArrayFloat | None, optional
-            Test data mask. The default is None.
+        b_val_mask : NDArrayFloat | None, optional
+            Validation data mask. The default is None.
         precondition : bool, optional
             Whether to use the preconditioned version of the algorithm. The default is True.
 
@@ -1195,7 +1204,7 @@ class PDHG(Solver):
             The reconstruction, and the residuals.
         """
         b = np.array(b)
-        require_residual = self._check_require_residual(b_test_mask)
+        require_residual = self._check_require_residual(b_val_mask)
 
         if precondition:
             try:
@@ -1206,7 +1215,7 @@ class PDHG(Solver):
                 print("WARNING: Turning off preconditioning because system matrix does not support absolute")
                 precondition = False
 
-        b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
+        b_mask, b_val_mask = self._initialize_b_masks(b, b_mask, b_val_mask)
 
         if precondition:
             sigma, tau, x_shape, x_dtype = compute_diagonal_scaling(
@@ -1246,14 +1255,16 @@ class PDHG(Solver):
             res_0 = self.data_term.compute_residual(Ax, mask=b_mask)
             info.set_residual_rec(self.data_term.compute_residual_norm(res_0))
 
-            if b_test_mask is not None:
-                if self.data_term_test.background != self.data_term.background:
-                    print("WARNING - the data_term and and data_term_test should have the same background. Making them equal.")
-                    self.data_term_test.background = self.data_term.background
-                self.data_term_test.assign_data(b, sigma)
+            if b_val_mask is not None:
+                if self.data_term_val.background != self.data_term.background:
+                    print(
+                        "WARNING - the data_term and and data_term_val should have the same background. Making them equal."
+                    )
+                    self.data_term_val.background = self.data_term.background
+                self.data_term_val.assign_data(b, sigma)
 
-                res_test_0 = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                info.set_residual_val(self.data_term_test.compute_residual_norm(res_test_0))
+                res_test_0 = self.data_term_val.compute_residual(Ax, mask=b_val_mask)
+                info.set_residual_val(self.data_term_val.compute_residual_norm(res_test_0))
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
@@ -1290,9 +1301,9 @@ class PDHG(Solver):
                 res = self.data_term.compute_residual(Ax, mask=b_mask)
                 info.set_residual_rec(self.data_term.compute_residual_norm(res))
 
-                if b_test_mask is not None:
-                    res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                    info.set_residual_val(self.data_term_test.compute_residual_norm(res_test))
+                if b_val_mask is not None:
+                    res_test = self.data_term_val.compute_residual(Ax, mask=b_val_mask)
+                    info.set_residual_val(self.data_term_val.compute_residual_norm(res_test))
 
                 if self.tolerance is not None and self.tolerance > info.residuals_rec[ii]:
                     if self.verbose:
@@ -1366,8 +1377,8 @@ class FISTA(Solver):
     data_term : str | DataFidelityBase, optional
         Data fidelity. Accepts ``"l2"`` or a ``DataFidelity_l2`` instance.
         The default is ``"l2"``.
-    data_term_test : DataFidelityBase | None, optional
-        Data fidelity for the held-out test set. Defaults to the same as
+    data_term_val : DataFidelityBase | None, optional
+        Data fidelity for the held-out validation set. Defaults to the same as
         ``data_term``.
     restart_period : int | None, optional
         If given, the FISTA momentum sequence is restarted every
@@ -1383,7 +1394,7 @@ class FISTA(Solver):
         relaxation: float = 1.0,
         regularizer: regularizers.BaseRegularizer | None = None,
         data_term: str | data_terms.DataFidelityBase = "l2",
-        data_term_test: str | data_terms.DataFidelityBase | None = None,
+        data_term_val: str | data_terms.DataFidelityBase | None = None,
         criterion: Literal["max_iter", "loss_rec", "loss_val"] = "max_iter",
         restart_period: int | None = None,
     ):
@@ -1393,7 +1404,7 @@ class FISTA(Solver):
             relaxation=relaxation,
             tolerance=tolerance,
             data_term=data_term,
-            data_term_test=data_term_test,
+            data_term_val=data_term_val,
             criterion=criterion,
         )
 
@@ -1456,7 +1467,7 @@ class FISTA(Solver):
         upper_limit: float | NDArrayFloat | None = None,
         x_mask: NDArrayFloat | None = None,
         b_mask: NDArrayFloat | None = None,
-        b_test_mask: NDArrayFloat | None = None,
+        b_val_mask: NDArrayFloat | None = None,
         precondition: bool = True,
     ) -> tuple[NDArrayFloat, SolutionInfo]:
         """Run FISTA.
@@ -1481,8 +1492,8 @@ class FISTA(Solver):
             Binary solution mask. The default is None.
         b_mask : NDArrayFloat | None, optional
             Binary data mask. The default is None.
-        b_test_mask : NDArrayFloat | None, optional
-            Held-out test set mask. The default is None.
+        b_val_mask : NDArrayFloat | None, optional
+            Held-out validation set mask. The default is None.
         precondition : bool, optional
             If ``True`` (default), use SIRT-style diagonal preconditioning.
             If ``False``, use ``tau = relaxation / L`` where
@@ -1494,7 +1505,7 @@ class FISTA(Solver):
             The reconstruction and associated iteration info.
         """
         b = np.array(b)
-        require_residual = self._check_require_residual(b_test_mask)
+        require_residual = self._check_require_residual(b_val_mask)
 
         if precondition:
             try:
@@ -1504,7 +1515,7 @@ class FISTA(Solver):
                 print("WARNING: operator does not support absolute(); falling back to un-preconditioned Lipschitz step size.")
                 precondition = False
 
-        b_mask, b_test_mask = self._initialize_b_masks(b, b_mask, b_test_mask)
+        b_mask, b_val_mask = self._initialize_b_masks(b, b_mask, b_val_mask)
 
         if precondition:
             sigma, tau, x_shape, x_dtype = compute_diagonal_scaling(
@@ -1531,11 +1542,11 @@ class FISTA(Solver):
         # sigma is passed for the test/residual tracking, but is NOT used in the
         # gradient step here; the gradient is computed analytically from compute_residual).
         self.data_term.assign_data(b)
-        if b_test_mask is not None:
-            if self.data_term_test.background != self.data_term.background:
-                print("WARNING - the data_term and data_term_test should have the same background. Making them equal.")
-                self.data_term_test.background = self.data_term.background
-            self.data_term_test.assign_data(b)
+        if b_val_mask is not None:
+            if self.data_term_val.background != self.data_term.background:
+                print("WARNING - the data_term and data_term_val should have the same background. Making them equal.")
+                self.data_term_val.background = self.data_term.background
+            self.data_term_val.assign_data(b)
 
         if x0 is None:
             x = np.zeros(x_shape, dtype=x_dtype)
@@ -1558,9 +1569,9 @@ class FISTA(Solver):
             res_0 = self.data_term.compute_residual(Ax0, mask=b_mask)
             info.set_residual_rec(self.data_term.compute_residual_norm(res_0))
 
-            if b_test_mask is not None:
-                res_test_0 = self.data_term_test.compute_residual(Ax0, mask=b_test_mask)
-                info.set_residual_val(self.data_term_test.compute_residual_norm(res_test_0))
+            if b_val_mask is not None:
+                res_test_0 = self.data_term_val.compute_residual(Ax0, mask=b_val_mask)
+                info.set_residual_val(self.data_term_val.compute_residual_norm(res_test_0))
 
         reg_info = "".join(["-" + r.info().upper() for r in self.regularizer])
         algo_info = f"- Performing {self.upper()}-{self.data_term.upper()}{reg_info} iterations: "
@@ -1604,9 +1615,9 @@ class FISTA(Solver):
                 res = self.data_term.compute_residual(Ax, mask=b_mask)
                 info.set_residual_rec(self.data_term.compute_residual_norm(res))
 
-                if b_test_mask is not None:
-                    res_test = self.data_term_test.compute_residual(Ax, mask=b_test_mask)
-                    info.set_residual_val(self.data_term_test.compute_residual_norm(res_test))
+                if b_val_mask is not None:
+                    res_test = self.data_term_val.compute_residual(Ax, mask=b_val_mask)
+                    info.set_residual_val(self.data_term_val.compute_residual_norm(res_test))
 
                 if self.tolerance is not None and self.tolerance > info.residuals_rec[ii]:
                     if self.verbose:

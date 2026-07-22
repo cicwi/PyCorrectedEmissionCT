@@ -49,7 +49,7 @@ bckgnd_avg = 1e-4  # Background concentrations averages
 beam_energy_keV = 20.0
 
 # Simulate the XRF-CT acquisition data (sinogram)
-(phantoms, vol_att_in, vols_att_out) = cct.testing.phantom_assign_concentration_multi(ph_or, in_energy_keV=beam_energy_keV)
+phantoms, vol_att_in, vols_att_out = cct.testing.phantom_assign_concentration_multi(ph_or, in_energy_keV=beam_energy_keV)
 
 num_vols = len(phantoms) + 1
 sinogram = [np.array([])] * num_vols
@@ -58,12 +58,12 @@ background_avg = np.zeros((num_vols,))
 
 # Compute Fluorescence and Compton projections
 for ii, (ph, vol_att_out) in enumerate(zip(phantoms, vols_att_out)):
-    (sinogram[ii], angles, expected_ph[ii], background_avg[ii]) = cct.testing.create_sino(
+    sinogram[ii], angles, expected_ph[ii], background_avg[ii] = cct.testing.create_sino(
         ph, 30, add_poisson=True, dwell_time_s=dwell_time_s, background_avg=bckgnd_avg
     )
 
 # Compute attenuation projections
-(sinogram_t, flat, angles, expected_ph[-1]) = cct.testing.create_sino_transmission(
+sinogram_t, flat, angles, expected_ph[-1] = cct.testing.create_sino_transmission(
     vol_att_in, 30, add_poisson=True, dwell_time_s=dwell_time_s
 )
 sinogram[-1] = cct.processing.pre.apply_minus_log(cct.processing.pre.apply_flat_field(sinogram_t, flat))
@@ -120,14 +120,14 @@ with cct.projectors.ProjectorUncorrected([*ph_or.shape, num_vols], angles) as A:
     # Solver, which in this case is the PDHG method from Chambolle and Pock
     solver_tv = cct.solvers.PDHG(data_term=data_term_lsw, verbose=True, regularizer=reg_tv)
     # We now run the solver on the noisy image
-    (rec_tvs, _) = solver_tv(A, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit)
+    rec_tvs, _ = solver_tv(A, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit)
 
     # Multi channel TV regularizer - aka TNV
     reg_vtv = cct.regularizers.Regularizer_TNV(lambda_tv)
     # Solver, which in this case is the PDHG method from Chambolle and Pock
     solver_tnv = cct.solvers.PDHG(data_term=data_term_lsw, verbose=True, regularizer=reg_vtv)
     # We now run the solver on the noisy image
-    (rec_tvm, _) = solver_tnv(A, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit)
+    rec_tvm, _ = solver_tnv(A, sino_substr, iterations, x_mask=vol_mask, lower_limit=lower_limit)
 
 rec_wls[-1] *= renorm_transm
 rec_tvs[-1] *= renorm_transm

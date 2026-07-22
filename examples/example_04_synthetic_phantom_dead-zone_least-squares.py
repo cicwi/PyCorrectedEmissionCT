@@ -46,8 +46,8 @@ data_type = np.float32
 ph_or = np.squeeze(phantom.modified_shepp_logan(vol_shape).astype(data_type))
 ph_or = ph_or[:, :, 1]
 
-(ph, vol_att_in, vol_att_out) = cct.testing.phantom_assign_concentration(ph_or)
-(sino, angles, expected_ph, background_avg) = cct.testing.create_sino(
+ph, vol_att_in, vol_att_out = cct.testing.phantom_assign_concentration(ph_or)
+sino, angles, expected_ph, background_avg = cct.testing.create_sino(
     ph, 30, psf=None, add_poisson=True, dwell_time_s=1e-2, background_avg=1e-2, background_std=1e-4
 )
 
