@@ -52,6 +52,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cone_beam_calibration_tutorial.html">Cone-Beam Geometry Calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 </ul>
@@ -92,6 +93,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -461,6 +463,69 @@
 
 
 
+<div class="viewcode-block" id="compute_reconstruction_bias_variance_maps">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.post.html#corrct.processing.post.compute_reconstruction_bias_variance_maps">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_reconstruction_bias_variance_maps</span><span class="p">(</span>
+    <span class="n">reference</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">reconstructions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">realizations_axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pixel-wise bias-variance decomposition of MSE over noise realisations.</span>
+
+<span class="sd">    MSE(x) = Bias^2(x) + Var(x)</span>
+<span class="sd">    where</span>
+<span class="sd">        Bias(x)   = E[x_hat] - x*           (systematic error)</span>
+<span class="sd">        Var(x)    = E[(x_hat - E[x_hat])^2]  (stochastic spread)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    reference : NDArray, shape (D1, D2, ..., Dn)</span>
+<span class="sd">        The noiseless reference image x*.</span>
+<span class="sd">    reconstructions : Sequence[NDArray] | NDArray, shape (R, D1, D2, ..., Dn)</span>
+<span class="sd">        R independent reconstructions of the *same* ground-truth image,</span>
+<span class="sd">        each produced from a different noise realisation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[NDArray, NDArray, NDArray]</span>
+<span class="sd">        A tuple containing:</span>
+<span class="sd">        - mse_map: NDArray, shape (D1, D2, ..., Dn)</span>
+<span class="sd">            The mean squared error map.</span>
+<span class="sd">        - bias_sq_map: NDArray, shape (D1, D2, ..., Dn)</span>
+<span class="sd">            The squared bias map.</span>
+<span class="sd">        - var_map: NDArray, shape (D1, D2, ..., Dn)</span>
+<span class="sd">            The variance map.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    With R the number of realisations the empirical mean converges as 1/sqrt(R),</span>
+<span class="sd">    so R &gt;= 20 is recommended; R &gt;= 50 gives reliable variance estimates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reconstructions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reconstructions</span><span class="p">)</span>
+    <span class="n">recs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">reconstructions</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">realizations_axis</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">ref_ndims</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">ndim</span>
+    <span class="k">if</span> <span class="n">recs</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">ref_ndims</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">refd</span> <span class="o">!=</span> <span class="n">recd</span> <span class="k">for</span> <span class="n">refd</span><span class="p">,</span> <span class="n">recd</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">reference</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">recs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="n">ref_ndims</span><span class="p">:])):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;`reconstructions` needs to be a sequence of arrays, who&#39;s shape is: </span><span class="si">{</span><span class="n">reference</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;, but we got </span><span class="si">{</span><span class="n">recs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="n">ref_ndims</span><span class="p">:]</span><span class="si">}</span><span class="s2">, with a number of arrays equal to: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span><span class="si">}</span><span class="s2"> (full shape: </span><span class="si">{</span><span class="n">reconstructions</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">num_realizations</span> <span class="o">=</span> <span class="n">recs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">num_realizations</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Only </span><span class="si">{</span><span class="n">num_realizations</span><span class="si">}</span><span class="s2"> realisations supplied; bias-variance estimates will be &quot;</span> <span class="s2">&quot;noisy. Recommend R &gt;= 20.&quot;</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">mean_recon</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">recs</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">bias_map</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">mean_recon</span> <span class="o">-</span> <span class="n">reference</span>  <span class="c1"># signed reconstruction bias</span>
+    <span class="n">bias_sq_map</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">bias_map</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">var_map</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">recs</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># unbiased sample variance</span>
+    <span class="n">mse_map</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="p">((</span><span class="n">recs</span> <span class="o">-</span> <span class="n">reference</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mse_map</span><span class="p">,</span> <span class="n">bias_sq_map</span><span class="p">,</span> <span class="n">var_map</span></div>
+
+
+
 <div class="viewcode-block" id="fit_scale_bias">
 <a class="viewcode-back" href="../../../apidocs/corrct/corrct.processing.post.html#corrct.processing.post.fit_scale_bias">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">fit_scale_bias</span><span class="p">(</span><span class="n">img_data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">prj_data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">prj</span><span class="p">:</span> <span class="n">BaseTransform</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
@@ -492,9 +557,11 @@
     <span class="n">prj_1_dot_prj_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prj_1</span> <span class="o">*</span> <span class="n">prj_x</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">obj_func</span><span class="p">(</span><span class="n">ab</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
-        <span class="n">residual</span> <span class="o">=</span> <span class="n">prj</span><span class="p">(</span><span class="n">img_data</span> <span class="o">*</span> <span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">prj_data</span>
-        <span class="n">grad_a</span> <span class="o">=</span> <span class="n">m_y_dot_prj_x</span> <span class="o">+</span> <span class="n">prj_x_2</span> <span class="o">*</span> <span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">prj_1_dot_prj_x</span> <span class="o">*</span> <span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">grad_b</span> <span class="o">=</span> <span class="n">m_y_dot_prj_1</span> <span class="o">+</span> <span class="n">prj_1_2</span> <span class="o">*</span> <span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">prj_1_dot_prj_x</span> <span class="o">*</span> <span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">prj</span><span class="p">(</span><span class="n">img_data</span> <span class="o">*</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">prj_data</span>
+        <span class="n">grad_a</span> <span class="o">=</span> <span class="n">m_y_dot_prj_x</span> <span class="o">+</span> <span class="n">prj_x_2</span> <span class="o">*</span> <span class="n">a</span> <span class="o">+</span> <span class="n">prj_1_dot_prj_x</span> <span class="o">*</span> <span class="n">b</span>
+        <span class="n">grad_b</span> <span class="o">=</span> <span class="n">m_y_dot_prj_1</span> <span class="o">+</span> <span class="n">prj_1_2</span> <span class="o">*</span> <span class="n">b</span> <span class="o">+</span> <span class="n">prj_1_dot_prj_x</span> <span class="o">*</span> <span class="n">a</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">grad_a</span><span class="p">,</span> <span class="n">grad_b</span><span class="p">))</span>
 
     <span class="n">opt_res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="n">obj_func</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">jac</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

@@ -735,4 +735,12 @@ Bases: {py:obj}`corrct.struct_illum.ProjectorGhostImaging`
 
 ````
 
+````{py:method} fbp(bucket_vals: numpy.typing.NDArray, use_lstsq: bool = True, adjust_scaling: bool = False) -> numpy.typing.NDArray
+:canonical: corrct.struct_illum.ProjectorGhostTomography.fbp
+
+```{autodoc2-docstring} corrct.struct_illum.ProjectorGhostTomography.fbp
+```
+
+````
+
 `````

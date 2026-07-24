@@ -13,12 +13,12 @@
 :titlesonly:
 :maxdepth: 1
 
+corrct.physics.attenuation
 corrct.physics.materials
 corrct.physics.phase
+corrct.physics.units
 corrct.physics.xraylib_helper
 corrct.physics.xrf
-corrct.physics.attenuation
-corrct.physics.units
 ```
 
 ## Package Contents

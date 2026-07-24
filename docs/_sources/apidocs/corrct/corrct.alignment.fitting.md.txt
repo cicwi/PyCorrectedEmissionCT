@@ -9,6 +9,22 @@
 
 ## Module Contents
 
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`Trajectory <corrct.alignment.fitting.Trajectory>`
+  - ```{autodoc2-docstring} corrct.alignment.fitting.Trajectory
+    :summary:
+    ```
+* - {py:obj}`Ellipse <corrct.alignment.fitting.Ellipse>`
+  - ```{autodoc2-docstring} corrct.alignment.fitting.Ellipse
+    :summary:
+    ```
+````
+
 ### Functions
 
 ````{list-table}
@@ -57,6 +73,22 @@
     ```
 * - {py:obj}`refine_max_position_2d <corrct.alignment.fitting.refine_max_position_2d>`
   - ```{autodoc2-docstring} corrct.alignment.fitting.refine_max_position_2d
+    :summary:
+    ```
+* - {py:obj}`fit_parabola_min <corrct.alignment.fitting.fit_parabola_min>`
+  - ```{autodoc2-docstring} corrct.alignment.fitting.fit_parabola_min
+    :summary:
+    ```
+* - {py:obj}`fit_ellipse_center <corrct.alignment.fitting.fit_ellipse_center>`
+  - ```{autodoc2-docstring} corrct.alignment.fitting.fit_ellipse_center
+    :summary:
+    ```
+* - {py:obj}`fit_ellipse_parameters <corrct.alignment.fitting.fit_ellipse_parameters>`
+  - ```{autodoc2-docstring} corrct.alignment.fitting.fit_ellipse_parameters
+    :summary:
+    ```
+* - {py:obj}`fit_ellipse <corrct.alignment.fitting.fit_ellipse>`
+  - ```{autodoc2-docstring} corrct.alignment.fitting.fit_ellipse
     :summary:
     ```
 ````
@@ -173,5 +205,177 @@
 :canonical: corrct.alignment.fitting.refine_max_position_2d
 
 ```{autodoc2-docstring} corrct.alignment.fitting.refine_max_position_2d
+```
+````
+
+````{py:function} fit_parabola_min(fun_x: numpy.typing.ArrayLike | numpy.typing.NDArray, fun_vals: numpy.typing.ArrayLike | numpy.typing.NDArray, scale: typing.Literal[linear, log] = 'linear', decimals: int = 2) -> tuple[float, float, tuple[numpy.typing.NDArray, numpy.typing.NDArray] | None]
+:canonical: corrct.alignment.fitting.fit_parabola_min
+
+```{autodoc2-docstring} corrct.alignment.fitting.fit_parabola_min
+```
+````
+
+````{py:function} fit_ellipse_center(prj_points_vu: numpy.typing.NDArray, rescale: bool = True, use_l1_norm: bool = False, decimals: int | None = 2) -> numpy.typing.NDArray
+:canonical: corrct.alignment.fitting.fit_ellipse_center
+
+```{autodoc2-docstring} corrct.alignment.fitting.fit_ellipse_center
+```
+````
+
+````{py:function} fit_ellipse_parameters(prj_points_vu: numpy.typing.NDArray, rescale: bool = True, use_l1_norm: bool = False) -> tuple[float, float, float, float, float]
+:canonical: corrct.alignment.fitting.fit_ellipse_parameters
+
+```{autodoc2-docstring} corrct.alignment.fitting.fit_ellipse_parameters
+```
+````
+
+`````{py:class} Trajectory
+:canonical: corrct.alignment.fitting.Trajectory
+
+Bases: {py:obj}`abc.ABC`
+
+```{autodoc2-docstring} corrct.alignment.fitting.Trajectory
+```
+
+````{py:method} __call__(uus: collections.abc.Sequence[float] | numpy.typing.NDArray) -> collections.abc.Sequence[numpy.typing.NDArray]
+:canonical: corrct.alignment.fitting.Trajectory.__call__
+:abstractmethod:
+
+```{autodoc2-docstring} corrct.alignment.fitting.Trajectory.__call__
+```
+
+````
+
+`````
+
+`````{py:class} Ellipse(a: float, b: float, c: float, u: float, v: float, c_vu: corrct.alignment.fitting.NDArrayFloat)
+:canonical: corrct.alignment.fitting.Ellipse
+
+Bases: {py:obj}`corrct.alignment.fitting.Trajectory`
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.__init__
+```
+
+````{py:attribute} a
+:canonical: corrct.alignment.fitting.Ellipse.a
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.a
+```
+
+````
+
+````{py:attribute} b
+:canonical: corrct.alignment.fitting.Ellipse.b
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.b
+```
+
+````
+
+````{py:attribute} c
+:canonical: corrct.alignment.fitting.Ellipse.c
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.c
+```
+
+````
+
+````{py:attribute} u
+:canonical: corrct.alignment.fitting.Ellipse.u
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.u
+```
+
+````
+
+````{py:attribute} v
+:canonical: corrct.alignment.fitting.Ellipse.v
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.v
+```
+
+````
+
+````{py:attribute} c_vu
+:canonical: corrct.alignment.fitting.Ellipse.c_vu
+:type: corrct.alignment.fitting.NDArrayFloat
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.c_vu
+```
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: corrct.alignment.fitting.Ellipse.__repr__
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.__repr__
+```
+
+````
+
+````{py:property} extremes_u
+:canonical: corrct.alignment.fitting.Ellipse.extremes_u
+:type: tuple[float, float]
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.extremes_u
+```
+
+````
+
+````{py:property} center_vu
+:canonical: corrct.alignment.fitting.Ellipse.center_vu
+:type: numpy.typing.NDArray
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.center_vu
+```
+
+````
+
+````{py:property} parameters
+:canonical: corrct.alignment.fitting.Ellipse.parameters
+:type: tuple[float, float, float, float, float]
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.parameters
+```
+
+````
+
+````{py:method} __call__(uus: numpy.typing.ArrayLike | numpy.typing.NDArray) -> collections.abc.Sequence[numpy.typing.NDArray]
+:canonical: corrct.alignment.fitting.Ellipse.__call__
+
+```{autodoc2-docstring} corrct.alignment.fitting.Ellipse.__call__
+```
+
+````
+
+`````
+
+````{py:function} fit_ellipse(prj_points_vu: numpy.typing.ArrayLike | numpy.typing.NDArray, rescale: bool = True, use_l1_norm: bool = False) -> corrct.alignment.fitting.Ellipse
+:canonical: corrct.alignment.fitting.fit_ellipse
+
+```{autodoc2-docstring} corrct.alignment.fitting.fit_ellipse
 ```
 ````

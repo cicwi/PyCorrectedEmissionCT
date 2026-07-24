@@ -24,8 +24,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Changelog" href="../../changelog.html" />
-    <link rel="prev" title="corrct.testing" href="corrct.testing.html" /> 
+    <link rel="next" title="corrct.testing" href="corrct.testing.html" />
+    <link rel="prev" title="corrct.solvers" href="corrct.solvers.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -55,22 +55,23 @@
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cone_beam_calibration_tutorial.html">Cone-Beam Geometry Calibration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="corrct.html#submodules">Submodules</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="corrct.regularizers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.regularizers</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="corrct.projectors.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.projectors</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct._projector_backends.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct._projector_backends</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="corrct.param_tuning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.data_terms.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.data_terms</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.denoisers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.denoisers</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.filters.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.filters</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.models.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.models</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.operators.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.operators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.param_tuning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.projectors.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.projectors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.regularizers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.regularizers</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.solvers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.solvers</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="corrct.testing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.struct_illum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.testing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
@@ -876,6 +877,22 @@ The list of bucket values.</p>
 Back-projected volume.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.struct_illum.ProjectorGhostTomography.fbp">
+<span class="sig-name descname"><span class="pre">fbp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_lstsq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjust_scaling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/struct_illum.html#ProjectorGhostTomography.fbp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.struct_illum.ProjectorGhostTomography.fbp" title="Link to this definition"></a></dt>
+<dd><p>Compute cross-correlation / FBP reconstruction of the bucket values.</p>
+<p class="rubric" id="id73">Parameters</p>
+<p>bucket_vals : NDArray
+The bucket vales to reconstruct.
+use_lstsq : bool, optional
+If True, uses least squares for reconstruction, by default True.
+adjust_scaling : bool, optional
+If True, adjusts scaling of the reconstructed image, to account for the intensity loss, by default False.</p>
+<p class="rubric" id="id74">Returns</p>
+<p>NDArray
+The reconstructed image.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -886,8 +903,8 @@ Back-projected volume.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="corrct.testing.html" class="btn btn-neutral float-left" title="corrct.testing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../changelog.html" class="btn btn-neutral float-right" title="Changelog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="corrct.solvers.html" class="btn btn-neutral float-left" title="corrct.solvers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.testing.html" class="btn btn-neutral float-right" title="corrct.testing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -52,6 +52,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cone_beam_calibration_tutorial.html">Cone-Beam Geometry Calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
@@ -102,7 +103,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTypeLike</span><span class="p">,</span> <span class="n">NDArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">operators</span><span class="p">,</span> <span class="n">processing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProjectorOperator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.processing.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">lines_intersection</span><span class="p">,</span> <span class="n">norm_cross_corr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.processing.pre</span><span class="w"> </span><span class="kn">import</span> <span class="n">bin_imgs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrct.solvers</span><span class="w"> </span><span class="kn">import</span> <span class="n">FBP</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pt</span>
@@ -203,8 +207,8 @@
 
     <span class="n">resolutions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">mask</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">masks</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Computing auto-correlations&quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">verbose</span><span class="p">)):</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">auto_corr</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">norm_cross_corr</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">point</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">lines_intersection</span><span class="p">(</span><span class="n">auto_corr</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">auto_corr</span> <span class="o">=</span> <span class="n">norm_cross_corr</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="n">lines_intersection</span><span class="p">(</span><span class="n">auto_corr</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span>
         <span class="n">resolutions</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">point</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
 
     <span class="n">res_mean</span> <span class="o">=</span> <span class="n">resolutions</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
@@ -452,8 +456,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">new_masks</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-        <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">pre</span><span class="o">.</span><span class="n">bin_imgs</span><span class="p">(</span><span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">binning</span><span class="p">)</span>
-        <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_dec</span> <span class="o">=</span> <span class="n">processing</span><span class="o">.</span><span class="n">pre</span><span class="o">.</span><span class="n">bin_imgs</span><span class="p">(</span><span class="n">new_masks</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">binning</span><span class="p">)</span>
+        <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span> <span class="o">=</span> <span class="n">bin_imgs</span><span class="p">(</span><span class="n">new_masks</span><span class="o">.</span><span class="n">masks_enc</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">binning</span><span class="p">)</span>
+        <span class="n">new_masks</span><span class="o">.</span><span class="n">masks_dec</span> <span class="o">=</span> <span class="n">bin_imgs</span><span class="p">(</span><span class="n">new_masks</span><span class="o">.</span><span class="n">masks_dec</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">binning</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">new_masks</span></div>
 
@@ -1021,7 +1025,7 @@
 
 <div class="viewcode-block" id="ProjectorGhostImaging">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ProjectorGhostImaging</span><span class="p">(</span><span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProjectorGhostImaging</span><span class="p">(</span><span class="n">ProjectorOperator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Projector class for the ghost imaging reconstructions.&quot;&quot;&quot;</span>
 
     <span class="n">mc</span><span class="p">:</span> <span class="n">MaskCollection</span>
@@ -1232,11 +1236,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ProjectorGhostTomography</span><span class="p">(</span><span class="n">ProjectorGhostImaging</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Ghost tomography projector.&quot;&quot;&quot;</span>
 
-    <span class="n">tomo_proj</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span>
+    <span class="n">tomo_proj</span><span class="p">:</span> <span class="n">ProjectorOperator</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">mask_collection</span><span class="p">:</span> <span class="n">MaskCollection</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tomo_proj</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">ProjectorOperator</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;torch&quot;</span>
-    <span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_collection</span><span class="p">:</span> <span class="n">MaskCollection</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tomo_proj</span><span class="p">:</span> <span class="n">ProjectorOperator</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;torch&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mask_collection</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
 
         <span class="n">tomo_prj_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">tomo_proj</span><span class="o">.</span><span class="n">dir_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">tomo_proj</span><span class="o">.</span><span class="n">dir_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
@@ -1287,6 +1289,31 @@
         <span class="n">imgs_wvu</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">bucket_vals</span><span class="p">)</span>
         <span class="n">imgs_vwu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">imgs_wvu</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tomo_proj</span><span class="o">.</span><span class="n">bp</span><span class="p">(</span><span class="n">imgs_vwu</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProjectorGhostTomography.fbp">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostTomography.fbp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fbp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">use_lstsq</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">adjust_scaling</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute cross-correlation / FBP reconstruction of the bucket values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        bucket_vals : NDArray</span>
+<span class="sd">            The bucket vales to reconstruct.</span>
+<span class="sd">        use_lstsq : bool, optional</span>
+<span class="sd">            If True, uses least squares for reconstruction, by default True.</span>
+<span class="sd">        adjust_scaling : bool, optional</span>
+<span class="sd">            If True, adjusts scaling of the reconstructed image, to account for the intensity loss, by default False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NDArray</span>
+<span class="sd">            The reconstructed image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">imgs_wvu</span> <span class="o">=</span> <span class="p">[</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fbp</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">use_lstsq</span><span class="p">,</span> <span class="n">adjust_scaling</span><span class="p">)</span> <span class="k">for</span> <span class="n">bs</span> <span class="ow">in</span> <span class="n">bucket_vals</span><span class="p">]</span>
+        <span class="n">imgs_vwu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">imgs_wvu</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">solver_fbp</span> <span class="o">=</span> <span class="n">FBP</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">solver_fbp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tomo_proj</span><span class="p">,</span> <span class="n">imgs_vwu</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

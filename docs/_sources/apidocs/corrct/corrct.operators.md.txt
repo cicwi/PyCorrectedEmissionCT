@@ -761,7 +761,7 @@ Bases: {py:obj}`corrct.operators.BaseTransform`
 
 `````
 
-`````{py:class} TransformSVD(x_shape: numpy.typing.ArrayLike, axes_rows: collections.abc.Sequence[int] | numpy.typing.NDArray = (0, ), axes_cols: collections.abc.Sequence[int] | numpy.typing.NDArray = (-1, ), rescale: bool = False)
+`````{py:class} TransformSVD(x_shape: numpy.typing.ArrayLike, axes_rows: int | collections.abc.Sequence[int] | numpy.typing.NDArray = (0, ), axes_cols: int | collections.abc.Sequence[int] | numpy.typing.NDArray = (-1, ), rescale: bool = False)
 :canonical: corrct.operators.TransformSVD
 
 Bases: {py:obj}`corrct.operators.BaseTransform`

@@ -1,0 +1,424 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>corrct.alignment.cone_beam &mdash; PyCorrectedEmissionCT  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="corrct.alignment.markers" href="corrct.alignment.markers.html" />
+    <link rel="prev" title="corrct.alignment.fitting" href="corrct.alignment.fitting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PyCorrectedEmissionCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">PyCorrectedEmissionCT (corrct)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial (basics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Reconstruction geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../physics_model.html">Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cone_beam_calibration_tutorial.html">Cone-Beam Geometry Calibration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="corrct.processing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.processing</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="corrct.alignment.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.physics.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.physics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyCorrectedEmissionCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a></li>
+          <li class="breadcrumb-item"><a href="corrct.alignment.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment.cone_beam</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/apidocs/corrct/corrct.alignment.cone_beam.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="module-corrct.alignment.cone_beam">
+<span id="corrct-alignment-cone-beam"></span><h1><a class="reference internal" href="#module-corrct.alignment.cone_beam" title="corrct.alignment.cone_beam"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.alignment.cone_beam</span></code></a><a class="headerlink" href="#module-corrct.alignment.cone_beam" title="Link to this heading"></a></h1>
+<p>Calibrate cone-beam reconstruction geometry.</p>
+<p>&#64;author: Nicola VIGANÒ, ESRF - The European Synchrotron, Grenoble, France,
+and CEA-IRIG, Grenoble, France</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.cone_beam.ConeBeamGeometry" title="corrct.alignment.cone_beam.ConeBeamGeometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConeBeamGeometry</span></code></a></p></td>
+<td><p>Store the acquisition geometry parameters, used for creating reconstruction geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.cone_beam.FitConeBeamGeometry" title="corrct.alignment.cone_beam.FitConeBeamGeometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FitConeBeamGeometry</span></code></a></p></td>
+<td><p>Cone-beam geometry calibration object.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.cone_beam._class_to_json" title="corrct.alignment.cone_beam._class_to_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_class_to_json</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.cone_beam._get_rot_axis_angle_deg" title="corrct.alignment.cone_beam._get_rot_axis_angle_deg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_rot_axis_angle_deg</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.cone_beam.tune_acquisition_geometry" title="corrct.alignment.cone_beam.tune_acquisition_geometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tune_acquisition_geometry</span></code></a></p></td>
+<td><p>Tune the acquisition geometry, based on calibration data self-consistency.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam._class_to_json">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.cone_beam.</span></span><span class="sig-name descname"><span class="pre">_class_to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#_class_to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam._class_to_json" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam._get_rot_axis_angle_deg">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.cone_beam.</span></span><span class="sig-name descname"><span class="pre">_get_rot_axis_angle_deg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center_1_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_2_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.DTypeLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">np.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#_get_rot_axis_angle_deg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam._get_rot_axis_angle_deg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.alignment.cone_beam.</span></span><span class="sig-name descname"><span class="pre">ConeBeamGeometry</span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#ConeBeamGeometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry" title="Link to this definition"></a></dt>
+<dd><p>Store the acquisition geometry parameters, used for creating reconstruction geometries.</p>
+<p>A description of the geometry / meaning of the fields can be found here:</p>
+<ul class="simple">
+<li><p>Noo, F., Clackdoyle, R., Mennessier, C., White, T. A. &amp; Roney, T. J. (2000). Phys. Med. Biol. 45, 3489–3508.
+doi: 10.1088/0031-9155/45/11/327</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.theta_deg">
+<span class="sig-name descname"><span class="pre">theta_deg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.theta_deg" title="Link to this definition"></a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.phi_deg">
+<span class="sig-name descname"><span class="pre">phi_deg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.phi_deg" title="Link to this definition"></a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.eta_deg">
+<span class="sig-name descname"><span class="pre">eta_deg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.eta_deg" title="Link to this definition"></a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.D_pix">
+<span class="sig-name descname"><span class="pre">D_pix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.D_pix" title="Link to this definition"></a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.R_pix">
+<span class="sig-name descname"><span class="pre">R_pix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.R_pix" title="Link to this definition"></a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.v0_pix">
+<span class="sig-name descname"><span class="pre">v0_pix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.v0_pix" title="Link to this definition"></a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.u0_pix">
+<span class="sig-name descname"><span class="pre">u0_pix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.u0_pix" title="Link to this definition"></a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.det_size_v_pix">
+<span class="sig-name descname"><span class="pre">det_size_v_pix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.det_size_v_pix" title="Link to this definition"></a></dt>
+<dd><p>0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.det_size_u_pix">
+<span class="sig-name descname"><span class="pre">det_size_u_pix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.det_size_u_pix" title="Link to this definition"></a></dt>
+<dd><p>0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.pix_size_um">
+<span class="sig-name descname"><span class="pre">pix_size_um</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.pix_size_um" title="Link to this definition"></a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#ConeBeamGeometry.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return a human readable representation of the object.</p>
+<p class="rubric" id="returns">Returns</p>
+<p>str
+The human readable representation of the object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.get_prj_geom">
+<span class="sig-name descname"><span class="pre">get_prj_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">translate_z_to_center</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="corrct.models.html#corrct.models.ProjectionGeometry" title="corrct.models.ProjectionGeometry"><span class="pre">corrct.models.ProjectionGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#ConeBeamGeometry.get_prj_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.get_prj_geom" title="Link to this definition"></a></dt>
+<dd><p>Create the geometry for reconstruction.</p>
+<p class="rubric" id="id1">Returns</p>
+<p>Dict
+The geometry to be used for reconstruction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.get_vol_geom">
+<span class="sig-name descname"><span class="pre">get_vol_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">up_sampling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="corrct.models.html#corrct.models.VolumeGeometry" title="corrct.models.VolumeGeometry"><span class="pre">corrct.models.VolumeGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#ConeBeamGeometry.get_vol_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.get_vol_geom" title="Link to this definition"></a></dt>
+<dd><p>Generate volume geometry.</p>
+<p class="rubric" id="id2">Returns</p>
+<p>VolumeGeometry
+The volume geometry.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_relative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.alignment.cone_beam.ConeBeamGeometry" title="corrct.alignment.cone_beam.ConeBeamGeometry"><span class="pre">corrct.alignment.cone_beam.ConeBeamGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#ConeBeamGeometry.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.update" title="Link to this definition"></a></dt>
+<dd><p>Return a copy of the original data, with a replaced field.</p>
+<p class="rubric" id="id3">Parameters</p>
+<p>field : str
+The field to replace.
+val : float
+The new value of the field.
+is_relative : bool, optional
+Whether the value is relative to the previous. The default is True.
+decimals : int | None, optional
+The number of decimals (precision) to use for the updated values, by default 3 decimals.</p>
+<p class="rubric" id="id4">Returns</p>
+<p>AcquisitionGeometry
+The updated geometry.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.get_tuning_params">
+<span class="sig-name descname"><span class="pre">get_tuning_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_relative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corrct.alignment.cone_beam.ConeBeamGeometry" title="corrct.alignment.cone_beam.ConeBeamGeometry"><span class="pre">corrct.alignment.cone_beam.ConeBeamGeometry</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#ConeBeamGeometry.get_tuning_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.get_tuning_params" title="Link to this definition"></a></dt>
+<dd><p>Generate sequences of acquisition geometries, with a slight variation over a field’s value.</p>
+<p class="rubric" id="id5">Parameters</p>
+<p>field : str
+The field to tune.
+val_range : Sequence[float] | NDArray
+The value range.
+is_relative : bool, optional
+Whether the values are relative. The default is True.</p>
+<p class="rubric" id="id6">Returns</p>
+<p>Sequence[AcquisitionGeometry]
+The list of new acquisition geometries.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#ConeBeamGeometry.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.to_json" title="Link to this definition"></a></dt>
+<dd><p>Save instance to JSON.</p>
+<p class="rubric" id="id7">Returns</p>
+<p>str
+The JSON representation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.ConeBeamGeometry.from_json">
+<span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_json</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#ConeBeamGeometry.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.ConeBeamGeometry.from_json" title="Link to this definition"></a></dt>
+<dd><p>Load instance from JSON.</p>
+<p class="rubric" id="id8">Parameters</p>
+<p>data : str
+The JSON data to load.</p>
+<p class="rubric" id="raises">Raises</p>
+<p>ValueError
+In case we were to load more than one instance, or different classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.FitConeBeamGeometry">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.alignment.cone_beam.</span></span><span class="sig-name descname"><span class="pre">FitConeBeamGeometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prj_size_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points_ell1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points_ell2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pix_size_um</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_l1_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#FitConeBeamGeometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.FitConeBeamGeometry" title="Link to this definition"></a></dt>
+<dd><p>Cone-beam geometry calibration object.</p>
+<p>This method is based on the following article:</p>
+<ul class="simple">
+<li><p>Noo, F., Clackdoyle, R., Mennessier, C., White, T. A. &amp; Roney, T. J. (2000). Phys. Med. Biol. 45, 3489–3508.
+doi: 10.1088/0031-9155/45/11/327</p></li>
+</ul>
+<p class="rubric">Initialization</p>
+<p>Initialize a cone-beam geometry calibration object.</p>
+<p class="rubric" id="id9">Parameters</p>
+<p>prj_size_vu : Sequence[int] | NDArray
+Size of the projections.
+points_ell1 : Sequence[Sequence[float]] | NDArray
+Points of first ellipse.
+points_ell2 : Sequence[Sequence[float]] | NDArray
+Points of second ellipse.
+points_axis : Sequence[Sequence[float]] | NDArray | None, optional
+Points of the rotation axis, by default None
+pix_size_um : float | None, optional
+The size of the pixel edge in micrometers. Default is None.
+use_l1_norm : bool, optional
+Whether to use the l1-norm or the least-squares (l2-norm) fit for optimization.
+Default is False.
+verbose : bool, optional
+Whether to produce verbose output, by default True
+plot_result : bool, optional
+Whether to plot the results of the geometry, by default False
+It requires verbose to be True.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.FitConeBeamGeometry.acq_geom">
+<span class="sig-name descname"><span class="pre">acq_geom</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#corrct.alignment.cone_beam.ConeBeamGeometry" title="corrct.alignment.cone_beam.ConeBeamGeometry"><span class="pre">corrct.alignment.cone_beam.ConeBeamGeometry</span></a></em><a class="headerlink" href="#corrct.alignment.cone_beam.FitConeBeamGeometry.acq_geom" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.FitConeBeamGeometry._initialize">
+<span class="sig-name descname"><span class="pre">_initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_l1_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#FitConeBeamGeometry._initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.FitConeBeamGeometry._initialize" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.FitConeBeamGeometry.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_D_pix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.alignment.cone_beam.ConeBeamGeometry" title="corrct.alignment.cone_beam.ConeBeamGeometry"><span class="pre">corrct.alignment.cone_beam.ConeBeamGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#FitConeBeamGeometry.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.FitConeBeamGeometry.fit" title="Link to this definition"></a></dt>
+<dd><p>Fit the cone-beam geometry parameters, that will be used for producing the projection geometry.</p>
+<p class="rubric" id="id10">Parameters</p>
+<p>r : float
+The radius of the circle performed by the spheres in pixels.
+e : float, optional
+Either 1 or -1, indicating whether the source is between the circles or not. The default is 1.
+meas_D_pix : float, optional
+The measured source-detector distance in pixels. This parameter is only necessary when the
+computed source-detector distance is invalid or zero.</p>
+<p class="rubric" id="id11">Raises</p>
+<p>ValueError
+In case of flipped ellipses or invalid computed source-detector distance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.FitConeBeamGeometry._fit_distance_det2src">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_fit_distance_det2src</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ellipse_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse" title="corrct.alignment.fitting.Ellipse"><span class="pre">corrct.alignment.fitting.Ellipse</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ellipse_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse" title="corrct.alignment.fitting.Ellipse"><span class="pre">corrct.alignment.fitting.Ellipse</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#FitConeBeamGeometry._fit_distance_det2src"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.FitConeBeamGeometry._fit_distance_det2src" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.cone_beam.tune_acquisition_geometry">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.cone_beam.</span></span><span class="sig-name descname"><span class="pre">tune_acquisition_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acq_geom_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#corrct.alignment.cone_beam.ConeBeamGeometry" title="corrct.alignment.cone_beam.ConeBeamGeometry"><span class="pre">corrct.alignment.cone_beam.ConeBeamGeometry</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angles_rot_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.alignment.cone_beam.ConeBeamGeometry" title="corrct.alignment.cone_beam.ConeBeamGeometry"><span class="pre">corrct.alignment.cone_beam.ConeBeamGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/alignment/cone_beam.html#tune_acquisition_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.cone_beam.tune_acquisition_geometry" title="Link to this definition"></a></dt>
+<dd><p>Tune the acquisition geometry, based on calibration data self-consistency.</p>
+<p class="rubric" id="id12">Parameters</p>
+<p>acq_geom : ConeBeamGeometry
+The cone-beam geometry to refine.
+data : NDArray
+The calibration projection data.
+angles : Sequence[float] | NDArray
+Angles of the projections.
+params : dict[str, Sequence[float] | NDArray]
+Parameters to tune as a dictionary.
+The acquisition parameters to tune are the keys, and their test values are the dictionary values.
+data_mask : NDArray | None, optional
+Pixel mask of the data, to mask out dead or hot pixels. The default is None.
+verbose : bool, optional
+Whether to output verbose information or not, by default False.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="corrct.alignment.fitting.html" class="btn btn-neutral float-left" title="corrct.alignment.fitting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="corrct.alignment.markers.html" class="btn btn-neutral float-right" title="corrct.alignment.markers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Nicola VIGANO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

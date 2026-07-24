@@ -52,6 +52,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cone_beam_calibration_tutorial.html">Cone-Beam Geometry Calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
@@ -251,9 +252,9 @@
         <span class="n">dual</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="BaseRegularizer.apply_proximal">
-<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer.apply_proximal">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseRegularizer.apply_proximal_dual">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer.apply_proximal_dual">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply the proximal operator to the dual in-place.</span>
 
@@ -263,9 +264,36 @@
 <span class="sd">            The dual to be applied the proximal on.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_dual</span><span class="p">(</span><span class="n">dual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_dual</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseRegularizer.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the proximal of the regularizer in the primal domain, in-place.</span>
+
+<span class="sd">        Computes prox_{tau * weight * g}(primal) where g is the regularization</span>
+<span class="sd">        functional, and stores the result back into ``primal``.</span>
+
+<span class="sd">        This method is only implemented for regularizers whose operator is</span>
+<span class="sd">        unitary (or the identity), so that the proximal separates in the primal</span>
+<span class="sd">        domain.  For regularizers based on non-unitary transforms (gradient,</span>
+<span class="sd">        Laplacian, etc.), this raises NotImplementedError — use PDHG instead.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        primal : NDArray</span>
+<span class="sd">            The primal variable to update in-place.</span>
+<span class="sd">        tau : float | NDArray</span>
+<span class="sd">            The proximal step size.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.apply_proximal_primal is not implemented. &quot;</span>
+            <span class="s2">&quot;Only regularizers with a unitary or identity transform support a primal proximal. &quot;</span>
+            <span class="s2">&quot;Use PDHG for this regularizer.&quot;</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BaseRegularizer.compute_update_primal">
@@ -322,9 +350,9 @@
 <span class="sd">    axes : Sequence, optional</span>
 <span class="sd">        The axes over which it computes the gradient. If None, it uses the last 2. The default is None.</span>
 <span class="sd">    pad_mode: str, optional</span>
-<span class="sd">        The padding mode to use for the linear convolution. The default is &quot;edge&quot;.</span>
+<span class="sd">        The padding mode to use. The default is &quot;edge&quot;.</span>
 <span class="sd">    norm : DataFidelityBase, optional</span>
-<span class="sd">        The norm of the regularizer minimization. The default is DataFidelity_l12().</span>
+<span class="sd">        The norm of the regularizer minimization. The default is DataFidelity_l21().</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;grad&quot;</span>
@@ -336,7 +364,7 @@
         <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
         <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l21</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
 
@@ -365,6 +393,25 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span>
         <span class="k">return</span> <span class="n">tau</span></div>
+
+
+<div class="viewcode-block" id="Regularizer_Grad.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_Grad.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Not implemented: gradient-based regularizers (TV, smooth) require solving</span>
+<span class="sd">        a non-trivial optimization subproblem in the primal domain, because the gradient</span>
+<span class="sd">        operator is not unitary. There is no simple closed-form proximal.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            Always raised; use PDHG for gradient-based regularizers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.apply_proximal_primal: gradient-based regularizers &quot;</span>
+            <span class="s2">&quot;(TV, smooth) do not have a simple closed-form primal proximal because &quot;</span>
+            <span class="s2">&quot;TransformGradient is not unitary. Use PDHG for these regularizers.&quot;</span>
+        <span class="p">)</span></div>
 </div>
 
 
@@ -382,7 +429,7 @@
         <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
         <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l21</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
 
@@ -401,7 +448,7 @@
         <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
         <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l21</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
 
@@ -420,7 +467,7 @@
         <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
         <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l21</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span></div>
 
@@ -575,6 +622,23 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span>
         <span class="k">return</span> <span class="n">tau</span></div>
+
+
+<div class="viewcode-block" id="Regularizer_lap.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_lap.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Not implemented: the Laplacian operator is not unitary, so its proximal in the primal</span>
+<span class="sd">        domain has no closed-form solution and requires an iterative solve.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            Always raised; use PDHG for Laplacian regularizers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.apply_proximal_primal: the Laplacian operator is &quot;</span>
+            <span class="s2">&quot;not unitary, so there is no closed-form primal proximal. Use PDHG instead.&quot;</span>
+        <span class="p">)</span></div>
 </div>
 
 
@@ -667,6 +731,36 @@
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1.update_dual">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dual</span> <span class="o">+=</span> <span class="n">primal</span></div>
+
+
+<div class="viewcode-block" id="Regularizer_l1.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply prox_{tau * weight * ||.||_1} in-place via element-wise soft-thresholding.</span>
+
+<span class="sd">        For g(x) = weight * ||x||_1, the proximal is:</span>
+<span class="sd">            prox(x)_i = sign(x_i) * max(|x_i| - tau * weight, 0)</span>
+
+<span class="sd">        The operator is the identity (TransformIdentity), so the proximal</span>
+<span class="sd">        separates element-wise.  When ``upd_mask`` is set, only the elements</span>
+<span class="sd">        inside the mask are thresholded; the rest are left unchanged.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        primal : NDArray</span>
+<span class="sd">            The primal variable to update in-place.</span>
+<span class="sd">        tau : float | NDArray</span>
+<span class="sd">            The proximal step size.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Apply soft-threshold only inside the mask region</span>
+            <span class="n">primal_masked</span> <span class="o">=</span> <span class="n">primal</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_primal</span><span class="p">(</span><span class="n">primal_masked</span><span class="p">,</span> <span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+            <span class="c1"># Blend: inside mask use thresholded value, outside keep original</span>
+            <span class="n">primal</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span>
+            <span class="n">primal</span> <span class="o">+=</span> <span class="n">primal_masked</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">,</span> <span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span></div>
 </div>
 
 
@@ -728,6 +822,7 @@
 <div class="viewcode-block" id="Regularizer_swl.initialize_sigma_tau">
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_swl.initialize_sigma_tau">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize_sigma_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">:</span>
+        <span class="c1"># TODO: Update handling of l21 norm, to use the weighted l21 norm, by passing the weights of the coefficients</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_primal</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformStationaryWavelet</span><span class="p">(</span>
@@ -791,17 +886,85 @@
             <span class="n">dual</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="Regularizer_swl.apply_proximal">
-<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_swl.apply_proximal">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_swl.apply_proximal_dual">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_swl.apply_proximal_dual">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l21</span><span class="p">):</span>
+            <span class="c1"># TODO: Double check this, as I am not sure about the logic here...</span>
             <span class="n">tmp_dual</span> <span class="o">=</span> <span class="n">dual</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
             <span class="n">tmp_dual</span> <span class="o">=</span> <span class="n">tmp_dual</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="o">*</span><span class="n">dual</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">tmp_dual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_dual</span><span class="p">(</span><span class="n">tmp_dual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
             <span class="n">tmp_dual</span> <span class="o">=</span> <span class="n">dual</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">:]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">tmp_dual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_dual</span><span class="p">(</span><span class="n">tmp_dual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_proximal_dual</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Regularizer_swl.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_swl.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply prox_{tau * weight * g} in the primal domain via the wavelet transform.</span>
+
+<span class="sd">        The stationary wavelet transform (with ``normalized=True``) is a tight frame</span>
+<span class="sd">        (Parseval / isometric), so the proximal of weight * ||W .||_1 in the primal</span>
+<span class="sd">        domain is:</span>
+
+<span class="sd">            prox(x) = W^T * prox_{tau * weight * ||.||_1}(W * x)</span>
+
+<span class="sd">        i.e. transform -&gt; soft-threshold coefficients -&gt; inverse transform.</span>
+
+<span class="sd">        When ``normalized=False`` the frame is not tight and this method raises</span>
+<span class="sd">        NotImplementedError, because the correct step sizes per sub-band cannot be</span>
+<span class="sd">        collapsed into a single tau without further information.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        primal : NDArray</span>
+<span class="sd">            The primal variable to update in-place.</span>
+<span class="sd">        tau : float | NDArray</span>
+<span class="sd">            The proximal step size.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            When the wavelet transform is not normalized (not a tight frame).</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            When the regularizer has not been initialized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Regularizer not initialized! Please use method: `initialize_sigma_tau`.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.apply_proximal_primal: the non-normalized &quot;</span>
+                <span class="s2">&quot;stationary wavelet transform is not a tight frame, so the per-sub-band &quot;</span>
+                <span class="s2">&quot;step sizes cannot be collapsed into a single tau. &quot;</span>
+                <span class="s2">&quot;Use normalized=True or switch to PDHG.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Forward stationary wavelet transform -&gt; list of dicts (pywt swtn format)</span>
+        <span class="n">coeffs_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
+        <span class="c1"># coeffs_list[0] is the approximation array; coeffs_list[1..level] are</span>
+        <span class="c1"># dicts of detail sub-bands keyed by orientation label.</span>
+
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>
+
+        <span class="c1"># Threshold detail sub-bands</span>
+        <span class="k">for</span> <span class="n">lvl</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">coeffs_list</span><span class="p">)):</span>
+            <span class="n">c_l</span> <span class="o">=</span> <span class="n">coeffs_list</span><span class="p">[</span><span class="n">lvl</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">c_l</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">coeff</span> <span class="o">=</span> <span class="n">c_l</span><span class="p">[</span><span class="n">lab</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_primal</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+                <span class="n">c_l</span><span class="p">[</span><span class="n">lab</span><span class="p">]</span> <span class="o">=</span> <span class="n">coeff</span>
+
+        <span class="c1"># Optionally threshold the approximation sub-band</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_approx</span><span class="p">:</span>
+            <span class="n">approx</span> <span class="o">=</span> <span class="n">coeffs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_primal</span><span class="p">(</span><span class="n">approx</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+            <span class="n">coeffs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">approx</span>
+
+        <span class="c1"># Inverse stationary wavelet transform back to primal domain</span>
+        <span class="n">primal</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">coeffs_list</span><span class="p">)</span></div>
 </div>
 
 
@@ -840,12 +1003,12 @@
 
 
 
-<div class="viewcode-block" id="Regularizer_l12swl">
-<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l12swl">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Regularizer_l12swl</span><span class="p">(</span><span class="n">Regularizer_swl</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_l21swl">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l21swl">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Regularizer_l21swl</span><span class="p">(</span><span class="n">Regularizer_swl</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain.&quot;&quot;&quot;</span>
 
-    <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l12swl&quot;</span>
+    <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l21swl&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -869,7 +1032,7 @@
             <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">,</span>
             <span class="n">normalized</span><span class="o">=</span><span class="n">normalized</span><span class="p">,</span>
             <span class="n">min_approx</span><span class="o">=</span><span class="n">min_approx</span><span class="p">,</span>
-            <span class="n">norm</span><span class="o">=</span><span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
+            <span class="n">norm</span><span class="o">=</span><span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l21</span><span class="p">(),</span>
         <span class="p">)</span></div>
 
 
@@ -886,13 +1049,13 @@
         <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">huber_size</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
         <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
         <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">huber_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -1021,10 +1184,18 @@
             <span class="n">dual</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="Regularizer_dwl.apply_proximal">
-<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_dwl.apply_proximal">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_dwl.apply_proximal_dual">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_dwl.apply_proximal_dual">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l21</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Regularizer not initialized! Please use method: `initialize_sigma_tau`.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformDecimatedWavelet</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Initialization error: the operator should have been `operators.TransformDecimatedWavelet`,&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; but </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">)</span><span class="si">}</span><span class="s2"> was found.&quot;</span>
+                <span class="p">)</span>
+
             <span class="n">op_wl</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformDecimatedWavelet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span>
             <span class="n">coeffs</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">array_to_coeffs</span><span class="p">(</span><span class="n">dual</span><span class="p">,</span> <span class="n">op_wl</span><span class="o">.</span><span class="n">slicing_info</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">ii_l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)):</span>
@@ -1035,14 +1206,71 @@
                     <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lab</span><span class="p">)</span>
                     <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">det</span><span class="p">)</span>
                 <span class="n">c_ll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">details</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">c_ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_dual</span><span class="p">(</span><span class="n">c_ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">lab</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
                     <span class="n">c_l</span><span class="p">[</span><span class="n">lab</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
                 <span class="n">coeffs</span><span class="p">[</span><span class="n">ii_l</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_l</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_dual</span><span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
             <span class="n">dual</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">coeffs_to_array</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_proximal_dual</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Regularizer_dwl.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_dwl.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply prox_{tau * weight * g} in the primal domain for decimated wavelets.</span>
+
+<span class="sd">        The decimated wavelet transform is orthogonal (W^T W = I), so it is a tight</span>
+<span class="sd">        frame with frame bound 1.  The proximal of weight * ||W .||_1 is therefore:</span>
+
+<span class="sd">            prox(x) = W^T * prox_{tau * weight * ||.||_1}(W * x)</span>
+
+<span class="sd">        i.e. transform -&gt; soft-threshold each sub-band -&gt; inverse transform.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        primal : NDArray</span>
+<span class="sd">            The primal variable to update in-place.</span>
+<span class="sd">        tau : float | NDArray</span>
+<span class="sd">            The proximal step size.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            When the regularizer has not been initialized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Regularizer not initialized! Please use method: `initialize_sigma_tau`.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformDecimatedWavelet</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Initialization error: the operator should have been `operators.TransformDecimatedWavelet`,&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; but </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">)</span><span class="si">}</span><span class="s2"> was found.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">op_wl</span><span class="p">:</span> <span class="n">operators</span><span class="o">.</span><span class="n">TransformDecimatedWavelet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span>
+
+        <span class="c1"># Forward decimated wavelet transform (returns a pywt coefficient list)</span>
+        <span class="n">coeffs_list</span> <span class="o">=</span> <span class="n">op_wl</span><span class="o">.</span><span class="n">direct_dwt</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
+
+        <span class="n">threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Soft-threshold detail sub-bands; optionally suppress approximation</span>
+        <span class="k">for</span> <span class="n">ii_l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">coeffs_list</span><span class="p">)):</span>
+            <span class="n">c_l</span> <span class="o">=</span> <span class="n">coeffs_list</span><span class="p">[</span><span class="n">ii_l</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">c_l</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">coeff</span> <span class="o">=</span> <span class="n">c_l</span><span class="p">[</span><span class="n">lab</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_primal</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+                <span class="n">c_l</span><span class="p">[</span><span class="n">lab</span><span class="p">]</span> <span class="o">=</span> <span class="n">coeff</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_approx</span><span class="p">:</span>
+            <span class="c1"># Also threshold the approximation band</span>
+            <span class="n">approx</span> <span class="o">=</span> <span class="n">coeffs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_primal</span><span class="p">(</span><span class="n">approx</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+            <span class="n">coeffs_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">approx</span>
+
+        <span class="c1"># Inverse transform back to primal domain</span>
+        <span class="n">primal</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">op_wl</span><span class="o">.</span><span class="n">inverse_dwt</span><span class="p">(</span><span class="n">coeffs_list</span><span class="p">)</span></div>
 </div>
 
 
@@ -1063,6 +1291,7 @@
         <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
         <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -1072,17 +1301,18 @@
             <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
             <span class="n">pad_on_demand</span><span class="o">=</span><span class="n">pad_on_demand</span><span class="p">,</span>
             <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">,</span>
+            <span class="n">min_approx</span><span class="o">=</span><span class="n">min_approx</span><span class="p">,</span>
             <span class="n">norm</span><span class="o">=</span><span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l1</span><span class="p">(),</span>
         <span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="Regularizer_l12dwl">
-<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l12dwl">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Regularizer_l12dwl</span><span class="p">(</span><span class="n">Regularizer_dwl</span><span class="p">):</span>
+<div class="viewcode-block" id="Regularizer_l21dwl">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l21dwl">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Regularizer_l21dwl</span><span class="p">(</span><span class="n">Regularizer_dwl</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions.&quot;&quot;&quot;</span>
 
-    <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l12dwl&quot;</span>
+    <span class="n">__reg_name__</span> <span class="o">=</span> <span class="s2">&quot;l21dwl&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1093,6 +1323,7 @@
         <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
         <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_approx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -1102,7 +1333,8 @@
             <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
             <span class="n">pad_on_demand</span><span class="o">=</span><span class="n">pad_on_demand</span><span class="p">,</span>
             <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">,</span>
-            <span class="n">norm</span><span class="o">=</span><span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
+            <span class="n">min_approx</span><span class="o">=</span><span class="n">min_approx</span><span class="p">,</span>
+            <span class="n">norm</span><span class="o">=</span><span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l21</span><span class="p">(),</span>
         <span class="p">)</span></div>
 
 
@@ -1119,11 +1351,11 @@
         <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">huber_size</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
         <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad_on_demand</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
         <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">huber_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">weight</span><span class="p">,</span>
@@ -1190,6 +1422,24 @@
 <a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer_med.update_dual">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dual</span> <span class="o">+=</span> <span class="n">primal</span> <span class="o">-</span> <span class="n">spimg</span><span class="o">.</span><span class="n">median_filter</span><span class="p">(</span><span class="n">primal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filt_size</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseRegularizer_med.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer_med.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Not implemented: the median-filter regularizer has a non-linear, non-unitary</span>
+<span class="sd">        &#39;operator&#39; (x - median_filter(x)), so no closed-form primal proximal exists.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            Always raised; use PDHG for median-filter regularizers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.apply_proximal_primal: the median-filter regularizer &quot;</span>
+            <span class="s2">&quot;uses a non-linear transform, so no closed-form primal proximal exists. &quot;</span>
+            <span class="s2">&quot;Use PDHG instead.&quot;</span>
+        <span class="p">)</span></div>
 </div>
 
 
@@ -1232,7 +1482,7 @@
         <span class="n">axes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">fft_filter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;exp&quot;</span><span class="p">,</span>
         <span class="n">upd_mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l12</span><span class="p">(),</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelityBase</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">DataFidelity_l21</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">upd_mask</span><span class="o">=</span><span class="n">upd_mask</span><span class="p">)</span>
 
@@ -1281,6 +1531,56 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span>
         <span class="k">return</span> <span class="n">tau</span></div>
+
+
+<div class="viewcode-block" id="Regularizer_fft.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_fft.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply prox_{tau * weight * g} in the primal domain for the Fourier regularizer.</span>
+
+<span class="sd">        The DFT (with ortho normalization) is unitary, so the proximal of</span>
+<span class="sd">        weight * ||W .||_{norm} separates in the frequency domain:</span>
+
+<span class="sd">            prox(x) = W^{-1} * prox_{tau * weight * ||.||_norm}(W * x)</span>
+
+<span class="sd">        where W is TransformFourier (ortho-normalized FFT).  The frequency</span>
+<span class="sd">        mask ``self.sigma`` is applied before thresholding (as in the dual),</span>
+<span class="sd">        and masked-out frequencies (sigma == 0, i.e. the DC or low-frequency</span>
+<span class="sd">        components, depending on fft_filter) are left unpenalized.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        primal : NDArray</span>
+<span class="sd">            The primal variable to update in-place.</span>
+<span class="sd">        tau : float | NDArray</span>
+<span class="sd">            The proximal step size.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            When the regularizer has not been initialized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Regularizer not initialized! Please use method: `initialize_sigma_tau`.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Forward ortho-normalized FFT: coeffs shape is (2, *x_shape)</span>
+        <span class="n">coeffs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">primal</span><span class="p">)</span>
+
+        <span class="c1"># Split into penalized (masked) and unpenalized (unmasked) frequencies.</span>
+        <span class="c1"># self.sigma is 1 for penalized frequencies and 0 for unpenalized ones</span>
+        <span class="c1"># (e.g. DC component for fft_filter=&quot;delta&quot;).</span>
+        <span class="n">coeffs_pen</span> <span class="o">=</span> <span class="n">coeffs</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span>  <span class="c1"># frequencies to be thresholded</span>
+        <span class="n">coeffs_free</span> <span class="o">=</span> <span class="n">coeffs</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>  <span class="c1"># frequencies left unchanged</span>
+
+        <span class="c1"># Apply the proximal (soft-threshold) only to the penalized frequencies</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_primal</span><span class="p">(</span><span class="n">coeffs_pen</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+        <span class="c1"># Reconstruct full coefficient array: thresholded + unpenalized</span>
+        <span class="n">coeffs_out</span> <span class="o">=</span> <span class="n">coeffs_pen</span> <span class="o">+</span> <span class="n">coeffs_free</span>
+
+        <span class="c1"># Inverse FFT back to primal domain</span>
+        <span class="n">primal</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">coeffs_out</span><span class="p">)</span></div>
 </div>
 
 
@@ -1377,9 +1677,9 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Regularizer_VTV.apply_proximal">
-<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_VTV.apply_proximal">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Regularizer_VTV.apply_proximal_dual">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_VTV.apply_proximal_dual">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Following assignments will detach the local array from the original one</span>
         <span class="n">dual_tmp</span> <span class="o">=</span> <span class="n">dual</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -1546,9 +1846,9 @@
         <span class="k">return</span> <span class="n">tau</span></div>
 
 
-<div class="viewcode-block" id="Regularizer_vl1wl.apply_proximal">
-<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_vl1wl.apply_proximal">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Regularizer_vl1wl.apply_proximal_dual">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_vl1wl.apply_proximal_dual">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dual_tmp</span> <span class="o">=</span> <span class="n">dual</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1630,6 +1930,25 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_mask</span>
         <span class="k">return</span> <span class="n">tau</span></div>
+
+
+<div class="viewcode-block" id="Regularizer_vSVD.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_vSVD.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Not implemented: the SVD-based regularizer uses a non-unitary, data-dependent transform</span>
+<span class="sd">        (TransformSVD stores U and Vt from the last forward pass), so the proximal cannot be</span>
+<span class="sd">        applied in the primal domain without re-computing the SVD.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            Always raised; use PDHG for SVD-based regularizers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.apply_proximal_primal: the SVD regularizer uses a &quot;</span>
+            <span class="s2">&quot;data-dependent, non-unitary transform. Its primal proximal requires a full SVD &quot;</span>
+            <span class="s2">&quot;recomputation and is not supported. Use PDHG instead.&quot;</span>
+        <span class="p">)</span></div>
 </div>
 
 
@@ -1691,11 +2010,33 @@
         <span class="n">dual</span> <span class="o">+=</span> <span class="n">primal</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span></div>
 
 
-<div class="viewcode-block" id="Constraint_LowerLimit.apply_proximal">
-<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_LowerLimit.apply_proximal">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Constraint_LowerLimit.apply_proximal_dual">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_LowerLimit.apply_proximal_dual">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dual</span><span class="p">[</span><span class="n">dual</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_dual</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Constraint_LowerLimit.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_LowerLimit.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the lower-limit constraint proximal in-place.</span>
+
+<span class="sd">        The proximal of the indicator function of {x &gt;= limit} is the projection</span>
+<span class="sd">        onto the feasible half-space:</span>
+<span class="sd">            prox(x)_i = max(x_i, limit)</span>
+
+<span class="sd">        The step size tau has no effect on an indicator function proximal</span>
+<span class="sd">        (the projection is independent of tau).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        primal : NDArray</span>
+<span class="sd">            The primal variable to update in-place.</span>
+<span class="sd">        tau : float | NDArray</span>
+<span class="sd">            The proximal step size (unused for indicator functions, kept for API consistency).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">fmax</span><span class="p">(</span><span class="n">primal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">primal</span><span class="p">)</span></div>
 </div>
 
 
@@ -1754,11 +2095,33 @@
         <span class="n">dual</span> <span class="o">+=</span> <span class="n">primal</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span></div>
 
 
-<div class="viewcode-block" id="Constraint_UpperLimit.apply_proximal">
-<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_UpperLimit.apply_proximal">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Constraint_UpperLimit.apply_proximal_dual">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_UpperLimit.apply_proximal_dual">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dual</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dual</span><span class="p">[</span><span class="n">dual</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">apply_proximal_dual</span><span class="p">(</span><span class="n">dual</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Constraint_UpperLimit.apply_proximal_primal">
+<a class="viewcode-back" href="../../apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_UpperLimit.apply_proximal_primal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_proximal_primal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the upper-limit constraint proximal in-place.</span>
+
+<span class="sd">        The proximal of the indicator function of {x &lt;= limit} is the projection</span>
+<span class="sd">        onto the feasible half-space:</span>
+<span class="sd">            prox(x)_i = min(x_i, limit)</span>
+
+<span class="sd">        The step size tau has no effect on an indicator function proximal</span>
+<span class="sd">        (the projection is independent of tau).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        primal : NDArray</span>
+<span class="sd">            The primal variable to update in-place.</span>
+<span class="sd">        tau : float | NDArray</span>
+<span class="sd">            The proximal step size (unused for indicator functions, kept for API consistency).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="n">primal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">primal</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

@@ -17,6 +17,7 @@ Contents:
    attenuation_tutorial
    param_tuning
    alignment_tools
+   cone_beam_calibration_tutorial
    apidocs/index
    changelog
 

@@ -23,8 +23,8 @@
   - ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2
     :summary:
     ```
-* - {py:obj}`DataFidelity_wl2 <corrct.data_terms.DataFidelity_wl2>`
-  - ```{autodoc2-docstring} corrct.data_terms.DataFidelity_wl2
+* - {py:obj}`DataFidelity_l2w <corrct.data_terms.DataFidelity_l2w>`
+  - ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2w
     :summary:
     ```
 * - {py:obj}`DataFidelity_l2b <corrct.data_terms.DataFidelity_l2b>`
@@ -39,8 +39,12 @@
   - ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l1
     :summary:
     ```
-* - {py:obj}`DataFidelity_l12 <corrct.data_terms.DataFidelity_l12>`
-  - ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l12
+* - {py:obj}`DataFidelity_l21 <corrct.data_terms.DataFidelity_l21>`
+  - ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21
+    :summary:
+    ```
+* - {py:obj}`DataFidelity_l21w <corrct.data_terms.DataFidelity_l21w>`
+  - ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21w
     :summary:
     ```
 * - {py:obj}`DataFidelity_l1b <corrct.data_terms.DataFidelity_l1b>`
@@ -278,11 +282,20 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} apply_proximal(dual: corrct.data_terms.NDArrayFloat) -> None
-:canonical: corrct.data_terms.DataFidelityBase.apply_proximal
+````{py:method} apply_proximal_dual(dual: corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelityBase.apply_proximal_dual
 :abstractmethod:
 
-```{autodoc2-docstring} corrct.data_terms.DataFidelityBase.apply_proximal
+```{autodoc2-docstring} corrct.data_terms.DataFidelityBase.apply_proximal_dual
+```
+
+````
+
+````{py:method} apply_proximal_primal(primal: corrct.data_terms.NDArrayFloat, tau: float | corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelityBase.apply_proximal_primal
+:abstractmethod:
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelityBase.apply_proximal_primal
 ```
 
 ````
@@ -343,8 +356,16 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````
 
-````{py:method} apply_proximal(dual: corrct.data_terms.NDArrayFloat) -> None
-:canonical: corrct.data_terms.DataFidelity_l2.apply_proximal
+````{py:method} apply_proximal_dual(dual: corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_l2.apply_proximal_dual
+
+````
+
+````{py:method} apply_proximal_primal(primal: corrct.data_terms.NDArrayFloat, tau: float | corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_l2.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2.apply_proximal_primal
+```
 
 ````
 
@@ -355,64 +376,72 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 `````
 
-`````{py:class} DataFidelity_wl2(weights: float | corrct.data_terms.NDArrayFloat, background: float | corrct.data_terms.NDArrayFloat | None = None)
-:canonical: corrct.data_terms.DataFidelity_wl2
+`````{py:class} DataFidelity_l2w(weights: float | corrct.data_terms.NDArrayFloat, background: float | corrct.data_terms.NDArrayFloat | None = None)
+:canonical: corrct.data_terms.DataFidelity_l2w
 
 Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
-```{autodoc2-docstring} corrct.data_terms.DataFidelity_wl2
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2w
 ```
 
 ```{rubric} Initialization
 ```
 
-```{autodoc2-docstring} corrct.data_terms.DataFidelity_wl2.__init__
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2w.__init__
 ```
 
 ````{py:attribute} __data_fidelity_name__
-:canonical: corrct.data_terms.DataFidelity_wl2.__data_fidelity_name__
+:canonical: corrct.data_terms.DataFidelity_l2w.__data_fidelity_name__
 :value: >
-   'wl2'
+   'l2w'
 
-```{autodoc2-docstring} corrct.data_terms.DataFidelity_wl2.__data_fidelity_name__
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2w.__data_fidelity_name__
 ```
 
 ````
 
 ````{py:attribute} sigma1
-:canonical: corrct.data_terms.DataFidelity_wl2.sigma1
+:canonical: corrct.data_terms.DataFidelity_l2w.sigma1
 :type: float | corrct.data_terms.NDArrayFloat
 :value: >
    None
 
-```{autodoc2-docstring} corrct.data_terms.DataFidelity_wl2.sigma1
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2w.sigma1
 ```
 
 ````
 
 ````{py:attribute} weights
-:canonical: corrct.data_terms.DataFidelity_wl2.weights
+:canonical: corrct.data_terms.DataFidelity_l2w.weights
 :type: corrct.data_terms.NDArrayFloat
 :value: >
    None
 
-```{autodoc2-docstring} corrct.data_terms.DataFidelity_wl2.weights
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2w.weights
 ```
 
 ````
 
 ````{py:method} assign_data(data: float | corrct.data_terms.NDArrayFloat | None, sigma: float | corrct.data_terms.NDArrayFloat = 1.0)
-:canonical: corrct.data_terms.DataFidelity_wl2.assign_data
+:canonical: corrct.data_terms.DataFidelity_l2w.assign_data
 
 ````
 
 ````{py:method} compute_residual(proj_primal, mask: float | corrct.data_terms.NDArrayFloat | None = None)
-:canonical: corrct.data_terms.DataFidelity_wl2.compute_residual
+:canonical: corrct.data_terms.DataFidelity_l2w.compute_residual
 
 ````
 
 ````{py:method} compute_residual_norm(dual: float | corrct.data_terms.NDArrayFloat) -> float
-:canonical: corrct.data_terms.DataFidelity_wl2.compute_residual_norm
+:canonical: corrct.data_terms.DataFidelity_l2w.compute_residual_norm
+
+````
+
+````{py:method} apply_proximal_primal(primal: corrct.data_terms.NDArrayFloat, tau: float | corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_l2w.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2w.apply_proximal_primal
+```
 
 ````
 
@@ -485,8 +514,16 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
 ````
 
-````{py:method} apply_proximal(dual: corrct.data_terms.NDArrayFloat) -> None
-:canonical: corrct.data_terms.DataFidelity_l2b.apply_proximal
+````{py:method} apply_proximal_dual(dual: corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_l2b.apply_proximal_dual
+
+````
+
+````{py:method} apply_proximal_primal(primal: corrct.data_terms.NDArrayFloat, tau: float | corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_l2b.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l2b.apply_proximal_primal
+```
 
 ````
 
@@ -497,7 +534,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l2`
 
 `````
 
-`````{py:class} DataFidelity_Huber(local_error, background=None, l2_axis=None)
+`````{py:class} DataFidelity_Huber(local_error: float | corrct.data_terms.NDArrayFloat, background: float | corrct.data_terms.NDArrayFloat | None = None, l2_axis: int | None = None)
 :canonical: corrct.data_terms.DataFidelity_Huber
 
 Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
@@ -532,22 +569,31 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````
 
-````{py:method} assign_data(data, sigma=1.0)
+````{py:method} assign_data(data: corrct.data_terms.NDArrayFloat, sigma: float | corrct.data_terms.NDArrayFloat = 1.0)
 :canonical: corrct.data_terms.DataFidelity_Huber.assign_data
 
 ````
 
-````{py:method} compute_residual_norm(dual)
+````{py:method} compute_residual_norm(dual: corrct.data_terms.NDArrayFloat) -> float
 :canonical: corrct.data_terms.DataFidelity_Huber.compute_residual_norm
 
 ````
 
-````{py:method} apply_proximal(dual)
-:canonical: corrct.data_terms.DataFidelity_Huber.apply_proximal
+````{py:method} apply_proximal_dual(dual: corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_Huber.apply_proximal_dual
 
 ````
 
-````{py:method} compute_primal_dual_gap(proj_primal, dual, mask=None)
+````{py:method} apply_proximal_primal(primal: corrct.data_terms.NDArrayFloat, tau: float | corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_Huber.apply_proximal_primal
+:abstractmethod:
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_Huber.apply_proximal_primal
+```
+
+````
+
+````{py:method} compute_primal_dual_gap(proj_primal: corrct.data_terms.NDArrayFloat, dual: corrct.data_terms.NDArrayFloat, mask: corrct.data_terms.NDArrayFloat | None = None) -> float
 :canonical: corrct.data_terms.DataFidelity_Huber.compute_primal_dual_gap
 
 ````
@@ -578,7 +624,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````
 
-````{py:method} _get_inner_norm(dual)
+````{py:method} _get_inner_norm(dual: corrct.data_terms.NDArrayFloat) -> corrct.data_terms.NDArrayFloat
 :canonical: corrct.data_terms.DataFidelity_l1._get_inner_norm
 
 ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l1._get_inner_norm
@@ -586,7 +632,7 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````
 
-````{py:method} _apply_threshold(dual)
+````{py:method} _apply_threshold(dual: corrct.data_terms.NDArrayFloat)
 :canonical: corrct.data_terms.DataFidelity_l1._apply_threshold
 
 ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l1._apply_threshold
@@ -594,58 +640,142 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````
 
-````{py:method} apply_proximal(dual, weight=1.0)
-:canonical: corrct.data_terms.DataFidelity_l1.apply_proximal
+````{py:method} apply_proximal_dual(dual: corrct.data_terms.NDArrayFloat, weight: float | corrct.data_terms.NDArrayFloat = 1.0)
+:canonical: corrct.data_terms.DataFidelity_l1.apply_proximal_dual
 
 ````
 
-````{py:method} compute_residual_norm(dual)
+````{py:method} apply_proximal_primal(primal: corrct.data_terms.NDArrayFloat, tau: float | corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_l1.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l1.apply_proximal_primal
+```
+
+````
+
+````{py:method} compute_residual_norm(dual: corrct.data_terms.NDArrayFloat) -> float
 :canonical: corrct.data_terms.DataFidelity_l1.compute_residual_norm
 
 ````
 
-````{py:method} compute_primal_dual_gap(proj_primal, dual, mask=None)
+````{py:method} compute_primal_dual_gap(proj_primal: corrct.data_terms.NDArrayFloat, dual: corrct.data_terms.NDArrayFloat, mask: corrct.data_terms.NDArrayFloat | None = None) -> float
 :canonical: corrct.data_terms.DataFidelity_l1.compute_primal_dual_gap
 
 ````
 
 `````
 
-`````{py:class} DataFidelity_l12(background=None, l2_axis=0)
-:canonical: corrct.data_terms.DataFidelity_l12
+`````{py:class} DataFidelity_l21(background: float | corrct.data_terms.NDArrayFloat | None = None, l2_axis: int = 0)
+:canonical: corrct.data_terms.DataFidelity_l21
 
 Bases: {py:obj}`corrct.data_terms.DataFidelity_l1`
 
-```{autodoc2-docstring} corrct.data_terms.DataFidelity_l12
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21
 ```
 
 ```{rubric} Initialization
 ```
 
-```{autodoc2-docstring} corrct.data_terms.DataFidelity_l12.__init__
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21.__init__
 ```
 
 ````{py:attribute} __data_fidelity_name__
-:canonical: corrct.data_terms.DataFidelity_l12.__data_fidelity_name__
+:canonical: corrct.data_terms.DataFidelity_l21.__data_fidelity_name__
 :value: >
    'l12'
 
-```{autodoc2-docstring} corrct.data_terms.DataFidelity_l12.__data_fidelity_name__
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21.__data_fidelity_name__
 ```
 
 ````
 
-````{py:method} _get_inner_norm(dual)
-:canonical: corrct.data_terms.DataFidelity_l12._get_inner_norm
+````{py:attribute} l2_axis
+:canonical: corrct.data_terms.DataFidelity_l21.l2_axis
+:type: int
+:value: >
+   None
 
-```{autodoc2-docstring} corrct.data_terms.DataFidelity_l12._get_inner_norm
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21.l2_axis
+```
+
+````
+
+````{py:method} _get_inner_norm(dual: corrct.data_terms.NDArrayFloat) -> corrct.data_terms.NDArrayFloat
+:canonical: corrct.data_terms.DataFidelity_l21._get_inner_norm
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21._get_inner_norm
+```
+
+````
+
+````{py:method} apply_proximal_primal(primal: corrct.data_terms.NDArrayFloat, tau: float | corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_l21.apply_proximal_primal
+:abstractmethod:
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21.apply_proximal_primal
 ```
 
 ````
 
 `````
 
-`````{py:class} DataFidelity_l1b(local_error, background=None)
+`````{py:class} DataFidelity_l21w(axis_weights: corrct.data_terms.NDArrayFloat, background: float | corrct.data_terms.NDArrayFloat | None = None, l2_axis: int = 0, inner_norm: float = 2)
+:canonical: corrct.data_terms.DataFidelity_l21w
+
+Bases: {py:obj}`corrct.data_terms.DataFidelity_l21`
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21w
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21w.__init__
+```
+
+````{py:attribute} __data_fidelity_name__
+:canonical: corrct.data_terms.DataFidelity_l21w.__data_fidelity_name__
+:value: >
+   'l21w'
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21w.__data_fidelity_name__
+```
+
+````
+
+````{py:attribute} axis_weights
+:canonical: corrct.data_terms.DataFidelity_l21w.axis_weights
+:type: corrct.data_terms.NDArrayFloat
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21w.axis_weights
+```
+
+````
+
+````{py:attribute} inner_norm
+:canonical: corrct.data_terms.DataFidelity_l21w.inner_norm
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21w.inner_norm
+```
+
+````
+
+````{py:method} _get_inner_norm(dual: corrct.data_terms.NDArrayFloat) -> corrct.data_terms.NDArrayFloat
+:canonical: corrct.data_terms.DataFidelity_l21w._get_inner_norm
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l21w._get_inner_norm
+```
+
+````
+
+`````
+
+`````{py:class} DataFidelity_l1b(local_error: float | corrct.data_terms.NDArrayFloat, background: float | corrct.data_terms.NDArrayFloat | None = None)
 :canonical: corrct.data_terms.DataFidelity_l1b
 
 Bases: {py:obj}`corrct.data_terms.DataFidelity_l1`
@@ -680,15 +810,23 @@ Bases: {py:obj}`corrct.data_terms.DataFidelity_l1`
 
 ````
 
-````{py:method} assign_data(data, sigma=1.0)
+````{py:method} assign_data(data: corrct.data_terms.NDArrayFloat, sigma: float | corrct.data_terms.NDArrayFloat = 1.0) -> None
 :canonical: corrct.data_terms.DataFidelity_l1b.assign_data
 
 ````
 
-````{py:method} _apply_threshold(dual)
+````{py:method} _apply_threshold(dual: corrct.data_terms.NDArrayFloat) -> None
 :canonical: corrct.data_terms.DataFidelity_l1b._apply_threshold
 
 ```{autodoc2-docstring} corrct.data_terms.DataFidelity_l1b._apply_threshold
+```
+
+````
+
+````{py:method} apply_proximal_primal(primal: corrct.data_terms.NDArrayFloat, tau: float | corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_l1b.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_l1b.apply_proximal_primal
 ```
 
 ````
@@ -727,29 +865,37 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````
 
-````{py:method} apply_proximal(dual)
-:canonical: corrct.data_terms.DataFidelity_KL.apply_proximal
+````{py:method} apply_proximal_dual(dual: corrct.data_terms.NDArrayFloat)
+:canonical: corrct.data_terms.DataFidelity_KL.apply_proximal_dual
 
 ````
 
-````{py:method} compute_residual(proj_primal, mask=None)
+````{py:method} apply_proximal_primal(primal: corrct.data_terms.NDArrayFloat, tau: float | corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_KL.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_KL.apply_proximal_primal
+```
+
+````
+
+````{py:method} compute_residual(proj_primal: numpy.typing.NDArray, mask: numpy.typing.NDArray | None = None, use_proximal: bool = True) -> corrct.data_terms.NDArrayFloat
 :canonical: corrct.data_terms.DataFidelity_KL.compute_residual
 
 ````
 
-````{py:method} compute_residual_norm(dual)
+````{py:method} compute_residual_norm(dual: corrct.data_terms.NDArrayFloat) -> float
 :canonical: corrct.data_terms.DataFidelity_KL.compute_residual_norm
 
 ````
 
-````{py:method} compute_primal_dual_gap(proj_primal, dual, mask=None)
+````{py:method} compute_primal_dual_gap(proj_primal: corrct.data_terms.NDArrayFloat, dual: corrct.data_terms.NDArrayFloat, mask: corrct.data_terms.NDArrayFloat | None = None)
 :canonical: corrct.data_terms.DataFidelity_KL.compute_primal_dual_gap
 
 ````
 
 `````
 
-`````{py:class} DataFidelity_ln(background=None, ln_axes: collections.abc.Sequence[int] = (1, -1), spectral_norm: corrct.data_terms.DataFidelityBase = DataFidelity_l1())
+`````{py:class} DataFidelity_ln(background: float | corrct.data_terms.NDArrayFloat | None = None, ln_axes: collections.abc.Sequence[int] = (1, -1), spectral_norm: corrct.data_terms.DataFidelityBase = DataFidelity_l1())
 :canonical: corrct.data_terms.DataFidelity_ln
 
 Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
@@ -773,17 +919,37 @@ Bases: {py:obj}`corrct.data_terms.DataFidelityBase`
 
 ````
 
-````{py:method} apply_proximal(dual)
-:canonical: corrct.data_terms.DataFidelity_ln.apply_proximal
+````{py:attribute} ln_axes
+:canonical: corrct.data_terms.DataFidelity_ln.ln_axes
+:type: collections.abc.Sequence[int]
+:value: >
+   None
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_ln.ln_axes
+```
 
 ````
 
-````{py:method} compute_residual_norm(dual)
+````{py:method} apply_proximal_dual(dual: corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_ln.apply_proximal_dual
+
+````
+
+````{py:method} apply_proximal_primal(primal: corrct.data_terms.NDArrayFloat, tau: float | corrct.data_terms.NDArrayFloat) -> None
+:canonical: corrct.data_terms.DataFidelity_ln.apply_proximal_primal
+:abstractmethod:
+
+```{autodoc2-docstring} corrct.data_terms.DataFidelity_ln.apply_proximal_primal
+```
+
+````
+
+````{py:method} compute_residual_norm(dual: corrct.data_terms.NDArrayFloat) -> float
 :canonical: corrct.data_terms.DataFidelity_ln.compute_residual_norm
 
 ````
 
-````{py:method} compute_primal_dual_gap(proj_primal, dual, mask=None)
+````{py:method} compute_primal_dual_gap(proj_primal: corrct.data_terms.NDArrayFloat, dual: corrct.data_terms.NDArrayFloat, mask: corrct.data_terms.NDArrayFloat | None = None)
 :canonical: corrct.data_terms.DataFidelity_ln.compute_primal_dual_gap
 
 ````

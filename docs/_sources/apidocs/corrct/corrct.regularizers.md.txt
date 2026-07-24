@@ -83,8 +83,8 @@
   - ```{autodoc2-docstring} corrct.regularizers.Regularizer_l1swl
     :summary:
     ```
-* - {py:obj}`Regularizer_l12swl <corrct.regularizers.Regularizer_l12swl>`
-  - ```{autodoc2-docstring} corrct.regularizers.Regularizer_l12swl
+* - {py:obj}`Regularizer_l21swl <corrct.regularizers.Regularizer_l21swl>`
+  - ```{autodoc2-docstring} corrct.regularizers.Regularizer_l21swl
     :summary:
     ```
 * - {py:obj}`Regularizer_Hub_swl <corrct.regularizers.Regularizer_Hub_swl>`
@@ -99,8 +99,8 @@
   - ```{autodoc2-docstring} corrct.regularizers.Regularizer_l1dwl
     :summary:
     ```
-* - {py:obj}`Regularizer_l12dwl <corrct.regularizers.Regularizer_l12dwl>`
-  - ```{autodoc2-docstring} corrct.regularizers.Regularizer_l12dwl
+* - {py:obj}`Regularizer_l21dwl <corrct.regularizers.Regularizer_l21dwl>`
+  - ```{autodoc2-docstring} corrct.regularizers.Regularizer_l21dwl
     :summary:
     ```
 * - {py:obj}`Regularizer_Hub_dwl <corrct.regularizers.Regularizer_Hub_dwl>`
@@ -304,10 +304,19 @@ Bases: {py:obj}`abc.ABC`
 
 ````
 
-````{py:method} apply_proximal(dual: numpy.typing.NDArray) -> None
-:canonical: corrct.regularizers.BaseRegularizer.apply_proximal
+````{py:method} apply_proximal_dual(dual: numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.BaseRegularizer.apply_proximal_dual
 
-```{autodoc2-docstring} corrct.regularizers.BaseRegularizer.apply_proximal
+```{autodoc2-docstring} corrct.regularizers.BaseRegularizer.apply_proximal_dual
+```
+
+````
+
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.BaseRegularizer.apply_proximal_primal
+:abstractmethod:
+
+```{autodoc2-docstring} corrct.regularizers.BaseRegularizer.apply_proximal_primal
 ```
 
 ````
@@ -330,7 +339,7 @@ Bases: {py:obj}`abc.ABC`
 
 `````
 
-`````{py:class} Regularizer_Grad(weight: float | numpy.typing.NDArray, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
+`````{py:class} Regularizer_Grad(weight: float | numpy.typing.NDArray, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l21())
 :canonical: corrct.regularizers.Regularizer_Grad
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -359,9 +368,18 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_Grad.apply_proximal_primal
+:abstractmethod:
+
+```{autodoc2-docstring} corrct.regularizers.Regularizer_Grad.apply_proximal_primal
+```
+
+````
+
 `````
 
-`````{py:class} Regularizer_TV1D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
+`````{py:class} Regularizer_TV1D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l21())
 :canonical: corrct.regularizers.Regularizer_TV1D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -387,7 +405,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_TV2D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
+`````{py:class} Regularizer_TV2D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l21())
 :canonical: corrct.regularizers.Regularizer_TV2D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -413,7 +431,7 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 `````
 
-`````{py:class} Regularizer_TV3D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
+`````{py:class} Regularizer_TV3D(weight: float | numpy.typing.NDArray, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l21())
 :canonical: corrct.regularizers.Regularizer_TV3D
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
@@ -598,6 +616,15 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_lap.apply_proximal_primal
+:abstractmethod:
+
+```{autodoc2-docstring} corrct.regularizers.Regularizer_lap.apply_proximal_primal
+```
+
+````
+
 `````
 
 `````{py:class} Regularizer_lap1D(weight, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_mode: str = 'edge', upd_mask: numpy.typing.NDArray | None = None)
@@ -712,6 +739,14 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_l1.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.regularizers.Regularizer_l1.apply_proximal_primal
+```
+
+````
+
 `````
 
 `````{py:class} Regularizer_swl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l1())
@@ -756,8 +791,16 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} apply_proximal(dual: numpy.typing.NDArray) -> None
-:canonical: corrct.regularizers.Regularizer_swl.apply_proximal
+````{py:method} apply_proximal_dual(dual: numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_swl.apply_proximal_dual
+
+````
+
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_swl.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.regularizers.Regularizer_swl.apply_proximal_primal
+```
 
 ````
 
@@ -789,33 +832,33 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_swl`
 
 `````
 
-`````{py:class} Regularizer_l12swl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True)
-:canonical: corrct.regularizers.Regularizer_l12swl
+`````{py:class} Regularizer_l21swl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True)
+:canonical: corrct.regularizers.Regularizer_l21swl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_swl`
 
-```{autodoc2-docstring} corrct.regularizers.Regularizer_l12swl
+```{autodoc2-docstring} corrct.regularizers.Regularizer_l21swl
 ```
 
 ```{rubric} Initialization
 ```
 
-```{autodoc2-docstring} corrct.regularizers.Regularizer_l12swl.__init__
+```{autodoc2-docstring} corrct.regularizers.Regularizer_l21swl.__init__
 ```
 
 ````{py:attribute} __reg_name__
-:canonical: corrct.regularizers.Regularizer_l12swl.__reg_name__
+:canonical: corrct.regularizers.Regularizer_l21swl.__reg_name__
 :value: >
-   'l12swl'
+   'l21swl'
 
-```{autodoc2-docstring} corrct.regularizers.Regularizer_l12swl.__reg_name__
+```{autodoc2-docstring} corrct.regularizers.Regularizer_l21swl.__reg_name__
 ```
 
 ````
 
 `````
 
-`````{py:class} Regularizer_Hub_swl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True, huber_size: int | None = None)
+`````{py:class} Regularizer_Hub_swl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, huber_size: float, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, normalized: bool = False, min_approx: bool = True)
 :canonical: corrct.regularizers.Regularizer_Hub_swl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_swl`
@@ -883,14 +926,22 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} apply_proximal(dual: numpy.typing.NDArray) -> None
-:canonical: corrct.regularizers.Regularizer_dwl.apply_proximal
+````{py:method} apply_proximal_dual(dual: numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_dwl.apply_proximal_dual
+
+````
+
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_dwl.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.regularizers.Regularizer_dwl.apply_proximal_primal
+```
 
 ````
 
 `````
 
-`````{py:class} Regularizer_l1dwl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None)
+`````{py:class} Regularizer_l1dwl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, min_approx: bool = True)
 :canonical: corrct.regularizers.Regularizer_l1dwl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_dwl`
@@ -916,33 +967,33 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_dwl`
 
 `````
 
-`````{py:class} Regularizer_l12dwl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None)
-:canonical: corrct.regularizers.Regularizer_l12dwl
+`````{py:class} Regularizer_l21dwl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, min_approx: bool = True)
+:canonical: corrct.regularizers.Regularizer_l21dwl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_dwl`
 
-```{autodoc2-docstring} corrct.regularizers.Regularizer_l12dwl
+```{autodoc2-docstring} corrct.regularizers.Regularizer_l21dwl
 ```
 
 ```{rubric} Initialization
 ```
 
-```{autodoc2-docstring} corrct.regularizers.Regularizer_l12dwl.__init__
+```{autodoc2-docstring} corrct.regularizers.Regularizer_l21dwl.__init__
 ```
 
 ````{py:attribute} __reg_name__
-:canonical: corrct.regularizers.Regularizer_l12dwl.__reg_name__
+:canonical: corrct.regularizers.Regularizer_l21dwl.__reg_name__
 :value: >
-   'l12dwl'
+   'l21dwl'
 
-```{autodoc2-docstring} corrct.regularizers.Regularizer_l12dwl.__reg_name__
+```{autodoc2-docstring} corrct.regularizers.Regularizer_l21dwl.__reg_name__
 ```
 
 ````
 
 `````
 
-`````{py:class} Regularizer_Hub_dwl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None, huber_size: int | None = None)
+`````{py:class} Regularizer_Hub_dwl(weight: float | numpy.typing.NDArray, wavelet: str, level: int, huber_size: float, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, pad_on_demand: str = 'constant', upd_mask: numpy.typing.NDArray | None = None)
 :canonical: corrct.regularizers.Regularizer_Hub_dwl
 
 Bases: {py:obj}`corrct.regularizers.Regularizer_dwl`
@@ -1010,6 +1061,15 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.BaseRegularizer_med.apply_proximal_primal
+:abstractmethod:
+
+```{autodoc2-docstring} corrct.regularizers.BaseRegularizer_med.apply_proximal_primal
+```
+
+````
+
 `````
 
 `````{py:class} Regularizer_l1med(weight: float | numpy.typing.NDArray, filt_size: int = 3)
@@ -1064,7 +1124,7 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer_med`
 
 `````
 
-`````{py:class} Regularizer_fft(weight: float | numpy.typing.NDArray, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, fft_filter: str = 'exp', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l12())
+`````{py:class} Regularizer_fft(weight: float | numpy.typing.NDArray, ndims: int = 2, axes: collections.abc.Sequence[int] | numpy.typing.NDArray | None = None, fft_filter: str = 'exp', upd_mask: numpy.typing.NDArray | None = None, norm: corrct.data_terms.DataFidelityBase = dt.DataFidelity_l21())
 :canonical: corrct.regularizers.Regularizer_fft
 
 Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
@@ -1090,6 +1150,14 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_fft.initialize_sigma_tau
+
+````
+
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_fft.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.regularizers.Regularizer_fft.apply_proximal_primal
+```
 
 ````
 
@@ -1158,8 +1226,8 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_Grad`
 
 ````
 
-````{py:method} apply_proximal(dual: numpy.typing.NDArray) -> None
-:canonical: corrct.regularizers.Regularizer_VTV.apply_proximal
+````{py:method} apply_proximal_dual(dual: numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_VTV.apply_proximal_dual
 
 ````
 
@@ -1233,8 +1301,8 @@ Bases: {py:obj}`corrct.regularizers.Regularizer_l1swl`
 
 ````
 
-````{py:method} apply_proximal(dual: numpy.typing.NDArray) -> None
-:canonical: corrct.regularizers.Regularizer_vl1wl.apply_proximal
+````{py:method} apply_proximal_dual(dual: numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_vl1wl.apply_proximal_dual
 
 ````
 
@@ -1266,6 +1334,15 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````{py:method} initialize_sigma_tau(primal: numpy.typing.NDArray) -> float | numpy.typing.NDArray
 :canonical: corrct.regularizers.Regularizer_vSVD.initialize_sigma_tau
+
+````
+
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Regularizer_vSVD.apply_proximal_primal
+:abstractmethod:
+
+```{autodoc2-docstring} corrct.regularizers.Regularizer_vSVD.apply_proximal_primal
+```
 
 ````
 
@@ -1313,8 +1390,16 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} apply_proximal(dual: numpy.typing.NDArray) -> None
-:canonical: corrct.regularizers.Constraint_LowerLimit.apply_proximal
+````{py:method} apply_proximal_dual(dual: numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Constraint_LowerLimit.apply_proximal_dual
+
+````
+
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Constraint_LowerLimit.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.regularizers.Constraint_LowerLimit.apply_proximal_primal
+```
 
 ````
 
@@ -1362,8 +1447,16 @@ Bases: {py:obj}`corrct.regularizers.BaseRegularizer`
 
 ````
 
-````{py:method} apply_proximal(dual: numpy.typing.NDArray) -> None
-:canonical: corrct.regularizers.Constraint_UpperLimit.apply_proximal
+````{py:method} apply_proximal_dual(dual: numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Constraint_UpperLimit.apply_proximal_dual
+
+````
+
+````{py:method} apply_proximal_primal(primal: numpy.typing.NDArray, tau: float | numpy.typing.NDArray) -> None
+:canonical: corrct.regularizers.Constraint_UpperLimit.apply_proximal_primal
+
+```{autodoc2-docstring} corrct.regularizers.Constraint_UpperLimit.apply_proximal_primal
+```
 
 ````
 

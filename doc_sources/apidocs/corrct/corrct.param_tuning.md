@@ -500,7 +500,7 @@ Bases: {py:obj}`corrct.param_tuning.BaseParameterTuning`
 
 `````
 
-`````{py:class} CrossValidation(data_shape: collections.abc.Sequence[int], cv_fraction: float | None = 0.1, num_averages: int = 5, mask_param_name: str = 'b_test_mask', parallel_eval: concurrent.futures.Executor | int | bool = True, dtype: numpy.typing.DTypeLike = np.float32, verbose: bool = False, plot_result: bool = False, print_timings: bool = False)
+`````{py:class} CrossValidation(data_shape: collections.abc.Sequence[int], cv_fraction: float | None = 0.1, num_averages: int = 5, mask_param_name: str = 'b_val_mask', parallel_eval: concurrent.futures.Executor | int | bool = True, dtype: numpy.typing.DTypeLike = np.float32, verbose: bool = False, plot_result: bool = False, print_timings: bool = False)
 :canonical: corrct.param_tuning.CrossValidation
 
 Bases: {py:obj}`corrct.param_tuning.BaseParameterTuning`

@@ -52,6 +52,7 @@
 <li class="toctree-l1"><a class="reference internal" href="attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cone_beam_calibration_tutorial.html">Cone-Beam Geometry Calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
@@ -122,12 +123,18 @@
         <li><a href="apidocs/corrct/corrct.processing.html#corrct.processing.__author__">(in module corrct.processing)</a>
 </li>
       </ul></li>
-      <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.Filter.__call__">__call__() (corrct.filters.Filter method)</a>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.__call__">__call__() (corrct.alignment.fitting.Ellipse method)</a>
 
       <ul>
+        <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Trajectory.__call__">(corrct.alignment.fitting.Trajectory method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.Filter.__call__">(corrct.filters.Filter method)</a>
+</li>
         <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform.__call__">(corrct.operators.BaseTransform method)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.FBP.__call__">(corrct.solvers.FBP method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.FISTA.__call__">(corrct.solvers.FISTA method)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.MLEM.__call__">(corrct.solvers.MLEM method)</a>
 </li>
@@ -147,17 +154,19 @@
 </li>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1.__data_fidelity_name__">(corrct.data_terms.DataFidelity_l1 attribute)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l12.__data_fidelity_name__">(corrct.data_terms.DataFidelity_l12 attribute)</a>
-</li>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1b.__data_fidelity_name__">(corrct.data_terms.DataFidelity_l1b attribute)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2.__data_fidelity_name__">(corrct.data_terms.DataFidelity_l2 attribute)</a>
 </li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l21.__data_fidelity_name__">(corrct.data_terms.DataFidelity_l21 attribute)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l21w.__data_fidelity_name__">(corrct.data_terms.DataFidelity_l21w attribute)</a>
+</li>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.__data_fidelity_name__">(corrct.data_terms.DataFidelity_l2b attribute)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.__data_fidelity_name__">(corrct.data_terms.DataFidelity_ln attribute)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2w.__data_fidelity_name__">(corrct.data_terms.DataFidelity_l2w attribute)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2.__data_fidelity_name__">(corrct.data_terms.DataFidelity_wl2 attribute)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.__data_fidelity_name__">(corrct.data_terms.DataFidelity_ln attribute)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.__data_fidelity_name__">(corrct.data_terms.DataFidelityBase attribute)</a>
 </li>
@@ -243,15 +252,15 @@
 </li>
         <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1.__reg_name__">(corrct.regularizers.Regularizer_l1 attribute)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l12dwl.__reg_name__">(corrct.regularizers.Regularizer_l12dwl attribute)</a>
-</li>
-        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l12swl.__reg_name__">(corrct.regularizers.Regularizer_l12swl attribute)</a>
-</li>
         <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1dwl.__reg_name__">(corrct.regularizers.Regularizer_l1dwl attribute)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1med.__reg_name__">(corrct.regularizers.Regularizer_l1med attribute)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1swl.__reg_name__">(corrct.regularizers.Regularizer_l1swl attribute)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l21dwl.__reg_name__">(corrct.regularizers.Regularizer_l21dwl attribute)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l21swl.__reg_name__">(corrct.regularizers.Regularizer_l21swl attribute)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l2med.__reg_name__">(corrct.regularizers.Regularizer_l2med attribute)</a>
 </li>
@@ -288,20 +297,26 @@
         <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_VTV.__reg_name__">(corrct.regularizers.Regularizer_VTV attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct._projector_backends.html#corrct._projector_backends.ProjectorBackend.__repr__">__repr__() (corrct._projector_backends.ProjectorBackend method)</a>
 
       <ul>
+        <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.__repr__">(corrct.alignment.fitting.Ellipse method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.__repr__">(corrct.solvers.SolutionInfo method)</a>
+</li>
         <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.__repr__">(corrct.struct_illum.MaskGenerator method)</a>
 </li>
       </ul></li>
-      <li><a href="apidocs/corrct/corrct.models.html#corrct.models.Geometry.__str__">__str__() (corrct.models.Geometry method)</a>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.__str__">__str__() (corrct.alignment.cone_beam.ConeBeamGeometry method)</a>
 
       <ul>
+        <li><a href="apidocs/corrct/corrct.models.html#corrct.models.Geometry.__str__">(corrct.models.Geometry method)</a>
+</li>
         <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.PerfMeterBatch.__str__">(corrct.param_tuning.PerfMeterBatch method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.html#corrct.__version__">__version__ (in module corrct)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform._adjoint">_adjoint() (corrct.operators.BaseTransform method)</a>
@@ -323,6 +338,10 @@
       <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer._check_primal">_check_primal() (corrct.regularizers.BaseRegularizer method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct._projector_backends.html#corrct._projector_backends.ProjectorBackendASTRA._check_prj_shape">_check_prj_shape() (corrct._projector_backends.ProjectorBackendASTRA method)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._check_require_residual">_check_require_residual() (corrct.solvers.Solver method)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam._class_to_json">_class_to_json() (in module corrct.alignment.cone_beam)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume._compute_attenuation_angle_in">_compute_attenuation_angle_in() (corrct.physics.attenuation.AttenuationVolume method)</a>
 </li>
@@ -346,39 +365,49 @@
 </li>
       <li><a href="apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.shifts._filter_shifts">_filter_shifts() (in module corrct.alignment.shifts)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.FitConeBeamGeometry._fit_distance_det2src">_fit_distance_det2src() (corrct.alignment.cone_beam.FitConeBeamGeometry static method)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator._generate_mask_shifts">_generate_mask_shifts() (corrct.struct_illum.MaskGenerator method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging._get_backend_device">_get_backend_device() (corrct.struct_illum.ProjectorGhostImaging method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models._get_data_dims">_get_data_dims() (in module corrct.models)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG._get_data_sigma_tau_unpreconditioned">_get_data_sigma_tau_unpreconditioned() (corrct.solvers.PDHG method)</a>
-</li>
       <li><a href="apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume._get_detector_angles">_get_detector_angles() (corrct.physics.attenuation.AttenuationVolume method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1._get_inner_norm">_get_inner_norm() (corrct.data_terms.DataFidelity_l1 method)</a>
 
       <ul>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l12._get_inner_norm">(corrct.data_terms.DataFidelity_l12 method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l21._get_inner_norm">(corrct.data_terms.DataFidelity_l21 method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l21w._get_inner_norm">(corrct.data_terms.DataFidelity_l21w method)</a>
 </li>
       </ul></li>
       <li><a href="apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf._get_lines_list">_get_lines_list() (in module corrct.physics.xrf)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam._get_rot_axis_angle_deg">_get_rot_axis_angle_deg() (in module corrct.alignment.cone_beam)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging._init_backend">_init_backend() (corrct.struct_illum.ProjectorGhostImaging method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator._init_fov_mm">_init_fov_mm() (corrct.struct_illum.MaskGenerator method)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.FitConeBeamGeometry._initialize">_initialize() (corrct.alignment.cone_beam.FitConeBeamGeometry method)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._initialize_b_masks">_initialize_b_masks() (corrct.solvers.Solver static method)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG._initialize_data_fidelity_function">_initialize_data_fidelity_function() (corrct.solvers.PDHG static method)</a>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.FISTA._initialize_data_fidelity_function">_initialize_data_fidelity_function() (corrct.solvers.FISTA static method)</a>
 
       <ul>
+        <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG._initialize_data_fidelity_function">(corrct.solvers.PDHG static method)</a>
+</li>
         <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._initialize_data_fidelity_function">(corrct.solvers.Solver static method)</a>
 </li>
       </ul></li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.BaseWaveletTransform._initialize_filter_bank">_initialize_filter_bank() (corrct.operators.BaseWaveletTransform method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._initialize_regularizer">_initialize_regularizer() (corrct.solvers.Solver static method)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.markers.html#corrct.alignment.markers.MarkerTrackingVisualizer._key_event">_key_event() (corrct.alignment.markers.MarkerTrackingVisualizer method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform._matvec">_matvec() (corrct.operators.BaseTransform method)</a>
 </li>
@@ -444,6 +473,10 @@
         <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_VTV._raise_pwise_norm_error">(corrct.regularizers.Regularizer_VTV method)</a>
 </li>
       </ul></li>
+      <li><a href="apidocs/corrct/corrct.alignment.markers.html#corrct.alignment.markers.MarkerTrackingVisualizer._scroll_event">_scroll_event() (corrct.alignment.markers.MarkerTrackingVisualizer method)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver._select_best_solution">_select_best_solution() (corrct.solvers.Solver method)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning._serial_compute">_serial_compute() (in module corrct.param_tuning)</a>
 </li>
       <li><a href="apidocs/corrct/corrct._projector_backends.html#corrct._projector_backends.ProjectorBackendSKimage._set_bpj_size">_set_bpj_size() (corrct._projector_backends.ProjectorBackendSKimage static method)</a>
@@ -468,6 +501,8 @@
         <li><a href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorMatrix._transpose">(corrct.projectors.ProjectorMatrix method)</a>
 </li>
       </ul></li>
+      <li><a href="apidocs/corrct/corrct.alignment.markers.html#corrct.alignment.markers.MarkerTrackingVisualizer._update">_update() (corrct.alignment.markers.MarkerTrackingVisualizer method)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.VolumeGeometry._vol_shape_xyz">_vol_shape_xyz (corrct.models.VolumeGeometry attribute)</a>
 </li>
   </ul></td>
@@ -476,6 +511,8 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.a">a (corrct.alignment.fitting.Ellipse attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorMatrix.A">A (corrct.projectors.ProjectorMatrix attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform.absolute">absolute() (corrct.operators.BaseTransform method)</a>
@@ -492,6 +529,8 @@
         <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging.absolute">(corrct.struct_illum.ProjectorGhostImaging method)</a>
 </li>
       </ul></li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.FitConeBeamGeometry.acq_geom">acq_geom (corrct.alignment.cone_beam.FitConeBeamGeometry attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.testing.html#corrct.testing.add_noise">add_noise() (in module corrct.testing)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform.adj_shape">adj_shape (corrct.operators.BaseTransform attribute)</a>
@@ -524,38 +563,82 @@
 </li>
       <li><a href="apidocs/corrct/corrct.physics.phase.html#corrct.physics.phase.apply_propagation_filter">apply_propagation_filter() (in module corrct.physics.phase)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_Huber.apply_proximal">apply_proximal() (corrct.data_terms.DataFidelity_Huber method)</a>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_Huber.apply_proximal_dual">apply_proximal_dual() (corrct.data_terms.DataFidelity_Huber method)</a>
 
       <ul>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL.apply_proximal">(corrct.data_terms.DataFidelity_KL method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL.apply_proximal_dual">(corrct.data_terms.DataFidelity_KL method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1.apply_proximal">(corrct.data_terms.DataFidelity_l1 method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1.apply_proximal_dual">(corrct.data_terms.DataFidelity_l1 method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2.apply_proximal">(corrct.data_terms.DataFidelity_l2 method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2.apply_proximal_dual">(corrct.data_terms.DataFidelity_l2 method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.apply_proximal">(corrct.data_terms.DataFidelity_l2b method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.apply_proximal_dual">(corrct.data_terms.DataFidelity_l2b method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.apply_proximal">(corrct.data_terms.DataFidelity_ln method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.apply_proximal_dual">(corrct.data_terms.DataFidelity_ln method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.apply_proximal">(corrct.data_terms.DataFidelityBase method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.apply_proximal_dual">(corrct.data_terms.DataFidelityBase method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer.apply_proximal">(corrct.regularizers.BaseRegularizer method)</a>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer.apply_proximal_dual">(corrct.regularizers.BaseRegularizer method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_LowerLimit.apply_proximal">(corrct.regularizers.Constraint_LowerLimit method)</a>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_LowerLimit.apply_proximal_dual">(corrct.regularizers.Constraint_LowerLimit method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_UpperLimit.apply_proximal">(corrct.regularizers.Constraint_UpperLimit method)</a>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_UpperLimit.apply_proximal_dual">(corrct.regularizers.Constraint_UpperLimit method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_dwl.apply_proximal">(corrct.regularizers.Regularizer_dwl method)</a>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_dwl.apply_proximal_dual">(corrct.regularizers.Regularizer_dwl method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_swl.apply_proximal">(corrct.regularizers.Regularizer_swl method)</a>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_swl.apply_proximal_dual">(corrct.regularizers.Regularizer_swl method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_vl1wl.apply_proximal">(corrct.regularizers.Regularizer_vl1wl method)</a>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_vl1wl.apply_proximal_dual">(corrct.regularizers.Regularizer_vl1wl method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_VTV.apply_proximal">(corrct.regularizers.Regularizer_VTV method)</a>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_VTV.apply_proximal_dual">(corrct.regularizers.Regularizer_VTV method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_Huber.apply_proximal_primal">apply_proximal_primal() (corrct.data_terms.DataFidelity_Huber method)</a>
+
+      <ul>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL.apply_proximal_primal">(corrct.data_terms.DataFidelity_KL method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1.apply_proximal_primal">(corrct.data_terms.DataFidelity_l1 method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1b.apply_proximal_primal">(corrct.data_terms.DataFidelity_l1b method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2.apply_proximal_primal">(corrct.data_terms.DataFidelity_l2 method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l21.apply_proximal_primal">(corrct.data_terms.DataFidelity_l21 method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.apply_proximal_primal">(corrct.data_terms.DataFidelity_l2b method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2w.apply_proximal_primal">(corrct.data_terms.DataFidelity_l2w method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.apply_proximal_primal">(corrct.data_terms.DataFidelity_ln method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.apply_proximal_primal">(corrct.data_terms.DataFidelityBase method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer.apply_proximal_primal">(corrct.regularizers.BaseRegularizer method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer_med.apply_proximal_primal">(corrct.regularizers.BaseRegularizer_med method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_LowerLimit.apply_proximal_primal">(corrct.regularizers.Constraint_LowerLimit method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_UpperLimit.apply_proximal_primal">(corrct.regularizers.Constraint_UpperLimit method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_dwl.apply_proximal_primal">(corrct.regularizers.Regularizer_dwl method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_fft.apply_proximal_primal">(corrct.regularizers.Regularizer_fft method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_Grad.apply_proximal_primal">(corrct.regularizers.Regularizer_Grad method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1.apply_proximal_primal">(corrct.regularizers.Regularizer_l1 method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_lap.apply_proximal_primal">(corrct.regularizers.Regularizer_lap method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_swl.apply_proximal_primal">(corrct.regularizers.Regularizer_swl method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_vSVD.apply_proximal_primal">(corrct.regularizers.Regularizer_vSVD method)</a>
+</li>
+      </ul></li>
       <li><a href="apidocs/corrct/corrct.alignment.centering.html#corrct.alignment.centering.RecenterVolume.as_reference">as_reference() (corrct.alignment.centering.RecenterVolume method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_Huber.assign_data">assign_data() (corrct.data_terms.DataFidelity_Huber method)</a>
@@ -567,7 +650,7 @@
 </li>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.assign_data">(corrct.data_terms.DataFidelity_l2b method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2.assign_data">(corrct.data_terms.DataFidelity_wl2 method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2w.assign_data">(corrct.data_terms.DataFidelity_l2w method)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.assign_data">(corrct.data_terms.DataFidelityBase method)</a>
 </li>
@@ -588,6 +671,8 @@
 </li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.BaseWaveletTransform.axes">axes (corrct.operators.BaseWaveletTransform attribute)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l21w.axis_weights">axis_weights (corrct.data_terms.DataFidelity_l21w attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.processing.misc.html#corrct.processing.misc.azimuthal_integration">azimuthal_integration() (in module corrct.processing.misc)</a>
 </li>
   </ul></td>
@@ -596,6 +681,8 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.b">b (corrct.alignment.fitting.Ellipse attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.background">background (corrct.data_terms.DataFidelityBase attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.background_from_margin">background_from_margin() (in module corrct.processing.pre)</a>
@@ -620,8 +707,14 @@
 </li>
       <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.BasisOptionsWavelets">BasisOptionsWavelets (class in corrct.filters)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.best_residual_ind_rec">best_residual_ind_rec (corrct.solvers.SolutionInfo attribute)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.best_residual_ind_val">best_residual_ind_val (corrct.solvers.SolutionInfo attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.bin_imgs">bin_imgs() (in module corrct.processing.pre)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.bin_masks">bin_masks() (corrct.struct_illum.MaskCollection method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.BasisOptionsBlocks.binning_start">binning_start (corrct.filters.BasisOptionsBlocks attribute)</a>
@@ -630,8 +723,6 @@
         <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.FilterMR.binning_start">(corrct.filters.FilterMR attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.BasisOptionsBlocks.binning_type">binning_type (corrct.filters.BasisOptionsBlocks attribute)</a>
 
       <ul>
@@ -672,9 +763,17 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.c">c (corrct.alignment.fitting.Ellipse attribute)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.c_vu">c_vu (corrct.alignment.fitting.Ellipse attribute)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.center_vu">center_vu (corrct.alignment.fitting.Ellipse property)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.processing.html#corrct.processing.circular_mask">circular_mask (in module corrct.processing)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.processing.misc.html#corrct.processing.misc.circular_mask">circular_mask() (in module corrct.processing.misc)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.markers.html#corrct.alignment.markers.cm2inch">cm2inch() (in module corrct.alignment.markers)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorAttenuationXRF.collapse_detectors">collapse_detectors() (corrct.projectors.ProjectorAttenuationXRF method)</a>
 </li>
@@ -685,6 +784,8 @@
       <li><a href="apidocs/corrct/corrct._projector_backends.html#corrct._projector_backends.compute_attenuation">compute_attenuation() (in module corrct._projector_backends)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.compute_data_dual_dot">compute_data_dual_dot() (corrct.data_terms.DataFidelityBase method)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.compute_diagonal_scaling">compute_diagonal_scaling() (in module corrct.solvers)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.processing.pre.html#corrct.processing.pre.compute_eigen_flats">compute_eigen_flats() (in module corrct.processing.pre)</a>
 </li>
@@ -701,6 +802,8 @@
 </li>
       </ul></li>
       <li><a href="apidocs/corrct/corrct.processing.post.html#corrct.processing.post.compute_frc">compute_frc() (in module corrct.processing.post)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.compute_Lipschitz_scaling">compute_Lipschitz_scaling() (in module corrct.solvers)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.compute_loss_values">compute_loss_values() (corrct.param_tuning.BaseParameterTuning method)</a>
 
@@ -730,6 +833,8 @@
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.compute_primal_dual_gap">(corrct.data_terms.DataFidelityBase method)</a>
 </li>
       </ul></li>
+      <li><a href="apidocs/corrct/corrct.processing.post.html#corrct.processing.post.compute_reconstruction_bias_variance_maps">compute_reconstruction_bias_variance_maps() (in module corrct.processing.post)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.compute_reconstruction_error">compute_reconstruction_error() (corrct.param_tuning.BaseParameterTuning method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL.compute_residual">compute_residual() (corrct.data_terms.DataFidelity_KL method)</a>
@@ -737,7 +842,7 @@
       <ul>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.compute_residual">(corrct.data_terms.DataFidelity_l2b method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2.compute_residual">(corrct.data_terms.DataFidelity_wl2 method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2w.compute_residual">(corrct.data_terms.DataFidelity_l2w method)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.compute_residual">(corrct.data_terms.DataFidelityBase method)</a>
 </li>
@@ -753,9 +858,9 @@
 </li>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2.compute_residual_norm">(corrct.data_terms.DataFidelity_l2 method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.compute_residual_norm">(corrct.data_terms.DataFidelity_ln method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2w.compute_residual_norm">(corrct.data_terms.DataFidelity_l2w method)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2.compute_residual_norm">(corrct.data_terms.DataFidelity_wl2 method)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.compute_residual_norm">(corrct.data_terms.DataFidelity_ln method)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.compute_residual_norm">(corrct.data_terms.DataFidelityBase method)</a>
 </li>
@@ -773,6 +878,8 @@
       <li><a href="apidocs/corrct/corrct.processing.html#corrct.processing.compute_variance_weight">compute_variance_weight (in module corrct.processing)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.processing.noise.html#corrct.processing.noise.compute_variance_weight">compute_variance_weight() (in module corrct.processing.noise)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry">ConeBeamGeometry (class in corrct.alignment.cone_beam)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Constraint_LowerLimit">Constraint_LowerLimit (class in corrct.regularizers)</a>
 </li>
@@ -810,6 +917,8 @@
         <li><a href="apidocs/corrct/corrct._projector_backends.html#module-corrct._projector_backends">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     corrct.alignment
 
@@ -817,8 +926,6 @@
         <li><a href="apidocs/corrct/corrct.alignment.html#module-corrct.alignment">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     corrct.alignment.centering
 
@@ -827,10 +934,24 @@
 </li>
       </ul></li>
       <li>
+    corrct.alignment.cone_beam
+
+      <ul>
+        <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#module-corrct.alignment.cone_beam">module</a>
+</li>
+      </ul></li>
+      <li>
     corrct.alignment.fitting
 
       <ul>
         <li><a href="apidocs/corrct/corrct.alignment.fitting.html#module-corrct.alignment.fitting">module</a>
+</li>
+      </ul></li>
+      <li>
+    corrct.alignment.markers
+
+      <ul>
+        <li><a href="apidocs/corrct/corrct.alignment.markers.html#module-corrct.alignment.markers">module</a>
 </li>
       </ul></li>
       <li>
@@ -1007,6 +1128,8 @@
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.create_k_fold_test_masks">create_k_fold_test_masks() (in module corrct.param_tuning)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.markers.html#corrct.alignment.markers.create_marker_disk">create_marker_disk() (in module corrct.alignment.markers)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.testing.html#corrct.testing.create_phantom_nuclei3d">create_phantom_nuclei3d() (in module corrct.testing)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.create_random_test_mask">create_random_test_mask() (in module corrct.param_tuning)</a>
@@ -1014,6 +1137,8 @@
       <li><a href="apidocs/corrct/corrct.testing.html#corrct.testing.create_sino">create_sino() (in module corrct.testing)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.testing.html#corrct.testing.create_sino_transmission">create_sino_transmission() (in module corrct.testing)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.criterion">criterion (corrct.solvers.Solver attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.CrossValidation">CrossValidation (class in corrct.param_tuning)</a>
 </li>
@@ -1025,11 +1150,17 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.D_pix">D_pix (corrct.alignment.cone_beam.ConeBeamGeometry attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.data">data (corrct.data_terms.DataFidelityBase attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.CrossValidation.data_cv_masks">data_cv_masks (corrct.param_tuning.CrossValidation attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.CrossValidation.data_shape">data_shape (corrct.param_tuning.CrossValidation attribute)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.data_term">data_term (corrct.solvers.Solver attribute)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.data_term_val">data_term_val (corrct.solvers.Solver attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.shifts.DetectorShiftsBase.data_vwu">data_vwu (corrct.alignment.shifts.DetectorShiftsBase attribute)</a>
 </li>
@@ -1039,17 +1170,19 @@
 </li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1">DataFidelity_l1 (class in corrct.data_terms)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l12">DataFidelity_l12 (class in corrct.data_terms)</a>
-</li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1b">DataFidelity_l1b (class in corrct.data_terms)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2">DataFidelity_l2 (class in corrct.data_terms)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l21">DataFidelity_l21 (class in corrct.data_terms)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l21w">DataFidelity_l21w (class in corrct.data_terms)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b">DataFidelity_l2b (class in corrct.data_terms)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln">DataFidelity_ln (class in corrct.data_terms)</a>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2w">DataFidelity_l2w (class in corrct.data_terms)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2">DataFidelity_wl2 (class in corrct.data_terms)</a>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln">DataFidelity_ln (class in corrct.data_terms)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase">DataFidelityBase (class in corrct.data_terms)</a>
 </li>
@@ -1063,12 +1196,16 @@
 </li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.det_shape_vu">det_shape_vu (corrct.models.ProjectionGeometry attribute)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.det_size_u_pix">det_size_u_pix (corrct.alignment.cone_beam.ConeBeamGeometry attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.det_size_v_pix">det_size_v_pix (corrct.alignment.cone_beam.ConeBeamGeometry attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.det_u_xyz">det_u_xyz (corrct.models.ProjectionGeometry attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.det_v_xyz">det_v_xyz (corrct.models.ProjectionGeometry attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.detectors">detectors (corrct.physics.attenuation.AttenuationVolume attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.shifts.DetectorShiftsBase">DetectorShiftsBase (class in corrct.alignment.shifts)</a>
@@ -1125,6 +1262,8 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse">Ellipse (class in corrct.alignment.fitting)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.emitted_local">emitted_local (corrct.physics.attenuation.AttenuationVolume attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.emitted_sub_sampling">emitted_sub_sampling (corrct.physics.attenuation.AttenuationVolume attribute)</a>
@@ -1159,6 +1298,8 @@
         <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.estimate_resolution">(in module corrct.struct_illum)</a>
 </li>
       </ul></li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.eta_deg">eta_deg (corrct.alignment.cone_beam.ConeBeamGeometry attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.PerfMeterTask.exec_time_s">exec_time_s (corrct.param_tuning.PerfMeterTask attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorAttenuationXRF.executor">executor (corrct.projectors.ProjectorAttenuationXRF attribute)</a>
@@ -1171,6 +1312,8 @@
 </li>
       <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.extract_peak_regions_1d">extract_peak_regions_1d() (in module corrct.alignment.fitting)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.extremes_u">extremes_u (corrct.alignment.fitting.Ellipse property)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1180,7 +1323,11 @@
       <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.FBP">FBP (class in corrct.solvers)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostImaging.fbp">fbp() (corrct.struct_illum.ProjectorGhostImaging method)</a>
+
+      <ul>
+        <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostTomography.fbp">(corrct.struct_illum.ProjectorGhostTomography method)</a>
 </li>
+      </ul></li>
       <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.Filter.fbp_filter">fbp_filter (corrct.filters.Filter attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.TransformFourier.fft">fft() (corrct.operators.TransformFourier method)</a>
@@ -1203,7 +1350,17 @@
 </li>
       <li><a href="apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.shifts.DetectorShiftsXC.find_shifts_vu">find_shifts_vu() (corrct.alignment.shifts.DetectorShiftsXC method)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.FISTA">FISTA (class in corrct.solvers)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.FitConeBeamGeometry.fit">fit() (corrct.alignment.cone_beam.FitConeBeamGeometry method)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_camera_tilt_angle">fit_camera_tilt_angle() (in module corrct.alignment.fitting)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_ellipse">fit_ellipse() (in module corrct.alignment.fitting)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_ellipse_center">fit_ellipse_center() (in module corrct.alignment.fitting)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_ellipse_parameters">fit_ellipse_parameters() (in module corrct.alignment.fitting)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.fit_func_min">fit_func_min() (in module corrct.param_tuning)</a>
 </li>
@@ -1211,18 +1368,20 @@
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.CrossValidation.fit_loss_min">fit_loss_min() (corrct.param_tuning.CrossValidation method)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_parabola_min">fit_parabola_min() (in module corrct.alignment.fitting)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.processing.post.html#corrct.processing.post.fit_scale_bias">fit_scale_bias() (in module corrct.processing.post)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_shifts_u_sad">fit_shifts_u_sad() (in module corrct.alignment.fitting)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_shifts_vu_xc">fit_shifts_vu_xc() (in module corrct.alignment.fitting)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_shifts_zyx_xc">fit_shifts_zyx_xc() (in module corrct.alignment.fitting)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_sinusoid">fit_sinusoid() (in module corrct.alignment.fitting)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.shifts.DetectorShiftsPRE.fit_u">fit_u() (corrct.alignment.shifts.DetectorShiftsPRE method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.shifts.DetectorShiftsXC.fit_u_180">fit_u_180() (corrct.alignment.shifts.DetectorShiftsXC method)</a>
@@ -1234,6 +1393,8 @@
       <li><a href="apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.shifts.DetectorShiftsXC.fit_vu">fit_vu() (corrct.alignment.shifts.DetectorShiftsXC method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.alignment.shifts.html#corrct.alignment.shifts.DetectorShiftsXC.fit_vu_accum_drifts">fit_vu_accum_drifts() (corrct.alignment.shifts.DetectorShiftsXC method)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.FitConeBeamGeometry">FitConeBeamGeometry (class in corrct.alignment.cone_beam)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.TransformConvolution.flip_adjoint">flip_adjoint (corrct.operators.TransformConvolution attribute)</a>
 </li>
@@ -1271,6 +1432,8 @@
         <li><a href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorUncorrected.fp_angle">(corrct.projectors.ProjectorUncorrected method)</a>
 </li>
       </ul></li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.from_json">from_json() (corrct.alignment.cone_beam.ConeBeamGeometry method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1305,6 +1468,10 @@
 </li>
       <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.FilterFBP.get_available_filters">get_available_filters() (corrct.filters.FilterFBP method)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.get_best_residual_rec">get_best_residual_rec() (corrct.solvers.SolutionInfo method)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.get_best_residual_val">get_best_residual_val() (corrct.solvers.SolutionInfo method)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.physics.html#corrct.physics.get_compound">get_compound (in module corrct.physics)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.physics.xraylib_helper.html#corrct.physics.xraylib_helper.get_compound">get_compound() (in module corrct.physics.xraylib_helper)</a>
@@ -1335,10 +1502,10 @@
 </li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.get_field_scaled">get_field_scaled() (corrct.models.ProjectionGeometry method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.physics.materials.html#corrct.physics.materials.VolumeMaterial.get_fluo_production">get_fluo_production() (corrct.physics.materials.VolumeMaterial method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.get_interval_shifts">get_interval_shifts() (corrct.struct_illum.MaskGenerator method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.get_lambda_range">get_lambda_range() (corrct.param_tuning.BaseParameterTuning static method)</a>
@@ -1367,6 +1534,8 @@
         <li><a href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorUncorrected.get_pre_weights">(corrct.projectors.ProjectorUncorrected method)</a>
 </li>
       </ul></li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.get_prj_geom">get_prj_geom() (corrct.alignment.cone_beam.ConeBeamGeometry method)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.get_prj_geom_cone">get_prj_geom_cone() (in module corrct.models)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.get_prj_geom_parallel">get_prj_geom_parallel() (in module corrct.models)</a>
@@ -1387,7 +1556,11 @@
 </li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.get_sequential_shifts">get_sequential_shifts() (corrct.struct_illum.MaskGenerator method)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.get_tuning_params">get_tuning_params() (corrct.alignment.cone_beam.ConeBeamGeometry method)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.html#corrct.get_version">get_version() (in module corrct)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.get_vol_geom">get_vol_geom() (corrct.alignment.cone_beam.ConeBeamGeometry method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.get_vol_geom_from_data">get_vol_geom_from_data() (in module corrct.models)</a>
 </li>
@@ -1425,6 +1598,8 @@
         <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_swl.info">(corrct.regularizers.Regularizer_swl method)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.FBP.info">(corrct.solvers.FBP method)</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.FISTA.info">(corrct.solvers.FISTA method)</a>
 </li>
         <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.MLEM.info">(corrct.solvers.MLEM method)</a>
 </li>
@@ -1495,6 +1670,8 @@
         <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_vSVD.initialize_sigma_tau">(corrct.regularizers.Regularizer_vSVD method)</a>
 </li>
       </ul></li>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l21w.inner_norm">inner_norm (corrct.data_terms.DataFidelity_l21w attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.processing.misc.html#corrct.processing.misc.inspect_fourier_img">inspect_fourier_img() (in module corrct.processing.misc)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.inspect_masks">inspect_masks() (corrct.struct_illum.MaskCollection method)</a>
@@ -1535,6 +1712,8 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l21.l2_axis">l2_axis (corrct.data_terms.DataFidelity_l21 attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.BaseWaveletTransform.labels">labels (corrct.operators.BaseWaveletTransform attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.FilterMR.lambda_smooth">lambda_smooth (corrct.filters.FilterMR attribute)</a>
@@ -1543,15 +1722,19 @@
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.LCurve">LCurve (class in corrct.param_tuning)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.BasisOptionsWavelets.level">level (corrct.filters.BasisOptionsWavelets attribute)</a>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.leave_progress">leave_progress (corrct.solvers.Solver attribute)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf.LinesSiegbahn.lines">lines (corrct.physics.xrf.LinesSiegbahn attribute)</a>
+      <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.BasisOptionsWavelets.level">level (corrct.filters.BasisOptionsWavelets attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf.LinesSiegbahn.lines">lines (corrct.physics.xrf.LinesSiegbahn attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.processing.misc.html#corrct.processing.misc.lines_intersection">lines_intersection() (in module corrct.processing.misc)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.physics.xrf.html#corrct.physics.xrf.LinesSiegbahn">LinesSiegbahn (class in corrct.physics.xrf)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_ln.ln_axes">ln_axes (corrct.data_terms.DataFidelity_ln attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.lower">lower() (corrct.data_terms.DataFidelityBase method)</a>
 
@@ -1578,6 +1761,8 @@
 </li>
       </ul></li>
       <li><a href="apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.maps">maps (corrct.physics.attenuation.AttenuationVolume attribute)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.markers.html#corrct.alignment.markers.MarkerTrackingVisualizer">MarkerTrackingVisualizer (class in corrct.alignment.markers)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.mask_dims">mask_dims (corrct.struct_illum.MaskCollection attribute)</a>
 </li>
@@ -1629,7 +1814,11 @@
 </li>
         <li><a href="apidocs/corrct/corrct.alignment.centering.html#module-corrct.alignment.centering">corrct.alignment.centering</a>
 </li>
+        <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#module-corrct.alignment.cone_beam">corrct.alignment.cone_beam</a>
+</li>
         <li><a href="apidocs/corrct/corrct.alignment.fitting.html#module-corrct.alignment.fitting">corrct.alignment.fitting</a>
+</li>
+        <li><a href="apidocs/corrct/corrct.alignment.markers.html#module-corrct.alignment.markers">corrct.alignment.markers</a>
 </li>
         <li><a href="apidocs/corrct/corrct.alignment.shifts.html#module-corrct.alignment.shifts">corrct.alignment.shifts</a>
 </li>
@@ -1782,6 +1971,8 @@
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.parallel_eval">parallel_eval (corrct.param_tuning.BaseParameterTuning attribute)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.parameters">parameters (corrct.alignment.fitting.Ellipse property)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG">PDHG (class in corrct.solvers)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.physics.html#corrct.physics.pencil_beam_profile">pencil_beam_profile() (in module corrct.physics)</a>
@@ -1794,7 +1985,11 @@
 </li>
       <li><a href="apidocs/corrct/corrct.testing.html#corrct.testing.phantom_assign_concentration_multi">phantom_assign_concentration_multi() (in module corrct.testing)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.phi_deg">phi_deg (corrct.alignment.cone_beam.ConeBeamGeometry attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.pix2vox_ratio">pix2vox_ratio (corrct.models.ProjectionGeometry attribute)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.pix_size_um">pix_size_um (corrct.alignment.cone_beam.ConeBeamGeometry attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.plot_cv_curves">plot_cv_curves() (in module corrct.param_tuning)</a>
 </li>
@@ -1808,20 +2003,22 @@
 </li>
       <li><a href="apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.plot_map">plot_map() (corrct.physics.attenuation.AttenuationVolume method)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.models.html#corrct.models.plot_projection_geometry">plot_projection_geometry() (in module corrct.models)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.plot_result">plot_result (corrct.param_tuning.BaseParameterTuning attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.plot_transmittance_decay">plot_transmittance_decay() (in module corrct.physics.attenuation)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG.power_method">power_method() (corrct.solvers.PDHG method)</a>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.power_method">power_method() (in module corrct.solvers)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.processing.post.html#corrct.processing.post.power_spectrum">power_spectrum() (in module corrct.processing.post)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.print_timings">print_timings (corrct.param_tuning.BaseParameterTuning attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.projectors.html#corrct.projectors.ProjectorUncorrected.prj_intensities">prj_intensities (corrct.projectors.ProjectorUncorrected attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.ProjectorOperator.prj_shape">prj_shape (corrct.operators.ProjectorOperator property)</a>
 </li>
       <li><a href="apidocs/corrct/corrct._projector_backends.html#corrct._projector_backends.ProjectorBackend.prj_shape_vu">prj_shape_vu (corrct._projector_backends.ProjectorBackend attribute)</a>
@@ -1874,6 +2071,8 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.R_pix">R_pix (corrct.alignment.cone_beam.ConeBeamGeometry attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.alignment.centering.html#corrct.alignment.centering.RecenterVolume">RecenterVolume (class in corrct.alignment.centering)</a>
 
       <ul>
@@ -1900,15 +2099,15 @@
 </li>
       <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1">Regularizer_l1 (class in corrct.regularizers)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l12dwl">Regularizer_l12dwl (class in corrct.regularizers)</a>
-</li>
-      <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l12swl">Regularizer_l12swl (class in corrct.regularizers)</a>
-</li>
       <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1dwl">Regularizer_l1dwl (class in corrct.regularizers)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1med">Regularizer_l1med (class in corrct.regularizers)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l1swl">Regularizer_l1swl (class in corrct.regularizers)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l21dwl">Regularizer_l21dwl (class in corrct.regularizers)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l21swl">Regularizer_l21swl (class in corrct.regularizers)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_l2med">Regularizer_l2med (class in corrct.regularizers)</a>
 </li>
@@ -1946,21 +2145,23 @@
 </li>
       <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.Regularizer_VTV">Regularizer_VTV (class in corrct.regularizers)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.relaxation">relaxation (corrct.solvers.Solver attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.reorder_masks">reorder_masks() (in module corrct.struct_illum)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.TransformSVD.rescale">rescale (corrct.operators.TransformSVD attribute)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residual0">residual0 (corrct.solvers.SolutionInfo attribute)</a>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residual0_rec">residual0_rec (corrct.solvers.SolutionInfo attribute)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residual0_cv">residual0_cv (corrct.solvers.SolutionInfo attribute)</a>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residual0_val">residual0_val (corrct.solvers.SolutionInfo attribute)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residuals">residuals (corrct.solvers.SolutionInfo attribute)</a>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residuals_rec">residuals_rec (corrct.solvers.SolutionInfo attribute)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residuals_cv">residuals_cv (corrct.solvers.SolutionInfo attribute)</a>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residuals_rec_rel">residuals_rec_rel (corrct.solvers.SolutionInfo property)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residuals_cv_rel">residuals_cv_rel (corrct.solvers.SolutionInfo property)</a>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residuals_val">residuals_val (corrct.solvers.SolutionInfo attribute)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residuals_rel">residuals_rel (corrct.solvers.SolutionInfo property)</a>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.residuals_val_rel">residuals_val_rel (corrct.solvers.SolutionInfo property)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.BaseTransform.rmatvec">rmatvec() (corrct.operators.BaseTransform method)</a>
 </li>
@@ -1990,6 +2191,10 @@
 </li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.set_detector_tilt">set_detector_tilt() (corrct.models.ProjectionGeometry method)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.set_residual_rec">set_residual_rec() (corrct.solvers.SolutionInfo method)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.set_residual_val">set_residual_val() (corrct.solvers.SolutionInfo method)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.ProjectionGeometry.set_source_shifts_vu">set_source_shifts_vu() (corrct.models.ProjectionGeometry method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskCollection.shape_fov">shape_fov (corrct.struct_illum.MaskCollection property)</a>
@@ -2018,16 +2223,16 @@
         <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer.sigma">(corrct.regularizers.BaseRegularizer attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2.sigma1">sigma1 (corrct.data_terms.DataFidelity_l2 attribute)</a>
 
       <ul>
         <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2b.sigma1">(corrct.data_terms.DataFidelity_l2b attribute)</a>
 </li>
-        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2.sigma1">(corrct.data_terms.DataFidelity_wl2 attribute)</a>
+        <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2w.sigma1">(corrct.data_terms.DataFidelity_l2w attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.sigma_data">sigma_data (corrct.data_terms.DataFidelityBase attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1b.sigma_error">sigma_error (corrct.data_terms.DataFidelity_l1b attribute)</a>
@@ -2076,14 +2281,22 @@
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.PerfMeterBatch.tasks_perf">tasks_perf (corrct.param_tuning.PerfMeterBatch attribute)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.theta_deg">theta_deg (corrct.alignment.cone_beam.ConeBeamGeometry attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.alignment.centering.html#corrct.alignment.centering.RecenterVolume.to_com">to_com() (corrct.alignment.centering.RecenterVolume method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.Filter.to_fourier">to_fourier() (corrct.filters.Filter method)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.to_json">to_json() (corrct.alignment.cone_beam.ConeBeamGeometry method)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.filters.html#corrct.filters.Filter.to_real">to_real() (corrct.filters.Filter method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SolutionInfo.tolerance">tolerance (corrct.solvers.SolutionInfo attribute)</a>
+
+      <ul>
+        <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.tolerance">(corrct.solvers.Solver attribute)</a>
 </li>
+      </ul></li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.ProjectorGhostTomography.tomo_proj">tomo_proj (corrct.struct_illum.ProjectorGhostTomography attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.PerfMeterBatch.total_time_s">total_time_s (corrct.param_tuning.PerfMeterBatch attribute)</a>
@@ -2094,6 +2307,10 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.alignment.markers.html#corrct.alignment.markers.track_marker">track_marker() (in module corrct.alignment.markers)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Trajectory">Trajectory (class in corrct.alignment.fitting)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.TransformConvolution">TransformConvolution (class in corrct.operators)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.TransformDecimatedWavelet">TransformDecimatedWavelet (class in corrct.operators)</a>
@@ -2116,15 +2333,23 @@
 </li>
       <li><a href="apidocs/corrct/corrct.struct_illum.html#corrct.struct_illum.MaskGenerator.transmittance">transmittance (corrct.struct_illum.MaskGenerator attribute)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.tune_acquisition_geometry">tune_acquisition_geometry() (in module corrct.alignment.cone_beam)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.u">u (corrct.alignment.fitting.Ellipse attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.TransformSVD.U">U (corrct.operators.TransformSVD attribute)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.u0_pix">u0_pix (corrct.alignment.cone_beam.ConeBeamGeometry attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.regularizers.html#corrct.regularizers.BaseRegularizer.upd_mask">upd_mask (corrct.regularizers.BaseRegularizer attribute)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.update">update() (corrct.alignment.cone_beam.ConeBeamGeometry method)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelityBase.update_dual">update_dual() (corrct.data_terms.DataFidelityBase method)</a>
 
@@ -2164,8 +2389,16 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.verbose">verbose (corrct.param_tuning.BaseParameterTuning attribute)</a>
+      <li><a href="apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.v">v (corrct.alignment.fitting.Ellipse attribute)</a>
 </li>
+      <li><a href="apidocs/corrct/corrct.alignment.cone_beam.html#corrct.alignment.cone_beam.ConeBeamGeometry.v0_pix">v0_pix (corrct.alignment.cone_beam.ConeBeamGeometry attribute)</a>
+</li>
+      <li><a href="apidocs/corrct/corrct.param_tuning.html#corrct.param_tuning.BaseParameterTuning.verbose">verbose (corrct.param_tuning.BaseParameterTuning attribute)</a>
+
+      <ul>
+        <li><a href="apidocs/corrct/corrct.solvers.html#corrct.solvers.Solver.verbose">(corrct.solvers.Solver attribute)</a>
+</li>
+      </ul></li>
       <li><a href="apidocs/corrct/corrct._projector_backends.html#corrct._projector_backends.ProjectorBackend.vol_geom">vol_geom (corrct._projector_backends.ProjectorBackend attribute)</a>
 
       <ul>
@@ -2174,10 +2407,10 @@
       </ul></li>
       <li><a href="apidocs/corrct/corrct.operators.html#corrct.operators.ProjectorOperator.vol_shape">vol_shape (corrct.operators.ProjectorOperator property)</a>
 </li>
-      <li><a href="apidocs/corrct/corrct._projector_backends.html#corrct._projector_backends.ProjectorBackend.vol_shape_zxy">vol_shape_zxy (corrct._projector_backends.ProjectorBackend attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidocs/corrct/corrct._projector_backends.html#corrct._projector_backends.ProjectorBackend.vol_shape_zxy">vol_shape_zxy (corrct._projector_backends.ProjectorBackend attribute)</a>
+</li>
       <li><a href="apidocs/corrct/corrct.physics.attenuation.html#corrct.physics.attenuation.AttenuationVolume.vol_shape_zyx">vol_shape_zyx (corrct.physics.attenuation.AttenuationVolume attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.models.html#corrct.models.VolumeGeometry">VolumeGeometry (class in corrct.models)</a>
@@ -2208,7 +2441,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2.weights">weights (corrct.data_terms.DataFidelity_wl2 attribute)</a>
+      <li><a href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2w.weights">weights (corrct.data_terms.DataFidelity_l2w attribute)</a>
 </li>
       <li><a href="apidocs/corrct/corrct.physics.units.html#corrct.physics.units.wlength_to_energy">wlength_to_energy() (in module corrct.physics.units)</a>
 </li>

@@ -56,7 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#the-projectors">The projectors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-solvers">The solvers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#fbp">FBP</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#sirt-pdhg-and-mlem">SIRT, PDHG, and MLEM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sirt-pdhg-mlem-and-fista">SIRT, PDHG, MLEM, and FISTA</a></li>
 </ul>
 </li>
 </ul>
@@ -67,7 +67,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#attenuation-correction">Attenuation correction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#guided-regularization-parameter-selection">Guided regularization parameter selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hyperparameter-tuning-guided-regularization-parameter-selection">Hyperparameter tuning - Guided regularization parameter selection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
@@ -76,6 +76,7 @@
 <li class="toctree-l1"><a class="reference internal" href="attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cone_beam_calibration_tutorial.html">Cone-Beam Geometry Calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
@@ -193,6 +194,7 @@ The included solvers are:</p>
 <li><p>Simultaneous Algebraic Reconstruction Technique <a class="reference internal" href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SART" title="corrct.solvers.SART"><span class="xref myst py py-class"><strong>SART</strong></span></a>.</p></li>
 <li><p>Simultaneous Iterative Reconstruction Technique <a class="reference internal" href="apidocs/corrct/corrct.solvers.html#corrct.solvers.SIRT" title="corrct.solvers.SIRT"><span class="xref myst py py-class"><strong>SIRT</strong></span></a>.</p></li>
 <li><p>Primal-Dual Hybrid Gradient <a class="reference internal" href="apidocs/corrct/corrct.solvers.html#corrct.solvers.PDHG" title="corrct.solvers.PDHG"><span class="xref myst py py-class"><strong>PDHG</strong></span></a>, from Chambolle and Pock.</p></li>
+<li><p>Fast Iterative Shrinkage-Thresholding Algorithm <a class="reference internal" href="apidocs/corrct/corrct.solvers.html#corrct.solvers.FISTA" title="corrct.solvers.FISTA"><span class="xref myst py py-class"><strong>FISTA</strong></span></a>, from Beck and Teboulle.</p></li>
 </ul>
 <section id="fbp">
 <h4>FBP<a class="headerlink" href="#fbp" title="Link to this heading"></a></h4>
@@ -224,12 +226,15 @@ filter can be selected, by passing the <code class="docutils literal notranslate
 </pre></div>
 </div>
 </section>
-<section id="sirt-pdhg-and-mlem">
-<h4>SIRT, PDHG, and MLEM<a class="headerlink" href="#sirt-pdhg-and-mlem" title="Link to this heading"></a></h4>
-<p>The SIRT and PDHG algorithms, are algebraic (iterative) methods. They both
+<section id="sirt-pdhg-mlem-and-fista">
+<h4>SIRT, PDHG, MLEM, and FISTA<a class="headerlink" href="#sirt-pdhg-mlem-and-fista" title="Link to this heading"></a></h4>
+<p>The SIRT, PDHG and FISTA algorithms, are algebraic (iterative) methods. They all
 support regularization, and box constraints on the solution. The PDHG also
-supports various data fidelity terms.
-The MLEM algorithm is also an iterative algorithm to find the maximum likelihood estimation of the reconstructed signal. The MLEM does not currently support any regularization.</p>
+supports various data fidelity terms. FISTA only supports regularizations that
+form a tight Parseval frame (like certain wavelet transforms).
+The MLEM algorithm is also an iterative algorithm to find the maximum likelihood
+estimation of the reconstructed signal. The MLEM does not currently support any
+regularization.</p>
 <p>The interface of the iterative methods is the same as for the FBP, with the only
 difference of requiring an iterations count:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -244,7 +249,7 @@ difference of requiring an iterations count:</p>
     <span class="n">vol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver_sirt</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>It is possible to specify an intial solution or box limits on the solutions like
+<p>It is possible to specify an initial solution or box limits on the solutions like
 the following:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">vol_shape_xy</span><span class="p">)</span>  <span class="c1"># Initial solution</span>
 <span class="n">lower_limit</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># Constraint</span>
@@ -266,7 +271,18 @@ latter impose prior knowledge on the weight given to the data points.</p>
 <section id="regularizers">
 <h3>Regularizers<a class="headerlink" href="#regularizers" title="Link to this heading"></a></h3>
 <p>Famous regularizers are the TV-min and wavelet l1-min. They can be found in the
-<a class="reference internal" href="apidocs/corrct/corrct.regularizers.html#module-corrct.regularizers" title="corrct.regularizers"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">regularizers</span></code></a> module.</p>
+<a class="reference internal" href="apidocs/corrct/corrct.regularizers.html#module-corrct.regularizers" title="corrct.regularizers"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">regularizers</span></code></a> module.
+Here is a simple example of how to add the use of the TV2D regularizer to the
+previous example, using the PDHG solver:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reg_weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">5</span>
+<span class="n">reg_tv</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">Regularizer_TV2D</span><span class="p">(</span><span class="n">reg_weight</span><span class="p">)</span>
+
+<span class="n">solver_pdhg</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span><span class="n">regularizer</span><span class="o">=</span><span class="n">reg_tv</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">vol_shape_xy</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+    <span class="n">vol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver_pdhg</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 <section id="data-fidelity-terms">
 <h3>Data fidelity terms<a class="headerlink" href="#data-fidelity-terms" title="Link to this heading"></a></h3>
@@ -276,12 +292,48 @@ the <a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#mo
 <li><p>l2 norm - least squares reconstruction - default:
 <a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2" title="corrct.data_terms.DataFidelity_l2"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">DataFidelity_l2</span></code></span></a></p></li>
 <li><p>weighted l2 norm - when the variance of the sinogram points is known:
-<a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_wl2" title="corrct.data_terms.DataFidelity_wl2"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">DataFidelity_wl2</span></code></span></a></p></li>
+<a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l2w" title="corrct.data_terms.DataFidelity_l2w"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">DataFidelity_l2w</span></code></span></a></p></li>
 <li><p>l1 norm - when the sinogram noise is mostly sparse:
 <a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_l1" title="corrct.data_terms.DataFidelity_l1"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">DataFidelity_l1</span></code></span></a></p></li>
 <li><p>Kullback-Leibler - when dealing with Poisson noise:
 <a class="reference internal" href="apidocs/corrct/corrct.data_terms.html#corrct.data_terms.DataFidelity_KL" title="corrct.data_terms.DataFidelity_KL"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">DataFidelity_KL</span></code></span></a></p></li>
 </ul>
+<p>Here is an example of how to use the weighted l2 norm data fidelity term,
+instead of the standard l2 norm:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sino_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">sino</span><span class="p">)</span>
+<span class="n">data_term_wl2</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_l2w</span><span class="p">(</span><span class="n">sino_weights</span><span class="p">)</span>
+
+<span class="n">solver_pdhg</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span><span class="n">data_term</span><span class="o">=</span><span class="n">data_term_wl2</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">cct</span><span class="o">.</span><span class="n">projectors</span><span class="o">.</span><span class="n">ProjectorUncorrected</span><span class="p">(</span><span class="n">vol_shape_xy</span><span class="p">,</span> <span class="n">angles_rad</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+    <span class="n">vol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">solver_pdhg</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">sino</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The weights used in the weighted l2 norm data fidelity term can be computed
+using the functions in the <a class="reference internal" href="apidocs/corrct/corrct.processing.noise.html#module-corrct.processing.noise" title="corrct.processing.noise"><code class="xref myst py py-mod docutils literal notranslate"><span class="pre">processing.noise</span></code></a> module.
+The module provides two functions to compute the variance of the signal,
+depending on the data acquisition regime:</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">compute_variance_poisson</span></code> computes the variance of a signal subject to Poisson noise</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">compute_variance_transmission</span></code> computes the variance of a linearized attenuation (transmission) signal.</p></li>
+</ul>
+<p>The weights can then be computed from the variance using the
+<code class="docutils literal notranslate"><span class="pre">compute_variance_weight</span></code> function, which takes the variance as input and
+returns the weights. This function provides the following options:</p>
+<ul class="simple">
+<li><p>Minimum percentile to discard, a mask of valid values</p></li>
+<li><p>Scaling the largest weight to 1</p></li>
+<li><p>Using the standard deviation instead of the variance</p></li>
+<li><p>Scaling the variance over a logarithmic curve</p></li>
+</ul>
+<p>It is also possible to specify a different data term for the validation loss as
+follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_term_kl</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_KL</span><span class="p">()</span>
+<span class="n">data_term_wl2</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">data_terms</span><span class="o">.</span><span class="n">DataFidelity_l2w</span><span class="p">(</span><span class="n">sino_weights</span><span class="p">)</span>
+
+<span class="n">solver_pdhg</span> <span class="o">=</span> <span class="n">cct</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">PDHG</span><span class="p">(</span><span class="n">data_term</span><span class="o">=</span><span class="n">data_term_kl</span><span class="p">,</span> <span class="n">data_term_val</span><span class="o">=</span><span class="n">data_term_wl2</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="attenuation-correction">
@@ -318,10 +370,12 @@ the reader can have a look at the dedicated <a class="reference internal" href="
 For a in-depth description of the functionality available in the physics module,
 instead, the reader can have a look at the dedicated <a class="reference internal" href="physics_model.html"><span class="std std-doc">physics page</span></a>.</p>
 </section>
-<section id="guided-regularization-parameter-selection">
-<h2>Guided regularization parameter selection<a class="headerlink" href="#guided-regularization-parameter-selection" title="Link to this heading"></a></h2>
-<p>Regularizer parameter selection can be performed through either
-cross-validation, or the elbow method.</p>
+<section id="hyperparameter-tuning-guided-regularization-parameter-selection">
+<h2>Hyperparameter tuning - Guided regularization parameter selection<a class="headerlink" href="#hyperparameter-tuning-guided-regularization-parameter-selection" title="Link to this heading"></a></h2>
+<p>Regularizer parameter selection (i.e., hyperparameter tuning) can be performed
+through either cross-validation, or the elbow method. We refer to the dedicated
+<a class="reference internal" href="param_tuning.html"><span class="std std-doc">parameter tuning</span></a> tutorial, for an in-depth explanation on how
+to use this functionality.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>

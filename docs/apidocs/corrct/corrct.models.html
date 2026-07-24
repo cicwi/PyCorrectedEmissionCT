@@ -55,22 +55,23 @@
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cone_beam_calibration_tutorial.html">Cone-Beam Geometry Calibration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="corrct.html#submodules">Submodules</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="corrct.regularizers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.regularizers</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="corrct.projectors.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.projectors</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct._projector_backends.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct._projector_backends</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="corrct.param_tuning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.data_terms.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.data_terms</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.denoisers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.denoisers</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.filters.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.filters</span></code></a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.models</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.operators.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.operators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.param_tuning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.param_tuning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.projectors.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.projectors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.regularizers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.regularizers</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.solvers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.solvers</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="corrct.testing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="corrct.struct_illum.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.struct_illum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="corrct.testing.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct.testing</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="corrct.html#package-contents">Package Contents</a></li>
@@ -155,6 +156,9 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#corrct.models.get_vol_geom_from_volume" title="corrct.models.get_vol_geom_from_volume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vol_geom_from_volume</span></code></a></p></td>
 <td><p>Generate a default volume geometry from the given volume.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.models.plot_projection_geometry" title="corrct.models.plot_projection_geometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_projection_geometry</span></code></a></p></td>
+<td><p>Plot the projection geometry using matplotlib.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -185,7 +189,7 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <dt class="sig sig-object py" id="corrct.models.Geometry.__str__">
 <span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#Geometry.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.Geometry.__str__" title="Link to this definition"></a></dt>
 <dd><p>Return a human readable representation of the object.</p>
-<p class="rubric" id="id11">Returns</p>
+<p class="rubric" id="id12">Returns</p>
 <p>str
 The human readable representation of the object.</p>
 </dd></dl>
@@ -254,7 +258,7 @@ The human readable representation of the object.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.__getitem__">
 <span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.__getitem__" title="Link to this definition"></a></dt>
 <dd><p>Slice projection geometry along the angular direction.</p>
-<p class="rubric" id="id12">Parameters</p>
+<p class="rubric" id="id13">Parameters</p>
 <p>indx : Any
 Indices of the slicing.</p>
 </dd></dl>
@@ -263,7 +267,7 @@ Indices of the slicing.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.ProjectionGeometry" title="corrct.models.ProjectionGeometry"><span class="pre">corrct.models.ProjectionGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.copy" title="Link to this definition"></a></dt>
 <dd><p>Deepcopy an existing geometry.</p>
-<p class="rubric" id="id13">Returns</p>
+<p class="rubric" id="id14">Returns</p>
 <p>ProjectionGeometry
 The new instance of ProjectionGeometry</p>
 </dd></dl>
@@ -272,14 +276,14 @@ The new instance of ProjectionGeometry</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.get_default_parallel">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'3d'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_axis_shift_pix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_axis_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.ArrayLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'clockwise'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.ProjectionGeometry" title="corrct.models.ProjectionGeometry"><span class="pre">corrct.models.ProjectionGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.get_default_parallel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.get_default_parallel" title="Link to this definition"></a></dt>
 <dd><p>Generate the default geometry for parallel beam.</p>
-<p class="rubric" id="id14">Parameters</p>
+<p class="rubric" id="id15">Parameters</p>
 <p>geom_type : str, optional
 The geometry type. The default is “parallel3d”.
 rot_axis_shift_pix : ArrayLike | None, optional
 Rotation axis shift in pixels. The default is None.
 rot_axis_dir : str | ArrayLike, optional
 Rotation axis direction. It can be either a string or a direction. The default is “clockwise”.</p>
-<p class="rubric" id="id15">Returns</p>
+<p class="rubric" id="id16">Returns</p>
 <p>ProjectionGeometry
 The default parallel-beam geometry.</p>
 </dd></dl>
@@ -288,7 +292,7 @@ The default parallel-beam geometry.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.ndim">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corrct.models.ProjectionGeometry.ndim" title="Link to this definition"></a></dt>
 <dd><p>Return the number of dimensions of the geometry.</p>
-<p class="rubric" id="id16">Returns</p>
+<p class="rubric" id="id17">Returns</p>
 <p>int
 The number of dimensions.</p>
 </dd></dl>
@@ -297,7 +301,7 @@ The number of dimensions.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.get_3d">
 <span class="sig-name descname"><span class="pre">get_3d</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.ProjectionGeometry" title="corrct.models.ProjectionGeometry"><span class="pre">corrct.models.ProjectionGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.get_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.get_3d" title="Link to this definition"></a></dt>
 <dd><p>Return the 3D version of the geometry.</p>
-<p class="rubric" id="id17">Returns</p>
+<p class="rubric" id="id18">Returns</p>
 <p>ProjectionGeometry
 The new geometry.</p>
 </dd></dl>
@@ -306,7 +310,7 @@ The new geometry.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.set_detector_shape_vu">
 <span class="sig-name descname"><span class="pre">set_detector_shape_vu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.set_detector_shape_vu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.set_detector_shape_vu" title="Link to this definition"></a></dt>
 <dd><p>Set the detector VU shape.</p>
-<p class="rubric" id="id18">Parameters</p>
+<p class="rubric" id="id19">Parameters</p>
 <p>vu : int | Sequence[int] | NDArray
 The VU shape of the projection data.</p>
 </dd></dl>
@@ -315,7 +319,7 @@ The VU shape of the projection data.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.set_detector_shifts_vu">
 <span class="sig-name descname"><span class="pre">set_detector_shifts_vu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">det_pos_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cor_pos_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">det_dist_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.set_detector_shifts_vu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.set_detector_shifts_vu" title="Link to this definition"></a></dt>
 <dd><p>Set the detector position in XZ, from VU (vertical, horizontal) coordinates.</p>
-<p class="rubric" id="id19">Parameters</p>
+<p class="rubric" id="id20">Parameters</p>
 <p>det_pos_vu : ArrayLike | NDArray | None
 Detector vertical and horizontal positions. Vertical is optional.
 cor_pos_u : float | None
@@ -328,7 +332,7 @@ Detector distance from origin along Y. The default is 0.0.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.set_source_shifts_vu">
 <span class="sig-name descname"><span class="pre">set_source_shifts_vu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_pos_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.set_source_shifts_vu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.set_source_shifts_vu" title="Link to this definition"></a></dt>
 <dd><p>Set the source position in XZ, from VU (vertical, horizontal) coordinates.</p>
-<p class="rubric" id="id20">Parameters</p>
+<p class="rubric" id="id21">Parameters</p>
 <p>src_pos_vu : ArrayLike | NDArray | None
 Source vertical and horizontal positions. Vertical is optional.</p>
 </dd></dl>
@@ -337,7 +341,7 @@ Source vertical and horizontal positions. Vertical is optional.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.set_detector_tilt">
 <span class="sig-name descname"><span class="pre">set_detector_tilt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angles_t_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tilt_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tilt_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.set_detector_tilt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.set_detector_tilt" title="Link to this definition"></a></dt>
 <dd><p>Rotate the detector by the given angle(s) and axis(axes).</p>
-<p class="rubric" id="id21">Parameters</p>
+<p class="rubric" id="id22">Parameters</p>
 <p>angles_t_rad : ArrayLike | NDArray
 Rotation angle(s) in radians.
 tilt_axis : Sequence[float] | NDArray, optional
@@ -353,10 +357,10 @@ that the application is not going to be independent.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.rotate">
 <span class="sig-name descname"><span class="pre">rotate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angles_w_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_astra_2d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.ProjectionGeometry" title="corrct.models.ProjectionGeometry"><span class="pre">corrct.models.ProjectionGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.rotate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.rotate" title="Link to this definition"></a></dt>
 <dd><p>Rotate the geometry by the given angle(s).</p>
-<p class="rubric" id="id22">Parameters</p>
+<p class="rubric" id="id23">Parameters</p>
 <p>angles_w_rad : ArrayLike
 Rotation angle(s) in radians.</p>
-<p class="rubric" id="id23">Returns</p>
+<p class="rubric" id="id24">Returns</p>
 <p>ProjectionGeometry
 The rotated geometry.</p>
 </dd></dl>
@@ -365,10 +369,10 @@ The rotated geometry.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.get_field_scaled">
 <span class="sig-name descname"><span class="pre">get_field_scaled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.get_field_scaled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.get_field_scaled" title="Link to this definition"></a></dt>
 <dd><p>Return the a field content, scaled by the pix2vox ratio.</p>
-<p class="rubric" id="id24">Parameters</p>
+<p class="rubric" id="id25">Parameters</p>
 <p>field_name : str
 Name of the field to access.</p>
-<p class="rubric" id="id25">Returns</p>
+<p class="rubric" id="id26">Returns</p>
 <p>NDArray
 The scaled field.</p>
 </dd></dl>
@@ -377,13 +381,13 @@ The scaled field.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.project_displacement_to_detector">
 <span class="sig-name descname"><span class="pre">project_displacement_to_detector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">disp_zyx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.project_displacement_to_detector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.project_displacement_to_detector" title="Link to this definition"></a></dt>
 <dd><p>Project a given displacement vector in the volume coordinates, over the detector.</p>
-<p class="rubric" id="id26">Parameters</p>
+<p class="rubric" id="id27">Parameters</p>
 <p>disp_zyx : ArrayLike
 The displacement vector in volume coordinates.</p>
-<p class="rubric" id="id27">Returns</p>
+<p class="rubric" id="id28">Returns</p>
 <p>NDArray
 The projection on u (and if applicable v) coordinates.</p>
-<p class="rubric" id="id28">Raises</p>
+<p class="rubric" id="id29">Raises</p>
 <p>ValueError
 When projection geometry and vector dimensions don match.</p>
 </dd></dl>
@@ -392,10 +396,10 @@ When projection geometry and vector dimensions don match.</p>
 <dt class="sig sig-object py" id="corrct.models.ProjectionGeometry.get_pre_weights">
 <span class="sig-name descname"><span class="pre">get_pre_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">det_shape_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#ProjectionGeometry.get_pre_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.ProjectionGeometry.get_pre_weights" title="Link to this definition"></a></dt>
 <dd><p>Compute the pre-weights of the projector geometry (notably for cone-beam geometries).</p>
-<p class="rubric" id="id29">Parameters</p>
+<p class="rubric" id="id30">Parameters</p>
 <p>det_shape_vu : Sequence[int] | NDArray | None, optional
 Shape of the detector in [V]U coordinates, by default None</p>
-<p class="rubric" id="id30">Returns</p>
+<p class="rubric" id="id31">Returns</p>
 <p>NDArray | None
 The computed detector weights</p>
 </dd></dl>
@@ -429,7 +433,7 @@ The computed detector weights</p>
 <dt class="sig sig-object py" id="corrct.models.VolumeGeometry.is_square">
 <span class="sig-name descname"><span class="pre">is_square</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#VolumeGeometry.is_square"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.VolumeGeometry.is_square" title="Link to this definition"></a></dt>
 <dd><p>Compute whether the volume is square in XY.</p>
-<p class="rubric" id="id31">Returns</p>
+<p class="rubric" id="id32">Returns</p>
 <p>bool
 True is the volume is square in XY.</p>
 </dd></dl>
@@ -438,7 +442,7 @@ True is the volume is square in XY.</p>
 <dt class="sig sig-object py" id="corrct.models.VolumeGeometry.shape_xyz">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape_xyz</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></em><a class="headerlink" href="#corrct.models.VolumeGeometry.shape_xyz" title="Link to this definition"></a></dt>
 <dd><p>Return the volume shape (XYZ).</p>
-<p class="rubric" id="id32">Returns</p>
+<p class="rubric" id="id33">Returns</p>
 <p>NDArray
 Shape of the volume (XYZ).</p>
 </dd></dl>
@@ -448,7 +452,7 @@ Shape of the volume (XYZ).</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape_zxy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></em><a class="headerlink" href="#corrct.models.VolumeGeometry.shape_zxy" title="Link to this definition"></a></dt>
 <dd><p>Return the volume shape (ZXY).</p>
 <p>The swap between X and Y is imposed by the astra-toolbox.</p>
-<p class="rubric" id="id33">Returns</p>
+<p class="rubric" id="id34">Returns</p>
 <p>NDArray
 Shape of the volume (ZXY).</p>
 </dd></dl>
@@ -457,7 +461,7 @@ Shape of the volume (ZXY).</p>
 <dt class="sig sig-object py" id="corrct.models.VolumeGeometry.mask_shape">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mask_shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></em><a class="headerlink" href="#corrct.models.VolumeGeometry.mask_shape" title="Link to this definition"></a></dt>
 <dd><p>Return the XY volume shape for circular masks.</p>
-<p class="rubric" id="id34">Returns</p>
+<p class="rubric" id="id35">Returns</p>
 <p>NDArray
 Shape of the XY volume.</p>
 </dd></dl>
@@ -466,7 +470,7 @@ Shape of the XY volume.</p>
 <dt class="sig sig-object py" id="corrct.models.VolumeGeometry.extent">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.models.VolumeGeometry.extent" title="Link to this definition"></a></dt>
 <dd><p>Return extent of the volume.</p>
-<p class="rubric" id="id35">Returns</p>
+<p class="rubric" id="id36">Returns</p>
 <p>Sequence[float]
 The extent of the volume [-x, +x, -y, +y, [-z, +z]].</p>
 </dd></dl>
@@ -475,7 +479,7 @@ The extent of the volume [-x, +x, -y, +y, [-z, +z]].</p>
 <dt class="sig sig-object py" id="corrct.models.VolumeGeometry.is_3D">
 <span class="sig-name descname"><span class="pre">is_3D</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#VolumeGeometry.is_3D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.VolumeGeometry.is_3D" title="Link to this definition"></a></dt>
 <dd><p>Tell whether this is a 3D geometry.</p>
-<p class="rubric" id="id36">Returns</p>
+<p class="rubric" id="id37">Returns</p>
 <p>bool
 Whether this is a 3D geometry or not.</p>
 </dd></dl>
@@ -484,7 +488,7 @@ Whether this is a 3D geometry or not.</p>
 <dt class="sig sig-object py" id="corrct.models.VolumeGeometry.get_3d">
 <span class="sig-name descname"><span class="pre">get_3d</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.VolumeGeometry" title="corrct.models.VolumeGeometry"><span class="pre">corrct.models.VolumeGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#VolumeGeometry.get_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.VolumeGeometry.get_3d" title="Link to this definition"></a></dt>
 <dd><p>Return the 3D version of the geometry.</p>
-<p class="rubric" id="id37">Returns</p>
+<p class="rubric" id="id38">Returns</p>
 <p>VolumeGeometry
 The new geometry.</p>
 </dd></dl>
@@ -493,12 +497,12 @@ The new geometry.</p>
 <dt class="sig sig-object py" id="corrct.models.VolumeGeometry.get_default_from_data">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'dvwu'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.VolumeGeometry" title="corrct.models.VolumeGeometry"><span class="pre">corrct.models.VolumeGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#VolumeGeometry.get_default_from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.VolumeGeometry.get_default_from_data" title="Link to this definition"></a></dt>
 <dd><p>Generate a default volume geometry from the data shape.</p>
-<p class="rubric" id="id38">Parameters</p>
+<p class="rubric" id="id39">Parameters</p>
 <p>data : NDArray
 The data.
 data_format : str, optional
 The ordering and meaning of the dimensions in the data. The deault is “dvwu”.</p>
-<p class="rubric" id="id39">Returns</p>
+<p class="rubric" id="id40">Returns</p>
 <p>VolumeGeometry
 The default volume geometry.</p>
 </dd></dl>
@@ -507,10 +511,10 @@ The default volume geometry.</p>
 <dt class="sig sig-object py" id="corrct.models.VolumeGeometry.get_default_from_volume">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_default_from_volume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.VolumeGeometry" title="corrct.models.VolumeGeometry"><span class="pre">corrct.models.VolumeGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#VolumeGeometry.get_default_from_volume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.VolumeGeometry.get_default_from_volume" title="Link to this definition"></a></dt>
 <dd><p>Generate a default volume geometry from the given volume.</p>
-<p class="rubric" id="id40">Parameters</p>
+<p class="rubric" id="id41">Parameters</p>
 <p>volume : NDArray
 The volume.</p>
-<p class="rubric" id="id41">Returns</p>
+<p class="rubric" id="id42">Returns</p>
 <p>VolumeGeometry
 The default volume geometry.</p>
 </dd></dl>
@@ -521,12 +525,12 @@ The default volume geometry.</p>
 <dt class="sig sig-object py" id="corrct.models.combine_shifts_vu">
 <span class="sig-prename descclassname"><span class="pre">corrct.models.</span></span><span class="sig-name descname"><span class="pre">combine_shifts_vu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shifts_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shifts_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#combine_shifts_vu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.combine_shifts_vu" title="Link to this definition"></a></dt>
 <dd><p>Combine vertical and horizontal shifts.</p>
-<p class="rubric" id="id42">Parameters</p>
+<p class="rubric" id="id43">Parameters</p>
 <p>shifts_v : NDArray
 The vertical shifts
 shifts_u : NDArray
 The horizontal shifts</p>
-<p class="rubric" id="id43">Returns</p>
+<p class="rubric" id="id44">Returns</p>
 <p>NDArray
 The combined shifts</p>
 </dd></dl>
@@ -535,13 +539,13 @@ The combined shifts</p>
 <dt class="sig sig-object py" id="corrct.models.get_rot_axis_dir">
 <span class="sig-prename descclassname"><span class="pre">corrct.models.</span></span><span class="sig-name descname"><span class="pre">get_rot_axis_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rot_axis_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'clockwise'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/models.html#get_rot_axis_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.get_rot_axis_dir" title="Link to this definition"></a></dt>
 <dd><p>Process the requested rotation axis direction and return a meaningful value.</p>
-<p class="rubric" id="id44">Parameters</p>
+<p class="rubric" id="id45">Parameters</p>
 <p>rot_axis_dir : str | ArrayLike | NDArray, optional
 The requested direction, by default “clockwise”</p>
-<p class="rubric" id="id45">Returns</p>
+<p class="rubric" id="id46">Returns</p>
 <p>NDArray
 The vector corresponding to the rotation direction.</p>
-<p class="rubric" id="id46">Raises</p>
+<p class="rubric" id="id47">Raises</p>
 <p>ValueError
 In case of malformed direction.</p>
 </dd></dl>
@@ -555,14 +559,14 @@ In case of malformed direction.</p>
 <dt class="sig sig-object py" id="corrct.models.get_prj_geom_parallel">
 <span class="sig-prename descclassname"><span class="pre">corrct.models.</span></span><span class="sig-name descname"><span class="pre">get_prj_geom_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'3d'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_axis_shift_pix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_axis_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'clockwise'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'dvwu'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.ProjectionGeometry" title="corrct.models.ProjectionGeometry"><span class="pre">corrct.models.ProjectionGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#get_prj_geom_parallel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.get_prj_geom_parallel" title="Link to this definition"></a></dt>
 <dd><p>Generate the default geometry for parallel beam.</p>
-<p class="rubric" id="id47">Parameters</p>
+<p class="rubric" id="id48">Parameters</p>
 <p>geom_type : str, optional
 The geometry type. The default is “parallel3d”.
 rot_axis_shift_pix : ArrayLike | NDArray | None, optional
 Rotation axis shift in pixels. The default is None.
 rot_axis_dir : str | ArrayLike | NDArray, optional
 Rotation axis direction. It can be either a string or a direction. The default is “clockwise”.</p>
-<p class="rubric" id="id48">Returns</p>
+<p class="rubric" id="id49">Returns</p>
 <p>ProjectionGeometry
 The default parallel-beam geometry.</p>
 </dd></dl>
@@ -571,14 +575,14 @@ The default parallel-beam geometry.</p>
 <dt class="sig sig-object py" id="corrct.models.get_prj_geom_cone">
 <span class="sig-prename descclassname"><span class="pre">corrct.models.</span></span><span class="sig-name descname"><span class="pre">get_prj_geom_cone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_to_sam_dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_axis_shift_pix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_axis_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'clockwise'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'dvwu'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.ProjectionGeometry" title="corrct.models.ProjectionGeometry"><span class="pre">corrct.models.ProjectionGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#get_prj_geom_cone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.get_prj_geom_cone" title="Link to this definition"></a></dt>
 <dd><p>Generate the default geometry for parallel beam.</p>
-<p class="rubric" id="id49">Parameters</p>
+<p class="rubric" id="id50">Parameters</p>
 <p>geom_type : str, optional
 The geometry type. The default is “parallel3d”.
 rot_axis_shift_pix : ArrayLike | NDArray | None, optional
 Rotation axis shift in pixels. The default is None.
 rot_axis_dir : str | ArrayLike | NDArray, optional
 Rotation axis direction. It can be either a string or a direction. The default is “clockwise”.</p>
-<p class="rubric" id="id50">Returns</p>
+<p class="rubric" id="id51">Returns</p>
 <p>ProjectionGeometry
 The default cone-beam geometry.</p>
 </dd></dl>
@@ -587,7 +591,7 @@ The default cone-beam geometry.</p>
 <dt class="sig sig-object py" id="corrct.models.get_vol_geom_from_data">
 <span class="sig-prename descclassname"><span class="pre">corrct.models.</span></span><span class="sig-name descname"><span class="pre">get_vol_geom_from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'dvwu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">super_sampling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.VolumeGeometry" title="corrct.models.VolumeGeometry"><span class="pre">corrct.models.VolumeGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#get_vol_geom_from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.get_vol_geom_from_data" title="Link to this definition"></a></dt>
 <dd><p>Generate a default volume geometry from the data shape.</p>
-<p class="rubric" id="id51">Parameters</p>
+<p class="rubric" id="id52">Parameters</p>
 <p>data : NDArray
 The data.
 padding_u : int | Sequence[int], optional
@@ -596,7 +600,7 @@ data_format : str, optional
 The ordering and meaning of the dimensions in the data. The default is “dvwu”.
 super_sampling: int, optional
 The super-sampling size of the voxels. The default is 1.</p>
-<p class="rubric" id="id52">Returns</p>
+<p class="rubric" id="id53">Returns</p>
 <p>VolumeGeometry
 The default volume geometry.</p>
 </dd></dl>
@@ -605,12 +609,23 @@ The default volume geometry.</p>
 <dt class="sig sig-object py" id="corrct.models.get_vol_geom_from_volume">
 <span class="sig-prename descclassname"><span class="pre">corrct.models.</span></span><span class="sig-name descname"><span class="pre">get_vol_geom_from_volume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.models.VolumeGeometry" title="corrct.models.VolumeGeometry"><span class="pre">corrct.models.VolumeGeometry</span></a></span></span><a class="reference internal" href="../../_modules/corrct/models.html#get_vol_geom_from_volume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.get_vol_geom_from_volume" title="Link to this definition"></a></dt>
 <dd><p>Generate a default volume geometry from the given volume.</p>
-<p class="rubric" id="id53">Parameters</p>
+<p class="rubric" id="id54">Parameters</p>
 <p>volume : NDArray
 The volume.</p>
-<p class="rubric" id="id54">Returns</p>
+<p class="rubric" id="id55">Returns</p>
 <p>VolumeGeometry
 The default volume geometry.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.models.plot_projection_geometry">
+<span class="sig-prename descclassname"><span class="pre">corrct.models.</span></span><span class="sig-name descname"><span class="pre">plot_projection_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prj_geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#corrct.models.ProjectionGeometry" title="corrct.models.ProjectionGeometry"><span class="pre">corrct.models.ProjectionGeometry</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol_geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#corrct.models.VolumeGeometry" title="corrct.models.VolumeGeometry"><span class="pre">corrct.models.VolumeGeometry</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/models.html#plot_projection_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.models.plot_projection_geometry" title="Link to this definition"></a></dt>
+<dd><p>Plot the projection geometry using matplotlib.</p>
+<p class="rubric" id="id56">Parameters</p>
+<p>prj_geom : ProjectionGeometry
+ProjectionGeometry class with precomputed geometric properties.
+vol_size_xyz : VolumeGeometry
+VolumeGeometry class reporting the volume size in number of voxels in X, Y, and Z directions, and their size.</p>
 </dd></dl>
 
 </section>

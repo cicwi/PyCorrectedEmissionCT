@@ -52,6 +52,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cone_beam_calibration_tutorial.html">Cone-Beam Geometry Calibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../apidocs/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 </ul>
@@ -92,7 +93,9 @@
 <span class="sd">and ESRF - The European Synchrotron, Grenoble, France</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -233,6 +236,7 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fft_dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">shifts_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data_vwu</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_angles</span><span class="p">))</span>
         <span class="n">slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_vwu</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">fft_axes</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">ii_a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_angles</span><span class="p">):</span>
             <span class="c1"># For performance reasons, it is better to do the fft on each image</span>
@@ -242,8 +246,8 @@
                 <span class="n">proj_vu</span> <span class="o">=</span> <span class="n">proj_vwu</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">stack_axis</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">proj_vu</span> <span class="o">=</span> <span class="n">proj_vwu</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span><span class="p">)]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">stack_axis</span><span class="p">)</span>
-            <span class="n">data_vwu_f</span> <span class="o">=</span> <span class="n">local_fftn</span><span class="p">(</span><span class="n">data_vu</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">new_fft_shapes</span><span class="p">))</span>
-            <span class="n">proj_vwu_f</span> <span class="o">=</span> <span class="n">local_fftn</span><span class="p">(</span><span class="n">proj_vu</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">new_fft_shapes</span><span class="p">))</span>
+            <span class="n">data_vwu_f</span> <span class="o">=</span> <span class="n">local_fftn</span><span class="p">(</span><span class="n">data_vu</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">new_fft_shapes</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">fft_axes</span><span class="p">)</span>
+            <span class="n">proj_vwu_f</span> <span class="o">=</span> <span class="n">local_fftn</span><span class="p">(</span><span class="n">proj_vu</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">new_fft_shapes</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">fft_axes</span><span class="p">)</span>
 
             <span class="n">cc_f</span> <span class="o">=</span> <span class="n">data_vwu_f</span> <span class="o">*</span> <span class="n">proj_vwu_f</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">normalize_fourier</span><span class="p">:</span>
@@ -562,7 +566,7 @@
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">l1_diff</span><span class="p">)</span>
 
         <span class="n">apb</span> <span class="o">=</span> <span class="n">spopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">b</span><span class="p">]))</span>
-        <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">=</span> <span class="n">apb</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">apb</span><span class="o">.</span><span class="n">x</span>
 
     <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">b</span></div>
 
@@ -835,6 +839,429 @@
             <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; Input values: </span><span class="si">{</span><span class="n">f_vals</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">vertex_yx</span></div>
+
+
+
+<div class="viewcode-block" id="fit_parabola_min">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_parabola_min">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_parabola_min</span><span class="p">(</span>
+    <span class="n">fun_x</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">fun_vals</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">scale</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;log&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+    <span class="n">decimals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parabolic fit local function stationary point.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fx : ArrayLike</span>
+<span class="sd">        Parameter values.</span>
+<span class="sd">    f_vals : ArrayLike</span>
+<span class="sd">        Objective function costs of each parameter value.</span>
+<span class="sd">    scale : str, optional</span>
+<span class="sd">        Scale of the fit. Options are: &quot;log&quot; | &quot;linear&quot;. The default is &quot;log&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    min_fx : float</span>
+<span class="sd">        Expected parameter value of the fitted minimum.</span>
+<span class="sd">    min_f_val : float</span>
+<span class="sd">        Expected objective function cost of the fitted minimum.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fun_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fun_x</span><span class="p">)</span>
+    <span class="n">fun_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fun_vals</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fun_x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">fun_vals</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">fun_x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fun_vals</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Lengths of the parameter values and function values should be identical and &gt;= 3.&quot;</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Given: fx=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">fun_x</span><span class="p">)</span><span class="si">}</span><span class="s2">, f_vals=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">fun_vals</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">scale</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;log&quot;</span><span class="p">:</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">to_fit</span><span class="p">(</span><span class="n">vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">from_fit</span><span class="p">(</span><span class="n">vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">10</span><span class="o">**</span><span class="n">vals</span>
+
+    <span class="k">elif</span> <span class="n">scale</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">to_fit</span><span class="p">(</span><span class="n">vals</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">vals</span>
+
+        <span class="n">from_fit</span> <span class="o">=</span> <span class="n">to_fit</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter &#39;scale&#39; should be either &#39;log&#39; or &#39;linear&#39;, given &#39;</span><span class="si">{</span><span class="n">scale</span><span class="si">}</span><span class="s2">&#39; instead&quot;</span><span class="p">)</span>
+
+    <span class="n">min_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">fun_vals</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_pos</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: minimum value at the beginning of the lambda range.&quot;</span><span class="p">)</span>
+        <span class="n">fx_fit</span> <span class="o">=</span> <span class="n">to_fit</span><span class="p">(</span><span class="n">fun_x</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">f_vals_fit</span> <span class="o">=</span> <span class="n">fun_vals</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">min_pos</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fun_vals</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: minimum value at the end of the lambda range.&quot;</span><span class="p">)</span>
+        <span class="n">fx_fit</span> <span class="o">=</span> <span class="n">to_fit</span><span class="p">(</span><span class="n">fun_x</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:])</span>
+        <span class="n">f_vals_fit</span> <span class="o">=</span> <span class="n">fun_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fx_fit</span> <span class="o">=</span> <span class="n">to_fit</span><span class="p">(</span><span class="n">fun_x</span><span class="p">[</span><span class="n">min_pos</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">min_pos</span> <span class="o">+</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">f_vals_fit</span> <span class="o">=</span> <span class="n">fun_vals</span><span class="p">[</span><span class="n">min_pos</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">min_pos</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># using Polynomial.fit, because it is supposed to be more numerically</span>
+    <span class="c1"># stable than previous solutions (according to numpy).</span>
+    <span class="n">poly</span> <span class="o">=</span> <span class="n">Polynomial</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fx_fit</span><span class="p">,</span> <span class="n">f_vals_fit</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span><span class="o">.</span><span class="n">coef</span>
+    <span class="k">if</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: fitted curve is concave. Returning minimum measured point.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fun_x</span><span class="p">[</span><span class="n">min_pos</span><span class="p">],</span> <span class="n">fun_vals</span><span class="p">[</span><span class="n">min_pos</span><span class="p">],</span> <span class="kc">None</span>
+
+    <span class="c1"># For a 1D parabola `f(x) = c + bx + ax^2`, the vertex position is:</span>
+    <span class="c1"># x_v = -b / 2a.</span>
+    <span class="n">vertex_pos</span> <span class="o">=</span> <span class="o">-</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">vertex_val</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">vertex_pos</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="n">vertex_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">vertex_pos</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="n">decimals</span><span class="p">)</span>
+    <span class="n">vertex_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">vertex_val</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="n">decimals</span><span class="p">)</span>
+
+    <span class="n">min_fx</span><span class="p">,</span> <span class="n">min_f_val</span> <span class="o">=</span> <span class="n">from_fit</span><span class="p">(</span><span class="n">vertex_pos</span><span class="p">),</span> <span class="n">vertex_val</span>
+    <span class="k">if</span> <span class="n">min_fx</span> <span class="o">&lt;</span> <span class="n">fun_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">min_fx</span> <span class="o">&gt;</span> <span class="n">fun_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;WARNING: fitted stationary point </span><span class="si">{</span><span class="n">min_fx</span><span class="si">}</span><span class="s2"> is outside input range [</span><span class="si">{</span><span class="n">fun_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">fun_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">].&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot; Returning minimum measured point.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">fun_x</span><span class="p">[</span><span class="n">min_pos</span><span class="p">],</span> <span class="n">fun_vals</span><span class="p">[</span><span class="n">min_pos</span><span class="p">],</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">min_fx</span><span class="p">,</span> <span class="n">min_f_val</span><span class="p">,</span> <span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">fx_fit</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fit_ellipse_center">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_ellipse_center">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_ellipse_center</span><span class="p">(</span>
+    <span class="n">prj_points_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">rescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">use_l1_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">decimals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit an ellipse center to a set of projected points in VU coordinates.</span>
+
+<span class="sd">    The function uses a least-squares approach to fit an ellipse center to the given points.</span>
+<span class="sd">    Optionally, it can use L1 norm for fitting instead of the default L2 norm, and rescale</span>
+<span class="sd">    the points during fitting to have a maximum range of 1 (improve numerical stability).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    prj_points_vu : NDArray</span>
+<span class="sd">        Projected points in VU coordinates. The expected organization is:</span>
+<span class="sd">        - Last dimension: List of points (each point is a 2D coordinate).</span>
+<span class="sd">        - First dimension: Coordinates (V and U).</span>
+<span class="sd">    rescale : bool, optional</span>
+<span class="sd">        If True, rescale the points to have a maximum range of 1. Default is True.</span>
+<span class="sd">    use_l1_norm : bool, optional</span>
+<span class="sd">        If True, use L1 norm for fitting instead of the default L2 norm. Default is False.</span>
+<span class="sd">    decimals : int | None, optional</span>
+<span class="sd">        The number of decimal places to round the result to. If None, no rounding is performed.</span>
+<span class="sd">        Default is 2.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The fitted ellipse center in VU coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">c_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">prj_points_vu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">pos_vu</span> <span class="o">=</span> <span class="n">prj_points_vu</span> <span class="o">-</span> <span class="n">c_vu</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">rescale</span><span class="p">:</span>
+        <span class="n">scale_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">pos_vu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">pos_vu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">pos_vu</span> <span class="o">/=</span> <span class="n">scale_vu</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">scale_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">pos_vu</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="n">num_lines</span> <span class="o">=</span> <span class="n">pos_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">pos1_vu</span> <span class="o">=</span> <span class="n">pos_vu</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_lines</span><span class="p">]</span>
+    <span class="n">pos2_vu</span> <span class="o">=</span> <span class="n">pos_vu</span><span class="p">[:,</span> <span class="n">num_lines</span> <span class="p">:</span> <span class="n">num_lines</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">diffs_vu</span> <span class="o">=</span> <span class="n">pos2_vu</span> <span class="o">-</span> <span class="n">pos1_vu</span>
+    <span class="n">vandermonde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">diffs_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="o">-</span><span class="n">diffs_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">extra_zeros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">pos1_vu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">pos1_vu0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">pos1_vu</span><span class="p">,</span> <span class="n">extra_zeros</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">pos2_vu0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">pos2_vu</span><span class="p">,</span> <span class="n">extra_zeros</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">pos1_vu0</span><span class="p">,</span> <span class="n">pos2_vu0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="n">p_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">vandermonde</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">use_l1_norm</span><span class="p">:</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_func</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="n">predicted_values</span> <span class="o">=</span> <span class="n">vandermonde</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+            <span class="n">l1_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">predicted_values</span> <span class="o">-</span> <span class="n">values</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">l1_diff</span><span class="p">)</span>
+
+        <span class="n">opt_p_vu</span> <span class="o">=</span> <span class="n">spopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">_func</span><span class="p">,</span> <span class="n">p_vu</span><span class="p">)</span>
+        <span class="n">p_vu</span> <span class="o">=</span> <span class="n">opt_p_vu</span><span class="o">.</span><span class="n">x</span>
+
+    <span class="n">pred_c_vu</span> <span class="o">=</span> <span class="n">p_vu</span> <span class="o">*</span> <span class="n">scale_vu</span> <span class="o">+</span> <span class="n">c_vu</span>
+
+    <span class="k">if</span> <span class="n">decimals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pred_c_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">pred_c_vu</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="n">decimals</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pred_c_vu</span></div>
+
+
+
+<div class="viewcode-block" id="fit_ellipse_parameters">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_ellipse_parameters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_ellipse_parameters</span><span class="p">(</span>
+    <span class="n">prj_points_vu</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">rescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">use_l1_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit ellipse parameters to a set of projected points in VU coordinates.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    prj_points_vu : NDArray</span>
+<span class="sd">        Projected points in VU coordinates. The expected organization is:</span>
+<span class="sd">        - Last dimension: List of points (each point is a 2D coordinate).</span>
+<span class="sd">        - First dimension: Coordinates (V and U).</span>
+<span class="sd">    rescale : bool, optional</span>
+<span class="sd">        If True, rescale the points to have a maximum range of 1. Default is True.</span>
+<span class="sd">    use_l1_norm : bool, optional</span>
+<span class="sd">        If True, use L1 norm for fitting instead of the default L2 norm. Default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[float, float, float, float, float]</span>
+<span class="sd">        The fitted ellipse parameters: a, b, c, u, v.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># First we fit 5 intermediate variables</span>
+    <span class="n">p_u</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">prj_points_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">p_v</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">prj_points_vu</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="k">if</span> <span class="n">rescale</span><span class="p">:</span>
+        <span class="n">c_u</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">p_u</span><span class="p">))</span>
+        <span class="n">c_v</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">p_v</span><span class="p">))</span>
+        <span class="n">p_u</span> <span class="o">=</span> <span class="n">p_u</span> <span class="o">-</span> <span class="n">c_u</span>
+        <span class="n">p_v</span> <span class="o">=</span> <span class="n">p_v</span> <span class="o">-</span> <span class="n">c_v</span>
+
+        <span class="n">p_u_scaling</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">p_u</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="n">p_v_scaling</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">p_v</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="n">p_u</span> <span class="o">/=</span> <span class="n">p_u_scaling</span>
+        <span class="n">p_v</span> <span class="o">/=</span> <span class="n">p_v_scaling</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">c_u</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">c_v</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">p_u_scaling</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">p_v_scaling</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">vandermonde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">p_u</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">p_u</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">p_v</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">p_u</span> <span class="o">*</span> <span class="n">p_v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">p_u</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">p_v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">vandermonde</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">use_l1_norm</span><span class="p">:</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_func</span><span class="p">(</span><span class="n">pars</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="n">predicted_b</span> <span class="o">=</span> <span class="n">vandermonde</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">pars</span><span class="p">)</span>
+            <span class="n">l1_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">predicted_b</span> <span class="o">-</span> <span class="n">values</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">l1_diff</span><span class="p">)</span>
+
+        <span class="n">opt_params</span> <span class="o">=</span> <span class="n">spopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">_func</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">)</span>
+        <span class="n">coeffs</span> <span class="o">=</span> <span class="n">opt_params</span><span class="o">.</span><span class="n">x</span>
+
+    <span class="k">if</span> <span class="n">rescale</span><span class="p">:</span>
+        <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="n">p_v_scaling</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">p_u_scaling</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="n">p_v_scaling</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">p_u_scaling</span>
+        <span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="n">p_v_scaling</span>
+        <span class="n">coeffs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*=</span> <span class="n">p_v_scaling</span> <span class="o">/</span> <span class="n">p_u_scaling</span>
+        <span class="n">coeffs</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">*=</span> <span class="n">p_v_scaling</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">v</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span> <span class="o">*</span> <span class="n">v</span> <span class="o">-</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span>
+
+    <span class="n">u</span> <span class="o">+=</span> <span class="n">c_u</span>
+    <span class="n">v</span> <span class="o">+=</span> <span class="n">c_v</span>
+
+    <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span></div>
+
+
+
+<div class="viewcode-block" id="Trajectory">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Trajectory">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Trajectory</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base trajectory class.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Trajectory.__call__">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Trajectory.__call__">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uus</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute V coordinates, given V coordinates.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uus : Sequence[float] | NDArray</span>
+<span class="sd">            The U coordinates</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Sequence[NDArray]</span>
+<span class="sd">            Corresponding V coordinates, given the multiplicity of the trajectory</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Ellipse">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Ellipse</span><span class="p">(</span><span class="n">Trajectory</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Elliptic trajectory class.&quot;&quot;&quot;</span>
+
+    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">b</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">c</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">u</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">v</span><span class="p">:</span> <span class="nb">float</span>
+
+    <span class="n">c_vu</span><span class="p">:</span> <span class="n">NDArrayFloat</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">u</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c_vu</span><span class="p">:</span> <span class="n">NDArrayFloat</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize ellipse class.</span>
+
+<span class="sd">        Ellipse corresponding to the equation: a*(x - u)**2 + b*(y - v)**2 + 2*c*(x - u)*(y - v) = 1</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : float</span>
+<span class="sd">            The semi-major axis of the ellipse.</span>
+<span class="sd">        b : float</span>
+<span class="sd">            The semi-minor axis of the ellipse.</span>
+<span class="sd">        c : float</span>
+<span class="sd">            The rotation angle of the ellipse in radians.</span>
+<span class="sd">        u : float</span>
+<span class="sd">            The center of the ellipse along the x-axis.</span>
+<span class="sd">        v : float</span>
+<span class="sd">            The center of the ellipse along the y-axis.</span>
+<span class="sd">        c_vu : NDArrayFloat</span>
+<span class="sd">            The projected center of the circular orbit generating the ellipse.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">u</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c_vu</span> <span class="o">=</span> <span class="n">c_vu</span>
+
+<div class="viewcode-block" id="Ellipse.__repr__">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.__repr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Ellipse instance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Ellipse(a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">, b=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="si">}</span><span class="s2">, c=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="si">}</span><span class="s2">, u=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="si">}</span><span class="s2">, v=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="si">}</span><span class="s2">, c_vu=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">c_vu</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extremes_u</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the most extreme x coordinates (U coordinates) that are still valid for the given ellipse equation.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple[float, float]</span>
+<span class="sd">            A tuple containing the most extreme U coordinates (u_min, u_max).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate the extreme U coordinates</span>
+        <span class="n">u_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">u_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">u_min</span><span class="p">,</span> <span class="n">u_max</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">center_vu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the fitted ellipse center.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NDArray</span>
+<span class="sd">            The fitted center position.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_vu</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the fitted ellipse parameters.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple[float, float, float, float, float]</span>
+<span class="sd">            The fitted ellipse parameters: b, a, c, v, u.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span>
+
+<div class="viewcode-block" id="Ellipse.__call__">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.Ellipse.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uus</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict V coordinates of ellipse from its parameters, and U coordinates.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uus : Union[ArrayLike, NDArray]</span>
+<span class="sd">            The U coordinates</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple[NDArray, NDArray]</span>
+<span class="sd">            The corresponding top and bottom V coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="n">uus</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uus</span><span class="p">)</span>
+
+        <span class="n">uus_u</span> <span class="o">=</span> <span class="n">uus</span> <span class="o">-</span> <span class="n">u</span>
+
+        <span class="n">a_tilde</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="c1"># b_tilde = 2 * (-b * v + c * uus - c * u)</span>
+        <span class="c1"># c_tilde = -(1 - a * (uus - u) ** 2 - b * v**2 + 2 * c * v * (uus - u))</span>
+        <span class="n">b_tilde</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">b</span> <span class="o">*</span> <span class="n">v</span> <span class="o">+</span> <span class="n">c</span> <span class="o">*</span> <span class="n">uus_u</span><span class="p">)</span>
+        <span class="n">c_tilde</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">uus_u</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">b</span> <span class="o">*</span> <span class="n">v</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">v</span> <span class="o">*</span> <span class="n">uus_u</span><span class="p">)</span>
+        <span class="n">delta_tilde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">b_tilde</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">a_tilde</span> <span class="o">*</span> <span class="n">c_tilde</span><span class="p">)</span>
+        <span class="n">v_1</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">b_tilde</span> <span class="o">+</span> <span class="n">delta_tilde</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">a_tilde</span><span class="p">)</span>
+        <span class="n">v_2</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">b_tilde</span> <span class="o">-</span> <span class="n">delta_tilde</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">a_tilde</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">v_1</span><span class="p">,</span> <span class="n">v_2</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="fit_ellipse">
+<a class="viewcode-back" href="../../../apidocs/corrct/corrct.alignment.fitting.html#corrct.alignment.fitting.fit_ellipse">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_ellipse</span><span class="p">(</span><span class="n">prj_points_vu</span><span class="p">:</span> <span class="n">ArrayLike</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">rescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">use_l1_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ellipse</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fit an ellipse to a set of 2D points using either least-squares or l1-norm optimization.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    prj_points_vu : ArrayLike | NDArray</span>
+<span class="sd">        A list or array of 2D points (shape: Nx2) representing the trajectory to fit.</span>
+<span class="sd">    rescale : bool, optional</span>
+<span class="sd">        Whether to rescale the data within the interval [-1, 1] to improve numerical stability.</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    use_l1_norm : bool, optional</span>
+<span class="sd">        Whether to use the l1-norm or the least-squares (l2-norm) fit for optimization.</span>
+<span class="sd">        Default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Ellipse</span>
+<span class="sd">        An Ellipse object containing the fitted ellipse parameters (center, axes, and rotation angle).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function first fits the ellipse parameters (axes and rotation angle) and then fits the center</span>
+<span class="sd">    separately. The optimization method can be switched between least-squares and l1-norm for robustness</span>
+<span class="sd">    against outliers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prj_points_vu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">prj_points_vu</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Ellipse</span><span class="p">(</span>
+        <span class="o">*</span><span class="n">fit_ellipse_parameters</span><span class="p">(</span><span class="n">prj_points_vu</span><span class="p">,</span> <span class="n">rescale</span><span class="p">,</span> <span class="n">use_l1_norm</span><span class="o">=</span><span class="n">use_l1_norm</span><span class="p">),</span>
+        <span class="n">fit_ellipse_center</span><span class="p">(</span><span class="n">prj_points_vu</span><span class="p">,</span> <span class="n">rescale</span><span class="p">,</span> <span class="n">use_l1_norm</span><span class="o">=</span><span class="n">use_l1_norm</span><span class="p">),</span>
+    <span class="p">)</span></div>
 
 </pre></div>
 

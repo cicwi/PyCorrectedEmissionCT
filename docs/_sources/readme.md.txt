@@ -19,6 +19,7 @@ This package provides the following functionality:
     * Various data fitting terms, including **Gaussian and Poisson noise** modelling.
     * Various optional regularization terms, including: **TV-min**, l1-min, laplacian, and **wavelet** l1-min.
     * Multi-channel (collaborative) regularization terms, like: **TNV** (Total Nuclear Variation).
+  - Fast Iterative Shrinkage-Thresholding Algorithm (FISTA).
   - Filtered Back-Projection (**FBP**), and its data-dependent filter learning variant
 (**[PyMR-FBP](https://github.com/dmpelt/pymrfbp)**).
 * Two projector backends, based on: [astra-toolbox](https://github.com/astra-toolbox/astra-toolbox) and

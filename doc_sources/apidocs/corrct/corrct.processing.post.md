@@ -35,6 +35,10 @@
   - ```{autodoc2-docstring} corrct.processing.post.plot_frcs
     :summary:
     ```
+* - {py:obj}`compute_reconstruction_bias_variance_maps <corrct.processing.post.compute_reconstruction_bias_variance_maps>`
+  - ```{autodoc2-docstring} corrct.processing.post.compute_reconstruction_bias_variance_maps
+    :summary:
+    ```
 * - {py:obj}`fit_scale_bias <corrct.processing.post.fit_scale_bias>`
   - ```{autodoc2-docstring} corrct.processing.post.fit_scale_bias
     :summary:
@@ -97,6 +101,13 @@
 :canonical: corrct.processing.post.plot_frcs
 
 ```{autodoc2-docstring} corrct.processing.post.plot_frcs
+```
+````
+
+````{py:function} compute_reconstruction_bias_variance_maps(reference: numpy.typing.NDArray, reconstructions: collections.abc.Sequence[numpy.typing.NDArray] | numpy.typing.NDArray, realizations_axis: int = 0) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray, numpy.typing.NDArray]
+:canonical: corrct.processing.post.compute_reconstruction_bias_variance_maps
+
+```{autodoc2-docstring} corrct.processing.post.compute_reconstruction_bias_variance_maps
 ```
 ````
 

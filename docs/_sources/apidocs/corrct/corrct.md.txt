@@ -24,18 +24,18 @@ corrct.physics
 :titlesonly:
 :maxdepth: 1
 
-corrct.regularizers
-corrct.projectors
 corrct._projector_backends
-corrct.param_tuning
 corrct.data_terms
 corrct.denoisers
 corrct.filters
 corrct.models
 corrct.operators
+corrct.param_tuning
+corrct.projectors
+corrct.regularizers
 corrct.solvers
-corrct.testing
 corrct.struct_illum
+corrct.testing
 ```
 
 ## Package Contents

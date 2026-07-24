@@ -24,7 +24,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="corrct.alignment.shifts" href="corrct.alignment.shifts.html" />
+    <link rel="next" title="corrct.alignment.cone_beam" href="corrct.alignment.cone_beam.html" />
     <link rel="prev" title="corrct.alignment.centering" href="corrct.alignment.centering.html" /> 
 </head>
 
@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../attenuation_tutorial.html">Attenuation correction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../param_tuning.html">Hyperparameter Tuning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alignment_tools.html">Alignment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cone_beam_calibration_tutorial.html">Cone-Beam Geometry Calibration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="corrct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">corrct</span></code></a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="corrct.html#subpackages">Subpackages</a><ul class="current">
@@ -107,6 +108,19 @@
 and ESRF - The European Synchrotron, Grenoble, France</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.Trajectory" title="corrct.alignment.fitting.Trajectory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Trajectory</span></code></a></p></td>
+<td><p>Base trajectory class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.fitting.Ellipse" title="corrct.alignment.fitting.Ellipse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Ellipse</span></code></a></p></td>
+<td><p>Elliptic trajectory class.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="functions">
 <h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
 <table class="autosummary longtable docutils align-left">
@@ -144,6 +158,18 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.refine_max_position_2d" title="corrct.alignment.fitting.refine_max_position_2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_max_position_2d</span></code></a></p></td>
 <td><p>Compute the sub-pixel max position of the given function sampling.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.fitting.fit_parabola_min" title="corrct.alignment.fitting.fit_parabola_min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_parabola_min</span></code></a></p></td>
+<td><p>Parabolic fit local function stationary point.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.fit_ellipse_center" title="corrct.alignment.fitting.fit_ellipse_center"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_ellipse_center</span></code></a></p></td>
+<td><p>Fit an ellipse center to a set of projected points in VU coordinates.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#corrct.alignment.fitting.fit_ellipse_parameters" title="corrct.alignment.fitting.fit_ellipse_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_ellipse_parameters</span></code></a></p></td>
+<td><p>Fit ellipse parameters to a set of projected points in VU coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#corrct.alignment.fitting.fit_ellipse" title="corrct.alignment.fitting.fit_ellipse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_ellipse</span></code></a></p></td>
+<td><p>Fit an ellipse to a set of 2D points using either least-squares or l1-norm optimization.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -178,7 +204,7 @@ and ESRF - The European Synchrotron, Grenoble, France</p>
 <dt class="sig sig-object py" id="corrct.alignment.fitting.fit_shifts_u_sad">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_shifts_u_sad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_wu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_wu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_shifts_u_sad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_shifts_u_sad" title="Link to this definition"></a></dt>
 <dd><p>Find the U shifts between two sets of lines, by means of the sum-of-absolute-difference (SAD).</p>
-<p class="rubric" id="id23">Parameters</p>
+<p class="rubric" id="id31">Parameters</p>
 <p>data_wu : NDArrayFloat
 The reference data.
 proj_wu : NDArrayFloat
@@ -189,7 +215,7 @@ error_norm : int, optional
 The error norm to use, by default 1
 decimals : int, optional
 The precision of the result, by default 2</p>
-<p class="rubric" id="id24">Returns</p>
+<p class="rubric" id="id32">Returns</p>
 <p>NDArrayFloat
 A list of one shift for each row.</p>
 </dd></dl>
@@ -198,7 +224,7 @@ A list of one shift for each row.</p>
 <dt class="sig sig-object py" id="corrct.alignment.fitting.fit_shifts_vu_xc">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_shifts_vu_xc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_vwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_vwu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_fourier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_rfft</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_shifts_vu_xc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_shifts_vu_xc" title="Link to this definition"></a></dt>
 <dd><p>Find the VU shifts of the projected data, through cross-correlation.</p>
-<p class="rubric" id="id25">Parameters</p>
+<p class="rubric" id="id33">Parameters</p>
 <p>data_vwu : NDArrayFloat
 The collected projection data.
 proj_vwu : NDArrayFloat
@@ -215,7 +241,7 @@ stack_axis : int, optional
 The axis along which the VU images are stacked. The default is -2.
 decimals : int, optional
 Decimals for the truncation of the sub-pixel  The default is 2.</p>
-<p class="rubric" id="id26">Returns</p>
+<p class="rubric" id="id34">Returns</p>
 <p>NDArrayFloat
 The VU shifts.</p>
 </dd></dl>
@@ -224,7 +250,7 @@ The VU shifts.</p>
 <dt class="sig sig-object py" id="corrct.alignment.fitting.fit_shifts_zyx_xc">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_shifts_zyx_xc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_vol_zyx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rec_vol_zyx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_zyx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_fourier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_rfft</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_shifts_zyx_xc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_shifts_zyx_xc" title="Link to this definition"></a></dt>
 <dd><p>Find the ZYX shifts of the volume, through cross-correlation.</p>
-<p class="rubric" id="id27">Parameters</p>
+<p class="rubric" id="id35">Parameters</p>
 <p>ref_vol_zyx : NDArrayFloat
 The reference volume.
 rec_vol_zyx : NDArrayFloat
@@ -237,7 +263,7 @@ use_rfft : bool, optional
 Whether to use the <code class="docutils literal notranslate"><span class="pre">rfft</span></code> transform in place of the complex <code class="docutils literal notranslate"><span class="pre">fft</span></code> transform. The default is True.
 decimals : int, optional
 Decimals for the truncation of the sub-pixel  The default is 2.</p>
-<p class="rubric" id="id28">Returns</p>
+<p class="rubric" id="id36">Returns</p>
 <p>NDArrayFloat
 The ZYX shifts.</p>
 </dd></dl>
@@ -246,7 +272,7 @@ The ZYX shifts.</p>
 <dt class="sig sig-object py" id="corrct.alignment.fitting.fit_image_rotation_and_scale">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_image_rotation_and_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_1_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_2_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'hann'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_image_rotation_and_scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_image_rotation_and_scale" title="Link to this definition"></a></dt>
 <dd><p>Fit the rotation and scaling of an image against a reference image. This works best for larger rotation angles.</p>
-<p class="rubric" id="id29">Parameters</p>
+<p class="rubric" id="id37">Parameters</p>
 <p>img_1_vu : NDArray
 Reference image
 img_2_vu : NDArray
@@ -257,10 +283,10 @@ window_type : str, optional
 Windowing type (to cud the high frequency aliasing), by default “hann”
 verbose : bool, optional
 Whether to give verbose output, by default False</p>
-<p class="rubric" id="id30">Returns</p>
+<p class="rubric" id="id38">Returns</p>
 <p>tuple[float, float]
 The rotation (in degrees) and scale of the second image with respect to the first</p>
-<p class="rubric" id="id31">Raises</p>
+<p class="rubric" id="id39">Raises</p>
 <p>ValueError
 In case of mismatching shape of the two images.</p>
 </dd></dl>
@@ -269,7 +295,7 @@ In case of mismatching shape of the two images.</p>
 <dt class="sig sig-object py" id="corrct.alignment.fitting.fit_camera_tilt_angle">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_camera_tilt_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_camera_tilt_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_camera_tilt_angle" title="Link to this definition"></a></dt>
 <dd><p>Estimate the camera tilt angle based on correlation peak values between two images.</p>
-<p class="rubric" id="id32">Parameters</p>
+<p class="rubric" id="id40">Parameters</p>
 <p>img_1: NDArray
 The first image.
 img_2: NDArray
@@ -280,7 +306,7 @@ fit_l1: bool, optional
 Perform L1 norm fitting if True. Default is True.
 verbose: bool, optional
 Enable verbose output. Default is False.</p>
-<p class="rubric" id="id33">Returns</p>
+<p class="rubric" id="id41">Returns</p>
 <p>tuple[float, float]
 Tuple containing the estimated center of rotation offset (pixels) and camera tilt angle (degrees).</p>
 </dd></dl>
@@ -289,7 +315,7 @@ Tuple containing the estimated center of rotation offset (pixels) and camera til
 <dt class="sig sig-object py" id="corrct.alignment.fitting.sinusoid">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">sinusoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#sinusoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.sinusoid" title="Link to this definition"></a></dt>
 <dd><p>Compute the values of a sine function.</p>
-<p class="rubric" id="id34">Parameters</p>
+<p class="rubric" id="id42">Parameters</p>
 <p>x : NDArrayFloat | float
 The independent variable.
 a : NDArrayFloat | float
@@ -298,7 +324,7 @@ p : NDArrayFloat | float
 The phase of the sine.
 b : NDArrayFloat | float
 The bias of the sine.</p>
-<p class="rubric" id="id35">Returns</p>
+<p class="rubric" id="id43">Returns</p>
 <p>NDArrayFloat
 The computed values.</p>
 </dd></dl>
@@ -307,14 +333,14 @@ The computed values.</p>
 <dt class="sig sig-object py" id="corrct.alignment.fitting.fit_sinusoid">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_sinusoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_l1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_sinusoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_sinusoid" title="Link to this definition"></a></dt>
 <dd><p>Fits a sinusoid to the given values.</p>
-<p class="rubric" id="id36">Parameters</p>
+<p class="rubric" id="id44">Parameters</p>
 <p>angles : NDArrayFloat
 Angles where to evaluate the sinusoid.
 values : NDArrayFloat
 Values of the sinusoid.
 fit_l1 : bool, optional
 Whether to use l1 fit instead of the l2 fit, by default False</p>
-<p class="rubric" id="id37">Returns</p>
+<p class="rubric" id="id45">Returns</p>
 <p>Tuple[float, float, float]
 The amplitude, phase and bias of the sinusoid.</p>
 </dd></dl>
@@ -323,7 +349,7 @@ The amplitude, phase and bias of the sinusoid.</p>
 <dt class="sig sig-object py" id="corrct.alignment.fitting.extract_peak_regions_1d">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">extract_peak_regions_1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cc_coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#extract_peak_regions_1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.extract_peak_regions_1d" title="Link to this definition"></a></dt>
 <dd><p>Extract a region around the maximum value.</p>
-<p class="rubric" id="id38">Parameters</p>
+<p class="rubric" id="id46">Parameters</p>
 <p>cc: NDArrayFloat
 Correlation image.
 axis: int, optional
@@ -332,7 +358,7 @@ peak_radius: int, optional
 The l_inf radius of the area to extract around the peak. The default is 1.
 cc_coords: ArrayLike, optional
 The coordinates of <code class="docutils literal notranslate"><span class="pre">cc</span></code> along the selected axis. The default is None.</p>
-<p class="rubric" id="id39">Returns</p>
+<p class="rubric" id="id47">Returns</p>
 <p>f_vals: NDArrayFloat
 The extracted function values.
 fc_ax: NDArrayFloat
@@ -343,18 +369,18 @@ The coordinates of the extracted values, along the selected axis.</p>
 <dt class="sig sig-object py" id="corrct.alignment.fitting.refine_max_position_1d">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">refine_max_position_1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_vertex_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#refine_max_position_1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.refine_max_position_1d" title="Link to this definition"></a></dt>
 <dd><p>Compute the sub-pixel max position of the given function sampling.</p>
-<p class="rubric" id="id40">Parameters</p>
+<p class="rubric" id="id48">Parameters</p>
 <p>f_vals: NDArrayFloat
 Function values of the sampled points
 fx: ArrayLike, optional
 Coordinates of the sampled points
 return_vertex_val: boolean, option
 Enables returning the vertex values. Defaults to False.</p>
-<p class="rubric" id="id41">Raises</p>
+<p class="rubric" id="id49">Raises</p>
 <p>ValueError
 In case position and values do not have the same size, or in case
 the fitted maximum is outside the fitting region.</p>
-<p class="rubric" id="id42">Returns</p>
+<p class="rubric" id="id50">Returns</p>
 <p>float
 Estimated function max, according to the coordinates in fx.</p>
 </dd></dl>
@@ -363,14 +389,14 @@ Estimated function max, according to the coordinates in fx.</p>
 <dt class="sig sig-object py" id="corrct.alignment.fitting.extract_peak_region_nd">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">extract_peak_region_nd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cc_coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Sequence</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#extract_peak_region_nd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.extract_peak_region_nd" title="Link to this definition"></a></dt>
 <dd><p>Extract a region around the maximum value.</p>
-<p class="rubric" id="id43">Parameters</p>
+<p class="rubric" id="id51">Parameters</p>
 <p>cc: NDArrayFloat
 Correlation image.
 peak_radius: int, optional
 The l_inf radius of the area to extract around the peak. The default is 1.
 cc_coords: ArrayLike, optional
 The coordinates of <code class="docutils literal notranslate"><span class="pre">cc</span></code>. The default is None.</p>
-<p class="rubric" id="id44">Returns</p>
+<p class="rubric" id="id52">Returns</p>
 <p>f_vals: NDArrayFloat
 The extracted function values.
 f_coords: Sequence[NDArrayFloat] | None
@@ -381,21 +407,226 @@ The coordinates of the extracted values.</p>
 <dt class="sig sig-object py" id="corrct.alignment.fitting.refine_max_position_2d">
 <span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">refine_max_position_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#refine_max_position_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.refine_max_position_2d" title="Link to this definition"></a></dt>
 <dd><p>Compute the sub-pixel max position of the given function sampling.</p>
-<p class="rubric" id="id45">Parameters</p>
+<p class="rubric" id="id53">Parameters</p>
 <p>f_vals: NDArrayFloat
 Function values of the sampled points
 fy: ArrayLike, optional
 Vertical coordinates of the sampled points
 fx: ArrayLike, optional
 Horizontal coordinates of the sampled points</p>
-<p class="rubric" id="id46">Raises</p>
+<p class="rubric" id="id54">Raises</p>
 <p>ValueError
 In case position and values do not have the same size, or in case
 the fitted maximum is outside the fitting region.</p>
-<p class="rubric" id="id47">Returns</p>
+<p class="rubric" id="id55">Returns</p>
 <p>tuple(float, float)
 Estimated (vertical, horizontal) function max, according to the
 coordinates in fy and fx.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.fit_parabola_min">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_parabola_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fun_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">linear</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">log</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_parabola_min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_parabola_min" title="Link to this definition"></a></dt>
+<dd><p>Parabolic fit local function stationary point.</p>
+<p class="rubric" id="id56">Parameters</p>
+<p>fx : ArrayLike
+Parameter values.
+f_vals : ArrayLike
+Objective function costs of each parameter value.
+scale : str, optional
+Scale of the fit. Options are: “log” | “linear”. The default is “log”.</p>
+<p class="rubric" id="id57">Returns</p>
+<p>min_fx : float
+Expected parameter value of the fitted minimum.
+min_f_val : float
+Expected objective function cost of the fitted minimum.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.fit_ellipse_center">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_ellipse_center</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prj_points_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_l1_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.typing.NDArray</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_ellipse_center"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_ellipse_center" title="Link to this definition"></a></dt>
+<dd><p>Fit an ellipse center to a set of projected points in VU coordinates.</p>
+<p>The function uses a least-squares approach to fit an ellipse center to the given points.
+Optionally, it can use L1 norm for fitting instead of the default L2 norm, and rescale
+the points during fitting to have a maximum range of 1 (improve numerical stability).</p>
+<p class="rubric" id="id58">Parameters</p>
+<p>prj_points_vu : NDArray
+Projected points in VU coordinates. The expected organization is:
+- Last dimension: List of points (each point is a 2D coordinate).
+- First dimension: Coordinates (V and U).
+rescale : bool, optional
+If True, rescale the points to have a maximum range of 1. Default is True.
+use_l1_norm : bool, optional
+If True, use L1 norm for fitting instead of the default L2 norm. Default is False.
+decimals : int | None, optional
+The number of decimal places to round the result to. If None, no rounding is performed.
+Default is 2.</p>
+<p class="rubric" id="id59">Returns</p>
+<p>NDArray
+The fitted ellipse center in VU coordinates.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.fit_ellipse_parameters">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_ellipse_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prj_points_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_l1_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_ellipse_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_ellipse_parameters" title="Link to this definition"></a></dt>
+<dd><p>Fit ellipse parameters to a set of projected points in VU coordinates.</p>
+<p class="rubric" id="id60">Parameters</p>
+<p>prj_points_vu : NDArray
+Projected points in VU coordinates. The expected organization is:
+- Last dimension: List of points (each point is a 2D coordinate).
+- First dimension: Coordinates (V and U).
+rescale : bool, optional
+If True, rescale the points to have a maximum range of 1. Default is True.
+use_l1_norm : bool, optional
+If True, use L1 norm for fitting instead of the default L2 norm. Default is False.</p>
+<p class="rubric" id="id61">Returns</p>
+<p>tuple[float, float, float, float, float]
+The fitted ellipse parameters: a, b, c, u, v.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Trajectory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">Trajectory</span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#Trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.Trajectory" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Base trajectory class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Trajectory.__call__">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#Trajectory.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.Trajectory.__call__" title="Link to this definition"></a></dt>
+<dd><p>Compute V coordinates, given V coordinates.</p>
+<p class="rubric" id="id62">Parameters</p>
+<p>uus : Sequence[float] | NDArray
+The U coordinates</p>
+<p class="rubric" id="id63">Returns</p>
+<p>Sequence[NDArray]
+Corresponding V coordinates, given the multiplicity of the trajectory</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">Ellipse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#Ellipse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.Ellipse" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#corrct.alignment.fitting.Trajectory" title="corrct.alignment.fitting.Trajectory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrct.alignment.fitting.Trajectory</span></code></a></p>
+<p>Elliptic trajectory class.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize ellipse class.</p>
+<p>Ellipse corresponding to the equation: a*(x - u)*<em>2 + b</em>(y - v)**2 + 2<em>c</em>(x - u)*(y - v) = 1</p>
+<p class="rubric" id="id64">Parameters</p>
+<p>a : float
+The semi-major axis of the ellipse.
+b : float
+The semi-minor axis of the ellipse.
+c : float
+The rotation angle of the ellipse in radians.
+u : float
+The center of the ellipse along the x-axis.
+v : float
+The center of the ellipse along the y-axis.
+c_vu : NDArrayFloat
+The projected center of the circular orbit generating the ellipse.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.a">
+<span class="sig-name descname"><span class="pre">a</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.a" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.b">
+<span class="sig-name descname"><span class="pre">b</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.b" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.c">
+<span class="sig-name descname"><span class="pre">c</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.c" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.u">
+<span class="sig-name descname"><span class="pre">u</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.u" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.v">
+<span class="sig-name descname"><span class="pre">v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.v" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.c_vu">
+<span class="sig-name descname"><span class="pre">c_vu</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">corrct.alignment.fitting.NDArrayFloat</span></em><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.c_vu" title="Link to this definition"></a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#Ellipse.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return a string representation of the Ellipse instance.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.extremes_u">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extremes_u</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.extremes_u" title="Link to this definition"></a></dt>
+<dd><p>Find the most extreme x coordinates (U coordinates) that are still valid for the given ellipse equation.</p>
+<p class="rubric" id="id65">Returns</p>
+<p>tuple[float, float]
+A tuple containing the most extreme U coordinates (u_min, u_max).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.center_vu">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">center_vu</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></em><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.center_vu" title="Link to this definition"></a></dt>
+<dd><p>Return the fitted ellipse center.</p>
+<p class="rubric" id="id66">Returns</p>
+<p>NDArray
+The fitted center position.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.parameters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.parameters" title="Link to this definition"></a></dt>
+<dd><p>Return the fitted ellipse parameters.</p>
+<p class="rubric" id="id67">Returns</p>
+<p>tuple[float, float, float, float, float]
+The fitted ellipse parameters: b, a, c, v, u.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.Ellipse.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing.NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#Ellipse.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.Ellipse.__call__" title="Link to this definition"></a></dt>
+<dd><p>Predict V coordinates of ellipse from its parameters, and U coordinates.</p>
+<p class="rubric" id="id68">Parameters</p>
+<p>uus : Union[ArrayLike, NDArray]
+The U coordinates</p>
+<p class="rubric" id="id69">Returns</p>
+<p>tuple[NDArray, NDArray]
+The corresponding top and bottom V coordinates</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="corrct.alignment.fitting.fit_ellipse">
+<span class="sig-prename descclassname"><span class="pre">corrct.alignment.fitting.</span></span><span class="sig-name descname"><span class="pre">fit_ellipse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prj_points_vu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.typing.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.typing.NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_l1_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corrct.alignment.fitting.Ellipse" title="corrct.alignment.fitting.Ellipse"><span class="pre">corrct.alignment.fitting.Ellipse</span></a></span></span><a class="reference internal" href="../../_modules/corrct/alignment/fitting.html#fit_ellipse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrct.alignment.fitting.fit_ellipse" title="Link to this definition"></a></dt>
+<dd><p>Fit an ellipse to a set of 2D points using either least-squares or l1-norm optimization.</p>
+<p class="rubric" id="id70">Parameters</p>
+<p>prj_points_vu : ArrayLike | NDArray
+A list or array of 2D points (shape: Nx2) representing the trajectory to fit.
+rescale : bool, optional
+Whether to rescale the data within the interval [-1, 1] to improve numerical stability.
+Default is True.
+use_l1_norm : bool, optional
+Whether to use the l1-norm or the least-squares (l2-norm) fit for optimization.
+Default is False.</p>
+<p class="rubric" id="id71">Returns</p>
+<p>Ellipse
+An Ellipse object containing the fitted ellipse parameters (center, axes, and rotation angle).</p>
+<p class="rubric" id="id72">Notes</p>
+<p>The function first fits the ellipse parameters (axes and rotation angle) and then fits the center
+separately. The optimization method can be switched between least-squares and l1-norm for robustness
+against outliers.</p>
 </dd></dl>
 
 </section>
@@ -407,7 +638,7 @@ coordinates in fy and fx.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="corrct.alignment.centering.html" class="btn btn-neutral float-left" title="corrct.alignment.centering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="corrct.alignment.shifts.html" class="btn btn-neutral float-right" title="corrct.alignment.shifts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="corrct.alignment.cone_beam.html" class="btn btn-neutral float-right" title="corrct.alignment.cone_beam" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
