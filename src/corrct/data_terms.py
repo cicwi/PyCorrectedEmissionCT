@@ -551,7 +551,10 @@ class DataFidelity_l1(DataFidelityBase):
             dual -= self.sigma_data
         self._apply_threshold(dual)
         dual_inner_norm = self._get_inner_norm(dual)
-        dual /= np.fmax(dual_inner_norm, weight)
+
+        invalid_points = weight <= 0
+        dual /= np.fmax(dual_inner_norm, weight) + invalid_points
+
         dual *= weight
 
     def apply_proximal_primal(self, primal: NDArrayFloat, tau: float | NDArrayFloat) -> None:
