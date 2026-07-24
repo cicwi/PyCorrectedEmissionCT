@@ -4,7 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]: https://www.github.com/cicwi/corrct/compare/v2.0.0...develop
+[Unreleased]: https://www.github.com/cicwi/corrct/compare/v3.0.0...develop
+
+## 3.0.0 - 2026-07-24
+### Added
+- Cone-beam geometry calibration (PR #21)
+- Support for primal domain regularization and FISTA (PR #26)
+- Solvers: Criterion for choosing best solution
+- Computation of reconstruction bias and variance
+### Fixed
+- Unintended implicit data type conversion, when using background
+- l1 data fidelity term handling of 0 weights
+### API Changes
+- Renamed data term wl2 to l2w, to be more consistent with l2b and l1b
+- Renamed data term l12 to l21, due to a previous mistake
 
 ## 2.0.0 - 2026-01-13
 ### Added
