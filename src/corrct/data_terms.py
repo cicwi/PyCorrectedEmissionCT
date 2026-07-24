@@ -630,6 +630,32 @@ class DataFidelity_l21(DataFidelity_l1):
         )
 
 
+class DataFidelity_l21w(DataFidelity_l21):
+    """l12-norm data-fidelity class."""
+
+    __data_fidelity_name__ = "l21w"
+
+    axis_weights: NDArrayFloat
+    inner_norm: float
+
+    def __init__(
+        self,
+        axis_weights: NDArrayFloat,
+        background: float | NDArrayFloat | None = None,
+        l2_axis: int = 0,
+        inner_norm: float = 2,
+    ):
+        super().__init__(background=background, l2_axis=l2_axis)
+        self.inner_norm = inner_norm
+        axis_weights = np.abs(axis_weights)
+        axis_weights = axis_weights / axis_weights.mean()
+        self.axis_weights = axis_weights ** (1 / inner_norm)
+
+    def _get_inner_norm(self, dual: NDArrayFloat) -> NDArrayFloat:
+        weights = self.axis_weights.reshape([-1, *(1,) * (dual.ndim - 1)])
+        return np.linalg.norm(dual / weights, ord=self.inner_norm, axis=self.l2_axis, keepdims=True)
+
+
 class DataFidelity_l1b(DataFidelity_l1):
     """l1-norm ball data-fidelity class."""
 

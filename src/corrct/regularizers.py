@@ -232,7 +232,7 @@ class Regularizer_Grad(BaseRegularizer):
     pad_mode: str, optional
         The padding mode to use. The default is "edge".
     norm : DataFidelityBase, optional
-        The norm of the regularizer minimization. The default is DataFidelity_l12().
+        The norm of the regularizer minimization. The default is DataFidelity_l21().
     """
 
     __reg_name__ = "grad"
@@ -634,6 +634,7 @@ class Regularizer_swl(BaseRegularizer):
         self.pad_on_demand = pad_on_demand
 
     def initialize_sigma_tau(self, primal: NDArray) -> float | NDArray:
+        # TODO: Update handling of l21 norm, to use the weighted l21 norm, by passing the weights of the coefficients
         self._check_primal(primal)
 
         self.op = operators.TransformStationaryWavelet(
@@ -695,6 +696,7 @@ class Regularizer_swl(BaseRegularizer):
 
     def apply_proximal_dual(self, dual: NDArray) -> None:
         if isinstance(self.norm, dt.DataFidelity_l21):
+            # TODO: Double check this, as I am not sure about the logic here...
             tmp_dual = dual[1:]
             tmp_dual = tmp_dual.reshape([-1, self.level, *dual.shape[1:]])
             self.norm.apply_proximal_dual(tmp_dual, self.weight)
@@ -799,10 +801,10 @@ class Regularizer_l1swl(Regularizer_swl):
         )
 
 
-class Regularizer_l12swl(Regularizer_swl):
+class Regularizer_l21swl(Regularizer_swl):
     """l1-norm Wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
 
-    __reg_name__ = "l12swl"
+    __reg_name__ = "l21swl"
 
     def __init__(
         self,
@@ -1076,10 +1078,10 @@ class Regularizer_l1dwl(Regularizer_dwl):
         )
 
 
-class Regularizer_l12dwl(Regularizer_dwl):
+class Regularizer_l21dwl(Regularizer_dwl):
     """l1-norm decimated wavelet regularizer. It can be used to promote sparse reconstructions."""
 
-    __reg_name__ = "l12dwl"
+    __reg_name__ = "l21dwl"
 
     def __init__(
         self,

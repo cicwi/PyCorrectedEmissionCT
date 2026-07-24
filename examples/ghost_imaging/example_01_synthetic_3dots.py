@@ -119,7 +119,7 @@ if __name__ == "__main__":
             sol_ls = cct.solvers.PDHG(verbose=True)
             rec_img_ls, _ = sol_ls(p_gi, bucket_vals_gi, iterations=25, lower_limit=lower_limit)
 
-            reg_type = lambda x, m: cct.regularizers.Regularizer_l12swl(x, "haar", 1, upd_mask=m)
+            reg_type = lambda x, m: cct.regularizers.Regularizer_l21swl(x, "haar", 1, upd_mask=m)
             # reg_type = lambda x, m: cct.regularizers.Regularizer_TV2D(x, upd_mask=m)
 
             if fit_reg_weight:
