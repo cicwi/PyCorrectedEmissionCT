@@ -108,7 +108,7 @@ sino_weights = np.concatenate((sino_weights_poisson, sino_weights_transmission),
 # plt.show(block=False)
 
 # Data fitting term: weighted least-squares, based on the standard deviation of the noise.
-data_term_lsw = cct.data_terms.DataFidelity_wl2(sino_weights)
+data_term_lsw = cct.data_terms.DataFidelity_l2w(sino_weights)
 
 with cct.projectors.ProjectorUncorrected([*ph_or.shape, num_vols], angles) as A:
     # Weighted least squares

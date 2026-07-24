@@ -97,7 +97,7 @@ def denoise_image(
     if pix_weights is None:
         data_term = data_terms.DataFidelity_l2()
     else:
-        data_term = data_terms.DataFidelity_wl2(pix_weights)
+        data_term = data_terms.DataFidelity_l2w(pix_weights)
 
     def solver_run(lam_reg, b_val_mask: NDArray | None = None) -> tuple[NDArray, solvers.SolutionInfo]:
         # Using the PDHG solver from Chambolle and Pock

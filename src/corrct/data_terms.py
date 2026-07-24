@@ -331,10 +331,10 @@ class DataFidelity_l2(DataFidelityBase):
         ) / 2 + self.compute_data_dual_dot(dual)
 
 
-class DataFidelity_wl2(DataFidelity_l2):
+class DataFidelity_l2w(DataFidelity_l2):
     """Weighted l2-norm data-fidelity class."""
 
-    __data_fidelity_name__ = "wl2"
+    __data_fidelity_name__ = "l2w"
 
     sigma1: float | NDArrayFloat
     weights: NDArrayFloat
@@ -598,10 +598,12 @@ class DataFidelity_l1(DataFidelityBase):
         return float(np.linalg.norm(residual_inner_norm, ord=1) + self.compute_data_dual_dot(dual))
 
 
-class DataFidelity_l12(DataFidelity_l1):
+class DataFidelity_l21(DataFidelity_l1):
     """l12-norm data-fidelity class."""
 
     __data_fidelity_name__ = "l12"
+
+    l2_axis: int
 
     def __init__(self, background: float | NDArrayFloat | None = None, l2_axis: int = 0):
         super().__init__(background=background)

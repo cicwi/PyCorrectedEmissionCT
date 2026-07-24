@@ -53,7 +53,7 @@ print("Added noise in %g seconds." % (c_noise - c_load))
 img_weights = cct.processing.compute_variance_weight(img_variance, normalized=True)
 
 # Data fitting term: weighted least-squares, based on the standard deviation of the noise. This is optional.
-data_term = cct.data_terms.DataFidelity_wl2(img_weights)
+data_term = cct.data_terms.DataFidelity_l2w(img_weights)
 
 # "Projection" operator. In this case, it's just a place holder, because we are denoising an image.
 A = cct.operators.TransformIdentity(img_orig.shape)

@@ -165,7 +165,7 @@ if __name__ == "__main__":
     sino_weights = cct.processing.noise.compute_variance_weight(sino_variance)
 
     # Data fitting term: weighted least-squares, based on the standard deviation of the noise.
-    data_term_lsw = cct.data_terms.DataFidelity_wl2(sino_weights)
+    data_term_lsw = cct.data_terms.DataFidelity_l2w(sino_weights)
 
     reg = cct.regularizers.Regularizer_TV2D
     # reg = lambda l: cct.regularizers.Regularizer_l1swl(l, "haar", 4)

@@ -63,10 +63,10 @@ sino_variance = cct.processing.compute_variance_poisson(sino)
 sino_weights = cct.processing.compute_variance_weight(sino_variance)
 
 lowlim_l2 = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_l2())
-lowlim_l2w = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_wl2(1 / bckgnd_weight))
+lowlim_l2w = cct.regularizers.Constraint_LowerLimit(0, norm=cct.data_terms.DataFidelity_l2w(1 / bckgnd_weight))
 
 data_term_ls = cct.data_terms.DataFidelity_l2()
-data_term_lsw = cct.data_terms.DataFidelity_wl2(sino_weights)
+data_term_lsw = cct.data_terms.DataFidelity_l2w(sino_weights)
 data_term_lsb = cct.data_terms.DataFidelity_l2b(sino_variance)
 
 with cct.projectors.ProjectorUncorrected(ph.shape, angles) as A:

@@ -192,7 +192,7 @@ the [](#data_terms) module, and they include:
 * l2 norm - least squares reconstruction - default:
 [`DataFidelity_l2`](#data_terms.DataFidelity_l2)
 * weighted l2 norm - when the variance of the sinogram points is known:
-[`DataFidelity_wl2`](#data_terms.DataFidelity_wl2)
+[`DataFidelity_l2w`](#data_terms.DataFidelity_l2w)
 * l1 norm - when the sinogram noise is mostly sparse:
 [`DataFidelity_l1`](#data_terms.DataFidelity_l1)
 * Kullback-Leibler - when dealing with Poisson noise:
@@ -203,7 +203,7 @@ instead of the standard l2 norm:
 
 ```python
 sino_weights = np.ones_like(sino)
-data_term_wl2 = cct.data_terms.DataFidelity_wl2(sino_weights)
+data_term_wl2 = cct.data_terms.DataFidelity_l2w(sino_weights)
 
 solver_pdhg = cct.solvers.PDHG(data_term=data_term_wl2)
 
@@ -233,7 +233,7 @@ follows:
 
 ```python
 data_term_kl = cct.data_terms.DataFidelity_KL()
-data_term_wl2 = cct.data_terms.DataFidelity_wl2(sino_weights)
+data_term_wl2 = cct.data_terms.DataFidelity_l2w(sino_weights)
 
 solver_pdhg = cct.solvers.PDHG(data_term=data_term_kl, data_term_val=data_term_wl2)
 ```

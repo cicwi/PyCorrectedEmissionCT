@@ -244,7 +244,7 @@ class Regularizer_Grad(BaseRegularizer):
         axes: Sequence[int] | NDArray | None = None,
         pad_mode: str = "edge",
         upd_mask: NDArray | None = None,
-        norm: dt.DataFidelityBase = dt.DataFidelity_l12(),
+        norm: dt.DataFidelityBase = dt.DataFidelity_l21(),
     ):
         super().__init__(weight=weight, norm=norm, upd_mask=upd_mask)
 
@@ -300,7 +300,7 @@ class Regularizer_TV1D(Regularizer_Grad):
         axes: Sequence[int] | NDArray | None = None,
         pad_mode: str = "edge",
         upd_mask: NDArray | None = None,
-        norm: dt.DataFidelityBase = dt.DataFidelity_l12(),
+        norm: dt.DataFidelityBase = dt.DataFidelity_l21(),
     ):
         super().__init__(weight=weight, ndims=1, axes=axes, pad_mode=pad_mode, norm=norm, upd_mask=upd_mask)
 
@@ -316,7 +316,7 @@ class Regularizer_TV2D(Regularizer_Grad):
         axes: Sequence[int] | NDArray | None = None,
         pad_mode: str = "edge",
         upd_mask: NDArray | None = None,
-        norm: dt.DataFidelityBase = dt.DataFidelity_l12(),
+        norm: dt.DataFidelityBase = dt.DataFidelity_l21(),
     ):
         super().__init__(weight=weight, ndims=2, axes=axes, pad_mode=pad_mode, norm=norm, upd_mask=upd_mask)
 
@@ -332,7 +332,7 @@ class Regularizer_TV3D(Regularizer_Grad):
         axes: Sequence[int] | NDArray | None = None,
         pad_mode: str = "edge",
         upd_mask: NDArray | None = None,
-        norm: dt.DataFidelityBase = dt.DataFidelity_l12(),
+        norm: dt.DataFidelityBase = dt.DataFidelity_l21(),
     ):
         super().__init__(weight=weight, ndims=3, axes=axes, pad_mode=pad_mode, norm=norm, upd_mask=upd_mask)
 
@@ -694,7 +694,7 @@ class Regularizer_swl(BaseRegularizer):
             dual[0, ...] = 0
 
     def apply_proximal_dual(self, dual: NDArray) -> None:
-        if isinstance(self.norm, dt.DataFidelity_l12):
+        if isinstance(self.norm, dt.DataFidelity_l21):
             tmp_dual = dual[1:]
             tmp_dual = tmp_dual.reshape([-1, self.level, *dual.shape[1:]])
             self.norm.apply_proximal_dual(tmp_dual, self.weight)
@@ -826,7 +826,7 @@ class Regularizer_l12swl(Regularizer_swl):
             upd_mask=upd_mask,
             normalized=normalized,
             min_approx=min_approx,
-            norm=dt.DataFidelity_l12(),
+            norm=dt.DataFidelity_l21(),
         )
 
 
@@ -964,7 +964,7 @@ class Regularizer_dwl(BaseRegularizer):
             dual[tuple(slices)] = 0
 
     def apply_proximal_dual(self, dual: NDArray) -> None:
-        if isinstance(self.norm, dt.DataFidelity_l12):
+        if isinstance(self.norm, dt.DataFidelity_l21):
             if self.op is None:
                 raise ValueError("Regularizer not initialized! Please use method: `initialize_sigma_tau`.")
             if not isinstance(self.op, operators.TransformDecimatedWavelet):
@@ -1101,7 +1101,7 @@ class Regularizer_l12dwl(Regularizer_dwl):
             pad_on_demand=pad_on_demand,
             upd_mask=upd_mask,
             min_approx=min_approx,
-            norm=dt.DataFidelity_l12(),
+            norm=dt.DataFidelity_l21(),
         )
 
 
@@ -1222,7 +1222,7 @@ class Regularizer_fft(BaseRegularizer):
         axes: Sequence[int] | NDArray | None = None,
         fft_filter: str = "exp",
         upd_mask: NDArray | None = None,
-        norm: dt.DataFidelityBase = dt.DataFidelity_l12(),
+        norm: dt.DataFidelityBase = dt.DataFidelity_l21(),
     ):
         super().__init__(weight=weight, norm=norm, upd_mask=upd_mask)
 
