@@ -516,18 +516,23 @@ class TransformConvolutionTightFrame(BaseTransform):
         The convolution kernel.
     pad_mode: str, optional
         The padding mode to use for the linear convolution. The default is "edge".
+    backend: str, optional
+        The backend to use for the convolution operations. Options are 'torch', 'scipy', and 'fft'. The default is 'torch'.
     """
 
     kernels: NDArray
     pad_mode: str
+    backend: str
 
-    conv_d: Callable
-    conv_t: Callable
+    # SciPy's kernels
+    k_s_dir: NDArray
 
-    device: str
+    # Pre-computed FFT of the kernels
+    k_fft: NDArray | None
+    k_fft_adj: NDArray | None
 
-    def __init__(self, x_shape: Sequence[int] | NDArray, kernels: NDArray, pad_mode: str = "edge"):
-        if not __has_torch__:
+    def __init__(self, x_shape: Sequence[int] | NDArray, kernels: NDArray, pad_mode: str = "edge", backend: str = "torch"):
+        if backend == "torch" and not __has_torch__:
             raise ValueError(f"PyTorch is not available, thus {self.__class__.__name__} will not be available.")
 
         self.num_filters = len(kernels)
@@ -537,24 +542,35 @@ class TransformConvolutionTightFrame(BaseTransform):
         self.kernels = np.array(kernels, dtype=np.float32)[:, None, ...]
 
         self.pad_mode = pad_mode.lower()
+        self.backend = backend.lower()
 
-        if len(x_shape) == 1:
-            self.conv_d = pt.nn.functional.conv1d
-            self.conv_t = pt.nn.functional.conv_transpose1d
-        elif len(x_shape) == 2:
-            self.conv_d = pt.nn.functional.conv2d
-            self.conv_t = pt.nn.functional.conv_transpose2d
-        elif len(x_shape) == 3:
-            self.conv_d = pt.nn.functional.conv3d
-            self.conv_t = pt.nn.functional.conv_transpose3d
+        if self.backend == "torch":
+            if len(x_shape) == 1:
+                self.conv_d = pt.nn.functional.conv1d
+                self.conv_t = pt.nn.functional.conv_transpose1d
+            elif len(x_shape) == 2:
+                self.conv_d = pt.nn.functional.conv2d
+                self.conv_t = pt.nn.functional.conv_transpose2d
+            elif len(x_shape) == 3:
+                self.conv_d = pt.nn.functional.conv3d
+                self.conv_t = pt.nn.functional.conv_transpose3d
+            else:
+                raise ValueError(f"We do not support {len(x_shape)}-dimensional convolutions ({x_shape = })")
+
+            self.device = "cuda" if pt.cuda.is_available() else "cpu"
+            self.k_t = pt.from_numpy(self.kernels).to(self.device)
+        elif self.backend == "scipy":
+            k_s = np.squeeze(self.kernels, axis=1)
+            self.k_s_dir = np.flip(k_s, axis=tuple(range(1, k_s.ndim)))
+            self.k_s_adj = k_s
+        # elif self.backend == "fft":
+        #     self.k_fft = None
+        #     self.k_fft_adj = None
+        #     self._precompute_fft_kernels()
         else:
-            raise ValueError(f"We do not support {len(x_shape)}-dimensional convolutions ({x_shape = })")
+            raise ValueError(f"Unknown backend: {self.backend}")
 
         super().__init__()
-
-        self.device = "cuda" if pt.cuda.is_available() else "cpu"
-
-        self.k_t = pt.from_numpy(self.kernels).to(self.device)
 
         # Check if filters form a tight Parseval frame
 
@@ -579,6 +595,22 @@ class TransformConvolutionTightFrame(BaseTransform):
             if not np.all(np.isclose(fourier_coverage, self.num_filters, rtol=1e-5, atol=1e-5)):
                 raise ValueError("The set of provided filters does not have spectral flatness.")
 
+    # def _precompute_fft_kernels(self):
+    #     """Pre-compute the FFT of the kernels in the expected shape (image + padding)."""
+    #     pw = self._compute_direct_padding()
+    #     padded_shape = np.array(self.dir_shape) + np.sum(pw, axis=1)
+    #     self.k_fft = np.zeros((self.num_filters, *padded_shape), dtype=np.complex64)
+    #     for i in range(self.num_filters):
+    #         padded_kernel = self._pad_valid(self.kernels[i, 0], pw)
+    #         self.k_fft[i] = np.fft.fftn(padded_kernel)
+
+    #     pw_pre, pw_post = self._compute_adjoint_padding()
+    #     padded_shape_adj = np.array(self.adj_shape[1:]) + np.sum(pw_pre, axis=1)
+    #     self.k_fft_adj = np.zeros((self.num_filters, *padded_shape_adj), dtype=np.complex64)
+    #     for i in range(self.num_filters):
+    #         padded_kernel = self._pad_valid(self.kernels[i, 0], pw_pre[1:])
+    #         self.k_fft_adj[i] = np.fft.fftn(padded_kernel)
+
     def absolute(self) -> "TransformConvolutionTightFrame":
         """
         Return the convolution operator using the absolute value of the kernel coefficients.
@@ -588,7 +620,7 @@ class TransformConvolutionTightFrame(BaseTransform):
         TransformConvolution
             The absolute value of the convolution operator.
         """
-        return TransformConvolutionTightFrame(self.dir_shape, np.abs(self.kernels))
+        return TransformConvolutionTightFrame(self.dir_shape, np.abs(self.kernels), self.pad_mode, self.backend)
 
     def _compute_direct_padding(self) -> NDArray:
         padding = []
@@ -602,7 +634,7 @@ class TransformConvolutionTightFrame(BaseTransform):
             pre_padding.append((s // 2, (s - 1) // 2))
         post_padding = []
         for s in self.kernels.shape[-len(self.dir_shape) :]:
-            post_padding.append(((s // 2) * 2, ((s - 1) // 2) * 2))
+            post_padding.append(((s // 2), ((s - 1) // 2)))
         return np.array(pre_padding), np.array(post_padding)
 
     def _pad_valid(self, x: NDArray, pad_width: NDArray) -> NDArray:
@@ -613,18 +645,51 @@ class TransformConvolutionTightFrame(BaseTransform):
         return x[tuple(slices)]
 
     def _op_direct(self, x: NDArray) -> NDArray:
-        pw = self._compute_direct_padding()
-        x = self._pad_valid(x, pw)
-        x_t = pt.from_numpy(x)[None, None, ...].to(self.device)
-        y_t = self.conv_d(x_t, self.k_t)
-        return y_t.cpu().numpy().copy()[0]
+        if self.backend == "torch":
+            pw = self._compute_direct_padding()
+            x = self._pad_valid(x, pw)
+            x_t = pt.from_numpy(x.astype(np.float32))[None, None, ...].to(self.device)
+            y_t = self.conv_d(x_t, self.k_t)
+            return y_t.cpu().numpy().copy()[0]
+        elif self.backend == "scipy":
+            pw_pre = self._compute_direct_padding()
+            x = self._pad_valid(x, pw_pre)
+            y = [spsig.convolve(x, k, mode='valid') for k in self.k_s_dir]
+            return np.ascontiguousarray(y)
+        # elif self.backend == "fft":
+        #     pw = self._compute_direct_padding()
+        #     x = self._pad_valid(x, pw)
+        #     x_fft = np.fft.fftn(x)
+        #     y_fft = x_fft[None, ...] * self.k_fft
+        #     y = np.fft.ifftn(y_fft, axes=tuple(range(1, y_fft.ndim))).real
+        #     return y
+        else:
+            raise ValueError(f"Unknown backend: {self.backend}")
 
     def _op_adjoint(self, x: NDArray) -> NDArray:
-        pw_pre, pw_post = self._compute_adjoint_padding()
-        x = self._pad_valid(x, pw_pre)
-        x_t = pt.from_numpy(x)[None, ...].to(self.device)
-        y_t = self.conv_t(x_t, self.k_t)
-        return self._crop_valid(y_t.cpu().numpy().copy()[0, 0], pw_post)
+        if self.backend == "torch":
+            pw_pre, pw_post = self._compute_adjoint_padding()
+            x = self._pad_valid(x, pw_pre)
+            x_t = pt.from_numpy(x.astype(np.float32))[None, ...].to(self.device)
+            y_t = self.conv_t(x_t, self.k_t)
+            return self._crop_valid(y_t.cpu().numpy().copy()[0, 0], pw_post * 2)
+        elif self.backend == "scipy":
+            pw_pre, _ = self._compute_adjoint_padding()
+            x = self._pad_valid(x, np.flip(pw_pre, axis=-1))
+            y = [spsig.convolve(x[ii], k, mode='valid') for ii, k in enumerate(self.k_s_adj)]
+            return np.sum(y, axis=0)
+        # elif self.backend == "fft":
+        #     pw_pre, pw_post = self._compute_adjoint_padding()
+        #     x = self._pad_valid(x, pw_pre)
+        #     x_fft = np.fft.fftn(x, axes=tuple(range(1, x.ndim)))
+        #     x_fft_reshaped = x_fft.reshape(-1, x_fft.shape[-1])
+        #     k_fft_adj_reshaped = np.conj(self.k_fft_adj).reshape(self.k_fft_adj.shape[0], -1)
+        #     y_fft_reshaped = np.dot(k_fft_adj_reshaped, x_fft_reshaped.T).T
+        #     y_fft = y_fft_reshaped.reshape(x.shape[1:])
+        #     y = np.fft.ifftn(y_fft).real
+        #     return self._crop_valid(y, pw_post[1:])
+        else:
+            raise ValueError(f"Unknown backend: {self.backend}")
 
 
 class BaseWaveletTransform(BaseTransform, ABC):
