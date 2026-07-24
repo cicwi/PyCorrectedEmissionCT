@@ -30,12 +30,12 @@ def find_reg_weight(
     def solver_spawn(lam_reg):
         # Using the PDHG solver from Chambolle and Pock
         return cct.solvers.PDHG(
-            verbose=True, data_term=data_term, regularizer=reg(lam_reg, bwd_prj_weights), data_term_test=data_term
+            verbose=True, data_term=data_term, regularizer=reg(lam_reg, bwd_prj_weights), data_term_val=data_term
         )
 
     # Computes the reconstruction for a given solver and a given cross-validation data mask
-    def solver_call(solver, b_test_mask=None):
-        return solver(A, data, iterations, lower_limit=0, precondition=True, b_test_mask=b_test_mask)
+    def solver_call(solver, b_val_mask=None):
+        return solver(A, data, iterations, lower_limit=0, precondition=True, b_val_mask=b_val_mask)
 
     # Create the regularization weight finding helper object (using cross-validation)
     reg_help_cv = cct.param_tuning.CrossValidation(

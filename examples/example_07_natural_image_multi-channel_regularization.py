@@ -14,7 +14,6 @@ import skimage.data as skd
 from numpy.typing import NDArray
 import corrct as cct
 
-
 # Noise parameters
 gauss_stddev = None
 photon_num = 1e2
@@ -67,14 +66,14 @@ reg_tv_s = cct.regularizers.Regularizer_TV2D(lambda_tv)
 # Solver, which in this case is the PDHG method from Chambolle and Pock
 solver_tv_s = cct.solvers.PDHG(data_term=data_term, verbose=True, regularizer=reg_tv_s)
 # We now run the solver on the noisy image
-(img_tvs, _) = solver_tv_s(A, img_noise, x0=img_noise, iterations=iterations, lower_limit=0.0)
+img_tvs, _ = solver_tv_s(A, img_noise, x0=img_noise, iterations=iterations, lower_limit=0.0)
 
 # Multi channel TV regularizer - aka TNV
 reg_tv_m = cct.regularizers.Regularizer_TNV(lambda_tv)
 # Solver, which in this case is the PDHG method from Chambolle and Pock
 solver_tv_m = cct.solvers.PDHG(data_term=data_term, verbose=True, regularizer=reg_tv_m)
 # We now run the solver on the noisy image
-(img_tvm, _) = solver_tv_m(A, img_noise, x0=img_noise, iterations=iterations, lower_limit=0.0)
+img_tvm, _ = solver_tv_m(A, img_noise, x0=img_noise, iterations=iterations, lower_limit=0.0)
 
 imgs = np.array([img_orig, img_noise, img_tvs, img_tvm]).clip(0, 1).transpose([0, 2, 3, 1])
 labs = ["Original", "Noisy", f"Single-channel TV, weight: {lambda_tv:.5}", f"Multi-channel TV, weight: {lambda_tv:.5}"]

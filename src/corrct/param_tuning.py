@@ -580,7 +580,7 @@ def plot_cv_curves(solution_infos: list[SolutionInfo], hp_vals: Sequence[float])
     """
     fig, axs = plt.subplots()
     for hp_val, info in zip(hp_vals, solution_infos):
-        axs.semilogy(info.residuals_cv_rel, label=f"CV residuals, HP val={hp_val:.3e}")
+        axs.semilogy(info.residuals_val_rel, label=f"CV residuals, HP val={hp_val:.3e}")
     axs.set_xlabel("Iterations", fontsize=16)
     axs.grid()
     axs.legend(fontsize=13)
@@ -1080,7 +1080,7 @@ class CrossValidation(BaseParameterTuning):
         data_shape: Sequence[int],
         cv_fraction: float | None = 0.1,
         num_averages: int = 5,
-        mask_param_name: str = "b_test_mask",
+        mask_param_name: str = "b_val_mask",
         parallel_eval: Executor | int | bool = True,
         dtype: DTypeLike = np.float32,
         verbose: bool = False,
@@ -1101,7 +1101,7 @@ class CrossValidation(BaseParameterTuning):
         num_averages : int, optional
             Number of averages random leave-out sets to use. The default is 5.
         mask_param_name: str, optional
-            The parameter name in the task execution function that accepts the data masks. The default is "b_test_mask".
+            The parameter name in the task execution function that accepts the data masks. The default is "b_val_mask".
         parallel_eval : Executor | int | bool, optional
             Compute loss and error values in parallel. The default is True.
         dtype : DTypeLike, optional
@@ -1230,7 +1230,7 @@ class CrossValidation(BaseParameterTuning):
             recs_ii, recs_info_ii, perf_batch_ii = self.process_hp_vals(
                 hp_vals, init_fun_kwds=init_fun_kwds, exec_fun_kwds=exec_fun_kwds
             )
-            f_vals[ii_avg] = np.array([info.residuals_cv_rel[-1] for info in recs_info_ii])
+            f_vals[ii_avg] = np.array([info.get_best_residual_val() for info in recs_info_ii])
 
             if return_all:
                 results.append((recs_ii, recs_info_ii, perf_batch_ii))

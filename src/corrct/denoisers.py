@@ -99,28 +99,31 @@ def denoise_image(
     else:
         data_term = data_terms.DataFidelity_wl2(pix_weights)
 
-    def solver_init(lam_reg):
+    def solver_run(lam_reg, b_val_mask: NDArray | None = None) -> tuple[NDArray, solvers.SolutionInfo]:
         # Using the PDHG solver from Chambolle and Pock
         reg = regularizer(lam_reg)
-        return solvers.PDHG(
-            verbose=verbose, data_term=data_term, regularizer=reg, data_term_test=data_term, leave_progress=False
+        solver = solvers.PDHG(
+            verbose=verbose,
+            data_term=data_term,
+            regularizer=reg,
+            data_term_val=data_term,
+            leave_progress=False,
+            criterion="loss_val",
         )
 
-    def solver_exec(solver: solvers.Solver, b_test_mask: NDArray | None = None) -> tuple[NDArray, solvers.SolutionInfo]:
         x0 = img.copy()
-        if b_test_mask is not None:
+        if b_val_mask is not None:
             med_img = spsig.medfilt2d(img, kernel_size=11)
-            masked_pixels = b_test_mask > 0.5
+            masked_pixels = b_val_mask > 0.5
 
             x0[masked_pixels] = med_img[masked_pixels]
 
-        return solver(op, img, iterations, x0=x0, lower_limit=lower_limit, b_test_mask=b_test_mask)
+        return solver(op, img, iterations, x0=x0, lower_limit=lower_limit, b_val_mask=b_val_mask)
 
     reg_weight = np.array(reg_weight)
     if reg_weight.size > 1:
         reg_help_cv = param_tuning.CrossValidation(img.shape, verbose=verbose, num_averages=3, plot_result=verbose)
-        reg_help_cv.task_init_function = solver_init
-        reg_help_cv.task_exec_function = solver_exec
+        reg_help_cv.task_exec_function = solver_run
 
         f_avgs, _, _ = reg_help_cv.compute_loss_values(reg_weight)
 
@@ -128,8 +131,8 @@ def denoise_image(
     else:
         min_reg_weight = reg_weight
 
-    solver = solver_init(min_reg_weight)
-    denoised_img, _ = solver_exec(solver, None)
+    pix_mask = param_tuning.create_random_test_mask(img.shape)
+    denoised_img, _ = solver_run(min_reg_weight, pix_mask)
 
     if reg_weight.size == 1:
         return denoised_img
