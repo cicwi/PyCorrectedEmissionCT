@@ -446,11 +446,12 @@ def norm_cross_corr(
             axs.plot(np.ones_like(cc_l) * 0.5, label="Half-maximum")
             if p_xy is not None:
                 axs.scatter(p_xy[0], p_xy[1])
-                axs.plot([p_xy[0], p_xy[0]], [0, 1], label=f"Resolution: {p_xy[0]:.3} pix")
+                axs.plot([p_xy[0], p_xy[0]], [0, 1], label=f"HWHM: {p_xy[0]:.3} pix")
             axs.grid()
             axs.legend(fontsize=13)
             axs.tick_params(labelsize=16)
-            axs.set_title("Cross-correlation")
+            # axs.set_title("Auto-correlation" if is_autocorrelation else "Cross-correlation")
+            axs.set_xlim(0, len(cc_l))
             fig.tight_layout()
             plt.show(block=False)
 

@@ -91,7 +91,7 @@ def decompose_qr_masks(masks: NDArray, verbose: bool = False) -> tuple[NDArray, 
     return Qt.reshape(masks_shape), R1t
 
 
-def estimate_resolution(masks: NDArray, verbose: bool = True, plot_result: bool = True) -> tuple[float, float]:
+def estimate_resolution(masks: NDArray, verbose: bool = True, plot_result: bool = True) -> tuple[float, float, float, float]:
     """Estimate the mask collection resolution through auto-correlation.
 
     Parameters
@@ -120,19 +120,33 @@ def estimate_resolution(masks: NDArray, verbose: bool = True, plot_result: bool 
 
     res_mean = resolutions.mean()
     res_min = resolutions.min()
+    res_max = resolutions.max()
+    res_std = resolutions.std()
 
     if plot_result:
         fig, axs = plt.subplots(1, 1, figsize=[9, 3.75])
-        axs.plot(resolutions, label="HWHM auto-correlation")
+        axs.plot(resolutions, label="Auto-Correlation")
         axs.hlines(res_mean, 0, len(resolutions), colors=["C1"], label=f"Mean: {res_mean:.3} pix")
+        axs.fill_between(
+            [0, len(resolutions)],
+            np.ones(2) * (res_mean - res_std),
+            np.ones(2) * (res_mean + res_std),
+            color="C1",
+            alpha=0.1,
+            label=f"Std: {res_std:.3} pix",
+        )
         axs.hlines(res_min, 0, len(resolutions), colors=["C2"], label=f"Min: {res_min:.3} pix")
+        axs.hlines(res_max, 0, len(resolutions), colors=["C3"], label=f"Max: {res_max:.3} pix", linestyle="--")
         axs.grid()
-        axs.legend(fontsize=13)
+        axs.legend(fontsize=13, loc="center left", bbox_to_anchor=(1.005, 0.5))
         axs.tick_params(labelsize=16)
+        axs.set_xlim(0, len(resolutions))
+        axs.set_xlabel("Masks", fontsize=16)
+        axs.set_ylabel("HWHM", fontsize=16)
         fig.tight_layout()
         plt.show(block=False)
 
-    return res_mean, res_min
+    return res_mean, res_min, res_max, res_std
 
 
 class MaskCollection:
