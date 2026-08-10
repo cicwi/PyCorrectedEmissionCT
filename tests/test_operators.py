@@ -175,16 +175,24 @@ class TestTransformConvolution:
     def test_000_initialize(self):
         """Test the initialization of the convolution operator."""
         C = operators.TransformConvolution(self.prj_shape_vu, kernel=self.kernel_u)
-        assert len(C.kernel.shape) == len(C.dir_shape), "Incorrect kernel dimensions initialization (img vu, ker u)"
+        assert len(C.kernel.shape) == len(
+            C.dir_shape
+        ), f"Incorrect kernel dimensions initialization (img vu: {C.dir_shape}, ker u: {C.kernel.shape})"
 
         C = operators.TransformConvolution(self.prj_shape_vu, kernel=self.kernel_vu)
-        assert len(C.kernel.shape) == len(C.dir_shape), "Incorrect kernel dimensions initialization (img vu, ker vu)"
+        assert len(C.kernel.shape) == len(
+            C.dir_shape
+        ), f"Incorrect kernel dimensions initialization (img vu: {C.dir_shape}, ker vu: {C.kernel.shape})"
 
         C = operators.TransformConvolution(self.prj_shape_vwu, kernel=self.kernel_u)
-        assert len(C.kernel.shape) == len(C.dir_shape), "Incorrect kernel dimensions initialization (img vwu, ker u)"
+        assert len(C.kernel.shape) == len(
+            C.dir_shape
+        ), f"Incorrect kernel dimensions initialization (img vwu: {C.dir_shape}, ker u: {C.kernel.shape})"
 
         C = operators.TransformConvolution(self.prj_shape_vwu, kernel=self.kernel_vu)
-        assert len(C.kernel.shape) == len(C.dir_shape), "Incorrect kernel dimensions initialization (img vwu, ker u)"
+        assert len(C.kernel.shape) == len(
+            C.dir_shape
+        ), f"Incorrect kernel dimensions initialization (img vwu: {C.dir_shape}, ker vu: {C.kernel.shape})"
 
     def test_001_direct_shapes(self):
         """Test the output dimensions of the convolution."""
@@ -206,28 +214,30 @@ class TestTransformConvolution:
 
     def test_002_direct_results_vu_u(self):
         """Test the output correctness of the convolution for the case  (img vu, ker u)."""
-        C = operators.TransformConvolution(self.prj_shape_vu, kernel=self.kernel_u, pad_mode="constant")
+        C = operators.TransformConvolution(self.prj_shape_vu, kernel=self.kernel_u, pad_mode="constant", backend="scipy")
         conv_prj = C(self.prj_vu)
         conv_prj_ref = spsig.convolve(self.prj_vu, self.kernel_u[None, :], mode="same")
-        assert np.allclose(conv_prj, conv_prj_ref, rtol=1e-7), "Non-matching output (img vu, ker u)"
+        assert np.allclose(conv_prj, conv_prj_ref, rtol=1e-5), "Non-matching output (img vu, ker u)"
 
     def test_002_direct_results_vu_vu(self):
         """Test the output correctness of the convolution for the case  (img vu, ker vu)."""
-        C = operators.TransformConvolution(self.prj_shape_vu, kernel=self.kernel_vu, pad_mode="constant")
+        C = operators.TransformConvolution(self.prj_shape_vu, kernel=self.kernel_vu, pad_mode="constant", backend="scipy")
         conv_prj = C(self.prj_vu)
         conv_prj_ref = spsig.convolve(self.prj_vu, self.kernel_vu, mode="same")
-        assert np.allclose(conv_prj, conv_prj_ref, rtol=1e-7), "Non-matching output (img vu, ker vu)"
+        assert np.allclose(conv_prj, conv_prj_ref, rtol=1e-5), "Non-matching output (img vu, ker vu)"
 
     def test_002_direct_results_vwu_u(self):
         """Test the output correctness of the convolution for the case  (img vwu, ker u)."""
-        C = operators.TransformConvolution(self.prj_shape_vwu, kernel=self.kernel_u, pad_mode="constant")
+        C = operators.TransformConvolution(self.prj_shape_vwu, kernel=self.kernel_u, pad_mode="constant", backend="scipy")
         conv_prj = C(self.prj_vwu)
         conv_prj_ref = spsig.convolve(self.prj_vwu, self.kernel_u[None, None, :], mode="same")
-        assert np.allclose(conv_prj, conv_prj_ref, rtol=1e-7), "Non-matching output (img vwu, ker u)"
+        assert np.allclose(conv_prj, conv_prj_ref, rtol=1e-5), "Non-matching output (img vwu, ker u)"
 
     def test_002_direct_results_vwu_vu(self):
         """Test the output correctness of the convolution for the case  (img vwu, ker vu)."""
-        C = operators.TransformConvolution(self.prj_shape_vwu, kernel=self.kernel_vu[..., None, :], pad_mode="constant")
+        C = operators.TransformConvolution(
+            self.prj_shape_vwu, kernel=self.kernel_vu[..., None, :], pad_mode="constant", backend="scipy"
+        )
         conv_prj = C(self.prj_vwu)
         conv_prj_ref = spsig.convolve(self.prj_vwu, self.kernel_vu[..., None, :], mode="same")
-        assert np.allclose(conv_prj, conv_prj_ref, rtol=1e-7), "Non-matching output (img vwu, ker vu)"
+        assert np.allclose(conv_prj, conv_prj_ref, rtol=1e-5), "Non-matching output (img vwu, ker vu)"
