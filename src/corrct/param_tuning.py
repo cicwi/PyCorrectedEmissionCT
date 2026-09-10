@@ -1080,6 +1080,7 @@ class CrossValidation(BaseParameterTuning):
         data_shape: Sequence[int],
         cv_fraction: float | None = 0.1,
         num_averages: int = 5,
+        data_cv_masks: Sequence[NDArray] | None = None,
         mask_param_name: str = "b_val_mask",
         parallel_eval: Executor | int | bool = True,
         dtype: DTypeLike = np.float32,
@@ -1100,6 +1101,8 @@ class CrossValidation(BaseParameterTuning):
             The default is 0.1.
         num_averages : int, optional
             Number of averages random leave-out sets to use. The default is 5.
+        data_cv_masks : Sequence[NDArray] | None = None, optional
+            Externally provided cross-validation masks, which overrides the values of cv_fraction and num_averages. The default is None.
         mask_param_name: str, optional
             The parameter name in the task execution function that accepts the data masks. The default is "b_val_mask".
         parallel_eval : Executor | int | bool, optional
@@ -1117,17 +1120,32 @@ class CrossValidation(BaseParameterTuning):
             dtype=dtype, parallel_eval=parallel_eval, verbose=verbose, plot_result=plot_result, print_timings=print_timings
         )
         self.data_shape = data_shape
-        self.cv_fraction = cv_fraction
-        self.num_averages = num_averages
 
         self.mask_param_name = mask_param_name
 
-        if self.cv_fraction is not None:
-            self.data_cv_masks = [
-                create_random_test_mask(self.data_shape, self.cv_fraction, self.dtype) for _ in range(self.num_averages)
-            ]
+        if data_cv_masks is None:
+            if cv_fraction is not None:
+                self.data_cv_masks = [
+                    create_random_test_mask(self.data_shape, cv_fraction, self.dtype) for _ in range(num_averages)
+                ]
+            else:
+                self.data_cv_masks = create_k_fold_test_masks(self.data_shape, num_averages, dtype=self.dtype)
         else:
-            self.data_cv_masks = create_k_fold_test_masks(self.data_shape, self.num_averages)
+            num_averages = len(data_cv_masks)
+            cv_fractions = np.zeros(num_averages)
+            self.data_cv_masks = [np.array([])] * num_averages
+            for ii, cv_mask in enumerate(data_cv_masks):
+                cv_mask = np.array(cv_mask)
+                if len(cv_mask.shape) != len(data_shape) or any(se != sm for se, sm in zip(data_shape, cv_mask.shape)):
+                    raise ValueError(
+                        f"The cross-validation mask at position #{ii} with shape={data_shape} should have shape={data_shape}"
+                    )
+                self.data_cv_masks[ii] = cv_mask.astype(self.dtype)
+                cv_fractions[ii] = self.data_cv_masks[ii].sum() / self.data_cv_masks[ii].size
+            cv_fraction = cv_fractions.mean()
+
+        self.cv_fraction = cv_fraction
+        self.num_averages = num_averages
 
     @overload
     def compute_loss_values(
