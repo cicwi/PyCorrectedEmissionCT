@@ -28,6 +28,14 @@ except ImportError:
     print("WARNING - pywt was not found")
 
 
+try:
+    import torch as pt
+
+    __has_torch__ = True
+except ImportError:
+    __has_torch__ = False
+
+
 NDArrayInt = NDArray[np.integer]
 
 
@@ -389,14 +397,14 @@ class TransformDiagonalScaling(BaseTransform):
 
     scale: NDArray
 
-    def __init__(self, x_shape: ArrayLike | NDArray, scale: ArrayLike | NDArray):
+    def __init__(self, x_shape: Sequence[int] | NDArray, scale: float | Sequence[float] | NDArray):
         """Diagonal scaling operator.
 
         Parameters
         ----------
-        x_shape : ArrayLike
+        x_shape : Sequence[int]
             Shape of the data.
-        scale : float or ArrayLike
+        scale : float | Sequence[float] | NDArray
             Operator diagonal.
         """
         self.scale = np.array(scale)
@@ -421,43 +429,168 @@ class TransformDiagonalScaling(BaseTransform):
         return self.scale * x
 
 
-class TransformConvolution(BaseTransform):
+class BaseTransformConvolution(BaseTransform):
+    """
+    Base Convolution operator.
+
+    Parameters
+    ----------
+    x_shape : Sequence[int] | NDArray
+        Shape of the direct space.
+    kernels : NDArray
+        The convolution kernels.
+    pad_mode: str, optional
+        The padding mode to use for the linear convolution. The default is "edge".
+    backend: str, optional
+        The backend to use for the convolution operations. Options are 'torch', 'scipy'. The default is 'torch'.
+    """
+
+    kernels_dir: NDArray
+    kernels_adj: NDArray
+    pad_mode: str
+    backend: str
+
+    def __init__(
+        self,
+        x_shape: Sequence[int] | NDArray,
+        kernels: NDArray,
+        pad_mode: str = "edge",
+        backend: str = "torch" if __has_torch__ else "scipy",
+    ):
+        if backend == "torch" and not __has_torch__:
+            raise ValueError(f"PyTorch is not available, thus {self.__class__.__name__} will not be available.")
+
+        self.num_filters = len(kernels)
+        self.dir_shape = np.array(x_shape, ndmin=1, dtype=int)
+        self.adj_shape = np.array([self.num_filters, *x_shape] if self.num_filters > 1 else x_shape, ndmin=1, dtype=int)
+
+        self.kernels_dir = np.array(kernels, dtype=np.float32, ndmin=len(x_shape) + 1)
+        self.kernels_adj = np.ascontiguousarray(np.flip(self.kernels_dir, axis=tuple(range(1, self.kernels_dir.ndim))))
+
+        self.pad_mode = pad_mode.lower()
+        self.backend = backend.lower()
+
+        if self.backend == "torch":
+            if len(x_shape) == 1:
+                self.conv_d = pt.nn.functional.conv1d
+                self.conv_t = pt.nn.functional.conv_transpose1d
+            elif len(x_shape) == 2:
+                self.conv_d = pt.nn.functional.conv2d
+                self.conv_t = pt.nn.functional.conv_transpose2d
+            elif len(x_shape) == 3:
+                self.conv_d = pt.nn.functional.conv3d
+                self.conv_t = pt.nn.functional.conv_transpose3d
+            else:
+                raise ValueError(f"We do not support {len(x_shape)}-dimensional convolutions ({x_shape = })")
+
+            self.device = "cuda" if pt.cuda.is_available() else "cpu"
+            self.k_t = pt.from_numpy(self.kernels_adj[:, None, ...]).to(self.device)
+        elif self.backend == "scipy":
+            pass
+        else:
+            raise ValueError(f"Unknown backend: {self.backend}")
+
+        super().__init__()
+
+    def absolute(self) -> "BaseTransformConvolution":
+        """
+        Return the convolution operator using the absolute value of the kernel coefficients.
+
+        Returns
+        -------
+        BaseTransformConvolution
+            The absolute value of the convolution operator.
+        """
+        return BaseTransformConvolution(self.dir_shape, np.abs(self.kernels_dir), self.pad_mode, self.backend)
+
+    def _compute_direct_padding(self) -> NDArray:
+        padding = []
+        for s in self.kernels_dir.shape[-len(self.dir_shape) :]:
+            padding.append((s // 2, (s - 1) // 2))
+        return np.array(padding)
+
+    def _compute_adjoint_padding(self) -> tuple[NDArray, NDArray]:
+        pre_padding = [(0, 0)]
+        for s in self.kernels_dir.shape[-len(self.dir_shape) :]:
+            pre_padding.append((s // 2, (s - 1) // 2))
+        post_padding = []
+        for s in self.kernels_dir.shape[-len(self.dir_shape) :]:
+            post_padding.append(((s // 2), ((s - 1) // 2)))
+        return np.array(pre_padding), np.array(post_padding)
+
+    def _pad_valid(self, x: NDArray, pad_width: NDArray) -> NDArray:
+        return np.pad(x, pad_width=pad_width, mode=self.pad_mode)  # type: ignore
+
+    def _crop_valid(self, x: NDArray, pad_width: NDArray) -> NDArray:
+        slices = [slice(pw[0] if pw[0] else None, -pw[1] if pw[1] else None) for pw in pad_width]
+        return x[tuple(slices)]
+
+    def _op_direct(self, x: NDArray) -> NDArray:
+        if self.backend == "torch":
+            pw = self._compute_direct_padding()
+            x = self._pad_valid(x, pw)
+            x_t = pt.from_numpy(x.astype(np.float32))[None, None, ...].to(self.device)
+            y_t = self.conv_d(x_t, self.k_t)
+            y_o = y_t.cpu().numpy().copy()[0]
+        elif self.backend == "scipy":
+            pw_pre = self._compute_direct_padding()
+            x = self._pad_valid(x, pw_pre)
+            y = [spsig.convolve(x, k, mode='valid') for k in self.kernels_dir]
+            y_o = np.ascontiguousarray(y)
+        else:
+            raise ValueError(f"Unknown backend: {self.backend}")
+
+        if self.num_filters == 1:
+            y_o = np.squeeze(y_o, axis=0)
+        return y_o
+
+    def _op_adjoint(self, x: NDArray) -> NDArray:
+        if self.num_filters == 1:
+            x = x[None, :]
+
+        if self.backend == "torch":
+            pw_pre, pw_post = self._compute_adjoint_padding()
+            x = self._pad_valid(x, pw_pre)
+            x_t = pt.from_numpy(x.astype(np.float32))[None, ...].to(self.device)
+            y_t = self.conv_t(x_t, self.k_t)
+            return self._crop_valid(y_t.cpu().numpy().copy()[0, 0], pw_post * 2)
+        elif self.backend == "scipy":
+            pw_pre, _ = self._compute_adjoint_padding()
+            x = self._pad_valid(x, np.flip(pw_pre, axis=-1))
+            y: list[NDArray] = [spsig.convolve(x[ii], k, mode='valid') for ii, k in enumerate(self.kernels_adj)]
+            return np.sum(y, axis=0)
+        else:
+            raise ValueError(f"Unknown backend: {self.backend}")
+
+
+class TransformConvolution(BaseTransformConvolution):
     """
     Convolution operator.
 
     Parameters
     ----------
-    x_shape : ArrayLike
+    x_shape : Sequence[int] | NDArray
         Shape of the direct space.
-    kernel : ArrayLike
+    kernel : NDArray
         The convolution kernel.
     pad_mode: str, optional
         The padding mode to use for the linear convolution. The default is "edge".
     is_symm : bool, optional
         Whether the operator is symmetric or not. The default is True.
-    flip_adjoint : bool, optional
-        Whether the adjoint kernel should be flipped. The default is False.
-        This is useful when the kernel is not symmetric.
     """
 
-    kernel: NDArray
-    pad_mode: str
     is_symm: bool
-    flip_adjoint: bool
 
     def __init__(
-        self, x_shape: ArrayLike, kernel: ArrayLike, pad_mode: str = "edge", is_symm: bool = True, flip_adjoint: bool = False
+        self,
+        x_shape: Sequence[int] | NDArray,
+        kernel: NDArray,
+        pad_mode: str = "edge",
+        is_symm: bool = True,
+        backend: str = "torch" if __has_torch__ else "scipy",
     ):
-        self.dir_shape = np.array(x_shape, ndmin=1, dtype=int)
-        self.adj_shape = np.array(x_shape, ndmin=1, dtype=int)
-
-        self.kernel = np.array(kernel, ndmin=len(self.dir_shape))
-
-        self.pad_mode = pad_mode.lower()
+        super().__init__(x_shape, kernels=np.array(kernel, ndmin=len(x_shape))[None, :], pad_mode=pad_mode, backend=backend)
         self.is_symm = is_symm
-        self.flip_adjoint = flip_adjoint
-
-        super().__init__()
 
     def absolute(self) -> "TransformConvolution":
         """
@@ -470,30 +603,64 @@ class TransformConvolution(BaseTransform):
         """
         return TransformConvolution(self.dir_shape, np.abs(self.kernel))
 
-    def _pad_valid(self, x: NDArray) -> tuple[NDArray, NDArray]:
-        pad_width = (np.array(self.kernel.shape) - 1) // 2
-        return np.pad(x, pad_width=pad_width[:, None], mode=self.pad_mode), pad_width  # type: ignore
-
-    def _crop_valid(self, x: NDArray, pad_width: NDArray) -> NDArray:
-        slices = [slice(pw if pw else None, -pw if pw else None) for pw in pad_width]
-        return x[tuple(slices)]
-
-    def _op_direct(self, x: NDArray) -> NDArray:
-        x, pw = self._pad_valid(x)
-        x = spsig.convolve(x, self.kernel, mode="same")
-        return self._crop_valid(x, pw)
-
     def _op_adjoint(self, x: NDArray) -> NDArray:
         if self.is_symm:
-            x, pw = self._pad_valid(x)
-            if self.flip_adjoint:
-                adj_kernel = np.flip(self.kernel)
-            else:
-                adj_kernel = self.kernel
-            x = spsig.convolve(x, adj_kernel, mode="same")
-            return self._crop_valid(x, pw)
+            return super()._op_adjoint(x)
         else:
             return x
+
+    @property
+    def kernel(self) -> NDArray:
+        return self.kernels_dir[0, ...].copy()
+
+
+class TransformConvolutionTightFrame(BaseTransformConvolution):
+    """
+    Tight Parseval Frame Convolution operator.
+
+    Parameters
+    ----------
+    x_shape : Sequence[int] | NDArray
+        Shape of the direct space.
+    kernel : NDArray
+        The convolution kernel.
+    pad_mode: str, optional
+        The padding mode to use for the linear convolution. The default is "edge".
+    backend: str, optional
+        The backend to use for the convolution operations. Options are 'torch', 'scipy'. The default is 'torch'.
+    """
+
+    def __init__(
+        self,
+        x_shape: Sequence[int] | NDArray,
+        kernels: NDArray,
+        pad_mode: str = "edge",
+        backend: str = "torch" if __has_torch__ else "scipy",
+    ):
+        super().__init__(x_shape=x_shape, kernels=kernels, pad_mode=pad_mode, backend=backend)
+
+        # Check if filters form a tight Parseval frame
+
+        # Check orthonormality
+        kernels_f_matr = kernels.reshape((self.num_filters, -1))
+        gram_matrix = kernels_f_matr @ kernels_f_matr.T
+
+        if not np.allclose(gram_matrix, np.eye(self.num_filters), rtol=1e-5, atol=1e-5):
+            raise ValueError(f"The provided filters are not orthonormal.\n - Gram matrix: {gram_matrix}")
+
+        # We should also check the frequency coverage, but since we might skip the low frequencies sometimes, we would get a
+        # false negative
+        if kernels_f_matr.shape[0] == kernels_f_matr.shape[1]:
+
+            emb = np.zeros(self.adj_shape)
+            slices = [slice(None)] + [slice(s) for s in self.kernels_dir.shape[2:]]
+            emb[tuple(slices)] = self.kernels_dir[:, 0]  # embed (grayscale)
+            axes = tuple([*(range(-self.kernels_dir.ndim + 2, 0))])
+            power_spectrum: NDArray = np.abs(np.fft.fftn(emb, axes=axes)) ** 2
+            fourier_coverage: NDArray = power_spectrum.sum(axis=0)
+
+            if not np.all(np.isclose(fourier_coverage, self.num_filters, rtol=1e-5, atol=1e-5)):
+                raise ValueError("The set of provided filters does not have spectral flatness.")
 
 
 class BaseWaveletTransform(BaseTransform, ABC):

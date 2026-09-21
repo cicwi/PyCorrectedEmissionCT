@@ -584,6 +584,114 @@ class Regularizer_l1(BaseRegularizer):
             self.norm.apply_proximal_primal(primal, tau * self.weight)
 
 
+class Regularizer_TPF(BaseRegularizer):
+    """Tight Parseval frame regularized (custom filters)."""
+
+    __reg_name__ = "tpf"
+
+    def info(self) -> str:
+        """
+        Return the regularizer info.
+
+        Returns
+        -------
+        str
+            Regularizer info string.
+        """
+        return self.__reg_name__ + f"(n:{len(self.filters)}-w:{self.weight.max():g})"
+
+    def __init__(
+        self,
+        weight: float | NDArray,
+        filters: NDArray,
+        axes: Sequence[int] | NDArray | None = None,
+        pad_on_demand: str = "edge",
+        upd_mask: NDArray | None = None,
+        isotropic: bool = True,
+    ):
+        if isotropic:
+            norm = dt.DataFidelity_l21w(weight)
+        else:
+            norm = dt.DataFidelity_l1()
+        super().__init__(weight=weight, norm=norm, upd_mask=upd_mask)
+        self.filters = filters
+
+        ndims = len(self.filters.shape) - 1
+        if axes is None:
+            axes = np.arange(-ndims, 0, dtype=int)
+        elif not ndims == len(axes):
+            raise ValueError(
+                "If you specify axes, they should match the number of filter dimensions."
+                f"Got {self.filters.shape[0]} filters of shape {self.filters.shape[1:]}, and axes {axes}."
+            )
+        self.ndims = ndims
+        self.axes = tuple(axes)
+
+        self.pad_on_demand = pad_on_demand
+
+        self.weight = self.weight.reshape([-1, *(1,) * ndims]).astype(np.float32)
+
+    def initialize_sigma_tau(self, primal: NDArray) -> float | NDArray:
+        self._check_primal(primal)
+
+        self.op = operators.TransformConvolutionTightFrame(primal.shape, self.filters, pad_mode=self.pad_on_demand)
+
+        # # Check spectral coverage
+        # # Compute the sum of the squared magnitudes of the filters in the frequency domain
+        # filters_fft = np.fft.fftn(self.filters, axes=self.axes)
+        # sum_squared_magnitudes = np.sum(np.abs(filters_fft) ** 2, axis=0)
+
+        # # Check if the sum of squared magnitudes is approximately constant (within a tolerance)
+        # # We use a relative tolerance of 1e-6 and an absolute tolerance of 1e-8
+        # if not np.allclose(sum_squared_magnitudes, sum_squared_magnitudes[0], rtol=1e-5, atol=1e-6):
+        #     raise ValueError("The provided filters do not provide full spectral coverage.")
+
+        self.sigma = 1.0
+        self.norm.assign_data(None, sigma=self.sigma)
+
+        tau = len(self.filters)
+        if not isinstance(self.norm, dt.DataFidelity_l1):
+            tau *= self.weight
+        if self.upd_mask is not None:
+            tau = tau * self.upd_mask
+        return tau
+
+    def apply_proximal_primal(self, primal: NDArray, tau: float | NDArray) -> None:
+        """Apply prox_{tau * weight * g} in the primal domain for the tight Parseval frame regularizer.
+
+        The tight Parseval frame transform is unitary, so the proximal of
+        weight * ||W .||_{norm} separates in the frame domain:
+
+            prox(x) = W^{-1} * prox_{tau * weight * ||.||_norm}(W * x)
+
+        where W is TransformConvolutionTightFrame.
+
+        Parameters
+        ----------
+        primal : NDArray
+            The primal variable to update in-place.
+        tau : float | NDArray
+            The proximal step size.
+
+        Raises
+        ------
+        ValueError
+            When the regularizer has not been initialized.
+        """
+        if self.op is None:
+            raise ValueError("Regularizer not initialized! Please use method: `initialize_sigma_tau`.")
+
+        # Forward tight Parseval frame transform: coeffs shape is (n_filters, *x_shape)
+        coeffs = self.op(primal)
+
+        # Apply the proximal (soft-threshold)
+        threshold = tau * self.weight
+        self.norm.apply_proximal_primal(coeffs, threshold)
+
+        # Inverse transform back to primal domain
+        primal[:] = self.op.T(coeffs)
+
+
 class Regularizer_swl(BaseRegularizer):
     """Base stationary wavelet regularizer. It can be used to promote sparse reconstructions in the wavelet domain."""
 
